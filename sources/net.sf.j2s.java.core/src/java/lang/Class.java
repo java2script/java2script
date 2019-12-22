@@ -38,15 +38,20 @@ import java.lang.reflect.Modifier;
 //import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import javax.xml.bind.annotation.XmlRootElement;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import sun.misc.CompoundEnumeration;
+import sun.reflect.annotation.AnnotationParser;
+import sun.reflect.annotation.AnnotationSupport;
 import sun.reflect.annotation.AnnotationType;
 import swingjs.JSUtil;
 
@@ -100,16 +105,18 @@ import swingjs.JSUtil;
  * @see java.lang.ClassLoader#defineClass(byte[], int, int)
  * @since JDK1.0
  */
-public final class Class<T> implements java.io.Serializable, java.lang.reflect.GenericDeclaration {
-//		java.lang.reflect.Type {//, java.lang.reflect.AnnotatedElement {
-	private static final int ANNOTATION = 0x00002000;
-	private static final int ENUM = 0x00004000;
-	private static final int SYNTHETIC = 0x00001000;
+public final class Class<T> {
+	// SwingJS provide a cleaner loading sequence
+	//implements Serializable, GenericDeclaration, AnnotatedElement {
+    private static final int ANNOTATION = 0x00002000;
+    private static final int ENUM       = 0x00004000;
+//    private static final int SYNTHETIC = 0x00001000;
 
-	private static class JSClass {
-		public String __CLASS_NAME__;
-	}
-	private JSClass $clazz$; //  BH SwingJS
+
+//	private static class JSClass {
+//		public String __CLASS_NAME__;
+//	}
+	public Object $clazz$; //  BH SwingJS
 	public String[] $methodList$; // BH see j2sClazz.js Clazz.getClass, from interface parameters
 	
 //	private static native void registerNatives();
@@ -314,9 +321,12 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 //		if (System.getSecurityManager() != null) {
 //			checkMemberAccess(Member.PUBLIC, ClassLoader.getCallerClassLoader());
 //		}
+		
+		@SuppressWarnings("unused")
+		Object c = $clazz$;
 		/**
 		 * @j2sNative
-	     * return new this.$clazz$;
+	     * return new c;
 		 */
 		{
 			return null;			
@@ -404,8 +414,10 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 * @since JDK1.1
 	 */
 	public boolean isInstance(Object obj) {
+		@SuppressWarnings("unused")
+		Object c = $clazz$;
 		/**
-		 * @j2sNative  return Clazz.instanceOf(obj, this.$clazz$);
+		 * @j2sNative  return Clazz.instanceOf(obj, c);
 		 */
 		{ 
 			return false;
@@ -436,18 +448,11 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 *                if the specified Class parameter is null.
 	 * @since JDK1.1
 	 */
+	@SuppressWarnings("unused")
 	public boolean isAssignableFrom(Class<?> cls) {
-		/**
-		 * @j2sNative 
-		 * 
-		 * return(Clazz.instanceOf(cls.$clazz$, this.$clazz$));
-		 * 
-		 */
-		{
-			return false;
-		}
-		  
-
+		Object a = cls.$clazz$;
+		Object me = $clazz$;
+		return /** @j2sNative Clazz.instanceOf(a, me) || */ false;
 
 	}
 
@@ -459,8 +464,10 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 *         {@code false} otherwise.
 	 */
 	public boolean isInterface() {
+		@SuppressWarnings("unused")
+		Object me = $clazz$;
 		/**
-		 * @j2sNative   return this.$clazz$.$isInterface;
+		 * @j2sNative   return me.$isInterface;
 		 * 
 		 */
 		{
@@ -476,8 +483,10 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 * @since JDK1.1
 	 */
 	public boolean isArray() {
+		@SuppressWarnings("unused")
+		Object me = $clazz$;
 		/**
-		 * @j2sNative    return !!this.$clazz$.__ARRAYTYPE;
+		 * @j2sNative    return !!me.__ARRAYTYPE;
 		 */
 		{
 		return false;
@@ -532,9 +541,43 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 *         {@code false} otherwise
 	 * @since 1.5
 	 */
-	public boolean isAnnotation() {
-		return (getModifiers() & ANNOTATION) != 0;
+	public boolean isAnnotation() {		
+		@SuppressWarnings("unused")
+		Object me = $clazz$;
+		/**
+		 * @j2sNative  return !!me.$getMembers$;
+		 *
+		 */
+		{
+			return true;
+		}
 	}
+
+	/**
+	 * Returns true if and only if this class was declared as an enum in the
+	 * source code.
+	 *
+	 * @return true if and only if this class was declared as an enum in the
+	 *         source code
+	 * @since 1.5
+	 */
+	public boolean isEnum() {
+		@SuppressWarnings("unused")
+		Object me = $clazz$;
+		/**
+		 * @j2sNative   return !!me.$isEnum;
+		 * 
+		 */
+		{
+			return false;
+		}
+//		// An enum must both directly extend java.lang.Enum and have
+//		// the ENUM bit set; classes for specialized enum constants
+//		// don't do the former.
+//		return //getModifiers() & Modifier.ENUM) != 0 && 
+//				this.getSuperclass() == java.lang.Enum.class;
+	}
+
 
 	/**
 	 * Returns {@code true} if this class is a synthetic class; returns
@@ -545,7 +588,8 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 * @since 1.5
 	 */
 	public boolean isSynthetic() {
-		return (getModifiers() & SYNTHETIC) != 0;
+		return false;
+//		return (getModifiers() & SYNTHETIC) != 0;
 	}
 
 	/**
@@ -744,16 +788,34 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		 * loader.getResourceAsStream$S = function(s) { return me.getResourceAsStream$S(s.indexOf("/") == 0 ? s : "/" + s) };
 		 * loader.getResource$S = function(s) { return me.getResource$S(s.indexOf("/") == 0 ? s : "/" + s) }; 
 		 * loader.getResources$S = function(s) { return me.getResources$S(s) };
+		 * loader.getParent$ = function() {return null};
 		 */
-	    { }
 	    return loader;
-
 	}
 	
+	/**
+	 * look first in this class's path, then in root
+	 * @param name
+	 * @return
+	 * @throws IOException
+	 */
 	protected CompoundEnumeration<Enumeration<URL>> getResources(String name) throws IOException {
-    	// sorry, just not implemented.
-        return new CompoundEnumeration((Enumeration<URL>[]) new Enumeration<?>[] { null, java.util.Collections.emptyEnumeration() });
+		URL url1 = getResource(name);
+		URL url2 = (name.indexOf("/") == 0 ? null : getClassLoader().getResource(name));
+		Enumeration<URL> e;
+		if (url1 == null && url2 == null) {
+			e = java.util.Collections.emptyEnumeration();
+		} else {
+			List<URL> list = new ArrayList<URL>(2);
+			if (url1 != null)
+				list.add(url1);
+			if (url2 != null && !url2.equals(url1))
+				list.add(url2);
+			e = java.util.Collections.enumeration(list);
+		}
+		return new CompoundEnumeration((Enumeration<URL>[]) new Enumeration<?>[] { null, e });
     } 
+	
 	/**
 	 * Returns an array of {@code TypeVariable} objects that represent the type
 	 * variables declared by the generic declaration represented by this
@@ -769,15 +831,17 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 *             Specification, 3rd edition
 	 * @since 1.5
 	 */
-	@Override
-	public TypeVariable<Class<T>>[] getTypeParameters() {
+    // GenericDeclaration @Override
+	public Object//TypeVariable<Class<T>>[] 
+			getTypeParameters() {
 //		if (getGenericSignature() != null)
 //			return (TypeVariable<Class<T>>[]) getGenericInfo().getTypeParameters();
 //		else
-			return (TypeVariable<Class<T>>[]) new TypeVariable[0];
+			return //(TypeVariable<Class<T>>[]) 
+					new TypeVariable[0];
 	}
 
-	/**
+	/** fe
 	 * Returns the {@code Class} representing the superclass of the entity
 	 * (class, interface, primitive type or void) represented by this
 	 * {@code Class}. If this {@code Class} represents either the {@code Object}
@@ -1001,10 +1065,13 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 * @see java.lang.reflect.Modifier
 	 * @since JDK1.1
 	 */
+	@SuppressWarnings("unused")
 	public int getModifiers() {
-		return Modifier.PUBLIC | (isEnum() ? Modifier.ENUM : isInterface() ? Modifier.INTERFACE : 0); 
+		return Modifier.PUBLIC 
+				| (isEnum() ? ENUM : isInterface() ? Modifier.INTERFACE : 0) 
+				| (isAnnotation() ? ANNOTATION : 0); 
 	}
-
+	
 	/**
 	 * Gets the signers of this class.
 	 *
@@ -1556,11 +1623,32 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		if (fields != null)
 			return fields;
 	    fields = new Field[0];
-	    Object cl = /** @j2sNative this.$clazz$ || */null;
-		Object proto = /** @j2sNative cl.prototype || */null;
-		addFields(proto, this.fields, 0);
-		addFields(cl, this.fields, Modifier.STATIC);
+	    addAllFields(fields, true);
 		return fields;
+	}
+
+	private void addAllFields(Field[] fields, boolean recurse) {
+	    Object cl = /** @j2sNative this.$clazz$ || */null;
+	    /** @j2sNative 
+	     * Clazz._initClass(cl,1,1,0);
+	     */
+		addFields(cl, fields, 0);
+		addFields(cl, fields, Modifier.STATIC);
+		if (!recurse)
+			return;
+		Class<? super T> c = getSuperclass();
+		if (c != null)
+			c.addAllFields(fields, true);
+	}
+	
+
+	Map<String, Object[]> fieldAnnMap = null;
+	private Field[] declaredFields;
+	
+	// Called by Field to get its 
+	public Map<String,Object[]> getFieldAnnMap(Object cl) {
+		initAnnotationsIfNecessary();
+		return fieldAnnMap;
 	}
 
 	/**
@@ -1725,48 +1813,28 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 //		return field;
 	}
 
-	private void addFields(Object c, Field[] f, int modifiers) {
-		String m = null;
-		/**
-		 * @j2sNative
-		 * 
-		 * 			for (m in c) { 
-		 *            var isStatic = (typeof this.$clazz$[m] != "undefined");
-		 *            if (!!modifiers != isStatic)
-		 *              continue; 
-		 *            if (this.excludeField$S(m)) continue; 
-		 *            var o = c[m]; 
-		 *            switch (typeof o) {
-		 *             case "object": if (o && !o.__CLASS_NAME__) continue; 
-		 *             case "number": case "boolean": case "string":
-		 */
-		 
-		addField(f, m, modifiers); 
-		
-		/**
-		  * @j2sNative
-		  *               break; 
-		  *            }
-		  *           }
-		  */
+	@SuppressWarnings("null")
+	private void addFields(Object cl, Field[] f, int modifiers) {				
+		String[] fieldNames = /** @j2sNative Clazz._getFieldNames(cl, !!modifiers) || [] ||*/null;
+		String[] types = /** @j2sNative Clazz._getFieldTypes(cl, !!modifiers) || [] ||*/null;
 
+		for (int i = 0; i < fieldNames.length; i++) {
+			addField(f, fieldNames[i], modifiers, types[i]); 
+		}
 	}
 
 	boolean excludeField(String name) { 
 		return (name == "prototype" 
 				|| name.startsWith("__") 
+				|| name.startsWith("$") && name.endsWith("$")
 				|| name == "$isInterface" 
 				|| name == "$isEnum" 
-				|| name == "implementz"
-				|| name == "$Class$"
-				|| name == "$init$"
-				|| name == "$init0$");
+				|| name == "implementz");
 	} 
 
-	private void addField(Field[] fields, String m, int modifiers) {
-
-		@SuppressWarnings("unused")
-		Field f = new Field(this, m, modifiers);
+	private void addField(Field[] fields, String name, int modifiers, String type) {
+		Field f = new Field(this, name, modifiers);
+		f._setTypeString(type);
 		/**
 		 * @j2sNative
 		 * 
@@ -1865,13 +1933,15 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 			 * 
 			 * o = this.$clazz$;
 			 * o = o[qname] || o.prototype && o.prototype[qname];
+			 * 
 			 */
+			m._setJSMethod(o);
 			if (o == null)
 			  throw new NoSuchMethodException(getName() + "." + qname);
 		}
 		return m;
 //		/**
-//		 * @j2sNative
+//		 * @j2sNative 
 //		 * 
 //		 *     return Clazz.new_(Clazz.load('java.lang.reflect.Method').c$$Class$S$ClassA$Class$ClassA$I, [this, name,
 //		 *     	                    paramTypes, java.lang.Void, [], 0]);
@@ -2018,12 +2088,11 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 * @since JDK1.1
 	 */
 	public Field[] getDeclaredFields() throws SecurityException {
-		return  getFields();
-//		// be very careful not to change the stack depth of this
-//		// checkMemberAccess call for security reasons
-//		// see java.lang.SecurityManager.checkMemberAccess
-////		checkMemberAccess(Member.DECLARED, ClassLoader.getCallerClassLoader());
-//		return copyFields(privateGetDeclaredFields(false));
+		if (declaredFields != null)
+			return declaredFields;
+		declaredFields = new Field[0];
+	    addAllFields(declaredFields, false);
+		return declaredFields;
 	}
 
 	/**
@@ -2310,7 +2379,10 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	@SuppressWarnings({ "unused", "null" })
 	public InputStream getResourceAsStream(String name) {
 		// allows an optional second argument to be a base directory in JavaScript 
-		String clazzName = /** @j2sNative this.$clazz$.__CLASS_NAME$__ ||  this.$clazz$.__CLASS_NAME__ ||*/ "";
+		// "System" class loader will not have this.$clazz$
+		String clazzName = /** @j2sNative this.$clazz$ && (this.$clazz$.__CLASS_NAME$__ ||  this.$clazz$.__CLASS_NAME__)||*/ "";
+		if (clazzName == "" && !name.startsWith("/"))
+			name = "/" + name;
 	    Object data = null, fname = null;
 		/**
 		 * @j2sNative
@@ -2428,7 +2500,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 *         this name is found
 	 * @since JDK1.1
 	 */
-	public java.net.URL getResource(String name) {
+	public URL getResource(String name) {
 		/**
 		 * @j2sNative
 		 * 
@@ -2500,22 +2572,33 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	/*
 	 * Return the Virtual Machine's Class object for the named primitive type.
 	 */
-	static Class<?> getPrimitiveClass(String name) {
+	public static Class<?> getPrimitiveOrStringClass(String name) {
 		switch (name) {
+		case "S":
+		case "String":
+			return String.class;
+		case "Z":
 		case "boolean":
 			return Boolean.TYPE;
+		case "B":
 		case "byte":
 			return Byte.TYPE;
+		case "C":
 		case "char":
 			return Character.TYPE;
+		case "H":
 		case "short":
 			return Short.TYPE;
+		case "I":
 		case "int":
 			return Integer.TYPE;
+		case "L":
 		case "long":
 			return Long.TYPE;
+		case "F":
 		case "float":
 		    return Float.TYPE;
+		case "D":
 		case "double":
 			return Double.TYPE;
 		default:
@@ -2590,14 +2673,14 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 //	private volatile transient SoftReference declaredPublicFields;
 //	private volatile transient SoftReference declaredPublicMethods;
 
-	// Incremented by the VM on each call to JVM TI RedefineClasses()
-	// that redefines this class or a superclass.
-	private volatile transient int classRedefinedCount = 0;
-
-	// Value of classRedefinedCount when we last cleared the cached values
-	// that are sensitive to class redefinition.
-	private volatile transient int lastRedefinedCount = 0;
-
+//	// Incremented by the VM on each call to JVM TI RedefineClasses()
+//	// that redefines this class or a superclass.
+//	private volatile transient int classRedefinedCount = 0;
+//
+//	// Value of classRedefinedCount when we last cleared the cached values
+//	// that are sensitive to class redefinition.
+//	private volatile transient int lastRedefinedCount = 0;
+//
 //	// Clears cached values that might possibly have been obsoleted by
 //	// a class redefinition.
 //	private void clearCachesOnClassRedefinition() {
@@ -2908,39 +2991,66 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		}
 	}
 
+	private Method[] $members$;
+
 	// Returns an array of "root" methods. These Method objects must NOT
 	// be propagated to the outside world, but must instead be copied
 	// via ReflectionFactory.copyMethod.
 	private Method[] privateGetPublicMethods() {
+		if (isAnnotation()) {
+			if ($members$ == null) {
+				$members$ = AnnotationParser.JSAnnotationObject.createMethods((Class<? extends Annotation>) this);
+			}
+			return $members$;
+		}
+
+		// TODO this is a nightmare.
 		Method[] ms;
 		if ($methodList$ != null) {
 			ms = new Method[$methodList$.length];
-			for (int i = ms.length; -- i >= 0;) {
+			for (int i = ms.length; --i >= 0;) {
 				ms[i] = new Method(this, $methodList$[i], null, Void.class, null, java.lang.reflect.Modifier.PUBLIC);
 			}
 			return ms;
 		}
+
 		ms = new Method[0];
+		String attr = null;
+		Object o = null;
 		/**
 		 * @j2sNative
 		 * 
 		 * 
-	    var p = this.$clazz$.prototype;
-	    for (var attr in p) {
-	      if (typeof p[attr] == "function" && !p[attr].__CLASS_NAME__ && p[attr] != this.$clazz$[attr] && p[attr].exClazz == this.$clazz$) {
-	        // there are polynormical methods. 
-	        ms.push(Clazz.new_(Clazz.load('java.lang.reflect.Method').c$$Class$S$ClassA$Class$ClassA$I,  [this, attr, [], java.lang.Void, [], 1]));
-	      }
-	    }
-	    p = this.$clazz$;
-	    for (var attr in p) {
-	      if (typeof p[attr] == "function" && !p[attr].__CLASS_NAME__  && p[attr].exClazz == this.$clazz$) {
-	        ms.push(Clazz.new_(Clazz.load('java.lang.reflect.Method').c$$Class$S$ClassA$Class$ClassA$I,  [this, attr, [], java.lang.Void, [], 1 | 8]));
-	      }
-	    }
+		 * 			var p = this.$clazz$.prototype; 
+		 * 
+		 * for (attr in p) { o = p[attr]; if (o.exName && typeof
+		 *            o == "function" && o.exName && !o.__CLASS_NAME__ &&
+		 *            o != this.$clazz$[attr] && o.exClazz == this.$clazz$)
+		 *            { // there are polynormical methods.
 		 */
-		{
-		}
+
+		Method m = new Method(this, attr, NO_PARAMETERS, Void.class, NO_PARAMETERS, Modifier.PUBLIC);
+		m._setJSMethod(o);
+
+		/**
+		 * @j2sNative
+		 * 
+		 * 			ms.push(m);
+		 * }} 
+		 *            p = this.$clazz$; 
+		 *            for (attr in p) { o = p[attr];if (typeof o ==
+		 *            "function" && o.exName && !o.__CLASS_NAME__ &&
+		 *            o.exClazz == this.$clazz$) {
+		 */
+		m = new Method(this, attr, NO_PARAMETERS, Void.class, NO_PARAMETERS, Modifier.PUBLIC | Modifier.STATIC);
+		m._setJSMethod(o);
+		/**
+		 * @j2sNative
+		 * 
+		 * 			ms.push(m);
+		 * }}
+		 */
+
 	    return ms;
 
 //		checkInitted();
@@ -3201,7 +3311,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	}
 	
 //	/** use serialVersionUID from JDK 1.1 for interoperability */
-	private static final long serialVersionUID = 3206093459760846163L;
+//	private static final long serialVersionUID = 3206093459760846163L;
 //
 //	/**
 //	 * Class Class is special cased within the Serialization Stream Protocol.
@@ -3266,29 +3376,6 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 
 //	// Retrieves the desired assertion status of this class from the VM
 //	private static native boolean desiredAssertionStatus0(Class clazz);
-
-	/**
-	 * Returns true if and only if this class was declared as an enum in the
-	 * source code.
-	 *
-	 * @return true if and only if this class was declared as an enum in the
-	 *         source code
-	 * @since 1.5
-	 */
-	public boolean isEnum() {
-		/**
-		 * @j2sNative   return this.$clazz$.$isEnum;
-		 * 
-		 */
-		{
-			return false;
-		}
-//		// An enum must both directly extend java.lang.Enum and have
-//		// the ENUM bit set; classes for specialized enum constants
-//		// don't do the former.
-//		return //getModifiers() & Modifier.ENUM) != 0 && 
-//				this.getSuperclass() == java.lang.Enum.class;
-	}
 
 //	// Fetches the factory for reflective objects
 //	private static ReflectionFactory getReflectionFactory() {
@@ -3406,6 +3493,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 
 	
 	private volatile transient Map<String, T> enumConstantDirectory = null;
+	private AnnotationData annotationData;
 
 	/**
 	 * Casts an object to the class or interface represented by this
@@ -3463,92 +3551,143 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
      * @throws NullPointerException {@inheritDoc}
      * @since 1.5
      */
-    public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
+    // AnnotationElement @Override
+	public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
         Objects.requireNonNull(annotationClass);
-		JSUtil.notImplemented(null);
-		return null;
+		initAnnotationsIfNecessary();
+        return (annotations == null ? null : (A) annotations.get(annotationClass));
 	}
 
-//	public XmlRootElement getAnnotation(Class<XmlRootElement> c) {
-//		
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-//
-	/**
-	 * @throws NullPointerException
-	 *             {@inheritDoc}
-	 * @since 1.5
-	 */
-	public boolean isAnnotationPresent(Class<? extends Annotation> annotationClass) {
-		if (annotationClass == null)
-			throw new NullPointerException();
-		JSUtil.notImplemented(null);
-		return false;
-//		return getAnnotation(annotationClass) != null;
-	}
-
-	private static Annotation[] EMPTY_ANNOTATIONS_ARRAY;
-	
-	private static Annotation[] getEmptyAnnotations() {
-		return (EMPTY_ANNOTATIONS_ARRAY == null ? EMPTY_ANNOTATIONS_ARRAY = new Annotation[0] : EMPTY_ANNOTATIONS_ARRAY);
-	}
 	/**
 	 * @since 1.5
 	 */
+    // AnnotationElement @Override
 	public Annotation[] getAnnotations() {
-		JSUtil.notImplemented(null);
-		return getEmptyAnnotations();
-//		initAnnotationsIfNecessary();
-//		return annotations.values().toArray(EMPTY_ANNOTATIONS_ARRAY);
+		initAnnotationsIfNecessary();
+		return annotations.values().toArray(AnnotationParser.getEmptyAnnotationArray());
 	}
+
+    // AnnotationElement @Override
+    @SuppressWarnings("hiding")
+	public <T extends Annotation> T[] getAnnotationsByType(Class<T> annotationClass) {
+        Objects.requireNonNull(annotationClass);
+        AnnotationData annotationData = annotationData();
+        return AnnotationSupport.getAssociatedAnnotations(annotationData.declaredAnnotations,
+                                                          this,
+                                                          annotationClass);
+    }
+
+    private AnnotationData annotationData() {
+     //   while (true) { // retry loop
+            AnnotationData annotationData = this.annotationData;
+//            int classRedefinedCount = this.classRedefinedCount;
+            if (annotationData != null 
+//            		&&
+//                annotationData.redefinedCount == classRedefinedCount
+            		) {
+                return annotationData;
+            }
+            // null or stale annotationData -> optimistically create new instance
+            return annotationData = createAnnotationData(0);//classRedefinedCount);
+     //   }
+    }
+
+    private AnnotationData createAnnotationData(int classRedefinedCount) {
+        Map<Class<? extends Annotation>, Annotation> declaredAnnotations =
+            AnnotationParser.parseAnnotations(null, this, false);
+        Class<?> superClass = getSuperclass();
+        Map<Class<? extends Annotation>, Annotation> annotations = null;
+        if (superClass != null) {
+            Map<Class<? extends Annotation>, Annotation> superAnnotations =
+                superClass.annotationData().annotations;
+            for (Map.Entry<Class<? extends Annotation>, Annotation> e : superAnnotations.entrySet()) {
+                Class<? extends Annotation> annotationClass = e.getKey();
+                if (AnnotationType.getInstance(annotationClass).isInherited()) {
+                    if (annotations == null) { // lazy construction
+                        annotations = new LinkedHashMap<>((Math.max(
+                                declaredAnnotations.size(),
+                                Math.min(12, declaredAnnotations.size() + superAnnotations.size())
+                            ) * 4 + 2) / 3
+                        );
+                    }
+                    annotations.put(annotationClass, e.getValue());
+                }
+            }
+        }
+        if (annotations == null) {
+            // no inherited annotations -> share the Map with declaredAnnotations
+            annotations = declaredAnnotations;
+        } else {
+            // at least one inherited annotation -> declared may override inherited
+            annotations.putAll(declaredAnnotations);
+        }
+        return new AnnotationData(annotations, declaredAnnotations, classRedefinedCount);
+    }
+
+    // Annotation types cache their internal (AnnotationType) form
+
+    private volatile transient AnnotationType annotationType;
+
+	public void setAnnotationResult(AnnotationType type) {
+		// SwingJS added
+		annotationType = type;	
+	}
+
+//    boolean casAnnotationType(AnnotationType oldType, AnnotationType newType) {
+//        return Atomic.casAnnotationType(this, oldType, newType);
+//    }
+
+    Class<? extends Annotation> annotationType() {
+    	return (isAnnotation() ? (Class<? extends Annotation>) this : null);
+    }
+
+	//
+    public AnnotationType getAnnotationType() {
+    	// SwingJS was package-private
+        return annotationType;
+    }
+
+    Map<Class<? extends Annotation>, Annotation> getDeclaredAnnotationMap() {
+        return annotationData().declaredAnnotations;
+    }
 
 	/**
 	 * @since 1.5
 	 */
+    // AnnotationElement @Override
 	public Annotation[] getDeclaredAnnotations() {
-		JSUtil.notImplemented(null);
-		return getEmptyAnnotations();
-//		initAnnotationsIfNecessary();
-//		return declaredAnnotations.values().toArray(EMPTY_ANNOTATIONS_ARRAY);
+		initAnnotationsIfNecessary();
+		return declaredAnnotations.values().toArray(AnnotationParser.getEmptyAnnotationArray());
 	}
 
 //	// Annotations cache
-//	private transient Map<Class, Annotation> annotations;
-//	private transient Map<Class, Annotation> declaredAnnotations;
-//
-//	private synchronized void initAnnotationsIfNecessary() {
-////		clearCachesOnClassRedefinition();
-////		if (annotations != null)
-////			return;
-////		declaredAnnotations = AnnotationParser.parseAnnotations(getRawAnnotations(), getConstantPool(), this);
-////		Class<?> superClass = getSuperclass();
-////		if (superClass == null) {
-////			annotations = declaredAnnotations;
-////		} else {
-////			annotations = new HashMap<Class, Annotation>();
-////			superClass.initAnnotationsIfNecessary();
-////			for (Map.Entry<Class, Annotation> e : superClass.annotations.entrySet()) {
-////				Class annotationClass = e.getKey();
-////				if (AnnotationType.getInstance(annotationClass).isInherited())
-////					annotations.put(annotationClass, e.getValue());
-////			}
-////			annotations.putAll(declaredAnnotations);
-////		}
-//	}
-//
-//	// Annotation types cache their internal (AnnotationType) form
-//
-	private AnnotationType annotationType;
+	private transient Map<Class<? extends Annotation>, Annotation> annotations;
+	private transient Map<Class<? extends Annotation>, Annotation> declaredAnnotations;
+
+	private synchronized void initAnnotationsIfNecessary() {
+//		clearCachesOnClassRedefinition(); // not allowing redefinition in SwingJS
+		if (annotations != null)
+			return;
+		declaredAnnotations = AnnotationParser.parseAnnotations(null, this, false);
+		Class<?> superClass = getSuperclass();
+		if (superClass == null) {
+			annotations = declaredAnnotations;
+		} else {
+			annotations = new HashMap<>();
+			superClass.initAnnotationsIfNecessary();
+			for (Map.Entry<Class<? extends Annotation>, Annotation>  e : superClass.annotations.entrySet()) {
+				Class annotationClass = e.getKey();
+				if (AnnotationType.getInstance(annotationClass).isInherited())
+					annotations.put(annotationClass, e.getValue());
+			}
+			annotations.putAll(declaredAnnotations);
+		}
+	}
 
 	void setAnnotationType(AnnotationType type) {
 		annotationType = type;
 	}
 
-	AnnotationType getAnnotationType() {
-		return annotationType;
-	}
-	
 	@SuppressWarnings("null")
 	@Override
 	public int hashCode() {
@@ -3608,5 +3747,58 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		}
 		return c;
 	}
+
+    // annotation data that might get invalidated when JVM TI RedefineClasses() is called
+    private static class AnnotationData {
+        final Map<Class<? extends Annotation>, Annotation> annotations;
+        final Map<Class<? extends Annotation>, Annotation> declaredAnnotations;
+
+        // Value of classRedefinedCount when we created this AnnotationData instance
+        //final int redefinedCount;
+
+        AnnotationData(Map<Class<? extends Annotation>, Annotation> annotations,
+                       Map<Class<? extends Annotation>, Annotation> declaredAnnotations,
+                       int redefinedCount) {
+            this.annotations = annotations;
+            this.declaredAnnotations = declaredAnnotations;
+          //  this.redefinedCount = redefinedCount;
+        }
+    }
+
+    // SwingJS from AnnotatedElement
+    @SuppressWarnings("hiding")
+	public <T extends Annotation> T getDeclaredAnnotation(Class<T> annotationClass) {
+        Objects.requireNonNull(annotationClass);
+        // Loop over all directly-present annotations looking for a matching one
+        for (Annotation annotation : getDeclaredAnnotations()) {
+            if (annotationClass.equals(annotation.annotationType())) {
+                // More robust to do a dynamic cast at runtime instead
+                // of compile-time only.
+                return annotationClass.cast(annotation);
+            }
+        }
+        return null;
+    }
+    
+    // SwingJS from AnnotatedElement
+    @SuppressWarnings("hiding")
+	public <T extends Annotation> T[] getDeclaredAnnotationsByType(Class<T> annotationClass) {
+        Objects.requireNonNull(annotationClass);
+        return AnnotationSupport.
+            getDirectlyAndIndirectlyPresent(Arrays.stream(getDeclaredAnnotations()).
+                                            collect(Collectors.toMap(Annotation::annotationType,
+                                                                     Function.identity(),
+                                                                     ((first,second) -> first),
+                                                                     LinkedHashMap::new)),
+                                            annotationClass);
+    }
+    
+    // SwingJS from AnnotatedElement
+	public boolean isAnnotationPresent(Class<? extends Annotation> annotationClass) {
+		if (annotationClass == null)
+			throw new NullPointerException();
+		return getAnnotation(annotationClass) != null;
+	}
+
 
 }

@@ -48,6 +48,7 @@ class Java2ScriptCompiler {
 	private final HashSet<String> copyResources = new HashSet<String>();
 	private Map<String, String> htMethodsCalled;
 	private List<String> lstMethodsDeclared;
+	private String ignoredAnnotations;
 
 	private final static String J2S_COMPILER_STATUS = "j2s.compiler.status";
 	private final static String J2S_COMPILER_STATUS_ENABLE = "enable";
@@ -90,6 +91,14 @@ class Java2ScriptCompiler {
 	private static final String J2S_EXCLUDED_PATHS = "j2s.excluded.paths";
 	private static final String J2S_EXCLUDED_PATHS_DEFAULT = "<none>";
 
+	/**
+	 * Added 3.2.6
+	 */
+	private static final String J2S_COMPILER_READ_ANNOTATIONS = "j2s.compiler.read.annotations";
+	private static final String J2S_COMPILER_READ_ANNOTATIONS_DEFAULT = "true";
+	private static final String J2S_COMPILER_IGNORED_ANNOTATIONS = "j2s.compiler.ignored.annotations";
+	private static final String J2S_COMPILER_IGNORED_ANNOTATIONS_DEFAULT = "CallerSensitive;ConstructorProperties;Deprecated;Override;SaveVarargs;SuppressWarnings;";
+
 	private static final String J2S_COMPILER_NONQUALIFIED_PACKAGES = "j2s.compiler.nonqualified.packages";
 	private static final String J2S_COMPILER_NONQUALIFIED_PACKAGES_DEFAULT = "<none>";
 
@@ -100,12 +109,12 @@ class Java2ScriptCompiler {
 	private static final String J2S_COMPILER_MODE_DEFAULT = "nodebug";
 	private static final String J2S_COMPILER_MODE_DEBUG = "debug";
 
-	private static final String J2S_CLASS_REPLACEMENTS = "j2s.class.replacements";
-	private static final String J2S_CLASS_REPLACEMENTS_DEFAULT = "<none>";
-
 	private static final String J2S_TEMPLATE_HTML = "j2s.template.html";
 	private static final String J2S_TEMPLATE_HTML_DEFAULT = "template.html";
 	
+	private static final String J2S_CLASS_REPLACEMENTS = "j2s.class.replacements";
+	private static final String J2S_CLASS_REPLACEMENTS_DEFAULT = "<none>";
+
 	private Properties props;
 	private String htmlTemplate = null;
 
@@ -283,6 +292,10 @@ class Java2ScriptCompiler {
 					lstExcludedPaths = null;
 			}
 
+			boolean readAnnotations = !"false".equals(getProperty(J2S_COMPILER_READ_ANNOTATIONS, J2S_COMPILER_READ_ANNOTATIONS_DEFAULT));
+			
+			ignoredAnnotations = (readAnnotations ? getProperty(J2S_COMPILER_IGNORED_ANNOTATIONS, J2S_COMPILER_IGNORED_ANNOTATIONS_DEFAULT) : null);
+
 			testing = "true".equalsIgnoreCase(getProperty(J2S_TESTING, J2S_TESTING_DEFAULT));
 
 			String prop = getProperty(J2S_COMPILER_NONQUALIFIED_PACKAGES, J2S_COMPILER_NONQUALIFIED_PACKAGES_DEFAULT);
@@ -308,6 +321,7 @@ class Java2ScriptCompiler {
 				System.out.println("J2S using HTML template " + file);
 			}
 
+			Java2ScriptVisitor.setAnnotating(ignoredAnnotations);
 			Java2ScriptVisitor.setDebugging(isDebugging);
 			Java2ScriptVisitor.setLogging(lstMethodsDeclared, htMethodsCalled, logAllCalls);
 
@@ -315,7 +329,7 @@ class Java2ScriptCompiler {
 			Java2ScriptVisitor.NameMapper.setClassReplacements(classReplacements);
 
 			if (isCleanBuild)
-				Java2ScriptVisitor.clearStringLiteralCache();
+				Java2ScriptVisitor.startCleanBuild();
 
 		} catch (Exception e) {
 			System.out.println("error " + e + "  " + e.getStackTrace());

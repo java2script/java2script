@@ -658,9 +658,8 @@ public class Proxy implements java.io.Serializable {
     	 * 
     	 * var cl$ = cl.$clazz$;
     	 * 
-    	 *  cl$.$clinit$ = function() {Clazz.load(cl$, 1);};
+    	 *  cl$.$clinit$ = 1;
     	 *  Clazz.newMeth(cl$, '$init$', function () {}, 1);
-    	 *  Clazz.newMeth(cl$, '$init0$', function () {}, 1);
     	 *  Clazz.newMeth(cl$, "c$$reflect_InvocationHandler", function(h) {
     	 *  cl$.superclazz.c$$reflect_InvocationHandler.apply(this, [h]);
 		 *  cl$.$init$.apply(this);

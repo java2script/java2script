@@ -930,6 +930,7 @@ public class CompletableFuture<T> implements Future<T>, CompletionStage<T> {
         }
     }
 
+    @Deprecated
     final <S> boolean uniCompose(
         CompletableFuture<S> a,
         Function<? super S, ? extends CompletionStage<T>> f,

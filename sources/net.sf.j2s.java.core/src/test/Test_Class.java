@@ -136,7 +136,7 @@ class Test_Class extends Test_Class2 {
 		final String testfinal = "testFinal" + Double.valueOf(3);
 		
 		String pseudofinal = "testPseudo";
-		
+
 		Hashtable<String, Object> t = new Hashtable<String, Object>() {
 			public Object put(String key, Object value) {
 				super.put(key,  value); 

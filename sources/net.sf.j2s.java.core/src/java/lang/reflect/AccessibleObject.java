@@ -35,7 +35,8 @@ import java.lang.annotation.Annotation;
  * @see ReflectPermission
  * @since 1.2
  */
-public class AccessibleObject implements AnnotatedElement {
+public abstract class AccessibleObject implements AnnotatedElement {
+	// BH SwingJS made abstract to let Field, Method, and Constructor handle AnnotatedElement interface by themselves
 	static final Object[] emptyArgs = new Object[0];
 
 	/**
@@ -46,6 +47,8 @@ public class AccessibleObject implements AnnotatedElement {
 		super();
 	}
 
+	boolean accessible = true;
+	
 	/**
 	 * Returns the value of the accessible flag. This is false if access checks
 	 * are performed, true if they are skipped.
@@ -53,7 +56,7 @@ public class AccessibleObject implements AnnotatedElement {
 	 * @return the value of the accessible flag
 	 */
 	public boolean isAccessible() {
-		return false;
+		return accessible;
 	}
 
 	/**
@@ -90,25 +93,77 @@ public class AccessibleObject implements AnnotatedElement {
 	 *             if the request is denied
 	 */
 	public void setAccessible(boolean flag) throws SecurityException {
-		return;
+		accessible = flag;
 	}
     
-    public boolean isAnnotationPresent(Class<? extends Annotation> annotationType) {
-        return false;
-    }
-    
-    public Annotation[] getDeclaredAnnotations() {
-        return new Annotation[0];
-    }
-    
-    public Annotation[] getAnnotations() {
-        return new Annotation[0];
-    }
-    
-    public <T extends Annotation> T getAnnotation(Class<T> annotationType) {
-        return null;
+//    /**
+//     * @throws NullPointerException {@inheritDoc}
+//     * @since 1.5
+//     */
+//    public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
+//        throw new AssertionError("All subclasses should override this method");
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     * @throws NullPointerException {@inheritDoc}
+//     * @since 1.5
+//     */
+//    @Override
+//    public boolean isAnnotationPresent(Class<? extends Annotation> annotationClass) {
+//        return AnnotatedElement.super.isAnnotationPresent(annotationClass);
+//    }
+
+//   /**
+//     * @throws NullPointerException {@inheritDoc}
+//     * @since 1.8
+//     */
+//    @Override
+//    public <T extends Annotation> T[] getAnnotationsByType(Class<T> annotationClass) {
+//    	// superclass version is only for Class
+//        throw new AssertionError("All subclasses should override this method");
+//    }
+//
+    /**
+     * @since 1.5
+     */
+    @Override
+	public Annotation[] getAnnotations() {
+        return getDeclaredAnnotations();
     }
 
+    /**
+     * @throws NullPointerException {@inheritDoc}
+     * @since 1.8
+     */
+    //@Override
+    public <T extends Annotation> T getDeclaredAnnotation(Class<T> annotationClass) {
+        // Only annotations on classes are inherited, for all other
+        // objects getDeclaredAnnotation is the same as
+        // getAnnotation.
+        return getAnnotation(annotationClass);
+    }
+
+    /**
+     * @throws NullPointerException {@inheritDoc}
+     * @since 1.8
+     */
+    @Override
+    public <T extends Annotation> T[] getDeclaredAnnotationsByType(Class<T> annotationClass) {
+        // Only annotations on classes are inherited, for all other
+        // objects getDeclaredAnnotationsByType is the same as
+        // getAnnotationsByType.
+        return getAnnotationsByType(annotationClass);
+    }
+
+//    /**
+//     * @since 1.5
+//     */
+//    public Annotation[] getDeclaredAnnotations()  {
+//        throw new AssertionError("All subclasses should override this method");
+//    }
+//
+//
 	static Object[] marshallArguments(@SuppressWarnings("rawtypes") Class[] parameterTypes, Object[] args)
 			throws IllegalArgumentException {
 		return null;
@@ -144,22 +199,38 @@ public class AccessibleObject implements AnnotatedElement {
 		return 0.0D;
 	}
 
-	/*native*/ Class<?>[] getParameterTypesImpl() {return null;}
+	
+	@Override
+	public boolean isAnnotationPresent(Class<? extends Annotation> annotationClass) {
+        return getAnnotation(annotationClass) != null;
+    }
 
-	/*native*/ int getModifiers() {return Member.PUBLIC;}
 
-	/*native*/ Class<?>[] getExceptionTypesImpl(){return null;}
-
-	/*native*/ String getSignature() {return "__FIELD__";}
-
-	/*native*/ boolean checkAccessibility(Class<?> senderClass, Object receiver) {return true;}
-
-	static /*native*/ void initializeClass(Class<?> clazz) {}
-
+	// SwingJS not implemented:
+	
+//	/*native*/ Class<?>[] getParameterTypesImpl() {return null;}
+//
+//	/*native*/ int getModifiers() {return Member.PUBLIC;}
+//
+//	/*native*/ Class<?>[] getExceptionTypesImpl(){return null;}
+//
+//	/*native*/ String getSignature() {return "__FIELD__";}
+//
+//	/*native*/ boolean checkAccessibility(Class<?> senderClass, Object receiver) {return true;}
+//
+//	static /*native*/ void initializeClass(Class<?> clazz) {}
+//
 	/**
 	 * Answer the class at depth. Notes: 1) This method operates on the defining
 	 * classes of methods on stack. NOT the classes of receivers. 2) The item at
 	 * index zero describes the caller of this method.
 	 */
-	static final /*native*/ Class<?> getStackClass(int depth) {return null;};
+	static final /*native*/ Class<?> getStackClass(int depth) {return null;}
+
+	public boolean isSynthetic() {
+		// TODO Auto-generated method stub
+		return false;
+	};
+	
+
 }

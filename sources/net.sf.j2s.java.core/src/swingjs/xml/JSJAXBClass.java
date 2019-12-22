@@ -145,7 +145,7 @@ class JSJAXBClass implements Cloneable {
 			null);
 			if (clazz == null)
 				break;
-			Object[][][] jsdata = (/** @j2sNative clazz.__ANN__ || */
+			Object[][][] jsdata = (/** @j2sNative clazz.$getAnn$ && clazz.$getAnn$() || */
 			null);
 			String className = (/** @j2sNative clazz.__CLASS$NAME__ || clazz.__CLASS_NAME__ || */
 			null);
@@ -282,8 +282,10 @@ class JSJAXBClass implements Cloneable {
 			@SuppressWarnings("unused")
 			Class<?> cl = value.getClass();
 			return (/**
-					 * @j2sNative (value.$clazz$ ? !!value.$clazz$.__ANN__ : cl.$clazz$ ?
-					 *            !!cl.$clazz$.__ANN__ : 0) ||
+					 * @j2sNative value.$clazz$ 
+					 * && value.$clazz$.$getAnn$ 
+					 * && cl.$clazz$ 
+					 * && !!cl.$clazz$.$getAnn$ ||
 					 */
 			false);
 		} catch (Throwable t) {

@@ -13863,6 +13863,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2019.12.19 3.2.6 revision of $clinit$
+// BH 2019.12.16 3.2.5.v4 adds ClassLoader static methods for system resources (just j2s/...)
 // BH 2019.12.15 3.2.5.v4 Character.prototype.valueOf() missing 
 // BH 2019.12.14 3.2.5.v3 Clazz._4Name initialization should be full static initialization 
 
@@ -14242,10 +14244,21 @@ Clazz.load = function(cName, from$clinit$) {
   if (from$clinit$ == 1) {
     // C$.$clinit$ call to finalize all dependencies
 	var cl = cName;
-	cl.$clinit$ = 0;
+	cl.$clinit$ = 0-cl.$clinit$;
+	// -2 means v 3.2.6
+	// -1 means v 3.2.5
+	// NaN means original 3.2.4 function() {Clazz.load(C$, 1)};
     var ld = cl.$load$;
     setSuperclass(cl, (ld && ld[0] ? Clazz.load(ld[0]) : null));
     ld[1] && addInterface(cl, ld[1]);
+    switch (cl.$clinit$) {
+    case -1:
+    	// done
+    	break;
+    case -2:
+    	initClass0(cl);
+    	break;    
+    }
     return;
   } 
   if (from$clinit$ == 2) {
@@ -14277,6 +14290,132 @@ Clazz.load = function(cName, from$clinit$) {
   return Clazz._4Name(cName, null, null, true);
 }
 
+//create  and $init0$
+var initClass0 = function(c) {
+	var fields = c.$fields$;
+	var objects = fields && fields[0];
+	createDefaults(c, objects, false);
+	if (!fields)
+		return;
+	var statics = fields[1];
+	if (statics && statics.length)
+		createDefaults(c, statics, true);
+}
+
+//C$.$fields$=[
+//['I',['test3','itype'],'S',['test1'],'O',['test2','java.util.List[]','test4','test.Test_','+test5']],
+//['D',['d'],'F',['f'],'I',['itest1','itest2'],'S',['stest1']]
+//]
+var createDefaults = function(c, data, isStatic) {
+	var a = getFields(c, data, true);
+	if (isStatic) {
+		for (var i = a.length; --i >= 0;) {
+			c[a[i][0]] = a[i][1];
+		}
+	} else {
+		c.$init0$ = 
+			//(function(cs, a) {return 
+			function(){
+				var cs = c.superclazz;
+				cs && cs.$init0$ && cs.$init0$.apply(this);
+				for (var i = a.length; --i >= 0;){
+					this[a[i][0]] = a[i][1];
+				}
+			};
+//		})(c.superclazz, a);
+	}
+		
+}
+
+Clazz._getFieldNames = function(c, isStatic) {
+	return (c.$fields$ ? getFields(c, c.$fields$[isStatic ? 1 : 0], 0) : []);
+}
+
+Clazz._getFieldTypes = function(c, isStatic) {
+	return (c.$fields$ ? getFields(c, c.$fields$[isStatic ? 1 : 0], "types") : []);
+}
+
+var fieldTypes = "Integer;Float;Double;Character;Long;Byte;"
+/**
+ * Get correct default (0, '\0', null) or just 
+ * return a list of names.
+ */
+var getFields = function(c, data, andDefaults) {
+  	var a = [];
+  	if (!data)
+  		return a;
+  	if (andDefaults == "types") {
+	  	for (var i = 0, n = data.length; i < n; i++) {
+	  		var type = data[i++];
+	  		var anames = data[i];
+	  		if (type != "O") {
+	  			for (var j = anames.length; --j >= 0;)
+	  			a.push(type);
+	  			continue;
+	  		}
+	  		type = "String";
+  	  		for (var j = 0, na = anames.length; j < na; j++) {
+  	  			if (anames[j].indexOf("+") != 0) {
+  	  				type = anames[++j];
+  	  			}
+  	  	 		a.push(type);
+  	   		}
+  	  		continue;
+	  	}	  		
+		return a;
+  	} 
+	if (andDefaults) {
+	  	for (var i = 0, n = data.length; i < n; i++) {
+	  		var type = data[i++];
+	  		var anames = data[i];
+	  		var defval;
+	  		switch (type) {
+	  		case 'S':
+	  			defval = null;
+	  			break;
+	  		case 'O':
+	  	  		for (var j = 0, na = anames.length; j < na; j++) {
+	  	  			var name = anames[j];
+	  	  			if (name.indexOf("+") == 0)
+	  	  				name = name.substring(1);
+	  	  			else
+	  	  				j++;
+	  	  	 		a.push([name, null]);
+	  	   		}
+	  	  		continue;
+	  		case 'C':
+	  			defval = '\0';
+	  			break;
+	  		default:
+	  			defval = 0;
+	  			break;  		
+	  		}
+	  		for (var j = 0, na = anames.length; j < na; j++) {	
+	  	 		a.push([anames[j], defval]);
+	   		}
+	  	}	
+  		return a;
+  	}
+  	for (var i = 0, n = data.length; i < n; i++) {
+  		var type = data[i++];
+  		var anames = data[i];
+  		if (type == 'O') {
+	  		for (var j = 0, na = anames.length; j < na; j++) {
+  	  			var name = anames[j];
+  	  			if (name.indexOf("+") == 0)
+  	  				name = name.substring(1);
+  	  			else
+  	  				j++;
+  	  	 		a.push(name);
+  	   		}	  			
+  		} else {
+	  		for (var j = 0, na = anames.length; j < na; j++) {	
+	  	 		a.push(anames[j]);
+	   		}
+  		}
+  	}	
+  	return a;
+}
 Clazz._newCount = 0;
 
 /**
@@ -14292,6 +14431,16 @@ Clazz._newCount = 0;
 Clazz.new_ = function(c, args, cl) {
   if (!c)
     return new Clazz._O();
+  var generics;
+  var a = arguments;
+  if (c === 1) { // new for 3.2.6 {K:"java.lang.String",...}
+	generics = arguments[1];
+	a = [];
+	c = a[0] = arguments[2];
+	args = a[1] = arguments[3];
+	cl = a[2] = arguments[4];
+	a = a.slice(0, arguments.length - 2);
+  }
   var haveArgs = !!args;
   args || (args = [[]]);
   
@@ -14314,7 +14463,7 @@ Clazz.new_ = function(c, args, cl) {
   // or a static field or method call (which is handled
   // by the $I$(n) handler in the function initializer in 
   // the newClass() call.
-  var obj = new (Function.prototype.bind.apply(cl, arguments));
+  var obj = new (Function.prototype.bind.apply(cl, a));
   if (args[2] != inheritArgs) {
     haveArgs && c.apply(obj, args);
     clInner && clInner.$init$.apply(obj);
@@ -14322,6 +14471,9 @@ Clazz.new_ = function(c, args, cl) {
     
   _profileNew && addProfileNew(cl, window.performance.now() - t0);
 
+  if (generics) {
+	  obj.$init$.generics = generics;
+  }
   return obj;
 }
 
@@ -14685,6 +14837,7 @@ var arrayClass = function(baseClass, ndim) {
     aas += aas;
   var aaa = aas.substring(0, ndim);
   var o = {};
+  var a = new Array(ndim);
   o.arrayType = 1;
   o.__BASECLASS = baseClass;
   o.__NDIM = ndim;
@@ -15174,8 +15327,11 @@ var excludeSuper = function(o) {
       || o == "$init0$"
       || o == "$static$"
       || o == "$clinit$"
+      || o == "$fields$"
       || o == "$load$"
       || o == "$Class$"
+      || o == "$getMembers$"
+      || o == "$getAnn$"
       || o == "prototype" 
       || o == "__PARAMCODE" 
       || o == "__CLASS_NAME__" 
@@ -15215,8 +15371,8 @@ var finalizeClazz = function(clazz, qname, bname, type, isNumber) {
   (type == 1) && (clazz.__ANON = clazz.prototype.__ANON = 1); 
   (type == 2) && (clazz.__LOCAL = clazz.prototype.__LOCAL = 1);
   
-  if (!isNumber && type != 0)
-    Clazz.newMeth(clazz, '$init0$', function(){var c;if ((c=clazz.superclazz) && (c = c.$init0$))c.apply(this);}, 1);
+//  if (!isNumber && type != 0)
+//    Clazz.newMeth(clazz, '$init0$', function(){var c;if ((c=clazz.superclazz) && (c = c.$init0$))c.apply(this);}, 1);
   if (isNumber || type != 0)
 	  extendPrototype(clazz);
 
@@ -15625,11 +15781,9 @@ Clazz.newMeth(C$, 'chars$', function () {
 return $I$(1).intStream$java_util_function_Supplier$I$Z(((P$.CharSequence$lambda1||
 (function(){var C$=Clazz.newClass(P$, "CharSequence$lambda1", function(){Clazz.newInstance(this, arguments[0],1,C$);}, null, 'java.util.function.Supplier', 1);
 
-C$.$clinit$ = function() {Clazz.load(C$, 1);
-}
+C$.$clinit$ = 1;
 
-Clazz.newMeth(C$, '$init$', function () {
-}, 1);
+Clazz.newMeth(C$, '$init$', function () {}, 1);
 /*lambda_E*/
 Clazz.newMeth(C$, 'get$', function () { return($I$(2).spliterator$java_util_PrimitiveIterator_OfInt$J$I(Clazz.new_(CharSequence$1CharIterator.$init$, [this, null]), this.b$['CharSequence'].length$(), 16));});
 })()
@@ -15640,8 +15794,7 @@ Clazz.newMeth(C$, 'codePoints$', function () {
 return $I$(1).intStream$java_util_function_Supplier$I$Z(((P$.CharSequence$lambda2||
 (function(){var C$=Clazz.newClass(P$, "CharSequence$lambda2", function(){Clazz.newInstance(this, arguments[0],1,C$);}, null, 'java.util.function.Supplier', 1);
 
-C$.$clinit$ = function() {Clazz.load(C$, 1);
-}
+C$.$clinit$ = 1;
 
 Clazz.newMeth(C$, '$init$', function () {
 }, 1);
@@ -15655,8 +15808,7 @@ Clazz.newMeth(C$, 'get$', function () { return($I$(2).spliteratorUnknownSize$jav
 Clazz.newInstance(this, arguments[0],true,C$);
 }, null, [['java.util.PrimitiveIterator','java.util.PrimitiveIterator.OfInt']], 2);
 
-C$.$clinit$ = function() {Clazz.load(C$, 1);
-}
+C$.$clinit$ = 1;
 
 Clazz.newMeth(C$, '$init0$', function () {
 var c;if((c = C$.superclazz) && (c = c.$init0$))c.apply(this);
@@ -15691,8 +15843,7 @@ Clazz.newMeth(C$);
 Clazz.newInstance(this, arguments[0],true,C$);
 }, null, [['java.util.PrimitiveIterator','java.util.PrimitiveIterator.OfInt']], 2);
 
-C$.$clinit$ = function() {Clazz.load(C$, 1);
-}
+C$.$clinit$ = 1;
 
 Clazz.newMeth(C$, '$init0$', function () {
 var c;if((c = C$.superclazz) && (c = c.$init0$))c.apply(this);
@@ -15813,6 +15964,9 @@ Clazz._Loader = function () {};
 
 ;(function(Clazz, _Loader) {
 
+// The class loader is always accessed through Class.
+// See Class.java for implementations of the methods of java.lang.ClassLoader such as getSystemResource and getResource
+
 java.lang.ClassLoader = _Loader;
 // BH windows-level only because it's java.lang
 ClassLoader = _Loader;
@@ -15829,7 +15983,19 @@ _Loader.getSystemClassLoader$ = function() {
 
 var assertionStatus = {};
 
-_Loader.getClassAssertionStatus$ = function(clazz) {
+_Loader.getSystemResource$S = function(name) {
+	return _Loader.getSystemClassLoader$().getResource$(name);	
+}
+
+_Loader.getSystemResources$S = function(name) {
+	return _Loader.getSystemClassLoader$().getResources$(name);	
+}
+
+_Loader.getSystemResourceAsStream$S = function(name) {
+	return _Loader.getSystemClassLoader$().getResourceAsStream$(name);	
+}
+
+_Loader.getClassAssertionStatus$ = function(clazz) { // harmony
   var ret;
   var clazzName = clazz.__CLASS_NAME__ + ".";
   for (var c in assertionStatus) {
@@ -15861,6 +16027,8 @@ _Loader.prototype.setClassAssertionStatus$S$Z = _Loader.prototype.setPackageAsse
 _Loader.prototype.loadClass$S = function(clazzName) {
   return Clazz.forName(clazzName);
 }
+
+
 _Loader._checkLoad = J2S._checkLoad;
  
 _Loader._TODO = [];
@@ -16192,7 +16360,7 @@ var evaluate = function(file, js) {
 
 Clazz._initClass = function(c,clinit,status,objThis) {
 	var f;
-	return clinit && (f=c.$clinit$) && (f === 1 ? Clazz.load(c,1) : f ? f() : 0),
+	return clinit && (f=c.$clinit$) && (f === 1 || f === 2 ? Clazz.load(c,1) : f && typeof f == "function"? f() : 0),
 	status && c.$load$ && Clazz.load(c, 2),
 	objThis  && (f=c.$init0$) && f.apply(objThis),
 	c;
@@ -16714,6 +16882,19 @@ Clazz.alert = function (s) {
 
 })(Clazz.Console);
 
+var getURIField = function(name, def) {
+	try {
+		var ref = document.location.href.toLowerCase();
+		var i = ref.indexOf(name.toLowerCase() + "=");
+		if (i >= 0)
+			def = (document.location.href + "&").substring(
+					i + name.length + 1).split("&")[0];
+	} catch (e) {
+	} finally {
+		return def;
+	}
+}
+
 
 Clazz._setDeclared("java.lang.System",
 java.lang.System = System = {
@@ -16742,6 +16923,11 @@ java.lang.System = System = {
   getProperties$ : function() {
     return System.props;
   },
+  getenv$S : function(key) {
+	  var s = J2S.getGlobal(key) || getURIField(key, null);
+	  return s || null;
+  },
+  
   getProperty$S$S : function(key, def) {
     if (System.props)
       return System.props.getProperty$S$S (key, def);
@@ -17085,18 +17271,20 @@ if (typeof arguments[0] != "object")this.c$(arguments[0]);
 
 var primTypes = {};
 
+var FALSE = function() { return false };
+
 var setJ2STypeclass = function(cl, type, paramCode) {
 // TODO -- should be a proper Java.lang.Class
   primTypes[paramCode] = cl;
   cl.TYPE = {
-    isArray$: function() { return false },
     isPrimitive$: function() { return true },
     type:type, 
     __PARAMCODE:paramCode, 
     __PRIMITIVE:1  // referenced in java.lang.Class
   };
+  cl.TYPE.isArray$ = cl.TYPE.isEnum$ = cl.TYPE.isAnnotation$ = FALSE;
   cl.TYPE.toString = cl.TYPE.getName$ = cl.TYPE.getTypeName$ 
-    = cl.TYPE.getCanonicalName$ = cl.TYPE.getSimpleName$ = function() {return type}
+    = cl.TYPE.getCanonicalName$ = cl.TYPE.getSimpleName$ = function() {return type};
 }
 
 var decorateAsNumber = function (clazz, qClazzName, type, PARAMCODE) {
@@ -18911,7 +19099,7 @@ Clazz._Error || (Clazz._Error = Error);
 //setSuperclass(Clazz._Error, Throwable);
 
 var setEx = function(C$) {
- C$.$clinit$ = function() {Clazz.load(C$, 1)};
+ C$.$clinit$ = 1;
  m$(C$, "c$", function() { C$.superclazz.c$.apply(this, []);}, 1);
  m$(C$, "c$$S", function(detailMessage){C$.superclazz.c$$S.apply(this,[detailMessage]);},1);
  m$(C$, "c$$Throwable", function(exception){C$.superclazz.c$$Throwable.apply(this, arguments);}, 1);
@@ -19127,7 +19315,7 @@ var C$=Clazz.newClass(java.util,"MissingResourceException",function(){
 this.className=null;
 this.key=null;
 },RuntimeException);
-C$.$clinit$ = function() {Clazz.load(C$, 1)};
+C$.$clinit$ = 1;
 m$(C$, "c$$S$S$S", function(detailMessage,className,resourceName){
 Clazz.super_(C$, this);
 C$.superclazz.c$$S.apply(this,[detailMessage]);
@@ -19150,71 +19338,6 @@ setJ2STypeclass(java.lang.Void, "void", "V");
 //java.lang.V
 
 Clazz.newInterface(java.lang.reflect,"GenericDeclaration");
-Clazz.newInterface(java.lang.reflect,"AnnotatedElement");
-
-;(function() {
-var C$=declareType(java.lang.reflect,"AccessibleObject",null,java.lang.reflect.AnnotatedElement);
-m$(C$, "c$",function(){
-}, 1);
-m$(C$,"isAccessible$",
-function(){
-return true;
-});
-m$(C$,"setAccessible$reflect_AccessibleObjectA$Z",
-function(objects,flag){
-return;
-},1);
-m$(C$,"setAccessible$Z",
-function(flag){
-return;
-});
-m$(C$,"isAnnotationPresent$Class",
-function(annotationType){
-return false;
-});
-m$(C$,"getDeclaredAnnotations$",
-function(){
-return new Array(0);
-});
-m$(C$,"getAnnotations$",
-function(){
-return new Array(0);
-});
-m$(C$,"getAnnotation$Class",
-function(annotationType){
-return null;
-});
-m$(C$,"marshallArguments$ClassA$OA",
-function(parameterTypes,args){
-return null;
-}, 1);
-m$(C$,"invokeV$O$OA",
-function(receiver,args){
-return;
-});
-m$(C$,"invokeL$O$OA",
-function(receiver,args){
-return null;
-});
-m$(C$,"invokeI$O$OA",
-function(receiver,args){
-return 0;
-});
-m$(C$,"invokeJ$O$OA",
-function(receiver,args){
-return 0;
-});
-m$(C$,"invokeF$O$OA",
-function(receiver,args){
-return 0.0;
-});
-m$(C$,"invokeD$O$OA",
-function(receiver,args){
-return 0.0;
-});
-C$.emptyArgs=C$.prototype.emptyArgs=new Array(0);
-})();
-
 
 Clazz.newInterface(java.lang.reflect,"InvocationHandler");
 

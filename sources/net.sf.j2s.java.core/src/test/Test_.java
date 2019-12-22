@@ -5,14 +5,16 @@ class Testx {
 	// It will get its own .js file.
 }
 
-class Test_ {
+public class Test_ {
 
-	static boolean j2sHeadless = true;
+	static public boolean j2sHeadless = true;
 
 	private static int i_ = 0;
 
 	private int t = 0;
 
+	public int test_int = 3;
+	
 	public int showt() {
 		if (true && (/**@j2sNative 1? test : */false)) {
 			

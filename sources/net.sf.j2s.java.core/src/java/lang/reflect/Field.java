@@ -15,6 +15,12 @@
 
 package java.lang.reflect;
 
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.Map;
+
+import sun.reflect.annotation.AnnotationParser;
+
 /**
  * This class must be implemented by the VM vendor. This class models a field.
  * Information about the field can be accessed, and the field's value can be
@@ -30,35 +36,12 @@ public final class Field extends AccessibleObject implements Member {
 	private Class<?> Class_;
 	private int modifiers;
 	boolean isStatic;
-	
+
 	public Field(Class<?> cl, String name, int modifiers) {
 		jsName = name;
 		Class_ = cl;
 		this.modifiers = modifiers;
 		isStatic = (modifiers == Modifier.STATIC);
-	}
-
-	@Override
-	public boolean isAccessible() {
-		// SwingJS
-		return true;
-	}
-
-	public boolean isSynthetic() {
-		return false;
-	}
-
-	/**
-	 * <p>
-	 * Returns the String representation of the field's declaration, including the
-	 * type parameters.
-	 * </p>
-	 * 
-	 * @return An instance of String.
-	 * @since 1.5
-	 */
-	public String toGenericString() {
-		return null;
 	}
 
 	/**
@@ -101,16 +84,17 @@ public final class Field extends AccessibleObject implements Member {
 	 * @return true if the specified object is equal to this Field, false otherwise
 	 * @see #hashCode
 	 */
+	@Override
 	public boolean equals(Object object) {
 		if (object == null)
 			return false;
 		Object o = getObj(object);
-;
+		;
 		/**
 		 * @j2sNative
 		 * 
-		 * o = o[this.jsName];
-		 * if (typeof o == "number" || typeof o == "boolean") return false;
+		 * 			o = o[this.jsName]; if (typeof o == "number" || typeof o ==
+		 *            "boolean") return false;
 		 */
 		return object.equals(o);
 	}
@@ -143,14 +127,14 @@ public final class Field extends AccessibleObject implements Member {
 		object = getObj(object);
 
 		/**
-		 * @j2sNative 
+		 * @j2sNative
 		 * 
-		 * object = object[this.jsName];
-		 * if (typeof object == "number") return (object == object|0 ?  new Integer(object) : new Double(object));
-		 * if (typeof object == "boolean") return new Boolean(object);
+		 * 			object = object[this.jsName]; if (typeof object == "number")
+		 *            return (object == object|0 ? new Integer(object) : new
+		 *            Double(object)); if (typeof object == "boolean") return new
+		 *            Boolean(object);
 		 * 
-		 * if (typeof object != "undefined")
-		 *   return object;
+		 *            if (typeof object != "undefined") return object;
 		 */
 		throw new NullPointerException();
 	}
@@ -159,7 +143,8 @@ public final class Field extends AccessibleObject implements Member {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			return (object == null || this.isStatic ? this.Class_.$clazz$ : object);
+		 * 			return (object == null || this.isStatic ? this.Class_.$clazz$ :
+		 *            object);
 		 */
 		{
 			return null;
@@ -268,7 +253,6 @@ public final class Field extends AccessibleObject implements Member {
 			return 0;
 		}
 
-		
 	}
 
 	/**
@@ -276,6 +260,7 @@ public final class Field extends AccessibleObject implements Member {
 	 * 
 	 * @return the declaring class
 	 */
+	@Override
 	public Class<?> getDeclaringClass() {
 		return Class_;
 	}
@@ -284,7 +269,7 @@ public final class Field extends AccessibleObject implements Member {
 	 * Return the value of the field in the specified object as a double. This
 	 * reproduces the effect of <code>object.fieldName</code>
 	 * <p>
-	 * If the modelled field is static, the object argument is ignored. Otherwise,
+	 * If the modeled field is static, the object argument is ignored. Otherwise,
 	 * if the object is null, a NullPointerException is thrown. If the object is not
 	 * an instance of the declaring class of the method, an IllegalArgumentException
 	 * is thrown.
@@ -427,13 +412,17 @@ public final class Field extends AccessibleObject implements Member {
 	 * @return the modifiers
 	 * @see java.lang.reflect.Modifier
 	 */
-	public int getModifiers() {return modifiers;}
+	@Override
+	public int getModifiers() {
+		return modifiers;
+	}
 
 	/**
 	 * Return the name of the modelled field.
 	 * 
 	 * @return the name
 	 */
+	@Override
 	public String getName() {
 		return jsName;
 	}
@@ -474,19 +463,25 @@ public final class Field extends AccessibleObject implements Member {
 
 	}
 
+//	@Override
 	String getSignature() {
 		return jsName;
 	}
 
+	private Object myType;
+	
 	/**
 	 * Return the {@link Class} associated with the type of this field.
 	 * 
 	 * @return the type
 	 */
 	public Class<?> getType() {
-		return null;
+		if (myType == null || myType instanceof Class)
+			return (Class<?>) myType;
+		return (Class<?>) (myType = AnnotationParser.JSAnnotationObject.typeForString(myType.toString()));
 	}
 
+	
 	/**
 	 * Answers an integer hash code for the receiver. Objects which are equal answer
 	 * the same value for this method.
@@ -496,6 +491,7 @@ public final class Field extends AccessibleObject implements Member {
 	 * @return the receiver's hash
 	 * @see #equals
 	 */
+	@Override
 	public int hashCode() {
 		return 0;
 	}
@@ -534,7 +530,7 @@ public final class Field extends AccessibleObject implements Member {
 		 * 			object[this.jsName] = value;
 		 * 
 		 */
-		
+
 	}
 
 	/**
@@ -827,7 +823,51 @@ public final class Field extends AccessibleObject implements Member {
 	 * 
 	 * @return a printable representation for the receiver
 	 */
+	@Override
 	public String toString() {
 		return "[field: " + jsName + "]";
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Annotation[] getDeclaredAnnotations() {
+		return AnnotationParser.toArray(declaredAnnotations());
+	}
+
+	private transient Map<Class<? extends Annotation>, Annotation> declaredAnnotations;
+
+	private synchronized Map<Class<? extends Annotation>, Annotation> declaredAnnotations() {
+		if (declaredAnnotations == null) {
+//
+//        	Field root = null;//??? this.root;
+//            if (root != null) {
+//                declaredAnnotations = root.declaredAnnotations();
+//            } else 
+			{
+				declaredAnnotations = AnnotationParser.parseAnnotations(getName(), getDeclaringClass(), false);
+			}
+		}
+		return declaredAnnotations;
+	}
+
+//    private native byte[] getTypeAnnotationBytes0();
+
+
+	@Override
+	public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
+		return (T) declaredAnnotations().get(annotationClass);
+	}
+
+	// from AnnotatedElement
+	@Override
+	public <T extends Annotation> T[] getAnnotationsByType(Class<T> annotationClass) {
+        return getDeclaredAnnotationsByType(annotationClass);
+    }
+
+	public void _setTypeString(String type) {
+		myType = type;
+	}
+
 }
