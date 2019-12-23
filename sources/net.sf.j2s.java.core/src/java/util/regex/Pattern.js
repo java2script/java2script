@@ -86,14 +86,14 @@ Clazz.newMeth(C$,"matches$S$CharSequence",function(regex,input){
 }, 1);
 
 Clazz.newMeth(C$,"quote$S",function(s){
-  var sb=new StringBuffer().append("\\Q");
+  var sb=new StringBuffer().append$S("\\Q");
   var apos=0;
   var k;
   while((k=s.indexOf("\\E",apos))>=0){
-    sb.append$S(s.substring(apos,k+2)).append("\\\\E\\Q");
+    sb.append$S(s.substring(apos,k+2)).append$S("\\\\E\\Q");
     apos=k+2;
   }
-  return sb.append$S(s.substring(apos)).append("\\E").toString();
+  return sb.append$S(s.substring(apos)).append$S("\\E").toString();
 }, 1);
 
 })();

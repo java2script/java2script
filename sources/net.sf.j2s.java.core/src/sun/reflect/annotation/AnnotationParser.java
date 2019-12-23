@@ -50,7 +50,7 @@ import java.util.Map.Entry;
 public class AnnotationParser {
 	public static class JSAnnotationObject {
 
-		// [ [var/methname, typeStr, typeObj, [anName1, anName2,...]], [@code1, @code2]
+		// [ [var/methname, typeStr, [anName1, anName2,...]], [@code1, @code2]
 		// ]
 
 		public final static int ANNOT_DATA = 0;
@@ -64,13 +64,12 @@ public class AnnotationParser {
 		public final static int DATA_FIXED        = 04;
 
 		// C$.$getAnn$ = function(){ return [
-		// [[null,'test.Test_Annotation_Impl',null,['test.Test_Annotation']],['@Test_Annotation(cl="test.Test_.class"
-		// btest="true" itype="2" type="impl" iitype={"1" "2" "3" } )']],
-		// [['test1','String',Clazz.getClass(String),['test.Test_Parameter']],['@Test_Parameter']],
-		// [['test2','String[]',Clazz.array(String,
-		// -1),['test.Test_Parameter']],['@Test_Parameter']],
-		// [['test3','int',Integer.TYPE,'test.Test_Item',['test.Test_Parameter']],['@Test_Item','@Test_Parameter']],
-		// [['M:name','String',Clazz.getClass(String),['test.Test_Parameter']],['@Test_Parameter']]]};
+		// [[null,'test.Test_Annotation_Impl',['test.Test_Annotation']],['cl="test.Test_.class"
+		// btest="true" itype="2" type="impl" iitype={"1" "2" "3" } ']],
+		// [['test1','String',['test.Test_Parameter']],['']],
+		// [['test2','String[]',['test.Test_Parameter']],['']],
+		// [['test3','int','test.Test_Item',['test.Test_Parameter']],['','']],
+		// [['M:name','String',['test.Test_Parameter']],['']]]};
 
 		/**
 		 * First record will have null field/method name if there are class-level
@@ -82,7 +81,7 @@ public class AnnotationParser {
 		 */
 		@SuppressWarnings("unused")
 		private static Object[][] getAnnotations(String name, Object me, boolean isMethod) {
-			Object[][][] __ANN__ = /** @j2sNative me.__ANN__ || */
+			Object[][][] __ANN__ = /** @j2sNative me.$getAnn$ && me.$getAnn$() || */
 					null;
 			if (__ANN__ == null)
 				return null;
@@ -140,17 +139,18 @@ public class AnnotationParser {
 			@SuppressWarnings("unused")
 			Object me = /** @j2sNative cl.$clazz$ || */
 					null;
-			Object[][] members = /** @j2sNative me.$getMembers$ && me.$getMembers$() || */
+			String[][] members = /** @j2sNative me.$getMembers$ && me.$getMembers$() || */
 					null;
 			@SuppressWarnings("null")
 			List<Method> list = new ArrayList<>(members.length);
 			for (int i = members.length; --i >= 0;) {
-				Object[] member = members[i];
-				String name = (String) member[0];
-				Class<?> retType = (Class<?>) member[1];
+				String[] member = members[i];
+				String name = member[0];
+				Class<?> retType = typeForString(member[1]);
+				Object val = member[2];
+
 				Method method = new Method(cl, name, Class.NO_PARAMETERS, retType, Class.NO_PARAMETERS,
 						Modifier.PUBLIC);
-				Object val = member[2];
 				if (retType.isAnnotation()) {
 					val = createAnnotation(retType.getName(), (String) val);
 				}
@@ -334,6 +334,12 @@ public class AnnotationParser {
 					if (values.containsKey(key)) {
 						memberValues.put(key, setLocalAnnotationValue(a, key, values.get(key), memberTypes.get(key)));
 					}
+					Object val = memberValues.get(key);
+					/**
+					 * @j2sNative
+					 * 
+					 * a[key] = a[key + "$"] = (function(val){ return function(){return val}})(val);
+					 */
 				}
 				aliasJS(a, "annotationType$", "annotationType");
 				aliasJS(a, "equals$", "equals");
@@ -353,7 +359,7 @@ public class AnnotationParser {
 
 		}
 
-		private static void aliasJS(Annotation a, String newName, String oldName) {
+		private static void aliasJS(Object a, String newName, String oldName) {
 			/**
 			 * @j2sNative a[newName] = a[oldName];
 			 */
@@ -429,6 +435,24 @@ public class AnnotationParser {
 				}
 			}
 			return null;
+		}
+
+		@SuppressWarnings("unused")
+		public static Class[] getDeclaredClasses(Object C$) {
+			String myName = /** @j2sNative C$.__CLASS_NAME__ || */null;
+			// C$.$classes$=[['Singleton',8],['Test_Class_Inner',8],['B',0],['C',8]]
+			Object[][] data = /** @j2sNative C$.$classes$ || */ null;
+			Class[] classes = new Class[0];
+			if (data != null) {
+				for (int i = 0; i < data.length; i++) {
+					String name = (String) data[i++][0];
+					int modifiers = /** @j2sNative data[i][1] || */0;
+					Class<?> cl = typeForString(myName + "." + name);
+					cl._setModifiers(modifiers);
+					/** @j2sNative classes.push(cl); */
+				}
+			}
+			return classes;
 		}
 
 	}

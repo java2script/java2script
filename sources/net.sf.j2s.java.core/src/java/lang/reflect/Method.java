@@ -386,7 +386,10 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 	 * @return the return type
 	 */
 	public Class<?> getReturnType() {
-		return returnType;
+		// SwingJS will store this as a String to avoid unnecessary class loading
+		if (returnType == null || returnType instanceof Class)
+			return (Class<?>) returnType;
+		return (Class<?>) (returnType = AnnotationParser.JSAnnotationObject.typeForString(returnType.toString()));
 	}
 
 

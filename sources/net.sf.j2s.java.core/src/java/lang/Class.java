@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -450,6 +451,8 @@ public final class Class<T> {
 	 */
 	@SuppressWarnings("unused")
 	public boolean isAssignableFrom(Class<?> cls) {
+		if (cls == null)
+			return false;
 		Object a = cls.$clazz$;
 		Object me = $clazz$;
 		return /** @j2sNative Clazz.instanceOf(a, me) || */ false;
@@ -689,6 +692,8 @@ public final class Class<T> {
 	// cache the name to reduce the number of calls into the VM
 	private transient String name;
 	private Field[] fields;
+	private Class<?>[] implementz;
+	private int modifiers = -1;
 
 	private String getName0() {
 		String code = "";
@@ -928,23 +933,22 @@ public final class Class<T> {
 //	}
 
 	/**
-	 * Determines the interfaces implemented by the class or interface
-	 * represented by this object.
+	 * Determines the interfaces implemented by the class or interface represented
+	 * by this object.
 	 *
 	 * <p>
-	 * If this object represents a class, the return value is an array
-	 * containing objects representing all interfaces implemented by the class.
-	 * The order of the interface objects in the array corresponds to the order
-	 * of the interface names in the {@code implements} clause of the
-	 * declaration of the class represented by this object. For example, given
-	 * the declaration: <blockquote> {@code class Shimmer implements FloorWax,
-	 * DessertTopping { ... }} </blockquote> suppose the value of {@code s} is
-	 * an instance of {@code Shimmer}; the value of the expression: <blockquote>
-	 * {@code s.getClass().getInterfaces()[0]} </blockquote> is the
-	 * {@code Class} object that represents interface {@code FloorWax}; and the
-	 * value of: <blockquote> {@code s.getClass().getInterfaces()[1]}
-	 * </blockquote> is the {@code Class} object that represents interface
-	 * {@code DessertTopping}.
+	 * If this object represents a class, the return value is an array containing
+	 * objects representing all interfaces implemented by the class. The order of
+	 * the interface objects in the array corresponds to the order of the interface
+	 * names in the {@code implements} clause of the declaration of the class
+	 * represented by this object. For example, given the declaration: <blockquote>
+	 * {@code class Shimmer implements FloorWax, DessertTopping { ... }}
+	 * </blockquote> suppose the value of {@code s} is an instance of
+	 * {@code Shimmer}; the value of the expression: <blockquote>
+	 * {@code s.getClass().getInterfaces()[0]} </blockquote> is the {@code Class}
+	 * object that represents interface {@code FloorWax}; and the value of:
+	 * <blockquote> {@code s.getClass().getInterfaces()[1]} </blockquote> is the
+	 * {@code Class} object that represents interface {@code DessertTopping}.
 	 *
 	 * <p>
 	 * If this object represents an interface, the array contains objects
@@ -954,8 +958,8 @@ public final class Class<T> {
 	 * represented by this object.
 	 *
 	 * <p>
-	 * If this object represents a class or interface that implements no
-	 * interfaces, the method returns an array of length 0.
+	 * If this object represents a class or interface that implements no interfaces,
+	 * the method returns an array of length 0.
 	 *
 	 * <p>
 	 * If this object represents a primitive type or void, the method returns an
@@ -963,10 +967,24 @@ public final class Class<T> {
 	 *
 	 * @return an array of interfaces implemented by this class.
 	 */
+	@SuppressWarnings("unused")
 	public Class<?>[] getInterfaces() {
-		JSUtil.notImplemented(null);
-		return new Class<?>[0];
-	}
+		if (implementz == null) {
+			Class<?>[] a = new Class<?>[0];
+			Object me = $clazz$;
+			Class<?>[] list = /** @j2sNative me.implementz || */null;
+			if (list != null) {
+				for (int i = 0, n = list.length; i < n; i++) {
+					/**
+					 * @j2sNative a.push(Clazz.getClass(list[i]));
+					 */
+				}
+			}	
+			implementz = a;
+		}
+		return implementz;
+	} 
+
 
 //	/**
 //	 * Returns the {@code Type}s representing the interfaces directly
@@ -1065,11 +1083,18 @@ public final class Class<T> {
 	 * @see java.lang.reflect.Modifier
 	 * @since JDK1.1
 	 */
-	@SuppressWarnings("unused")
 	public int getModifiers() {
-		return Modifier.PUBLIC 
+		return (modifiers >= 0 ? modifiers : Modifier.PUBLIC 
 				| (isEnum() ? ENUM : isInterface() ? Modifier.INTERFACE : 0) 
-				| (isAnnotation() ? ANNOTATION : 0); 
+				| (isAnnotation() ? ANNOTATION : 0)); 
+	}
+
+	/**
+	 * From AnnotationParser.JSAnnotationObject
+	 * @param m
+	 */
+	public void _setModifiers(int m) {
+		modifiers = m;
 	}
 	
 	/**
@@ -1542,33 +1567,36 @@ public final class Class<T> {
 	 * @since JDK1.1
 	 */
 	public Class<?>[] getClasses() {
-		return null;
-//		// be very careful not to change the stack depth of this
-//		// checkMemberAccess call for security reasons
-//		// see java.lang.SecurityManager.checkMemberAccess
-////		checkMemberAccess(Member.PUBLIC, ClassLoader.getCallerClassLoader());
-//
-//		// Privileged so this implementation can look at DECLARED classes,
-//		// something the caller might not have privilege to do. The code here
-//		// is allowed to look at DECLARED classes because (1) it does not hand
-//		// out anything other than public members and (2) public member access
-//		// has already been ok'd by the SecurityManager.
-//
-//		Class[] result = (Class[]) java.security.AccessController.doPrivileged(new java.security.PrivilegedAction() {
+		// be very careful not to change the stack depth of this
+		// checkMemberAccess call for security reasons
+		// see java.lang.SecurityManager.checkMemberAccess
+//		checkMemberAccess(Member.PUBLIC, ClassLoader.getCallerClassLoader());
+
+		// Privileged so this implementation can look at DECLARED classes,
+		// something the caller might not have privilege to do. The code here
+		// is allowed to look at DECLARED classes because (1) it does not hand
+		// out anything other than public members and (2) public member access
+		// has already been ok'd by the SecurityManager.
+
+//		Class[] result; 
+//				(Class[]) java.security.AccessController.doPrivileged(new java.security.PrivilegedAction() {
 //			public Object run() {
-//				java.util.List<Class> list = new java.util.ArrayList();
-//				Class currentClass = Class.this;
-//				while (currentClass != null) {
-//					Class[] members = currentClass.getDeclaredClasses();
-//					for (int i = 0; i < members.length; i++) {
-//						if (Modifier.isPublic(members[i].getModifiers())) {
-//							list.add(members[i]);
-//						}
-//					}
-//					currentClass = currentClass.getSuperclass();
-//				}
+				java.util.List<Class> list = new java.util.ArrayList();
+				Class currentClass = this;
+				while (currentClass != null) {
+					Class[] members = currentClass.getDeclaredClasses();
+					for (int i = 0; i < members.length; i++) {
+						//if (Modifier.isPublic(members[i].getModifiers())) {
+						// public only
+							list.add(members[i]);
+						//}
+					}
+					currentClass = currentClass.getSuperclass();
+				}
 //				Class[] empty = {};
-//				return list.toArray(empty);
+			//	result = 
+				
+				return list.toArray(new Class[list.size()]);
 //			}
 //		});
 //
@@ -2044,12 +2072,11 @@ public final class Class<T> {
 	 * @since JDK1.1
 	 */
 	public Class<?>[] getDeclaredClasses() throws SecurityException {
-		return getClasses();
 //		// be very careful not to change the stack depth of this
 //		// checkMemberAccess call for security reasons
 //		// see java.lang.SecurityManager.checkMemberAccess
 ////		checkMemberAccess(Member.DECLARED, ClassLoader.getCallerClassLoader());
-//		return getDeclaredClasses0();
+		return getDeclaredClasses0();
 	}
 
 	/**
@@ -2179,6 +2206,9 @@ public final class Class<T> {
 	 */
 	public Constructor<?>[] getDeclaredConstructors() throws SecurityException {
 		return getConstructors();
+		
+		// TODO 
+		
 //		// be very careful not to change the stack depth of this
 //		// checkMemberAccess call for security reasons
 //		// see java.lang.SecurityManager.checkMemberAccess
@@ -3021,12 +3051,11 @@ public final class Class<T> {
 		 * @j2sNative
 		 * 
 		 * 
-		 * 			var p = this.$clazz$.prototype; 
+		 * 			var p = this.$clazz$.prototype;
 		 * 
-		 * for (attr in p) { o = p[attr]; if (o.exName && typeof
-		 *            o == "function" && o.exName && !o.__CLASS_NAME__ &&
-		 *            o != this.$clazz$[attr] && o.exClazz == this.$clazz$)
-		 *            { // there are polynormical methods.
+		 *            for (attr in p) { o = p[attr]; if (typeof o == "function" &&
+		 *            o.exName && !o.__CLASS_NAME__ && o != this.$clazz$[attr] &&
+		 *            o.exClazz == this.$clazz$) { // there are polynormical methods.
 		 */
 
 		Method m = new Method(this, attr, NO_PARAMETERS, Void.class, NO_PARAMETERS, Modifier.PUBLIC);
@@ -3277,7 +3306,10 @@ public final class Class<T> {
 //
 //	private native Constructor[] getDeclaredConstructors0(boolean publicOnly);
 //
-//	private native Class[] getDeclaredClasses0();
+	private //native 
+	Class[] getDeclaredClasses0() {
+		return AnnotationParser.JSAnnotationObject.getDeclaredClasses(this.$clazz$);
+	}
 //
 //	private static String argumentTypesToString(Class[] argTypes) {
 //		StringBuilder buf = new StringBuilder();
@@ -3705,10 +3737,12 @@ public final class Class<T> {
 		/**
 		 * @j2sNative
 		 * 
-		 * return o.__CLASS_NAME__ == "java.lang.Class" && o.$clazz$ == this.$clazz$; 
+		 * return o && o.__CLASS_NAME__ == "java.lang.Class" && o.$clazz$ == this.$clazz$; 
 		 * 
 		 */
+		{
 		return false;
+		}
 	}
 
 	/**

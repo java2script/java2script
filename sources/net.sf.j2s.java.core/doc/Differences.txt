@@ -32,6 +32,7 @@ ever be overridden by subclasses. As in java.lang.Thread.java:
 ----------------------------------
 
 
+updated 12/22/19 -- additional issues
 updated 11/03/19 -- adds information about File.exists() and points to src/javajs/async
 updated 10/26/19 -- adds information about File.createTempFile()
 updated 8/16/19 -- minor typos and added summary paragraph
@@ -1052,3 +1053,18 @@ may or may not be present with the JAR or class files. Use class files at your o
 
 Bob Hanson
 2019.08.16
+
+
+Additional Issues
+-----------------
+
+Annotation is working for classes, methods, and fields (12/22/19). Method reflection, however,
+is limited. Interfaces do not expose their methods, as the transpiler does not actually transpile
+the interfaces themselves. And method reflection only includes annotated methods.
+
+java.util.concurrent is not fully elaborated. This package is rewritten to not actually use the
+memory handling capabilities of concurrency, which JavaScript does not have access to.
+
+System.getProperties() just returns a minimal set of properties.
+
+

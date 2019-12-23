@@ -13863,6 +13863,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2019.12.23 3.2.6 update of System
 // BH 2019.12.19 3.2.6 revision of $clinit$
 // BH 2019.12.16 3.2.5.v4 adds ClassLoader static methods for system resources (just j2s/...)
 // BH 2019.12.15 3.2.5.v4 Character.prototype.valueOf() missing 
@@ -14204,10 +14205,11 @@ Clazz.instanceOf = function (obj, clazz) {
   // unwrap java.lang.Class to JavaScript clazz using $clazz$
   if (typeof clazz == "string") {
     clazz = Clazz._getDeclared(clazz);
-  }
-  
+  } 
   if (obj == null || !clazz)
     return false;
+  if (obj == clazz)
+	return true;
     // check for object being a java.lang.Class and the other not 
   if (obj.$clazz$ && !clazz.$clazz$) return (clazz == java.lang.Class);
   obj.$clazz$ && (obj = obj.$clazz$);
@@ -15321,12 +15323,14 @@ var extendObject = function(clazz, ext) {
 //  return false;
 //};
 
+// see also 
 var excludeSuper = function(o) {
  return o == "b$" || o == "$this$0"
       || o == "$init$"
       || o == "$init0$"
       || o == "$static$"
       || o == "$clinit$"
+      || o == "$classes$"
       || o == "$fields$"
       || o == "$load$"
       || o == "$Class$"
@@ -16895,174 +16899,211 @@ var getURIField = function(name, def) {
 	}
 }
 
+var sysprops = {
+		"file.separator" : "/",
+		"line.separator" : "\n",
+		"java.awt.printerjob" : "swingjs.JSPrinterJob",
+		"java.class.path" : "/",
+		"java.class.version" : "80",
+		"java.home" : "https://.",
+		"java.vendor" : "java2script/SwingJS/OpenJDK",
+		"java.vendor.url" : "https://github.com/BobHanson/java2script",
+		"java.version" : "1.8",
+		"os.arch" : navigator.userAgent,
+		"os.name" : navigator.userAgent,
+		"os.version": navigator.userAgent,
+		"path.separator" : ":",
+		"user.dir" : "https://.",
+		"user.home" : "https://.",
+		"user.name" : "user",
+		"javax.xml.datatype.DatatypeFactory" : "swingjs.xml.JSJAXBDatatypeFactory",
+		"javax.xml.bind.JAXBContextFactory" : "swingjs.xml.JSJAXBContextFactory"	
+}
 
-Clazz._setDeclared("java.lang.System",
-java.lang.System = System = {
-  props : null, //new java.util.Properties (),
-  $props : {},
-  arraycopy$O$I$O$I$I : function (src, srcPos, dest, destPos, length) {  
-    if (src !== dest || srcPos > destPos) {
-      for (var i = length; --i >= 0;)
-        dest[destPos++] = src[srcPos++];
-    } else {
-      destPos += length;
-      srcPos += length;
-      for (var i = length; --i >= 0;)
-        src[--destPos] = src[--srcPos];
-    }
-  },
-  
-  currentTimeMillis$ : function() {
-    return new Date().getTime();
-  },
-  exit$ : function(status) { 
-	 java.lang.Runtime || Clazz.loadClass("java.lang.Runtime");
-	 java.lang.Runtime.getRuntime$().exit$I(status || 0);
-  },
-  gc$ : function() {}, // bh
-  getProperties$ : function() {
-    return System.props;
-  },
-  getenv$S : function(key) {
-	  var s = J2S.getGlobal(key) || getURIField(key, null);
+Clazz._setDeclared("java.lang.System", java.lang.System = System = {});
+;(function(C$){
+
+C$.lineSeparator = "\n";
+C$.props = null;
+	
+C$.setIn$java_io_InputStream=function ($in) {
+	C$.$in=$in;
+}
+
+C$.setOut$java_io_PrintStream=function (out) {
+	C$.out=out;
+}
+
+C$.setErr$java_io_PrintStream=function (err) {
+	C$.err=err;
+}
+
+C$.console$=function () {
+	return null;
+}
+
+C$.inheritedChannel$=function () {
+	return null;
+}
+
+C$.setSecurityManager$SecurityManager=function (s) {
+}
+
+C$.getSecurityManager$=function () {
+	return null;
+}
+
+C$.currentTimeMillis$=function () {
+	{
+	return new Date().getTime();
+}
+}
+
+C$.nanoTime$=function () {
+	{
+	return Math.round(window.performance.now() * 1e6);
+}
+}
+
+C$.arraycopy$O$I$O$I$I=function (src, srcPos, dest, destPos, length) {
+
+	if (src !== dest || srcPos > destPos) { for (var i = length; --i >= 0;) dest[destPos++] = src[srcPos++]; } else { destPos += length; srcPos += length; for (var i = length; --i >= 0;) src[--destPos] = src[--srcPos]; }
+}
+
+C$.identityHashCode$O=function (x) {
+	return x==null ? 0 : x._$hashcode || (x._$hashcode = ++hashCode);
+}
+
+C$.getProperties$=function () {
+	if (C$.props == null )
+		C$.props=Clazz.new_("java.util.Properties");
+	for (a in sysprops)
+		C$.props.put$TK$TV(a, sysprops[a]);
+	return C$.props;
+}
+
+C$.lineSeparator$=function () {
+	return C$.lineSeparator;
+}
+
+C$.setProperties$java_util_Properties=function (props) {
+	C$.props = props;
+}
+
+C$.getProperty$S=function (key) {
+	C$.checkKey$S(key);
+	return (C$.props == null ? sysprops[key] : C$.props.getProperty$S(key));
+}
+
+C$.getProperty$S$S=function (key, def) {
+	C$.checkKey$S(key);
+	if (C$.props == null) {
+		var prop = sysprops[key];
+		return (prop == null ? def : prop);
+	}
+	return C$.props.getProperty$S$S(key, def);
+}
+
+C$.setProperty$S$S=function (key, value) {
+	C$.checkKey$S(key);
+	var ret;
+	if (C$.props == null) {
+		ret = sysprops[key];
+		sysprops[key] = value;
+		return ret || null;
+	}
+	return C$.props.setProperty$S$S(key, value);
+}
+
+C$.clearProperty$S=function (key) {
+	C$.checkKey$S(key);
+	return (C$.props == null ? null : C$.props.remove$O(key));
+}
+
+C$.checkKey$S=function (key) {
+	if (key == null ) {
+	throw Clazz.new_(Clazz.load('NullPointerException').c$$S,["key can\'t be null"]);
+	}if (key.equals$O("")) {
+	throw Clazz.new_(Clazz.load('IllegalArgumentException').c$$S,["key can\'t be empty"]);
+	}
+}
+
+C$.getenv$S=function (name) {
+	  var s = J2S.getGlobal(name) || getURIField(name, null);
 	  return s || null;
-  },
-  
-  getProperty$S$S : function(key, def) {
-    if (System.props)
-      return System.props.getProperty$S$S (key, def);
-    var v = System.$props[key];
-    if (typeof v != "undefined")
-      return v;
-    if (key.indexOf(".") > 0) {
-      v = null;    
-      switch (key) {
-      case "java.awt.printerjob":
-        v = "swingjs.JSPrinterJob";
-        break; 
-      case "java.class.version":
-        v = "50";
-        break;
-      case "user.home":
-    	v = "https://.";
-    	break;
-      case "java.vendor":
-    	v = "SwingJS/OpenJDK";
-    	break;
-      case "java.version":
-        v = "1.6-1.8";
-        break;
-      case "file.separator":
-      case "path.separator":
-        v = "/";
-        break;        
-      case "line.separator":
-        v = (navigator.userAgent.indexOf("Windows") >= 0 ? "\r\n" : "\n");
-        break;
-      case "os.name":
-      case "os.version":
-        v = navigator.userAgent;
-        break;
-      case "javax.xml.datatype.DatatypeFactory":
-		v = "swingjs.xml.JSJAXBDatatypeFactory";
-		break;
-	  case "javax.xml.bind.JAXBContextFactory":
-		v = "swingjs.xml.JSJAXBContextFactory";
-		break;
-      }
-      if (v)
-        return System.$props[key] = v;
-    }
-    return (arguments.length == 1 ? null : def == null ? key : def); // BH
-  },
-  getSecurityManager$ : function() { return null },  // bh
-  identityHashCode$O : function(obj){return obj==null ? 0 : obj._$hashcode || (obj._$hashcode = ++hashCode)},
-  lineSeparator$ : function() { return '\n' }, // bh
-  nanoTime$: function() {
-   return Math.round(window.performance.now() * 1e6)
-  },  
-  setProperties$java_util_Properties : function (props) {
-    System.props = props;
-  },
-  setProperty$S$S : function (key, val) {
-    if (!System.props)
-      return System.$props[key] = val; // BH
-    System.props.setProperty (key, val);
-  }
-  
-});
+}
+
+var env = null;
+
+C$.getenv$=function () {
+	return env || (env = Clazz.load("java.util.Properties"));
+}
+
+C$.exit$I=function (status) {
+	Clazz.loadClass("java.lang.Runtime").getRuntime$().exit$I(status | 0);
+}
+
+C$.gc$=C$.runFinalization$=C$.runFinalizersOnExit$Z=C$.load$S=C$.loadLibrary$S=C$.mapLibraryName$S=
+	function (libname) {return null;}
+
+})(System);
 
 ;(function(Con, Sys) {
 
-Sys.getProperty$S = Sys.getProperty$S$S;
-Sys.exit$I = Sys.exit$;
+Sys.exit$ = Sys.exit$I;
 
 Sys.out = new Clazz._O ();
 Sys.out.__CLASS_NAME__ = "java.io.PrintStream";
-
-Sys.setOut$java_io_PrintStream = function(ps) {
-  Sys.out = ps;
-};
-
-Sys.setErr$java_io_PrintStream = function(ps) {
-  Sys.err = ps;
-};
-
-
-Sys.out.print = Sys.out.print$O = Sys.out.print$Z = Sys.out.print$I = Sys.out.println$J = Sys.out.print$S = Sys.out.print$C = Sys.out.print = function (s) { 
-
-  Con.consoleOutput (s);
-};
-
-Sys.out.printf = Sys.out.printf$S$OA = Sys.out.format = Sys.out.format$S$OA = function (f, args) {
-  Sys.out.print(String.format$S$OA.apply(null, arguments));
-}
-
-Sys.out.flush$ = function() {}
-
-Sys.out.println = Sys.out.println$ = Sys.out.println$O = Sys.out.println$Z = Sys.out.println$I = Sys.out.println$J = Sys.out.println$S = Sys.out.println$C = function(s) {
- s = (typeof s == "undefined" ? "" : "" + s);
-  if (J2S._nooutput || J2S._traceFilter && s.indexOf(J2S._traceFilter) < 0) return;
-  if (!J2S._traceFilter && J2S._traceOutput && s && 
-		  (s.indexOf(J2S._traceOutput) >= 0 || '"' + s + '"' == J2S._traceOutput)) {
-    alert(s + "\n\n" + Clazz._getStackTrace());
-    doDebugger();
-  }
-  Con.consoleOutput(typeof s == "undefined" ? "\r\n" : s == null ?  s = "null\r\n" : s + "\r\n");
-};
-
-Sys.out.println$F = Sys.out.println$D = function(f) {var s = "" + f; Sys.out.println(s.indexOf(".") < 0 && s.indexOf("Inf") < 0 ? s + ".0" : s)};
-
-Sys.out.write$BA$I$I = function (buf, offset, len) {
-  Sys.out.print(String.instantialize(buf).substring(offset, offset+len));
-};
-
 Sys.err = new Clazz._O ();
 Sys.err.__CLASS_NAME__ = "java.io.PrintStream";
 
-Sys.err.print = Sys.err.print$S = function (s) { 
-  Con.consoleOutput (s, "red");
+Sys.setOut$java_io_PrintStream = function(ps) {
+  System.out = ps;
 };
 
-Sys.err.printf = Sys.err.printf$S$OA = Sys.err.format = Sys.err.format$S$OA = Sys.err.format = function (f, args) {
-  Sys.out.print(String.format$S$OA.apply(null, arguments));
+Sys.setErr$java_io_PrintStream = function(ps) {
+  System.err = ps;
+};
+
+var checkTrace = function(s) {
+	  if (J2S._nooutput || J2S._traceFilter && s.indexOf(J2S._traceFilter) < 0) return;
+	  if (!J2S._traceFilter && J2S._traceOutput && s && 
+			  (("" + s).indexOf(J2S._traceOutput) >= 0 || '"' + s + '"' == J2S._traceOutput)) {
+	    alert(s + "\n\n" + Clazz._getStackTrace());
+	    doDebugger();
+	  }
 }
 
-Sys.err.println = Sys.err.println$O = Sys.err.println$Z = Sys.err.println$I = Sys.err.println$S = Sys.err.println$C = Sys.err.println = function (s) {
-  if (Clazz._traceOutput && s && ("" + s).indexOf(Clazz._traceOutput) >= 0) {
-    alert(s + "\n\n" + Clazz._getStackTrace());
-    doDebugger();
-  }
-  Con.consoleOutput (typeof s == "undefined" ? "\r\n" : s == null ?  s = "null\r\n" : s + "\r\n", "red");
+var setps = function(ps, f) {
+
+ps.print = ps.print$O = ps.print$Z = ps.print$I = ps.println$J = ps.print$S = ps.print$C = ps.print = function (s) { 
+  checkTrace(s);
+  f(s);
 };
 
-Sys.err.println$F = Sys.err.println$D = function(f) {var s = "" + f; Sys.err.println(s.indexOf(".") < 0  && s.indexOf("Inf") < 0 ? s + ".0" : s)};
+ps.printf = ps.printf$S$OA = ps.format = ps.format$S$OA = function (f, args) {
+  ps.print(String.format$S$OA.apply(null, arguments));
+}
 
-Sys.err.write$BA$I$I = function (buf, offset, len) {
-  Sys.err.print(String.instantialize(buf).substring(offset, offset+len));
+ps.flush$ = function() {}
+
+ps.println = ps.println$ = ps.println$O = ps.println$Z = ps.println$I = ps.println$J = ps.println$S = ps.println$C = function(s) {
+ s = (typeof s == "undefined" ? "" : "" + s);
+ checkTrace(s);
+ s = (typeof s == "undefined" ? "\r\n" : s == null ?  s = "null\r\n" : s + "\r\n");
+  f(s);
 };
 
-Sys.err.flush$ = function() {}
+ps.println$F = ps.println$D = function(f) {var s = "" + f; ps.println(s.indexOf(".") < 0 && s.indexOf("Inf") < 0 ? s + ".0" : s)};
+
+ps.write$BA$I$I = function (buf, offset, len) {
+  ps.print(String.instantialize(buf).substring(offset, offset+len));
+};
+
+}
+
+setps(Sys.out, function(s) {Con.consoleOutput(s)});
+setps(Sys.err, function(s) {Con.consoleOutput(s, "red")});
 
 })(Clazz.Console, System);
 
@@ -17285,6 +17326,7 @@ var setJ2STypeclass = function(cl, type, paramCode) {
   cl.TYPE.isArray$ = cl.TYPE.isEnum$ = cl.TYPE.isAnnotation$ = FALSE;
   cl.TYPE.toString = cl.TYPE.getName$ = cl.TYPE.getTypeName$ 
     = cl.TYPE.getCanonicalName$ = cl.TYPE.getSimpleName$ = function() {return type};
+  cl.TYPE.isAssignableFrom$Class = (function(t) {return function(c) {return c == t}})(cl.TYPE);
 }
 
 var decorateAsNumber = function (clazz, qClazzName, type, PARAMCODE) {
@@ -18923,27 +18965,31 @@ return this.stackTrace;
 });
 
 m$(C$, 'printStackTrace$', function () {
-	printStackTrace(this, System.err.println$O);
+	printStackTrace(this, System.err);
 });
 
-var printStackTrace = function(e, f) {
-f("" + e);
+m$(C$, 'printStackTrace$java_io_PrintWriter', function (writer) {
+	printStackTrace(this, writer);
+});
+
+var printStackTrace = function(e, ps) {
+ps.println$O("" + e);
 if (!e.stackTrace){
-  f(e.stack);
+  ps.println$O(e.stack);
   return;
 }
 for (var i = 0; i < e.stackTrace.length; i++) {
 var t = e.stackTrace[i];
 if (t.nativeClazz == null || isInstanceOf(t.nativeClazz, Throwable) < 0) {
- f(t);
+ ps.println$O(t);
 }
 }
 // from a JavaScript error 
-e.stack && f(e.stack);
+e.stack && ps.println$O(e.stack);
 }
 
 m$(C$, ['printStackTrace$java_io_PrintStream','printStackTrace$java_io_PrintWriter'], function (stream) {
-  printStackTrace(this, stream.println$O);
+  printStackTrace(this, stream);
 });
 
 Clazz.newMeth(C$, 'fillInStackTrace$', function () {
@@ -19084,7 +19130,7 @@ TypeError.prototype.getMessage$ || (TypeError.prototype.getMessage$ = TypeError.
 			= function(){ return (this.stack ? this.stack : this.message || this.toString()) + (this.getStackTrace ? this.getStackTrace$() : Clazz._getStackTrace())});
 TypeError.prototype.printStackTrace$ = function(){System.out.println(this + "\n" + this.stack)};
 TypeError.prototype.printStackTrace$java_io_PrintStream = function(stream){stream.println$S(this + "\n" + this.stack);};
-
+TypeError.prototype.printStackTrace$java_io_PrintWriter = function(printer){printer.println$S(this + "\n" + this.stack);};
 Clazz.Error = Error;
 
 var declareType = function(prefix, name, clazzSuper, interfacez) {

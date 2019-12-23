@@ -1883,8 +1883,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 *                         'l' (local), 
 	 *                         'm' (LambdaExpression),
 	 *                         '@' (_at_interface AnnotationType), 
-	 *                         or 'c' (standard
-	 *                         class)
+	 *                         or 'c' (standard class)
 	 * @return localName
 	 */
 	@SuppressWarnings({ "null", "unchecked" })
@@ -1959,6 +1958,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 		ITypeBinding oldBinding = null;
 		String oldShortClassName = null, this$0Name0 = null, finalShortClassName, finalPackageName;
+		List<ClassAnnotation> oldAnnotations = null;
 		if (isTopLevel) {
 			String javaName = binding.getName();
 			appendElementKey(javaName);
@@ -1969,6 +1969,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if (isAnonymous) {
 			oldShortClassName = class_shortName;
 			oldBinding = class_typeBinding;
+			oldAnnotations = class_annotations;
+			class_annotations = null;
 			// anonymous classes reference their package, not their outer class in
 			// Clazz.newClass, so clazz.$this$0 is not assigned.
 			this$0Name0 = this$0Name;
@@ -2039,6 +2041,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		buffer.append(", ");
 		List<IMethodBinding> unqualifiedMethods = getUnqualifiedMethods(binding, null);
 		List<AbstractTypeDeclaration> innerClasses = new ArrayList<>();
+		String innerTypes = "";
 		if (isAnonymous) {
 			if (!(parent instanceof EnumConstantDeclaration))
 				func = "function(){Clazz.newInstance(this, arguments[0],1,C$);}";
@@ -2058,7 +2061,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		} else {
 			for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
 				BodyDeclaration bd = (BodyDeclaration) iter.next();
-				if (bd instanceof TypeDeclaration || bd instanceof EnumDeclaration || bd instanceof AnnotationTypeDeclaration) {
+				if (bd instanceof AbstractTypeDeclaration) {
+					//TypeDeclaration || EnumDeclaration || AnnotationTypeDeclaration) 
+					ITypeBinding b = ((AbstractTypeDeclaration)bd).resolveBinding();
+					String s = j2sNonPrimitiveName(b, false);
+					innerTypes += ",['" + s.substring(s.lastIndexOf(".") + 1) + "'," + b.getModifiers() + "]";					
 					innerClasses.add((AbstractTypeDeclaration) bd);
 				}
 			}
@@ -2180,6 +2187,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// close the initializer
 
 		buffer.append(");\n");
+
+		if (innerTypes.length() > 0) {
+			buffer.append("C$.$classes$=[" + innerTypes.substring(1) + "];\n");
+		}
 
 		// add the Java8 compatibility local variable $o$
 
@@ -2434,6 +2445,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				buffer.append(")");
 				this$0Name = this$0Name0;
 				setClassAndBinding(oldShortClassName, oldBinding);
+				class_annotations = oldAnnotations;
 			}
 		}
 		return isStatic;
