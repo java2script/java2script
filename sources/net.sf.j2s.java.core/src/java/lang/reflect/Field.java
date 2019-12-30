@@ -478,7 +478,7 @@ public final class Field extends AccessibleObject implements Member {
 	public Class<?> getType() {
 		if (myType == null || myType instanceof Class)
 			return (Class<?>) myType;
-		return (Class<?>) (myType = AnnotationParser.JSAnnotationObject.typeForString(myType.toString()));
+		return (Class<?>) (myType = AnnotationParser.JSAnnotationObject.typeForString(myType.toString(), false));
 	}
 
 	

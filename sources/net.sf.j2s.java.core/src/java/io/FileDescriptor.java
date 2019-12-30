@@ -31,6 +31,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import swingjs.JSTempFile;
+
 /**
  * Instances of the file descriptor class serve as an opaque handle
  * to the underlying machine-specific structure representing an open
@@ -48,8 +50,41 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public final class FileDescriptor {
 
+	/**
+	 * SwingJS added
+	 */
 	File _file;
 	
+	private int pos, len = -1;
+
+	public void _setPosAndLen(int pos, int len) {
+		this.pos = pos;
+		this.len = len;
+	}
+	
+	public int _getPos() {
+		return pos;
+	}
+	
+	public int _getLen() {
+		return len;
+	}
+	
+	private boolean isTempFile;
+	
+	/** SwingJS added
+	 * 
+	 * @return true if this is a temp file so should not be saved to disk
+	 */
+	public boolean _isTempFile() {
+		return isTempFile;
+	}
+
+	public void _setTempFile(boolean b) {
+		isTempFile = b;
+	}
+
+
     private int fd = -1;
     private long handle = -1;
 
@@ -189,20 +224,21 @@ public final class FileDescriptor {
     synchronized void attach(Closeable c) {
 
     	_file = (/**  @j2sNative c._file || */null);
+		isTempFile = _file instanceof JSTempFile;
     	
-        if (parent == null) {
-            // first caller gets to do this
-            parent = c;
-        } else if (otherParents == null) {
-            otherParents = new ArrayList<>();
-            otherParents.add(parent);
-            otherParents.add(c);
-        } else {
-            otherParents.add(c);
-        }
-    }
+		if (parent == null) {
+			// first caller gets to do this
+			parent = c;
+		} else if (otherParents == null) {
+			otherParents = new ArrayList<>();
+			otherParents.add(parent);
+			otherParents.add(c);
+		} else {
+			otherParents.add(c);
+		}
+	}
     
-    /**
+	/**
      * Cycle through all Closeables sharing this FD and call
      * close() on each one.
      *

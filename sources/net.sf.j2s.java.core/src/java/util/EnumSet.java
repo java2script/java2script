@@ -25,8 +25,6 @@
 
 package java.util;
 
-import sun.misc.SharedSecrets;
-
 /**
  * A specialized {@link Set} implementation for use with enum types.  All of
  * the elements in an enum set must come from a single enum type that is
@@ -77,6 +75,7 @@ import sun.misc.SharedSecrets;
  * @see EnumMap
  * @serial exclude
  */
+@SuppressWarnings("serial")
 public abstract class EnumSet<E extends Enum<E>> extends AbstractSet<E>
     implements Cloneable, java.io.Serializable
 {
@@ -90,7 +89,7 @@ public abstract class EnumSet<E extends Enum<E>> extends AbstractSet<E>
      */
     final Enum<?>[] universe;
 
-    private static Enum<?>[] ZERO_LENGTH_ENUM_ARRAY = new Enum<?>[0];
+//    private static Enum<?>[] ZERO_LENGTH_ENUM_ARRAY = new Enum<?>[0];
 
     EnumSet(Class<E>elementType, Enum<?>[] universe) {
         this.elementType = elementType;
@@ -111,7 +110,7 @@ public abstract class EnumSet<E extends Enum<E>> extends AbstractSet<E>
         if (universe == null)
             throw new ClassCastException(elementType + " not an enum");
 
-        if (universe.length <= 64)
+        if (universe.length <= 32)
             return new RegularEnumSet<>(elementType, universe);
         else
             return new JumboEnumSet<>(elementType, universe);
@@ -375,7 +374,7 @@ public abstract class EnumSet<E extends Enum<E>> extends AbstractSet<E>
      *
      * @return a copy of this set
      */
-    @SuppressWarnings("unchecked")
+    @Override
     public EnumSet<E> clone() {
         try {
             return (EnumSet<E>) super.clone();
@@ -409,58 +408,56 @@ public abstract class EnumSet<E extends Enum<E>> extends AbstractSet<E>
                                     //    .getEnumConstantsShared(elementType);
     }
 
-    /**
-     * This class is used to serialize all EnumSet instances, regardless of
-     * implementation type.  It captures their "logical contents" and they
-     * are reconstructed using public static factories.  This is necessary
-     * to ensure that the existence of a particular implementation type is
-     * an implementation detail.
-     *
-     * @serial include
-     */
-    private static class SerializationProxy <E extends Enum<E>>
-        implements java.io.Serializable
-    {
-        /**
-         * The element type of this enum set.
-         *
-         * @serial
-         */
-        private final Class<E> elementType;
-
-        /**
-         * The elements contained in this enum set.
-         *
-         * @serial
-         */
-        private final Enum<?>[] elements;
-
-        SerializationProxy(EnumSet<E> set) {
-            elementType = set.elementType;
-            elements = set.toArray(ZERO_LENGTH_ENUM_ARRAY);
-        }
-
-        // instead of cast to E, we should perhaps use elementType.cast()
-        // to avoid injection of forged stream, but it will slow the implementation
-        @SuppressWarnings("unchecked")
-        private Object readResolve() {
-            EnumSet<E> result = EnumSet.noneOf(elementType);
-            for (Enum<?> e : elements)
-                result.add((E)e);
-            return result;
-        }
-
-        private static final long serialVersionUID = 362491234563181265L;
-    }
-
-    Object writeReplace() {
-        return new SerializationProxy<>(this);
-    }
-
-    // readObject method for the serialization proxy pattern
-    // See Effective Java, Second Ed., Item 78.
-    private void readObject(java.io.ObjectInputStream stream)
-        throws java.io.InvalidObjectException {
-        throw new java.io.InvalidObjectException("Proxy required");
-    }
+//    /**
+//     * This class is used to serialize all EnumSet instances, regardless of
+//     * implementation type.  It captures their "logical contents" and they
+//     * are reconstructed using public static factories.  This is necessary
+//     * to ensure that the existence of a particular implementation type is
+//     * an implementation detail.
+//     *
+//     * @serial include
+//     */
+//    private static class SerializationProxy <E extends Enum<E>>
+//        implements java.io.Serializable
+//    {
+//        /**
+//         * The element type of this enum set.
+//         *
+//         * @serial
+//         */
+//        private final Class<E> elementType;
+//
+//        /**
+//         * The elements contained in this enum set.
+//         *
+//         * @serial
+//         */
+//        private final Enum<?>[] elements;
+//
+//        SerializationProxy(EnumSet<E> set) {
+//            elementType = set.elementType;
+//            elements = set.toArray(ZERO_LENGTH_ENUM_ARRAY);
+//        }
+//
+//        // instead of cast to E, we should perhaps use elementType.cast()
+//        // to avoid injection of forged stream, but it will slow the implementation
+//        @SuppressWarnings("unchecked")
+//        private Object readResolve() {
+//            EnumSet<E> result = EnumSet.noneOf(elementType);
+//            for (Enum<?> e : elements)
+//                result.add((E)e);
+//            return result;
+//        }
+//    }
+//
+//    Object writeReplace() {
+//        return new SerializationProxy<>(this);
+//    }
+//
+//    // readObject method for the serialization proxy pattern
+//    // See Effective Java, Second Ed., Item 78.
+//    private void readObject(java.io.ObjectInputStream stream)
+//        throws java.io.InvalidObjectException {
+//        throw new java.io.InvalidObjectException("Proxy required");
+//    }
 }

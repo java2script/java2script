@@ -3037,6 +3037,7 @@ public final class Class<T> {
 		// TODO this is a nightmare.
 		Method[] ms;
 		if ($methodList$ != null) {
+			// interface hack
 			ms = new Method[$methodList$.length];
 			for (int i = ms.length; --i >= 0;) {
 				ms[i] = new Method(this, $methodList$[i], null, Void.class, null, java.lang.reflect.Modifier.PUBLIC);
@@ -3057,8 +3058,8 @@ public final class Class<T> {
 		 *            o.exName && !o.__CLASS_NAME__ && o != this.$clazz$[attr] &&
 		 *            o.exClazz == this.$clazz$) { // there are polynormical methods.
 		 */
-
-		Method m = new Method(this, attr, NO_PARAMETERS, Void.class, NO_PARAMETERS, Modifier.PUBLIC);
+		
+		Method m = new Method(this, attr, UNKNOWN_PARAMETERS, Void.class, NO_PARAMETERS, Modifier.PUBLIC);
 		m._setJSMethod(o);
 
 		/**
@@ -3071,7 +3072,7 @@ public final class Class<T> {
 		 *            "function" && o.exName && !o.__CLASS_NAME__ &&
 		 *            o.exClazz == this.$clazz$) {
 		 */
-		m = new Method(this, attr, NO_PARAMETERS, Void.class, NO_PARAMETERS, Modifier.PUBLIC | Modifier.STATIC);
+		m = new Method(this, attr, UNKNOWN_PARAMETERS, Void.class, NO_PARAMETERS, Modifier.PUBLIC | Modifier.STATIC);
 		m._setJSMethod(o);
 		/**
 		 * @j2sNative
@@ -3366,6 +3367,7 @@ public final class Class<T> {
 //	private static final ObjectStreamField[] serialPersistentFields = new ObjectStreamField[0];
 
 	public static final Class<?>[] NO_PARAMETERS = new Class<?>[0];
+	public static final Class<?>[] UNKNOWN_PARAMETERS = new Class<?>[0];
 
 //	/**
 //	 * Returns the assertion status that would be assigned to this class if it

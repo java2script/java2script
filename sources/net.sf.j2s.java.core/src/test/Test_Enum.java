@@ -1,5 +1,8 @@
 package test;
 
+import java.util.EnumSet;
+import java.util.Iterator;
+
 import javax.swing.LayoutStyle.ComponentPlacement;
 
 @SuppressWarnings("unused")
@@ -7,6 +10,13 @@ public class Test_Enum extends Test_{
 
 	public enum Day {
 		SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY 
+	}
+
+	public enum Dates {
+		D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,
+		D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,
+		D21,D22,D23,D24,D25,D26,D27,D28,D29,D30,
+		D31,D32,D33,D34,D35,D36,D37,D38,D39,D40
 	}
 
 	Day day;
@@ -38,10 +48,10 @@ public class Test_Enum extends Test_{
 
 	public static void main(String[] args) {
 		Day[] a = new Day[0];
- 		Day[] d = Day.values();
-		for (int i = 0; i < d.length; i++)
-			System.out.println(i + " day " + d[i]);
-		System.out.println(d.toString());
+ 		Day[] dd = Day.values();
+		for (int i = 0; i < dd.length; i++)
+			System.out.println(i + " day " + dd[i]);
+		System.out.println(dd.toString());
 		System.out.println(Enum.valueOf(Day.class, "MONDAY").getClass().getName());
 		assert(Enum.valueOf(Day.class, "MONDAY").ordinal() == 1);
 		
@@ -56,6 +66,37 @@ public class Test_Enum extends Test_{
 		Test_Enum seventhDay = new Test_Enum(Day.SUNDAY);
 		assert(seventhDay.tellItLikeItIs() == "Weekends are best.");
 		Planet.main(new String[] { "155" });
+		
+		EnumSet<Day> e = EnumSet.of(Day.MONDAY);
+		e.add(Day.WEDNESDAY);
+		e.add(Day.FRIDAY);
+		
+		Iterator<Day> it = e.iterator();
+		
+		String mwf = "";
+		while (it.hasNext()) {
+			mwf += it.next();
+		}
+		
+		System.out.println(mwf);
+		assert(mwf.equals("MONDAYWEDNESDAYFRIDAY"));
+		
+		
+		EnumSet<Dates> d = EnumSet.noneOf(Dates.class);
+		for (int i = 1; i < 40; i += 3)
+		d.add(Dates.valueOf("D" + i));
+		
+		Iterator<Dates> dt = d.iterator();
+		
+		String d123 = "";
+		while (dt.hasNext()) {
+			d123 += dt.next();
+		}
+		
+		System.out.println(d123);
+		assert(d123.equals("D1D4D7D10D13D16D19D22D25D28D31D34D37"));
+		
+		
 		System.out.println("Test_Enum OK");
 	}
 

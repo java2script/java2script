@@ -13,6 +13,9 @@ public class Test_ {
 
 	private int t = 0;
 
+	public void test123(int a, int b, int c) {
+		
+	}
 	public int test_int = 3;
 	
 	public int showt() {

@@ -146,10 +146,10 @@ public class AnnotationParser {
 			for (int i = members.length; --i >= 0;) {
 				String[] member = members[i];
 				String name = member[0];
-				Class<?> retType = typeForString(member[1]);
+				Class<?> retType = typeForString(member[1], false);
 				Object val = member[2];
 
-				Method method = new Method(cl, name, Class.NO_PARAMETERS, retType, Class.NO_PARAMETERS,
+				Method method = new Method(cl, name, Class.UNKNOWN_PARAMETERS, retType, Class.NO_PARAMETERS,
 						Modifier.PUBLIC);
 				if (retType.isAnnotation()) {
 					val = createAnnotation(retType.getName(), (String) val);
@@ -404,7 +404,7 @@ public class AnnotationParser {
 			return result;
 		}
 
-		public static Class<?> typeForString(String name) {
+		public static Class<?> typeForString(String name, boolean allowNull) {
 			String s = name;
 			int dim = 0;
 			while (s.endsWith("[]")) {
@@ -425,29 +425,29 @@ public class AnnotationParser {
 				}
 				return c;
 			} catch (ClassNotFoundException e) {
+				if (allowNull)
+					return null;
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				try {
 					throw e;
 				} catch (ClassNotFoundException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
 				}
 			}
 			return null;
 		}
 
 		@SuppressWarnings("unused")
-		public static Class[] getDeclaredClasses(Object C$) {
-			String myName = /** @j2sNative C$.__CLASS_NAME__ || */null;
+		public static Class[] getDeclaredClasses(Object clazz) {
+			String myName = /** @j2sNative clazz.__CLASS_NAME__ || */null;
 			// C$.$classes$=[['Singleton',8],['Test_Class_Inner',8],['B',0],['C',8]]
-			Object[][] data = /** @j2sNative C$.$classes$ || */ null;
+			Object[][] data = /** @j2sNative clazz.$classes$ || */ null;
 			Class[] classes = new Class[0];
 			if (data != null) {
 				for (int i = 0; i < data.length; i++) {
-					String name = (String) data[i++][0];
+					String name = (String) data[i][0];
 					int modifiers = /** @j2sNative data[i][1] || */0;
-					Class<?> cl = typeForString(myName + "." + name);
+					Class<?> cl = typeForString(myName + "." + name, false);
 					cl._setModifiers(modifiers);
 					/** @j2sNative classes.push(cl); */
 				}
@@ -455,6 +455,32 @@ public class AnnotationParser {
 			return classes;
 		}
 
+		@SuppressWarnings("null")
+		public static Class<?>[] guessMethodParameterTypes(String signature) {
+			String[] args = /** @j2sNative signature.split("$")|| */
+					null;
+			Class<?>[] classes = new Class<?>[args.length - 1];
+			if (args.length > 1) {
+				for (int i = 0; i < classes.length; i++) {
+					String param = args[i + 1];
+					String arrays = "";
+					int len = param.length();
+					while (len > 1 && param.endsWith("A")) {
+						arrays += "[]";
+						param = param.substring(0, --len);
+					}
+					param += arrays;
+					// in case we have __ initially due to non-packaged classes being put in package _. 
+					param = param.substring(0, 1) + param.substring(1).replace('_', '.');
+					classes[i] = typeForString(param, true);
+					if (classes[i] == null) {
+						classes[i] = Object.class;
+						System.err.println("JSAnnotationObject - method parameter typing failed for " + signature);
+					}
+				}
+			}
+			return classes;
+		}
 	}
 
 	/**

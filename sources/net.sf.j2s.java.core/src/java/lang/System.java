@@ -1100,7 +1100,7 @@ public final class System {
 	 * @see java.lang.Runtime#exit(int)
 	 */
 	public static void exit(int status) {
-		Runtime r = /** @j2sNative Clazz.loadClass("java.lang.Runtime").getRuntime$() ||*/null;
+		Runtime r = /** @j2sNative Clazz.load("java.lang.Runtime").getRuntime$() ||*/null;
 		r = Runtime.getRuntime();
 		r.exit(status);
 	}

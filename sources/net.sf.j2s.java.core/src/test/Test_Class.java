@@ -12,9 +12,13 @@ import java.util.Hashtable;
 @SuppressWarnings("rawtypes")
 class Test_Class extends Test_Class2 {
 
+	int x = 2000000000 + 2000000000;
 	
 	static int istatic = 5;
 	static String sstatic = "test5";
+	
+	String same$ = null;
+	String same() {return null;}
 	
 	static class Singleton {
 		// reference to Test_Class.Singleton.instance 

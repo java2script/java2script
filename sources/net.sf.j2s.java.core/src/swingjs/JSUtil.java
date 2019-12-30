@@ -29,7 +29,7 @@ import swingjs.json.JSON;
 public class JSUtil {
 
 	public JSUtil() {
-		System.out.println("JSUtil initialized");
+		System.out.println("swingjs.JSUtil initialized");
 	}
 
 	static {
@@ -65,10 +65,16 @@ public class JSUtil {
 		return fileCache;
 	}
 
-	private static Object getCachedFileData(String path) {
+	public static Object getCachedFileData(String path) {
 		return (useCache && fileCache != null ?
 					fileCache.get(path) : null);
 	}
+
+	public static Object removeCachedFileData(String path) {
+		return (useCache && fileCache != null ?
+					fileCache.remove(path) : null);
+	}
+
 
 	/**
 	 * This could be a simple String, a javajs.util.SB, or unsigned or signed bytes
@@ -231,7 +237,12 @@ public class JSUtil {
 			System.out.println("JSUtil releasing cached bytes for " + path);
 			getFileCache().remove(path);
 		} else {
-			System.out.println("JSUtil caching bytes for " + path);
+			String count = "?";
+			if (data instanceof byte[])
+				count = ""+ ((byte[]) data).length;
+			else if (data instanceof String)
+				count = "" + ((String) data).length();				
+			System.out.println("JSUtil caching " + count + " bytes for " + path);
 			getFileCache().put(path, data);
 		}
 	}

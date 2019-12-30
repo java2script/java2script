@@ -97,8 +97,8 @@ public class Arrays {
      * based implementation.
      */
     static final class NaturalOrder implements Comparator<Object> {
-        @SuppressWarnings("unchecked")
-        public int compare(Object first, Object second) {
+        @Override
+		public int compare(Object first, Object second) {
             return ((Comparable<Object>)first).compareTo(second);
         }
         static final NaturalOrder INSTANCE = new NaturalOrder();
@@ -3177,8 +3177,13 @@ public class Arrays {
      * @throws NullPointerException if <tt>original</tt> is null
      * @since 1.6
      */
-    @SuppressWarnings("unchecked")
     public static <T> T[] copyOf(T[] original, int newLength) {
+    	if (newLength <= original.length) {
+    		/**
+    		 * @j2sNative
+    		 * return Clazz.array(-1, original, 0, newLength);
+    		 */
+    	}
         return (T[]) copyOf(original, newLength, original.getClass());
     }
 
@@ -3207,7 +3212,6 @@ public class Arrays {
      * @since 1.6
      */
     public static <T,U> T[] copyOf(U[] original, int newLength, Class<? extends T[]> newType) {
-        @SuppressWarnings("unchecked")
         T[] copy = ((Object)newType == (Object)Object[].class)
             ? (T[]) new Object[newLength]
             : (T[]) Array.newInstance(newType.getComponentType(), newLength);
@@ -3234,6 +3238,12 @@ public class Arrays {
      * @since 1.6
      */
     public static byte[] copyOf(byte[] original, int newLength) {
+    	if (newLength <= original.length) {
+    		/**
+    		 * @j2sNative
+    		 * return Clazz.array(-1, original, 0, newLength);
+    		 */
+    	}
         byte[] copy = new byte[newLength];
         System.arraycopy(original, 0, copy, 0,
                          Math.min(original.length, newLength));
@@ -3258,6 +3268,12 @@ public class Arrays {
      * @since 1.6
      */
     public static short[] copyOf(short[] original, int newLength) {
+    	if (newLength <= original.length) {
+    		/**
+    		 * @j2sNative
+    		 * return Clazz.array(-1, original, 0, newLength);
+    		 */
+    	}
         short[] copy = new short[newLength];
         System.arraycopy(original, 0, copy, 0,
                          Math.min(original.length, newLength));
@@ -3282,6 +3298,12 @@ public class Arrays {
      * @since 1.6
      */
     public static int[] copyOf(int[] original, int newLength) {
+    	if (newLength <= original.length) {
+    		/**
+    		 * @j2sNative
+    		 * return Clazz.array(-1, original, 0, newLength);
+    		 */
+    	}
         int[] copy = new int[newLength];
         System.arraycopy(original, 0, copy, 0,
                          Math.min(original.length, newLength));
@@ -3306,6 +3328,12 @@ public class Arrays {
      * @since 1.6
      */
     public static long[] copyOf(long[] original, int newLength) {
+    	if (newLength <= original.length) {
+    		/**
+    		 * @j2sNative
+    		 * return Clazz.array(-1, original, 0, newLength);
+    		 */
+    	}
         long[] copy = new long[newLength];
         System.arraycopy(original, 0, copy, 0,
                          Math.min(original.length, newLength));
@@ -3330,6 +3358,12 @@ public class Arrays {
      * @since 1.6
      */
     public static char[] copyOf(char[] original, int newLength) {
+    	if (newLength <= original.length) {
+    		/**
+    		 * @j2sNative
+    		 * return Clazz.array(-1, original, 0, newLength);
+    		 */
+    	}
         char[] copy = new char[newLength];
         System.arraycopy(original, 0, copy, 0,
                          Math.min(original.length, newLength));
@@ -3354,6 +3388,12 @@ public class Arrays {
      * @since 1.6
      */
     public static float[] copyOf(float[] original, int newLength) {
+    	if (newLength <= original.length) {
+    		/**
+    		 * @j2sNative
+    		 * return Clazz.array(-1, original, 0, newLength);
+    		 */
+    	}
         float[] copy = new float[newLength];
         System.arraycopy(original, 0, copy, 0,
                          Math.min(original.length, newLength));
@@ -3378,6 +3418,12 @@ public class Arrays {
      * @since 1.6
      */
     public static double[] copyOf(double[] original, int newLength) {
+    	if (newLength <= original.length) {
+    		/**
+    		 * @j2sNative
+    		 * return Clazz.array(-1, original, 0, newLength);
+    		 */
+    	}
         double[] copy = new double[newLength];
         System.arraycopy(original, 0, copy, 0,
                          Math.min(original.length, newLength));
@@ -3402,6 +3448,12 @@ public class Arrays {
      * @since 1.6
      */
     public static boolean[] copyOf(boolean[] original, int newLength) {
+    	if (newLength <= original.length) {
+    		/**
+    		 * @j2sNative
+    		 * return Clazz.array(-1, original, 0, newLength);
+    		 */
+    	}
         boolean[] copy = new boolean[newLength];
         System.arraycopy(original, 0, copy, 0,
                          Math.min(original.length, newLength));
@@ -3439,6 +3491,12 @@ public class Arrays {
      */
     @SuppressWarnings("unchecked")
     public static <T> T[] copyOfRange(T[] original, int from, int to) {
+    	if (to <= original.length) {
+    		/**
+    		 * @j2sNative
+    		 * return Clazz.array(-1, original, from, to);
+    		 */
+    	}
         return copyOfRange(original, from, to, (Class<? extends T[]>) original.getClass());
     }
 
@@ -3518,6 +3576,12 @@ public class Arrays {
         int newLength = to - from;
         if (newLength < 0)
             throw new IllegalArgumentException(from + " > " + to);
+    	if (to <= original.length) {
+    		/**
+    		 * @j2sNative
+    		 * return Clazz.array(-1, original, from, to);
+    		 */
+    	}
         byte[] copy = new byte[newLength];
         System.arraycopy(original, from, copy, 0,
                          Math.min(original.length - from, newLength));
@@ -3554,6 +3618,12 @@ public class Arrays {
         int newLength = to - from;
         if (newLength < 0)
             throw new IllegalArgumentException(from + " > " + to);
+    	if (to <= original.length) {
+    		/**
+    		 * @j2sNative
+    		 * return Clazz.array(-1, original, from, to);
+    		 */
+    	}
         short[] copy = new short[newLength];
         System.arraycopy(original, from, copy, 0,
                          Math.min(original.length - from, newLength));
@@ -3590,6 +3660,12 @@ public class Arrays {
         int newLength = to - from;
         if (newLength < 0)
             throw new IllegalArgumentException(from + " > " + to);
+    	if (to <= original.length) {
+    		/**
+    		 * @j2sNative
+    		 * return Clazz.array(-1, original, from, to);
+    		 */
+    	}
         int[] copy = new int[newLength];
         System.arraycopy(original, from, copy, 0,
                          Math.min(original.length - from, newLength));
@@ -3626,6 +3702,12 @@ public class Arrays {
         int newLength = to - from;
         if (newLength < 0)
             throw new IllegalArgumentException(from + " > " + to);
+    	if (to <= original.length) {
+    		/**
+    		 * @j2sNative
+    		 * return Clazz.array(-1, original, from, to);
+    		 */
+    	}
         long[] copy = new long[newLength];
         System.arraycopy(original, from, copy, 0,
                          Math.min(original.length - from, newLength));
@@ -3662,6 +3744,12 @@ public class Arrays {
         int newLength = to - from;
         if (newLength < 0)
             throw new IllegalArgumentException(from + " > " + to);
+    	if (to <= original.length) {
+    		/**
+    		 * @j2sNative
+    		 * return Clazz.array(-1, original, from, to);
+    		 */
+    	}
         char[] copy = new char[newLength];
         System.arraycopy(original, from, copy, 0,
                          Math.min(original.length - from, newLength));
@@ -3698,6 +3786,12 @@ public class Arrays {
         int newLength = to - from;
         if (newLength < 0)
             throw new IllegalArgumentException(from + " > " + to);
+    	if (to <= original.length) {
+    		/**
+    		 * @j2sNative
+    		 * return Clazz.array(-1, original, from, to);
+    		 */
+    	}
         float[] copy = new float[newLength];
         System.arraycopy(original, from, copy, 0,
                          Math.min(original.length - from, newLength));
@@ -3734,6 +3828,12 @@ public class Arrays {
         int newLength = to - from;
         if (newLength < 0)
             throw new IllegalArgumentException(from + " > " + to);
+    	if (to <= original.length) {
+    		/**
+    		 * @j2sNative
+    		 * return Clazz.array(-1, original, from, to);
+    		 */
+    	}
         double[] copy = new double[newLength];
         System.arraycopy(original, from, copy, 0,
                          Math.min(original.length - from, newLength));
@@ -3770,6 +3870,12 @@ public class Arrays {
         int newLength = to - from;
         if (newLength < 0)
             throw new IllegalArgumentException(from + " > " + to);
+    	if (to <= original.length) {
+    		/**
+    		 * @j2sNative
+    		 * return Clazz.array(-1, original, from, to);
+    		 */
+    	}
         boolean[] copy = new boolean[newLength];
         System.arraycopy(original, from, copy, 0,
                          Math.min(original.length - from, newLength));
@@ -3796,7 +3902,6 @@ public class Arrays {
      * @return a list view of the specified array
      */
     @SafeVarargs
-    @SuppressWarnings("varargs")
     public static <T> List<T> asList(T... a) {
         return new ArrayList<>(a);
     }
@@ -3825,7 +3930,6 @@ public class Arrays {
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         public <T> T[] toArray(T[] a) {
             int size = size();
             if (a.length < size)

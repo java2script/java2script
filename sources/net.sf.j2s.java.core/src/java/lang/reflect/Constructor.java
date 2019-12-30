@@ -42,10 +42,10 @@ Member {
 	 * these objects in Java code from the java.lang package via
 	 * sun.reflect.LangReflectAccess.
 	 */
-	public Constructor(Class<T> declaringClass, Class<?>[] parameterTypes, Class<?>[] checkedExceptions,
+	public Constructor(Class<T> declaringClass, Class<?>[] paramTypes, Class<?>[] checkedExceptions,
 			int modifiers) {
 		this.Class_ = declaringClass;
-		this.parameterTypes = parameterTypes;
+		this.parameterTypes = paramTypes;
 		this.exceptionTypes = checkedExceptions;
 		this.modifiers = modifiers;
 		// NO!! wrong: all of the SwingJS primitive classes run without parameterization
@@ -53,9 +53,9 @@ Member {
 			//parameterTypes = null;
 		// Special case - constructors with parameters have c$$, not just c$. For whatever reason!
 		// This signals NOT to add "$" if there are no parameters.
-		if (parameterTypes == null)
-			parameterTypes = Class.NO_PARAMETERS;
-		this.signature = "c$" + Class.argumentTypesToString(parameterTypes);
+		if (paramTypes == null)
+			paramTypes = Class.NO_PARAMETERS;
+		this.signature = "c$" + Class.argumentTypesToString(paramTypes);
  		constr = /** @j2sNative this.Class_.$clazz$[this.signature] || */ null;
 	}
 

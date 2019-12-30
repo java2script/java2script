@@ -62,10 +62,12 @@ class FileInputStream extends InputStream
      */
     private final String path;
 
-    private FileChannel channel = null;
+    private JSFileChannel channel = null;
 
 //    private final Object closeLock = new Object();
     private volatile boolean closed = false;
+
+	public File _file;
 
     /**
      * Creates a <code>FileInputStream</code> by
@@ -140,6 +142,7 @@ class FileInputStream extends InputStream
 //            throw new FileNotFoundException("Invalid file path");
 //        }
         fd = new FileDescriptor();
+        this._file = file;
         fd.attach(this);
         path = name;
         open(file);
@@ -217,7 +220,7 @@ class FileInputStream extends InputStream
      */
     @Override
 	public int read() throws IOException {
-      return is.read();	
+      return (channel == null ? is.read() : channel.read());	
     }
 
     /**
@@ -228,7 +231,7 @@ class FileInputStream extends InputStream
      * @exception IOException If an I/O error has occurred.
      */
     private int readBytes(byte b[], int off, int len) throws IOException {
-        return is.read(b, off, len);	    	
+        return channel == null ? is.read(b, off, len) : channel.readBytes(b, off, len);	    	
     }
 
     /**
@@ -296,8 +299,7 @@ class FileInputStream extends InputStream
      */
     @Override
 	public long skip(long n) throws IOException {
-        return is.skip(n);    	
-    	
+        return channel == null ? is.skip(n) : channel.skip(n);    	
     }
 
     /**
@@ -319,7 +321,7 @@ class FileInputStream extends InputStream
      */
     @Override
 	public int available() throws IOException {
-    	return is.available();    	
+    	return channel == null ? is.available() : channel.available();    	
     }
 
     /**
@@ -340,17 +342,16 @@ class FileInputStream extends InputStream
             if (closed) {
                 return;
             }
-            is.close();
             closed = true;
 //        }
-        if (channel != null) {
-           channel.close();
-        }
-
         fd.closeAll(new Closeable() {
             @Override
 			public void close() throws IOException {
-               //close0();
+                if (channel == null) {
+                	is.close();
+                } else {
+                    channel.close();
+                 }
            }
         });
     }
@@ -384,14 +385,21 @@ class FileInputStream extends InputStream
      * file position.
      *
      * @return  the file channel associated with this file input stream
+     * @throws IOException 
      *
      * @since 1.4
      * @spec JSR-51
      */
-    public FileChannel getChannel() {
+    public JSFileChannel getChannel() {
         synchronized (this) {
             if (channel == null) {
-                channel = JSFileChannel.open(fd, path, true, false, this);
+                try {
+                	fd._setPosAndLen(is.pos, is.pos + is.available());
+					channel = JSFileChannel.open(fd, path, true, false, this);
+					is = null;
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
             }
             return channel;
         }

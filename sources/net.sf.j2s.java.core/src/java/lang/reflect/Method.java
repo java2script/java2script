@@ -54,19 +54,21 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 	 * these objects in Java code from the java.lang package via
 	 * sun.reflect.LangReflectAccess.
 	 */
-	public Method(Class<?> declaringClass, String name, Class<?>[] parameterTypes, Class<?> returnType,
+	public Method(Class<?> declaringClass, String name, Class<?>[] paramTypes, Class<?> returnType,
 			Class<?>[] checkedExceptions, int modifiers) {
 		this.Class_ = declaringClass;
 		this.name = name;
-		this.parameterTypes = (parameterTypes == null ? Class.NO_PARAMETERS : parameterTypes);
+		this.parameterTypes = (paramTypes == null ? Class.NO_PARAMETERS : paramTypes);
 		this.returnType = returnType;
 		this.exceptionTypes = checkedExceptions;
 		this.modifiers = modifiers;
 		// modifier PUBLIC means this is from Class.java getMethods
-		if (parameterTypes != null && parameterTypes.length == 0)
-			parameterTypes = null;
-		this.signature = (declaringClass.$methodList$ == null && !declaringClass.isAnnotation() 
-				? name + Class.argumentTypesToString(parameterTypes) : name);
+		if (paramTypes != null && paramTypes.length == 0)
+			paramTypes = null;
+		this.signature = (paramTypes == Class.UNKNOWN_PARAMETERS 
+				|| declaringClass.$methodList$ != null 
+				|| declaringClass.isAnnotation() 
+				? name : name + Class.argumentTypesToString(paramTypes));
 	}
 
 	/**
@@ -377,7 +379,8 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 	 * @return the parameter types
 	 */
 	public Class<?>[] getParameterTypes() {
-		return parameterTypes;
+		return (parameterTypes == Class.UNKNOWN_PARAMETERS ?
+			parameterTypes = AnnotationParser.JSAnnotationObject.guessMethodParameterTypes(signature) : parameterTypes);
 	}
 
 	/**
@@ -389,7 +392,7 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 		// SwingJS will store this as a String to avoid unnecessary class loading
 		if (returnType == null || returnType instanceof Class)
 			return (Class<?>) returnType;
-		return (Class<?>) (returnType = AnnotationParser.JSAnnotationObject.typeForString(returnType.toString()));
+		return (Class<?>) (returnType = AnnotationParser.JSAnnotationObject.typeForString(returnType.toString(), false));
 	}
 
 

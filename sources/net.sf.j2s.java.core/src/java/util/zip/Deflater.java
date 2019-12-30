@@ -31,6 +31,11 @@ package java.util.zip;
 public class Deflater extends swingjs.jzlib.Deflater {
   
   public static final int DEFAULT_COMPRESSION = -1;
+    /**
+     * Compression level for best compression.
+     */
+    public static final int BEST_COMPRESSION = 9;
+
   
   public Deflater(int compressionLevel) {
     super();

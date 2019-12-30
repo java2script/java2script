@@ -68,7 +68,7 @@ abstract public class ZStream{
 
   byte[] next_in;     // next input byte
   int next_in_index;
-  protected int avail_in;       // number of bytes available at next_in
+  public int avail_in;       // number of bytes available at next_in
   protected long total_in;      // total nb of input bytes read so far
 
   byte[] next_out;    // next output byte should be put there
@@ -223,7 +223,7 @@ abstract public class ZStream{
   // this function so some applications may wish to modify it to avoid
   // allocating a large strm->next_in buffer and copying from it.
   // (See also flush_pending()).
-  int read_buf(byte[] buf, int start, int size) {
+  public int read_buf(byte[] buf, int start, int size) {
     int len=avail_in;
 
     if(len>size) len=size;
@@ -256,7 +256,7 @@ abstract public class ZStream{
     avail_out = len;
   }
 
-  void setInput(byte[] buf, int off, int len, boolean append){
+  public void setInput(byte[] buf, int off, int len, boolean append){
     if(len<=0 && append && next_in!=null) return;
     if(avail_in>0 && append){  
       byte[] tmp = new byte[avail_in+len];

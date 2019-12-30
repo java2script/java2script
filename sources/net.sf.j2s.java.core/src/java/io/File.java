@@ -235,7 +235,7 @@ public class File
     }
 
     private String resolve(String path, String child) {
-    	if (child.length() > 0 && !path.endsWith("/"))
+    	if (child.length() > 0 && !child.startsWith("/") && !path.endsWith("/"))
     			path += "/";
     	return path + child; 
 		}
@@ -295,7 +295,7 @@ public class File
 			throw new NullPointerException();
 		}
 		if (parent != null) {
-			if (parent.equals("")) {
+			if (parent.equals("") && !child.startsWith("/")) {
 				this.path = resolve(".", child); // fs.resolve(fs.getDefaultParent(),
 				// fs.normalize(child));
 			} else {
@@ -953,12 +953,11 @@ public class File
      *          delete access to the file
      */
     public boolean delete() {
-    	return true;
 //        SecurityManager security = System.getSecurityManager();
 //        if (security != null) {
 //            security.checkDelete(path);
 //        }
-//        return fs.delete(this);
+        return fs.delete(this);
     }
 //
 //    /**
@@ -1997,7 +1996,7 @@ public class File
                 result = filePath;
                 if (result == null) {
                     result = FileSystems.getDefault().getPath(path);
-                    ((JSPath) result).秘bytes = 秘bytes;
+                    ((JSPath) result).set(秘bytes, this);
                     filePath = result;
                 }
             }

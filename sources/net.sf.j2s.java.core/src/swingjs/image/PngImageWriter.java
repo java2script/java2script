@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageReader;
+import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.metadata.IIOMetadata;
@@ -18,7 +19,7 @@ import javax.imageio.metadata.IIOMetadata;
  * @see javax.imageio.spi.ImageWriterSpi
  *
  */
-public class PngImageWriter extends ImageWriter {
+public class PngImageWriter extends JSImageWriter {
 	public PngImageWriter() {
 		super();
 		params.put("type", "PNG");
@@ -36,5 +37,6 @@ public class PngImageWriter extends ImageWriter {
 	public ImageWriteParam getDefaultWriteParam() {
 		return new PngImageWriteParam(null);
 	}
+
 
 }

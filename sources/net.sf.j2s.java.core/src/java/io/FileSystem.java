@@ -25,14 +25,21 @@
 
 package java.io;
 
+import swingjs.JSTempFile;
 
 /**
  * Package-private abstract class for the local filesystem abstraction.
  */
 
+/**
+ * @author hansonr
+ *
+ */
 class FileSystem {
 
     /**
+     * Note that JSFileSystem does not implement java.io.FileSystem. It implements java.nio.FileSystem.
+     * 
      * Return the FileSystem object representing this platform's local
      * filesystem.
      */
@@ -172,12 +179,14 @@ class FileSystem {
 //                                                  boolean restrictive)
 //        throws IOException;
 //
-//    /**
-//     * Delete the file or directory denoted by the given abstract pathname,
-//     * returning <code>true</code> if and only if the operation succeeds.
-//     */
-//    public abstract boolean delete(File f);
-//
+    /**
+     * Delete the file or directory denoted by the given abstract pathname,
+     * returning <code>true</code> if and only if the operation succeeds.
+     */
+    public boolean delete(File f) {
+    	return (f instanceof JSTempFile ? f.delete() : false);
+    }
+
     /**
      * List the elements of the directory denoted by the given abstract
      * pathname.  Return an array of strings naming the elements of the
@@ -262,4 +271,6 @@ class FileSystem {
 //        useCanonPrefixCache = getBooleanProperty("sun.io.useCanonPrefixCache",
 //                                                 useCanonPrefixCache);
 //    }
+
+
 }

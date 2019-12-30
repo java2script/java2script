@@ -1,5 +1,6 @@
 package test;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -12,6 +13,8 @@ public class Test_Resource extends Test_ {
 		return 0;
 	}
 	
+	static boolean isClosed = false;
+
 	public static void main(String[] args) {
 		Properties p = new Properties();
 		try {
@@ -21,19 +24,40 @@ public class Test_Resource extends Test_ {
 	        String test = p.getProperty("test");
 	        System.out.println(test);
 	        assert("OK".equals(test));
-	        System.out.println("Test_Resource OK");
 		} catch (Exception e) {
 			System.out.println(e);
 			assert(false);
 		}
-		
-		
-		try(OutputStream os = new FileOutputStream("test.test")) {
-			
-		} catch (IOException e) {
-			e.printStackTrace();
+
+		try {
+			File f = File.createTempFile("test", ".txt");
+			try(OutputStream os = new FileOutputStream(f) {
+				public void close() {
+					try {
+						System.out.println("closing OutputStream ");
+						isClosed = true;
+						super.close();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}) {
+				os.write("test".getBytes());
+				// this will close the output stream as a 4-byte file
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			System.out.println(f.getName() + " length=" + f.length());
+			assert(f.length() == 4);
+			assert(isClosed);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
 		
+		
+		System.out.println("Test_Resource OK");
 	}
 
 } 

@@ -772,7 +772,8 @@ public interface Path
      * @return  {@code true} if, and only if, the given object is a {@code Path}
      *          that is identical to this {@code Path}
      */
-    boolean equals(Object other);
+    @Override
+	boolean equals(Object other);
 
     /**
      * Computes a hash code for this path.
@@ -783,7 +784,8 @@ public interface Path
      *
      * @return  the hash-code value for this path
      */
-    int hashCode();
+    @Override
+	int hashCode();
 
     /**
      * Returns the string representation of this path.
@@ -797,5 +799,6 @@ public interface Path
      *
      * @return  the string representation of this path
      */
-    String toString();
+    @Override
+	String toString();
 }

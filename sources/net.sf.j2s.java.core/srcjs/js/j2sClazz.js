@@ -116,7 +116,8 @@ var _array = function(baseClass, paramType, ndims, params, isClone) {
     return copyArrayProps(a, b);
   }
   if (arguments.length == 2 && baseClass.BYTES_PER_ELEMENT) {
-	// direct transfer of parameters from java.nio.ByteBuffer
+	  // Clazz.array(rawInt8Array, int[] array)
+	  // direct transfer of __* metadata (see java.nio.ByteBuffer)
 	return copyArrayProps(paramType, baseClass); 
   }
   var prim = Clazz._getParamCode(baseClass);
@@ -972,13 +973,16 @@ Clazz.super_ = function(cl, obj) {
 /////////////////////////////////////////////////////////////////////
 
 var aas = "AAA";
-/**
- * Create an array class placeholder for reflection
- */
+
+var arrayClasses = {};
 
 var arrayClass = function(baseClass, ndim) {
   ndim || (ndim = 1);
   var stub = Clazz._getParamCode(baseClass);
+  var key = stub + ";" + ndim;
+  var ret = arrayClasses[key];
+  if (ret)
+	  return ret;
   while (aas.length < ndim)
     aas += aas;
   var aaa = aas.substring(0, ndim);
@@ -1002,9 +1006,6 @@ var arrayClass = function(baseClass, ndim) {
     case "S":
       stub = "String";
       break;
-    case "H":
-      stub = "S";
-      break;
     default:
       if (stub.length > 1)
         stub = baseClass.__CLASS_NAME__;
@@ -1016,6 +1017,7 @@ var arrayClass = function(baseClass, ndim) {
       stub = "Ljava.lang." + stub + ";";
     return aaa.replace(/A/g,"[") + stub;
   })())};
+  arrayClasses[key] = oclass;  
   return oclass;  
 }
 
@@ -4373,6 +4375,15 @@ var getChars = function(s, srcBegin,srcEnd,dst,dstBegin, asBytes){
 
 //var charset=["utf-8","utf8","us-ascii","iso-8859-1","8859_1","gb2312","gb18030"];
 var charset=["utf-8","utf8","us-ascii","iso-8859-1"]; // gb* uses GBK
+
+sp.getBytes$I$I$BA$I=function(i0, i1, dst, dpt) {
+	if (i1 == i0)
+		return;
+	var s = this.valueOf();
+	for (var i = i0; i < i1; i++)
+		dst[dpt++] = s.charCodeAt(i);
+}
+
 sp.getBytes$=sp.getBytes$S=sp.getBytes$java_nio_charset_Charset=function(){
 var s=this;
 if(arguments.length==1){
@@ -4694,9 +4705,10 @@ String.join$CharSequence$CharSequenceA = function(sep,array) {
  return ret;
 }
 
-String.join$CharSequence$Iterable = function(sep,iter) {
+String.join$CharSequence$Iterable = function(sep,iterable) {
  var ret = "";
  var s = "";
+ var iter = iterable.iterator$();
  while (iter.hasNext$()) {
 	 ret += s + iter.next$().toString();
 	 s || (s = sep);	 

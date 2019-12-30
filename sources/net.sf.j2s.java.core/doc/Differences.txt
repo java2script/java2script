@@ -71,6 +71,42 @@ that one can call in JavaScript
 and for all practical purposes it will appear that Java is running.
 
 
+Method Disambiguation
+---------------------
+
+SwingJS has no problem with the overloading of methods, for example:
+
+  public void print(int b);
+  public void print(float b);
+
+JavaScript does not allow overloading of methods, and the common practice in
+Java of naming a field the same as a method -- isAllowed and isAllowed() -- is
+not possible in JavaScript. As a result, SwingJS implements "fully-qualified" 
+method names using "$" parameter type separation. For example, in Java we see:
+
+public void equals(Object o) {...}
+
+Whereas in SwingJS we have:
+
+Clazz.newMeth(C$, 'equals$O', function (o) {...}
+
+And 
+
+ this.getContentPane().add(bar, "North");
+
+becomes
+
+ this.getContentPane$().add$java_awt_Component$O(bar, "North");
+
+
+Parameterless methods such as toString() are appended with "$" to become toString$().
+The one exception to this rule is private methods, which are saved in (truly) private 
+array in the class (and are not accessible by reflection). Private parameterless 
+methods retain their simple Java name, since they cannot conflict with field names.
+
+This renaming of methods has a few consequences, which are discussed more fully below.
+
+
 Applet vs. Application
 ----------------------
 
@@ -174,6 +210,7 @@ myclass.xxx in Java (and JavaScript).
 
 This was done extensively in the Jalview project. See jalview.bin.Instance.
 
+
 Helper Packages -- swingjs/ and javajs/
 ---------------------------------------
 
@@ -200,8 +237,6 @@ javajs.async.AsyncFileChooser
 
 See javajs.async.Async JavaDoc comments for a full description of 
 these useful classes.
-
-
 
 
 Modal Dialogs
@@ -297,6 +332,7 @@ a2s components, which in turn subclass JComponents. So no changes in code are ne
 successfully transpiled over 500 applets using this strategy. (Kind of surprising, actually, that
 the original Java developers did not see that option. But we have a hindsight advantage here.)
 
+
 Working with Files
 ==================
 
@@ -317,9 +353,13 @@ does not generate a pseudo-download to the user's machine.
 UNIMPLEMENTED CLASSES BY DESIGN
 ===============================
 
+The SwingJS implementation of the following classes are present 
+in a way that gracefully bypasses their functionality:
+
 accessibility
 security
 serialization
+
 
 
 TODO LIST FOR UNIMPLEMENTED CLASSES
@@ -341,7 +381,10 @@ Thread.currentThread() == dispatchThread
 MINOR ISSUES--requiring some rewriting/refactoring outside of SwingJS  
 =====================================================================
 
+See below for a full discussion.
 
+Names with "$" and "_"
+positive integers do not add to give negative numbers
 ArrayIndexOutOfBounds
 java.awt.Color
 native methods
@@ -362,7 +405,7 @@ MAJOR ISSUES--for Bob and Udo within SwingJS
 fonts
 OS-dependent classes
 AWT component peers
-
+some aspects of reflection
 
 MAJOR ISSUES--to be resolved by implementers
 ============================================
@@ -442,26 +485,24 @@ changed to JSToolkit.isDispatchThread()
 MINOR ISSUES--requiring some rewriting/refactoring outside of SwingJS  
 =====================================================================
 
-primitive numerical types
--------------------------
+positive integers do not add to give negative numbers
+-----------------------------------------------------
 
-Large integers will never roll over to negative ones. They will
-just get bigger.
+In Java, the following is true:
 
-						int newLength = lineBuf.length * 2;
-						/**
-						 * @j2sIgnore
-						 */
-						{
-							// never going to happen in JavaScript
-							if (newLength < 0) {
-								newLength = Integer.MAX_VALUE;
-							}
-						}
+  2000000000 + 2000000000 == -294967296
 
+But in SwingJS, that will be 4000000000. So, for example, the following
+strategy will fail in SwingJS:
 
-Because "-1" in JavaScript is not 0xFFFFFFFF one must take care to not compare a negative 
-number with a 32-bit mask. So
+		int newLength = lineBuf.length * 2;
+		if (newLength < 0) {
+			newLength = Integer.MAX_VALUE;
+		}
+
+"-1" in JavaScript is not 0xFFFFFFFF.
+
+And one must take care to not compare a negative number with a 32-bit mask. So
 
 (b & 0xFF000000) == 0xFF000000
 
@@ -476,6 +517,74 @@ The fix is that one must compare similar operations:
 
 if ((b & 0xFF000000) == (0xFF000000 & 0xFF000000)) .....
 
+Importantly, the JavaScript Int32Array does behave properly. From 
+the Firefox developer console:
+
+>> x = new Int32Array(1)
+<- Int32Array(1) [ 0 ]
+>> x[0] = 4000000000
+<- 4000000000
+>> x[0]
+<- -294967296
+
+Notice that, perhaps unexpectedly, the following two constructs produce 
+different results in JavaScript:
+
+x = new Int32Array(1);
+b = x[0] = 4000000000;
+
+(b will be 4000000000)
+
+and
+
+x = new Int32Array(1);
+x[0] = 4000000000;
+b = x[0];
+
+(b will be -294967296)
+
+
+SwingJS leverages array typing to handle all byte and short arithmetic so as
+to ensure that any byte or short operation in JavaScript does give the same 
+result in Java. The design decision to not also do this with integer math was
+a trade-off between performance and handling edge cases.
+
+
+Names with "$" and "_"
+----------------------
+
+For the most part, this should be no problem. 
+
+Note that the use of $ and _ in Java field names has always been discouraged:
+[https://docs.oracle.com/javase/tutorial/java/nutsandbolts/variables.html]
+
+	You may find some situations where auto-generated names will contain the dollar sign, 
+	but your variable names should always avoid using it. A similar convention 
+	exists for the underscore character; while it's technically legal to begin your 
+	variable's name with "_", this practice is discouraged.
+
+Some impacts of transpiling method names with full qualification:
+
+1) SwingJS will introduce fields that start with $ or _. These will not conflict
+   if the above convention is followed.
+   
+2) Fields that have the same Java name as a method are not an issue. 
+
+3) Fields that have a Java name with $ that matches a transpiled method name, 
+   such as toString$, will need to be refactored in Java to not have that name collision.
+   
+4) Fields in a subclass that have the same name as private fields in a superclass
+   represent a name collision, because the superclass method needs to call its private
+   field even if invoked from a subclass. The solution was to modify the subclass field
+   name using one or more prepended $.
+   
+5) Use of Class.getDeclaredMethods() reflection will return Method objects having the transpiled 
+   name, not the Java name. This could require some j2sNative adjustment 
+   to strip the $... parameters from the name if that is needed. 
+
+6) Use of Method.getParameterTypes() should work fine, provided class names
+   do not contain "_". This is because the transpiler converts "." to "_" when
+   creating the fully qualified JavaScript name.
 
 
 ArrayIndexOutOfBounds
@@ -1027,6 +1136,7 @@ The JS document model does not allow two text fields to address the same underly
 Formatter/Regex limitations
 ---------------------------
 
+Some browsers cannot process Regex "look-behind" process such as (?<=\W)
 java.util.regex.Matcher and Pattern use JavaScript's RegExp object rather than
 the native Java object. These are not identical. Only flags /igm are supported.
 Matcher.start(groupID) is not supported.
