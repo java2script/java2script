@@ -905,25 +905,21 @@ public final class ImageIO {
         private static Method writerFileSuffixesMethod;
         private static Method writerMIMETypesMethod;
 
-        static {
-            try {
-                readerFormatNamesMethod =
-                    ImageReaderSpi.class.getMethod("getFormatNames");
-                readerFileSuffixesMethod =
-                    ImageReaderSpi.class.getMethod("getFileSuffixes");
-                readerMIMETypesMethod =
-                    ImageReaderSpi.class.getMethod("getMIMETypes");
+	static {
+		try {
+			if (useSPI) {
+				readerFormatNamesMethod = ImageReaderSpi.class.getMethod("getFormatNames");
+				readerFileSuffixesMethod = ImageReaderSpi.class.getMethod("getFileSuffixes");
+				readerMIMETypesMethod = ImageReaderSpi.class.getMethod("getMIMETypes");
 
-                writerFormatNamesMethod =
-                    ImageWriterSpi.class.getMethod("getFormatNames");
-                writerFileSuffixesMethod =
-                    ImageWriterSpi.class.getMethod("getFileSuffixes");
-                writerMIMETypesMethod =
-                    ImageWriterSpi.class.getMethod("getMIMETypes");
-            } catch (NoSuchMethodException e) {
-                e.printStackTrace();
-            }
-        }
+				writerFormatNamesMethod = ImageWriterSpi.class.getMethod("getFormatNames");
+				writerFileSuffixesMethod = ImageWriterSpi.class.getMethod("getFileSuffixes");
+				writerMIMETypesMethod = ImageWriterSpi.class.getMethod("getMIMETypes");
+			}
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+		}
+	}
 
         /**
          * Returns an <code>Iterator</code> containing all currently

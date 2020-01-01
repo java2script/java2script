@@ -51,8 +51,6 @@ import javax.imageio.spi.ImageWriterSpi;
 import javax.imageio.stream.ImageOutputStream;
 import javax.imageio.stream.ImageOutputStreamImpl;
 
-import swingjs.jzlib.JZlib;
-
 class CRC {
 
     private static int[] crcTable = new int[256];
@@ -110,20 +108,24 @@ final class ChunkStream extends ImageOutputStreamImpl {
         writeInt(type);
     }
 
-    public int read() throws IOException {
+    @Override
+	public int read() throws IOException {
         throw new RuntimeException("Method not available");
     }
 
-    public int read(byte[] b, int off, int len) throws IOException {
+    @Override
+	public int read(byte[] b, int off, int len) throws IOException {
         throw new RuntimeException("Method not available");
     }
 
-    public void write(byte[] b, int off, int len) throws IOException {
+    @Override
+	public void write(byte[] b, int off, int len) throws IOException {
         crc.update(b, off, len);
         stream.write(b, off, len);
     }
 
-    public void write(int b) throws IOException {
+    @Override
+	public void write(int b) throws IOException {
         crc.update(b);
         stream.write(b);
     }
@@ -142,7 +144,8 @@ final class ChunkStream extends ImageOutputStreamImpl {
         stream.flushBefore(pos);
     }
 
-    protected void finalize() throws Throwable {
+    @Override
+	protected void finalize() throws Throwable {
         // Empty finalizer (for improved performance; no need to call
         // super.finalize() in this case)
     }
@@ -198,29 +201,27 @@ final class IDATOutputStream extends ImageOutputStreamImpl {
         stream.flushBefore(pos);
     }
 
-    public int read() throws IOException {
+    @Override
+	public int read() throws IOException {
         throw new RuntimeException("Method not available");
     }
 
-    public int read(byte[] b, int off, int len) throws IOException {
+    @Override
+	public int read(byte[] b, int off, int len) throws IOException {
         throw new RuntimeException("Method not available");
     }
 
-    public void write(byte[] b, int off, int len) throws IOException {
+    @Override
+	public void write(byte[] b, int off, int len) throws IOException {
         if (len == 0) {
             return;
         }
 
         if (!def.finished()) {
-            def.setInput(b, off, len, true);
-    		while (def.avail_in > 0) {
-    			int err = deflate();
-    			if (err == JZlib.Z_STREAM_END)
-    				break;
-    		}
-//            while (!def.needsInput()) {
-//                deflate();
-//            }
+            def.setInput(b, off, len);
+            while (!def.needsInput()) {
+                deflate();
+            }
         }
     }
 
@@ -244,7 +245,8 @@ final class IDATOutputStream extends ImageOutputStreamImpl {
         }
     }
 
-    public void write(int b) throws IOException {
+    @Override
+	public void write(int b) throws IOException {
         byte[] wbuf = new byte[1];
         wbuf[0] = (byte)b;
         write(wbuf, 0, 1);
@@ -264,7 +266,8 @@ final class IDATOutputStream extends ImageOutputStreamImpl {
         }
     }
 
-    protected void finalize() throws Throwable {
+    @Override
+	protected void finalize() throws Throwable {
         // Empty finalizer (for improved performance; no need to call
         // super.finalize() in this case)
     }
@@ -331,7 +334,8 @@ public class PNGImageWriter extends ImageWriter {
         super(originatingProvider);
     }
 
-    public void setOutput(Object output) {
+    @Override
+	public void setOutput(Object output) {
         super.setOutput(output);
         if (output != null) {
             if (!(output instanceof ImageOutputStream)) {
@@ -345,27 +349,32 @@ public class PNGImageWriter extends ImageWriter {
 
     private static int[] allowedProgressivePasses = { 1, 7 };
 
-    public ImageWriteParam getDefaultWriteParam() {
+    @Override
+	public ImageWriteParam getDefaultWriteParam() {
         return new PNGImageWriteParam(getLocale());
     }
 
-    public IIOMetadata getDefaultStreamMetadata(ImageWriteParam param) {
+    @Override
+	public IIOMetadata getDefaultStreamMetadata(ImageWriteParam param) {
         return null;
     }
 
-    public IIOMetadata getDefaultImageMetadata(ImageTypeSpecifier imageType,
+    @Override
+	public IIOMetadata getDefaultImageMetadata(ImageTypeSpecifier imageType,
                                                ImageWriteParam param) {
         PNGMetadata m = new PNGMetadata();
         m.initialize(imageType, imageType.getSampleModel().getNumBands());
         return m;
     }
 
-    public IIOMetadata convertStreamMetadata(IIOMetadata inData,
+    @Override
+	public IIOMetadata convertStreamMetadata(IIOMetadata inData,
                                              ImageWriteParam param) {
         return null;
     }
 
-    public IIOMetadata convertImageMetadata(IIOMetadata inData,
+    @Override
+	public IIOMetadata convertImageMetadata(IIOMetadata inData,
                                             ImageTypeSpecifier imageType,
                                             ImageWriteParam param) {
         // TODO - deal with imageType
@@ -1025,7 +1034,8 @@ public class PNGImageWriter extends ImageWriter {
         }
     }
 
-    public void write(IIOMetadata streamMetadata,
+    @Override
+	public void write(IIOMetadata streamMetadata,
                       IIOImage image,
                       ImageWriteParam param) throws IIOException {
         if (stream == null) {
