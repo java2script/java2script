@@ -13864,6 +13864,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2019.12.29 3.2.6 fixes Float.parseFloat$S("NaN") [and Double]
 // BH 2019.12.23 3.2.6 update of System
 // BH 2019.12.19 3.2.6 revision of $clinit$
 // BH 2019.12.16 3.2.5.v4 adds ClassLoader static methods for system resources (just j2s/...)
@@ -13923,7 +13924,7 @@ Clazz.ClassFilesLoaded = [];
 Clazz.popup = Clazz.log = Clazz.error = window.alert;
 
 /* can be set by page JavaScript */
-Clazz.defaultAssertionStatus = true;
+Clazz.defaultAssertionStatus = false;
 
 /* can be set by page JavaScript */
 Clazz._assertFunction = null;
@@ -17316,6 +17317,8 @@ if (typeof arguments[0] != "object")this.c$(arguments[0]);
 var primTypes = {};
 
 var FALSE = function() { return false };
+var EMPTY_CLASSES = function() {return Clazz.array(Class, [0])};
+var NULL_FUNC = function() {return null};
 
 var setJ2STypeclass = function(cl, type, paramCode) {
 // TODO -- should be a proper Java.lang.Class
@@ -17330,6 +17333,8 @@ var setJ2STypeclass = function(cl, type, paramCode) {
   cl.TYPE.toString = cl.TYPE.getName$ = cl.TYPE.getTypeName$ 
     = cl.TYPE.getCanonicalName$ = cl.TYPE.getSimpleName$ = function() {return type};
   cl.TYPE.isAssignableFrom$Class = (function(t) {return function(c) {return c == t}})(cl.TYPE);
+  cl.TYPE.getSuperclass$ = NULL_FUNC;
+  cl.TYPE.getInterfaces$ = EMPTY_CLASSES;
 }
 
 var decorateAsNumber = function (clazz, qClazzName, type, PARAMCODE) {
@@ -17763,6 +17768,8 @@ if(s==null){
 throw Clazz.new_(NumberFormatException.c$$S, ["null"]);
 }
 if (typeof s == "number")return s;  // important -- typeof NaN is "number" and is OK here
+if (s == "NaN")
+	return NaN;
 var floatVal=Number(s);
 if(isNaN(floatVal)){
 throw Clazz.new_(NumberFormatException.c$$S, ["Not a Number : "+s]);
@@ -17835,6 +17842,8 @@ if(s==null){
   throw Clazz.new_(NumberFormatException.c$$S, ["null"]);
 }
 if (typeof s == "number")return s;  // important -- typeof NaN is "number" and is OK here
+if (s == "NaN")
+	return NaN;
 var doubleVal=Number(s);
 if(isNaN(doubleVal)){
 throw Clazz.new_(NumberFormatException.c$$S, ["Not a Number : "+s]);
