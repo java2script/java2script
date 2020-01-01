@@ -12,6 +12,13 @@ import java.util.Hashtable;
 @SuppressWarnings("rawtypes")
 class Test_Class extends Test_Class2 {
 
+	Test_Class(byte[]...d) {
+		super(d);
+		System.out.println("Test_Class len = " + d.length);
+	}
+	
+
+	
 	int x = 2000000000 + 2000000000;
 	
 	static int istatic = 5;
@@ -229,14 +236,38 @@ class Test_Class extends Test_Class2 {
 
 	static class C extends Test_Class {
 
+		C() {
+			super();
+		}
+		
+		C(byte[]...d) {
+			super(d);
+			System.out.println("C len = " + d.length);
+		}
+		
 	}
 
 	Class C() {
 		return C.class;
 	}
+	
+	
+	
 
 	public static void main(String[] args) {
 
+		
+		new C(new byte[0], new byte[100], new byte[1000]);
+		
+		new C(new byte[3][5]);
+
+		try {
+		new C((byte[][])null);
+		} catch (Throwable t) {
+			System.out.println("Right!");
+		}
+		
+		
 		Class<?> type = Object.class;
 	    assert(type instanceof Class<?>);
 
