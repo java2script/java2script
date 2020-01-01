@@ -28,10 +28,6 @@ import swingjs.json.JSON;
 
 public class JSUtil {
 
-	public JSUtil() {
-		System.out.println("swingjs.JSUtil initialized");
-	}
-
 	static {
 		boolean j2sdebug = false;
 		J2SInterface j2sself = null;
@@ -46,6 +42,7 @@ public class JSUtil {
 		}
 		debugging = j2sdebug;
 		J2S = j2sself;
+		System.out.println("swingjs.JSUtil initialized;debug=" + j2sdebug);
 	}
 
 	/**
@@ -67,12 +64,17 @@ public class JSUtil {
 
 	public static Object getCachedFileData(String path) {
 		return (useCache && fileCache != null ?
-					fileCache.get(path) : null);
+					fileCache.get(fixCachePath(path)) : null);
 	}
 
+	/**
+	 * Set the cache to Boolean.FALSE to indicate that we have checked this
+	 * @param path
+	 * @return
+	 */
 	public static Object removeCachedFileData(String path) {
 		return (useCache && fileCache != null ?
-					fileCache.remove(path) : null);
+					fileCache.put(fixCachePath(path), Boolean.FALSE) : null);
 	}
 
 
@@ -80,10 +82,11 @@ public class JSUtil {
 	 * This could be a simple String, a javajs.util.SB, or unsigned or signed bytes
 	 * depending upon the browser and the file type.
 	 * 
-	 * It will not be cached, but it might come from a cache;
+	 * It will not be cached, but it might come from a cache; 
 	 * 
-	 * @param uriOrJSFile
-	 * @return
+	 * @param uriOrJSFile File or URL or URI or String
+	 * 
+	 * @return may be byte[], String, or javajs.util.SB if found; Boolean FALSE if not found
 	 */
 	@SuppressWarnings("unused")
 	private static Object getFileContents(Object uriOrJSFile, boolean asBytes) {
@@ -103,9 +106,11 @@ public class JSUtil {
 			if (!uri.startsWith("/"))
 				uri = "/" + uri;
 			uri = "http://." + uri;
+			// Note that SwingJS will convert this to https if necessary.
 		}
-		if (data == null)
+		if (data == null) {
 			data = getCachedFileData(uri);
+		}
 		if (data == null && !uri.startsWith("./")) {
 			// Java applications may use "./" here
 			try {
@@ -114,9 +119,31 @@ public class JSUtil {
 			} catch (Exception e) {
 				// bypasses AjaxURLConnection
 				data = J2S.getFileData(uri, null, false, asBytes);
+				if (data == null)
+					removeCachedFileData(uri);
 			}
 		}
 		return data;
+	}
+
+	private static String fixCachePath(String uri) {
+		int pt;
+		if (uri.startsWith("./"))
+			uri = "/" + uri;
+		if (uri.startsWith("https:/"))
+			uri = uri.substring(7);
+		if (uri.startsWith("http:/"))
+			uri = uri.substring(6);
+		uri = uri.replace("//", "/");
+		while ((pt = uri.indexOf("/././")) >= 0) {
+			// https://././xxx --> /./xxx
+			uri = uri.substring(0, pt) + uri.substring(pt + 2);
+		}
+		if (uri.startsWith("/"))
+			uri = uri.substring(1);
+		if (uri.startsWith("./"))
+			uri = uri.substring(2);
+		return uri;
 	}
 
 	/**
@@ -128,11 +155,37 @@ public class JSUtil {
 	 */
 	public static String getFileAsString(String filename) {
 		Object data = getFileContents(filename, false);
-		return  ensureString(data);
+		return ensureString(data);
 	}
 
+	/**
+	 * Transform byte[], SB, or InputStream data to String
+	 * @param data
+	 * @return String data or null
+	 */
+	static String ensureString(Object data) {
+		if (data == null)
+			return null;
+		if (data instanceof byte[])
+			return Rdr.bytesToUTF8String((byte[]) data);
+		if (data instanceof String || data instanceof SB)
+			return data.toString();
+		if (data instanceof InputStream)
+			return Rdr.streamToUTF8String(new BufferedInputStream((InputStream) data));
+		return null;
+	}
+
+	/**
+	 * Ensure byte[] or null
+	 * 
+	 * @param file
+	 * @param checkNotFound
+	 * @return
+	 */
 	public static byte[] getFileAsBytes(Object file, boolean checkNotFound) {
 		byte[] data = getFileAsBytes(file);
+		if (data == null)
+			return null;
 		if (checkNotFound) {
 			if (data.length == 0) 
 				return null;
@@ -151,14 +204,18 @@ public class JSUtil {
 	}
 
 	/**
+	 * Standard call for getting file contents. 
+	 * 
 	 * Regardless of how returned by Jmol.getFileContents(), 
 	 * this method ensures that we get signed bytes.
 	 * 
 	 * @param filename
-	 * @return
+	 * @return byte[] or null
 	 */
 	public static byte[] getFileAsBytes(Object file) {
 		Object data = getFileContents(file, true);
+		if (data == null || data == Boolean.FALSE)
+			return null;
 		byte[] b = null;
 		if (data instanceof byte[])
 			b = (byte[]) data;
@@ -186,28 +243,34 @@ public class JSUtil {
 	 * 
 	 * @param resourceName
 	 * @param isJavaPath
-	 * @param doProcess
-	 *          evaluate JS or load CSS
+	 * @param doProcess    evaluate JS or load CSS
 	 * @return the resource as a string
 	 */
-	public static String getJavaResource(String resourceName, boolean isJavaPath,
-			boolean doCache, boolean doProcess) {
+	public static String getJavaResource(String resourceName, boolean isJavaPath, boolean doCache, boolean doProcess) {
 		System.out.println("JSUtil getting Java resource " + resourceName);
 		String path = J2S.getResourcePath(resourceName, isJavaPath);
 		if (path == null)
 			return null;
 		Object data = getCachedFileData(path);
-		if (data == null
-				&& (data = J2S.getFileData(path, null, false, false)) != null
-				&& useCache && doCache)
-			cacheFileData(path, data);
+		if (data == Boolean.FALSE)
+			return null;
+		if (data == null) {
+			data = J2S.getFileData(path, null, false, false);
+			if (data == null) {
+				if (useCache && doCache) {
+					removeCachedFileData(path);
+				}
+			} else if (useCache && doCache) {
+				cacheFileData(path, data);
+			}
+		}
 		String sdata = ensureString(data);
 		boolean ok = (sdata != null && sdata.indexOf("[Exception") != 0);
-		System.out.println("Processing " + path + " ["
-				+ (ok ? "" + sdata.length() : sdata) + "]");
-		return (!ok ? null : !doProcess ? sdata
-				: path.endsWith(".css") ? processCSS(sdata, path) : path
-						.endsWith(".js") ? processJS(sdata, resourceName) : sdata);
+		System.out.println("Processing " + path + " [" + (ok ? "" + sdata.length() : sdata) + "]");
+		return (!ok ? null
+				: !doProcess ? sdata
+						: path.endsWith(".css") ? processCSS(sdata, path)
+								: path.endsWith(".js") ? processJS(sdata, resourceName) : sdata);
 	}
 	
 	public static InputStream getCachedResourceAsStream(String name) {
@@ -241,8 +304,10 @@ public class JSUtil {
 			if (data instanceof byte[])
 				count = ""+ ((byte[]) data).length;
 			else if (data instanceof String)
-				count = "" + ((String) data).length();				
-			System.out.println("JSUtil caching " + count + " bytes for " + path);
+				count = "" + ((String) data).length();
+			path = fixCachePath(path);
+			if (!getFileCache().containsKey(path))
+				System.out.println("JSUtil caching " + count + " bytes for " + path);
 			getFileCache().put(path, data);
 		}
 	}
@@ -322,18 +387,6 @@ public class JSUtil {
 	  return null;
 	}
 	return js;
-	}
-
-	static String ensureString(Object data) {
-		if (data == null)
-			return null;
-		if (data instanceof byte[])
-			return Rdr.bytesToUTF8String((byte[]) data);
-		if (data instanceof String || data instanceof SB)
-			return data.toString();
-		if (data instanceof InputStream)
-			return Rdr.streamToUTF8String(new BufferedInputStream((InputStream) data));
-		return null;
 	}
 
 	/**
