@@ -2756,9 +2756,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 		buffer.append(getFinalMethodNameWith$Params(";C$.superclazz.c$", null, node.resolveConstructorBinding(), null,
 				false, null, METHOD_NOTSPECIAL));
-		buffer.append(".apply(this");
-		addMethodParameterList(node.arguments(), methodDeclaration, ", [", "]", METHOD_CONSTRUCTOR);
-		buffer.append(")");
+		buffer.append(".apply(this,[");
+		addMethodParameterList(node.arguments(), methodDeclaration, null, null, METHOD_CONSTRUCTOR);
+		buffer.append("])");
 		addCallInit();
 	}
 
@@ -4225,11 +4225,35 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			String op = (isIndexOf && i == 0 ? "q" : "p");
 			if (i == nparam - 1) {
 				// BH: can't just check for an array; it has to be an array with
-				// the right number of dimensions
-				if (nparam != argCount || methodIsVarArgs && paramType.isArray()
-						&& arg.resolveTypeBinding().getDimensions() != paramType.getDimensions()
-						&& !(arg instanceof NullLiteral)) {
+				// the right component type
+				// NOTE: This is still not quite right. 
+				// It will not pass a true primitive numeric array type -- 
+				// int[]... value will be [1,2,3], not Int32Array(1,2,3)
+				// Also, for a generic, we could have a problem if there is only one 
+				// argument, and it is an array.
+				
+				ITypeBinding atype = null;
+				if (nparam != argCount // clearly need [ ]
+						||methodIsVarArgs // only one argument - might need [ ]
+						&& !(arg instanceof NullLiteral) // unless it's null
+						&& (!(atype = arg.resolveTypeBinding()).isArray() // otherwise if it is not an array
+							|| !atype.getComponentType().isAssignmentCompatible(paramType.getComponentType().getErasure())
+							)
+						// or it is not compatible
+						) {
 					buffer.append("[");
+//					
+//					
+//					bufferDebug(paramType.getComponentType().getName() + " " 
+//					+ (atype != null && atype.isArray() ? atype.getComponentType().getName() : null)
+//					+ " " + (atype != null && atype.isArray() ? atype.getComponentType().isAssignmentCompatible(paramType.getComponentType()) : null)
+//					+ " " + (atype != null && atype.isArray() ? paramType.getComponentType().isAssignmentCompatible(atype.getComponentType()) : null)
+//					+ " " + paramType.getComponentType().getErasure().getName()
+//					+ " " + paramType.getComponentType().getName()
+//					+ " " + (atype != null && atype.isArray() ? atype.getComponentType().isAssignmentCompatible(paramType.getComponentType().getErasure()) : null)
+//							);
+					
+					
 					for (int j = i; j < argCount; j++) {
 						addExpressionAsTargetType((Expression) arguments.get(j), paramType, op, null);
 						if (j != argCount - 1) {
@@ -5391,8 +5415,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				String genericType = genericTypes[i];
 				if (genericType != null) {
 					boolean isAlias = (genericType.indexOf("|") < 0);
-					if (isAlias)
-						bufferDebug(genericType + " " + i + " " + nParams);
+//					if (isAlias)
+//						bufferDebug(genericType + " " + i + " " + nParams);
 					if (isAlias ? genericType.length() > 0 && !genericType.equals("*")
 							: genericType.indexOf("|null") < 0) {
 						if (!isAlias && genericType.indexOf("|" + getJavaClassNameQualified(paramTypes[i]) + ";") < 0)
