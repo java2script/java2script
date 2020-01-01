@@ -538,7 +538,8 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 throw new IllegalArgumentException("This image types do not have "+
 	 "premultiplied alpha.");
 	 }
-	
+	 this.width = width;
+	 this.height = height;
 	 switch(imageType) {
 	 case TYPE_BYTE_BINARY:
 	 int bits; // Will be set below
@@ -635,6 +636,8 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 
 		colorModel = cm;
 		this.raster = raster;
+		this.width = raster.getWidth();
+		this.height = raster.getHeight();
 		raster.setImage(this);
 		秘pix = ((DataBufferInt) raster.getDataBuffer()).data;
 		this.properties = properties;
