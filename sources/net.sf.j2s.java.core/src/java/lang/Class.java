@@ -1374,9 +1374,12 @@ public final class Class<T> {
 			return getComponentType().getSimpleName() + "[]";
 		String name = "";
 		/**
+		 * .name is for String, Integer, etc.
+		 * 
 		 * @j2sNative 
 		 * 
 		 * name = (this.$clazz$.__ANON ? "" : this.$clazz$.__CLASS_NAME__);
+		 * name || (name = this.$clazz$.name);
 		 */
 		{
 		}
