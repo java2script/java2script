@@ -1492,20 +1492,20 @@ public final class Deflate /*implements Cloneable*/{
     return err;
   }
 
-  int deflateSetDictionary(byte[] dictionary, int dictLength) {
-    int length = dictLength;
-    int index = 0;
+  int deflateSetDictionary(byte[] dictionary, int off, int len) {
+    int length = len;
+    int index = off;
 
     if (dictionary == null || status != INIT_STATE)
       return Z_STREAM_ERROR;
 
-    strm.checksum.update(dictionary, 0, dictLength);
+    strm.checksum.update(dictionary, off, len);
 
     if (length < MIN_MATCH)
       return Z_OK;
     if (length > w_size - MIN_LOOKAHEAD) {
       length = w_size - MIN_LOOKAHEAD;
-      index = dictLength - length; // use the tail of the dictionary
+      index = len - length; // use the tail of the dictionary
     }
     System.arraycopy(dictionary, index, window, 0, length);
     strstart = length;
@@ -1534,7 +1534,7 @@ public final class Deflate /*implements Cloneable*/{
       return Z_STREAM_ERROR;
     }
 
-    if (strm.next_out == null || (strm.next_in == null && strm.avail_in != 0)
+    if (strm.next_out == null || (strm.in == null && strm.avail_in != 0)
         || (status == FINISH_STATE && flush != Z_FINISH)) {
       strm.msg = z_errmsg[Z_NEED_DICT - (Z_STREAM_ERROR)];
       return Z_STREAM_ERROR;
@@ -1794,4 +1794,5 @@ public final class Deflate /*implements Cloneable*/{
   public long getBytesWritten() {
     return strm.total_out;
   }
+
 }

@@ -41,9 +41,9 @@ import java.io.UnsupportedEncodingException;
  * 
  * ZStream
  *
- * deprecated?  Not for public use in the future.
+ * deprecated? Not for public use in the future.
  */
-abstract public class ZStream{
+abstract public class ZStream {
 
 //  static final private int MAX_WBITS=15;        // 32K LZ77 window
 //  static final private int DEF_WBITS=MAX_WBITS;
@@ -60,141 +60,127 @@ abstract public class ZStream{
 //  static final private int Z_STREAM_END=1;
 //  static final private int Z_NEED_DICT=2;
 //  static final private int Z_ERRNO=-1;
-  static final private int Z_STREAM_ERROR=-2;
+	static final private int Z_STREAM_ERROR = -2;
 //  static final private int Z_DATA_ERROR=-3;
 //  static final private int Z_MEM_ERROR=-4;
 //  static final private int Z_BUF_ERROR=-5;
 //  static final private int Z_VERSION_ERROR=-6;
 
-  byte[] next_in;     // next input byte
-  int next_in_index;
-  public int avail_in;       // number of bytes available at next_in
-  protected long total_in;      // total nb of input bytes read so far
+	byte[] in; // next input byte
+	int in_index;
+	int avail_in; // number of bytes available at next_in
+	protected long total_in; // total nb of input bytes read so far
 
-  byte[] next_out;    // next output byte should be put there
-  int next_out_index;
-  int avail_out;      // remaining free space at next_out
-  protected long total_out;     // total nb of bytes output so far
+	byte[] next_out; // next output byte should be put there
+	int next_out_index;
+	int avail_out; // remaining free space at next_out
+	long total_out; // total nb of bytes output so far
 
-  String msg;
+	String msg;
 
-  Deflate dstate; 
-  Inflate istate; 
+	Deflate dstate;
+	Inflate istate;
 
-  int data_type; // best guess about the data type: ascii or binary
+	int data_type; // best guess about the data type: ascii or binary
 
-  Checksum checksum;
-  
-  void setAdler32() {
-    this.checksum=new Adler32();
-  }
+	Checksum checksum;
 
-  /*
-  public int inflateInit(){
-    return inflateInit(DEF_WBITS);
-  }
-  public int inflateInit(boolean nowrap){
-    return inflateInit(DEF_WBITS, nowrap);
-  }
-  public int inflateInit(int w){
-    return inflateInit(w, false);
-  }
+	void setAdler32() {
+		this.checksum = new Adler32();
+	}
 
-  public int inflateInit(int w, boolean nowrap){
-    istate=new Inflate(this);
-    return istate.inflateInit(nowrap?-w:w);
-  }
+	/*
+	 * public int inflateInit(){ return inflateInit(DEF_WBITS); } public int
+	 * inflateInit(boolean nowrap){ return inflateInit(DEF_WBITS, nowrap); } public
+	 * int inflateInit(int w){ return inflateInit(w, false); }
+	 * 
+	 * public int inflateInit(int w, boolean nowrap){ istate=new Inflate(this);
+	 * return istate.inflateInit(nowrap?-w:w); }
+	 * 
+	 * public int inflateEnd(){ if(istate==null) return Z_STREAM_ERROR; int
+	 * ret=istate.inflateEnd(); // istate = null; return ret; }
+	 * 
+	 */
 
-  public int inflateEnd(){
-    if(istate==null) return Z_STREAM_ERROR;
-    int ret=istate.inflateEnd();
-//    istate = null;
-    return ret;
-  }
+	int inflate(int f) {
+		if (istate == null)
+			return Z_STREAM_ERROR;
+		return istate.inflate(f);
+	}
 
-  */
-  
-  
-  int inflate(int f){
-    if(istate==null) return Z_STREAM_ERROR;
-    return istate.inflate(f);
-  }
-  
+//  public int inflateSync(){
+//    if(istate == null)
+//      return Z_STREAM_ERROR;
+//    return istate.inflateSync();
+//  }
+//  public int inflateSyncPoint(){
+//    if(istate == null)
+//      return Z_STREAM_ERROR;
+//    return istate.inflateSyncPoint();
+//  }
+//  public int inflateSetDictionary(byte[] dictionary, int dictLength){
+//    if(istate == null)
+//      return Z_STREAM_ERROR;
+//    return istate.inflateSetDictionary(dictionary, dictLength);
+//  }
+//  public boolean inflateFinished(){
+//    return istate.mode==12; //DONE
+//  }
+//
+//  public int deflateInit(int level){
+//    return deflateInit(level, MAX_WBITS);
+//  }
+//  public int deflateInit(int level, boolean nowrap){
+//    return deflateInit(level, MAX_WBITS, nowrap);
+//  }
+//  public int deflateInit(int level, int bits){
+//    return deflateInit(level, bits, false);
+//  }
+//  public int deflateInit(int level, int bits, int memlevel){
+//    dstate=new Deflate(this);
+//    return dstate.deflateInit3(level, bits, memlevel);
+//  }
+//  public int deflateInit(int level, int bits, boolean nowrap){
+//    dstate=new Deflate(this);
+//    return dstate.deflateInit2(level, nowrap?-bits:bits);
+//  }
+//
+//  public int deflateEnd(){
+//    if(dstate==null) return Z_STREAM_ERROR;
+//    int ret=dstate.deflateEnd();
+//    dstate=null;
+//    return ret;
+//  }
+//
+//  public int deflateParams(int level, int strategy){
+//    if(dstate==null) return Z_STREAM_ERROR;
+//    return dstate.deflateParams(level, strategy);
+//  }
+//
+	public int deflateSetDictionary(byte[] dictionary, int off, int len) {
+		if (dstate == null)
+			return Z_STREAM_ERROR;
+		return dstate.deflateSetDictionary(dictionary, off, len);
+	}
 
-  /*
+	int deflate(int flush) {
+		if (dstate == null) {
+			return Z_STREAM_ERROR;
+		}
+		return dstate.deflate(flush);
+	}
 
-  public int inflateSync(){
-    if(istate == null)
-      return Z_STREAM_ERROR;
-    return istate.inflateSync();
-  }
-  public int inflateSyncPoint(){
-    if(istate == null)
-      return Z_STREAM_ERROR;
-    return istate.inflateSyncPoint();
-  }
-  public int inflateSetDictionary(byte[] dictionary, int dictLength){
-    if(istate == null)
-      return Z_STREAM_ERROR;
-    return istate.inflateSetDictionary(dictionary, dictLength);
-  }
-  public boolean inflateFinished(){
-    return istate.mode==12; //DONE
-  }
+	// Flush as much pending output as possible. All deflate() output goes
+	// through this function so some applications may wish to modify it
+	// to avoid allocating a large strm->next_out buffer and copying into it.
+	// (See also read_buf()).
+	void flush_pending() {
+		int len = dstate.pending;
 
-  public int deflateInit(int level){
-    return deflateInit(level, MAX_WBITS);
-  }
-  public int deflateInit(int level, boolean nowrap){
-    return deflateInit(level, MAX_WBITS, nowrap);
-  }
-  public int deflateInit(int level, int bits){
-    return deflateInit(level, bits, false);
-  }
-  public int deflateInit(int level, int bits, int memlevel){
-    dstate=new Deflate(this);
-    return dstate.deflateInit3(level, bits, memlevel);
-  }
-  public int deflateInit(int level, int bits, boolean nowrap){
-    dstate=new Deflate(this);
-    return dstate.deflateInit2(level, nowrap?-bits:bits);
-  }
-
-  public int deflateEnd(){
-    if(dstate==null) return Z_STREAM_ERROR;
-    int ret=dstate.deflateEnd();
-    dstate=null;
-    return ret;
-  }
-
-  public int deflateParams(int level, int strategy){
-    if(dstate==null) return Z_STREAM_ERROR;
-    return dstate.deflateParams(level, strategy);
-  }
-
-  public int deflateSetDictionary (byte[] dictionary, int dictLength){
-    if(dstate == null)
-      return Z_STREAM_ERROR;
-    return dstate.deflateSetDictionary(dictionary, dictLength);
-  }
-
-  */
-  int deflate(int flush){
-    if(dstate==null){
-      return Z_STREAM_ERROR;
-    }
-    return dstate.deflate(flush);
-  }
-  
-  // Flush as much pending output as possible. All deflate() output goes
-  // through this function so some applications may wish to modify it
-  // to avoid allocating a large strm->next_out buffer and copying into it.
-  // (See also read_buf()).
-  void flush_pending(){
-    int len=dstate.pending;
-
-    if(len>avail_out) len=avail_out;
-    if(len==0) return;
+		if (len > avail_out)
+			len = avail_out;
+		if (len == 0)
+			return;
 
 //    if(dstate.pending_buf.length<=dstate.pending_out ||
 //       next_out.length<=next_out_index ||
@@ -205,156 +191,138 @@ abstract public class ZStream{
 //      System.out.println("avail_out="+avail_out);
 //    }
 
-    System.arraycopy(dstate.pending_buf, dstate.pending_out,
-		     next_out, next_out_index, len);
+		System.arraycopy(dstate.pending_buf, dstate.pending_out, next_out, next_out_index, len);
 
-    next_out_index+=len;
-    dstate.pending_out+=len;
-    total_out+=len;
-    avail_out-=len;
-    dstate.pending-=len;
-    if(dstate.pending==0){
-      dstate.pending_out=0;
-    }
-  }
+		next_out_index += len;
+		dstate.pending_out += len;
+		total_out += len;
+		avail_out -= len;
+		dstate.pending -= len;
+		if (dstate.pending == 0) {
+			dstate.pending_out = 0;
+		}
+	}
 
-  // Read a new buffer from the current input stream, update the adler32
-  // and total number of bytes read.  All deflate() input goes through
-  // this function so some applications may wish to modify it to avoid
-  // allocating a large strm->next_in buffer and copying from it.
-  // (See also flush_pending()).
-  public int read_buf(byte[] buf, int start, int size) {
-    int len=avail_in;
+	// Read a new buffer from the current input stream, update the adler32
+	// and total number of bytes read. All deflate() input goes through
+	// this function so some applications may wish to modify it to avoid
+	// allocating a large strm->next_in buffer and copying from it.
+	// (See also flush_pending()).
+	public int read_buf(byte[] out, int start, int size) {
+		int len = avail_in;
 
-    if(len>size) len=size;
-    if(len==0) return 0;
+		if (len > size)
+			len = size;
+		if (len == 0)
+			return 0;
 
-    avail_in-=len;
+		avail_in -= len;
 
-    if(dstate.wrap!=0) {
-      checksum.update(next_in, next_in_index, len);
-    }
-    System.arraycopy(next_in, next_in_index, buf, start, len);
-    next_in_index  += len;
-    total_in += len;
-    return len;
-  }
+		if (dstate.wrap != 0) {
+			checksum.update(in, in_index, len);
+		}
+		System.arraycopy(in, in_index, out, start, len);
+		in_index += len;
+		total_in += len;
+		return len;
+	}
 
-  long getAdler(){
-    return checksum.getValue();
-  }
+	public long getAdlerL() {
+		return checksum.getValue();
+	}
 
-  void free(){
-    next_in=null;
-    next_out=null;
-    msg=null;
-  }
+	void free() {
+		in = null;
+		next_out = null;
+		msg = null;
+	}
 
-  void setOutput(byte[] buf, int off, int len){
-    next_out = buf;
-    next_out_index = off;
-    avail_out = len;
-  }
+	void setOutput(byte[] buf, int off, int len) {
+		next_out = buf;
+		next_out_index = off;
+		avail_out = len;
+	}
 
-  public void setInput(byte[] buf, int off, int len, boolean append){
-    if(len<=0 && append && next_in!=null) return;
-    if(avail_in>0 && append){  
-      byte[] tmp = new byte[avail_in+len];
-      System.arraycopy(next_in, next_in_index, tmp, 0, avail_in);
-      System.arraycopy(buf, off, tmp, avail_in, len);
-      next_in=tmp;
-      next_in_index=0;
-      avail_in+=len;
-    }
-    else{
-      next_in=buf;
-      next_in_index=off;
-      avail_in=len;
-    }
-  }
+	public void setInput(byte[] in, int off, int len, boolean append) {
+		if (len <= 0 && append && this.in != null)
+			return;
+		if (avail_in > 0 && append) {
+			byte[] tmp = new byte[avail_in + len];
+			System.arraycopy(this.in, in_index, tmp, 0, avail_in);
+			System.arraycopy(in, off, tmp, avail_in, len);
+			this.in = tmp;
+			in_index = 0;
+			avail_in += len;
+		} else {
+			this.in = in;
+			in_index = off;
+			avail_in = len;
+		}
+	}
 
-  /*
-  public byte[] getNextIn(){
-    return next_in;
-  }
+	/*
+	 * public byte[] getNextIn(){ return next_in; }
+	 * 
+	 * public void setNextIn(byte[] next_in){ this.next_in = next_in; }
+	 * 
+	 * public int getNextInIndex(){ return next_in_index; }
+	 * 
+	 * public void setNextInIndex(int next_in_index){ this.next_in_index =
+	 * next_in_index; } public void setAvailIn(int avail_in){ this.avail_in =
+	 * avail_in; }
+	 * 
+	 * public byte[] getNextOut(){ return next_out; }
+	 * 
+	 * public void setNextOut(byte[] next_out){ this.next_out = next_out; }
+	 * 
+	 * public int getNextOutIndex(){ return next_out_index; }
+	 * 
+	 * public void setNextOutIndex(int next_out_index){ this.next_out_index =
+	 * next_out_index; }
+	 * 
+	 * public int getAvailOut(){ return avail_out;
+	 * 
+	 * }
+	 * 
+	 * public void setAvailOut(int avail_out){ this.avail_out = avail_out; } public
+	 * String getMessage(){ return msg; }
+	 * 
+	 */
+	public int getAvailIn() {
+		return avail_in;
+	}
 
-  public void setNextIn(byte[] next_in){
-    this.next_in = next_in;
-  }
+	public long getTotalOutL() {
+		return total_out;
+	}
 
-  public int getNextInIndex(){
-    return next_in_index;
-  }
+	public long getTotalInL() {
+		return total_in;
+	}
 
-  public void setNextInIndex(int next_in_index){
-    this.next_in_index = next_in_index;
-  }
-  public void setAvailIn(int avail_in){
-    this.avail_in = avail_in;
-  }
+	/**
+	 * Those methods are expected to be override by Inflater and Deflater. In the
+	 * future, they will become abstract methods.
+	 * 
+	 * @return true or false
+	 */
+	abstract void end();// { return Z_OK; }
 
-  public byte[] getNextOut(){
-    return next_out;
-  }
+	abstract boolean finished();// { return false; }
 
-  public void setNextOut(byte[] next_out){
-    this.next_out = next_out;
-  }
+	/**
+	 * added by Bob Hanson
+	 * 
+	 * @param s
+	 * @return UTF-8 byte array (or, for code points < 256, ISO-8859-1)
+	 */
+	public static byte[] getBytes(String s) {
+		try {
+			return s.getBytes("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// impossible
+			return null;
+		}
+	}
 
-  public int getNextOutIndex(){
-    return next_out_index;
-  }
-
-  public void setNextOutIndex(int next_out_index){
-    this.next_out_index = next_out_index;
-  }
-
-  public int getAvailOut(){
-    return avail_out;
-
-  }
-
-  public void setAvailOut(int avail_out){
-    this.avail_out = avail_out;
-  }
-  public String getMessage(){
-    return msg;
-  }
-
-*/
-  public int getAvailIn(){
-    return avail_in;
-  }
-
-  public long getTotalOut(){
-    return total_out;
-  }
-
-  public long getTotalIn(){
-    return total_in;
-  }
-
-  /**
-   * Those methods are expected to be override by Inflater and Deflater.
-   * In the future, they will become abstract methods.
-   * @return true or false
-   */ 
-  abstract int end();//{ return Z_OK; }
-  abstract boolean finished();//{ return false; }
-  
-  /**
-   * added by Bob Hanson
-   * 
-   * @param s  
-   * @return UTF-8 byte array (or, for code points < 256, ISO-8859-1)
-   */
-  public static byte[] getBytes(String s) {
-	  try {
-	    return s.getBytes("UTF-8");
-	  } catch (UnsupportedEncodingException e) {
-		  // impossible
-	    return null;
-	  }
-  }
-  
 }

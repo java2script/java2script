@@ -431,8 +431,8 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
     }
     if ((flag & 8) == 8) {
       /* "Data Descriptor" present */
-      if (inf.getTotalOut() > ZipConstants64.ZIP64_MAGICVAL
-          || inf.getTotalIn() > ZipConstants64.ZIP64_MAGICVAL) {
+      if (inf.getTotalOutL() > ZipConstants64.ZIP64_MAGICVAL
+          || inf.getTotalInL() > ZipConstants64.ZIP64_MAGICVAL) {
         // ZIP64 format
         readFully(tmpbuf, 0, ZipConstants64.ZIP64_EXTHDR);
         long sig = get32(tmpbuf, 0);
@@ -465,13 +465,13 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
         }
       }
     }
-    if (e.size != inf.getTotalOut()) {
+    if (e.size != inf.getTotalOutL()) {
       throw new ZipException("invalid entry size (expected " + e.size
-          + " but got " + inf.getTotalOut() + " bytes)");
+          + " but got " + inf.getTotalOutL() + " bytes)");
     }
-    if (e.csize != inf.getTotalIn()) {
+    if (e.csize != inf.getTotalInL()) {
       throw new ZipException("invalid entry compressed size (expected "
-          + e.csize + " but got " + inf.getTotalIn() + " bytes)");
+          + e.csize + " but got " + inf.getTotalInL() + " bytes)");
     }
     if (e.crc != crc.getValue()) {
       throw new ZipException("invalid entry CRC (expected 0x"
