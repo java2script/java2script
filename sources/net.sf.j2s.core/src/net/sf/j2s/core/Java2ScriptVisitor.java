@@ -157,6 +157,8 @@ import org.eclipse.jdt.core.dom.WildcardType;
 //
 // todo: j2sdoc in static field showing up in default static block only, not in initializer block. 
 
+// BH 2020.01.01 3.2.6-v1 fixes for generic varargs with only one parameter
+
 // BH 2019.12.19 3.2.6-v0 C$.$clinit$=2 adds C$.$fields$, Clazz._getFields
 
 // BH 2019.11.20 3.2.5-v1 fix and refactoring for FINAL $finals$ fix throughout java.util.stream
