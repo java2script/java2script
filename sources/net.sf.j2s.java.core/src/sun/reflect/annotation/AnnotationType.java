@@ -105,7 +105,7 @@ public class AnnotationType {
         for (Method method :  methods) {
             String name = method.getName();
             Class<?> type = method.getReturnType();
-            memberTypes.put(name, invocationHandlerReturnType(type));
+            memberTypes.put(name, type);//invocationHandlerReturnType(type));
             members.put(name, method);
 
             Object defaultValue = method.getDefaultValue();
@@ -142,23 +142,24 @@ public class AnnotationType {
      * for an annotation).
      */
     public static Class<?> invocationHandlerReturnType(Class<?> type) {
+    	// No! That is not how it works.
         // Translate primitives to wrappers
-        if (type == byte.class)
-            return Byte.class;
-        if (type == char.class)
-            return Character.class;
-        if (type == double.class)
-            return Double.class;
-        if (type == float.class)
-            return Float.class;
-        if (type == int.class)
-            return Integer.class;
-        if (type == long.class)
-            return Long.class;
-        if (type == short.class)
-            return Short.class;
-        if (type == boolean.class)
-            return Boolean.class;
+//        if (type == byte.class)
+//            return Byte.class;
+//        if (type == char.class)
+//            return Character.class;
+//        if (type == double.class)
+//            return Double.class;
+//        if (type == float.class)
+//            return Float.class;
+//        if (type == int.class)
+//            return Integer.class;
+//        if (type == long.class)
+//            return Long.class;
+//        if (type == short.class)
+//            return Short.class;
+//        if (type == boolean.class)
+//            return Boolean.class;
 
         // Otherwise, just return declared type
         return type;

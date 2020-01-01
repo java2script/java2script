@@ -277,6 +277,7 @@ public class AnnotationParser {
 				val = Enum.valueOf((Class<Enum>) type, (String) val);
 			} else if (type.isPrimitive()) {
 				val = boxValue(val, type);
+				/** @j2sNative val = val.valueOf(); */
 			} else if (type == Class.class) {
 				val = Class.forName(((String) val).replace(".class", ""));
 			} else {
