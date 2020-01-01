@@ -28,6 +28,7 @@
 package java.io;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -60,6 +61,10 @@ public final class FileDescriptor {
 	public void _setPosAndLen(int pos, int len) {
 		this.pos = pos;
 		this.len = len;
+		if (_file.秘bytes == null)
+			_file.秘bytes = new byte[len];
+		else if (len > _file.秘bytes.length)
+			_file.秘bytes = Arrays.copyOf(_file.秘bytes, len);
 	}
 	
 	public int _getPos() {

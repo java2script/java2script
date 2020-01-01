@@ -75,6 +75,10 @@ public class RandomAccessFile implements DataOutput, DataInput, Closeable {
     private Object closeLock = new Object();
     private volatile boolean closed = false;
 	private boolean hasWritten, hasRead;
+	/**
+	 * _file will be passed on to the FileDescriptor using JavaScript
+	 */
+	File _file;
 
     private static final int O_RDONLY = 1;
     private static final int O_RDWR =   2;
@@ -243,6 +247,7 @@ public class RandomAccessFile implements DataOutput, DataInput, Closeable {
 //            throw new FileNotFoundException("Invalid file path");
 //        }
         fd = new FileDescriptor();
+        this._file = file;
         fd.attach(this);
         fd._setTempFile(file instanceof JSTempFile);
         if (rw)
@@ -504,7 +509,7 @@ public class RandomAccessFile implements DataOutput, DataInput, Closeable {
     	if (!rw)
       	  accessDenied();	
     	channel.writeBytes(b, off, len);
-    	hasWritten = (len > 0);
+    	hasWritten = true;
     }
 
     // 'Random access' stuff

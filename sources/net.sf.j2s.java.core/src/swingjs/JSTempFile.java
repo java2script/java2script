@@ -27,11 +27,6 @@ public class JSTempFile extends File {
 		JSUtil.cacheFileData(path, 秘bytes);
 	}
 
-    @Override
-	public boolean delete() {
-    	return JSUtil.removeCachedFileData(toPath().toString()) != null;
-  }
-
 	public boolean setBytes(Object isOrBytes) {
 		if (isOrBytes instanceof InputStream) {
 			秘bytes = /**

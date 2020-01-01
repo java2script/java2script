@@ -541,7 +541,7 @@ public class File
      * @see     java.io.File#isAbsolute()
      */
     public String getAbsolutePath() {
-        return this.path;// TODO fs.resolve(this);
+    	return fs.resolve(this);
     }
 
     /**
@@ -557,9 +557,8 @@ public class File
      * @since 1.2
      */
     public File getAbsoluteFile() {
-//        String absPath = getAbsolutePath()
-        		return this;
-//        return new File(absPath, fs.prefixLength(absPath));
+        String absPath = getAbsolutePath();
+        return new File(absPath, fs.prefixLength(absPath));
     }
 
     /**
@@ -774,12 +773,7 @@ public class File
      *          method denies read access to the file or directory
      */
     public boolean exists() {
-    	return  true;
-//        SecurityManager security = System.getSecurityManager();
-//        if (security != null) {
-//            security.checkRead(path);
-//        }
-//        return ((fs.getBooleanAttributes(this) & FileSystem.BA_EXISTS) != 0);
+        return fs._exists(this);
     }
 
     /**
@@ -800,11 +794,11 @@ public class File
 //        if (security != null) {
 //            security.checkRead(path);
 //        }
-//        return ((fs.getBooleanAttributes(this) & FileSystem.BA_DIRECTORY)
-//                != 0);
+        return fs._isDir(this);
 //    
-    	// BH 2019.09.23 return true;
-    	return false;
+//    	return false;
+//    	// BH 2019.09.23 return true;
+//      // BH 2019.12.31 return true if prefixLength == path.length()
     	}
 
     /**
@@ -1059,7 +1053,6 @@ public class File
      *          SecurityManager#checkRead(String)} method denies read access to
      *          the directory
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
 	public String[] list(FilenameFilter filter) {
         String names[] = list();
         if ((names == null) || (filter == null)) {
@@ -1931,7 +1924,8 @@ public class File
      *
      * @since   1.2
      */
-    public int compareTo(File pathname) {
+    @Override
+	public int compareTo(File pathname) {
     	return getPath().compareTo(pathname.getPath()); // SwingJS
     }
 
@@ -1949,7 +1943,8 @@ public class File
      * @return  <code>true</code> if and only if the objects are the same;
      *          <code>false</code> otherwise
      */
-    public boolean equals(Object obj) {
+    @Override
+	public boolean equals(Object obj) {
         if ((obj != null) && (obj instanceof File)) {
             return compareTo((File)obj) == 0;
         }
@@ -1970,7 +1965,8 @@ public class File
      *
      * @return  A hash code for this abstract pathname
      */
-    public int hashCode() {
+    @Override
+	public int hashCode() {
     	try {
 			return this.getCanonicalPath().hashCode() | 1234321;
 		} catch (IOException e) {
@@ -1985,7 +1981,8 @@ public class File
      *
      * @return  The string form of this abstract pathname
      */
-    public String toString() {
+    @Override
+	public String toString() {
         return getPath();
     }
  
