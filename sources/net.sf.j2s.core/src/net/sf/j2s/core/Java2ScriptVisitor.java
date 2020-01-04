@@ -12,6 +12,7 @@ package net.sf.j2s.core;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+//import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1293,7 +1294,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				: temp_add$UnqualifiedMethod ? METHOD_$_QUALIFIED : METHOD_FULLY_QUALIFIED);
 		if (isUserApplet && lambdaType == NOT_LAMBDA && !isConstructor && !isStatic && isPublic)
 			qualification |= METHOD_UNQUALIFIED;
-		String finalName = getFinalMethodNameOrArrayForDeclaration(mBinding, isConstructor, aliases, qualification);
+		String finalName = getMethodNameWithSyntheticBridgeForDeclaration(mBinding, isConstructor, aliases, qualification);
 		boolean isMain = (isStatic && isPublic && mBinding.getName().equals("main")
 				&& mBinding.getKey().indexOf(";.main([Ljava/lang/String;)V") >= 0);
 
@@ -5107,7 +5108,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	/**
 	 * Check a class, interface, or Enum binding for generics.
 	 * 
-	 * This is used in the method declaration to add alias names to methods.
+	 * This is used in the method declaration to add synthetic names to methods.
 	 * 
 	 * @param topBinding -- the class being declared
 	 * @param binding
@@ -5115,6 +5116,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 */
 	private boolean checkGenericClass(ITypeBinding topBinding, ITypeBinding binding) {
 		// debugListAllOverrides(binding);
+		// from addClassOrInterface
 		if (topBinding == binding)
 			syntheticClassMethodNameMap.put(binding.getKey(), null);
 		// check all superclasses from most super to least super
@@ -5145,6 +5147,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 */
 	private void addSyntheticMethods(String topClassKey, ITypeBinding binding) {
 		Map<String, String> classTypes = getGenericClassTypes(binding);
+		//buffer Debug(">addSynthMethods " + topClassKey + " " + classTypes);
 		if (classTypes == null)
 			return;
 		String classKey = binding.getKey();
@@ -5154,11 +5157,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			String methodName = m.getName();
 			ITypeBinding[] params = m.getParameterTypes();
 			boolean haveGeneric = false;
-			for (int j = params.length; --j >= 0 && !haveGeneric;)
+			for (int j = params.length; --j >= 0 && !haveGeneric;) {
 				if (isTypeOrArrayType(params[j]))
 					haveGeneric = true;
+			}
 			if (!haveGeneric)
-				return;
+				continue;
 			String[] list = new String[params.length];
 			for (int j = list.length; --j >= 0;) {
 				String name = params[j].getName();
@@ -5167,7 +5171,24 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			addSyntheticMethod(classKey, methodName, list);
 			addSyntheticMethod(topClassKey, methodName, list);
 		}
+	}
 
+	/**
+	 * add a generic class method to syntheticClassMethodNameMap under the class and method
+	 * 
+	 * @param classKey
+	 * @param methodName
+	 * @param list
+	 */
+	private void addSyntheticMethod(String classKey, String methodName, String[] list) {
+
+		Map<String, List<String[]>> classMap = syntheticClassMethodNameMap.get(classKey);
+		if (classMap == null)
+			syntheticClassMethodNameMap.put(classKey, classMap = new Hashtable<String, List<String[]>>());
+		List<String[]> methodList = classMap.get(methodName);
+		if (methodList == null)
+			classMap.put(methodName, methodList = new ArrayList<String[]>());
+		methodList.add(list);
 	}
 
 	private static ASTNode getAbstractOrAnonymousParentForNode(ASTNode node) {
@@ -5228,7 +5249,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 
 		String[] tokens = sb.toString().split(",");
-		for (int i = tokens.length; --i >= 0;) {
+		for (int i = 0; i < tokens.length; i++) {
 			String key = tokens[i].trim();
 			key = key.substring(0, (key + " ").indexOf(" "));
 			String value = (i < types.length ? getJavaClassNameQualified(types[i]) : "java.lang.Object");
@@ -5252,24 +5273,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	/**
-	 * add a generic class method to the genericClassMap under the class and method
-	 * 
-	 * @param classKey
-	 * @param methodName
-	 * @param list
-	 */
-	private void addSyntheticMethod(String classKey, String methodName, String[] list) {
-
-		Map<String, List<String[]>> classMap = syntheticClassMethodNameMap.get(classKey);
-		if (classMap == null)
-			syntheticClassMethodNameMap.put(classKey, classMap = new Hashtable<String, List<String[]>>());
-		List<String[]> methodList = classMap.get(methodName);
-		if (methodList == null)
-			classMap.put(methodName, methodList = new ArrayList<String[]>());
-		methodList.add(list);
-	}
-
-	/**
 	 * 
 	 * This is the method used to get the name or names to write into the method
 	 * declaration Clazz.newMeth(...). Bracketed returns tell Clazz to create
@@ -5282,8 +5285,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @param mode
 	 * @return j2s-qualified name or an array of j2s-qualified names
 	 */
-	String getFinalMethodNameOrArrayForDeclaration(IMethodBinding mBinding, boolean isConstructor,
-			String aliases,		int mode) {
+	String getMethodNameWithSyntheticBridgeForDeclaration(IMethodBinding mBinding, boolean isConstructor,
+			String aliases,	int mode) {
 		String nodeName = mBinding.getName();
 		String methodName = (isConstructor ? "c$" : nodeName);
 		String qname = getFinalMethodNameWith$Params(methodName, null, mBinding, null, false, null, METHOD_NOTSPECIAL);
@@ -6693,7 +6696,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 						if (mBinding == null)
 							continue;
 						varName = "M:" + mBinding.getName();
-						signature = visitor.getFinalMethodNameOrArrayForDeclaration(mBinding, mBinding.isConstructor(), null, METHOD_FULLY_QUALIFIED);
+						signature = visitor.getMethodNameWithSyntheticBridgeForDeclaration(mBinding, mBinding.isConstructor(), null, METHOD_FULLY_QUALIFIED);
 						type = mBinding.getReturnType();
 					} else if (a.node instanceof AnnotationTypeMemberDeclaration) {
 						MethodDeclaration method = (MethodDeclaration) a.node;
