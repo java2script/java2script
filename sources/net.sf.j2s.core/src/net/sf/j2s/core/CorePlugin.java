@@ -26,6 +26,7 @@ public class CorePlugin extends Plugin {
 	 * 
 	 */
 	public static String VERSION = "3.2.6-v1";
+	// BH 2020.01.03 -- 3.2.6-v1 fixes for $__T and some synthetic methods missing
 	// BH 2020.01.01 -- 3.2.6-v1 fixes for generic varargs with only one parameter
 	// BH 2019.12.19 -- 3.2.6-v0 adds C$.$fields$
 	// BH 2019.12.15 -- 3.2.5-v4 fix for local class within anonymous class not getting name 

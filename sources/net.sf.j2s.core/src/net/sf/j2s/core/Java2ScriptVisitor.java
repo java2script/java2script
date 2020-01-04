@@ -157,10 +157,9 @@ import org.eclipse.jdt.core.dom.WildcardType;
 //
 // todo: j2sdoc in static field showing up in default static block only, not in initializer block. 
 
+// BH 2020.01.03 -- 3.2.6-v1 fixes for $__T and some synthetic methods missing
 // BH 2020.01.01 3.2.6-v1 fixes for generic varargs with only one parameter
-
 // BH 2019.12.19 3.2.6-v0 C$.$clinit$=2 adds C$.$fields$, Clazz._getFields
-
 // BH 2019.11.20 3.2.5-v1 fix and refactoring for FINAL $finals$ fix throughout java.util.stream
 
 // NOTE: All of the original (complicated and only partially working) nested block-counting code in 
@@ -319,7 +318,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private static Map<String, String> global_htMethodsCalled;
 	private static boolean global_logAllCalls;
 
-	private static Map<String, Map<String, List<String[]>>> genericClassMap = new HashMap<String, Map<String, List<String[]>>>();
+	private static Map<String, Map<String, List<String[]>>> syntheticClassMethodNameMap = new HashMap<String, Map<String, List<String[]>>>();
 	private static Map<String, Map<String, String>> genericClassTypes = new HashMap<String, Map<String, String>>();
 
 	private static Map<String,String> htStrLitCache = new Hashtable<>();
@@ -1281,7 +1280,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private void processMethodDeclaration(MethodDeclaration mnode, IMethodBinding mBinding, List<ASTNode> parameters,
 			ASTNode body, boolean isConstructor, int lambdaType) {
 		String aliases = (mnode == null ? null : checkJ2SMethodDoc(mnode));
-
 		int mods = mBinding.getModifiers();
 		boolean isNative = Modifier.isNative(mods);
 		if (body == null && !isNative && lambdaType == NOT_LAMBDA) {
@@ -1397,6 +1395,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 		String methodName = mBinding.getName();
 		ITypeBinding declaringClass = mBinding.getDeclaringClass();
+		if (mBinding.isSynthetic()) {
+			System.out.println(">>>synthetic invoc " + methodName + " " + mBinding);
+		}
 		boolean isStatic = isStatic(mBinding);
 		boolean isPrivate = isPrivate(mBinding);
 		boolean isPrivateAndNotStatic = isPrivate && !isStatic;
@@ -2354,7 +2355,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					IMethodBinding method = mnode.resolveBinding();
 					if (method == null || !checkAnnotations(mnode, CHECK_J2S_IGNORE_AND_ANNOTATIONS))
 						continue;
-					
 					if (methods != null) {
 						String mname = method.getName();
 						if (class_annotationType == NOT_JAXB 
@@ -2518,11 +2518,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		buffer.append("]);\n");
 		trailingBuffer.append(buffer.substring(pt));
 		buffer.setLength(pt);
-	}
-
-	private String getPackageName(ITypeBinding javaClass) {
-		IPackageBinding p = javaClass.getPackage();
-		return (p == null ? "_" : p.getName());
 	}
 
 	/**
@@ -4246,7 +4241,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					buffer.append("[");
 //					
 //					
-//					bufferDebug(paramType.getComponentType().getName() + " " 
+//					buffer Debug(paramType.getComponentType().getName() + " " 
 //					+ (atype != null && atype.isArray() ? atype.getComponentType().getName() : null)
 //					+ " " + (atype != null && atype.isArray() ? atype.getComponentType().isAssignmentCompatible(paramType.getComponentType()) : null)
 //					+ " " + (atype != null && atype.isArray() ? paramType.getComponentType().isAssignmentCompatible(atype.getComponentType()) : null)
@@ -4718,7 +4713,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if (binding == null) {
 			return null;
 		}
-		if (binding.isTypeVariable())
+		if (isTypeOrArrayType(binding))
 			return binding.toString();
 		String name = null, bindingKey;
 		if ((binding.isAnonymous() || binding.isLocal()) && (name = binding.getBinaryName()) == null
@@ -4737,6 +4732,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			}
 		}
 		return name;
+	}
+
+	private static boolean isTypeOrArrayType(ITypeBinding binding) {
+		return binding.isTypeVariable() || binding.isArray() && binding.getComponentType().isTypeVariable();
 	}
 
 	private static String getJavaClassNameSuperNoBrackets(ITypeBinding typeBinding) {
@@ -4960,7 +4959,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @return array listing classes that need to be loaded in order
 	 */
 	private String getFinalInnerClassList(ITypeBinding javaClass, String javaClassName) {
-		String packageName = getPackageName(javaClass);		
+		IPackageBinding p = javaClass.getPackage();
+		String packageName = (p == null ? NULL_PACKAGE : p.getName());
 		if (javaClassName == null) {
 			javaClassName = getJavaClassNameQualified(javaClass);
 			//System.out.println(">>jcn was null! " + javaClassName);
@@ -5113,10 +5113,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @param binding
 	 * @return true if this class could have generic replacements
 	 */
-	private static boolean checkGenericClass(ITypeBinding topBinding, ITypeBinding binding) {
+	private boolean checkGenericClass(ITypeBinding topBinding, ITypeBinding binding) {
 		// debugListAllOverrides(binding);
 		if (topBinding == binding)
-			genericClassMap.put(binding.getKey(), null);
+			syntheticClassMethodNameMap.put(binding.getKey(), null);
 		// check all superclasses from most super to least super
 		String classKey = binding.getKey();
 		boolean hasGenerics = (binding.isRawType() || binding.getTypeArguments().length > 0);
@@ -5129,9 +5129,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			hasGenerics = checkGenericClass(topBinding, interfaces[i]) || hasGenerics;
 		}
 		if (hasGenerics) {
-			checkMethodsWithGenericParams(topBinding.getKey(), binding);
+			addSyntheticMethods(topBinding.getKey(), binding);
 		} else {
-			genericClassMap.put(classKey, null);
+			syntheticClassMethodNameMap.put(classKey, null);
 		}
 		return hasGenerics;
 	}
@@ -5143,7 +5143,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @param topClassKey
 	 * @param binding
 	 */
-	private static void checkMethodsWithGenericParams(String topClassKey, ITypeBinding binding) {
+	private void addSyntheticMethods(String topClassKey, ITypeBinding binding) {
 		Map<String, String> classTypes = getGenericClassTypes(binding);
 		if (classTypes == null)
 			return;
@@ -5153,18 +5153,19 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			IMethodBinding m = methods[i];
 			String methodName = m.getName();
 			ITypeBinding[] params = m.getParameterTypes();
-			if (params.length == 0)
-				continue;
-			String key = m.getKey();
-			if (key.indexOf(";T") >= 0 || key.indexOf("(T") >= 0) {
-				String[] list = new String[params.length];
-				for (int j = list.length; --j >= 0;) {
-					String name = params[j].getName();
-					list[j] = name + "|" + classTypes.get(name) + ";";
-				}
-				addGenericClassMethod(classKey, methodName, list);
-				addGenericClassMethod(topClassKey, methodName, list);
+			boolean haveGeneric = false;
+			for (int j = params.length; --j >= 0 && !haveGeneric;)
+				if (isTypeOrArrayType(params[j]))
+					haveGeneric = true;
+			if (!haveGeneric)
+				return;
+			String[] list = new String[params.length];
+			for (int j = list.length; --j >= 0;) {
+				String name = params[j].getName();
+				list[j] = name + "|" + classTypes.get(name) + ";";
 			}
+			addSyntheticMethod(classKey, methodName, list);
+			addSyntheticMethod(topClassKey, methodName, list);
 		}
 
 	}
@@ -5184,7 +5185,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @param type
 	 * @return a map {T:"java.lang.String",K:"java.lang.Object"}
 	 */
-	private static Map<String, String> getGenericClassTypes(ITypeBinding type) {
+	private Map<String, String> getGenericClassTypes(ITypeBinding type) {
 		String classKey = type.getKey();
 		Map<String, String> classTypes = genericClassTypes.get(classKey);
 		if (classTypes != null)
@@ -5245,8 +5246,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @param methodName
 	 * @return list of generic types for methods with this name
 	 */
-	private static List<String[]> getGenericMethodList(ITypeBinding methodClass, String methodName) {
-		Map<String, List<String[]>> methodList = genericClassMap.get(methodClass.getKey());
+	private List<String[]> getGenericMethodList(ITypeBinding methodClass, String methodName) {
+		Map<String, List<String[]>> methodList = syntheticClassMethodNameMap.get(methodClass.getKey());
 		return (methodList == null ? null : methodList.get(methodName));
 	}
 
@@ -5257,11 +5258,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @param methodName
 	 * @param list
 	 */
-	private static void addGenericClassMethod(String classKey, String methodName, String[] list) {
+	private void addSyntheticMethod(String classKey, String methodName, String[] list) {
 
-		Map<String, List<String[]>> classMap = genericClassMap.get(classKey);
+		Map<String, List<String[]>> classMap = syntheticClassMethodNameMap.get(classKey);
 		if (classMap == null)
-			genericClassMap.put(classKey, classMap = new Hashtable<String, List<String[]>>());
+			syntheticClassMethodNameMap.put(classKey, classMap = new Hashtable<String, List<String[]>>());
 		List<String[]> methodList = classMap.get(methodName);
 		if (methodList == null)
 			classMap.put(methodName, methodList = new ArrayList<String[]>());
@@ -5291,7 +5292,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		
 
 		List<String[]> methodList = getGenericMethodList(methodClass, nodeName);
-
 		if (aliases != null) {
 			String[] types = aliases.split(",");
 			String pname = getFinalMethodNameWith$Params(methodName, null, mBinding, types, false,
@@ -5304,11 +5304,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		} else if (methodList != null) {
 			names = new ArrayList<String>();
 			for (int i = methodList.size(); --i >= 0;) {
+				String[] l = methodList.get(i);
 				String pname = getFinalMethodNameWith$Params(methodName, null, mBinding, methodList.get(i), false,
 						null, METHOD_NOTSPECIAL);
 				if (pname != null)
 					names.add(pname);
-				if ((mode & METHOD_FULLY_QUALIFIED) == 0)
+				if ((mode & METHOD_FULLY_QUALIFIED) == 0) 
 					names.add(ensureMethod$Name(methodName, mBinding, getJavaClassNameQualified(methodClass)));
 			}
 		}
@@ -5412,13 +5413,16 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// if this is a method invocation and has generics, then we alias that
 		boolean haveGeneric = false;
 		for (int i = 0; i < nParams; i++) {
+			// I guess erasure is not useful here 
+			// this is things like Map<String, String> vs Map
+			//if (!paramTypes[i].equals(paramTypes[i].getErasure())) {
+			//	buffer Debug(i + " " + paramTypes[i].getName() + " " + paramTypes[i].getErasure().getName());
+			//}
 			String type = j2sGetParamCode(paramTypes[i], true, toObject);
 			if (genericTypes != null) {
 				String genericType = genericTypes[i];
 				if (genericType != null) {
 					boolean isAlias = (genericType.indexOf("|") < 0);
-//					if (isAlias)
-//						bufferDebug(genericType + " " + i + " " + nParams);
 					if (isAlias ? genericType.length() > 0 && !genericType.equals("*")
 							: genericType.indexOf("|null") < 0) {
 						if (!isAlias && genericType.indexOf("|" + getJavaClassNameQualified(paramTypes[i]) + ";") < 0)
@@ -5458,8 +5462,17 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			return (asGenericObject ? "O" : "T" + binding.getName());
 		}
 		String name = removeBrackets(getJavaClassNameQualified(binding));
-		if (!asGenericObject && !binding.isPrimitive())
+		if (binding.isArray() && binding.getComponentType().isTypeVariable()) {
+			// TK[]
+			if (asGenericObject) {
+				name = "O" + name.substring(name.indexOf("["));
+			} else {
+				name = "T" + name;				
+			}
+		} else if (!asGenericObject && !binding.isPrimitive()) {
 			name = NameMapper.fixPackageName(name);
+		}
+			
 		String arrays = null;
 		int pt = name.indexOf("[");
 		if (pt >= 0) {
@@ -6215,8 +6228,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			j2sName = methodName;
 		ITypeBinding declaringClass = mBinding.getDeclaringClass();
 		String javaClassName = getJavaClassNameQualified(declaringClass);
-		if (NameMapper.isMethodNonqualified(javaClassName, methodName))
+		if (NameMapper.isMethodNonqualified(javaClassName, methodName)) {
 			return j2sName;
+		}
 
 		// BH: Note in the next statement, that Map.put$K$V is translated to actual
 		// values
@@ -6229,8 +6243,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				: mBinding.getMethodDeclaration().getParameterTypes());
 
 		int nParams = paramTypes.length;
-		if (genericTypes != null && genericTypes.length != nParams)
+		if (genericTypes != null && genericTypes.length != nParams) {
 			return null;
+		}
 
 		// xxx() adds $ to become xxx$() iff it is NOT
 		// - (private and not static)
@@ -6252,6 +6267,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		String s = getParamsAsString(nParams, genericTypes, paramTypes, false);
 
 		if (specialType != METHOD_ALIAS && addCallingOption$O && s.indexOf("$T") >= 0 && isJava(javaClassName) && !isJava(class_fullName)) {
+
 			// If the method being called is a Java class and the calling class is NOT a
 			// Java class,
 			// then also add the $O version.
