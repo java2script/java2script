@@ -97,7 +97,19 @@ class Java2ScriptCompiler {
 	private static final String J2S_COMPILER_READ_ANNOTATIONS = "j2s.compiler.read.annotations";
 	private static final String J2S_COMPILER_READ_ANNOTATIONS_DEFAULT = "true";
 	private static final String J2S_COMPILER_IGNORED_ANNOTATIONS = "j2s.compiler.ignored.annotations";
-	private static final String J2S_COMPILER_IGNORED_ANNOTATIONS_DEFAULT = "CallerSensitive;ConstructorProperties;Deprecated;Override;SaveVarargs;SuppressWarnings;";
+	private static final String J2S_COMPILER_IGNORED_ANNOTATIONS_DEFAULT = 
+			"CallerSensitive;"
+			+ "ConstructorProperties;"
+			+ "Deprecated;"
+			+ "Override;"
+			+ "SafeVarargs;"
+			+ "SuppressWarnings;"
+			+ "FunctionalInterface;"
+			+ "Documented;"
+			+ "Inherited;"
+			+ "Native;"
+			+ "Repeatable;"
+			+ "Retention;";
 
 	private static final String J2S_COMPILER_NONQUALIFIED_PACKAGES = "j2s.compiler.nonqualified.packages";
 	private static final String J2S_COMPILER_NONQUALIFIED_PACKAGES_DEFAULT = "<none>";
@@ -549,6 +561,7 @@ class Java2ScriptCompiler {
 		return "#j2s default configuration file created by net.sf.java2script_" 
         + CorePlugin.VERSION + " " + new Date() + "\n\n" +
         "#enable the Java2Script transpiler -- comment out to disable\n" + 
+		"# default is \"enabled\".\n" + 
 		"j2s.compiler.status=enable\n" + 
 		"\n" + 
 		"\n" + 
@@ -557,8 +570,14 @@ class Java2ScriptCompiler {
 		"\n" + 
 		"# uncomment j2s.* lines to process:\n" + 
 		"\n" + 
-		"# a semicolon-separated list of package-level file paths to be excluded\n" + 
+		"# a semicolon-separated list of package-level file paths to be excluded (default \"<none>\")\n" + 
 		"#j2s.excluded.paths=test;testng\n" + 
+		"\n" + 
+		"# whether to read annotations\n" + 
+		"#j2s.compiler.read.annotations="+ J2S_COMPILER_READ_ANNOTATIONS_DEFAULT +"\n" + 
+		"\n" + 
+		"# a semicolon-separated list of annotations to ignore, if reading annotations\n" + 
+		"#j2s.compiler.ignored.annotations="+ J2S_COMPILER_IGNORED_ANNOTATIONS_DEFAULT +"\n" + 
 		"\n" + 
 		"# output file name for logging methods declared - delete the file to regenerate a listing \n" + 
 		"#j2s.log.methods.declared=methodsDeclared.csv\n" + 
@@ -577,6 +596,7 @@ class Java2ScriptCompiler {
 		"# methods such as calling window or jQuery functions or the methods in Clazz or J2S. \n" + 
 		"# The classes must not have any methods that are overloaded - with the\n" + 
 		"# same name but different paramater type, as JavaScript will only see the last one.\n" + 
+		"# default is \"<none>\".\n" + 
 		"#j2s.compiler.nonqualified.packages=org.jmol.api.js;jspecview.api.js\n" + 
 		"\n" + 
 		"# uncomment to add debugging output. Start eclipse with the -consoleLog option to see output.\n" + 
@@ -588,6 +608,7 @@ class Java2ScriptCompiler {
 		"# have exactly the same parameter signature. We use it in Jalview to provide a minimal\n" + 
 		"# JavaScript implementation of a large third-party library while still using that library's\n" + 
 		"# jar file in Java.\n" + 
+		"# default is \"<none>\".\n" + 
 		"#j2s.class.replacements=org.apache.log4j.->jalview.javascript.log4j.\n" + 
 		"\n" + 
 		"# uncomment and change if you do not want to use the template.html file created for you\n" + 
