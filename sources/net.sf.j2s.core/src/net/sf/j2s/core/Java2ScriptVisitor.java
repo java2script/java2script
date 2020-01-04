@@ -2476,21 +2476,23 @@ public class Java2ScriptVisitor extends ASTVisitor {
 //		}
 //	}
 
+	/**
+	 * for at_interfaces, build the 
+	 * @param node
+	 */
 	private void processAnnotationTypeMemberDeclaration(AnnotationTypeMemberDeclaration node) {
 
 		Expression def = node.getDefault();
 		SimpleName name = node.getName();
 		IMethodBinding mbinding = node.resolveBinding();
 		ITypeBinding ret = mbinding.getReturnType();
-//		buffer.append("\nClazz.newMeth(C$,'").append(name).append("',function(){});\n");
 		int pt = buffer.length();
-//		retName = j2sClassObject(ret, retName);
-//		if (ret.isPrimitive()) {
-//			retName = NameMapper.getPrimitiveTYPE(retName) + ".TYPE";
-//		} else {
-//			retName += ".class";
-//		}
-		buffer.append("a.push(['" + name + "'," + j2sClassObject(ret) + ",");
+		// note that annotations cannot be generic
+		boolean isArray = ret.isArray();
+		if (isArray)
+			ret = ret.getComponentType();
+		String retName = (ret.isPrimitive() ? ret.getName() : j2sNonPrimitiveName(ret, true));
+		buffer.append("a.push(['" + name + "','" + retName + (isArray ? "[]" : "") + "',");
 		if (def == null) {
 			if (ret.isPrimitive()) {
 				switch (ret.getName()) {
@@ -5465,17 +5467,17 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			return (asGenericObject ? "O" : "T" + binding.getName());
 		}
 		String name = removeBrackets(getJavaClassNameQualified(binding));
-		if (binding.isArray() && binding.getComponentType().isTypeVariable()) {
+		if (isTypeOrArrayType(binding)) {
 			// TK[]
 			if (asGenericObject) {
-				name = "O" + name.substring(name.indexOf("["));
+				int pt = name.indexOf("[");
+				name = "O" + (pt < 0 ? "" : name.substring(pt));
 			} else {
 				name = "T" + name;				
 			}
 		} else if (!asGenericObject && !binding.isPrimitive()) {
 			name = NameMapper.fixPackageName(name);
-		}
-			
+		}	
 		String arrays = null;
 		int pt = name.indexOf("[");
 		if (pt >= 0) {
@@ -6721,11 +6723,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					String className = (type == null ? null
 							: type.isTypeVariable() ? type.toString() // could be "<T>" 
 									: j2sNonPrimitiveName(type, false));
-					//stripJavaLang(NameMapper.fixPackageName(getJavaClassNameQualified(type))
-					//String typeref = (type == null ? null : j2sClassObject(type));
 					if (className != null && className.equals(lastClassName)) {
 						className = ".";
-						//typeref = "'.'";
 					} else {
 						lastClassName = className;
 					}
@@ -6733,7 +6732,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					trailingBuffer.append((varName == null ? null : "'" + varName + "'"));
 					ptBuf = trailingBuffer.buf.length();
 					trailingBuffer.append(",'" + className + "'," 
-					//+ typeref + "," 
 							 + signature + ",['" + a.qname 
 							 + "']],[");
 					ptBuf1 = trailingBuffer.buf.length() - 5;
@@ -7078,16 +7076,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			e.printStackTrace(System.out);
 		}
 	}
-
-	public static String j2sClassObject(ITypeBinding type) {
-		boolean isArray = type.isArray() && !type.isTypeVariable();
-		if (isArray)
-			type = type.getComponentType();
-		String name = (type.isPrimitive() ? type.getName() : j2sNonPrimitiveName(type, true));
-		return "'" + (isArray ? name + "[]" : name) + "'";
-	}
-	
-//	private static Map<ITypeBinding, String> nonPrimitiveJ2STypeNames = new Hashtable<>();
 
 	static String j2sNonPrimitiveName(ITypeBinding type, boolean typeAsObject) {
 		if (type.isTypeVariable()) {
