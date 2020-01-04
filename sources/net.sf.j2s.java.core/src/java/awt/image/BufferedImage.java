@@ -507,76 +507,77 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		this.imageType = imageType;
 	}
 
-	// /**
-	// * Constructs a <code>BufferedImage</code> of one of the predefined
-	// * image types:
-	// * TYPE_BYTE_BINARY or TYPE_BYTE_INDEXED.
-	// *
-	// * <p> If the image type is TYPE_BYTE_BINARY, the number of
-	// * entries in the color model is used to determine whether the
-	// * image should have 1, 2, or 4 bits per pixel. If the color model
-	// * has 1 or 2 entries, the image will have 1 bit per pixel. If it
-	// * has 3 or 4 entries, the image with have 2 bits per pixel. If
-	// * it has between 5 and 16 entries, the image will have 4 bits per
-	// * pixel. Otherwise, an IllegalArgumentException will be thrown.
-	// *
-	// * @param width width of the created image
-	// * @param height height of the created image
-	// * @param imageType type of the created image
-	// * @param cm <code>IndexColorModel</code> of the created image
-	// * @throws IllegalArgumentException if the imageType is not
-	// * TYPE_BYTE_BINARY or TYPE_BYTE_INDEXED or if the imageType is
-	// * TYPE_BYTE_BINARY and the color map has more than 16 entries.
-	// * @see #TYPE_BYTE_BINARY
-	// * @see #TYPE_BYTE_INDEXED
-	// */
-	// public BufferedImage (int width,
-	// int height,
-	// int imageType,
-	// IndexColorModel cm) {
-	// if (cm.hasAlpha() && cm.isAlphaPremultiplied()) {
-	// throw new IllegalArgumentException("This image types do not have "+
-	// "premultiplied alpha.");
-	// }
-	//
-	// switch(imageType) {
-	// case TYPE_BYTE_BINARY:
-	// int bits; // Will be set below
-	// int mapSize = cm.getMapSize();
-	// if (mapSize <= 2) {
-	// bits = 1;
-	// } else if (mapSize <= 4) {
-	// bits = 2;
-	// } else if (mapSize <= 16) {
-	// bits = 4;
-	// } else {
-	// throw new IllegalArgumentException
-	// ("Color map for TYPE_BYTE_BINARY " +
-	// "must have no more than 16 entries");
-	// }
-	// raster = Raster.createPackedRaster(DataBuffer.TYPE_BYTE,
-	// width, height, 1, bits, null);
-	// break;
-	//
-	// case TYPE_BYTE_INDEXED:
-	// raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE,
-	// width, height, 1, null);
-	// break;
-	// default:
-	// throw new IllegalArgumentException("Invalid image type (" +
-	// imageType+").  Image type must"+
-	// " be either TYPE_BYTE_BINARY or "+
-	// " TYPE_BYTE_INDEXED");
-	// }
-	//
-	// if (!cm.isCompatibleRaster(raster)) {
-	// throw new
-	// IllegalArgumentException("Incompatible image type and IndexColorModel");
-	// }
-	//
-	// colorModel = cm;
-	// this.imageType = imageType;
-	// }
+	 /**
+	 * Constructs a <code>BufferedImage</code> of one of the predefined
+	 * image types:
+	 * TYPE_BYTE_BINARY or TYPE_BYTE_INDEXED.
+	 *
+	 * <p> If the image type is TYPE_BYTE_BINARY, the number of
+	 * entries in the color model is used to determine whether the
+	 * image should have 1, 2, or 4 bits per pixel. If the color model
+	 * has 1 or 2 entries, the image will have 1 bit per pixel. If it
+	 * has 3 or 4 entries, the image with have 2 bits per pixel. If
+	 * it has between 5 and 16 entries, the image will have 4 bits per
+	 * pixel. Otherwise, an IllegalArgumentException will be thrown.
+	 *
+	 * @param width width of the created image
+	 * @param height height of the created image
+	 * @param imageType type of the created image
+	 * @param cm <code>IndexColorModel</code> of the created image
+	 * @throws IllegalArgumentException if the imageType is not
+	 * TYPE_BYTE_BINARY or TYPE_BYTE_INDEXED or if the imageType is
+	 * TYPE_BYTE_BINARY and the color map has more than 16 entries.
+	 * @see #TYPE_BYTE_BINARY
+	 * @see #TYPE_BYTE_INDEXED
+	 */
+	 public BufferedImage (int width,
+	 int height,
+	 int imageType,
+	 IndexColorModel cm) {
+	 if (cm.hasAlpha() && cm.isAlphaPremultiplied()) {
+	 throw new IllegalArgumentException("This image types do not have "+
+	 "premultiplied alpha.");
+	 }
+	 this.width = width;
+	 this.height = height;
+	 switch(imageType) {
+	 case TYPE_BYTE_BINARY:
+	 int bits; // Will be set below
+	 int mapSize = cm.getMapSize();
+	 if (mapSize <= 2) {
+	 bits = 1;
+	 } else if (mapSize <= 4) {
+	 bits = 2;
+	 } else if (mapSize <= 16) {
+	 bits = 4;
+	 } else {
+	 throw new IllegalArgumentException
+	 ("Color map for TYPE_BYTE_BINARY " +
+	 "must have no more than 16 entries");
+	 }
+	 raster = Raster.createPackedRaster(DataBuffer.TYPE_BYTE,
+	 width, height, 1, bits, null);
+	 break;
+	
+	 case TYPE_BYTE_INDEXED:
+	 raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE,
+	 width, height, 1, null);
+	 break;
+	 default:
+	 throw new IllegalArgumentException("Invalid image type (" +
+	 imageType+").  Image type must"+
+	 " be either TYPE_BYTE_BINARY or "+
+	 " TYPE_BYTE_INDEXED");
+	 }
+	
+	 if (!cm.isCompatibleRaster(raster)) {
+	 throw new
+	 IllegalArgumentException("Incompatible image type and IndexColorModel");
+	 }
+	
+	 colorModel = cm;
+	 this.imageType = imageType;
+	 }
 
 	/**
 	 * Constructs a new <code>BufferedImage</code> with a specified
@@ -635,6 +636,8 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 
 		colorModel = cm;
 		this.raster = raster;
+		this.width = raster.getWidth();
+		this.height = raster.getHeight();
 		raster.setImage(this);
 		秘pix = ((DataBufferInt) raster.getDataBuffer()).data;
 		this.properties = properties;
@@ -845,30 +848,30 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		return raster;
 	}
 
-	// /**
-	// * Returns a <code>WritableRaster</code> representing the alpha
-	// * channel for <code>BufferedImage</code> objects
-	// * with <code>ColorModel</code> objects that support a separate
-	// * spatial alpha channel, such as <code>ComponentColorModel</code> and
-	// * <code>DirectColorModel</code>. Returns <code>null</code> if there
-	// * is no alpha channel associated with the <code>ColorModel</code> in
-	// * this image. This method assumes that for all
-	// * <code>ColorModel</code> objects other than
-	// * <code>IndexColorModel</code>, if the <code>ColorModel</code>
-	// * supports alpha, there is a separate alpha channel
-	// * which is stored as the last band of image data.
-	// * If the image uses an <code>IndexColorModel</code> that
-	// * has alpha in the lookup table, this method returns
-	// * <code>null</code> since there is no spatially discrete alpha
-	// * channel. This method creates a new
-	// * <code>WritableRaster</code>, but shares the data array.
-	// * @return a <code>WritableRaster</code> or <code>null</code> if this
-	// * <code>BufferedImage</code> has no alpha channel associated
-	// * with its <code>ColorModel</code>.
-	// */
-	// public WritableRaster getAlphaRaster() {
-	// return colorModel.getAlphaRaster(raster);
-	// }
+	 /**
+	 * Returns a <code>WritableRaster</code> representing the alpha
+	 * channel for <code>BufferedImage</code> objects
+	 * with <code>ColorModel</code> objects that support a separate
+	 * spatial alpha channel, such as <code>ComponentColorModel</code> and
+	 * <code>DirectColorModel</code>. Returns <code>null</code> if there
+	 * is no alpha channel associated with the <code>ColorModel</code> in
+	 * this image. This method assumes that for all
+	 * <code>ColorModel</code> objects other than
+	 * <code>IndexColorModel</code>, if the <code>ColorModel</code>
+	 * supports alpha, there is a separate alpha channel
+	 * which is stored as the last band of image data.
+	 * If the image uses an <code>IndexColorModel</code> that
+	 * has alpha in the lookup table, this method returns
+	 * <code>null</code> since there is no spatially discrete alpha
+	 * channel. This method creates a new
+	 * <code>WritableRaster</code>, but shares the data array.
+	 * @return a <code>WritableRaster</code> or <code>null</code> if this
+	 * <code>BufferedImage</code> has no alpha channel associated
+	 * with its <code>ColorModel</code>.
+	 */
+	 public WritableRaster getAlphaRaster() {
+	 return colorModel.getAlphaRaster(raster);
+	 }
 
 
 	
@@ -1601,61 +1604,61 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	// throw new IllegalArgumentException("Only 1 tile in image");
 	// }
 	//
-	// /**
-	// * Returns an array of {@link Point} objects indicating which tiles
-	// * are checked out for writing. Returns <code>null</code> if none are
-	// * checked out.
-	// * @return a <code>Point</code> array that indicates the tiles that
-	// * are checked out for writing, or <code>null</code> if no
-	// * tiles are checked out for writing.
-	// */
-	// public Point[] getWritableTileIndices() {
-	// Point[] p = new Point[1];
-	// p[0] = new Point(0, 0);
-	//
-	// return p;
-	// }
-	//
-	// /**
-	// * Returns whether or not any tile is checked out for writing.
-	// * Semantically equivalent to
-	// * <pre>
-	// * (getWritableTileIndices() != null).
-	// * </pre>
-	// * @return <code>true</code> if any tile is checked out for writing;
-	// * <code>false</code> otherwise.
-	// */
-	// public boolean hasTileWriters () {
-	// return true;
-	// }
-	//
-	// // /**
-	// // * Checks out a tile for writing. All registered
-	// // * <code>TileObservers</code> are notified when a tile goes from having
-	// // * no writers to having one writer.
-	// // * @param tileX the x index of the tile
-	// // * @param tileY the y index of the tile
-	// // * @return a <code>WritableRaster</code> that is the tile, indicated by
-	// // * the specified indices, to be checked out for writing.
-	// // */
-	// // public WritableRaster getWritableTile (int tileX, int tileY) {
-	// // return raster;
-	// // }
-	//
-	// /**
-	// * Relinquishes permission to write to a tile. If the caller
-	// * continues to write to the tile, the results are undefined.
-	// * Calls to this method should only appear in matching pairs
-	// * with calls to {@link #getWritableTile(int, int) getWritableTile(int,
-	// int)}. Any other leads
-	// * to undefined results. All registered <code>TileObservers</code>
-	// * are notified when a tile goes from having one writer to having no
-	// * writers.
-	// * @param tileX the x index of the tile
-	// * @param tileY the y index of the tile
-	// */
-	// public void releaseWritableTile (int tileX, int tileY) {
-	// }
+	 /**
+	 * Returns an array of {@link Point} objects indicating which tiles
+	 * are checked out for writing. Returns <code>null</code> if none are
+	 * checked out.
+	 * @return a <code>Point</code> array that indicates the tiles that
+	 * are checked out for writing, or <code>null</code> if no
+	 * tiles are checked out for writing.
+	 */
+	 public Point[] getWritableTileIndices() {
+	 Point[] p = new Point[1];
+	 p[0] = new Point(0, 0);
+	
+	 return p;
+	 }
+	
+	 /**
+	 * Returns whether or not any tile is checked out for writing.
+	 * Semantically equivalent to
+	 * <pre>
+	 * (getWritableTileIndices() != null).
+	 * </pre>
+	 * @return <code>true</code> if any tile is checked out for writing;
+	 * <code>false</code> otherwise.
+	 */
+	 public boolean hasTileWriters () {
+	 return true;
+	 }
+	
+	  /**
+	  * Checks out a tile for writing. All registered
+	  * <code>TileObservers</code> are notified when a tile goes from having
+	  * no writers to having one writer.
+	  * @param tileX the x index of the tile
+	  * @param tileY the y index of the tile
+	  * @return a <code>WritableRaster</code> that is the tile, indicated by
+	  * the specified indices, to be checked out for writing.
+	  */
+	  public WritableRaster getWritableTile (int tileX, int tileY) {
+	  return raster;
+	  }
+	
+	 /**
+	 * Relinquishes permission to write to a tile. If the caller
+	 * continues to write to the tile, the results are undefined.
+	 * Calls to this method should only appear in matching pairs
+	 * with calls to {@link #getWritableTile(int, int) getWritableTile(int,
+	 int)}. Any other leads
+	 * to undefined results. All registered <code>TileObservers</code>
+	 * are notified when a tile goes from having one writer to having no
+	 * writers.
+	 * @param tileX the x index of the tile
+	 * @param tileY the y index of the tile
+	 */
+	 public void releaseWritableTile (int tileX, int tileY) {
+	 }
 
 	/**
 	 * Returns the transparency. Returns either OPAQUE, BITMASK, or TRANSLUCENT.

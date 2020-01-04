@@ -220,18 +220,18 @@ public class InflaterInputStream extends FilterInputStream {
   }
 
   public long getTotalIn() {
-    return inflater.getTotalIn();
+    return inflater.getTotalInL();
   }
 
   public long getTotalOut() {
-    return inflater.getTotalOut();
+    return inflater.getTotalOutL();
   }
 
   public byte[] getAvailIn() {
     if (inflater.avail_in <= 0)
       return null;
     byte[] tmp = new byte[inflater.avail_in];
-    System.arraycopy(inflater.next_in, inflater.next_in_index, tmp, 0,
+    System.arraycopy(inflater.in, inflater.in_index, tmp, 0,
         inflater.avail_in);
     return tmp;
   }

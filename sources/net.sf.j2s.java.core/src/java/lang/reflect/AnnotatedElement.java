@@ -27,13 +27,12 @@ package java.lang.reflect;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.AnnotationFormatError;
-import java.lang.annotation.Repeatable;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
 import sun.reflect.annotation.AnnotationSupport;
 import sun.reflect.annotation.AnnotationType;
 
@@ -254,9 +253,9 @@ public interface AnnotatedElement {
      * @throws NullPointerException if the given annotation class is null
      * @since 1.5
      */
-//    default boolean isAnnotationPresent(Class<? extends Annotation> annotationClass) {
-//        return getAnnotation(annotationClass) != null;
-//    }
+    default boolean isAnnotationPresent(Class<? extends Annotation> annotationClass) {
+        return getAnnotation(annotationClass) != null;
+    }
 
    /**
      * Returns this element's annotation for the specified type if
@@ -321,7 +320,10 @@ public interface AnnotatedElement {
      * @throws NullPointerException if the given annotation class is null
      * @since 1.8
      */
-//    default <T extends Annotation> T[] getAnnotationsByType(Class<T> annotationClass) {
+// SwingJS placed directly in Class; Field, Method, and Constructor do not implement this due to AccessibleObject override
+//default 
+    <T extends Annotation> T[] getAnnotationsByType(Class<T> annotationClass);
+//    {
 //         /*
 //          * Definition of associated: directly or indirectly present OR
 //          * neither directly nor indirectly present AND the element is
@@ -330,7 +332,7 @@ public interface AnnotatedElement {
 //          * element.
 //          */
 //         T[] result = getDeclaredAnnotationsByType(annotationClass);
-//
+//SwingJS this next was only for Class
 //         if (result.length == 0 && // Neither directly nor indirectly present
 //             ((Object)this) instanceof Class && // the element is a class
 //             AnnotationType.getInstance(annotationClass).isInherited()) { // Inheritable
@@ -344,30 +346,33 @@ public interface AnnotatedElement {
 //
 //         return result;
 //     }
-
-    /**
-     * Returns this element's annotation for the specified type if
-     * such an annotation is <em>directly present</em>, else null.
-     *
-     * This method ignores inherited annotations. (Returns null if no
-     * annotations are directly present on this element.)
-     *
-     * @implSpec The default implementation first performs a null check
-     * and then loops over the results of {@link
-     * #getDeclaredAnnotations} returning the first annotation whose
-     * annotation type matches the argument type.
-     *
-     * @param <T> the type of the annotation to query for and return if directly present
-     * @param annotationClass the Class object corresponding to the
-     *        annotation type
-     * @return this element's annotation for the specified annotation type if
-     *     directly present on this element, else null
-     * @throws NullPointerException if the given annotation class is null
-     * @since 1.8
-     */
+// SwingJS placed directly in Class; Field, Method, and Constructor do not implement this due to AccessibleObject override
+//    /**
+//     * Returns this element's annotation for the specified type if
+//     * such an annotation is <em>directly present</em>, else null.
+//     *
+//     * This method ignores inherited annotations. (Returns null if no
+//     * annotations are directly present on this element.)
+//     *
+//     * @implSpec The default implementation first performs a null check
+//     * and then loops over the results of {@link
+//     * #getDeclaredAnnotations} returning the first annotation whose
+//     * annotation type matches the argument type.
+//     *
+//     * @param <T> the type of the annotation to query for and return if directly present
+//     * @param annotationClass the Class object corresponding to the
+//     *        annotation type
+//     * @return this element's annotation for the specified annotation type if
+//     *     directly present on this element, else null
+//     * @throws NullPointerException if the given annotation class is null
+//     * @since 1.8
+//     */
 //    default <T extends Annotation> T getDeclaredAnnotation(Class<T> annotationClass) {
 //         Objects.requireNonNull(annotationClass);
-//         // Loop over all directly-present annotations looking for a matching one
+//         // Only annotations on classes are inherited, for all other
+//         // objects getDeclaredAnnotation is the same as
+//         // getAnnotation.
+//        // Loop over all directly-present annotations looking for a matching one
 //         for (Annotation annotation : getDeclaredAnnotations()) {
 //             if (annotationClass.equals(annotation.annotationType())) {
 //                 // More robust to do a dynamic cast at runtime instead
@@ -422,8 +427,10 @@ public interface AnnotatedElement {
      * @throws NullPointerException if the given annotation class is null
      * @since 1.8
      */
-//    default <T extends Annotation> T[] getDeclaredAnnotationsByType(Class<T> annotationClass) {
-//    	return null;
+    // SwingJS implemented directly in Class; already overridded in Field, Constructor, and Method
+    //default 
+    <T extends Annotation> T[] getDeclaredAnnotationsByType(Class<T> annotationClass);
+//    {
 //        Objects.requireNonNull(annotationClass);
 //        return AnnotationSupport.
 //            getDirectlyAndIndirectlyPresent(Arrays.stream(getDeclaredAnnotations()).
@@ -433,6 +440,7 @@ public interface AnnotatedElement {
 //                                                                     LinkedHashMap::new)),
 //                                            annotationClass);
 //    }
+
 
     /**
      * Returns annotations that are <em>directly present</em> on this element.
@@ -448,4 +456,5 @@ public interface AnnotatedElement {
      * @since 1.5
      */
     Annotation[] getDeclaredAnnotations();
+
 }

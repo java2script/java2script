@@ -669,7 +669,8 @@ public class ComponentColorModel extends ColorModel {
      * @throws IllegalArgumentException If the component value for this
      * <CODE>ColorModel</CODE> is signed
      */
-    public int getRed(int pixel) {
+    @Override
+	public int getRed(int pixel) {
         return getRGBComponent(pixel, 0);
     }
 
@@ -691,7 +692,8 @@ public class ComponentColorModel extends ColorModel {
      * @throws IllegalArgumentException If the component value for this
      * <CODE>ColorModel</CODE> is signed
      */
-    public int getGreen(int pixel) {
+    @Override
+	public int getGreen(int pixel) {
         return getRGBComponent(pixel, 1);
     }
 
@@ -713,7 +715,8 @@ public class ComponentColorModel extends ColorModel {
      * @throws IllegalArgumentException If the component value for this
      * <CODE>ColorModel</CODE> is signed
      */
-    public int getBlue(int pixel) {
+    @Override
+	public int getBlue(int pixel) {
         return getRGBComponent(pixel, 2);
     }
 
@@ -730,7 +733,8 @@ public class ComponentColorModel extends ColorModel {
      * @throws IllegalArgumentException If the component value for this
      * <CODE>ColorModel</CODE> is signed
      */
-    public int getAlpha(int pixel) {
+    @Override
+	public int getAlpha(int pixel) {
         if (supportsAlpha == false) {
             return 255;
         }
@@ -762,7 +766,8 @@ public class ComponentColorModel extends ColorModel {
      * @throws IllegalArgumentException If the component value for this
      * <CODE>ColorModel</CODE> is signed
      */
-    public int getRGB(int pixel) {
+    @Override
+	public int getRGB(int pixel) {
         if (numComponents > 1) {
             throw new
                 IllegalArgumentException("More than one component per pixel");
@@ -943,7 +948,8 @@ public class ComponentColorModel extends ColorModel {
      * <CODE>DataBuffer.TYPE_INT</CODE>, <CODE>DataBuffer.TYPE_SHORT</CODE>,
      * <CODE>DataBuffer.TYPE_FLOAT</CODE>, or <CODE>DataBuffer.TYPE_DOUBLE</CODE>.
      */
-    public int getRed(Object inData) {
+    @Override
+	public int getRed(Object inData) {
         return getRGBComponent(inData, 0);
     }
 
@@ -978,7 +984,8 @@ public class ComponentColorModel extends ColorModel {
      * <CODE>DataBuffer.TYPE_INT</CODE>, <CODE>DataBuffer.TYPE_SHORT</CODE>,
      * <CODE>DataBuffer.TYPE_FLOAT</CODE>, or <CODE>DataBuffer.TYPE_DOUBLE</CODE>.
      */
-    public int getGreen(Object inData) {
+    @Override
+	public int getGreen(Object inData) {
         return getRGBComponent(inData, 1);
     }
 
@@ -1013,7 +1020,8 @@ public class ComponentColorModel extends ColorModel {
      * <CODE>DataBuffer.TYPE_INT</CODE>, <CODE>DataBuffer.TYPE_SHORT</CODE>,
      * <CODE>DataBuffer.TYPE_FLOAT</CODE>, or <CODE>DataBuffer.TYPE_DOUBLE</CODE>.
      */
-    public int getBlue(Object inData) {
+    @Override
+	public int getBlue(Object inData) {
         return getRGBComponent(inData, 2);
     }
 
@@ -1044,7 +1052,8 @@ public class ComponentColorModel extends ColorModel {
      * <CODE>DataBuffer.TYPE_INT</CODE>, <CODE>DataBuffer.TYPE_SHORT</CODE>,
      * <CODE>DataBuffer.TYPE_FLOAT</CODE>, or <CODE>DataBuffer.TYPE_DOUBLE</CODE>.
      */
-    public int getAlpha(Object inData) {
+    @Override
+	public int getAlpha(Object inData) {
         if (supportsAlpha == false) {
             return 255;
         }
@@ -1125,7 +1134,8 @@ public class ComponentColorModel extends ColorModel {
      * <CODE>DataBuffer.TYPE_FLOAT</CODE>, or <CODE>DataBuffer.TYPE_DOUBLE</CODE>.
      * @see ColorModel#getRGBdefault
      */
-    public int getRGB(Object inData) {
+    @Override
+	public int getRGB(Object inData) {
         if (needScaleInit) {
             initScale();
         }
@@ -1185,7 +1195,8 @@ public class ComponentColorModel extends ColorModel {
      * @see WritableRaster#setDataElements
      * @see SampleModel#setDataElements
      */
-    public Object getDataElements(int rgb, Object pixel) {
+    @Override
+	public Object getDataElements(int rgb, Object pixel) {
         // REMIND: Use rendering hints?
 
         int red, grn, blu, alp;
@@ -1681,7 +1692,8 @@ public class ComponentColorModel extends ColorModel {
      * array is not null and is not large enough to hold all the color and
      * alpha components (starting at offset).
      */
-    public int[] getComponents(int pixel, int[] components, int offset) {
+    @Override
+	public int[] getComponents(int pixel, int[] components, int offset) {
         if (numComponents > 1) {
             throw new
                 IllegalArgumentException("More than one component per pixel");
@@ -1741,7 +1753,8 @@ public class ComponentColorModel extends ColorModel {
      * components (starting at offset), or if <CODE>pixel</CODE> is not large
      * enough to hold a pixel value for this ColorModel.
      */
-    public int[] getComponents(Object pixel, int[] components, int offset) {
+    @Override
+	public int[] getComponents(Object pixel, int[] components, int offset) {
         int intpixel[];
         if (needScaleInit) {
             initScale();
@@ -1816,7 +1829,8 @@ public class ComponentColorModel extends ColorModel {
      *          <code>normComponents</code> minus <code>normOffset</code>
      *          is less than <code>numComponents</code>
      */
-    public int[] getUnnormalizedComponents(float[] normComponents,
+    @Override
+	public int[] getUnnormalizedComponents(float[] normComponents,
                                            int normOffset,
                                            int[] components, int offset) {
         if (needScaleInit) {
@@ -1865,7 +1879,8 @@ public class ComponentColorModel extends ColorModel {
      * @throws IllegalArgumentException If this
      * <CODE>ComponentColorModel</CODE> does not support the unnormalized form
      */
-    public float[] getNormalizedComponents(int[] components, int offset,
+    @Override
+	public float[] getNormalizedComponents(int[] components, int offset,
                                            float[] normComponents,
                                            int normOffset) {
         if (needScaleInit) {
@@ -1894,7 +1909,8 @@ public class ComponentColorModel extends ColorModel {
      * @throws IllegalArgumentException If this
      * <CODE>ComponentColorModel</CODE> does not support the unnormalized form
      */
-    public int getDataElement(int[] components, int offset) {
+    @Override
+	public int getDataElement(int[] components, int offset) {
         if (needScaleInit) {
             initScale();
         }
@@ -1952,7 +1968,8 @@ public class ComponentColorModel extends ColorModel {
      * @see WritableRaster#setDataElements
      * @see SampleModel#setDataElements
      */
-    public Object getDataElements(int[] components, int offset, Object obj) {
+    @Override
+	public Object getDataElements(int[] components, int offset, Object obj) {
         if (needScaleInit) {
             initScale();
         }
@@ -2042,7 +2059,8 @@ public class ComponentColorModel extends ColorModel {
      *  <code>normOffset</code>
      * @since 1.4
      */
-    public int getDataElement(float[] normComponents, int normOffset) {
+    @Override
+	public int getDataElement(float[] normComponents, int normOffset) {
         if (numComponents > 1) {
             throw new
                 IllegalArgumentException("More than one component per pixel");
@@ -2111,7 +2129,8 @@ public class ComponentColorModel extends ColorModel {
      * @see SampleModel#setDataElements
      * @since 1.4
      */
-    public Object getDataElements(float[] normComponents, int normOffset,
+    @Override
+	public Object getDataElements(float[] normComponents, int normOffset,
                                   Object obj) {
         boolean needAlpha = supportsAlpha && isAlphaPremultiplied;
         float[] stdNormComponents;
@@ -2343,7 +2362,8 @@ public class ComponentColorModel extends ColorModel {
      *          value for this <code>ColorModel</code>.
      * @since 1.4
      */
-    public float[] getNormalizedComponents(Object pixel,
+    @Override
+	public float[] getNormalizedComponents(Object pixel,
                                            float[] normComponents,
                                            int normOffset) {
         if (normComponents == null) {
@@ -2450,7 +2470,8 @@ public class ComponentColorModel extends ColorModel {
      * <CODE>DataBuffer.TYPE_INT</CODE>, <CODE>DataBuffer.TYPE_SHORT</CODE>,
      * <CODE>DataBuffer.TYPE_FLOAT</CODE>, or <CODE>DataBuffer.TYPE_DOUBLE</CODE>.
      */
-    public ColorModel coerceData (WritableRaster raster,
+    @Override
+	public ColorModel coerceData (WritableRaster raster,
                                   boolean isAlphaPremultiplied) {
         if ((supportsAlpha == false) ||
             (this.isAlphaPremultiplied == isAlphaPremultiplied))
@@ -2785,7 +2806,8 @@ public class ComponentColorModel extends ColorModel {
       * @return <CODE>true</CODE> if <CODE>raster</CODE> is compatible with this
       * <CODE>ColorModel</CODE>, <CODE>false</CODE> if it is not.
       */
-    public boolean isCompatibleRaster(Raster raster) {
+    @Override
+	public boolean isCompatibleRaster(Raster raster) {
 
         SampleModel sm = raster.getSampleModel();
 
@@ -2818,7 +2840,8 @@ public class ComponentColorModel extends ColorModel {
      * @see WritableRaster
      * @see SampleModel
      */
-    public WritableRaster createCompatibleWritableRaster (int w, int h) {
+    @Override
+	public WritableRaster createCompatibleWritableRaster (int w, int h) {
        // int dataSize = w*h*numComponents;
         WritableRaster raster = null;
 
@@ -2850,7 +2873,8 @@ public class ComponentColorModel extends ColorModel {
      *
      * @see SampleModel
      */
-    public SampleModel createCompatibleSampleModel(int w, int h) {
+    @Override
+	public SampleModel createCompatibleSampleModel(int w, int h) {
         int[] bandOffsets = new int[numComponents];
         for (int i=0; i < numComponents; i++) {
             bandOffsets[i] = i;
@@ -2883,7 +2907,8 @@ public class ComponentColorModel extends ColorModel {
      *
      * @see SampleModel
      */
-    public boolean isCompatibleSampleModel(SampleModel sm) {
+    @Override
+	public boolean isCompatibleSampleModel(SampleModel sm) {
         if (!(sm instanceof ComponentSampleModel)) {
             return false;
         }
@@ -2916,7 +2941,8 @@ public class ComponentColorModel extends ColorModel {
      * @return A <CODE>WritableRaster</CODE> containing the image's alpha channel.
      *
      */
-    public WritableRaster getAlphaRaster(WritableRaster raster) {
+    @Override
+	public WritableRaster getAlphaRaster(WritableRaster raster) {
         if (hasAlpha() == false) {
             return null;
         }
@@ -2937,7 +2963,8 @@ public class ComponentColorModel extends ColorModel {
      * @return <CODE>true</CODE> if the color model objects are equal,
      * <CODE>false</CODE> if they are not.
      */
-    public boolean equals(Object obj) {
+    @Override
+	public boolean equals(Object obj) {
         if (!super.equals(obj)) {
             return false;
         }

@@ -1480,33 +1480,33 @@ public abstract class ColorModel implements Transparency{
         return colorSpace;
     }
 
-//    /**
-//     * Forces the raster data to match the state specified in the
-//     * <code>isAlphaPremultiplied</code> variable, assuming the data is
-//     * currently correctly described by this <code>ColorModel</code>.  It
-//     * may multiply or divide the color raster data by alpha, or do
-//     * nothing if the data is in the correct state.  If the data needs to
-//     * be coerced, this method will also return an instance of this
-//     * <code>ColorModel</code> with the <code>isAlphaPremultiplied</code>
-//     * flag set appropriately.  This method will throw a
-//     * <code>UnsupportedOperationException</code> if it is not supported
-//     * by this <code>ColorModel</code>.
-//     * Since <code>ColorModel</code> is an abstract class,
-//     * any instance is an instance of a subclass.  Subclasses must
-//     * override this method since the implementation in this abstract
-//     * class throws an <code>UnsupportedOperationException</code>.
-//     * @param raster the <code>WritableRaster</code> data
-//     * @param isAlphaPremultiplied <code>true</code> if the alpha is
-//     * premultiplied; <code>false</code> otherwise
-//     * @return a <code>ColorModel</code> object that represents the
-//     * coerced data.
-//     */
-//    public ColorModel coerceData (WritableRaster raster,
-//                                  boolean isAlphaPremultiplied) {
-//        throw new UnsupportedOperationException
-//            ("This method is not supported by this color model");
-//    }
-//
+    /**
+     * Forces the raster data to match the state specified in the
+     * <code>isAlphaPremultiplied</code> variable, assuming the data is
+     * currently correctly described by this <code>ColorModel</code>.  It
+     * may multiply or divide the color raster data by alpha, or do
+     * nothing if the data is in the correct state.  If the data needs to
+     * be coerced, this method will also return an instance of this
+     * <code>ColorModel</code> with the <code>isAlphaPremultiplied</code>
+     * flag set appropriately.  This method will throw a
+     * <code>UnsupportedOperationException</code> if it is not supported
+     * by this <code>ColorModel</code>.
+     * Since <code>ColorModel</code> is an abstract class,
+     * any instance is an instance of a subclass.  Subclasses must
+     * override this method since the implementation in this abstract
+     * class throws an <code>UnsupportedOperationException</code>.
+     * @param raster the <code>WritableRaster</code> data
+     * @param isAlphaPremultiplied <code>true</code> if the alpha is
+     * premultiplied; <code>false</code> otherwise
+     * @return a <code>ColorModel</code> object that represents the
+     * coerced data.
+     */
+    public ColorModel coerceData (WritableRaster raster,
+                                  boolean isAlphaPremultiplied) {
+        throw new UnsupportedOperationException
+            ("This method is not supported by this color model");
+    }
+
     /**
       * Returns <code>true</code> if <code>raster</code> is compatible
       * with this <code>ColorModel</code> and <code>false</code> if it is

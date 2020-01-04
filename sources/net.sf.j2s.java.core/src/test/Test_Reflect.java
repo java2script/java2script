@@ -2,11 +2,19 @@ package test;
 
 import java.awt.Button;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 class Test_Reflect extends Test_ {
 
-	static long ltime = System.currentTimeMillis();
+	public static long ltime = System.currentTimeMillis();
 	public String s = "field s";
+	public int[] testing;
+	public Test_ test;
 	
 	public void test(char i, String s) {
 		System.out.println("testchar " + i);assert(s.equals("char"));
@@ -54,63 +62,109 @@ class Test_Reflect extends Test_ {
 	}
 
 	/*
-test.Test_Reflect.getMethod$S$ClassA ("test", [Character.TYPE, String]).invoke$O$OA (tr, [new Character ('K').charCodeAt (0), "char"]);
-test.Test_Reflect.getMethod$S$ClassA ("test", [Character.TYPE, String]).invoke$O$OA (tr, [new Character ('K').charCodeAt (0), "char"]);
-test.Test_Reflect.getMethod$S$ClassA ("test", [Integer, String]).invoke$O$OA (tr, [Integer.$valueOf (10), "Integer"]);
-test.Test_Reflect.getMethod$S$ClassA ("test", [Integer.TYPE, String]).invoke$O$OA (tr, [new Integer (10), "int"]);
-test.Test_Reflect.getMethod$S$ClassA ("test", [Integer.TYPE, String]).invoke$O$OA (tr, [Short.$valueOf (10), "int"]);
-test.Test_Reflect.getMethod$S$ClassA ("test", [Integer.TYPE, String]).invoke$O$OA (tr, [new Short (10), "int"]);
-test.Test_Reflect.getMethod$S$ClassA ("test", [Float, String]).invoke$O$OA (tr, [Float.$valueOf (10), "Float"]);
-test.Test_Reflect.getMethod$S$ClassA ("test", [Float.TYPE, String]).invoke$O$OA (tr, [new Integer (10), "float"]);
-test.Test_Reflect.getMethod$S$ClassA ("test", [String, Clazz.arrayType('int[]')]).invoke$O$OA (tr, ["int[]",  Clazz.newIntArray (-1, [10])]);
-test.Test_Reflect.getMethod$S$ClassA ("test", [String, Clazz.arrayType('float[]')]).invoke$O$OA (tr, ["float[]",  Clazz.newFloatArray (-1, [10])]);
-test.Test_Reflect.getMethod$S$ClassA ("test", [String, Clazz.arrayType('test.Test_Reflect[]')]).invoke$O$OA (tr, ["test.Test_Reflect[]",  Clazz.newArray (-1, [tr])]);
-test.Test_Reflect.getMethod$S$ClassA ("test", [String, Clazz.arrayType('java.lang.String[]')]).invoke$O$OA (tr, ["String[]",  Clazz.newArray (-1, ["10"])]);
-test.Test_Reflect.getMethod$S$ClassA ("test", [String, Clazz.arrayType('java.lang.String[][]')]).invoke$O$OA (tr, ["String[][]",  Clazz.newArray (-1, [ Clazz.newArray (-1, ["10"]), null])]);
-test.Test_Reflect.getMethod$S$ClassA ("test", [String, Clazz.arrayType('float[][]')]).invoke$O$OA (tr, ["float[][]",  Clazz.newArray (-1, [ Clazz.newFloatArray (-1, [10]), null])]);
+	 * test.Test_Reflect.getMethod$S$ClassA ("test", [Character.TYPE,
+	 * String]).invoke$O$OA (tr, [new Character ('K').charCodeAt (0), "char"]);
+	 * test.Test_Reflect.getMethod$S$ClassA ("test", [Character.TYPE,
+	 * String]).invoke$O$OA (tr, [new Character ('K').charCodeAt (0), "char"]);
+	 * test.Test_Reflect.getMethod$S$ClassA ("test", [Integer, String]).invoke$O$OA
+	 * (tr, [Integer.$valueOf (10), "Integer"]);
+	 * test.Test_Reflect.getMethod$S$ClassA ("test", [Integer.TYPE,
+	 * String]).invoke$O$OA (tr, [new Integer (10), "int"]);
+	 * test.Test_Reflect.getMethod$S$ClassA ("test", [Integer.TYPE,
+	 * String]).invoke$O$OA (tr, [Short.$valueOf (10), "int"]);
+	 * test.Test_Reflect.getMethod$S$ClassA ("test", [Integer.TYPE,
+	 * String]).invoke$O$OA (tr, [new Short (10), "int"]);
+	 * test.Test_Reflect.getMethod$S$ClassA ("test", [Float, String]).invoke$O$OA
+	 * (tr, [Float.$valueOf (10), "Float"]); test.Test_Reflect.getMethod$S$ClassA
+	 * ("test", [Float.TYPE, String]).invoke$O$OA (tr, [new Integer (10), "float"]);
+	 * test.Test_Reflect.getMethod$S$ClassA ("test", [String,
+	 * Clazz.arrayType('int[]')]).invoke$O$OA (tr, ["int[]", Clazz.newIntArray (-1,
+	 * [10])]); test.Test_Reflect.getMethod$S$ClassA ("test", [String,
+	 * Clazz.arrayType('float[]')]).invoke$O$OA (tr, ["float[]", Clazz.newFloatArray
+	 * (-1, [10])]); test.Test_Reflect.getMethod$S$ClassA ("test", [String,
+	 * Clazz.arrayType('test.Test_Reflect[]')]).invoke$O$OA (tr,
+	 * ["test.Test_Reflect[]", Clazz.newArray (-1, [tr])]);
+	 * test.Test_Reflect.getMethod$S$ClassA ("test", [String,
+	 * Clazz.arrayType('java.lang.String[]')]).invoke$O$OA (tr, ["String[]",
+	 * Clazz.newArray (-1, ["10"])]); test.Test_Reflect.getMethod$S$ClassA ("test",
+	 * [String, Clazz.arrayType('java.lang.String[][]')]).invoke$O$OA (tr,
+	 * ["String[][]", Clazz.newArray (-1, [ Clazz.newArray (-1, ["10"]), null])]);
+	 * test.Test_Reflect.getMethod$S$ClassA ("test", [String,
+	 * Clazz.arrayType('float[][]')]).invoke$O$OA (tr, ["float[][]", Clazz.newArray
+	 * (-1, [ Clazz.newFloatArray (-1, [10]), null])]);
 	 */
 
 	public static void main(String[] args) {
+
+		List<String> list = new ArrayList<>();
+		Map.Entry<String, Integer>entry = new Map.Entry<String, Integer>(){
+
+			@Override
+			public String getKey() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public Integer getValue() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public Integer setValue(Integer value) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+			
+		};
+		Method[] m = Map.Entry.class.getDeclaredMethods();
+		for (int i = 0; i < m.length; i++)
+			System.out.println(m[i].getName() + "\t" + m[i].getReturnType().getName());
+				
 		
 		
-		new Test_Reflect().test("int[]", new int[] {1,2,3});
+		
+		new Test_Reflect().test("int[]", new int[] { 1, 2, 3 });
 		String name = "";
 		try {
-			Test_Path tp = (Test_Path) Class.forName(name = "Test_Path", true, Test_Reflect.class.getClassLoader()).newInstance();
-			assert(tp != null);
+			Test_Path tp = (Test_Path) Class.forName(name = "test.Test_Path", true, Test_Reflect.class.getClassLoader())
+					.newInstance();
+			assert (tp != null);
 			System.out.println("class loaded: " + tp.getClass().getName());
 
-			Button b = (Button) Class.forName(name = "java.awt.Button", true, Test_Reflect.class.getClassLoader()).newInstance();
-			assert(b != null);
+			Button b = (Button) Class.forName(name = "java.awt.Button", true, Test_Reflect.class.getClassLoader())
+					.newInstance();
+			assert (b != null);
 			System.out.println("class loaded: " + b.getClass().getName());
 
 		} catch (Throwable t) {
 			System.out.println("problems loading " + name);
-			assert(false);
+			t.printStackTrace();
+			assert (false);
 		}
-		
+
 		Test_Reflect tr = new Test_Reflect();
-		
+
 		new Test_Char();
-		assert(tr instanceof Test_);
-		assert(tr instanceof Test_);
-		assert(!(((Test_)tr) instanceof Test_Char));
+		assert (tr instanceof Test_);
+		assert (tr instanceof Test_);
+		assert (!(((Test_) tr) instanceof Test_Char));
 
 		long l = System.currentTimeMillis();
-		System.out.println(l - ltime);
+		System.out.println("time/ms to here " + (l - ltime));
 		for (int i = 0; i < 10000; i++) {
-		assert(!(((Test_)tr) instanceof Test_Char));
+			assert (!(((Test_) tr) instanceof Test_Char));
 		}
-		System.out.println(l - System.currentTimeMillis());
-		
-		
-  		  // Field is not implemented
+		System.out.println("time/ms for 10000 instanceof " + (System.currentTimeMillis() - l));
+
+		// Field is not implemented
 //			Field f = Test_Reflect.class.getDeclaredField("s");
 //			System.out.println(f.getDeclaringClass());
-			
+
 		try {
-			Test_Reflect.class.getMethod("test", char.class, String.class).invoke(tr, (char)75, "char");
-			Test_Reflect.class.getMethod("test", Character.TYPE, String.class).invoke(tr, (char)75, "char");
+			Test_Reflect.class.getMethod("test", char.class, String.class).invoke(tr, (char) 75, "char");
+			Test_Reflect.class.getMethod("test", Character.TYPE, String.class).invoke(tr, (char) 75, "char");
 
 			Test_Reflect.class.getMethod("test", Integer.class, String.class).invoke(tr, Integer.valueOf(10),
 					"Integer");
@@ -124,12 +178,13 @@ test.Test_Reflect.getMethod$S$ClassA ("test", [String, Clazz.arrayType('float[][
 			int[][] ii = new int[2][2];
 			ii[0][0] = 10;
 			float[][] ff = new float[2][];
-			ff[0] = new float[] {10};
-			String[][] ss = new String[][] {new String[] {"10"}, null};
-			
+			ff[0] = new float[] { 10 };
+			String[][] ss = new String[][] { new String[] { "10" }, null };
+
 			Test_Reflect.class.getMethod("test", String.class, int[].class).invoke(tr, "int[]", ii[0]);
 			Test_Reflect.class.getMethod("test", String.class, float[].class).invoke(tr, "float[]", ff[0]);
-			Test_Reflect.class.getMethod("test", String.class, test.Test_Reflect[].class).invoke(tr, "test.Test_Reflect[]", new test.Test_Reflect[] {tr});
+			Test_Reflect.class.getMethod("test", String.class, test.Test_Reflect[].class).invoke(tr,
+					"test.Test_Reflect[]", new test.Test_Reflect[] { tr });
 
 			Test_Reflect.class.getMethod("test", String.class, String[].class).invoke(tr, "String[]", ss[0]);
 			Test_Reflect.class.getMethod("test", String.class, String[][].class).invoke(tr, "String[][]", ss);
@@ -138,24 +193,37 @@ test.Test_Reflect.getMethod$S$ClassA ("test", [String, Clazz.arrayType('float[][
 			try {
 				// intentional failure to invoke
 				Test_Reflect.class.getMethod("test", String.class, int[][][][].class).invoke(tr, "int[][][][]", ii[0]);
-				assert(false);
+				assert (false);
 			} catch (Exception e) {
-				assert(e instanceof NoSuchMethodException);
+				assert (e instanceof NoSuchMethodException);
 			}
 		} catch (Throwable e) {
-			assert(false);
+			assert (false);
 		}
 		Test_Reflect t = new Test_Reflect();
 		Class<? extends Test_Reflect> f = t.getClass();
-		Field[] fields = f.getDeclaredFields();
-		for (int i = 0; i < fields.length; i++)
-			try {
+		try {
+			Field[] fields = f.getDeclaredFields();
+			for (int i = 0; i < fields.length; i++)
+				System.out.println("declaredField " + i + ": " + fields[i].getName() + " " + fields[i].get(t) + " as " + fields[i].getType().getName());
+			f.getField("s").set(t, "news");
+			System.out.println("t.s=" + t.s);
+			assert (t.s.equals("news"));
+			fields = f.getFields();
+			for (int i = 0; i < fields.length; i++)
 				System.out.println("field " + i + ": " + fields[i].getName() + " " + fields[i].get(t));
-			} catch (IllegalArgumentException | IllegalAccessException e) {
-				e.printStackTrace();
-			}
-		
-		System.out.println("Test_Reflect OK");				
+
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (NoSuchFieldException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		System.out.println("Test_Reflect OK");
 	}
 
 }

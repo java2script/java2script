@@ -89,7 +89,7 @@ public abstract class AbstractInterruptibleChannel
 {
 
     private final Object closeLock = new Object();
-    private volatile boolean open = true;
+    protected volatile boolean open = true;
 
     /**
      * Initializes a new instance of this class.
@@ -141,9 +141,9 @@ public abstract class AbstractInterruptibleChannel
 
     // -- Interruption machinery --
 
-    private Interruptible interruptor;
-    private volatile Thread interrupted;
-
+//    private Interruptible interruptor;
+//    private volatile Thread interrupted;
+//
     /**
      * Marks the beginning of an I/O operation that might block indefinitely.
      *
@@ -153,24 +153,24 @@ public abstract class AbstractInterruptibleChannel
      * closing and interruption for this channel.  </p>
      */
     protected final void begin() {
-        if (interruptor == null) {
-            interruptor = new Interruptible() {
-                    public void interrupt(Thread target) {
-                        synchronized (closeLock) {
-                            if (!open)
-                                return;
-                            open = false;
-                            interrupted = target;
-                            try {
-                                AbstractInterruptibleChannel.this.implCloseChannel();
-                            } catch (IOException x) { }
-                        }
-                    }};
-        }
-        blockedOn(interruptor);
-        Thread me = Thread.currentThread();
-        if (me.isInterrupted())
-            interruptor.interrupt(me);
+//        if (interruptor == null) {
+//            interruptor = new Interruptible() {
+//                    public void interrupt(Thread target) {
+//                        synchronized (closeLock) {
+//                            if (!open)
+//                                return;
+//                            open = false;
+//                            interrupted = target;
+//                            try {
+//                                AbstractInterruptibleChannel.this.implCloseChannel();
+//                            } catch (IOException x) { }
+//                        }
+//                    }};
+//        }
+//        blockedOn(interruptor);
+//        Thread me = Thread.currentThread();
+//        if (me.isInterrupted())
+//            interruptor.interrupt(me);
     }
 
     /**
@@ -195,20 +195,20 @@ public abstract class AbstractInterruptibleChannel
     protected final void end(boolean completed)
         throws AsynchronousCloseException
     {
-        blockedOn(null);
-        Thread interrupted = this.interrupted;
-        if (interrupted != null && interrupted == Thread.currentThread()) {
-            interrupted = null;
-            throw new ClosedByInterruptException();
-        }
+//        blockedOn(null);
+//        Thread interrupted = this.interrupted;
+//        if (interrupted != null && interrupted == Thread.currentThread()) {
+//            interrupted = null;
+//            throw new ClosedByInterruptException();
+//        }
         if (!completed && !open)
             throw new AsynchronousCloseException();
     }
 
-
-    // -- sun.misc.SharedSecrets --
-    static void blockedOn(Interruptible intr) {         // package-private
-        sun.misc.SharedSecrets.getJavaLangAccess().blockedOn(Thread.currentThread(),
-                                                             intr);
-    }
+//
+//    // -- sun.misc.SharedSecrets --
+//    static void blockedOn(Interruptible intr) {         // package-private
+//        sun.misc.SharedSecrets.getJavaLangAccess().blockedOn(Thread.currentThread(),
+//                                                             intr);
+//    }
 }

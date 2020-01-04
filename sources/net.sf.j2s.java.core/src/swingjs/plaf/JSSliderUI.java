@@ -168,7 +168,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 			} else {
 				DOMNode node = (myScrollPaneUI == null && !paintTicks ? jqSlider : sliderTrack);
 				DOMNode.setStyles(node, "background-color", JSToolkit.getCSSColor(c));
-				if (isScrollBar && Color.WHITE.equals(c))
+				if (isScrollBar&& (Color.WHITE.equals(c) || c.getRGB() == (0xFFEEEEEE & -1)))
 					DOMNode.setStyles(sliderHandle, "background", "#ccc");
 			}
 

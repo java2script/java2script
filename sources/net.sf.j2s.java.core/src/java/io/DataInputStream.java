@@ -608,6 +608,10 @@ public class DataInputStream extends FilterInputStream implements DataInput {
 		return readUTFBytes(this, -1);
 	}
 
+    public final static String readUTF(DataInput in) throws IOException {
+    	return readUTFBytes(in, -1);
+    }
+
 	/**
 	 * Reads from the stream <code>in</code> a representation of a Unicode
 	 * character string encoded in

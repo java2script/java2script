@@ -25,11 +25,11 @@
 
 package java.util;
 
-import java.io.*;
-import java.util.concurrent.ThreadLocalRandom;
+import java.io.IOException;
+import java.io.StreamCorruptedException;
 import java.util.function.BiConsumer;
-import java.util.function.Function;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * This class implements a hash table, which maps keys to values. Any
@@ -230,7 +230,8 @@ public class Hashtable<K,V>
      *
      * @return  the number of keys in this hashtable.
      */
-    public synchronized int size() {
+    @Override
+	public synchronized int size() {
         return count;
     }
 
@@ -240,7 +241,8 @@ public class Hashtable<K,V>
      * @return  <code>true</code> if this hashtable maps no keys to values;
      *          <code>false</code> otherwise.
      */
-    public synchronized boolean isEmpty() {
+    @Override
+	public synchronized boolean isEmpty() {
         return count == 0;
     }
 
@@ -253,7 +255,8 @@ public class Hashtable<K,V>
      * @see     #keySet()
      * @see     Map
      */
-    public synchronized Enumeration<K> keys() {
+    @Override
+	public synchronized Enumeration<K> keys() {
         return this.<K>getEnumeration(KEYS);
     }
 
@@ -268,7 +271,8 @@ public class Hashtable<K,V>
      * @see     #values()
      * @see     Map
      */
-    public synchronized Enumeration<V> elements() {
+    @Override
+	public synchronized Enumeration<V> elements() {
         return this.<V>getEnumeration(VALUES);
     }
 
@@ -316,7 +320,8 @@ public class Hashtable<K,V>
      * @throws NullPointerException  if the value is <code>null</code>
      * @since 1.2
      */
-    public boolean containsValue(Object value) {
+    @Override
+	public boolean containsValue(Object value) {
         return contains(value);
     }
 
@@ -330,7 +335,8 @@ public class Hashtable<K,V>
      * @throws  NullPointerException  if the key is <code>null</code>
      * @see     #contains(Object)
      */
-    public synchronized boolean containsKey(Object key) {
+    @Override
+	public synchronized boolean containsKey(Object key) {
         Entry<?,?> tab[] = table;
         int hash = key.hashCode();
         int index = (hash & 0x7FFFFFFF) % tab.length;
@@ -357,7 +363,8 @@ public class Hashtable<K,V>
      * @throws NullPointerException if the specified key is null
      * @see     #put(Object, Object)
      */
-    @SuppressWarnings("unchecked")
+    @Override
+	@SuppressWarnings("unchecked")
     public synchronized V get(Object key) {
         Entry<?,?> tab[] = table;
         int hash = key.hashCode();
@@ -453,7 +460,8 @@ public class Hashtable<K,V>
      * @see     Object#equals(Object)
      * @see     #get(Object)
      */
-    public synchronized V put(K key, V value) {
+    @Override
+	public synchronized V put(K key, V value) {
         // Make sure the value is not null
         if (value == null) {
             throw new NullPointerException();
@@ -486,7 +494,8 @@ public class Hashtable<K,V>
      *          or <code>null</code> if the key did not have a mapping
      * @throws  NullPointerException  if the key is <code>null</code>
      */
-    public synchronized V remove(Object key) {
+    @Override
+	public synchronized V remove(Object key) {
         Entry<?,?> tab[] = table;
         int hash = key.hashCode();
         int index = (hash & 0x7FFFFFFF) % tab.length;
@@ -518,7 +527,8 @@ public class Hashtable<K,V>
      * @throws NullPointerException if the specified map is null
      * @since 1.2
      */
-    public synchronized void putAll(Map<? extends K, ? extends V> t) {
+    @Override
+	public synchronized void putAll(Map<? extends K, ? extends V> t) {
         for (Map.Entry<? extends K, ? extends V> e : t.entrySet())
             put(e.getKey(), e.getValue());
     }
@@ -526,7 +536,8 @@ public class Hashtable<K,V>
     /**
      * Clears this hashtable so that it contains no keys.
      */
-    public synchronized void clear() {
+    @Override
+	public synchronized void clear() {
         Entry<?,?> tab[] = table;
         modCount++;
         for (int index = tab.length; --index >= 0; )
@@ -541,7 +552,8 @@ public class Hashtable<K,V>
      *
      * @return  a clone of the hashtable
      */
-    public synchronized Object clone() {
+    @Override
+	public synchronized Object clone() {
         try {
             Hashtable<?,?> t = (Hashtable<?,?>)super.clone();
             t.table = new Entry<?,?>[table.length];
@@ -570,7 +582,8 @@ public class Hashtable<K,V>
      *
      * @return  a string representation of this hashtable
      */
-    public synchronized String toString() {
+    @Override
+	public synchronized String toString() {
         int max = size() - 1;
         if (max == -1)
             return "{}";
@@ -636,26 +649,32 @@ public class Hashtable<K,V>
      *
      * @since 1.2
      */
-    public Set<K> keySet() {
+    @Override
+	public Set<K> keySet() {
         if (keySet == null)
             keySet = Collections.synchronizedSet(new KeySet(), this);
         return keySet;
     }
 
     private class KeySet extends AbstractSet<K> {
-        public Iterator<K> iterator() {
+        @Override
+		public Iterator<K> iterator() {
             return getIterator(KEYS);
         }
-        public int size() {
+        @Override
+		public int size() {
             return count;
         }
-        public boolean contains(Object o) {
+        @Override
+		public boolean contains(Object o) {
             return containsKey(o);
         }
-        public boolean remove(Object o) {
+        @Override
+		public boolean remove(Object o) {
             return Hashtable.this.remove(o) != null;
         }
-        public void clear() {
+        @Override
+		public void clear() {
             Hashtable.this.clear();
         }
     }
@@ -676,22 +695,26 @@ public class Hashtable<K,V>
      *
      * @since 1.2
      */
-    public Set<Map.Entry<K,V>> entrySet() {
+    @Override
+	public Set<Map.Entry<K,V>> entrySet() {
         if (entrySet==null)
             entrySet = Collections.synchronizedSet(new EntrySet(), this);
         return entrySet;
     }
 
     private class EntrySet extends AbstractSet<Map.Entry<K,V>> {
-        public Iterator<Map.Entry<K,V>> iterator() {
+        @Override
+		public Iterator<Map.Entry<K,V>> iterator() {
             return getIterator(ENTRIES);
         }
 
-        public boolean add(Map.Entry<K,V> o) {
+        @Override
+		public boolean add(Map.Entry<K,V> o) {
             return super.add(o);
         }
 
-        public boolean contains(Object o) {
+        @Override
+		public boolean contains(Object o) {
             if (!(o instanceof Map.Entry))
                 return false;
             Map.Entry<?,?> entry = (Map.Entry<?,?>)o;
@@ -706,7 +729,8 @@ public class Hashtable<K,V>
             return false;
         }
 
-        public boolean remove(Object o) {
+        @Override
+		public boolean remove(Object o) {
             if (!(o instanceof Map.Entry))
                 return false;
             Map.Entry<?,?> entry = (Map.Entry<?,?>) o;
@@ -733,11 +757,13 @@ public class Hashtable<K,V>
             return false;
         }
 
-        public int size() {
+        @Override
+		public int size() {
             return count;
         }
 
-        public void clear() {
+        @Override
+		public void clear() {
             Hashtable.this.clear();
         }
     }
@@ -757,7 +783,8 @@ public class Hashtable<K,V>
      *
      * @since 1.2
      */
-    public Collection<V> values() {
+    @Override
+	public Collection<V> values() {
         if (values==null)
             values = Collections.synchronizedCollection(new ValueCollection(),
                                                         this);
@@ -765,16 +792,20 @@ public class Hashtable<K,V>
     }
 
     private class ValueCollection extends AbstractCollection<V> {
-        public Iterator<V> iterator() {
+        @Override
+		public Iterator<V> iterator() {
             return getIterator(VALUES);
         }
-        public int size() {
+        @Override
+		public int size() {
             return count;
         }
-        public boolean contains(Object o) {
+        @Override
+		public boolean contains(Object o) {
             return containsValue(o);
         }
-        public void clear() {
+        @Override
+		public void clear() {
             Hashtable.this.clear();
         }
     }
@@ -790,7 +821,8 @@ public class Hashtable<K,V>
      * @see Map#equals(Object)
      * @since 1.2
      */
-    public synchronized boolean equals(Object o) {
+    @Override
+	public synchronized boolean equals(Object o) {
         if (o == this)
             return true;
 
@@ -830,7 +862,8 @@ public class Hashtable<K,V>
      * @see Map#hashCode()
      * @since 1.2
      */
-    public synchronized int hashCode() {
+    @Override
+	public synchronized int hashCode() {
         /*
          * This code detects the recursion caused by computing the hash code
          * of a self-referential hash table and prevents the stack overflow
@@ -1243,25 +1276,28 @@ public class Hashtable<K,V>
             this.key =  key;
             this.value = value;
             this.next_ = next;
-        }
+        } 
 
-        @SuppressWarnings("unchecked")
-        protected Object clone() {
+        @Override
+		protected Object clone() {
             return new Entry<>(hash, key, value,
                                   (next_==null ? null : (Entry<K,V>) next_.clone()));
         }
 
         // Map.Entry Ops
 
-        public K getKey() {
+        @Override
+		public K getKey() {
             return key;
         }
 
-        public V getValue() {
+        @Override
+		public V getValue() {
             return value;
         }
 
-        public V setValue(V value) {
+        @Override
+		public V setValue(V value) {
             if (value == null)
                 throw new NullPointerException();
 
@@ -1270,7 +1306,8 @@ public class Hashtable<K,V>
             return oldValue;
         }
 
-        public boolean equals(Object o) {
+        @Override
+		public boolean equals(Object o) {
             if (!(o instanceof Map.Entry))
                 return false;
             Map.Entry<?,?> e = (Map.Entry<?,?>)o;
@@ -1279,11 +1316,13 @@ public class Hashtable<K,V>
                (value==null ? e.getValue()==null : value.equals(e.getValue()));
         }
 
-        public int hashCode() {
+        @Override
+		public int hashCode() {
             return hash ^ Objects.hashCode(value);
         }
 
-        public String toString() {
+        @Override
+		public String toString() {
             return key.toString()+"="+value.toString();
         }
     }
@@ -1325,7 +1364,8 @@ public class Hashtable<K,V>
             this.iterator = iterator;
         }
 
-        public boolean hasMoreElements() {
+        @Override
+		public boolean hasMoreElements() {
             Entry<?,?> e = entry;
             int i = index;
             Entry<?,?>[] t = table;
@@ -1338,7 +1378,8 @@ public class Hashtable<K,V>
             return e != null;
         }
 
-        @SuppressWarnings("unchecked")
+        @Override
+		@SuppressWarnings("unchecked")
         public T nextElement() {
             Entry<?,?> et = entry;
             int i = index;
@@ -1358,17 +1399,20 @@ public class Hashtable<K,V>
         }
 
         // Iterator methods
-        public boolean hasNext() {
+        @Override
+		public boolean hasNext() {
             return hasMoreElements();
         }
 
-        public T next() {
+        @Override
+		public T next() {
             if (modCount != expectedModCount)
                 throw new ConcurrentModificationException();
             return nextElement();
         }
 
-        public void remove() {
+        @Override
+		public void remove() {
             if (!iterator)
                 throw new UnsupportedOperationException();
             if (lastReturned == null)

@@ -5,6 +5,7 @@ import java.lang.reflect.Array;
 class Test_Array extends Test_ {
 
 	static int[] i0 = new int[0];
+	static Object ono = new Class<?>[0];
 
 	static Object c33def2b = new int[][] { { 0, 1, 2 }, { 3, 4, 5 }, { 3, 4, 5 }, { 3, 4, 5 } };
 

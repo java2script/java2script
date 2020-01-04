@@ -58,14 +58,17 @@ class HeapByteBuffer extends ByteBuffer {
 		 */
 	}
 
+	@Override
 	public ByteBuffer slice() {
 		return new HeapByteBuffer(hb, -1, 0, this.remaining(), this.remaining(), this.position() + offset);
 	}
 
+	@Override
 	public ByteBuffer duplicate() {
 		return new HeapByteBuffer(hb, this.markValue(), this.position(), this.limit(), this.capacity(), offset);
 	}
 
+	@Override
 	public ByteBuffer asReadOnlyBuffer() {
 		return new HeapByteBufferR(hb, this.markValue(), this.position(), this.limit(), this.capacity(), offset);
 	}
@@ -74,14 +77,17 @@ class HeapByteBuffer extends ByteBuffer {
 		return i + offset;
 	}
 
+	@Override
 	public byte get() {
 		return hb[ix(nextGetIndex())];
 	}
 
+	@Override
 	public byte get(int i) {
 		return hb[ix(checkIndex(i))];
 	}
 
+	@Override
 	public ByteBuffer get(byte[] dst, int offset, int length) {
 		checkBounds(offset, length, dst.length);
 		if (length > remaining())
@@ -91,25 +97,30 @@ class HeapByteBuffer extends ByteBuffer {
 		return this;
 	}
 
+	@Override
 	public boolean isDirect() {
 		return false;
 	}
 
+	@Override
 	public boolean isReadOnly() {
 		return false;
 	}
 
+	@Override
 	public ByteBuffer put(byte x) {
 		hb[ix(nextPutIndex())] = x;
 		return this;
 	}
 
+	@Override
 	public ByteBuffer put(int i, byte x) {
 
 		hb[ix(checkIndex(i))] = x;
 		return this;
 	}
 
+	@Override
 	public ByteBuffer put(byte[] src, int offset, int length) {
 
 		checkBounds(offset, length, src.length);
@@ -120,6 +131,7 @@ class HeapByteBuffer extends ByteBuffer {
 		return this;
 	}
 
+	@Override
 	public ByteBuffer put(ByteBuffer src) {
 
 		if (src instanceof HeapByteBuffer) {
@@ -144,6 +156,7 @@ class HeapByteBuffer extends ByteBuffer {
 		return this;
 	}
 	
+	@Override
 	public ByteBuffer compact() {
 
 		System.arraycopy(hb, ix(position()), hb, ix(0), remaining());
@@ -153,10 +166,12 @@ class HeapByteBuffer extends ByteBuffer {
 		return this;
 	}
 
+	@Override
 	public byte _get(int i) { // package-private
 		return hb[i];
 	}
 
+	@Override
 	public void _put(int i, byte b) { // package-private
 
 		hb[i] = b;
@@ -184,6 +199,7 @@ class HeapByteBuffer extends ByteBuffer {
 		return this;
 	}
 
+	@Override
 	public CharBuffer asCharBuffer() {
 		int size = this.remaining() >> 1;
 		int off = offset + position();
@@ -213,6 +229,7 @@ class HeapByteBuffer extends ByteBuffer {
 		return this;
 	}
 
+	@Override
 	public ShortBuffer asShortBuffer() {
 		int size = this.remaining() >> 1;
 		int off = offset + position();
@@ -242,6 +259,7 @@ class HeapByteBuffer extends ByteBuffer {
 		return this;
 	}
 
+	@Override
 	public IntBuffer asIntBuffer() {
 		int size = this.remaining() >> 2;
 		int off = offset + position();
@@ -271,6 +289,7 @@ class HeapByteBuffer extends ByteBuffer {
 		return this;
 	}
 
+	@Override
 	public LongBuffer asLongBuffer() {
 		int size = this.remaining() >> 3;
 		int off = offset + position();
@@ -300,6 +319,7 @@ class HeapByteBuffer extends ByteBuffer {
 		return this;
 	}
 
+	@Override
 	public FloatBuffer asFloatBuffer() {
 		int size = this.remaining() >> 2;
 		int off = offset + position();
@@ -329,6 +349,7 @@ class HeapByteBuffer extends ByteBuffer {
 		return this;
 	}
 
+	@Override
 	public DoubleBuffer asDoubleBuffer() {
 		int size = this.remaining() >> 3;
 		int off = offset + position();

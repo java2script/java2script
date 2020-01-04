@@ -26,7 +26,7 @@ public class JSTempFile extends File {
 	public void cacheBytes() {
 		JSUtil.cacheFileData(path, 秘bytes);
 	}
-	
+
 	public boolean setBytes(Object isOrBytes) {
 		if (isOrBytes instanceof InputStream) {
 			秘bytes = /**

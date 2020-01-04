@@ -207,16 +207,16 @@ public abstract class AbstractSelector
      * blocked in an I/O operation upon the selector.  </p>
      */
     protected final void begin() {
-        if (interruptor == null) {
-            interruptor = new Interruptible() {
-                    public void interrupt(Thread ignore) {
-                        AbstractSelector.this.wakeup();
-                    }};
-        }
-        AbstractInterruptibleChannel.blockedOn(interruptor);
-        Thread me = Thread.currentThread();
-        if (me.isInterrupted())
-            interruptor.interrupt(me);
+//        if (interruptor == null) {
+//            interruptor = new Interruptible() {
+//                    public void interrupt(Thread ignore) {
+//                        AbstractSelector.this.wakeup();
+//                    }};
+//        }
+//        AbstractInterruptibleChannel.blockedOn(interruptor);
+//        Thread me = Thread.currentThread();
+//        if (me.isInterrupted())
+//            interruptor.interrupt(me);
     }
 
     /**
@@ -228,7 +228,7 @@ public abstract class AbstractSelector
      * this selector.  </p>
      */
     protected final void end() {
-        AbstractInterruptibleChannel.blockedOn(null);
+//        AbstractInterruptibleChannel.blockedOn(null);
     }
 
 }

@@ -231,7 +231,7 @@ public class JSAudio implements AudioClip {
 		// 0x0001 WAVE_FORMAT_PCM PCM
 		// 0x0003 WAVE_FORMAT_IEEE_FLOAT IEEE float
 		// 0x0006 WAVE_FORMAT_ALAW 8-bit ITU-T G.711 A-law
-		// 0x0007 WAVE_FORMAT_MULAW 8-bit ITU-T G.711 µ-law
+		// 0x0007 WAVE_FORMAT_MULAW 8-bit ITU-T G.711 ï¿½-law
 
 		// byte[] b;
 		int fmt = FORMAT_UNSUPPORTED;
@@ -362,6 +362,7 @@ public class JSAudio implements AudioClip {
 		return new JSAudioInputStream(stream, getAudioFormatForStreamOrBytes(stream, null), -1);
 	}
 
+	@SuppressWarnings("unused")
 	private static AudioFormat getAudioFormatForStreamOrBytes(
 			ByteArrayInputStream stream, byte[] header) throws UnsupportedAudioFileException {
 		
@@ -392,8 +393,8 @@ public class JSAudio implements AudioClip {
 					stream.read(header);
 				}
 				sampleSizeInBits = 8;
-				int pt = BC.bytesToInt(header, 4, true);
-				int length = BC.bytesToInt(header, 8, true);
+				//int pt = BC.bytesToInt(header, 4, true);
+				//int length = BC.bytesToInt(header, 8, true);
 				int enc = BC.bytesToInt(header, 12, true);
 				frameRate = sampleRate = BC.bytesToInt(header, 16, true);
 				channels = BC.bytesToInt(header, 20, true);

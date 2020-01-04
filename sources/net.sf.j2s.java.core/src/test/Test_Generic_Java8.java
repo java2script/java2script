@@ -1,5 +1,8 @@
 package test;
 
+import java.util.List;
+import java.util.ArrayList;
+
 import javax.swing.DefaultListModel;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -8,6 +11,12 @@ import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 
 public class Test_Generic_Java8 extends Test_ implements ListCellRenderer {
+
+	
+    public static <T> List<T> asList(T... a) {
+        return (List<T>) new ArrayList<String>();
+    }
+
 
 	/**
 	 * Demonstrates the issue with Java8 classes being generic while Java6
@@ -21,6 +30,8 @@ public class Test_Generic_Java8 extends Test_ implements ListCellRenderer {
 	 */
 	public static void main(String[] args) {
 	
+		System.out.println(Test_Generic_Java8.<String>asList("testing"));
+		
 		Test_Generic_Java8 test = new Test_Generic_Java8();
 		// calls getListCellRendererComponent$javax_swing_JList$O$I$Z$Z 
 		test.getListCellRendererComponent(null,  null, 0, false, false);

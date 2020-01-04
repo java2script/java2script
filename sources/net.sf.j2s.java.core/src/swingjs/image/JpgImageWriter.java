@@ -18,7 +18,7 @@ import javax.imageio.metadata.IIOMetadata;
  * @see javax.imageio.spi.ImageWriterSpi
  *
  */
-public class JpgImageWriter extends ImageWriter {
+public class JpgImageWriter extends JSImageWriter {
 	public JpgImageWriter() {
 		super();
 		params.put("type", "JPG");

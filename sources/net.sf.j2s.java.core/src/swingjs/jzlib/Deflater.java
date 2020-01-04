@@ -36,137 +36,141 @@ package swingjs.jzlib;
 
 public class Deflater extends ZStream {
 
-  static final private int MAX_WBITS = 15; // 32K LZ77 window
+	static final private int MAX_WBITS = 15; // 32K LZ77 window
 
-  //static final private int DEF_WBITS=MAX_WBITS;
+	// static final private int DEF_WBITS=MAX_WBITS;
 
-  //  static final private int Z_NO_FLUSH=0;
-  //  static final private int Z_PARTIAL_FLUSH=1;
-  //  static final private int Z_SYNC_FLUSH=2;
-  //  static final private int Z_FULL_FLUSH=3;
-  //  static final private int Z_FINISH=4;
-  //
-  //  static final private int MAX_MEM_LEVEL=9;
+	// static final private int Z_NO_FLUSH=0;
+	// static final private int Z_PARTIAL_FLUSH=1;
+	// static final private int Z_SYNC_FLUSH=2;
+	// static final private int Z_FULL_FLUSH=3;
+	// static final private int Z_FINISH=4;
+	//
+	// static final private int MAX_MEM_LEVEL=9;
 
-  //static final private int Z_OK = 0;
-  static final private int Z_STREAM_END = 1;
-  //  static final private int Z_NEED_DICT=2;
-  //  static final private int Z_ERRNO=-1;
-  static final private int Z_STREAM_ERROR = -2;
-  //  static final private int Z_DATA_ERROR=-3;
-  //  static final private int Z_MEM_ERROR=-4;
-  //  static final private int Z_BUF_ERROR=-5;
-  //  static final private int Z_VERSION_ERROR=-6;
+	// static final private int Z_OK = 0;
+	static final private int Z_STREAM_END = 1;
+	// static final private int Z_NEED_DICT=2;
+	// static final private int Z_ERRNO=-1;
+	static final private int Z_STREAM_ERROR = -2;
+	// static final private int Z_DATA_ERROR=-3;
+	// static final private int Z_MEM_ERROR=-4;
+	// static final private int Z_BUF_ERROR=-5;
+	// static final private int Z_VERSION_ERROR=-6;
 
-  private boolean finished = false;
+	private boolean finished = false;
 
-  /*
+	/*
+	 * 
+	 * public Deflater(int level) { this(level, 0, false); }
+	 * 
+	 * public Deflater(int level, boolean nowrap) { this(level, 0, nowrap); }
+	 * 
+	 * public Deflater(int level, int bits) { this(level, bits, false); }
+	 */
 
-  public Deflater(int level) {
-    this(level, 0, false);
-  }
+	/*
+	 * public Deflater(int level, int bits, int memlevel) { super(); init3(level,
+	 * bits, memlevel); //if (ret != Z_OK) //throw new GZIPException(ret + ": " +
+	 * msg); } public int init(int level) { return init2(level, MAX_WBITS); }
+	 * 
+	 * public int init2(int level, int bits) { return init3b(level, bits, false); }
+	 * 
+	 * 
+	 * public int init2b(int level, boolean nowrap) { return init3b(level,
+	 * MAX_WBITS, nowrap); }
+	 * 
+	 * public int init3(int level, int bits, int memlevel) { finished = false;
+	 * dstate = new Deflate(this); return dstate.deflateInit3(level, bits,
+	 * memlevel); }
+	 * 
+	 * 
+	 */
+	public Deflater init(int level, int bits, boolean nowrap) {
+		if (bits == 0)
+			bits = MAX_WBITS;
+		finished = false;
+		setAdler32();
+		dstate = new Deflate(this);
+		dstate.deflateInit2(level, nowrap ? -bits : bits);
+		return this;
+	}
 
-  public Deflater(int level, boolean nowrap) {
-    this(level, 0, nowrap);
-  }
+	public int deflate(byte[] buf, int off, int len, int flush) {
+		super.setOutput(buf, off, len);
+		long thisLen = getBytesWritten();
+		deflate(flush);
+		long newLen = getBytesWritten();
+		return (int) (newLen - thisLen);
+	}
 
-  public Deflater(int level, int bits) {
-    this(level, bits, false);
-  }
-   */
-  
-/*
-  public Deflater(int level, int bits, int memlevel) {
-    super();
-    init3(level, bits, memlevel);
-    //if (ret != Z_OK)
-      //throw new GZIPException(ret + ": " + msg);
-  }
-  public int init(int level) {
-    return init2(level, MAX_WBITS);
-  }
+	@Override
+	public int deflate(int flush) {
+		if (dstate == null) {
+			return Z_STREAM_ERROR;
+		}
+		int ret = dstate.deflate(flush);
+		if (ret == Z_STREAM_END)
+			finished = true;
+		return ret;
+	}
 
-  public int init2(int level, int bits) {
-    return init3b(level, bits, false);
-  }
+//	public boolean needsInput() {
+//		return avail_out == 0;
+//	}
+//
+	@Override
+	public void end() {
+		finished = true;
+		if (dstate == null)
+			return;
+//      return Z_STREAM_ERROR;
+		int ret = dstate.deflateEnd();
+		dstate = null;
+		free();
+//    return ret;
+	}
 
+	public int params(int level, int strategy) {
+		if (dstate == null)
+			return Z_STREAM_ERROR;
+		return dstate.deflateParams(level, strategy);
+	}
 
-  public int init2b(int level, boolean nowrap) {
-    return init3b(level, MAX_WBITS, nowrap);
-  }
+	public int setDictionaryRet(byte[] dictionary, int off, int len) {
+		if (dstate == null)
+			return Z_STREAM_ERROR;
+		return dstate.deflateSetDictionary(dictionary, off, len);
+	}
 
-  public int init3(int level, int bits, int memlevel) {
-    finished = false;
-    dstate = new Deflate(this);
-    return dstate.deflateInit3(level, bits, memlevel);
-  }
+	@Override
+	public boolean finished() {
+		return finished;
+	}
 
+	public void finish() {
+		// native use only?
 
-*/
-  public Deflater init(int level, int bits, boolean nowrap) {
-    if (bits == 0)
-      bits = MAX_WBITS;
-    finished = false;
-    setAdler32();
-    dstate = new Deflate(this);
-    dstate.deflateInit2(level, nowrap ? -bits : bits);
-    return this;
-  }
+	}
 
-  @Override
-  public int deflate(int flush) {
-    if (dstate == null) {
-      return Z_STREAM_ERROR;
-    }
-    int ret = dstate.deflate(flush);
-    if (ret == Z_STREAM_END)
-      finished = true;
-    return ret;
-  }
+	public long getBytesRead() {
+		return dstate.getBytesRead();
+	}
 
-  @Override
-  public int end() {
-    finished = true;
-    if (dstate == null)
-      return Z_STREAM_ERROR;
-    int ret = dstate.deflateEnd();
-    dstate = null;
-    free();
-    return ret;
-  }
+	public long getBytesWritten() {
+		return dstate.getBytesWritten();
+	}
 
-  public int params(int level, int strategy) {
-    if (dstate == null)
-      return Z_STREAM_ERROR;
-    return dstate.deflateParams(level, strategy);
-  }
+	public void reset() {
+		dstate.deflateReset();
+	}
 
-  public int setDictionary(byte[] dictionary, int dictLength) {
-    if (dstate == null)
-      return Z_STREAM_ERROR;
-    return dstate.deflateSetDictionary(dictionary, dictLength);
-  }
+	public boolean needsInput() {
+		return avail_in <= 0;
+	}
 
-  @Override
-  public boolean finished() {
-    return finished;
-  }
-
-  public void finish() {
-    // native use only?
-    
-  }
-
-  public long getBytesRead() {
-    return dstate.getBytesRead();
-  }
-
-  public long getBytesWritten() {
-    return dstate.getBytesWritten();
-  }
-
-  //  public int copy(Deflater src){
-  //    this.finished = src.finished;
-  //    return Deflate.deflateCopy(this, src);
-  //  }
+	// public int copy(Deflater src){
+	// this.finished = src.finished;
+	// return Deflate.deflateCopy(this, src);
+	// }
 }

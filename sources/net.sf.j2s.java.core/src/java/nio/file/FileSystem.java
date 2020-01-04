@@ -32,6 +32,9 @@ import java.io.Closeable;
 import java.io.IOException;
 
 /**
+ * 
+ * Extended by swingjs.JSFileSytem
+ * 
  * Provides an interface to a file system and is the factory for objects to
  * access files and other objects in the file system.
  *

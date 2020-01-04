@@ -67,7 +67,7 @@ public final class DataBufferUShort extends DataBuffer
     short data[];
 
     /** All data banks */
-    short bankdata[][];
+    public short bankdata[][];
 
     /**
      * Constructs an unsigned-short based <CODE>DataBuffer</CODE> with a single bank and the

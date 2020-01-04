@@ -38,11 +38,17 @@
 
 
 package java.awt.image;
+import swingjs.JSUtil;
 import swingjs.api.Interface;
 import java.awt.Rectangle;
 import java.awt.Point;
 
+import sun.awt.image.ByteBandedRaster;
+import sun.awt.image.ByteInterleavedRaster;
 import sun.awt.image.BytePackedRaster;
+import sun.awt.image.IntegerInterleavedRaster;
+import sun.awt.image.ShortBandedRaster;
+import sun.awt.image.ShortInterleavedRaster;
 import sun.awt.image.SunWritableRaster;
 
 /**
@@ -179,249 +185,249 @@ public class Raster {
 //        initIDs();
 //    }
 //
-//    /**
-//     * Creates a Raster based on a PixelInterleavedSampleModel with the
-//     * specified data type, width, height, and number of bands.
-//     *
-//     * <p> The upper left corner of the Raster is given by the
-//     * location argument.  If location is null, (0, 0) will be used.
-//     * The dataType parameter should be one of the enumerated values
-//     * defined in the DataBuffer class.
-//     *
-//     * <p> Note that interleaved <code>DataBuffer.TYPE_INT</code>
-//     * Rasters are not supported.  To create a 1-band Raster of type
-//     * <code>DataBuffer.TYPE_INT</code>, use
-//     * Raster.createPackedRaster().
-//     * <p> The only dataTypes supported currently are TYPE_BYTE
-//     * and TYPE_USHORT.
-//     * @param dataType  the data type for storing samples
-//     * @param w         the width in pixels of the image data
-//     * @param h         the height in pixels of the image data
-//     * @param bands     the number of bands
-//     * @param location  the upper-left corner of the <code>Raster</code>
-//     * @return a WritableRaster object with the specified data type,
-//     *         width, height and number of bands.
-//     * @throws RasterFormatException if <code>w</code> or <code>h</code>
-//     *         is less than or equal to zero, or computing either
-//     *         <code>location.x + w</code> or
-//     *         <code>location.y + h</code> results in integer
-//     *         overflow
-//     */
-//    public static WritableRaster createInterleavedRaster(int dataType,
-//                                                         int w, int h,
-//                                                         int bands,
-//                                                         Point location) {
-//        int[] bandOffsets = new int[bands];
-//        for (int i = 0; i < bands; i++) {
-//            bandOffsets[i] = i;
-//        }
-//        return createInterleavedRaster(dataType, w, h, w*bands, bands,
-//                                       bandOffsets, location);
-//    }
-//
-//    /**
-//     * Creates a Raster based on a PixelInterleavedSampleModel with the
-//     * specified data type, width, height, scanline stride, pixel
-//     * stride, and band offsets.  The number of bands is inferred from
-//     * bandOffsets.length.
-//     *
-//     * <p> The upper left corner of the Raster is given by the
-//     * location argument.  If location is null, (0, 0) will be used.
-//     * The dataType parameter should be one of the enumerated values
-//     * defined in the DataBuffer class.
-//     *
-//     * <p> Note that interleaved <code>DataBuffer.TYPE_INT</code>
-//     * Rasters are not supported.  To create a 1-band Raster of type
-//     * <code>DataBuffer.TYPE_INT</code>, use
-//     * Raster.createPackedRaster().
-//     * <p> The only dataTypes supported currently are TYPE_BYTE
-//     * and TYPE_USHORT.
-//     * @param dataType  the data type for storing samples
-//     * @param w         the width in pixels of the image data
-//     * @param h         the height in pixels of the image data
-//     * @param scanlineStride the line stride of the image data
-//     * @param pixelStride the pixel stride of the image data
-//     * @param bandOffsets the offsets of all bands
-//     * @param location  the upper-left corner of the <code>Raster</code>
-//     * @return a WritableRaster object with the specified data type,
-//     *         width, height, scanline stride, pixel stride and band
-//     *         offsets.
-//     * @throws RasterFormatException if <code>w</code> or <code>h</code>
-//     *         is less than or equal to zero, or computing either
-//     *         <code>location.x + w</code> or
-//     *         <code>location.y + h</code> results in integer
-//     *         overflow
-//     * @throws IllegalArgumentException if <code>dataType</code> is not
-//     *         one of the supported data types, which are
-//     *         <code>DataBuffer.TYPE_BYTE</code>, or
-//     *         <code>DataBuffer.TYPE_USHORT</code>.
-//     */
-//    public static WritableRaster createInterleavedRaster(int dataType,
-//                                                         int w, int h,
-//                                                         int scanlineStride,
-//                                                         int pixelStride,
-//                                                         int bandOffsets[],
-//                                                         Point location) {
-//        DataBuffer d;
-//
-//        int size = scanlineStride * (h - 1) + // fisrt (h - 1) scans
-//            pixelStride * w; // last scan
-//
-//        switch(dataType) {
-//        case DataBuffer.TYPE_BYTE:
-//            d = new DataBufferByte(size);
+    /**
+     * Creates a Raster based on a PixelInterleavedSampleModel with the
+     * specified data type, width, height, and number of bands.
+     *
+     * <p> The upper left corner of the Raster is given by the
+     * location argument.  If location is null, (0, 0) will be used.
+     * The dataType parameter should be one of the enumerated values
+     * defined in the DataBuffer class.
+     *
+     * <p> Note that interleaved <code>DataBuffer.TYPE_INT</code>
+     * Rasters are not supported.  To create a 1-band Raster of type
+     * <code>DataBuffer.TYPE_INT</code>, use
+     * Raster.createPackedRaster().
+     * <p> The only dataTypes supported currently are TYPE_BYTE
+     * and TYPE_USHORT.
+     * @param dataType  the data type for storing samples
+     * @param w         the width in pixels of the image data
+     * @param h         the height in pixels of the image data
+     * @param bands     the number of bands
+     * @param location  the upper-left corner of the <code>Raster</code>
+     * @return a WritableRaster object with the specified data type,
+     *         width, height and number of bands.
+     * @throws RasterFormatException if <code>w</code> or <code>h</code>
+     *         is less than or equal to zero, or computing either
+     *         <code>location.x + w</code> or
+     *         <code>location.y + h</code> results in integer
+     *         overflow
+     */
+    public static WritableRaster createInterleavedRaster(int dataType,
+                                                         int w, int h,
+                                                         int bands,
+                                                         Point location) {
+        int[] bandOffsets = new int[bands];
+        for (int i = 0; i < bands; i++) {
+            bandOffsets[i] = i;
+        }
+        return createInterleavedRaster(dataType, w, h, w*bands, bands,
+                                       bandOffsets, location);
+    }
+
+    /**
+     * Creates a Raster based on a PixelInterleavedSampleModel with the
+     * specified data type, width, height, scanline stride, pixel
+     * stride, and band offsets.  The number of bands is inferred from
+     * bandOffsets.length.
+     *
+     * <p> The upper left corner of the Raster is given by the
+     * location argument.  If location is null, (0, 0) will be used.
+     * The dataType parameter should be one of the enumerated values
+     * defined in the DataBuffer class.
+     *
+     * <p> Note that interleaved <code>DataBuffer.TYPE_INT</code>
+     * Rasters are not supported.  To create a 1-band Raster of type
+     * <code>DataBuffer.TYPE_INT</code>, use
+     * Raster.createPackedRaster().
+     * <p> The only dataTypes supported currently are TYPE_BYTE
+     * and TYPE_USHORT.
+     * @param dataType  the data type for storing samples
+     * @param w         the width in pixels of the image data
+     * @param h         the height in pixels of the image data
+     * @param scanlineStride the line stride of the image data
+     * @param pixelStride the pixel stride of the image data
+     * @param bandOffsets the offsets of all bands
+     * @param location  the upper-left corner of the <code>Raster</code>
+     * @return a WritableRaster object with the specified data type,
+     *         width, height, scanline stride, pixel stride and band
+     *         offsets.
+     * @throws RasterFormatException if <code>w</code> or <code>h</code>
+     *         is less than or equal to zero, or computing either
+     *         <code>location.x + w</code> or
+     *         <code>location.y + h</code> results in integer
+     *         overflow
+     * @throws IllegalArgumentException if <code>dataType</code> is not
+     *         one of the supported data types, which are
+     *         <code>DataBuffer.TYPE_BYTE</code>, or
+     *         <code>DataBuffer.TYPE_USHORT</code>.
+     */
+    public static WritableRaster createInterleavedRaster(int dataType,
+                                                         int w, int h,
+                                                         int scanlineStride,
+                                                         int pixelStride,
+                                                         int bandOffsets[],
+                                                         Point location) {
+        DataBuffer d;
+
+        int size = scanlineStride * (h - 1) + // fisrt (h - 1) scans
+            pixelStride * w; // last scan
+
+        switch(dataType) {
+        case DataBuffer.TYPE_BYTE:
+            d = new DataBufferByte(size);
+            break;
+        case DataBuffer.TYPE_USHORT:
+            d = new DataBufferUShort(size);
+            break;
+
+        default:
+            throw new IllegalArgumentException("Unsupported data type " +
+                                                dataType);
+        }
+
+        return createInterleavedRaster(d, w, h, scanlineStride,
+                                       pixelStride, bandOffsets, location);
+    }
+
+    /**
+     * Creates a Raster based on a BandedSampleModel with the
+     * specified data type, width, height, and number of bands.
+     *
+     * <p> The upper left corner of the Raster is given by the
+     * location argument.  If location is null, (0, 0) will be used.
+     * The dataType parameter should be one of the enumerated values
+     * defined in the DataBuffer class.
+     *
+     * <p> The only dataTypes supported currently are TYPE_BYTE, TYPE_USHORT,
+     * and TYPE_INT.
+     * @param dataType  the data type for storing samples
+     * @param w         the width in pixels of the image data
+     * @param h         the height in pixels of the image data
+     * @param bands     the number of bands
+     * @param location  the upper-left corner of the <code>Raster</code>
+     * @return a WritableRaster object with the specified data type,
+     *         width, height and number of bands.
+     * @throws RasterFormatException if <code>w</code> or <code>h</code>
+     *         is less than or equal to zero, or computing either
+     *         <code>location.x + w</code> or
+     *         <code>location.y + h</code> results in integer
+     *         overflow
+     * @throws ArrayIndexOutOfBoundsException if <code>bands</code>
+     *         is less than 1
+     */
+    public static WritableRaster createBandedRaster(int dataType,
+                                                    int w, int h,
+                                                    int bands,
+                                                    Point location) {
+        if (bands < 1) {
+            throw new ArrayIndexOutOfBoundsException("Number of bands ("+
+                                                     bands+") must"+
+                                                     " be greater than 0");
+        }
+        int[] bankIndices = new int[bands];
+        int[] bandOffsets = new int[bands];
+        for (int i = 0; i < bands; i++) {
+            bankIndices[i] = i;
+            bandOffsets[i] = 0;
+        }
+
+        return createBandedRaster(dataType, w, h, w,
+                                  bankIndices, bandOffsets,
+                                  location);
+    }
+
+    /**
+     * Creates a Raster based on a BandedSampleModel with the
+     * specified data type, width, height, scanline stride, bank
+     * indices and band offsets.  The number of bands is inferred from
+     * bankIndices.length and bandOffsets.length, which must be the
+     * same.
+     *
+     * <p> The upper left corner of the Raster is given by the
+     * location argument.  The dataType parameter should be one of the
+     * enumerated values defined in the DataBuffer class.
+     *
+     * <p> The only dataTypes supported currently are TYPE_BYTE, TYPE_USHORT,
+     * and TYPE_INT.
+     * @param dataType  the data type for storing samples
+     * @param w         the width in pixels of the image data
+     * @param h         the height in pixels of the image data
+     * @param scanlineStride the line stride of the image data
+     * @param bankIndices the bank indices for each band
+     * @param bandOffsets the offsets of all bands
+     * @param location  the upper-left corner of the <code>Raster</code>
+     * @return a WritableRaster object with the specified data type,
+     *         width, height, scanline stride, bank indices and band
+     *         offsets.
+     * @throws RasterFormatException if <code>w</code> or <code>h</code>
+     *         is less than or equal to zero, or computing either
+     *         <code>location.x + w</code> or
+     *         <code>location.y + h</code> results in integer
+     *         overflow
+     * @throws IllegalArgumentException if <code>dataType</code> is not
+     *         one of the supported data types, which are
+     *         <code>DataBuffer.TYPE_BYTE</code>,
+     *         <code>DataBuffer.TYPE_USHORT</code>
+     *         or <code>DataBuffer.TYPE_INT</code>
+     * @throws ArrayIndexOutOfBoundsException if <code>bankIndices</code>
+     *         or <code>bandOffsets</code> is <code>null</code>
+     */
+    public static WritableRaster createBandedRaster(int dataType,
+                                                    int w, int h,
+                                                    int scanlineStride,
+                                                    int bankIndices[],
+                                                    int bandOffsets[],
+                                                    Point location) {
+        DataBuffer d;
+
+        if (bankIndices == null) {
+            throw new
+                ArrayIndexOutOfBoundsException("Bank indices array is null");
+        }
+        if (bandOffsets == null) {
+            throw new
+                ArrayIndexOutOfBoundsException("Band offsets array is null");
+        }
+
+        int bands = bandOffsets.length;
+
+        // Figure out the #banks and the largest band offset
+        int maxBank = bankIndices[0];
+        int maxBandOff = bandOffsets[0];
+        for (int i = 1; i < bands; i++) {
+            if (bankIndices[i] > maxBank) {
+                maxBank = bankIndices[i];
+            }
+            if (bandOffsets[i] > maxBandOff) {
+                maxBandOff = bandOffsets[i];
+            }
+        }
+        int banks = maxBank + 1;
+        int size = scanlineStride * (h - 1) + // fisrt (h - 1) scans
+            w; // last scan
+
+        switch(dataType) {
+        case DataBuffer.TYPE_BYTE:
+            d = new DataBufferByte(size, banks);
+            break;
+
+//        case DataBuffer.TYPE_USHORT:
+//            d = new DataBufferUShort(size, banks);
 //            break;
 //
-////        case DataBuffer.TYPE_USHORT:
-////            d = new DataBufferUShort(size);
-////            break;
-////
-//        default:
-//            throw new IllegalArgumentException("Unsupported data type " +
-//                                                dataType);
-//        }
-//
-//        return createInterleavedRaster(d, w, h, scanlineStride,
-//                                       pixelStride, bandOffsets, location);
-//    }
-//
-//    /**
-//     * Creates a Raster based on a BandedSampleModel with the
-//     * specified data type, width, height, and number of bands.
-//     *
-//     * <p> The upper left corner of the Raster is given by the
-//     * location argument.  If location is null, (0, 0) will be used.
-//     * The dataType parameter should be one of the enumerated values
-//     * defined in the DataBuffer class.
-//     *
-//     * <p> The only dataTypes supported currently are TYPE_BYTE, TYPE_USHORT,
-//     * and TYPE_INT.
-//     * @param dataType  the data type for storing samples
-//     * @param w         the width in pixels of the image data
-//     * @param h         the height in pixels of the image data
-//     * @param bands     the number of bands
-//     * @param location  the upper-left corner of the <code>Raster</code>
-//     * @return a WritableRaster object with the specified data type,
-//     *         width, height and number of bands.
-//     * @throws RasterFormatException if <code>w</code> or <code>h</code>
-//     *         is less than or equal to zero, or computing either
-//     *         <code>location.x + w</code> or
-//     *         <code>location.y + h</code> results in integer
-//     *         overflow
-//     * @throws ArrayIndexOutOfBoundsException if <code>bands</code>
-//     *         is less than 1
-//     */
-//    public static WritableRaster createBandedRaster(int dataType,
-//                                                    int w, int h,
-//                                                    int bands,
-//                                                    Point location) {
-//        if (bands < 1) {
-//            throw new ArrayIndexOutOfBoundsException("Number of bands ("+
-//                                                     bands+") must"+
-//                                                     " be greater than 0");
-//        }
-//        int[] bankIndices = new int[bands];
-//        int[] bandOffsets = new int[bands];
-//        for (int i = 0; i < bands; i++) {
-//            bankIndices[i] = i;
-//            bandOffsets[i] = 0;
-//        }
-//
-//        return createBandedRaster(dataType, w, h, w,
-//                                  bankIndices, bandOffsets,
-//                                  location);
-//    }
-//
-//    /**
-//     * Creates a Raster based on a BandedSampleModel with the
-//     * specified data type, width, height, scanline stride, bank
-//     * indices and band offsets.  The number of bands is inferred from
-//     * bankIndices.length and bandOffsets.length, which must be the
-//     * same.
-//     *
-//     * <p> The upper left corner of the Raster is given by the
-//     * location argument.  The dataType parameter should be one of the
-//     * enumerated values defined in the DataBuffer class.
-//     *
-//     * <p> The only dataTypes supported currently are TYPE_BYTE, TYPE_USHORT,
-//     * and TYPE_INT.
-//     * @param dataType  the data type for storing samples
-//     * @param w         the width in pixels of the image data
-//     * @param h         the height in pixels of the image data
-//     * @param scanlineStride the line stride of the image data
-//     * @param bankIndices the bank indices for each band
-//     * @param bandOffsets the offsets of all bands
-//     * @param location  the upper-left corner of the <code>Raster</code>
-//     * @return a WritableRaster object with the specified data type,
-//     *         width, height, scanline stride, bank indices and band
-//     *         offsets.
-//     * @throws RasterFormatException if <code>w</code> or <code>h</code>
-//     *         is less than or equal to zero, or computing either
-//     *         <code>location.x + w</code> or
-//     *         <code>location.y + h</code> results in integer
-//     *         overflow
-//     * @throws IllegalArgumentException if <code>dataType</code> is not
-//     *         one of the supported data types, which are
-//     *         <code>DataBuffer.TYPE_BYTE</code>,
-//     *         <code>DataBuffer.TYPE_USHORT</code>
-//     *         or <code>DataBuffer.TYPE_INT</code>
-//     * @throws ArrayIndexOutOfBoundsException if <code>bankIndices</code>
-//     *         or <code>bandOffsets</code> is <code>null</code>
-//     */
-//    public static WritableRaster createBandedRaster(int dataType,
-//                                                    int w, int h,
-//                                                    int scanlineStride,
-//                                                    int bankIndices[],
-//                                                    int bandOffsets[],
-//                                                    Point location) {
-//        DataBuffer d;
-//        int bands = bandOffsets.length;
-//
-//        if (bankIndices == null) {
-//            throw new
-//                ArrayIndexOutOfBoundsException("Bank indices array is null");
-//        }
-//        if (bandOffsets == null) {
-//            throw new
-//                ArrayIndexOutOfBoundsException("Band offsets array is null");
-//        }
-//
-//        // Figure out the #banks and the largest band offset
-//        int maxBank = bankIndices[0];
-//        int maxBandOff = bandOffsets[0];
-//        for (int i = 1; i < bands; i++) {
-//            if (bankIndices[i] > maxBank) {
-//                maxBank = bankIndices[i];
-//            }
-//            if (bandOffsets[i] > maxBandOff) {
-//                maxBandOff = bandOffsets[i];
-//            }
-//        }
-//        int banks = maxBank + 1;
-//        int size = scanlineStride * (h - 1) + // fisrt (h - 1) scans
-//            w; // last scan
-//
-//        switch(dataType) {
-//        case DataBuffer.TYPE_BYTE:
-//            d = new DataBufferByte(size, banks);
-//            break;
-//
-////        case DataBuffer.TYPE_USHORT:
-////            d = new DataBufferUShort(size, banks);
-////            break;
-////
-//        case DataBuffer.TYPE_INT:
-//            d = new DataBufferInt(size, banks);
-//            break;
-//
-//        default:
-//            throw new IllegalArgumentException("Unsupported data type " +
-//                                                dataType);
-//        }
-//
-//        return createBandedRaster(d, w, h, scanlineStride,
-//                                  bankIndices, bandOffsets, location);
-//    }
+        case DataBuffer.TYPE_INT:
+            d = new DataBufferInt(size, banks);
+            break;
+
+        default:
+            throw new IllegalArgumentException("Unsupported data type " +
+                                                dataType);
+        }
+
+        return createBandedRaster(d, w, h, scanlineStride,
+                                  bankIndices, bandOffsets, location);
+    }
 
     /**
      * Creates a Raster based on a SinglePixelPackedSampleModel with
@@ -594,144 +600,145 @@ public class Raster {
         }
     }
 
-//    /**
-//     * Creates a Raster based on a PixelInterleavedSampleModel with the
-//     * specified DataBuffer, width, height, scanline stride, pixel
-//     * stride, and band offsets.  The number of bands is inferred from
-//     * bandOffsets.length.  The upper left corner of the Raster
-//     * is given by the location argument.  If location is null, (0, 0)
-//     * will be used.
-//     * <p> Note that interleaved <code>DataBuffer.TYPE_INT</code>
-//     * Rasters are not supported.  To create a 1-band Raster of type
-//     * <code>DataBuffer.TYPE_INT</code>, use
-//     * Raster.createPackedRaster().
-//     * @param dataBuffer the <code>DataBuffer</code> that contains the
-//     *        image data
-//     * @param w         the width in pixels of the image data
-//     * @param h         the height in pixels of the image data
-//     * @param scanlineStride the line stride of the image data
-//     * @param pixelStride the pixel stride of the image data
-//     * @param bandOffsets the offsets of all bands
-//     * @param location  the upper-left corner of the <code>Raster</code>
-//     * @return a WritableRaster object with the specified
-//     *         <code>DataBuffer</code>, width, height, scanline stride,
-//     *         pixel stride and band offsets.
-//     * @throws RasterFormatException if <code>w</code> or <code>h</code>
-//     *         is less than or equal to zero, or computing either
-//     *         <code>location.x + w</code> or
-//     *         <code>location.y + h</code> results in integer
-//     *         overflow
-//     * @throws IllegalArgumentException if <code>dataType</code> is not
-//     *         one of the supported data types, which are
-//     *         <code>DataBuffer.TYPE_BYTE</code>,
-//     *         <code>DataBuffer.TYPE_USHORT</code>
-//     * @throws RasterFormatException if <code>dataBuffer</code> has more
-//     *         than one bank.
-//     * @throws NullPointerException if <code>dataBuffer</code> is null
-//     */
-//    public static WritableRaster createInterleavedRaster(DataBuffer dataBuffer,
-//                                                         int w, int h,
-//                                                         int scanlineStride,
-//                                                         int pixelStride,
-//                                                         int bandOffsets[],
-//                                                         Point location) {
-//        if (dataBuffer == null) {
-//            throw new NullPointerException("DataBuffer cannot be null");
-//        }
-//        if (location == null) {
-//            location = new Point(0, 0);
-//        }
-//        int dataType = dataBuffer.getDataType();
-//
-//        PixelInterleavedSampleModel csm =
-//            new PixelInterleavedSampleModel(dataType, w, h,
-//                                            pixelStride,
-//                                            scanlineStride,
-//                                            bandOffsets);
-//        switch(dataType) {
-//        case DataBuffer.TYPE_BYTE:
-//            return new ByteInterleavedRaster(csm, dataBuffer, location);
-//
-//        case DataBuffer.TYPE_USHORT:
+    /**
+     * Creates a Raster based on a PixelInterleavedSampleModel with the
+     * specified DataBuffer, width, height, scanline stride, pixel
+     * stride, and band offsets.  The number of bands is inferred from
+     * bandOffsets.length.  The upper left corner of the Raster
+     * is given by the location argument.  If location is null, (0, 0)
+     * will be used.
+     * <p> Note that interleaved <code>DataBuffer.TYPE_INT</code>
+     * Rasters are not supported.  To create a 1-band Raster of type
+     * <code>DataBuffer.TYPE_INT</code>, use
+     * Raster.createPackedRaster().
+     * @param dataBuffer the <code>DataBuffer</code> that contains the
+     *        image data
+     * @param w         the width in pixels of the image data
+     * @param h         the height in pixels of the image data
+     * @param scanlineStride the line stride of the image data
+     * @param pixelStride the pixel stride of the image data
+     * @param bandOffsets the offsets of all bands
+     * @param location  the upper-left corner of the <code>Raster</code>
+     * @return a WritableRaster object with the specified
+     *         <code>DataBuffer</code>, width, height, scanline stride,
+     *         pixel stride and band offsets.
+     * @throws RasterFormatException if <code>w</code> or <code>h</code>
+     *         is less than or equal to zero, or computing either
+     *         <code>location.x + w</code> or
+     *         <code>location.y + h</code> results in integer
+     *         overflow
+     * @throws IllegalArgumentException if <code>dataType</code> is not
+     *         one of the supported data types, which are
+     *         <code>DataBuffer.TYPE_BYTE</code>,
+     *         <code>DataBuffer.TYPE_USHORT</code>
+     * @throws RasterFormatException if <code>dataBuffer</code> has more
+     *         than one bank.
+     * @throws NullPointerException if <code>dataBuffer</code> is null
+     */
+    public static WritableRaster createInterleavedRaster(DataBuffer dataBuffer,
+                                                         int w, int h,
+                                                         int scanlineStride,
+                                                         int pixelStride,
+                                                         int bandOffsets[],
+                                                         Point location) {
+        if (dataBuffer == null) {
+            throw new NullPointerException("DataBuffer cannot be null");
+        }
+        if (location == null) {
+            location = new Point(0, 0);
+        }
+        int dataType = dataBuffer.getDataType();
+
+        PixelInterleavedSampleModel csm =
+            new PixelInterleavedSampleModel(dataType, w, h,
+                                            pixelStride,
+                                            scanlineStride,
+                                            bandOffsets);
+        switch(dataType) {
+        case DataBuffer.TYPE_BYTE:
+            return new ByteInterleavedRaster(csm, dataBuffer, location);
+
+        case DataBuffer.TYPE_USHORT:
+        	JSUtil.notImplemented("USHORT-interleaved raster");
+        	return null;
 //            return new ShortInterleavedRaster(csm, dataBuffer, location);
-//
-//        default:
-//            throw new IllegalArgumentException("Unsupported data type " +
-//                                                dataType);
-//        }
-//    }
-//
-//    /**
-//     * Creates a Raster based on a BandedSampleModel with the
-//     * specified DataBuffer, width, height, scanline stride, bank
-//     * indices, and band offsets.  The number of bands is inferred
-//     * from bankIndices.length and bandOffsets.length, which must be
-//     * the same.  The upper left corner of the Raster is given by the
-//     * location argument.  If location is null, (0, 0) will be used.
-//     * @param dataBuffer the <code>DataBuffer</code> that contains the
-//     *        image data
-//     * @param w         the width in pixels of the image data
-//     * @param h         the height in pixels of the image data
-//     * @param scanlineStride the line stride of the image data
-//     * @param bankIndices the bank indices for each band
-//     * @param bandOffsets the offsets of all bands
-//     * @param location  the upper-left corner of the <code>Raster</code>
-//     * @return a WritableRaster object with the specified
-//     *         <code>DataBuffer</code>, width, height, scanline stride,
-//     *         bank indices and band offsets.
-//     * @throws RasterFormatException if <code>w</code> or <code>h</code>
-//     *         is less than or equal to zero, or computing either
-//     *         <code>location.x + w</code> or
-//     *         <code>location.y + h</code> results in integer
-//     *         overflow
-//     * @throws IllegalArgumentException if <code>dataType</code> is not
-//     *         one of the supported data types, which are
-//     *         <code>DataBuffer.TYPE_BYTE</code>,
-//     *         <code>DataBuffer.TYPE_USHORT</code>
-//     *         or <code>DataBuffer.TYPE_INT</code>
-//     * @throws NullPointerException if <code>dataBuffer</code> is null
-//     */
-//    public static WritableRaster createBandedRaster(DataBuffer dataBuffer,
-//                                                    int w, int h,
-//                                                    int scanlineStride,
-//                                                    int bankIndices[],
-//                                                    int bandOffsets[],
-//                                                    Point location) {
-//    	JSToolkit.notImplemented(null);
-//        if (dataBuffer == null) {
-//            throw new NullPointerException("DataBuffer cannot be null");
-//        }
-//        if (location == null) {
-//           location = new Point(0,0);
-//        }
-//        int dataType = dataBuffer.getDataType();
-//
-//        int bands = bankIndices.length;
-//        if (bandOffsets.length != bands) {
-//            throw new IllegalArgumentException(
-//                                   "bankIndices.length != bandOffsets.length");
-//        }
-//
-//        BandedSampleModel bsm =
-//            new BandedSampleModel(dataType, w, h,
-//                                  scanlineStride,
-//                                  bankIndices, bandOffsets);
-//
-//        switch(dataType) {
-//        case DataBuffer.TYPE_BYTE:
-//            return new ByteBandedRaster(bsm, dataBuffer, location);
-//
-//        case DataBuffer.TYPE_USHORT:
-//            return new ShortBandedRaster(bsm, dataBuffer, location);
-//
-//        case DataBuffer.TYPE_INT:
-//            return new SunWritableRaster(bsm, dataBuffer, location);
-//
-//        default:
-//            throw new IllegalArgumentException("Unsupported data type " +
-//                                                dataType);
-//        }
-//    }
+
+        default:
+            throw new IllegalArgumentException("Unsupported data type " +
+                                                dataType);
+        }
+    }
+
+    /**
+     * Creates a Raster based on a BandedSampleModel with the
+     * specified DataBuffer, width, height, scanline stride, bank
+     * indices, and band offsets.  The number of bands is inferred
+     * from bankIndices.length and bandOffsets.length, which must be
+     * the same.  The upper left corner of the Raster is given by the
+     * location argument.  If location is null, (0, 0) will be used.
+     * @param dataBuffer the <code>DataBuffer</code> that contains the
+     *        image data
+     * @param w         the width in pixels of the image data
+     * @param h         the height in pixels of the image data
+     * @param scanlineStride the line stride of the image data
+     * @param bankIndices the bank indices for each band
+     * @param bandOffsets the offsets of all bands
+     * @param location  the upper-left corner of the <code>Raster</code>
+     * @return a WritableRaster object with the specified
+     *         <code>DataBuffer</code>, width, height, scanline stride,
+     *         bank indices and band offsets.
+     * @throws RasterFormatException if <code>w</code> or <code>h</code>
+     *         is less than or equal to zero, or computing either
+     *         <code>location.x + w</code> or
+     *         <code>location.y + h</code> results in integer
+     *         overflow
+     * @throws IllegalArgumentException if <code>dataType</code> is not
+     *         one of the supported data types, which are
+     *         <code>DataBuffer.TYPE_BYTE</code>,
+     *         <code>DataBuffer.TYPE_USHORT</code>
+     *         or <code>DataBuffer.TYPE_INT</code>
+     * @throws NullPointerException if <code>dataBuffer</code> is null
+     */
+    public static WritableRaster createBandedRaster(DataBuffer dataBuffer,
+                                                    int w, int h,
+                                                    int scanlineStride,
+                                                    int bankIndices[],
+                                                    int bandOffsets[],
+                                                    Point location) {
+        if (dataBuffer == null) {
+            throw new NullPointerException("DataBuffer cannot be null");
+        }
+        if (location == null) {
+           location = new Point(0,0);
+        }
+        int dataType = dataBuffer.getDataType();
+
+        int bands = bankIndices.length;
+        if (bandOffsets.length != bands) {
+            throw new IllegalArgumentException(
+                                   "bankIndices.length != bandOffsets.length");
+        }
+
+        BandedSampleModel bsm =
+            new BandedSampleModel(dataType, w, h,
+                                  scanlineStride,
+                                  bankIndices, bandOffsets);
+
+        switch(dataType) {
+        case DataBuffer.TYPE_BYTE:
+            return new ByteBandedRaster(bsm, dataBuffer, location);
+
+        case DataBuffer.TYPE_USHORT:
+            return new ShortBandedRaster(bsm, dataBuffer, location);
+
+        case DataBuffer.TYPE_INT:
+            return new SunWritableRaster(bsm, dataBuffer, location);
+
+        default:
+            throw new IllegalArgumentException("Unsupported data type " +
+                                                dataType);
+        }
+    }
 
     /**
      * Creates a Raster based on a SinglePixelPackedSampleModel with
@@ -783,7 +790,7 @@ public class Raster {
         switch(dataType) {
         case DataBuffer.TYPE_BYTE:
         case DataBuffer.TYPE_INT:
-//        case DataBuffer.TYPE_USHORT:
+        case DataBuffer.TYPE_USHORT:
         	break;
         default:
             throw new IllegalArgumentException("Unsupported data type " +
@@ -835,7 +842,7 @@ public class Raster {
         int dataType = dataBuffer.getDataType();
 
         if (dataType != DataBuffer.TYPE_BYTE &&
-//            dataType != DataBuffer.TYPE_USHORT &&
+            dataType != DataBuffer.TYPE_USHORT &&
             dataType != DataBuffer.TYPE_INT) {
             throw new IllegalArgumentException("Unsupported data type " +
                                                dataType);
@@ -892,26 +899,26 @@ public class Raster {
         }
         int dataType = sm.getDataType();
 
-//        if (sm instanceof PixelInterleavedSampleModel) {
-//            switch(dataType) {
-//                case DataBuffer.TYPE_BYTE:
-//                    return new ByteInterleavedRaster(sm, db, location);
-//
-//                case DataBuffer.TYPE_USHORT:
-//                    return new ShortInterleavedRaster(sm, db, location);
-//            }
-//        } else if (sm instanceof SinglePixelPackedSampleModel) {
-//            switch(dataType) {
-//                case DataBuffer.TYPE_BYTE:
-//                    return new ByteInterleavedRaster(sm, db, location);
-//
-//                case DataBuffer.TYPE_USHORT:
-//                    return new ShortInterleavedRaster(sm, db, location);
-//
-//                case DataBuffer.TYPE_INT:
-//                    return new IntegerInterleavedRaster(sm, db, location);
-//            }
-//        } else 
+        if (sm instanceof PixelInterleavedSampleModel) {
+            switch(dataType) {
+                case DataBuffer.TYPE_BYTE:
+                    return new ByteInterleavedRaster(sm, db, location);
+
+                case DataBuffer.TYPE_USHORT:
+                    return new ShortInterleavedRaster(sm, db, location);
+            }
+        } else if (sm instanceof SinglePixelPackedSampleModel) {
+            switch(dataType) {
+                case DataBuffer.TYPE_BYTE:
+                    return new ByteInterleavedRaster(sm, db, location);
+
+                case DataBuffer.TYPE_USHORT:
+                    return new ShortInterleavedRaster(sm, db, location);
+
+                case DataBuffer.TYPE_INT:
+                    return new IntegerInterleavedRaster(sm, db, location);
+            }
+        } else 
         	if (sm instanceof MultiPixelPackedSampleModel &&
                    dataType == DataBuffer.TYPE_BYTE &&
                    sm.getSampleSize(0) < 8) {
@@ -984,27 +991,27 @@ public class Raster {
             r.秘pix = SunWritableRaster.stealData((DataBufferInt) db, 0);
             return r;
         }
-//
-//        if (sm instanceof PixelInterleavedSampleModel) {
-//            switch(dataType) {
-//                case DataBuffer.TYPE_BYTE:
-//                    return new ByteInterleavedRaster(sm, db, location);
-//
-//                case DataBuffer.TYPE_USHORT:
-//                    return new ShortInterleavedRaster(sm, db, location);
-//            }
-//        } else if (sm instanceof SinglePixelPackedSampleModel) {
-//            switch(dataType) {
-//                case DataBuffer.TYPE_BYTE:
-//                    return new ByteInterleavedRaster(sm, db, location);
-//
-//                case DataBuffer.TYPE_USHORT:
-//                    return new ShortInterleavedRaster(sm, db, location);
-//
-//                case DataBuffer.TYPE_INT:
-//                    return new IntegerInterleavedRaster(sm, db, location);
-//            }
-//        } else 
+
+        if (sm instanceof PixelInterleavedSampleModel) {
+            switch(dataType) {
+                case DataBuffer.TYPE_BYTE:
+                    return new ByteInterleavedRaster(sm, db, location);
+
+                case DataBuffer.TYPE_USHORT:
+                    return new ShortInterleavedRaster(sm, db, location);
+            }
+        } else if (sm instanceof SinglePixelPackedSampleModel) {
+            switch(dataType) {
+                case DataBuffer.TYPE_BYTE:
+                    return new ByteInterleavedRaster(sm, db, location);
+
+                case DataBuffer.TYPE_USHORT:
+                    return new ShortInterleavedRaster(sm, db, location);
+
+                case DataBuffer.TYPE_INT:
+                    return new IntegerInterleavedRaster(sm, db, location);
+            }
+        } else 
         if (sm instanceof MultiPixelPackedSampleModel &&
                    dataType == DataBuffer.TYPE_BYTE &&
                    sm.getSampleSize(0) < 8) {

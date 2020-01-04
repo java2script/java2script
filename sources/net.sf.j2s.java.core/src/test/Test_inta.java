@@ -14,5 +14,4 @@ public class Test_inta implements Test_inta1 {
 		return null;
 	}
 
-
 }

@@ -9,7 +9,10 @@ public class Test_Zipout extends Test_ {
 
 	public static void main(String[] args) {
 		try {
-			byte[] bytes = "this is a test".getBytes(); 
+			String s = "";
+			for (int i = 0; i < 4000; i++)
+				s += i + "\tthis is a test\n";
+			byte[] bytes = s.getBytes(); 
 			OutputStream os = new FileOutputStream("C:/temp/testzip.zip");
 			ZipOutputStream zos = new ZipOutputStream(os);
 			zos.putNextEntry(new ZipEntry("test1.txt"));

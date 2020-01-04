@@ -94,6 +94,10 @@ class Test_Class2 extends Test_ implements Test_Class_int {
 		};
 	}
 
+	public Test_Class2(byte[]... d) {
+		System.out.println("Test_Class2 len = " + d.length);
+	}
+
 	public static void main(String[] args) {
 		new Test_Class2();
 		new Test_Class2();

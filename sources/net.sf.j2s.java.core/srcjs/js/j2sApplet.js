@@ -1209,7 +1209,8 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 			return Clazz.loadClass("javajs.util.Base64").decodeBase64$S(
 					s.substring(8));
 		}
-		// not UTF-8
+		// 		return Clazz.array(new Int8Array(new TextEncoder().encode(s).buffer),Clazz.array(Byte.TYPE));
+		// not UTF-8 - this is a Chrome encoding of the bytes as "string"
 		var b = Clazz.array(Byte.TYPE, s.length);
 		for (var i = s.length; --i >= 0;)
 			b[i] = s.charCodeAt(i) & 0xFF;

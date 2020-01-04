@@ -11878,7 +11878,8 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 			return Clazz.loadClass("javajs.util.Base64").decodeBase64$S(
 					s.substring(8));
 		}
-		// not UTF-8
+		// 		return Clazz.array(new Int8Array(new TextEncoder().encode(s).buffer),Clazz.array(Byte.TYPE));
+		// not UTF-8 - this is a Chrome encoding of the bytes as "string"
 		var b = Clazz.array(Byte.TYPE, s.length);
 		for (var i = s.length; --i >= 0;)
 			b[i] = s.charCodeAt(i) & 0xFF;
@@ -13863,6 +13864,10 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2019.12.29 3.2.6 fixes Float.parseFloat$S("NaN") [and Double]
+// BH 2019.12.23 3.2.6 update of System
+// BH 2019.12.19 3.2.6 revision of $clinit$
+// BH 2019.12.16 3.2.5.v4 adds ClassLoader static methods for system resources (just j2s/...)
 // BH 2019.12.15 3.2.5.v4 Character.prototype.valueOf() missing 
 // BH 2019.12.14 3.2.5.v3 Clazz._4Name initialization should be full static initialization 
 
@@ -13919,7 +13924,7 @@ Clazz.ClassFilesLoaded = [];
 Clazz.popup = Clazz.log = Clazz.error = window.alert;
 
 /* can be set by page JavaScript */
-Clazz.defaultAssertionStatus = true;
+Clazz.defaultAssertionStatus = false;
 
 /* can be set by page JavaScript */
 Clazz._assertFunction = null;
@@ -13969,7 +13974,8 @@ var _array = function(baseClass, paramType, ndims, params, isClone) {
     return copyArrayProps(a, b);
   }
   if (arguments.length == 2 && baseClass.BYTES_PER_ELEMENT) {
-	// direct transfer of parameters from java.nio.ByteBuffer
+	  // Clazz.array(rawInt8Array, int[] array)
+	  // direct transfer of __* metadata (see java.nio.ByteBuffer)
 	return copyArrayProps(paramType, baseClass); 
   }
   var prim = Clazz._getParamCode(baseClass);
@@ -14202,10 +14208,11 @@ Clazz.instanceOf = function (obj, clazz) {
   // unwrap java.lang.Class to JavaScript clazz using $clazz$
   if (typeof clazz == "string") {
     clazz = Clazz._getDeclared(clazz);
-  }
-  
+  } 
   if (obj == null || !clazz)
     return false;
+  if (obj == clazz)
+	return true;
     // check for object being a java.lang.Class and the other not 
   if (obj.$clazz$ && !clazz.$clazz$) return (clazz == java.lang.Class);
   obj.$clazz$ && (obj = obj.$clazz$);
@@ -14242,10 +14249,21 @@ Clazz.load = function(cName, from$clinit$) {
   if (from$clinit$ == 1) {
     // C$.$clinit$ call to finalize all dependencies
 	var cl = cName;
-	cl.$clinit$ = 0;
+	cl.$clinit$ = 0-cl.$clinit$;
+	// -2 means v 3.2.6
+	// -1 means v 3.2.5
+	// NaN means original 3.2.4 function() {Clazz.load(C$, 1)};
     var ld = cl.$load$;
     setSuperclass(cl, (ld && ld[0] ? Clazz.load(ld[0]) : null));
     ld[1] && addInterface(cl, ld[1]);
+    switch (cl.$clinit$) {
+    case -1:
+    	// done
+    	break;
+    case -2:
+    	initClass0(cl);
+    	break;    
+    }
     return;
   } 
   if (from$clinit$ == 2) {
@@ -14277,6 +14295,132 @@ Clazz.load = function(cName, from$clinit$) {
   return Clazz._4Name(cName, null, null, true);
 }
 
+//create  and $init0$
+var initClass0 = function(c) {
+	var fields = c.$fields$;
+	var objects = fields && fields[0];
+	createDefaults(c, objects, false);
+	if (!fields)
+		return;
+	var statics = fields[1];
+	if (statics && statics.length)
+		createDefaults(c, statics, true);
+}
+
+//C$.$fields$=[
+//['I',['test3','itype'],'S',['test1'],'O',['test2','java.util.List[]','test4','test.Test_','+test5']],
+//['D',['d'],'F',['f'],'I',['itest1','itest2'],'S',['stest1']]
+//]
+var createDefaults = function(c, data, isStatic) {
+	var a = getFields(c, data, true);
+	if (isStatic) {
+		for (var i = a.length; --i >= 0;) {
+			c[a[i][0]] = a[i][1];
+		}
+	} else {
+		c.$init0$ = 
+			//(function(cs, a) {return 
+			function(){
+				var cs = c.superclazz;
+				cs && cs.$init0$ && cs.$init0$.apply(this);
+				for (var i = a.length; --i >= 0;){
+					this[a[i][0]] = a[i][1];
+				}
+			};
+//		})(c.superclazz, a);
+	}
+		
+}
+
+Clazz._getFieldNames = function(c, isStatic) {
+	return (c.$fields$ ? getFields(c, c.$fields$[isStatic ? 1 : 0], 0) : []);
+}
+
+Clazz._getFieldTypes = function(c, isStatic) {
+	return (c.$fields$ ? getFields(c, c.$fields$[isStatic ? 1 : 0], "types") : []);
+}
+
+var fieldTypes = "Integer;Float;Double;Character;Long;Byte;"
+/**
+ * Get correct default (0, '\0', null) or just 
+ * return a list of names.
+ */
+var getFields = function(c, data, andDefaults) {
+  	var a = [];
+  	if (!data)
+  		return a;
+  	if (andDefaults == "types") {
+	  	for (var i = 0, n = data.length; i < n; i++) {
+	  		var type = data[i++];
+	  		var anames = data[i];
+	  		if (type != "O") {
+	  			for (var j = anames.length; --j >= 0;)
+	  			a.push(type);
+	  			continue;
+	  		}
+	  		type = "String";
+  	  		for (var j = 0, na = anames.length; j < na; j++) {
+  	  			if (anames[j].indexOf("+") != 0) {
+  	  				type = anames[++j];
+  	  			}
+  	  	 		a.push(type);
+  	   		}
+  	  		continue;
+	  	}	  		
+		return a;
+  	} 
+	if (andDefaults) {
+	  	for (var i = 0, n = data.length; i < n; i++) {
+	  		var type = data[i++];
+	  		var anames = data[i];
+	  		var defval;
+	  		switch (type) {
+	  		case 'S':
+	  			defval = null;
+	  			break;
+	  		case 'O':
+	  	  		for (var j = 0, na = anames.length; j < na; j++) {
+	  	  			var name = anames[j];
+	  	  			if (name.indexOf("+") == 0)
+	  	  				name = name.substring(1);
+	  	  			else
+	  	  				j++;
+	  	  	 		a.push([name, null]);
+	  	   		}
+	  	  		continue;
+	  		case 'C':
+	  			defval = '\0';
+	  			break;
+	  		default:
+	  			defval = 0;
+	  			break;  		
+	  		}
+	  		for (var j = 0, na = anames.length; j < na; j++) {	
+	  	 		a.push([anames[j], defval]);
+	   		}
+	  	}	
+  		return a;
+  	}
+  	for (var i = 0, n = data.length; i < n; i++) {
+  		var type = data[i++];
+  		var anames = data[i];
+  		if (type == 'O') {
+	  		for (var j = 0, na = anames.length; j < na; j++) {
+  	  			var name = anames[j];
+  	  			if (name.indexOf("+") == 0)
+  	  				name = name.substring(1);
+  	  			else
+  	  				j++;
+  	  	 		a.push(name);
+  	   		}	  			
+  		} else {
+	  		for (var j = 0, na = anames.length; j < na; j++) {	
+	  	 		a.push(anames[j]);
+	   		}
+  		}
+  	}	
+  	return a;
+}
 Clazz._newCount = 0;
 
 /**
@@ -14292,6 +14436,16 @@ Clazz._newCount = 0;
 Clazz.new_ = function(c, args, cl) {
   if (!c)
     return new Clazz._O();
+  var generics;
+  var a = arguments;
+  if (c === 1) { // new for 3.2.6 {K:"java.lang.String",...}
+	generics = arguments[1];
+	a = [];
+	c = a[0] = arguments[2];
+	args = a[1] = arguments[3];
+	cl = a[2] = arguments[4];
+	a = a.slice(0, arguments.length - 2);
+  }
   var haveArgs = !!args;
   args || (args = [[]]);
   
@@ -14314,7 +14468,7 @@ Clazz.new_ = function(c, args, cl) {
   // or a static field or method call (which is handled
   // by the $I$(n) handler in the function initializer in 
   // the newClass() call.
-  var obj = new (Function.prototype.bind.apply(cl, arguments));
+  var obj = new (Function.prototype.bind.apply(cl, a));
   if (args[2] != inheritArgs) {
     haveArgs && c.apply(obj, args);
     clInner && clInner.$init$.apply(obj);
@@ -14322,6 +14476,9 @@ Clazz.new_ = function(c, args, cl) {
     
   _profileNew && addProfileNew(cl, window.performance.now() - t0);
 
+  if (generics) {
+	  obj.$init$.generics = generics;
+  }
   return obj;
 }
 
@@ -14674,17 +14831,21 @@ Clazz.super_ = function(cl, obj) {
 /////////////////////////////////////////////////////////////////////
 
 var aas = "AAA";
-/**
- * Create an array class placeholder for reflection
- */
+
+var arrayClasses = {};
 
 var arrayClass = function(baseClass, ndim) {
   ndim || (ndim = 1);
   var stub = Clazz._getParamCode(baseClass);
+  var key = stub + ";" + ndim;
+  var ret = arrayClasses[key];
+  if (ret)
+	  return ret;
   while (aas.length < ndim)
     aas += aas;
   var aaa = aas.substring(0, ndim);
   var o = {};
+  var a = new Array(ndim);
   o.arrayType = 1;
   o.__BASECLASS = baseClass;
   o.__NDIM = ndim;
@@ -14703,9 +14864,6 @@ var arrayClass = function(baseClass, ndim) {
     case "S":
       stub = "String";
       break;
-    case "H":
-      stub = "S";
-      break;
     default:
       if (stub.length > 1)
         stub = baseClass.__CLASS_NAME__;
@@ -14717,6 +14875,7 @@ var arrayClass = function(baseClass, ndim) {
       stub = "Ljava.lang." + stub + ";";
     return aaa.replace(/A/g,"[") + stub;
   })())};
+  arrayClasses[key] = oclass;  
   return oclass;  
 }
 
@@ -15168,14 +15327,19 @@ var extendObject = function(clazz, ext) {
 //  return false;
 //};
 
+// see also 
 var excludeSuper = function(o) {
  return o == "b$" || o == "$this$0"
       || o == "$init$"
       || o == "$init0$"
       || o == "$static$"
       || o == "$clinit$"
+      || o == "$classes$"
+      || o == "$fields$"
       || o == "$load$"
       || o == "$Class$"
+      || o == "$getMembers$"
+      || o == "$getAnn$"
       || o == "prototype" 
       || o == "__PARAMCODE" 
       || o == "__CLASS_NAME__" 
@@ -15215,8 +15379,8 @@ var finalizeClazz = function(clazz, qname, bname, type, isNumber) {
   (type == 1) && (clazz.__ANON = clazz.prototype.__ANON = 1); 
   (type == 2) && (clazz.__LOCAL = clazz.prototype.__LOCAL = 1);
   
-  if (!isNumber && type != 0)
-    Clazz.newMeth(clazz, '$init0$', function(){var c;if ((c=clazz.superclazz) && (c = c.$init0$))c.apply(this);}, 1);
+//  if (!isNumber && type != 0)
+//    Clazz.newMeth(clazz, '$init0$', function(){var c;if ((c=clazz.superclazz) && (c = c.$init0$))c.apply(this);}, 1);
   if (isNumber || type != 0)
 	  extendPrototype(clazz);
 
@@ -15625,11 +15789,9 @@ Clazz.newMeth(C$, 'chars$', function () {
 return $I$(1).intStream$java_util_function_Supplier$I$Z(((P$.CharSequence$lambda1||
 (function(){var C$=Clazz.newClass(P$, "CharSequence$lambda1", function(){Clazz.newInstance(this, arguments[0],1,C$);}, null, 'java.util.function.Supplier', 1);
 
-C$.$clinit$ = function() {Clazz.load(C$, 1);
-}
+C$.$clinit$ = 1;
 
-Clazz.newMeth(C$, '$init$', function () {
-}, 1);
+Clazz.newMeth(C$, '$init$', function () {}, 1);
 /*lambda_E*/
 Clazz.newMeth(C$, 'get$', function () { return($I$(2).spliterator$java_util_PrimitiveIterator_OfInt$J$I(Clazz.new_(CharSequence$1CharIterator.$init$, [this, null]), this.b$['CharSequence'].length$(), 16));});
 })()
@@ -15640,8 +15802,7 @@ Clazz.newMeth(C$, 'codePoints$', function () {
 return $I$(1).intStream$java_util_function_Supplier$I$Z(((P$.CharSequence$lambda2||
 (function(){var C$=Clazz.newClass(P$, "CharSequence$lambda2", function(){Clazz.newInstance(this, arguments[0],1,C$);}, null, 'java.util.function.Supplier', 1);
 
-C$.$clinit$ = function() {Clazz.load(C$, 1);
-}
+C$.$clinit$ = 1;
 
 Clazz.newMeth(C$, '$init$', function () {
 }, 1);
@@ -15655,8 +15816,7 @@ Clazz.newMeth(C$, 'get$', function () { return($I$(2).spliteratorUnknownSize$jav
 Clazz.newInstance(this, arguments[0],true,C$);
 }, null, [['java.util.PrimitiveIterator','java.util.PrimitiveIterator.OfInt']], 2);
 
-C$.$clinit$ = function() {Clazz.load(C$, 1);
-}
+C$.$clinit$ = 1;
 
 Clazz.newMeth(C$, '$init0$', function () {
 var c;if((c = C$.superclazz) && (c = c.$init0$))c.apply(this);
@@ -15691,8 +15851,7 @@ Clazz.newMeth(C$);
 Clazz.newInstance(this, arguments[0],true,C$);
 }, null, [['java.util.PrimitiveIterator','java.util.PrimitiveIterator.OfInt']], 2);
 
-C$.$clinit$ = function() {Clazz.load(C$, 1);
-}
+C$.$clinit$ = 1;
 
 Clazz.newMeth(C$, '$init0$', function () {
 var c;if((c = C$.superclazz) && (c = c.$init0$))c.apply(this);
@@ -15813,6 +15972,9 @@ Clazz._Loader = function () {};
 
 ;(function(Clazz, _Loader) {
 
+// The class loader is always accessed through Class.
+// See Class.java for implementations of the methods of java.lang.ClassLoader such as getSystemResource and getResource
+
 java.lang.ClassLoader = _Loader;
 // BH windows-level only because it's java.lang
 ClassLoader = _Loader;
@@ -15829,7 +15991,19 @@ _Loader.getSystemClassLoader$ = function() {
 
 var assertionStatus = {};
 
-_Loader.getClassAssertionStatus$ = function(clazz) {
+_Loader.getSystemResource$S = function(name) {
+	return _Loader.getSystemClassLoader$().getResource$(name);	
+}
+
+_Loader.getSystemResources$S = function(name) {
+	return _Loader.getSystemClassLoader$().getResources$(name);	
+}
+
+_Loader.getSystemResourceAsStream$S = function(name) {
+	return _Loader.getSystemClassLoader$().getResourceAsStream$(name);	
+}
+
+_Loader.getClassAssertionStatus$ = function(clazz) { // harmony
   var ret;
   var clazzName = clazz.__CLASS_NAME__ + ".";
   for (var c in assertionStatus) {
@@ -15861,6 +16035,8 @@ _Loader.prototype.setClassAssertionStatus$S$Z = _Loader.prototype.setPackageAsse
 _Loader.prototype.loadClass$S = function(clazzName) {
   return Clazz.forName(clazzName);
 }
+
+
 _Loader._checkLoad = J2S._checkLoad;
  
 _Loader._TODO = [];
@@ -16192,7 +16368,7 @@ var evaluate = function(file, js) {
 
 Clazz._initClass = function(c,clinit,status,objThis) {
 	var f;
-	return clinit && (f=c.$clinit$) && (f === 1 ? Clazz.load(c,1) : f ? f() : 0),
+	return clinit && (f=c.$clinit$) && (f === 1 || f === 2 ? Clazz.load(c,1) : f && typeof f == "function"? f() : 0),
 	status && c.$load$ && Clazz.load(c, 2),
 	objThis  && (f=c.$init0$) && f.apply(objThis),
 	c;
@@ -16714,169 +16890,224 @@ Clazz.alert = function (s) {
 
 })(Clazz.Console);
 
+var getURIField = function(name, def) {
+	try {
+		var ref = document.location.href.toLowerCase();
+		var i = ref.indexOf(name.toLowerCase() + "=");
+		if (i >= 0)
+			def = (document.location.href + "&").substring(
+					i + name.length + 1).split("&")[0];
+	} catch (e) {
+	} finally {
+		return def;
+	}
+}
 
-Clazz._setDeclared("java.lang.System",
-java.lang.System = System = {
-  props : null, //new java.util.Properties (),
-  $props : {},
-  arraycopy$O$I$O$I$I : function (src, srcPos, dest, destPos, length) {  
-    if (src !== dest || srcPos > destPos) {
-      for (var i = length; --i >= 0;)
-        dest[destPos++] = src[srcPos++];
-    } else {
-      destPos += length;
-      srcPos += length;
-      for (var i = length; --i >= 0;)
-        src[--destPos] = src[--srcPos];
-    }
-  },
-  
-  currentTimeMillis$ : function() {
-    return new Date().getTime();
-  },
-  exit$ : function(status) { 
-	 java.lang.Runtime || Clazz.loadClass("java.lang.Runtime");
-	 java.lang.Runtime.getRuntime$().exit$I(status || 0);
-  },
-  gc$ : function() {}, // bh
-  getProperties$ : function() {
-    return System.props;
-  },
-  getProperty$S$S : function(key, def) {
-    if (System.props)
-      return System.props.getProperty$S$S (key, def);
-    var v = System.$props[key];
-    if (typeof v != "undefined")
-      return v;
-    if (key.indexOf(".") > 0) {
-      v = null;    
-      switch (key) {
-      case "java.awt.printerjob":
-        v = "swingjs.JSPrinterJob";
-        break; 
-      case "java.class.version":
-        v = "50";
-        break;
-      case "user.home":
-    	v = "https://.";
-    	break;
-      case "java.vendor":
-    	v = "SwingJS/OpenJDK";
-    	break;
-      case "java.version":
-        v = "1.6-1.8";
-        break;
-      case "file.separator":
-      case "path.separator":
-        v = "/";
-        break;        
-      case "line.separator":
-        v = (navigator.userAgent.indexOf("Windows") >= 0 ? "\r\n" : "\n");
-        break;
-      case "os.name":
-      case "os.version":
-        v = navigator.userAgent;
-        break;
-      case "javax.xml.datatype.DatatypeFactory":
-		v = "swingjs.xml.JSJAXBDatatypeFactory";
-		break;
-	  case "javax.xml.bind.JAXBContextFactory":
-		v = "swingjs.xml.JSJAXBContextFactory";
-		break;
-      }
-      if (v)
-        return System.$props[key] = v;
-    }
-    return (arguments.length == 1 ? null : def == null ? key : def); // BH
-  },
-  getSecurityManager$ : function() { return null },  // bh
-  identityHashCode$O : function(obj){return obj==null ? 0 : obj._$hashcode || (obj._$hashcode = ++hashCode)},
-  lineSeparator$ : function() { return '\n' }, // bh
-  nanoTime$: function() {
-   return Math.round(window.performance.now() * 1e6)
-  },  
-  setProperties$java_util_Properties : function (props) {
-    System.props = props;
-  },
-  setProperty$S$S : function (key, val) {
-    if (!System.props)
-      return System.$props[key] = val; // BH
-    System.props.setProperty (key, val);
-  }
-  
-});
+var sysprops = {
+		"file.separator" : "/",
+		"line.separator" : "\n",
+		"java.awt.printerjob" : "swingjs.JSPrinterJob",
+		"java.class.path" : "/",
+		"java.class.version" : "80",
+		"java.home" : "https://.",
+		"java.vendor" : "java2script/SwingJS/OpenJDK",
+		"java.vendor.url" : "https://github.com/BobHanson/java2script",
+		"java.version" : "1.8",
+		"os.arch" : navigator.userAgent,
+		"os.name" : navigator.userAgent,
+		"os.version": navigator.userAgent,
+		"path.separator" : ":",
+		"user.dir" : "https://.",
+		"user.home" : "https://.",
+		"user.name" : "user",
+		"javax.xml.datatype.DatatypeFactory" : "swingjs.xml.JSJAXBDatatypeFactory",
+		"javax.xml.bind.JAXBContextFactory" : "swingjs.xml.JSJAXBContextFactory"	
+}
+
+Clazz._setDeclared("java.lang.System", java.lang.System = System = {});
+;(function(C$){
+
+C$.lineSeparator = "\n";
+C$.props = null;
+	
+C$.setIn$java_io_InputStream=function ($in) {
+	C$.$in=$in;
+}
+
+C$.setOut$java_io_PrintStream=function (out) {
+	C$.out=out;
+}
+
+C$.setErr$java_io_PrintStream=function (err) {
+	C$.err=err;
+}
+
+C$.console$=function () {
+	return null;
+}
+
+C$.inheritedChannel$=function () {
+	return null;
+}
+
+C$.setSecurityManager$SecurityManager=function (s) {
+}
+
+C$.getSecurityManager$=function () {
+	return null;
+}
+
+C$.currentTimeMillis$=function () {
+	{
+	return new Date().getTime();
+}
+}
+
+C$.nanoTime$=function () {
+	{
+	return Math.round(window.performance.now() * 1e6);
+}
+}
+
+C$.arraycopy$O$I$O$I$I=function (src, srcPos, dest, destPos, length) {
+
+	if (src !== dest || srcPos > destPos) { for (var i = length; --i >= 0;) dest[destPos++] = src[srcPos++]; } else { destPos += length; srcPos += length; for (var i = length; --i >= 0;) src[--destPos] = src[--srcPos]; }
+}
+
+C$.identityHashCode$O=function (x) {
+	return x==null ? 0 : x._$hashcode || (x._$hashcode = ++hashCode);
+}
+
+C$.getProperties$=function () {
+	if (C$.props == null )
+		C$.props=Clazz.new_("java.util.Properties");
+	for (a in sysprops)
+		C$.props.put$TK$TV(a, sysprops[a]);
+	return C$.props;
+}
+
+C$.lineSeparator$=function () {
+	return C$.lineSeparator;
+}
+
+C$.setProperties$java_util_Properties=function (props) {
+	C$.props = props;
+}
+
+C$.getProperty$S=function (key) {
+	C$.checkKey$S(key);
+	return (C$.props == null ? sysprops[key] : C$.props.getProperty$S(key));
+}
+
+C$.getProperty$S$S=function (key, def) {
+	C$.checkKey$S(key);
+	if (C$.props == null) {
+		var prop = sysprops[key];
+		return (prop == null ? def : prop);
+	}
+	return C$.props.getProperty$S$S(key, def);
+}
+
+C$.setProperty$S$S=function (key, value) {
+	C$.checkKey$S(key);
+	var ret;
+	if (C$.props == null) {
+		ret = sysprops[key];
+		sysprops[key] = value;
+		return ret || null;
+	}
+	return C$.props.setProperty$S$S(key, value);
+}
+
+C$.clearProperty$S=function (key) {
+	C$.checkKey$S(key);
+	return (C$.props == null ? null : C$.props.remove$O(key));
+}
+
+C$.checkKey$S=function (key) {
+	if (key == null ) {
+	throw Clazz.new_(Clazz.load('NullPointerException').c$$S,["key can\'t be null"]);
+	}if (key.equals$O("")) {
+	throw Clazz.new_(Clazz.load('IllegalArgumentException').c$$S,["key can\'t be empty"]);
+	}
+}
+
+C$.getenv$S=function (name) {
+	  var s = J2S.getGlobal(name) || getURIField(name, null);
+	  return s || null;
+}
+
+var env = null;
+
+C$.getenv$=function () {
+	return env || (env = Clazz.load("java.util.Properties"));
+}
+
+C$.exit$I=function (status) {
+	Clazz.loadClass("java.lang.Runtime").getRuntime$().exit$I(status | 0);
+}
+
+C$.gc$=C$.runFinalization$=C$.runFinalizersOnExit$Z=C$.load$S=C$.loadLibrary$S=C$.mapLibraryName$S=
+	function (libname) {return null;}
+
+})(System);
 
 ;(function(Con, Sys) {
 
-Sys.getProperty$S = Sys.getProperty$S$S;
-Sys.exit$I = Sys.exit$;
+Sys.exit$ = Sys.exit$I;
 
 Sys.out = new Clazz._O ();
 Sys.out.__CLASS_NAME__ = "java.io.PrintStream";
-
-Sys.setOut$java_io_PrintStream = function(ps) {
-  Sys.out = ps;
-};
-
-Sys.setErr$java_io_PrintStream = function(ps) {
-  Sys.err = ps;
-};
-
-
-Sys.out.print = Sys.out.print$O = Sys.out.print$Z = Sys.out.print$I = Sys.out.println$J = Sys.out.print$S = Sys.out.print$C = Sys.out.print = function (s) { 
-
-  Con.consoleOutput (s);
-};
-
-Sys.out.printf = Sys.out.printf$S$OA = Sys.out.format = Sys.out.format$S$OA = function (f, args) {
-  Sys.out.print(String.format$S$OA.apply(null, arguments));
-}
-
-Sys.out.flush$ = function() {}
-
-Sys.out.println = Sys.out.println$ = Sys.out.println$O = Sys.out.println$Z = Sys.out.println$I = Sys.out.println$J = Sys.out.println$S = Sys.out.println$C = function(s) {
- s = (typeof s == "undefined" ? "" : "" + s);
-  if (J2S._nooutput || J2S._traceFilter && s.indexOf(J2S._traceFilter) < 0) return;
-  if (!J2S._traceFilter && J2S._traceOutput && s && 
-		  (s.indexOf(J2S._traceOutput) >= 0 || '"' + s + '"' == J2S._traceOutput)) {
-    alert(s + "\n\n" + Clazz._getStackTrace());
-    doDebugger();
-  }
-  Con.consoleOutput(typeof s == "undefined" ? "\r\n" : s == null ?  s = "null\r\n" : s + "\r\n");
-};
-
-Sys.out.println$F = Sys.out.println$D = function(f) {var s = "" + f; Sys.out.println(s.indexOf(".") < 0 && s.indexOf("Inf") < 0 ? s + ".0" : s)};
-
-Sys.out.write$BA$I$I = function (buf, offset, len) {
-  Sys.out.print(String.instantialize(buf).substring(offset, offset+len));
-};
-
 Sys.err = new Clazz._O ();
 Sys.err.__CLASS_NAME__ = "java.io.PrintStream";
 
-Sys.err.print = Sys.err.print$S = function (s) { 
-  Con.consoleOutput (s, "red");
+Sys.setOut$java_io_PrintStream = function(ps) {
+  System.out = ps;
 };
 
-Sys.err.printf = Sys.err.printf$S$OA = Sys.err.format = Sys.err.format$S$OA = Sys.err.format = function (f, args) {
-  Sys.out.print(String.format$S$OA.apply(null, arguments));
+Sys.setErr$java_io_PrintStream = function(ps) {
+  System.err = ps;
+};
+
+var checkTrace = function(s) {
+	  if (J2S._nooutput || J2S._traceFilter && s.indexOf(J2S._traceFilter) < 0) return;
+	  if (!J2S._traceFilter && J2S._traceOutput && s && 
+			  (("" + s).indexOf(J2S._traceOutput) >= 0 || '"' + s + '"' == J2S._traceOutput)) {
+	    alert(s + "\n\n" + Clazz._getStackTrace());
+	    doDebugger();
+	  }
 }
 
-Sys.err.println = Sys.err.println$O = Sys.err.println$Z = Sys.err.println$I = Sys.err.println$S = Sys.err.println$C = Sys.err.println = function (s) {
-  if (Clazz._traceOutput && s && ("" + s).indexOf(Clazz._traceOutput) >= 0) {
-    alert(s + "\n\n" + Clazz._getStackTrace());
-    doDebugger();
-  }
-  Con.consoleOutput (typeof s == "undefined" ? "\r\n" : s == null ?  s = "null\r\n" : s + "\r\n", "red");
+var setps = function(ps, f) {
+
+ps.print = ps.print$O = ps.print$Z = ps.print$I = ps.println$J = ps.print$S = ps.print$C = ps.print = function (s) { 
+  checkTrace(s);
+  f(s);
 };
 
-Sys.err.println$F = Sys.err.println$D = function(f) {var s = "" + f; Sys.err.println(s.indexOf(".") < 0  && s.indexOf("Inf") < 0 ? s + ".0" : s)};
+ps.printf = ps.printf$S$OA = ps.format = ps.format$S$OA = function (f, args) {
+  ps.print(String.format$S$OA.apply(null, arguments));
+}
 
-Sys.err.write$BA$I$I = function (buf, offset, len) {
-  Sys.err.print(String.instantialize(buf).substring(offset, offset+len));
+ps.flush$ = function() {}
+
+ps.println = ps.println$ = ps.println$O = ps.println$Z = ps.println$I = ps.println$J = ps.println$S = ps.println$C = function(s) {
+ s = (typeof s == "undefined" ? "" : "" + s);
+ checkTrace(s);
+ s = (typeof s == "undefined" ? "\r\n" : s == null ?  s = "null\r\n" : s + "\r\n");
+  f(s);
 };
 
-Sys.err.flush$ = function() {}
+ps.println$F = ps.println$D = function(f) {var s = "" + f; ps.println(s.indexOf(".") < 0 && s.indexOf("Inf") < 0 ? s + ".0" : s)};
+
+ps.write$BA$I$I = function (buf, offset, len) {
+  ps.print(String.instantialize(buf).substring(offset, offset+len));
+};
+
+}
+
+setps(Sys.out, function(s) {Con.consoleOutput(s)});
+setps(Sys.err, function(s) {Con.consoleOutput(s, "red")});
 
 })(Clazz.Console, System);
 
@@ -17085,18 +17316,25 @@ if (typeof arguments[0] != "object")this.c$(arguments[0]);
 
 var primTypes = {};
 
+var FALSE = function() { return false };
+var EMPTY_CLASSES = function() {return Clazz.array(Class, [0])};
+var NULL_FUNC = function() {return null};
+
 var setJ2STypeclass = function(cl, type, paramCode) {
 // TODO -- should be a proper Java.lang.Class
   primTypes[paramCode] = cl;
   cl.TYPE = {
-    isArray$: function() { return false },
     isPrimitive$: function() { return true },
     type:type, 
     __PARAMCODE:paramCode, 
     __PRIMITIVE:1  // referenced in java.lang.Class
   };
+  cl.TYPE.isArray$ = cl.TYPE.isEnum$ = cl.TYPE.isAnnotation$ = FALSE;
   cl.TYPE.toString = cl.TYPE.getName$ = cl.TYPE.getTypeName$ 
-    = cl.TYPE.getCanonicalName$ = cl.TYPE.getSimpleName$ = function() {return type}
+    = cl.TYPE.getCanonicalName$ = cl.TYPE.getSimpleName$ = function() {return type};
+  cl.TYPE.isAssignableFrom$Class = (function(t) {return function(c) {return c == t}})(cl.TYPE);
+  cl.TYPE.getSuperclass$ = NULL_FUNC;
+  cl.TYPE.getInterfaces$ = EMPTY_CLASSES;
 }
 
 var decorateAsNumber = function (clazz, qClazzName, type, PARAMCODE) {
@@ -17530,6 +17768,8 @@ if(s==null){
 throw Clazz.new_(NumberFormatException.c$$S, ["null"]);
 }
 if (typeof s == "number")return s;  // important -- typeof NaN is "number" and is OK here
+if (s == "NaN")
+	return NaN;
 var floatVal=Number(s);
 if(isNaN(floatVal)){
 throw Clazz.new_(NumberFormatException.c$$S, ["Not a Number : "+s]);
@@ -17602,6 +17842,8 @@ if(s==null){
   throw Clazz.new_(NumberFormatException.c$$S, ["null"]);
 }
 if (typeof s == "number")return s;  // important -- typeof NaN is "number" and is OK here
+if (s == "NaN")
+	return NaN;
 var doubleVal=Number(s);
 if(isNaN(doubleVal)){
 throw Clazz.new_(NumberFormatException.c$$S, ["Not a Number : "+s]);
@@ -17999,6 +18241,15 @@ var getChars = function(s, srcBegin,srcEnd,dst,dstBegin, asBytes){
 
 //var charset=["utf-8","utf8","us-ascii","iso-8859-1","8859_1","gb2312","gb18030"];
 var charset=["utf-8","utf8","us-ascii","iso-8859-1"]; // gb* uses GBK
+
+sp.getBytes$I$I$BA$I=function(i0, i1, dst, dpt) {
+	if (i1 == i0)
+		return;
+	var s = this.valueOf();
+	for (var i = i0; i < i1; i++)
+		dst[dpt++] = s.charCodeAt(i);
+}
+
 sp.getBytes$=sp.getBytes$S=sp.getBytes$java_nio_charset_Charset=function(){
 var s=this;
 if(arguments.length==1){
@@ -18320,9 +18571,10 @@ String.join$CharSequence$CharSequenceA = function(sep,array) {
  return ret;
 }
 
-String.join$CharSequence$Iterable = function(sep,iter) {
+String.join$CharSequence$Iterable = function(sep,iterable) {
  var ret = "";
  var s = "";
+ var iter = iterable.iterator$();
  while (iter.hasNext$()) {
 	 ret += s + iter.next$().toString();
 	 s || (s = sep);	 
@@ -18735,27 +18987,31 @@ return this.stackTrace;
 });
 
 m$(C$, 'printStackTrace$', function () {
-	printStackTrace(this, System.err.println$O);
+	printStackTrace(this, System.err);
 });
 
-var printStackTrace = function(e, f) {
-f("" + e);
+m$(C$, 'printStackTrace$java_io_PrintWriter', function (writer) {
+	printStackTrace(this, writer);
+});
+
+var printStackTrace = function(e, ps) {
+ps.println$O("" + e);
 if (!e.stackTrace){
-  f(e.stack);
+  ps.println$O(e.stack);
   return;
 }
 for (var i = 0; i < e.stackTrace.length; i++) {
 var t = e.stackTrace[i];
 if (t.nativeClazz == null || isInstanceOf(t.nativeClazz, Throwable) < 0) {
- f(t);
+ ps.println$O(t);
 }
 }
 // from a JavaScript error 
-e.stack && f(e.stack);
+e.stack && ps.println$O(e.stack);
 }
 
 m$(C$, ['printStackTrace$java_io_PrintStream','printStackTrace$java_io_PrintWriter'], function (stream) {
-  printStackTrace(this, stream.println$O);
+  printStackTrace(this, stream);
 });
 
 Clazz.newMeth(C$, 'fillInStackTrace$', function () {
@@ -18896,7 +19152,7 @@ TypeError.prototype.getMessage$ || (TypeError.prototype.getMessage$ = TypeError.
 			= function(){ return (this.stack ? this.stack : this.message || this.toString()) + (this.getStackTrace ? this.getStackTrace$() : Clazz._getStackTrace())});
 TypeError.prototype.printStackTrace$ = function(){System.out.println(this + "\n" + this.stack)};
 TypeError.prototype.printStackTrace$java_io_PrintStream = function(stream){stream.println$S(this + "\n" + this.stack);};
-
+TypeError.prototype.printStackTrace$java_io_PrintWriter = function(printer){printer.println$S(this + "\n" + this.stack);};
 Clazz.Error = Error;
 
 var declareType = function(prefix, name, clazzSuper, interfacez) {
@@ -18911,7 +19167,7 @@ Clazz._Error || (Clazz._Error = Error);
 //setSuperclass(Clazz._Error, Throwable);
 
 var setEx = function(C$) {
- C$.$clinit$ = function() {Clazz.load(C$, 1)};
+ C$.$clinit$ = 1;
  m$(C$, "c$", function() { C$.superclazz.c$.apply(this, []);}, 1);
  m$(C$, "c$$S", function(detailMessage){C$.superclazz.c$$S.apply(this,[detailMessage]);},1);
  m$(C$, "c$$Throwable", function(exception){C$.superclazz.c$$Throwable.apply(this, arguments);}, 1);
@@ -19127,7 +19383,7 @@ var C$=Clazz.newClass(java.util,"MissingResourceException",function(){
 this.className=null;
 this.key=null;
 },RuntimeException);
-C$.$clinit$ = function() {Clazz.load(C$, 1)};
+C$.$clinit$ = 1;
 m$(C$, "c$$S$S$S", function(detailMessage,className,resourceName){
 Clazz.super_(C$, this);
 C$.superclazz.c$$S.apply(this,[detailMessage]);
@@ -19150,71 +19406,6 @@ setJ2STypeclass(java.lang.Void, "void", "V");
 //java.lang.V
 
 Clazz.newInterface(java.lang.reflect,"GenericDeclaration");
-Clazz.newInterface(java.lang.reflect,"AnnotatedElement");
-
-;(function() {
-var C$=declareType(java.lang.reflect,"AccessibleObject",null,java.lang.reflect.AnnotatedElement);
-m$(C$, "c$",function(){
-}, 1);
-m$(C$,"isAccessible$",
-function(){
-return true;
-});
-m$(C$,"setAccessible$reflect_AccessibleObjectA$Z",
-function(objects,flag){
-return;
-},1);
-m$(C$,"setAccessible$Z",
-function(flag){
-return;
-});
-m$(C$,"isAnnotationPresent$Class",
-function(annotationType){
-return false;
-});
-m$(C$,"getDeclaredAnnotations$",
-function(){
-return new Array(0);
-});
-m$(C$,"getAnnotations$",
-function(){
-return new Array(0);
-});
-m$(C$,"getAnnotation$Class",
-function(annotationType){
-return null;
-});
-m$(C$,"marshallArguments$ClassA$OA",
-function(parameterTypes,args){
-return null;
-}, 1);
-m$(C$,"invokeV$O$OA",
-function(receiver,args){
-return;
-});
-m$(C$,"invokeL$O$OA",
-function(receiver,args){
-return null;
-});
-m$(C$,"invokeI$O$OA",
-function(receiver,args){
-return 0;
-});
-m$(C$,"invokeJ$O$OA",
-function(receiver,args){
-return 0;
-});
-m$(C$,"invokeF$O$OA",
-function(receiver,args){
-return 0.0;
-});
-m$(C$,"invokeD$O$OA",
-function(receiver,args){
-return 0.0;
-});
-C$.emptyArgs=C$.prototype.emptyArgs=new Array(0);
-})();
-
 
 Clazz.newInterface(java.lang.reflect,"InvocationHandler");
 

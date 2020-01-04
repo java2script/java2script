@@ -381,6 +381,7 @@ public interface Map<K,V> {
          *         required to, throw this exception if the entry has been
          *         removed from the backing map.
          */
+    	@Deprecated
         K getKey();
 
         /**

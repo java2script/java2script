@@ -310,24 +310,26 @@ public abstract class AtomicReferenceFieldUpdater<T,V> {
             final Class<?> fieldClass;
             final int modifiers;
             try {
-                field = AccessController.doPrivileged(
-                    new PrivilegedExceptionAction<Field>() {
-                        public Field run() throws NoSuchFieldException {
-                            return tclass.getDeclaredField(fieldName);
-                        }
-                    });
-                modifiers = field.getModifiers();
-                sun.reflect.misc.ReflectUtil.ensureMemberAccess(
-                    caller, tclass, null, modifiers);
-                ClassLoader cl = tclass.getClassLoader();
-                ClassLoader ccl = caller.getClassLoader();
-                if ((ccl != null) && (ccl != cl) &&
-                    ((cl == null) || !isAncestor(cl, ccl))) {
-                  sun.reflect.misc.ReflectUtil.checkPackageAccess(tclass);
-                }
+                field = 
+//                		AccessController.doPrivileged(
+//                    new PrivilegedExceptionAction<Field>() {
+//                        public Field run() throws NoSuchFieldException {
+//                            return 
+                            		tclass.getDeclaredField(fieldName);
+//                        }
+//                    });
+//                modifiers = field.getModifiers();
+//                sun.reflect.misc.ReflectUtil.ensureMemberAccess(
+//                    caller, tclass, null, modifiers);
+//                ClassLoader cl = tclass.getClassLoader();
+//                ClassLoader ccl = caller.getClassLoader();
+//                if ((ccl != null) && (ccl != cl) &&
+//                    ((cl == null) || !isAncestor(cl, ccl))) {
+//                  sun.reflect.misc.ReflectUtil.checkPackageAccess(tclass);
+//                }
                 fieldClass = field.getType();
-            } catch (PrivilegedActionException pae) {
-                throw new RuntimeException(pae.getException());
+//            } catch (PrivilegedActionException pae) {
+//                throw new RuntimeException(pae.getException());
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
@@ -337,11 +339,12 @@ public abstract class AtomicReferenceFieldUpdater<T,V> {
             if (vclass.isPrimitive())
                 throw new IllegalArgumentException("Must be reference type");
 
-            if (!Modifier.isVolatile(modifiers))
-                throw new IllegalArgumentException("Must be volatile type");
+//            if (!Modifier.isVolatile(modifiers))
+//                throw new IllegalArgumentException("Must be volatile type");
 
-            this.cclass = (Modifier.isProtected(modifiers) &&
-                           caller != tclass) ? caller : null;
+            this.cclass = null;
+//            (Modifier.isProtected(modifiers) &&
+//                           caller != tclass) ? caller : null;
             this.tclass = tclass;
             if (vclass == Object.class)
                 this.vclass = null;
@@ -350,21 +353,21 @@ public abstract class AtomicReferenceFieldUpdater<T,V> {
             offset = unsafe.objectFieldOffset(field);
         }
 
-        /**
-         * Returns true if the second classloader can be found in the first
-         * classloader's delegation chain.
-         * Equivalent to the inaccessible: first.isAncestor(second).
-         */
-        private static boolean isAncestor(ClassLoader first, ClassLoader second) {
-            ClassLoader acl = first;
-            do {
-                acl = acl.getParent();
-                if (second == acl) {
-                    return true;
-                }
-            } while (acl != null);
-            return false;
-        }
+//        /**
+//         * Returns true if the second classloader can be found in the first
+//         * classloader's delegation chain.
+//         * Equivalent to the inaccessible: first.isAncestor(second).
+//         */
+//        private static boolean isAncestor(ClassLoader first, ClassLoader second) {
+//            ClassLoader acl = first;
+//            do {
+//                acl = acl.getParent();
+//                if (second == acl) {
+//                    return true;
+//                }
+//            } while (acl != null);
+//            return false;
+//        }
 
         void targetCheck(T obj) {
             if (!tclass.isInstance(obj))
@@ -381,7 +384,8 @@ public abstract class AtomicReferenceFieldUpdater<T,V> {
                 ensureProtectedAccess(obj);
         }
 
-        public boolean compareAndSet(T obj, V expect, V update) {
+        @Override
+		public boolean compareAndSet(T obj, V expect, V update) {
             if (obj == null || obj.getClass() != tclass || cclass != null ||
                 (update != null && vclass != null &&
                  vclass != update.getClass()))
@@ -389,7 +393,8 @@ public abstract class AtomicReferenceFieldUpdater<T,V> {
             return unsafe.compareAndSwapObject(obj, offset, expect, update);
         }
 
-        public boolean weakCompareAndSet(T obj, V expect, V update) {
+        @Override
+		public boolean weakCompareAndSet(T obj, V expect, V update) {
             // same implementation as strong form for now
             if (obj == null || obj.getClass() != tclass || cclass != null ||
                 (update != null && vclass != null &&
@@ -398,7 +403,8 @@ public abstract class AtomicReferenceFieldUpdater<T,V> {
             return unsafe.compareAndSwapObject(obj, offset, expect, update);
         }
 
-        public void set(T obj, V newValue) {
+        @Override
+		public void set(T obj, V newValue) {
             if (obj == null || obj.getClass() != tclass || cclass != null ||
                 (newValue != null && vclass != null &&
                  vclass != newValue.getClass()))
@@ -406,7 +412,8 @@ public abstract class AtomicReferenceFieldUpdater<T,V> {
             unsafe.putObjectVolatile(obj, offset, newValue);
         }
 
-        public void lazySet(T obj, V newValue) {
+        @Override
+		public void lazySet(T obj, V newValue) {
             if (obj == null || obj.getClass() != tclass || cclass != null ||
                 (newValue != null && vclass != null &&
                  vclass != newValue.getClass()))
@@ -414,14 +421,16 @@ public abstract class AtomicReferenceFieldUpdater<T,V> {
             unsafe.putOrderedObject(obj, offset, newValue);
         }
 
-        @SuppressWarnings("unchecked")
+        @Override
+		@SuppressWarnings("unchecked")
         public V get(T obj) {
             if (obj == null || obj.getClass() != tclass || cclass != null)
                 targetCheck(obj);
             return (V)unsafe.getObjectVolatile(obj, offset);
         }
 
-        @SuppressWarnings("unchecked")
+        @Override
+		@SuppressWarnings("unchecked")
         public V getAndSet(T obj, V newValue) {
             if (obj == null || obj.getClass() != tclass || cclass != null ||
                 (newValue != null && vclass != null &&

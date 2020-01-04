@@ -180,7 +180,7 @@ final class Inflate {
     int r;
     int b;
 
-    if (z == null || z.next_in == null) {
+    if (z == null || z.in == null) {
       if (f == Z_FINISH && this.mode == HEAD)
         return Z_OK;
       return Z_STREAM_ERROR;
@@ -266,7 +266,7 @@ final class Inflate {
 
         z.avail_in--;
         z.total_in++;
-        this.need = ((z.next_in[z.next_in_index++] & 0xff) << 24) & 0xff000000L;
+        this.need = ((z.in[z.in_index++] & 0xff) << 24) & 0xff000000L;
         this.mode = DICT3;
         //$FALL-THROUGH$
       case DICT3:
@@ -277,7 +277,7 @@ final class Inflate {
 
         z.avail_in--;
         z.total_in++;
-        this.need += ((z.next_in[z.next_in_index++] & 0xff) << 16) & 0xff0000L;
+        this.need += ((z.in[z.in_index++] & 0xff) << 16) & 0xff0000L;
         this.mode = DICT2;
         //$FALL-THROUGH$
       case DICT2:
@@ -288,7 +288,7 @@ final class Inflate {
 
         z.avail_in--;
         z.total_in++;
-        this.need += ((z.next_in[z.next_in_index++] & 0xff) << 8) & 0xff00L;
+        this.need += ((z.in[z.in_index++] & 0xff) << 8) & 0xff00L;
         this.mode = DICT1;
         //$FALL-THROUGH$
       case DICT1:
@@ -299,7 +299,7 @@ final class Inflate {
 
         z.avail_in--;
         z.total_in++;
-        this.need += (z.next_in[z.next_in_index++] & 0xffL);
+        this.need += (z.in[z.in_index++] & 0xffL);
         z.checksum.resetLong(this.need);
         this.mode = DICT0;
         return Z_NEED_DICT;
@@ -338,7 +338,7 @@ final class Inflate {
 
         z.avail_in--;
         z.total_in++;
-        this.need = ((z.next_in[z.next_in_index++] & 0xff) << 24) & 0xff000000L;
+        this.need = ((z.in[z.in_index++] & 0xff) << 24) & 0xff000000L;
         this.mode = CHECK3;
         //$FALL-THROUGH$
       case CHECK3:
@@ -349,7 +349,7 @@ final class Inflate {
 
         z.avail_in--;
         z.total_in++;
-        this.need += ((z.next_in[z.next_in_index++] & 0xff) << 16) & 0xff0000L;
+        this.need += ((z.in[z.in_index++] & 0xff) << 16) & 0xff0000L;
         this.mode = CHECK2;
         //$FALL-THROUGH$
       case CHECK2:
@@ -360,7 +360,7 @@ final class Inflate {
 
         z.avail_in--;
         z.total_in++;
-        this.need += ((z.next_in[z.next_in_index++] & 0xff) << 8) & 0xff00L;
+        this.need += ((z.in[z.in_index++] & 0xff) << 8) & 0xff00L;
         this.mode = CHECK1;
         //$FALL-THROUGH$
       case CHECK1:
@@ -371,7 +371,7 @@ final class Inflate {
 
         z.avail_in--;
         z.total_in++;
-        this.need += (z.next_in[z.next_in_index++] & 0xffL);
+        this.need += (z.in[z.in_index++] & 0xffL);
 
         if (flags != 0) { // gzip
           this.need = ((this.need & 0xff000000) >> 24
@@ -631,13 +631,13 @@ final class Inflate {
     if ((n = z.avail_in) == 0)
       return Z_BUF_ERROR;
 
-    p = z.next_in_index;
+    p = z.in_index;
     m = this.marker;
     // search
     while (n != 0 && m < 4) {
-      if (z.next_in[p] == mark[m]) {
+      if (z.in[p] == mark[m]) {
         m++;
-      } else if (z.next_in[p] != 0) {
+      } else if (z.in[p] != 0) {
         m = 0;
       } else {
         m = 4 - m;
@@ -647,8 +647,8 @@ final class Inflate {
     }
 
     // restore
-    z.total_in += p - z.next_in_index;
-    z.next_in_index = p;
+    z.total_in += p - z.in_index;
+    z.in_index = p;
     z.avail_in = n;
     this.marker = m;
 
@@ -691,7 +691,7 @@ final class Inflate {
       z.avail_in--;
       z.total_in++;
       this.need = this.need
-          | ((z.next_in[z.next_in_index++] & 0xff) << ((n - need秘bytes) * 8));
+          | ((z.in[z.in_index++] & 0xff) << ((n - need秘bytes) * 8));
       need秘bytes--;
     }
     if (n == 2) {
@@ -726,11 +726,11 @@ class Return extends Exception {
       r = f;
       z.avail_in--;
       z.total_in++;
-      b = z.next_in[z.next_in_index];
+      b = z.in[z.in_index];
       if (b != 0)
-        tmp_string.write(z.next_in, z.next_in_index, 1);
-      z.checksum.update(z.next_in, z.next_in_index, 1);
-      z.next_in_index++;
+        tmp_string.write(z.in, z.in_index, 1);
+      z.checksum.update(z.in, z.in_index, 1);
+      z.in_index++;
     } while (b != 0);
     return r;
   }
@@ -748,9 +748,9 @@ class Return extends Exception {
       z.avail_in--;
       z.total_in++;
       //b = z.next_in[z.next_in_index];
-      tmp_string.write(z.next_in, z.next_in_index, 1);
-      z.checksum.update(z.next_in, z.next_in_index, 1);
-      z.next_in_index++;
+      tmp_string.write(z.in, z.in_index, 1);
+      z.checksum.update(z.in, z.in_index, 1);
+      z.in_index++;
       this.need--;
     }
     return r;

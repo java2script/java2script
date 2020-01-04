@@ -1466,7 +1466,7 @@ class Thread implements Runnable {
      	 /**
      	  * @j2sNative
      	  * 
-     	  * cl.baseClass = {getName$:function(){return "swingjs"}};
+     	  * cl.baseClass = {getName$:function(){return ""}};
      	  */
      	 return cl;
   	}
