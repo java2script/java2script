@@ -29,11 +29,12 @@ public class Test_Ints extends Test_ {
  
     static long[] uia = /** @j2sNative new Uint32Array(1) || */null;
 
+    static long[] la = new long[3];
     private static long uint(int i) {
     	/**
     	 * @j2sNative 
     	 * 
-    	 * return uia[0] = i, uia[0];
+    	 * return C$.uia[0] = i, C$.uia[0];
     	 */
 		return 0xFFFFFFFFL & i;
 	}
