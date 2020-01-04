@@ -47,6 +47,7 @@ class Test_Class extends Test_Class2 {
 		System.out.println("Test_Class nonstatic init " + istatic + " " + sstatic);
 	}
 
+	@SuppressWarnings("unused")
 	private void test(String s) {
 	
 	}
@@ -55,6 +56,7 @@ class Test_Class extends Test_Class2 {
 		
 	}
 	
+	@SuppressWarnings("unused")
 	private void test(Integer i) {
 		c();
 	}
@@ -148,7 +150,9 @@ class Test_Class extends Test_Class2 {
 		
 		String pseudofinal = "testPseudo";
 
+		@SuppressWarnings("serial")
 		Hashtable<String, Object> t = new Hashtable<String, Object>() {
+			@Override
 			public Object put(String key, Object value) {
 				super.put(key,  value); 
 				System.out.println("t.put:" + key + "/" + value);
@@ -318,6 +322,7 @@ class Test_Class extends Test_Class2 {
 			new Test_Class().new B().testB();
 			Class<?> cl;
 			ClassLoader loader = test.Test_Anon.class.getClassLoader();
+			@SuppressWarnings("unused")
 			Object x = Class.forName("test.Test_Anon", false, loader).getConstructor().newInstance();
 
 			cl = Class.forName("test.Test_Class");
