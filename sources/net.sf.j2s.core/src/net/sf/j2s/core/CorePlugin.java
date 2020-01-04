@@ -25,7 +25,10 @@ public class CorePlugin extends Plugin {
 	 * "net.sf.j2s.core.jar" not "net.sf.j2s.core.3.2.5"
 	 * 
 	 */
-	public static String VERSION = "3.2.5-v4";
+	public static String VERSION = "3.2.6-v1";
+	// BH 2020.01.03 -- 3.2.6-v1 fixes for $__T and some synthetic methods missing
+	// BH 2020.01.01 -- 3.2.6-v1 fixes for generic varargs with only one parameter
+	// BH 2019.12.19 -- 3.2.6-v0 adds C$.$fields$
 	// BH 2019.12.15 -- 3.2.5-v4 fix for local class within anonymous class not getting name 
 	// BH 2019.12.12 -- 3.2.5-v3 fix for enums == null in annotations
 	// BH 2019.12.06 -- 3.2.5-v2 fix for try(resources) not closing those

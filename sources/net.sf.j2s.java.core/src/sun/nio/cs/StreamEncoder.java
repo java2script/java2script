@@ -185,7 +185,7 @@ public class StreamEncoder extends Writer
         this.cs = enc.charset();
         this.encoder = enc;
 
-        // This path disabled until direct buffers are faster
+        // Java8 comment: This path disabled until direct buffers are faster
         if (false && out instanceof FileOutputStream) {
                 ch = ((FileOutputStream)out).getChannel();
         if (ch != null)

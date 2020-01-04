@@ -24,6 +24,19 @@ package test;
  
 class Test_Native extends Test_ {
 
+	/**@j2sAlias *,P,* */
+	@Override
+	public void test123(int a, int b, int c) {
+		
+	}
+
+	
+	/** @j2sAlias  *,P,* */
+	void checkP(int i, Object obj, int j) {
+		
+	}
+	
+	
 	/**
 	 * @j2sNative
 	 * 

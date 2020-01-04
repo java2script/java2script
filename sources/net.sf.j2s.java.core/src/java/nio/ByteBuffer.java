@@ -25,8 +25,6 @@
 
 package java.nio;
 
-import java.util.Spliterator;
-
 /**
  * $A$ byte buffer.
  *
@@ -256,6 +254,11 @@ public abstract class ByteBuffer
 {
 
     public abstract CharBuffer asCharBuffer();
+    public abstract ShortBuffer asShortBuffer();
+    public abstract IntBuffer asIntBuffer();
+    public abstract LongBuffer asLongBuffer();
+    public abstract FloatBuffer asFloatBuffer();
+    public abstract DoubleBuffer asDoubleBuffer();
 
 
     // These fields are declared here rather than in Heap-X-Buffer in order to
@@ -757,7 +760,8 @@ public abstract class ByteBuffer
      * @return  <tt>true</tt> if, and only if, this buffer
      *          is backed by an array and is not read-only
      */
-    public final boolean hasArray() {
+    @Override
+	public final boolean hasArray() {
         return (hb != null) && !isReadOnly;
     }
 
@@ -780,7 +784,8 @@ public abstract class ByteBuffer
      * @throws  UnsupportedOperationException
      *          If this buffer is not backed by an accessible array
      */
-    public final byte[] array() {
+    @Override
+	public final byte[] array() {
         if (hb == null)
             throw new UnsupportedOperationException();
         if (isReadOnly)
@@ -808,7 +813,8 @@ public abstract class ByteBuffer
      * @throws  UnsupportedOperationException
      *          If this buffer is not backed by an accessible array
      */
-    public final int arrayOffset() {
+    @Override
+	public final int arrayOffset() {
         if (hb == null)
             throw new UnsupportedOperationException();
         if (isReadOnly)
@@ -863,7 +869,8 @@ public abstract class ByteBuffer
      *
      * @return  <tt>true</tt> if, and only if, this buffer is direct
      */
-    public abstract boolean isDirect();
+    @Override
+	public abstract boolean isDirect();
 
 
     /**
@@ -871,7 +878,8 @@ public abstract class ByteBuffer
      *
      * @return  A summary string
      */
-    public String toString() {
+    @Override
+	public String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append(getClass().getName());
         sb.append("[pos=");
@@ -901,7 +909,8 @@ public abstract class ByteBuffer
      *
      * @return  The current hash code of this buffer
      */
-    public int hashCode() {
+    @Override
+	public int hashCode() {
         int h = 1;
         int p = position();
         for (int i = limit() - 1; i >= p; i--)
@@ -941,7 +950,8 @@ public abstract class ByteBuffer
      * @return  <tt>true</tt> if, and only if, this buffer is equal to the
      *           given object
      */
-    public boolean equals(Object ob) {
+    @Override
+	public boolean equals(Object ob) {
         if (this == ob)
             return true;
         if (!(ob instanceof ByteBuffer))
@@ -983,7 +993,8 @@ public abstract class ByteBuffer
      * @return  A negative integer, zero, or a positive integer as this buffer
      *          is less than, equal to, or greater than the given buffer
      */
-    public int compareTo(ByteBuffer that) {
+    @Override
+	public int compareTo(ByteBuffer that) {
         int n = this.position() + Math.min(this.remaining(), that.remaining());
         for (int i = this.position(), j = that.position(); i < n; i++, j++) {
             int cmp = compare(this.get(i), that.get(j));

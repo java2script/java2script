@@ -27,9 +27,11 @@ package java.io;
 
 import java.nio.channels.FileChannel;
 
+import javajs.util.OC;
 import swingjs.JSFileSystem.JSFileChannel;
 import swingjs.JSTempFile;
-import javajs.util.OC;
+import swingjs.JSUtil;
+
 
 /**
  * A file output stream is an output stream for writing data to a
@@ -65,11 +67,11 @@ class FileOutputStream extends OutputStream
      */
     private final boolean append;
 
-	protected OC out;
+//	protected OC out;
     /**
      * The associated channel, initialized lazily.
      */
-    private FileChannel channel;
+    private JSFileChannel channel;
 
     /**
      * The path of the referenced file
@@ -119,7 +121,7 @@ class FileOutputStream extends OutputStream
      * @see        java.lang.SecurityManager#checkWrite(java.lang.String)
      */
     public FileOutputStream(String name) throws FileNotFoundException {
-        this(name != null ? new File(name) : null, false);
+        this(name, false);
     }
 
     /**
@@ -151,7 +153,10 @@ class FileOutputStream extends OutputStream
     public FileOutputStream(String name, boolean append)
         throws FileNotFoundException
     {
-        this(name != null ? new File(name) : null, append);
+    	this (name == null ? (File) null 
+    			: name.startsWith(File.temporaryDirectory) ? 
+    					new JSTempFile(name) : new File(name)
+        , append);
     }
 
     /**
@@ -220,10 +225,6 @@ class FileOutputStream extends OutputStream
     {
     	this._file = file;
         String name = (file != null ? file.getPath() : null);
-//        SecurityManager security = System.getSecurityManager();
-//        if (security != null) {
-//            security.checkWrite(name);
-//        }
         if (name == null) {
             throw new NullPointerException();
         }
@@ -234,7 +235,6 @@ class FileOutputStream extends OutputStream
         fd.attach(this);
         this.append = append;
         this.path = name;
-
         open(name, append);
     }
 
@@ -262,7 +262,7 @@ class FileOutputStream extends OutputStream
      * @see        java.lang.SecurityManager#checkWrite(java.io.FileDescriptor)
      */
     public FileOutputStream(FileDescriptor fdObj) {
-        SecurityManager security = System.getSecurityManager();
+//        SecurityManager security = System.getSecurityManager();
         if (fdObj == null) {
             throw new NullPointerException();
         }
@@ -277,24 +277,21 @@ class FileOutputStream extends OutputStream
 // SwingJS old:		this(new File("output"), false);
 
     }
+	ByteArrayOutputStream bos = null;
 
-    /**
-     * Opens a file, with the specified name, for overwriting or appending.
-     * @param name name of file to be opened
-     * @param append whether the file is to be opened in append mode
-     */
-    private void open0(String name, boolean append) 
-        throws FileNotFoundException {
-    		out = new OC();
-    		ByteArrayOutputStream bos = null;
-    		// append is an interesting option here! -- temp files?
-    		if (append && _file != null && _file.秘bytes != null) {
-    			bos = new ByteArrayOutputStream();
-    			bos.write(_file.秘bytes, 0, _file.秘bytes.length);
-    		}
-    		out.setParams(null, name, false, bos);
-    		out.setTemp(_file != null && _file instanceof JSTempFile);
-        }
+	/**
+	 * Opens a file, with the specified name, for overwriting or appending.
+	 * 
+	 * @param name   name of file to be opened
+	 * @param append whether the file is to be opened in append mode
+	 */
+	private void open0(String name, boolean append) throws FileNotFoundException {
+		bos = new ByteArrayOutputStream();
+		// append is an interesting option here! -- temp files?
+		if (append && _file != null && _file.秘bytes != null) {
+			bos.write(_file.秘bytes, 0, _file.秘bytes.length);
+		}
+	}
 
     // wrap native call to allow instrumentation
     /**
@@ -308,17 +305,6 @@ class FileOutputStream extends OutputStream
     }
 
     /**
-     * Writes the specified byte to this file output stream.
-     *
-     * @param   b   the byte to be written.
-     * @param   append   {@code true} if the write operation first
-     *     advances the position to the end of file
-     */
-	private void writeBytes(byte b[], int off, int len) throws IOException {
-		out.write(b, off, len);
-	}
-
-    /**
      * Writes the specified byte to this file output stream. Implements
      * the <code>write</code> method of <code>OutputStream</code>.
      *
@@ -327,7 +313,10 @@ class FileOutputStream extends OutputStream
      */
     @Override
 	public void write(int b) throws IOException {
-		out.writeByteAsInt(b);
+    	if (channel == null)
+    		bos.write(b);
+    	else
+    		channel.write(b);
     }
 
     /**
@@ -339,7 +328,7 @@ class FileOutputStream extends OutputStream
      */
     @Override
 	public void write(byte b[]) throws IOException {
-		writeBytes(b, 0, b.length);
+		write(b, 0, b.length);
     }
 
     /**
@@ -353,7 +342,10 @@ class FileOutputStream extends OutputStream
      */
     @Override
 	public void write(byte b[], int off, int len) throws IOException {
-		writeBytes(b, off, len);
+		if (channel == null)
+			bos.write(b, off, len);
+		else
+			channel.writeBytes(b, off, len);
     }
 
     /**
@@ -371,28 +363,19 @@ class FileOutputStream extends OutputStream
      */
     @Override
 	public void close() throws IOException {
-    	out.closeChannel();
-    	秘bytes = out.toByteArray();
-    	if (_file != null && 秘bytes != null)
-    		_file.秘bytes = 秘bytes;
-    	if (_file instanceof JSTempFile)
-    		((JSTempFile) _file).cacheBytes();
-        synchronized (closeLock) {
-            if (closed) {
-                return;
-            }
-            closed = true;
-        }
-
-        if (channel != null) {
-            channel.close();
-        }
-
+    	closed = true;
         fd.closeAll(new Closeable() {
-            @Override
+			@Override
 			public void close() throws IOException {
-               close0();
-           }
+				if (channel == null) {
+					bos.close();
+					fd._file.秘bytes = 秘bytes = bos.toByteArray();
+					if (!fd._isTempFile())
+						JSUtil.saveFile(path, 秘bytes, null, null);
+				} else {
+					channel.close();
+				}
+			}
         });
     }
     
@@ -433,7 +416,12 @@ class FileOutputStream extends OutputStream
     public FileChannel getChannel() {
 //        synchronized (this) {
             if (channel == null) {
-                channel = JSFileChannel.open(fd, path, false, true, append, null);
+                try {
+					channel = JSFileChannel.open(fd, path, false, true, append, null);
+				} catch (IOException e) {
+					// should not be possible
+					e.printStackTrace();
+				}
             }
             return channel;
     //    }
@@ -462,9 +450,6 @@ class FileOutputStream extends OutputStream
         }
     }
 
-    private void close0() throws IOException {
-    	out.closeChannel();
-    }
 
 //    private static native void initIDs();
 

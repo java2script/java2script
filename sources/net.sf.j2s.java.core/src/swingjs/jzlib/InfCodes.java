@@ -120,7 +120,7 @@ final class InfCodes {
     int f; // pointer to copy strings from
 
     // copy input/output information to locals (UPDATE macro restores)
-    p = z.next_in_index;
+    p = z.in_index;
     n = z.avail_in;
     b = s.bitb;
     k = s.bitk;
@@ -137,13 +137,13 @@ final class InfCodes {
           s.bitb = b;
           s.bitk = k;
           z.avail_in = n;
-          z.total_in += p - z.next_in_index;
-          z.next_in_index = p;
+          z.total_in += p - z.in_index;
+          z.in_index = p;
           s.write = q;
           r = inflate_fast(lbits, dbits, ltree, ltree_index, dtree,
               dtree_index, s, z);
 
-          p = z.next_in_index;
+          p = z.in_index;
           n = z.avail_in;
           b = s.bitb;
           k = s.bitk;
@@ -172,13 +172,13 @@ final class InfCodes {
             s.bitb = b;
             s.bitk = k;
             z.avail_in = n;
-            z.total_in += p - z.next_in_index;
-            z.next_in_index = p;
+            z.total_in += p - z.in_index;
+            z.in_index = p;
             s.write = q;
             return s.inflate_flush(r);
           }
           n--;
-          b |= (z.next_in[p++] & 0xff) << k;
+          b |= (z.in[p++] & 0xff) << k;
           k += 8;
         }
 
@@ -216,8 +216,8 @@ final class InfCodes {
         s.bitb = b;
         s.bitk = k;
         z.avail_in = n;
-        z.total_in += p - z.next_in_index;
-        z.next_in_index = p;
+        z.total_in += p - z.in_index;
+        z.in_index = p;
         s.write = q;
         return s.inflate_flush(r);
 
@@ -232,13 +232,13 @@ final class InfCodes {
             s.bitb = b;
             s.bitk = k;
             z.avail_in = n;
-            z.total_in += p - z.next_in_index;
-            z.next_in_index = p;
+            z.total_in += p - z.in_index;
+            z.in_index = p;
             s.write = q;
             return s.inflate_flush(r);
           }
           n--;
-          b |= (z.next_in[p++] & 0xff) << k;
+          b |= (z.in[p++] & 0xff) << k;
           k += 8;
         }
 
@@ -263,13 +263,13 @@ final class InfCodes {
             s.bitb = b;
             s.bitk = k;
             z.avail_in = n;
-            z.total_in += p - z.next_in_index;
-            z.next_in_index = p;
+            z.total_in += p - z.in_index;
+            z.in_index = p;
             s.write = q;
             return s.inflate_flush(r);
           }
           n--;
-          b |= (z.next_in[p++] & 0xff) << k;
+          b |= (z.in[p++] & 0xff) << k;
           k += 8;
         }
 
@@ -297,8 +297,8 @@ final class InfCodes {
         s.bitb = b;
         s.bitk = k;
         z.avail_in = n;
-        z.total_in += p - z.next_in_index;
-        z.next_in_index = p;
+        z.total_in += p - z.in_index;
+        z.in_index = p;
         s.write = q;
         return s.inflate_flush(r);
 
@@ -313,13 +313,13 @@ final class InfCodes {
             s.bitb = b;
             s.bitk = k;
             z.avail_in = n;
-            z.total_in += p - z.next_in_index;
-            z.next_in_index = p;
+            z.total_in += p - z.in_index;
+            z.in_index = p;
             s.write = q;
             return s.inflate_flush(r);
           }
           n--;
-          b |= (z.next_in[p++] & 0xff) << k;
+          b |= (z.in[p++] & 0xff) << k;
           k += 8;
         }
 
@@ -357,8 +357,8 @@ final class InfCodes {
                 s.bitb = b;
                 s.bitk = k;
                 z.avail_in = n;
-                z.total_in += p - z.next_in_index;
-                z.next_in_index = p;
+                z.total_in += p - z.in_index;
+                z.in_index = p;
                 s.write = q;
                 return s.inflate_flush(r);
               }
@@ -394,8 +394,8 @@ final class InfCodes {
               s.bitb = b;
               s.bitk = k;
               z.avail_in = n;
-              z.total_in += p - z.next_in_index;
-              z.next_in_index = p;
+              z.total_in += p - z.in_index;
+              z.in_index = p;
               s.write = q;
               return s.inflate_flush(r);
             }
@@ -424,8 +424,8 @@ final class InfCodes {
           s.bitb = b;
           s.bitk = k;
           z.avail_in = n;
-          z.total_in += p - z.next_in_index;
-          z.next_in_index = p;
+          z.total_in += p - z.in_index;
+          z.in_index = p;
           s.write = q;
           return s.inflate_flush(r);
         }
@@ -436,8 +436,8 @@ final class InfCodes {
         s.bitb = b;
         s.bitk = k;
         z.avail_in = n;
-        z.total_in += p - z.next_in_index;
-        z.next_in_index = p;
+        z.total_in += p - z.in_index;
+        z.in_index = p;
         s.write = q;
         return s.inflate_flush(r);
 
@@ -448,8 +448,8 @@ final class InfCodes {
         s.bitb = b;
         s.bitk = k;
         z.avail_in = n;
-        z.total_in += p - z.next_in_index;
-        z.next_in_index = p;
+        z.total_in += p - z.in_index;
+        z.in_index = p;
         s.write = q;
         return s.inflate_flush(r);
 
@@ -459,8 +459,8 @@ final class InfCodes {
         s.bitb = b;
         s.bitk = k;
         z.avail_in = n;
-        z.total_in += p - z.next_in_index;
-        z.next_in_index = p;
+        z.total_in += p - z.in_index;
+        z.in_index = p;
         s.write = q;
         return s.inflate_flush(r);
       }
@@ -500,7 +500,7 @@ final class InfCodes {
     int tp_index_t_3; // (tp_index+t)*3
 
     // load input, output, bit values
-    p = z.next_in_index;
+    p = z.in_index;
     n = z.avail_in;
     b = s.bitb;
     k = s.bitk;
@@ -516,7 +516,7 @@ final class InfCodes {
       // get literal/length code
       while (k < (20)) { // max bits for literal/length code
         n--;
-        b |= (z.next_in[p++] & 0xff) << k;
+        b |= (z.in[p++] & 0xff) << k;
         k += 8;
       }
 
@@ -547,7 +547,7 @@ final class InfCodes {
           // decode distance base of block to copy
           while (k < (15)) { // max bits for distance code
             n--;
-            b |= (z.next_in[p++] & 0xff) << k;
+            b |= (z.in[p++] & 0xff) << k;
             k += 8;
           }
 
@@ -567,7 +567,7 @@ final class InfCodes {
               e &= 15;
               while (k < (e)) { // get extra bits (up to 13)
                 n--;
-                b |= (z.next_in[p++] & 0xff) << k;
+                b |= (z.in[p++] & 0xff) << k;
                 k += 8;
               }
 
@@ -643,8 +643,8 @@ final class InfCodes {
               s.bitb = b;
               s.bitk = k;
               z.avail_in = n;
-              z.total_in += p - z.next_in_index;
-              z.next_in_index = p;
+              z.total_in += p - z.in_index;
+              z.in_index = p;
               s.write = q;
 
               return Z_DATA_ERROR;
@@ -677,8 +677,8 @@ final class InfCodes {
           s.bitb = b;
           s.bitk = k;
           z.avail_in = n;
-          z.total_in += p - z.next_in_index;
-          z.next_in_index = p;
+          z.total_in += p - z.in_index;
+          z.in_index = p;
           s.write = q;
 
           return Z_STREAM_END;
@@ -694,8 +694,8 @@ final class InfCodes {
           s.bitb = b;
           s.bitk = k;
           z.avail_in = n;
-          z.total_in += p - z.next_in_index;
-          z.next_in_index = p;
+          z.total_in += p - z.in_index;
+          z.in_index = p;
           s.write = q;
 
           return Z_DATA_ERROR;
@@ -713,8 +713,8 @@ final class InfCodes {
     s.bitb = b;
     s.bitk = k;
     z.avail_in = n;
-    z.total_in += p - z.next_in_index;
-    z.next_in_index = p;
+    z.total_in += p - z.in_index;
+    z.in_index = p;
     s.write = q;
 
     return Z_OK;

@@ -270,23 +270,24 @@ public abstract class Preferences {
     }
 
     private static PreferencesFactory factory1() {
-        // 2. Try service provider interface
-        Iterator<PreferencesFactory> itr = ServiceLoader
-            .load(PreferencesFactory.class, ClassLoader.getSystemClassLoader())
-            .iterator();
-
-        // choose first provider instance
-        while (itr.hasNext()) {
-            try {
-                return itr.next();
-            } catch (ServiceConfigurationError sce) {
-                if (sce.getCause() instanceof SecurityException) {
-                    // Ignore the security exception, try the next provider
-                    continue;
-                }
-                throw sce;
-            }
-        }
+     // SwingJS not
+//        // 2. Try service provider interface
+//        Iterator<PreferencesFactory> itr = ServiceLoader
+//            .load(PreferencesFactory.class, ClassLoader.getSystemClassLoader())
+//            .iterator();
+//
+//        // choose first provider instance
+//        while (itr.hasNext()) {
+//            try {
+//                return itr.next();
+//            } catch (ServiceConfigurationError sce) {
+//                if (sce.getCause() instanceof SecurityException) {
+//                    // Ignore the security exception, try the next provider
+//                    continue;
+//                }
+//                throw sce;
+//            }
+//        }
 
         // 3. Use platform-specific system-wide default
         String osName = System.getProperty("os.name");

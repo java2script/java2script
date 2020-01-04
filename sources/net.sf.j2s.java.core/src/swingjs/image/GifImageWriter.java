@@ -18,7 +18,7 @@ import javax.imageio.metadata.IIOMetadata;
  * @see javax.imageio.spi.ImageWriterSpi
  *
  */
-public class GifImageWriter extends ImageWriter {
+public class GifImageWriter extends JSImageWriter {
 	public GifImageWriter() {
 		super();
 		params.put("type", "GIF");

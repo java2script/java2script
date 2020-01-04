@@ -131,6 +131,10 @@ public class DeflaterOutputStream extends FilterOutputStream {
 			closed = true;
 		}
 	}
+	
+	public boolean isClosed() {
+		return closed;
+	}
 
 	protected int deflate(int flush) throws IOException {
 		deflater.setOutput(buffer, 0, buffer.length);
@@ -170,11 +174,11 @@ public class DeflaterOutputStream extends FilterOutputStream {
 	}
 
 	public long getTotalIn() {
-		return deflater.getTotalIn();
+		return deflater.getTotalInL();
 	}
 
 	public long getTotalOut() {
-		return deflater.getTotalOut();
+		return deflater.getTotalOutL();
 	}
 
 	public void setSyncFlush(boolean syncFlush) {

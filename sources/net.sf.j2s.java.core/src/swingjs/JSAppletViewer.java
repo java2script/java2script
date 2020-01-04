@@ -56,7 +56,7 @@ import swingjs.plaf.Resizer;
  * 
  * The basic start up in JavaScript involves:
  * 
- * Clazz.loadClass("swingjs.JSAppletViewer"); var _appletViewer = new
+ * Clazz.load("swingjs.JSAppletViewer"); var _appletViewer = new
  * JSAppletViewer(viewerOptions); _appletViewer.start();
  * 
  * where viewerOptions holds critical information needed to create this applet

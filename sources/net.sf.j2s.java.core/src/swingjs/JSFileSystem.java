@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -87,39 +88,40 @@ public class JSFileSystem extends FileSystem {
 
 	public static class JSFileChannel extends FileChannel {
 
-		// Used by FileInputStream.getChannel() and RandomAccessFile.getChannel()
-		public static FileChannel open(FileDescriptor fd, String path, boolean readable, boolean writable,
-				Object parent) {
-			return new JSFileChannel(fd, path, readable, writable, false, parent);
-		}
-
-		// Used by FileOutputStream.getChannel
-		public static FileChannel open(FileDescriptor fd, String path, boolean readable, boolean writable,
-				boolean append, Object parent) {
-			return new JSFileChannel(fd, path, readable, writable, append, parent);
-		}
-
-		public JSFileChannel(Path path, Set<? extends OpenOption> options, FileAttribute<?>[] attrs) {
-			this.fd = null;
-			this.parent = null;
-			this.path= (JSPath) path;
-			try {
-				bc = new JSByteChannel(this.path, options, attrs);
-			} catch (FileAlreadyExistsException e) {
-			}
-		}
-
 		private FileDescriptor fd;
 		private Object parent; // possibly a FileOutputStream
 		private JSPath path;
 		private JSByteChannel bc;
 
+		public static JSFileChannel open(FileDescriptor fd, String path, boolean readable, boolean writable,
+				Object parent) throws IOException {
+			// Used by FileInputStream.getChannel() and RandomAccessFile.getChannel()
+			return open(fd, path, readable, writable, false, parent);
+		}
+
+		public static JSFileChannel open(FileDescriptor fd, String path, boolean readable, boolean writable,
+				boolean append, Object parent) throws IOException {
+			// Used by FileOutputStream.getChannel
+			return new JSFileChannel(fd, path, readable, writable, append, parent);
+		}
+
+		public JSFileChannel(Path path, Set<? extends OpenOption> options, FileAttribute<?>[] attrs) throws IOException {
+			// from JSFileSystemProvider
+			this.fd = null;
+			this.parent = null;
+			this.path= (JSPath) path;
+//			try {
+				bc = new JSByteChannel(null, this.path, options, attrs);
+//			} catch (FileAlreadyExistsException e) {
+//			}
+		}
+
 		private JSFileChannel(FileDescriptor fd, String path, boolean readable, boolean writable, boolean append,
-				Object parent) {
+				Object parent) throws IOException {
 			this.fd = fd;
 			this.parent = parent;
 			this.path = (JSPath) new File(path).toPath();
-
+			this.path.setIsTempFile(fd._isTempFile());
 			Set<StandardOpenOption> options = new HashSet<>();
 			if (readable)
 				options.add(StandardOpenOption.READ);
@@ -130,7 +132,7 @@ public class JSFileSystem extends FileSystem {
 			if (append)
 				options.add(StandardOpenOption.APPEND);
 			try {
-				bc = new JSByteChannel(this.path, options, NO_ATTRIBUTES);
+				bc = new JSByteChannel(fd, this.path, options, NO_ATTRIBUTES);
 			} catch (FileAlreadyExistsException e) {
 			}
 			// this.nd = new FileDispatcherImpl(append);
@@ -243,6 +245,45 @@ public class JSFileSystem extends FileSystem {
 			bc.close();
 		}
 
+	    // From RandomAccessFile
+		public void seek(long pos) {
+			bc.seek(pos);
+		}
+
+		public int read() {
+			return bc.read();
+		}
+
+		public int readBytes(byte[] b, int off, int len) {
+			return bc.readBytes(b, off, len);
+		}
+
+		public void write(int b) {
+			bc.write(b);
+		}
+
+		public void writeBytes(byte[] b, int off, int length) {
+			if (length > 0)
+				bc.writeBytes(b, off, length);
+		}
+
+		public void setLength(long newLength) {
+			bc.setLength(newLength);
+		}
+
+		public void doSave() {
+			bc.doSave = true;
+		}
+
+		public int available() {
+			return (int) (bc.len - bc.pos);
+		}
+
+		public long skip(long n) {
+			bc.seek(bc.pos + n);
+			return bc.pos;
+		}
+
 	}
 
 	public static class JSFileAttributes implements BasicFileAttributes {
@@ -336,29 +377,41 @@ public class JSFileSystem extends FileSystem {
 	public static class JSByteChannel
 			implements SeekableByteChannel, WritableByteChannel, ReadableByteChannel, BasicFileAttributeView {
 
+		/**
+		 * flag to indicate that a RAF has opened a file that already has bytes for
+		 * writing but never written anything.
+		 */
+		boolean doSave = false;
+
 		long tCreate, tMod, tAccess;
 		private JSPath path;
 		private byte[] 秘bytes;
 		private BufferedInputStream bis;
 		protected int pos, len;
 		private JSFileAttribute<?>[] attrs;
-		private boolean open, append, write, delete;
+		private boolean open, append, write, read, delete;
 		private JSFileAttributes fsAttrs;
 
-		public JSByteChannel(JSPath path, Set<? extends OpenOption> options, FileAttribute<?>[] attrs)
-				throws FileAlreadyExistsException {
+		public JSByteChannel(FileDescriptor fd, JSPath path, Set<? extends OpenOption> options, FileAttribute<?>[] attrs)
+				throws IOException {
 			this.path = path;
 			this.attrs = (JSFileAttribute<?>[]) attrs;
 
 			// APPEND, CREATE, CREATE_NEW, DELETE_ON_CLOSE,
 			// READ, TRUNCATE_EXISTING, WRITE,
-
+			read = options.contains(StandardOpenOption.READ);
 			write = options.contains(StandardOpenOption.WRITE);
 			append = options.contains(StandardOpenOption.APPEND);
 			delete = options.contains(StandardOpenOption.DELETE_ON_CLOSE);
 			boolean truncate = options.contains(StandardOpenOption.TRUNCATE_EXISTING);
 			boolean create = options.contains(StandardOpenOption.CREATE);
 			boolean createNew = options.contains(StandardOpenOption.CREATE_NEW);
+			if (read && write) {
+				秘bytes = getBytes();
+				if (秘bytes == null) {
+					秘bytes = new byte[len = 0];
+				}
+			}
 			if (append) {
 				write = true;
 				pos = len = getBytes().length;
@@ -369,8 +422,10 @@ public class JSFileSystem extends FileSystem {
 						if (b != null)
 							throw new FileAlreadyExistsException(path.name);
 					}
-					path.秘bytes = null;
-					JSUtil.cacheFileData(path.name, null);
+					path.秘bytes = (read ? getBytes() : null);
+					// from FileOutputStream
+					setPosLen(fd);
+					JSUtil.cacheFileData(path.name, path.秘bytes);
 				} else if (truncate) {
 					path.秘bytes = null;
 				}
@@ -379,7 +434,72 @@ public class JSFileSystem extends FileSystem {
 				} else {
 					getBytes();
 				}
+			} else {
+				// readonly
+				if (getBytes() == null)
+					throw new FileNotFoundException();
+				// from FileInputStream
+				setPosLen(fd);
 			}
+			open = true;
+		}
+
+		// for RandomAccessFile
+
+		private void setPosLen(FileDescriptor fd) {
+			if (fd != null) {
+				pos = fd._getPos();
+				len = fd._getLen();
+			}
+		}
+		
+		public void setLength(long newLength) {
+			if (len == newLength)
+				return;
+			len = (int) newLength;
+			ensureLength(len);
+			if (pos > len)
+				pos = len;
+		}
+
+		private void ensureLength(int len) {
+			秘bytes = Arrays.copyOf(秘bytes, len);
+		}
+
+		public void seek(long pos) {
+			this.pos = (int) pos;
+		}
+
+		public int read() {
+			return (pos >= len ? -1 : 秘bytes[pos++]);
+		}
+
+		public int readBytes(byte[] b, int off, int len) {
+			if (len == 0)
+				return 0;
+			len = Math.min(this.len - pos, len);
+			if (len < 0)
+				return -1;
+			System.arraycopy(秘bytes, pos, b, off, len);
+			return len;
+		}
+
+		public void write(int b) {
+			if (pos >= len) {
+				ensureLength(len + 8192);
+				len++;
+			}
+				秘bytes[pos++] = (byte) b;
+		}
+
+
+		public void writeBytes(byte[] b, int off, int length) {
+			if (pos + length >= len) {
+				ensureLength(pos + Math.max(length << 1, 8192));
+				len = pos + length;
+			}
+			System.arraycopy(b, off, 秘bytes, pos, length);
+			pos += length;
 		}
 
 
@@ -390,16 +510,21 @@ public class JSFileSystem extends FileSystem {
 
 		@Override
 		public void close() throws IOException {
+			if (!open)
+				return;
 			open = false;
 			if (delete) {
 				秘bytes = null;
 				JSUtil.cacheFileData(path.name, null);
 			} else if (write) {
+				if (!doSave)
+					return;
 				if (len < 秘bytes.length)
 					秘bytes = Arrays.copyOf(秘bytes, len);
 				path.秘bytes = 秘bytes;
 				JSUtil.cacheFileData(path.name, 秘bytes);
-				JSUtil.saveFile(path.name, 秘bytes, null, null);
+				if (!path.isTempFile)
+					JSUtil.saveFile(path.name, 秘bytes, null, null);
 			}
 		}
 
@@ -453,8 +578,9 @@ public class JSFileSystem extends FileSystem {
 				秘bytes = path.秘bytes;
 			if (秘bytes == null) {
 				秘bytes = JSUtil.getFileAsBytes(path.toString());
-				len = 秘bytes.length;
 			}
+			if (秘bytes != null)
+				len = 秘bytes.length;
 			return 秘bytes;
 		}
 
@@ -542,6 +668,15 @@ public class JSFileSystem extends FileSystem {
 
 		private String[] nameArray;
 		public byte[] 秘bytes;
+		private boolean isTempFile;
+		
+		public boolean isTempFile() {
+			return isTempFile;
+		}
+
+		public void setIsTempFile(boolean isTempFile) {
+			this.isTempFile = isTempFile;
+		}
 
 		private String[] getNameArray() {
 			if (nameArray == null)
@@ -551,6 +686,8 @@ public class JSFileSystem extends FileSystem {
 		}
 
 		public JSPath(String name, JSFileSystem jsFileSystem) {
+			while (name.startsWith("././"))
+				name = name.substring(3);
 			this.name = name;
 			this.fileSystem = jsFileSystem;
 		}
@@ -674,7 +811,7 @@ public class JSFileSystem extends FileSystem {
 
 			String[] a = ((JSPath) getParent()).getNameArray();
 			String[] b = ((JSPath) other.getParent()).getNameArray();
-			String[] c = new String[Math.max(a.length, b.length)];
+//			String[] c = new String[Math.max(a.length, b.length)];
 			int min = Math.min(a.length, b.length);
 			int firstDiff = 0;
 			for (; firstDiff < min; firstDiff++) {
@@ -758,6 +895,11 @@ public class JSFileSystem extends FileSystem {
 
 		}
 
+		public void set(byte[] bytes, File file) {
+            	秘bytes = bytes;
+            	setIsTempFile(file instanceof JSTempFile);
+		}
+
 	}
 
 	public static class JSFileSystemProvider extends FileSystemProvider {
@@ -797,11 +939,11 @@ public class JSFileSystem extends FileSystem {
 		@Override
 		public SeekableByteChannel newByteChannel(Path path, Set<? extends OpenOption> options,
 				FileAttribute<?>... attrs) throws IOException {
-			return new JSByteChannel((JSPath) path, options, attrs);
+			return new JSByteChannel(null, (JSPath) path, options, attrs);
 		}
 
 		@Override
-		public FileChannel newFileChannel(Path path, Set<? extends OpenOption> options,
+		public JSFileChannel newFileChannel(Path path, Set<? extends OpenOption> options,
 				FileAttribute<?>... attrs) throws IOException {
 			return new JSFileChannel((JSPath) path, options, attrs);
 		}
@@ -820,7 +962,7 @@ public class JSFileSystem extends FileSystem {
 
 		@Override
 		public void delete(Path path) throws IOException {
-			ni();
+			JSUtil.removeCachedFileData(path.toString());
 		}
 
 		@Override

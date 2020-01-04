@@ -16,6 +16,10 @@
 package java.lang.reflect;
 
 import java.lang.annotation.Annotation;
+import java.util.Map;
+
+import javajs.api.JSFunction;
+import sun.reflect.annotation.AnnotationParser;
 
 /**
  * This class must be implemented by the VM vendor. This class models a method.
@@ -28,6 +32,10 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 	
 	private String signature;
 	private Class<?> Class_;
+	
+	private JSFunction $meth$; // SwingJS -- set in AnnotationParser
+	boolean isAnnotation; // SwingJS -- set in AnnotationParser
+	
 	// This is guaranteed to be interned by the VM in the 1.4
 	// reflection implementation
 	private String name;
@@ -37,23 +45,30 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 	private int modifiers = Member.PUBLIC;
     boolean isProxy;
     
+//    private Annotation[]              annotations;
+//    private Annotation[]              parameterAnnotations;
+    private Object                    annotationDefault;
+    
 	/**
 	 * Package-private constructor used by ReflectAccess to enable instantiation of
 	 * these objects in Java code from the java.lang package via
 	 * sun.reflect.LangReflectAccess.
 	 */
-	public Method(Class<?> declaringClass, String name, Class<?>[] parameterTypes, Class<?> returnType,
+	public Method(Class<?> declaringClass, String name, Class<?>[] paramTypes, Class<?> returnType,
 			Class<?>[] checkedExceptions, int modifiers) {
 		this.Class_ = declaringClass;
 		this.name = name;
-		this.parameterTypes = (parameterTypes == null ? Class.NO_PARAMETERS : parameterTypes);
+		this.parameterTypes = (paramTypes == null ? Class.NO_PARAMETERS : paramTypes);
 		this.returnType = returnType;
 		this.exceptionTypes = checkedExceptions;
 		this.modifiers = modifiers;
 		// modifier PUBLIC means this is from Class.java getMethods
-		if (parameterTypes != null && parameterTypes.length == 0)
-			parameterTypes = null;
-		this.signature = (declaringClass.$methodList$ == null ? name + Class.argumentTypesToString(parameterTypes) : name);
+		if (paramTypes != null && paramTypes.length == 0)
+			paramTypes = null;
+		this.signature = (paramTypes == Class.UNKNOWN_PARAMETERS 
+				|| declaringClass.$methodList$ != null 
+				|| declaringClass.isAnnotation() 
+				? name : name + Class.argumentTypesToString(paramTypes));
 	}
 
 	/**
@@ -112,14 +127,16 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 		// proxy does uses this.Class_ as its receiver and ensures initialization
 		boolean isProxy = this.isProxy;
 		Object[] a = Class.getArgumentArray(parameterTypes, args, isProxy);
-		Object c = (isProxy ? receiver : this.Class_);
-		Object m = null, val = null;
+		Object c = (isProxy || isAnnotation ? receiver : Class_);
+		Object m = null//$meth$
+				, val = null;
+		String sig = signature;
 		/** 
 		 * @j2sNative
 		 * 
-		 * if (!isProxy) {c = c.$clazz$;} 
+		 * !isProxy && c.$clazz$ && (c = c.$clazz$); 
 		 * Clazz._initClass(c,1,1,0);
-		 * m= c[this.signature] || c.prototype && c.prototype[this.signature];
+		 * m || (m = c[sig]) || (m = this.$meth$) || (m = c.prototype && c.prototype[sig]);
 		 * val = (m == null ? null : m.apply(receiver,a));
 		 */
 				
@@ -128,7 +145,7 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 				  + "." + signature + " was not found";
 		  throw new IllegalArgumentException(message); 
 		}
-		return (val == null || isProxy ? val : wrap(val));
+		return (val == null || isProxy || isAnnotation ? val : wrap(val));
 	}
 
 	Object wrap(Object o) {
@@ -142,6 +159,7 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 		return o;
 	}
 
+	@Override
 	public TypeVariable<Method>[] getTypeParameters() {
 		return null;
 	}
@@ -231,6 +249,7 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 	 * @since 1.5
 	 */
 	public Annotation[][] getParameterAnnotations() {
+		// TODO
 		return null;
 	}
 
@@ -260,9 +279,10 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 		return false;
 	}
 
+    @Override
 	public boolean isSynthetic() {
-		return false;
-	}
+        return super.isSynthetic();
+    }
 
 	/**
 	 * <p>
@@ -275,7 +295,8 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 	 * @since 1.5
 	 */
 	public Object getDefaultValue() {
-		return null;
+		// just the value in SwingJS
+		return annotationDefault;
 	}
 
 	/**
@@ -287,6 +308,7 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 	 * @return true if the specified object is equal to this Method, false otherwise
 	 * @see #hashCode
 	 */
+	@Override
 	public boolean equals(Object object) {
 		if (object != null && object instanceof Method) {
 			Method other = (Method) object;
@@ -311,6 +333,7 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 	 * 
 	 * @return the declaring class
 	 */
+	@Override
 	public Class<?> getDeclaringClass() {
 		return Class_;
 	}
@@ -333,6 +356,7 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 	 * @return the modifiers
 	 * @see java.lang.reflect.Modifier
 	 */
+	@Override
 	public int getModifiers() {
 		return modifiers;
 	}
@@ -342,6 +366,7 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 	 * 
 	 * @return the name
 	 */
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -354,7 +379,8 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 	 * @return the parameter types
 	 */
 	public Class<?>[] getParameterTypes() {
-		return parameterTypes;
+		return (parameterTypes == Class.UNKNOWN_PARAMETERS ?
+			parameterTypes = AnnotationParser.JSAnnotationObject.guessMethodParameterTypes(signature) : parameterTypes);
 	}
 
 	/**
@@ -363,11 +389,14 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 	 * @return the return type
 	 */
 	public Class<?> getReturnType() {
-		return returnType;
+		// SwingJS will store this as a String to avoid unnecessary class loading
+		if (returnType == null || returnType instanceof Class)
+			return (Class<?>) returnType;
+		return (Class<?>) (returnType = AnnotationParser.JSAnnotationObject.typeForString(returnType.toString(), false));
 	}
 
 
-	@Override
+//	@Override
 	public String getSignature() {
 		return (String) signature;
 	}
@@ -380,6 +409,7 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 	 * @return the receiver's hash
 	 * @see #equals
 	 */
+	@Override
 	public int hashCode() {
 		return getDeclaringClass().getName().hashCode() ^ getName().hashCode();
 	}
@@ -394,8 +424,51 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 	 * 
 	 * @return a printable representation for the receiver
 	 */
+	@Override
 	public String toString() {
 		return Class_.getName() + "." + name;
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Annotation[] getDeclaredAnnotations() {
+		return AnnotationParser.toArray(declaredAnnotations());
+	}
+
+	private transient Map<Class<? extends Annotation>, Annotation> declaredAnnotations;
+
+	private synchronized Map<Class<? extends Annotation>, Annotation> declaredAnnotations() {
+		if (declaredAnnotations == null) {
+				declaredAnnotations = AnnotationParser.parseAnnotations(signature, getDeclaringClass(), true);
+		}
+		return declaredAnnotations;
+	}
+
+	public void _setJSMethod(Object o) {
+		$meth$ = (JSFunction) o;
+		signature = /** @j2sNative	o && o.exName || */ null;
+	}
+
+	public Object _getJSMethod() {
+		return $meth$;
+	}
+
+	public void setDefaultValue(Object val) {
+		annotationDefault = val;
+	}
+
+
+	@Override
+	public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
+		return (T) declaredAnnotations().get(annotationClass);
+	}
+
+	// from AnnotatedElement
+	@Override
+	public <T extends Annotation> T[] getAnnotationsByType(Class<T> annotationClass) {
+        return getDeclaredAnnotationsByType(annotationClass);
+    }
 
 }

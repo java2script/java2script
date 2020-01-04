@@ -16,6 +16,9 @@
 package java.lang.reflect;
 
 import java.lang.annotation.Annotation;
+import java.util.Map;
+
+import sun.reflect.annotation.AnnotationParser;
 
 /**
  * This class must be implemented by the VM vendor. This class models a
@@ -23,13 +26,15 @@ import java.lang.annotation.Annotation;
  * constructor can be invoked dynamically.
  * 
  */
-public final class Constructor<T> extends AccessibleObject implements GenericDeclaration, Member {
+public final class Constructor<T> extends AccessibleObject implements 
+//GenericDeclaration, 
+Member {
 
 	private Class<T> Class_;
 	private Class<?>[] parameterTypes;
 	private Class<?>[] exceptionTypes;
 	private int modifiers;
-	private Object signature;
+	private String signature;
 	private Object constr;
 
 	/**
@@ -37,10 +42,10 @@ public final class Constructor<T> extends AccessibleObject implements GenericDec
 	 * these objects in Java code from the java.lang package via
 	 * sun.reflect.LangReflectAccess.
 	 */
-	public Constructor(Class<T> declaringClass, Class<?>[] parameterTypes, Class<?>[] checkedExceptions,
+	public Constructor(Class<T> declaringClass, Class<?>[] paramTypes, Class<?>[] checkedExceptions,
 			int modifiers) {
 		this.Class_ = declaringClass;
-		this.parameterTypes = parameterTypes;
+		this.parameterTypes = paramTypes;
 		this.exceptionTypes = checkedExceptions;
 		this.modifiers = modifiers;
 		// NO!! wrong: all of the SwingJS primitive classes run without parameterization
@@ -48,9 +53,9 @@ public final class Constructor<T> extends AccessibleObject implements GenericDec
 			//parameterTypes = null;
 		// Special case - constructors with parameters have c$$, not just c$. For whatever reason!
 		// This signals NOT to add "$" if there are no parameters.
-		if (parameterTypes == null)
-			parameterTypes = Class.NO_PARAMETERS;
-		this.signature = "c$" + Class.argumentTypesToString(parameterTypes);
+		if (paramTypes == null)
+			paramTypes = Class.NO_PARAMETERS;
+		this.signature = "c$" + Class.argumentTypesToString(paramTypes);
  		constr = /** @j2sNative this.Class_.$clazz$[this.signature] || */ null;
 	}
 
@@ -101,7 +106,13 @@ public final class Constructor<T> extends AccessibleObject implements GenericDec
 			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		if (this.constr != null) {
 			Object[] a = Class.getArgumentArray(parameterTypes, args, false);
-			T instance = /** @j2sNative Clazz.new_(this.constr, a) || */ null;
+			T instance;
+			Class<?> component = Class_.getComponentType();
+			if (component != null) {
+				instance = /** @j2sNative Clazz.array(component, [a[0].intValue()]) || */ null;
+			} else {
+				instance = /** @j2sNative Clazz.new_(this.constr, a) || */ null;
+			}
 			if (instance != null)
 				return instance;
 		}
@@ -109,7 +120,10 @@ public final class Constructor<T> extends AccessibleObject implements GenericDec
 		throw new IllegalArgumentException(message);
 	}
 
-	public TypeVariable<Constructor<T>>[] getTypeParameters() {
+//	was GenericDeclaration @Override
+	public Object
+//	TypeVariable<Constructor<T>>[] 
+			getTypeParameters() {
 		return null;
 	}
 
@@ -179,6 +193,7 @@ public final class Constructor<T> extends AccessibleObject implements GenericDec
 	 * @since 1.5
 	 */
 	public Annotation[][] getParameterAnnotations() {
+		// TODO
 		return null;
 	}
 
@@ -195,6 +210,7 @@ public final class Constructor<T> extends AccessibleObject implements GenericDec
 		return false;
 	}
 
+	@Override
 	public boolean isSynthetic() {
 		return false;
 	}
@@ -209,6 +225,7 @@ public final class Constructor<T> extends AccessibleObject implements GenericDec
 	 *         otherwise
 	 * @see #hashCode
 	 */
+	@Override
 	public boolean equals(Object object) {
 		if (object != null && object instanceof Constructor) {
 			Constructor<?> other = (Constructor<?>) object;
@@ -234,6 +251,7 @@ public final class Constructor<T> extends AccessibleObject implements GenericDec
 	 * 
 	 * @return the declaring class
 	 */
+	@Override
 	public Class<T> getDeclaringClass() {
 		return Class_;
 	}
@@ -256,6 +274,7 @@ public final class Constructor<T> extends AccessibleObject implements GenericDec
 	 * @return the modifiers
 	 * @see java.lang.reflect.Modifier
 	 */
+	@Override
 	public int getModifiers() {
 		return modifiers;
 	}
@@ -266,6 +285,7 @@ public final class Constructor<T> extends AccessibleObject implements GenericDec
 	 * 
 	 * @return the name
 	 */
+	@Override
 	public String getName() {
 		return getDeclaringClass().getName();
 	}
@@ -289,6 +309,7 @@ public final class Constructor<T> extends AccessibleObject implements GenericDec
 	 * @return the receiver's hash
 	 * @see #equals
 	 */
+	@Override
 	public int hashCode() {
 		return getDeclaringClass().getName().hashCode();
 	}
@@ -302,8 +323,45 @@ public final class Constructor<T> extends AccessibleObject implements GenericDec
 	 * 
 	 * @return a printable representation for the receiver
 	 */
+	@Override
 	public String toString() {
 		// TODO - just the simple JavaScript equivalent
 		return Class_.getName() + "." + signature;
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Annotation[] getDeclaredAnnotations() {
+		return AnnotationParser.toArray(declaredAnnotations());
+	}
+
+	private transient Map<Class<? extends Annotation>, Annotation> declaredAnnotations;
+
+	private synchronized Map<Class<? extends Annotation>, Annotation> declaredAnnotations() {
+		if (declaredAnnotations == null) {
+				declaredAnnotations = AnnotationParser.parseAnnotations(signature, getDeclaringClass(), true);
+		}
+		return declaredAnnotations;
+	}
+
+	@SuppressWarnings("hiding")
+	@Override
+	public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
+		return (T) declaredAnnotations().get(annotationClass);
+	}
+
+	// from AnnotatedElement
+	@SuppressWarnings("hiding")
+	@Override
+	public <T extends Annotation> T[] getAnnotationsByType(Class<T> annotationClass) {
+        return getDeclaredAnnotationsByType(annotationClass);
+    }
+
+	public String getSignature() {
+		return (String) signature;
+	}
+
+
 }

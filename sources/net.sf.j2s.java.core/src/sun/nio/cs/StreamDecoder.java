@@ -242,7 +242,7 @@ public class StreamDecoder extends Reader
         this.cs = dec.charset();
         this.decoder = dec;
 
-        // This path disabled until direct buffers are faster
+        // Java8 comment: This path disabled until direct buffers are faster
         if (false && in instanceof FileInputStream) {
         ch = getChannel((FileInputStream)in);
         if (ch != null)

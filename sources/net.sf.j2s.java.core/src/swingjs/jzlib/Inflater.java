@@ -77,12 +77,13 @@ public class Inflater extends ZStream{
   }
 
   @Override
-  public int end(){
+  public void end(){
     //finished = true;
-    if(istate==null) return Z_STREAM_ERROR;
-    int ret=istate.inflateEnd();
+    if(istate==null) return;// Z_STREAM_ERROR;
+    //int ret=
+    istate.inflateEnd();
 //    istate = null;
-    return ret;
+//    return ret;
   }
 
   public int sync(){

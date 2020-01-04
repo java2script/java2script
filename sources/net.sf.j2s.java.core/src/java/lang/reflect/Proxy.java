@@ -658,9 +658,8 @@ public class Proxy implements java.io.Serializable {
     	 * 
     	 * var cl$ = cl.$clazz$;
     	 * 
-    	 *  cl$.$clinit$ = function() {Clazz.load(cl$, 1);};
+    	 *  cl$.$clinit$ = 1;
     	 *  Clazz.newMeth(cl$, '$init$', function () {}, 1);
-    	 *  Clazz.newMeth(cl$, '$init0$', function () {}, 1);
     	 *  Clazz.newMeth(cl$, "c$$reflect_InvocationHandler", function(h) {
     	 *  cl$.superclazz.c$$reflect_InvocationHandler.apply(this, [h]);
 		 *  cl$.$init$.apply(this);
@@ -672,7 +671,7 @@ public class Proxy implements java.io.Serializable {
     	for (int i = 0; i < interfaces.length; i++) {
     		Method[] methods = interfaces[i].getDeclaredMethods();
     		for (int j = 0; j < methods.length; j++) {
-    			setJSPrototype(cl, methods[j], false);
+    			setJSPrototype(cl, methods[j], interfaces[i].isAnnotation());
     		}
     		if (methods.length == 1) 
     			setJSPrototype(cl, methods[0], true);    		
@@ -681,18 +680,19 @@ public class Proxy implements java.io.Serializable {
     }
 
     @SuppressWarnings("unused")
-	private static void setJSPrototype(Class<?> cl, Method m, boolean isFunctionalInterfaceMethod) {
+	private static void setJSPrototype(Class<?> cl, Method m, boolean add$) {
 		String mname = m.getName();
 		
 		// SwingJS transfers the invocation to a temporary method, then invokes it
 		/**
 		 * @j2sNative
 		 * 
-		 * 			if (isFunctionalInterfaceMethod) { mname = mname.split("$")[0] + "$"; }
-		 *            m.Class_ = cl; m.isProxy = true; cl.$clazz$.prototype[mname] =
+		 * 			  var mname1 = (add$ ? mname.split("$")[0] + "$" : mname);
+		 *            m.Class_ = cl; m.isProxy = true; 
+		 *            cl.$clazz$.prototype[mname] = cl.$clazz$.prototype[mname1] =
 		 *            function() { var args = new Array(arguments.length); for (var k =
 		 *            arguments.length; --k >= 0;)args[k] = arguments[k];
-		 *            this.h.invoke$O$reflect_Method$OA(this, m, args); }
+		 *            return(this.h.invoke$O$reflect_Method$OA(this, m, args)); }
 		 */
 	}
 }

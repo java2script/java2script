@@ -402,17 +402,17 @@ class FileSystemPreferences extends AbstractPreferences {
         super(parent, name);
         isUserNode = parent.isUserNode;
         dir  = new File(parent.dir, dirName(name));
-        newNode = !dir.exists();
-        
-//        prefsFile = new File(dir, "prefs.xml");
-//        tmpFile  = new File(dir, "prefs.tmp");
-        AccessController.doPrivileged(new PrivilegedAction<Void>() {
-            @Override
-			public Void run() {
-                newNode = !dir.exists();
-                return null;
-            }
-        });
+        newNode = false;// formerly, File.exists was true;//!dir.exists();
+//        
+////        prefsFile = new File(dir, "prefs.xml");
+////        tmpFile  = new File(dir, "prefs.tmp");
+//        AccessController.doPrivileged(new PrivilegedAction<Void>() {
+//            @Override
+//			public Void run() {
+//                newNode = !dir.exists();
+//                return null;
+//            }
+//        });
         if (newNode) {
             // These 2 things guarantee node will get wrtten at next flush/sync
             prefsCache = new TreeMap<>();

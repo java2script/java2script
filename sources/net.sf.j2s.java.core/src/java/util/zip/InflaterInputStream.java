@@ -30,14 +30,23 @@ package java.util.zip;
 
 import java.io.InputStream;
 
-class InflaterInputStream extends swingjs.jzlib.InflaterInputStream {
+public class InflaterInputStream extends swingjs.jzlib.InflaterInputStream {
 
   protected Inflater inf;
-  InflaterInputStream(InputStream in, Inflater inflater, int size) {
+  public InflaterInputStream(InputStream in, Inflater inflater, int size) {
     super(in, inflater, size, true);
       this.inf = inflater;
     }
-//  
+  
+  public InflaterInputStream(InputStream in, Inflater inflater) {
+	  this(in, inflater, 512);
+  }
+  
+  public InflaterInputStream(InputStream in) {
+	  this(in, new Inflater(), 512);
+  }
+  
+  
 //  /**
 //   * Returns the total number of bytes remaining in the input buffer.
 //   * This can be used to find out what bytes still remain in the input

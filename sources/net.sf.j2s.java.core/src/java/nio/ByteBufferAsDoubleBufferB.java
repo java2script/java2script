@@ -27,7 +27,8 @@ class ByteBufferAsDoubleBufferB
     this.offset = paramInt5;
   }
   
-  public DoubleBuffer slice()
+  @Override
+public DoubleBuffer slice()
   {
     int i = position();
     int j = limit();
@@ -38,7 +39,8 @@ class ByteBufferAsDoubleBufferB
     return new ByteBufferAsDoubleBufferB(this.bb, -1, 0, k, k, m);
   }
   
-  public DoubleBuffer duplicate()
+  @Override
+public DoubleBuffer duplicate()
   {
     return new ByteBufferAsDoubleBufferB(this.bb, 
       markValue(), 
@@ -47,7 +49,8 @@ class ByteBufferAsDoubleBufferB
       capacity(), this.offset);
   }
   
-  public DoubleBuffer asReadOnlyBuffer()
+  @Override
+public DoubleBuffer asReadOnlyBuffer()
   {
     return new ByteBufferAsDoubleBufferRB(this.bb, 
       markValue(), 
@@ -61,29 +64,34 @@ class ByteBufferAsDoubleBufferB
     return (paramInt << 3) + this.offset;
   }
   
-  public double get()
+  @Override
+public double get()
   {
     return Bits.getDoubleB(this.bb, ix(nextGetIndex()));
   }
   
-  public double get(int paramInt)
+  @Override
+public double get(int paramInt)
   {
     return Bits.getDoubleB(this.bb, ix(checkIndex(paramInt)));
   }
   
-  public DoubleBuffer put(double paramDouble)
+  @Override
+public DoubleBuffer put(double paramDouble)
   {
     Bits.putDoubleB(this.bb, ix(nextPutIndex()), paramDouble);
     return this;
   }
   
-  public DoubleBuffer put(int paramInt, double paramDouble)
+  @Override
+public DoubleBuffer put(int paramInt, double paramDouble)
   {
     Bits.putDoubleB(this.bb, ix(checkIndex(paramInt)), paramDouble);
     return this;
   }
   
-  public DoubleBuffer compact()
+  @Override
+public DoubleBuffer compact()
   {
     int i = position();
     int j = limit();
@@ -102,17 +110,20 @@ class ByteBufferAsDoubleBufferB
     return this;
   }
   
-  public boolean isDirect()
+  @Override
+public boolean isDirect()
   {
     return this.bb.isDirect();
   }
   
-  public boolean isReadOnly()
+  @Override
+public boolean isReadOnly()
   {
     return false;
   }
   
-  public ByteOrder order()
+  @Override
+public ByteOrder order()
   {
     return ByteOrder.BIG_ENDIAN;
   }

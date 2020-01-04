@@ -85,7 +85,8 @@ public abstract class AbstractSelectableChannel
      *
      * @return  The provider that created this channel
      */
-    public final SelectorProvider provider() {
+    @Override
+	public final SelectorProvider provider() {
         return provider;
     }
 
@@ -152,13 +153,15 @@ public abstract class AbstractSelectableChannel
 
     // -- Registration --
 
-    public final boolean isRegistered() {
+    @Override
+	public final boolean isRegistered() {
         synchronized (keyLock) {
             return keyCount != 0;
         }
     }
 
-    public final SelectionKey keyFor(Selector sel) {
+    @Override
+	public final SelectionKey keyFor(Selector sel) {
         return findKey(sel);
     }
 
@@ -188,7 +191,8 @@ public abstract class AbstractSelectableChannel
      *
      * @throws  IllegalArgumentException {@inheritDoc}
      */
-    public final SelectionKey register(Selector sel, int ops,
+    @Override
+	public final SelectionKey register(Selector sel, int ops,
                                        Object att)
         throws ClosedChannelException
     {
@@ -230,7 +234,8 @@ public abstract class AbstractSelectableChannel
      * order to perform the actual work of closing this channel.  It then
      * cancels all of this channel's keys.  </p>
      */
-    protected final void implCloseChannel() throws IOException {
+    @Override
+	protected final void implCloseChannel() throws IOException {
         implCloseSelectableChannel();
         synchronized (keyLock) {
             int count = (keys == null) ? 0 : keys.length;
@@ -263,13 +268,15 @@ public abstract class AbstractSelectableChannel
 
     // -- Blocking --
 
-    public final boolean isBlocking() {
+    @Override
+	public final boolean isBlocking() {
         synchronized (regLock) {
             return blocking;
         }
     }
 
-    public final Object blockingLock() {
+    @Override
+	public final Object blockingLock() {
         return regLock;
     }
 
@@ -281,7 +288,8 @@ public abstract class AbstractSelectableChannel
      * implConfigureBlocking} method, while holding the appropriate locks, in
      * order to change the mode.  </p>
      */
-    public final SelectableChannel configureBlocking(boolean block)
+    @Override
+	public final SelectableChannel configureBlocking(boolean block)
         throws IOException
     {
         synchronized (regLock) {

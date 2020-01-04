@@ -30,6 +30,7 @@ import java.awt.Rectangle;
 import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
 import java.awt.image.DataBufferInt;
+import java.awt.image.DataBufferUShort;
 import java.awt.image.Raster;
 import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
@@ -58,11 +59,12 @@ public class SunWritableRaster extends WritableRaster {
 				return dbb.bankdata[bank];
 			}
 
-			// SwingJS not implemented public short[] getData(DataBufferUShort dbus,
-			// int bank) {
-			// return dbus.bankdata[bank];
-			// }
-			//
+			@Override
+			public short[] getData(DataBufferUShort dbus,
+			 int bank) {
+			 return dbus.bankdata[bank];
+			}
+			
 			@Override
 			public int[] getData(DataBufferInt dbi, int bank) {
 				return dbi.bankdata[bank];
@@ -95,10 +97,10 @@ public class SunWritableRaster extends WritableRaster {
 		return getStealer().getData(dbb, bank);
 	}
 
-	// public static short[] stealData(DataBufferUShort dbus, int bank) {
-	// return getStealer().getData(dbus, bank);
-	// }
-	//
+	 public static short[] stealData(DataBufferUShort dbus, int bank) {
+	 return getStealer().getData(dbus, bank);
+	 }
+	 
 	public static int[] stealData(DataBufferInt dbi, int bank) {
 		return getStealer().getData(dbi, bank);
 	}
