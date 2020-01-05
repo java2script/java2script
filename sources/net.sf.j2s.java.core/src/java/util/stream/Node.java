@@ -261,9 +261,9 @@ interface Node<T> {
          */
         @Override
         default T[] asArray(IntFunction<T[]> generator) {
-            if (java.util.stream.Tripwire.ENABLED)
-                java.util.stream.Tripwire.trip(getClass(), "{0} calling Node.OfPrimitive.asArray");
-
+//            if (java.util.stream.Tripwire.ENABLED)
+//                java.util.stream.Tripwire.trip(getClass(), "{0} calling Node.OfPrimitive.asArray");
+//
             long size = count();
             if (size >= Nodes.MAX_ARRAY_SIZE)
                 throw new IllegalArgumentException(Nodes.BAD_SIZE);
@@ -326,8 +326,8 @@ interface Node<T> {
                 forEach((IntConsumer) consumer);
             }
             else {
-                if (Tripwire.ENABLED)
-                    Tripwire.trip(getClass(), "{0} calling Node.OfInt.forEachRemaining(Consumer)");
+//                if (Tripwire.ENABLED)
+//                    Tripwire.trip(getClass(), "{0} calling Node.OfInt.forEachRemaining(Consumer)");
                 spliterator().forEachRemaining(consumer);
             }
         }
@@ -342,8 +342,8 @@ interface Node<T> {
          */
         @Override
         default void copyInto(Integer[] boxed, int offset) {
-            if (Tripwire.ENABLED)
-                Tripwire.trip(getClass(), "{0} calling Node.OfInt.copyInto(Integer[], int)");
+//            if (Tripwire.ENABLED)
+//                Tripwire.trip(getClass(), "{0} calling Node.OfInt.copyInto(Integer[], int)");
 
             int[] array = asPrimitiveArray();
             for (int i = 0; i < array.length; i++) {
@@ -399,8 +399,8 @@ interface Node<T> {
                 forEach((LongConsumer) consumer);
             }
             else {
-                if (Tripwire.ENABLED)
-                    Tripwire.trip(getClass(), "{0} calling Node.OfLong.forEachRemaining(Consumer)");
+//                if (Tripwire.ENABLED)
+//                    Tripwire.trip(getClass(), "{0} calling Node.OfLong.forEachRemaining(Consumer)");
                 spliterator().forEachRemaining(consumer);
             }
         }
@@ -415,9 +415,9 @@ interface Node<T> {
          */
         @Override
         default void copyInto(Long[] boxed, int offset) {
-            if (Tripwire.ENABLED)
-                Tripwire.trip(getClass(), "{0} calling Node.OfInt.copyInto(Long[], int)");
-
+//            if (Tripwire.ENABLED)
+//                Tripwire.trip(getClass(), "{0} calling Node.OfInt.copyInto(Long[], int)");
+//
             long[] array = asPrimitiveArray();
             for (int i = 0; i < array.length; i++) {
                 boxed[offset + i] = array[i];
@@ -472,8 +472,8 @@ interface Node<T> {
                 forEach((DoubleConsumer) consumer);
             }
             else {
-                if (Tripwire.ENABLED)
-                    Tripwire.trip(getClass(), "{0} calling Node.OfLong.forEachRemaining(Consumer)");
+//                if (Tripwire.ENABLED)
+//                    Tripwire.trip(getClass(), "{0} calling Node.OfLong.forEachRemaining(Consumer)");
                 spliterator().forEachRemaining(consumer);
             }
         }
@@ -490,9 +490,9 @@ interface Node<T> {
          */
         @Override
         default void copyInto(Double[] boxed, int offset) {
-            if (Tripwire.ENABLED)
-                Tripwire.trip(getClass(), "{0} calling Node.OfDouble.copyInto(Double[], int)");
-
+//            if (Tripwire.ENABLED)
+//                Tripwire.trip(getClass(), "{0} calling Node.OfDouble.copyInto(Double[], int)");
+//
             double[] array = asPrimitiveArray();
             for (int i = 0; i < array.length; i++) {
                 boxed[offset + i] = array[i];

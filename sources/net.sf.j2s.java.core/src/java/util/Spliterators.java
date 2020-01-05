@@ -867,7 +867,7 @@ public final class Spliterators {
 
         private static final class OfInt
                 extends EmptySpliterator<Integer, Spliterator.OfInt, IntConsumer>
-                implements Spliterator.OfInt {
+                implements Spliterator.OfInt { 
             OfInt() { }
             
             /**

@@ -12,6 +12,7 @@ package net.sf.j2s.core;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 //import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -5133,9 +5134,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			hasGenerics = checkGenericClass(topBinding, interfaces[i]) || hasGenerics;
 		}
 		if (hasGenerics) {
+			bufferDebug("\n>checkGeneric true " + topBinding.getKey() + " for " + classKey);
 			addSyntheticMethods(topBinding.getKey(), binding);
 		} else {
-			syntheticClassMethodNameMap.put(classKey, null);
+			bufferDebug("\n>checkGeneric false removing " + topBinding.getKey()  + " for "+ classKey);
+			syntheticClassMethodNameMap.remove(classKey);
 		}
 		return hasGenerics;
 	}
@@ -5149,7 +5152,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 */
 	private void addSyntheticMethods(String topClassKey, ITypeBinding binding) {
 		Map<String, String> classTypes = getGenericClassTypes(binding);
-		//buffer Debug(">addSynthMethods " + topClassKey + " " + classTypes);
+		bufferDebug("\n>addSynthMethods" + topClassKey + " " + classTypes);
 		if (classTypes == null)
 			return;
 		String classKey = binding.getKey();
@@ -5191,6 +5194,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if (methodList == null)
 			classMap.put(methodName, methodList = new ArrayList<String[]>());
 		methodList.add(list);
+		bufferDebug("\n>>addsynmeth" + classKey + " " + methodName + " " + Arrays.toString(list));
 	}
 
 	private static ASTNode getAbstractOrAnonymousParentForNode(ASTNode node) {

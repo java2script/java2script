@@ -99,9 +99,9 @@ abstract class LongPipeline<E_IN>
         if (sink instanceof LongConsumer) {
             return (LongConsumer) sink;
         } else {
-            if (Tripwire.ENABLED)
-                Tripwire.trip(AbstractPipeline.class,
-                              "using LongStream.adapt(Sink<Long> s)");
+//            if (Tripwire.ENABLED)
+//                Tripwire.trip(AbstractPipeline.class,
+//                              "using LongStream.adapt(Sink<Long> s)");
             return sink::accept;
         }
     }
@@ -117,9 +117,9 @@ abstract class LongPipeline<E_IN>
         if (s instanceof Spliterator.OfLong) {
             return (Spliterator.OfLong) s;
         } else {
-            if (Tripwire.ENABLED)
-                Tripwire.trip(AbstractPipeline.class,
-                              "using LongStream.adapt(Spliterator<Long> s)");
+//            if (Tripwire.ENABLED)
+//                Tripwire.trip(AbstractPipeline.class,
+//                              "using LongStream.adapt(Spliterator<Long> s)");
             throw new UnsupportedOperationException("LongStream.adapt(Spliterator<Long> s)");
         }
     }
