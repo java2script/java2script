@@ -11,7 +11,7 @@ public class Test_GenericExt2 extends Test_GenericExt_K<Test_Generic_Comp> {
 		lst.add("String");
     	Test_GenericExt_K<Test_Generic_Comp> t = new Test_GenericExt2();
     	t.check(null, null);
-    		  	
+    	
 	}
 
 	

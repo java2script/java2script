@@ -17,8 +17,6 @@ class Test_Class extends Test_Class2 {
 		System.out.println("Test_Class len = " + d.length);
 	}
 	
-
-	
 	int x = 2000000000 + 2000000000;
 	
 	static int istatic = 5;
@@ -178,6 +176,7 @@ class Test_Class extends Test_Class2 {
 			}			
 		};
 		
+		t.replace("test","testing");
 		Object o = t.put("test", getTesting());
 		assert(o == "testing2");
 		

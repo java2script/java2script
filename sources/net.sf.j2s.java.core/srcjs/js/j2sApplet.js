@@ -1010,7 +1010,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 	 * arguments.
 	 * 
 	 * format: "ArrayBuffer" for the raw array, "string" for a string,
-	 * "java.util.Map" meaning something with a get$TK(key) method that is
+	 * "java.util.Map" meaning something with a get$O(key) method that is
 	 * looking for fileName:string and bytes:byte[], or anything else for byte[]
 	 * directly.
 	 * 
@@ -1040,7 +1040,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 					System.out.println("J2S.getFileFromDialog format=" + format + " file name=" + file.name  + " size=" + data.length)
 					switch (format) {
 					case "java.util.Map":
-						map.put$TK$TV(file.name, J2S._toBytes(data));
+						map.put$O$O(file.name, J2S._toBytes(data));
 						data = map;
 						break;
 					case "java.util.Array":
@@ -2435,7 +2435,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 						&& !J2S.featureDetection.supportsLocalization())
 					continue;
 				if (isHashtable)
-					params.put$TK$TV(i, (Info[i] === true ? Boolean.TRUE
+					params.put$O$O(i, (Info[i] === true ? Boolean.TRUE
 							: Info[i] === false ? Boolean.FALSE : Info[i]))
 				else
 					params[i] = Info[i];
@@ -2645,7 +2645,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 				} else {
 					
 					var viewerOptions = Clazz.new_("java.util.Hashtable");
-					viewerOptions.put = viewerOptions.put$TK$TV;
+					viewerOptions.put = viewerOptions.put$O$O;
 					J2S._setAppletParams(applet._availableParams,
 							viewerOptions, applet.__Info, true);
 					viewerOptions.put("name", applet._id);// + "_object");
