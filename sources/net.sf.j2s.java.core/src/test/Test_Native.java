@@ -24,6 +24,9 @@ package test;
  
 class Test_Native extends Test_ {
 
+	/**
+	 * @j2sAlias test123
+	 */
 	@Override
 	public void test123(int a, int b, int c) {
 		

@@ -136,35 +136,37 @@ import org.eclipse.jdt.core.dom.WildcardType;
 
 //todo: j2sdoc in static field showing up in default static block only, not in initializer block. 
 
+//BH 2020.01.09 -- 3.2.7-v2 introduces @j2sAlias as a way of adding a custom method name, as in exports. 
 //BH 2020.01.08 -- 3.2.7-v1 sets generic references to their erasures; adds implicit synthetic default methods to interfaces 
-//BH 2020.01.05 -- 3.2.6-v2 fixes synthetic methods missing for generics
 
-// There was a limitation discovered in relation to Spliterators. Specifically, 
-// Spliterators.EmptySpliterator.OfInt (|Long|Double) did not have the 
-// synthetic bridge tryAdvance(IntConsumer consumer). This was due to the fact that
-// Java considers tryAdvance(C consumer) in the Spliterator.EmptySpliterator superclass<T,C,S>
-// to do that: 
+//	Note: There was a limitation discovered in relation to Spliterators. Specifically, 
+//	Spliterators$EmptySpliterator$OfInt (OfLong, OfDouble, etc) did not have the 
+//	the method tryAdvance(IntConsumer consumer). This was due to the fact that
+//	interface Spliterator$OfInt.tryAdvance(C consumer) overrides interface Spliterator$ofPrimitive.tryAdvance(C action)
+//	but does not have the same signature.
+//	Java handles this with a synthetic bridge in Spliterators$EmptySpliterator$OfInt, which maps
+//	java.util.Spliterators$EmptySpliterator$OfInt.tryAdvance(IntConsumer)
+//	to Spliterator.OfInt.tryAdvance(Object):
+//	
+//	public bridge synthetic boolean tryAdvance(java.util.function.IntConsumer arg0);
+//	0  aload_0 [this]
+//	1  aload_1 [arg0]
+//	2  checkcast java.lang.Object [18]
+//	5  invokevirtual java.util.Spliterators$EmptySpliterator$OfInt.tryAdvance(java.lang.Object) : boolean [20]
+//	8  ireturn
+//
+//	 But, actually, we can do one better. All that was necessary was to add to the $defaults$ function of
+//	 the Spliterator$OfInt interface an alias that equates tryAdvace$java_util_function_IntConsumer 
+//	 to tryAdvance$O:
+//	
+//		C$.$defaults$ = function(C$){
+//		  ...
+//		  C$.prototype['tryAdvance$java_util_function_IntConsumer']=C$.prototype['tryAdvance$O'];
+//		};
+//
+//  In this way, any implementing class gets that synthetic bridge method. Ta-DA!
 
-// public boolean tryAdvance(C consumer) {
-//    Objects.requireNonNull(consumer);
-//    return false;
-// }
-
-// where class OfInt extends EmptySpliterator<Integer, Spliterator.OfInt, IntConsumer>
-
-// Java handles this with a synthetic bridge in Spliterators$EmptySpliterator$OfInt that maps
-// java.util.Spliterators$EmptySpliterator$OfInt.tryAdvance(IntConsumer)
-// to Spliterator.OfInt.tryAdvance(Object):
-
-//// Method descriptor #17 (Ljava/util/function/IntConsumer;)Z
-//// Stack: 2, Locals: 2
-//public bridge synthetic boolean tryAdvance(java.util.function.IntConsumer arg0);
-//  0  aload_0 [this]
-//  1  aload_1 [arg0]
-//  2  checkcast java.lang.Object [18]
-//  5  invokevirtual java.util.Spliterators$EmptySpliterator$OfInt.tryAdvance(java.lang.Object) : boolean [20]
-//  8  ireturn
-  
+// BH 2020.01.05 -- 3.2.6-v2 fixes synthetic methods missing for generics
 // BH 2020.01.03 -- 3.2.6-v1 fixes for $__T and some synthetic methods missing
 // BH 2020.01.01 3.2.6-v1 fixes for generic varargs with only one parameter
 // BH 2019.12.19 3.2.6-v0 C$.$clinit$=2 adds C$.$fields$, Clazz._getFields
@@ -281,8 +283,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private final static int METHOD_INDEXOF = 8;
 	private final static int METHOD_ISQUALIFIED = 16;
 	private final static int METHOD_NULLEXPRESSION = 32;
-
-	private final static int METHOD_ALIAS = 64;
 
 	private static final int NOT_LOCAL = 0;
 	private static final int REALLY_LOCAL_CLASS = 1;
@@ -1292,6 +1292,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		String quotedFinalNameOrArray = getMethodNameWithSyntheticBridgeForDeclaration(mBinding, isConstructor, alias, qualification, 
 				isAbstract ? abstractMethodList : null);
 		if (isAbstract) {
+			// allows us to catalog method names for an interface or abstract class
 			return;
 		}
 		boolean isMain = (isStatic && isPublic && mBinding.getName().equals("main")
@@ -5292,8 +5293,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		for (int i = 0; i < tokens.length; i++) {
 			String key = tokens[i].trim();
 			key = key.substring(0, (key + " ").indexOf(" "));
-//			if (i >= types.length)
-//				System.out.println("???getGeneric??? " + i + "/" + types.length + " key=" + key + " temp=" + temp + " sb=" + sb);
 			classTypes.put(key, (i < types.length ? types[i] : "O"));
 		}
 		// note: enabling this line causes an intense memory situation.
@@ -5324,28 +5323,24 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @param node
 	 * @param mBinding
 	 * @param isConstructor
-	 * @param aliases 
+	 * @param alias  name provided using at_j2sAlias 
 	 * @param mode
 	 * @param declaredMethodList 
 	 * @return j2s-qualified name or an array of j2s-qualified names
 	 */
 	String getMethodNameWithSyntheticBridgeForDeclaration(IMethodBinding mBinding, boolean isConstructor,
-			String aliases,	int mode, List<String> declaredMethodList) {
+			String alias,	int mode, List<String> declaredMethodList) {
 		List<String> names = (declaredMethodList == null ? new ArrayList<String>() : declaredMethodList);
 		int pt = names.size();
+		if (alias != null)
+			names.add(alias);
 		String nodeName = mBinding.getName();
 		String methodName = (isConstructor ? "c$" : nodeName);
 		String qname = getFinalMethodNameWith$Params(methodName, mBinding, null, false, METHOD_NOTSPECIAL);
 		names.add(qname);
 		ITypeBinding methodClass = mBinding.getDeclaringClass();
 		List<String[]> methodList = getGenericMethodList(methodClass, nodeName);
-		if (aliases != null) {
-			String[] types = aliases.split(",");
-			String pname = getFinalMethodNameWith$Params(methodName, mBinding, types, false, METHOD_ALIAS);
-			if (pname != null) {
-				names.add(pname);
-			}			
-		} else if (methodList != null) {
+		if (methodList != null) {
 			for (int i = methodList.size(); --i >= 0;) {
 				String pname = getFinalMethodNameWith$Params(methodName, mBinding, methodList.get(i), false, METHOD_NOTSPECIAL);
 				if (pname != null)
