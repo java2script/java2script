@@ -134,6 +134,7 @@ public class Test_ {
 		Test_Interface2.main(args);
 		Test_Intern.main(args);
 		Test_Ints.main(args);
+		Test_J8_Generic2.main(args);
 		Test_J8_Stream.main(args);
 		Test_Java8.main(args);
 		Test_Map.main(args);

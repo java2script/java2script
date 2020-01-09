@@ -1,7 +1,12 @@
 package test;
 
 import java.util.List;
+import java.util.Spliterator;
+import java.util.Spliterator.OfInt;
+import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JComboBox;
@@ -31,6 +36,9 @@ public class Test_Generic_Java8 extends Test_ implements ListCellRenderer {
 	public static void main(String[] args) {
 	
 		System.out.println(Test_Generic_Java8.<String>asList("testing"));
+		
+		Hashtable ht = new Hashtable();
+		ht.put("Testing", "now");
 		
 		Test_Generic_Java8 test = new Test_Generic_Java8();
 		// calls getListCellRendererComponent$javax_swing_JList$O$I$Z$Z 

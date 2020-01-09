@@ -98,9 +98,9 @@ abstract class DoublePipeline<E_IN>
         if (sink instanceof DoubleConsumer) {
             return (DoubleConsumer) sink;
         } else {
-            if (Tripwire.ENABLED)
-                Tripwire.trip(AbstractPipeline.class,
-                              "using DoubleStream.adapt(Sink<Double> s)");
+//            if (Tripwire.ENABLED)
+//                Tripwire.trip(AbstractPipeline.class,
+//                              "using DoubleStream.adapt(Sink<Double> s)");
             return sink::accept;
         }
     }
@@ -116,9 +116,9 @@ abstract class DoublePipeline<E_IN>
         if (s instanceof Spliterator.OfDouble) {
             return (Spliterator.OfDouble) s;
         } else {
-            if (Tripwire.ENABLED)
-                Tripwire.trip(AbstractPipeline.class,
-                              "using DoubleStream.adapt(Spliterator<Double> s)");
+//            if (Tripwire.ENABLED)
+//                Tripwire.trip(AbstractPipeline.class,
+//                              "using DoubleStream.adapt(Spliterator<Double> s)");
             throw new UnsupportedOperationException("DoubleStream.adapt(Spliterator<Double> s)");
         }
     }

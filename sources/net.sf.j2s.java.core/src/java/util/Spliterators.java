@@ -867,35 +867,15 @@ public final class Spliterators {
 
         private static final class OfInt
                 extends EmptySpliterator<Integer, Spliterator.OfInt, IntConsumer>
-                implements Spliterator.OfInt {
+                implements Spliterator.OfInt { 
             OfInt() { }
             
-            /**
-             * Was necessary for SwingJS
-             */
-            @Override
-			public boolean tryAdvance(IntConsumer consumer) {
-                Objects.requireNonNull(consumer);
-                return false;
-            }
-
-
         }
 
         private static final class OfLong
                 extends EmptySpliterator<Long, Spliterator.OfLong, LongConsumer>
                 implements Spliterator.OfLong {
             OfLong() { }
-            
-            /**
-             * Was necessary for SwingJS
-             */
-            @Override
-			public boolean tryAdvance(LongConsumer consumer) {
-                Objects.requireNonNull(consumer);
-                return false;
-            }
-
 
         }
 
@@ -903,16 +883,6 @@ public final class Spliterators {
                 extends EmptySpliterator<Double, Spliterator.OfDouble, DoubleConsumer>
                 implements Spliterator.OfDouble {
             OfDouble() { }
-
-            /**
-             * Was necessary for SwingJS
-             */
-            @Override
-			public boolean tryAdvance(DoubleConsumer consumer) {
-                Objects.requireNonNull(consumer);
-                return false;
-            }
-
 
         }
     }
