@@ -440,6 +440,7 @@ Clazz.load = function(cName, from$clinit$) {
 
 //create  and $init0$
 var initClass0 = function(c) {
+    c.$synth$ && c.$synth$(); // add synthetic bridges for generics
 	var fields = c.$fields$;
 	var objects = fields && fields[0];
 	createDefaults(c, objects, false);
@@ -1483,6 +1484,7 @@ var excludeSuper = function(o) {
       || o == "$Class$"
       || o == "$getMembers$"
       || o == "$getAnn$"
+      || o == "$synth$"
       || o == "prototype" 
       || o == "__PARAMCODE" 
       || o == "__CLASS_NAME__" 
@@ -1981,7 +1983,7 @@ return this.b$['CharSequence'].charAt$I.apply(this.b$['CharSequence'], [this.cur
 throw Clazz.new_(Clazz.load('java.util.NoSuchElementException'));
 }});
 
-Clazz.newMeth(C$, ['forEachRemaining$java_util_function_IntConsumer','forEachRemaining$TT_CONS'], function (block) {
+Clazz.newMeth(C$, ['forEachRemaining$java_util_function_IntConsumer','forEachRemaining$O'], function (block) {
 for (; this.cur < this.b$['CharSequence'].length$(); this.cur++) {
 block.accept$(this.b$['CharSequence'].charAt$I(this.cur).$c());
 }
@@ -2005,7 +2007,7 @@ Clazz.newMeth(C$, '$init$', function () {
 this.cur = 0;
 }, 1);
 
-Clazz.newMeth(C$, ['forEachRemaining$java_util_function_IntConsumer','forEachRemaining$TT_CONS'], function (block) {
+Clazz.newMeth(C$, ['forEachRemaining$java_util_function_IntConsumer','forEachRemaining$O'], function (block) {
 var length = this.b$['CharSequence'].length$();
 var i = this.cur;
 try {
@@ -3125,7 +3127,7 @@ C$.getProperties$=function () {
 	if (C$.props == null )
 		C$.props=Clazz.new_("java.util.Properties");
 	for (a in sysprops)
-		C$.props.put$TK$TV(a, sysprops[a]);
+		C$.props.put$O$O(a, sysprops[a]);
 	return C$.props;
 }
 
@@ -3434,7 +3436,7 @@ Number.prototype._numberToString=Number.prototype.toString;
 Number.__CLASS_NAME__="Number";
 addInterface(Number,java.io.Serializable);
 //extendPrototype(Number, true, false);
-Number.prototype.compareTo$ = Number.prototype.compareTo$Number = Number.prototype.compareTo$TT = function(x) { var a = this.valueOf(), b = x.valueOf(); return (a < b ? -1 : a == b ? 0 : 1) };
+Number.prototype.compareTo$ = Number.prototype.compareTo$Number = Number.prototype.compareTo$O = function(x) { var a = this.valueOf(), b = x.valueOf(); return (a < b ? -1 : a == b ? 0 : 1) };
 
 var $b$ = new Int8Array(1);
 var $s$ = new Int16Array(1);
@@ -4027,7 +4029,7 @@ m$(Boolean,["booleanValue","booleanValue$"], function(){ return this.valueOf(); 
 
 m$(Boolean,"compare$Z$Z", function(a,b){return(a == b ? 0 : a ? 1 : -1);}, 1);
 
-m$(Boolean,["compareTo$Boolean","compareTo$TT"],
+m$(Boolean,["compareTo$Boolean","compareTo$O"],
 		function(b){
 		return(b.valueOf() == this.valueOf() ? 0 : this.valueOf() ? 1 : -1);
 		});
@@ -4433,7 +4435,7 @@ return Clazz.array(Byte.TYPE, -1, arrs);
 };
 
 sp.contains$S = function(a) {return this.indexOf(a) >= 0}  // bh added
-sp.compareTo$ = sp.compareTo$S = sp.compareTo$TT = function(a){return this > a ? 1 : this < a ? -1 : 0} // bh added
+sp.compareTo$ = sp.compareTo$S = sp.compareTo$O = function(a){return this > a ? 1 : this < a ? -1 : 0} // bh added
 
 sp.toCharArray$=function(){
 	var result = this.split("");	
@@ -4782,7 +4784,7 @@ function(i){
 return(this.value).charCodeAt(i);
 });
 
-m$(C$,["compareTo$C","compareTo$","compareTo$TT"],
+m$(C$,["compareTo$C","compareTo$","compareTo$O"],
 function(c){
 return(this.value).charCodeAt(0)-(c.value).charCodeAt(0);
 });
@@ -5013,7 +5015,7 @@ m$(java.util.Date,["equals","equals$O"],
 function(obj){
 return Clazz.instanceOf(obj,java.util.Date)&&this.getTime()==(obj).getTime();
 });
-m$(java.util.Date,["compareTo","compareTo$java_util_Date","compareTo$","compareTo$TT","compareTo$O"],
+m$(java.util.Date,["compareTo","compareTo$java_util_Date","compareTo$","compareTo$O","compareTo$O"],
 function(anotherDate){
 var thisTime=this.getTime();
 var anotherTime=anotherDate.getTime();

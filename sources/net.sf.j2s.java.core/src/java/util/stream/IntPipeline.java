@@ -100,9 +100,9 @@ abstract class IntPipeline<E_IN>
             return (IntConsumer) sink;
         }
         else {
-            if (Tripwire.ENABLED)
-                Tripwire.trip(AbstractPipeline.class,
-                              "using IntStream.adapt(Sink<Integer> s)");
+//            if (Tripwire.ENABLED)
+//                Tripwire.trip(AbstractPipeline.class,
+//                              "using IntStream.adapt(Sink<Integer> s)");
             return sink::accept;
         }
     }
@@ -119,9 +119,9 @@ abstract class IntPipeline<E_IN>
             return (Spliterator.OfInt) s;
         }
         else {
-            if (Tripwire.ENABLED)
-                Tripwire.trip(AbstractPipeline.class,
-                              "using IntStream.adapt(Spliterator<Integer> s)");
+//            if (Tripwire.ENABLED)
+//                Tripwire.trip(AbstractPipeline.class,
+//                              "using IntStream.adapt(Spliterator<Integer> s)");
             throw new UnsupportedOperationException("IntStream.adapt(Spliterator<Integer> s)");
         }
     }

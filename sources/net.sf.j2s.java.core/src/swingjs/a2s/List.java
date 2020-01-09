@@ -858,7 +858,7 @@ public class List extends JList implements ItemSelectable, JSComponent.A2SWrappe
 
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
-		if (itemListener != null && getSelectionModel().getValueIsAdjusting()) {
+		if (itemListener != null && !getSelectionModel().getValueIsAdjusting()) {
 			processItemEvent(new ItemEvent(this, ItemEvent.ITEM_STATE_CHANGED, getSelectedItem(), ItemEvent.SELECTED));
 		}
 	}

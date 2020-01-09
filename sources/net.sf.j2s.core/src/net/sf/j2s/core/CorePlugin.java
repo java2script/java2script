@@ -25,7 +25,10 @@ public class CorePlugin extends Plugin {
 	 * "net.sf.j2s.core.jar" not "net.sf.j2s.core.3.2.5"
 	 * 
 	 */
-	public static String VERSION = "3.2.6-v1";
+	public static String VERSION = "3.2.7-v1";
+	// BH 2020.01.08 -- 3.2.7-v1 sets generic references to their erasures; adds implicit synthetic default methods to interfaces 
+	// BH 2020.01.05 -- 3.2.6-v2 fixes synthetic methods missing for generics
+	// BH 2020.01.03 -- 3.2.6-v2 fixes for missing synthetic methods  
 	// BH 2020.01.03 -- 3.2.6-v1 fixes for $__T and some synthetic methods missing
 	// BH 2020.01.01 -- 3.2.6-v1 fixes for generic varargs with only one parameter
 	// BH 2019.12.19 -- 3.2.6-v0 adds C$.$fields$

@@ -3,15 +3,17 @@ package test;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 class J8_param<T> {
     T elem;
@@ -32,7 +34,7 @@ class J8_param<T> {
 public class Test_J8_Stream extends Test_J8_Stream0 {
 	
 	public static void main(String[] args) {
-
+		
 		Test_J8_Stream j8 = new Test_J8_Stream("s3");
 		List<Test_J8_Stream> myList1 = new ArrayList<>();
 		myList1.add(new Test_J8_Stream("s1"));
