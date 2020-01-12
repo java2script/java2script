@@ -225,6 +225,8 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 		if (isRoot)
 			output("\n");
 		writeTagClose(qname, true);
+		if (isRoot)
+			output("\n");
 	}
 	
 	private static boolean hasElements(List<JSJAXBField> fields) {
