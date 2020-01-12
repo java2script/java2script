@@ -1,4 +1,4 @@
-package test.jaxb;
+package test.jaxb.field;
  
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -14,7 +14,7 @@ public class PhoneNumber {
     private String number;
  
     public String getType() { 
-        return type+"????";
+        return type+"(property)";
     }
  
     public void setType(String type) {
@@ -22,7 +22,7 @@ public class PhoneNumber {
     }
  
     public String getNumber() {
-        return number;
+        return number+"(property)";
     }
  
     public void setNumber(String number) {

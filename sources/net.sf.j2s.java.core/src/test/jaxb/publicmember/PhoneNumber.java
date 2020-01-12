@@ -1,8 +1,5 @@
-package test.jaxb;
+package test.jaxb.publicmember;
  
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
  
 // source: http://blog.bdoughan.com/2011/06/jaxb-and-complex-types-with-simple.html
@@ -11,22 +8,23 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class PhoneNumber {
  
     private String type;
-    private String number;
+    public String number;
  
     public String getType() { 
-        return type+"????";
+        return type+"(property)";
     }
  
     public void setType(String type) {
         this.type = type;
     }
  
-    public String getNumber() {
-        return number;
+    String getNumber() {
+        return number+"(property)";
     }
  
-    public void setNumber(String number) {
+    void setNumber(String number) {
         this.number = number;
     }
  
+
 }
