@@ -337,7 +337,9 @@ public class JMenu extends JMenuItem implements MenuElement
 //            System.out.println("in JMenu.setPopupMenuVisible " + b);
 //            // Thread.dumpStack();
 //        }
-//
+
+    	if (b && popupMenu.getPeer() == null)
+    		popupMenu.addNotify();// BH SwingJS 
         boolean isVisible = isPopupMenuVisible();
         if (b != isVisible && (isEnabled() || !b)) {
             ensurePopupMenuCreated();
@@ -544,7 +546,6 @@ public class JMenu extends JMenuItem implements MenuElement
             this.popupMenu = new JPopupMenu();
             popupMenu.setInvoker(this);
             popupListener = createWinListener(popupMenu);
-            popupMenu.addNotify();// BH SwingJS 
         }
     }
 
