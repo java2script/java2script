@@ -1,19 +1,12 @@
 package test;
 
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.Hashtable;
-
 class Test_Class4 extends Test_ {
 
-
-	static  {
+	static {
 		System.out.println("Test_Class4 static init ");
 	}
 
-	 {
+	{
 		System.out.println("Test_Class4 nonstatic init ");
 	}
 

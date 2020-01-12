@@ -10,7 +10,7 @@ import java.lang.reflect.Method;
 import java.util.Hashtable;
 
 @SuppressWarnings("rawtypes")
-class Test_Class extends Test_Class2 {
+class Test_Class extends Test_Class2<Integer> {
 
 	Test_Class(byte[]...d) {
 		super(d);
@@ -109,12 +109,19 @@ class Test_Class extends Test_Class2 {
 		final Test_Class me = Test_Class.this;
 		MouseListener c = new MouseListener() {
 			
+			public int showt() {
+				return 2;
+			}
+			
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				System.out.println("mouseClicked1");
-				Test_Class.this.showt(); 
-				showt();				
+				// test of qualified this
+				setT(1);
+				assert(Test_Class.this.showt() == 1); 
+				assert(showt() == 2);				
 				assert(Test_Class.this == me);
+				setT(0);
 				System.out.println("mouseClicked2");
 			}
 
@@ -370,6 +377,19 @@ class Test_Class extends Test_Class2 {
 		// TODO Auto-generated method stub
 		
 	}
+
+	
+	public void testAbstract(int i, Integer n, long j) {
+		System.out.println("OK -- Test_Class.testAbstract int Integer long");
+		
+	}
+
+	public void testAbstract(int i, Double n, long j) {
+		System.out.println("OHOH!!!!!!!!!!!!!!!!!!!!!!!!!");
+		//assert(false);
+		
+	}
+
 
 }
 

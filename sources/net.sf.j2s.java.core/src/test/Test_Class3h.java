@@ -1,11 +1,5 @@
 package test;
 
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.Hashtable;
-
 class Test_Class3h extends Test_ implements Test_Class3fint1, Test_Class3fint3 {
 
    // two interfaces; references the first (7) and then the second interface field in a sub-interface(6 of 5)

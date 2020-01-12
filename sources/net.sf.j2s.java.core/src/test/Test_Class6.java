@@ -1,11 +1,5 @@
 package test;
 
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.Hashtable;
-
 class Test_Class6 extends Test_Class5 {
 
 

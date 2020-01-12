@@ -28,6 +28,10 @@ public class Test_ {
 		}
 		return t;
 	}
+	
+	public void setT(int t) {
+		this.t = t;
+	}
 
 	public String t_test = "test_";
 
@@ -112,14 +116,21 @@ public class Test_ {
 		Test_Cinit.main(args);
 		Test_Cinit2.main(args);
 		Test_Class.main(args);
+		Test_Class_1.main(args);
+		Test_ClassBase.main(args);
 		Test_Clone.main(args);
 		Test_DivEqual.main(args);
 		Test_Double.main(args);
 		Test_Enum.main(args);
+		Test_Enum2.main(args);
+		Test_EPS.main(args);
 		Test_Extends_6.main(args);
 //		Test_Extends_7.main(args);
 		// Test_Extends_JButton.main(args);
 		Test_Extends.main(args);
+		Test_Field_fails.main(args);
+		Test_Field_ok.main(args);
+		//Test_File.main(args);
 		Test_Final.main(args);
 		Test_Format.main(args);
 		Test_Generic_Java8.main(args);
@@ -133,6 +144,7 @@ public class Test_ {
 		Test_Interface.main(args);
 		Test_Interface2.main(args);
 		Test_Intern.main(args);
+		Test_Interval.main(args);
 		Test_Ints.main(args);
 		Test_J8_Generic2.main(args);
 		Test_J8_Stream.main(args);
