@@ -36,8 +36,8 @@ class Test_Interval extends Test_ {
 		System.out.println(findClosestPoint(ap, 0, false)); // -1
 		System.out.println(findClosestPoint(ap, 30, true)); // 2
 		System.out.println(findClosestPoint(ap, 60, true)); // 7
-		System.out.println(findClosestPoint(ap, 50, true)); // 6
-		System.out.println(findClosestPoint(ap, 50, false)); // 4
+		System.out.println(findClosestPoint(ap, 50, true)); // 4
+		System.out.println(findClosestPoint(ap, 50, false)); // 6
 
 		assert (findClosestPoint(ap, 11, true) == 0);
 		assert (findClosestPoint(ap, 11, false) == 1);
@@ -49,8 +49,8 @@ class Test_Interval extends Test_ {
 		assert (findClosestPoint(ap, 0, false) == -1);
 		assert (findClosestPoint(ap, 30, true) == 2);
 		assert (findClosestPoint(ap, 60, true) == 7);
-		assert (findClosestPoint(ap, 50, true) == 6);
-		assert (findClosestPoint(ap, 50, false) == 4);
+		assert (findClosestPoint(ap, 50, true) == 4);
+		assert (findClosestPoint(ap, 50, false) == 6);
 
 		new Test_Interval().findIntervals(a, 3);
 		new Test_Interval().findIntervals(a, 5);
@@ -65,8 +65,7 @@ class Test_Interval extends Test_ {
 		try {
 			Thread.sleep(500);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+//			e.printStackTrace();
 		}
 		Random rand = new Random();
 		int n = a.length;

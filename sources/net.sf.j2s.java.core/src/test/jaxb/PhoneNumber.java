@@ -1,18 +1,20 @@
 package test.jaxb;
  
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
  
 // source: http://blog.bdoughan.com/2011/06/jaxb-and-complex-types-with-simple.html
+// note that we are not honoring package-info here. Why not?
 @XmlRootElement(name="phone-number")
 public class PhoneNumber {
  
     private String type;
     private String number;
  
-    @XmlAttribute
-    public String getType() {
-        return type;
+    public String getType() { 
+        return type+"????";
     }
  
     public void setType(String type) {

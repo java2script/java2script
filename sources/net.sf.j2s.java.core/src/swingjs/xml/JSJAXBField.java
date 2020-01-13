@@ -92,6 +92,9 @@ class JSJAXBField implements Cloneable {
 	boolean isArray;
 	boolean isByteArray;
 	boolean isContainer;
+	boolean isNotPublic;
+	
+	boolean ignore;
 
 	/// private only
 
@@ -103,6 +106,9 @@ class JSJAXBField implements Cloneable {
 
 	private int index;
 	private Object clazz; // for debugging only
+
+	String methodName;
+
 
 	JSJAXBField(JSJAXBField listOwner) {
 		this.listOwner = listOwner;
@@ -156,7 +162,16 @@ class JSJAXBField implements Cloneable {
 			getMethods(jaxbClass.getJavaObject(), clazz);
 		Map<String, String> attr = new Hashtable<String, String>();
 		text = "";
-		readAnnotations(jaxbClass, (String[]) adata[1], propOrder, attr);
+		String[] attrs = (String[]) adata[1];
+		if (adata[0].length == 4) {
+			// new style has the full class name, not just @XmlRootElement
+			String[] classes = (String[]) adata[0][3];
+			for (int i = classes.length; --i >= 0;) {
+				attrs[i] = "@" + classes[i] + "(" + attrs[i] + ")";
+			}
+		}
+		readAnnotations(jaxbClass, attrs, propOrder, attr);
+
 		// ensure that we have a qualified name if appropriate
 		finalizeNames(index, jaxbClass);
 	}
@@ -184,7 +199,7 @@ class JSJAXBField implements Cloneable {
 		}
 	}
 
-	private static String stripJavaLang(String name) {
+	static String stripJavaLang(String name) {
 		return (name.startsWith("java.lang.")?  name.substring(10) : name);
 	}
 
@@ -221,6 +236,11 @@ class JSJAXBField implements Cloneable {
 		xmlAttributeData = val;
 	}
 
+	/**
+	 * Unmarshaller from DOM node
+	 * 
+	 * @param attr
+	 */
 	void setAttributes(Attributes attr) {
 //		xmlAttributes = attr;
 		xmlType = attr.getValue("xsi:type");
@@ -280,7 +300,6 @@ class JSJAXBField implements Cloneable {
 		case "@XmlSchema":
 			return;
 		}
-
 		// check type annotations:
 		switch (tag) {
 		case "@XmlRootElement":
@@ -300,9 +319,7 @@ class JSJAXBField implements Cloneable {
 			}
 			return;
 		case "@XmlAccessorType":
-			jaxbClass.accessorType = (data.indexOf("FIELD") >= 0 ? JSJAXBClass.TYPE_FIELD
-					: data.indexOf("MEMBER") >= 0 ? JSJAXBClass.TYPE_PUBLIC_MEMBER
-							: data.indexOf("PROPERTY") >= 0 ? JSJAXBClass.TYPE_PROPERTY : JSJAXBClass.TYPE_NONE);
+			jaxbClass.accessorType = JSJAXBClass.parseAccessorType(data);
 			return;
 		case "@XmlSeeAlso":
 			// @XmlSeeAlso({Dog.class,Cat.class})
@@ -330,41 +347,66 @@ class JSJAXBField implements Cloneable {
 	 */
 	private void processFieldAnnotation(JSJAXBClass jaxbClass, String tag, String data, Map<String, String> attr) {
 		switch (tag) {
+		case "!XmlPublic":
+			// transpiler has added this tag for each field and method because XmlAccessorType was not indicated in
+			// the class file
+			isNotPublic = data.equals("false");
+			switch (jaxbClass.accessorType) {
+			case JSJAXBClass.TYPE_PUBLIC_MEMBER:
+				ignore = isNotPublic;
+				break;
+			case JSJAXBClass.TYPE_NONE:
+				ignore = true;
+				break;
+			case JSJAXBClass.TYPE_FIELD:
+				ignore = isMethod;
+				break;
+			case JSJAXBClass.TYPE_PROPERTY:
+				ignore = !isMethod;
+				break;
+			}
+			if (!ignore)
+				javaName = null;
+			break;
 		case "!XmlInner":
 			jaxbClass.addSeeAlso(javaClassName);
 			javaName = null;
 			return;
 		case "@XmlTransient":
 			isTransient = true;
-			return;
+			break;
 		case "@XmlAttribute":
 			isAttribute = true;
 			if (isContainer)
 				asList = true;
 			qualifiedName = getName(tag, attr);
-			return;
+			break;
 		case "@XmlElements":
 			listFields = new ArrayList<JSJAXBField>();
-			return;
+			break;
 		case "@XmlElement":
 			if (listFields != null) {
 				JSJAXBField f = new JSJAXBField(this);
 				listFields.add(f);
 				f.processFieldAnnotation(jaxbClass, tag, data, attr);
-				f.javaClassName = stripJavaLang(f.javaClassName).replace(".class",  "");
+				f.javaClassName = f.javaClassName.replace(".class", "");
 				f.javaName = javaName + "::" + f.javaClassName;
+				// some issue here?
+				f.javaClassName = stripJavaLang(f.javaClassName);
 				f.finalizeNames(index, jaxbClass);
-				return;
+				break;
 			}
 			qualifiedName = getName(tag, attr);
 			isNillable = "true".equals(attr.get("@XmlElement:nillable"));
 			defaultValue = attr.get("@XmlElement:defaultValue");
 			String type = attr.get("@XmlElement:type");
 			if (type != null)
-				javaClassName = type;
-			return;
+				javaClassName = type.replace(".class", "");
+			break;
 		case "@XmlSchemaType":
 			xmlSchemaType = attr.get("@XmlSchemaType:name");
+			if (xmlSchemaType.startsWith("xs:"))
+				xmlSchemaType = xmlSchemaType.substring(3);
 			if (xmlSchemaType.equals("hexBinary")) {
 				xmlSchemaType = null;
 				typeAdapter = "javax.xml.bind.annotation.adapters.HexBinaryAdapter";
@@ -379,45 +421,49 @@ class JSJAXBField implements Cloneable {
 			//
 			// @XmlSchemaType(name="base64Binary")
 			// public byte[] base64Bytes;
-			return;
-		case "@XmlJavaTypeAdapter":
+			break;
+			case "@adapters.XmlJavaTypeAdapter":
+			case "@XmlJavaTypeAdapter":
 			// typically CollapsedStringAdapter.class
-			typeAdapter = attr.get("@XmlJavaTypeAdapter:name");
+			typeAdapter = attr.get(tag + ":name");
 			if (typeAdapter == null)
 				typeAdapter = data;
 			typeAdapter = getQuotedClass(data);
-			return;
+			break;
 		case "@XmlValue":
 			jaxbClass.xmlValueField = this;
 			isXmlValue = true;
-			return;
+			break;
 		case "@XmlEnumValue":
 			enumValue = data = PT.trim(data, "\"");
 			jaxbClass.enumMap.put("/" + javaName, data); // for marshaller
 			jaxbClass.enumMap.put("//" + data, javaName); // for unmarshaller
 			jaxbClass.enumMap.put(data, this); // for unmarshaller
-			return;
+			break;
 		case "@XmlList":
 			asList = true;
-			return;
+			break;
 		case "@XmlID":
 			isXmlID = true;
 			jaxbClass.xmlIDField = this;
-			return;
+			break;
 		case "@XmlIDREF":
 			isXmlIDREF = true;
-			return;
+			break;
 		case "@XmlMimeType":
 			mimeType = attr.get("@XmlMimeType:name");
 			// e.g. @XmlMimeType("application/octet-stream")
 			// @XmlMimeType("image/jpeg")
 			// @XmlMimeType("text/xml; charset=iso-8859-1")
-			return;
+			break;
 		case "@XmlElementWrapper":
 			qualifiedWrapName = getName(tag, attr);
-			return;
+			break;
+		default:
+			System.out.println("JSJAXBField Unprocessed field annotation: " +tag + " "+ text);
+			ignore = true;
+			break;
 		}
-		System.out.println("JSJAXBField Unprocessed field annotation: " + text);
 	}
 
 	private static String[] getSeeAlso(String data) {
@@ -551,7 +597,7 @@ class JSJAXBField implements Cloneable {
 	 * Check for methods in C$.$P$[] (private) and object[] (all others)
 	 */
 	private void getMethods(Object javaObject, Object clazz) {
-		String methodName = javaName.substring(2);
+		methodName = javaName.substring(2);
 		Object[] pm = /** @j2sNative clazz.$P$ || */
 				null;
 		Object[] jo = /** @j2sNative clazz.prototype || */
@@ -738,6 +784,29 @@ class JSJAXBField implements Cloneable {
 
 	public static boolean isknownSchemaType(String xmlSchemaType) {
 		return PT.isOneOf(xmlSchemaType, XML_SCHEMA_TYPES);
+	}
+
+	/**
+	 * Arrays may need forcing.
+	 * 
+	 * @param type
+	 * @return
+	 */
+	public static String boxPrimitive(String type) {
+		switch (type) {
+		case "int":
+			return "Integer";
+		case "boolean":
+		case "float":
+		case "double":
+		case "integer":
+		case "long":
+		case "short":
+		case "byte":
+			return type.substring(0,1).toUpperCase() + type.substring(1);
+		default:
+			return type;
+		}
 	}
 
 }

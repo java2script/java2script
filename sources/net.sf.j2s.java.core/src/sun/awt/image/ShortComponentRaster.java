@@ -76,12 +76,12 @@ public class ShortComponentRaster extends SunWritableRaster {
     /** A cached copy of minY + height for use in bounds checks. */
     private int maxY;
 
-    static private native void initIDs();
-    static {
-        /* ensure that the necessary native libraries are loaded */
-        NativeLibLoader.loadLibraries();
-        initIDs();
-    }
+//    static private native void initIDs();
+//    static {
+//        /* ensure that the necessary native libraries are loaded */
+//        NativeLibLoader.loadLibraries();
+//        initIDs();
+//    }
 
     /**
      *  Constructs a ShortComponentRaster with the given SampleModel.
