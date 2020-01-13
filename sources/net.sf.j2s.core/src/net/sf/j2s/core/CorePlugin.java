@@ -25,7 +25,10 @@ public class CorePlugin extends Plugin {
 	 * "net.sf.j2s.core.jar" not "net.sf.j2s.core.3.2.5"
 	 * 
 	 */
-	public static String VERSION = "3.2.7-v1";
+	public static String VERSION = "3.2.7-v3";
+	// BH 2020.01.12 -- 3.2.7-v3 fixes JAXB annotation marshalling for 3.2.7 
+	// BH 2020.01.11 -- 3.2.7-v3 corrects and rewrites synthetic bridge creation with much cleaner heap usage 
+	// BH 2020.01.09 -- 3.2.7-v2 introduces @j2sAlias as a way of adding a custom method name, as in exports. 
 	// BH 2020.01.08 -- 3.2.7-v1 sets generic references to their erasures; adds implicit synthetic default methods to interfaces 
 	// BH 2020.01.05 -- 3.2.6-v2 fixes synthetic methods missing for generics
 	// BH 2020.01.03 -- 3.2.6-v2 fixes for missing synthetic methods  
