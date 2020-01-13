@@ -199,7 +199,7 @@ class JSJAXBField implements Cloneable {
 		}
 	}
 
-	private static String stripJavaLang(String name) {
+	static String stripJavaLang(String name) {
 		return (name.startsWith("java.lang.")?  name.substring(10) : name);
 	}
 
@@ -236,6 +236,11 @@ class JSJAXBField implements Cloneable {
 		xmlAttributeData = val;
 	}
 
+	/**
+	 * Unmarshaller from DOM node
+	 * 
+	 * @param attr
+	 */
 	void setAttributes(Attributes attr) {
 //		xmlAttributes = attr;
 		xmlType = attr.getValue("xsi:type");
@@ -384,8 +389,10 @@ class JSJAXBField implements Cloneable {
 				JSJAXBField f = new JSJAXBField(this);
 				listFields.add(f);
 				f.processFieldAnnotation(jaxbClass, tag, data, attr);
-				f.javaClassName = stripJavaLang(f.javaClassName).replace(".class", "");
+				f.javaClassName = f.javaClassName.replace(".class", "");
 				f.javaName = javaName + "::" + f.javaClassName;
+				// some issue here?
+				f.javaClassName = stripJavaLang(f.javaClassName);
 				f.finalizeNames(index, jaxbClass);
 				break;
 			}
@@ -394,10 +401,12 @@ class JSJAXBField implements Cloneable {
 			defaultValue = attr.get("@XmlElement:defaultValue");
 			String type = attr.get("@XmlElement:type");
 			if (type != null)
-				javaClassName = type;
+				javaClassName = type.replace(".class", "");
 			break;
 		case "@XmlSchemaType":
 			xmlSchemaType = attr.get("@XmlSchemaType:name");
+			if (xmlSchemaType.startsWith("xs:"))
+				xmlSchemaType = xmlSchemaType.substring(3);
 			if (xmlSchemaType.equals("hexBinary")) {
 				xmlSchemaType = null;
 				typeAdapter = "javax.xml.bind.annotation.adapters.HexBinaryAdapter";
@@ -413,9 +422,10 @@ class JSJAXBField implements Cloneable {
 			// @XmlSchemaType(name="base64Binary")
 			// public byte[] base64Bytes;
 			break;
-		case "@XmlJavaTypeAdapter":
+			case "@adapters.XmlJavaTypeAdapter":
+			case "@XmlJavaTypeAdapter":
 			// typically CollapsedStringAdapter.class
-			typeAdapter = attr.get("@XmlJavaTypeAdapter:name");
+			typeAdapter = attr.get(tag + ":name");
 			if (typeAdapter == null)
 				typeAdapter = data;
 			typeAdapter = getQuotedClass(data);
@@ -450,7 +460,7 @@ class JSJAXBField implements Cloneable {
 			qualifiedWrapName = getName(tag, attr);
 			break;
 		default:
-			System.out.println("JSJAXBField Unprocessed field annotation: " + text);
+			System.out.println("JSJAXBField Unprocessed field annotation: " +tag + " "+ text);
 			ignore = true;
 			break;
 		}
@@ -774,6 +784,29 @@ class JSJAXBField implements Cloneable {
 
 	public static boolean isknownSchemaType(String xmlSchemaType) {
 		return PT.isOneOf(xmlSchemaType, XML_SCHEMA_TYPES);
+	}
+
+	/**
+	 * Arrays may need forcing.
+	 * 
+	 * @param type
+	 * @return
+	 */
+	public static String boxPrimitive(String type) {
+		switch (type) {
+		case "int":
+			return "Integer";
+		case "boolean":
+		case "float":
+		case "double":
+		case "integer":
+		case "long":
+		case "short":
+		case "byte":
+			return type.substring(0,1).toUpperCase() + type.substring(1);
+		default:
+			return type;
+		}
 	}
 
 }

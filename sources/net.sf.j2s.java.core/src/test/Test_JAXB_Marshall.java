@@ -21,7 +21,7 @@ public class Test_JAXB_Marshall extends Test_ {
 	        pnp.setType("work");
 	        pnp.number = "555-1234";	 
 	        marshal(pnp, true);
-	        System.out.println("Test_JAXB2 OK");
+	        System.out.println("Test_JAXB_Marshall OK");
  
     }
 

@@ -155,7 +155,7 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 		}
 	}
 
-private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
+   private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 		return jaxbClass.getFieldFromJavaNameForMarshaller(javaName);
 	}
 

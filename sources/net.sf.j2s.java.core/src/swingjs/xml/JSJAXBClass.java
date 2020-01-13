@@ -141,7 +141,8 @@ class JSJAXBClass implements Cloneable {
 	static boolean checkC$__ANN__(JSJAXBClass jsjaxbClass, Class<?> javaClass, boolean haveJavaObject,
 			boolean isXmlIDREF) {
 		getPackageInfo(javaClass);
-		jsjaxbClass.accessorType = packageAccessorType;
+		if (jsjaxbClass != null)
+			jsjaxbClass.accessorType = packageAccessorType;
 		boolean isTop = true;
 		while (javaClass != null) {
 
@@ -313,10 +314,10 @@ class JSJAXBClass implements Cloneable {
 			@SuppressWarnings("unused")
 			Class<?> cl = value.getClass();
 			return (/**
-					 * @j2sNative value.$clazz$ 
-					 * && value.$clazz$.$getAnn$ 
-					 * && cl.$clazz$ 
-					 * && !!cl.$clazz$.$getAnn$ ||
+					 * @j2sNative (value.$clazz$ ? 
+					 * !!value.$clazz$.$getAnn$ 
+					 * : cl.$clazz$ ?
+					 *            !!cl.$clazz$.$getAnn$: 0) ||
 					 */
 			false);
 		} catch (Throwable t) {

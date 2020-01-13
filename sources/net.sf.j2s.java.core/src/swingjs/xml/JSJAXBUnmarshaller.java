@@ -226,7 +226,6 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 					&& (field.boundListNodes != null || field.listValues != null) 
 					&& field.fieldType != JSJAXBField.MAP) {
 				// unwrapped set - array or list or map?
-//				System.out.println("Filling List " + field.javaName);
 				String type = (field.isArray ? field.javaClassName.replace("[]", "") : field.listClassName);
 				boolean holdsObject = (field.holdsObjects != JSJAXBField.NO_OBJECT);
 				field.setValue(fillArrayData(field, null, null, (holdsObject ? null : type)), this.javaObject);
@@ -240,7 +239,6 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 			JSJAXBField field = jaxbClass.fields.get(j);
 			if (field.fieldType != JSJAXBField.MAP)
 				continue;
-//			System.out.println("Filling Map " + field.javaName);
 			List<Object> nodes = field.boundListNodes;
 			Map<Object, Object> map = (Map<Object, Object>) field.getObject(javaObject);
 			if (map == null) {
@@ -261,9 +259,8 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 					valueType = className;
 				JSJAXBField valueFieldToUnmarshal = (className == null ? null : field);
 				for (int i = 1, n = nodes.size(); i < n;) {
-					Object key = getNodeObject(keyFieldToUnmarshal, (DOMNode) nodes.get(i++), keyType, null);
-					Object value = getNodeObject(valueFieldToUnmarshal, (DOMNode) nodes.get(i++), valueType, null);
-//					System.out.println("map.put " + key + " = " + value);
+					Object key = getNodeObject(keyFieldToUnmarshal, (DOMNode) nodes.get(i++), keyType, null, true);
+					Object value = getNodeObject(valueFieldToUnmarshal, (DOMNode) nodes.get(i++), valueType, null, true);
 					map.put(key, value);
 				}
 			}
@@ -308,14 +305,15 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		// TODO: what if arrayType is Object?
 		String className = needsUnmarshalling(field, arrayType);
 		JSJAXBField fieldToUnmarshal = (className == null ? null : field);
+		boolean asObject = (arrayType == null);
 		if (className != null)
 			arrayType = className;
 		for (int i = 0; i < n; i++)
-			a[i] = (field.listValues != null ? field.listValues.get(i) : getNodeObject(fieldToUnmarshal, (node == null ? (DOMNode) field.boundListNodes.get(i) : node), arrayType, data[i]));
+			a[i] = (field.listValues != null ? field.listValues.get(i) : getNodeObject(fieldToUnmarshal, (node == null ? (DOMNode) field.boundListNodes.get(i) : node), arrayType, data[i], asObject));
 		return a;
 	}
 
-	private Object getNodeObject(JSJAXBField fieldToUnmarshal, DOMNode node, String type, Object data) {
+	private Object getNodeObject(JSJAXBField fieldToUnmarshal, DOMNode node, String type, Object data, boolean asObject) {
 		if (fieldToUnmarshal != null) {
 			return unmarshalField(fieldToUnmarshal, node, type);
 		}
@@ -327,28 +325,27 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 			type = JSSAXParser.getAttribute(node, "xsi:type");
 			if (type == null)
 				return null;
-			if (type.indexOf(":") >= 0 && !type.startsWith("xs:")) {
-				// this is a SeeAlso entry
-				QName qname = getQnameForAttribute(null, null, type);
-				JSJAXBField field = getFieldFromQName(qname);
-				return unmarshalField(field, node, null);
+			if (type.indexOf(":") >= 0) {
+				if (!type.startsWith("xs:")) {
+					// this is a SeeAlso entry
+					QName qname = getQnameForAttribute(null, null, type);
+					JSJAXBField field = getFieldFromQName(qname);
+					return unmarshalField(field, node, null);
+				}
+			} else if (asObject) {
+				type = JSJAXBField.boxPrimitive(type);
 			}
 		}
 		return convertFromType(null, data, type);
 	}
 
 	private void start(DOMNode node, QName qName, Attributes atts) {
-		//System.out.println(">>JSJAXBUnmarshaller start:" + qName);
 		String text = JSSAXParser.getSimpleInnerText(node);
 		if (doc == null) {
 			doc = node;
 			setDocAttributes(qName, text, atts);
 			return;
 		}
-//		/**
-//		 * @j2sNative
-//		System.out.println("start:" +node.outerHTML);
-//		 */
 		JSJAXBField field = getFieldFromQName(qName);
 		if (field != null) {
 			bindNode(node, field, atts);
@@ -465,7 +462,6 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 				String cl = seeAlso.get(i);
 				try {
 					addSeeAlso(Class.forName(cl));
-					//System.out.println("JSJAXBClass seeAlso: " + cl);
 				} catch (ClassNotFoundException e) {
 					System.out.println("JSJAXBClass seeAlso[" + i + "] not found: " + cl);
 				}
@@ -498,8 +494,6 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		String qn = q.getNamespaceURI() + ":" + q.getLocalPart();
 		map.put(qn, field);
 		map.put("/lc/" + qn.toLowerCase(), field);
-		// System.out.println("JSJAXBClass#binding " + namespace + ":" +
-		// q.getLocalPart() + "->" + field.javaName);
 	}
 
 	JSJAXBField getFieldFromQName(QName qName) {
@@ -570,7 +564,12 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 			return;
 		}
 
-		String dataType = (field.xmlType == null ? field.javaClassName : field.xmlType);
+		String dataType;
+		if ("java.lang.Object".equals(field.javaClassName) && field.xmlType != null) {
+			dataType = JSJAXBField.boxPrimitive(field.xmlType);			
+		} else {
+			dataType = field.javaClassName;
+		}
 		field.setValue(convertFromType(field, data, dataType), javaObject);
 	}
 
@@ -633,8 +632,9 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 								null);
 					default:
 						if (haventUnmarshalled.indexOf(field.xmlSchemaType) < 0) {
-							haventUnmarshalled  += ";" + field.xmlSchemaType;
-							System.out.println("JSJAXBUnmarhsaller using target type " + type + " for " + field.xmlSchemaType);
+							haventUnmarshalled += ";" + field.xmlSchemaType;
+							System.out.println(
+									"JSJAXBUnmarhsaller using target type " + type + " for " + field.xmlSchemaType);
 						}
 						// fall through //
 					case "xsd:ID":
@@ -647,31 +647,35 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 				String lctype = type.substring(3);
 				// must be an OBJECT for a List, Map, or Object field
 				type = type.substring(3, 4).toUpperCase() + lctype.substring(1);
-				switch (type) {
-				case "Decimal":
-					type = "java.math.BigDecimal";
-					break;
-				case "Unsignedlong": 
-				case "Integer":
-					type = "java.math.BigInteger";
-					break;
-				case "Int":
-				case "Unsignedshort":
-					type = "Integer";
-					break;
-				case "Unsignedbyte":
-					type = "Short";
-					break;
-				case "Unsignedint":
-					type = "Long";
-					break;
-				default:
-					if (isPrimitive(lctype)) {
-						/**
-						 * return newVal = eval(type + ".valueOf$S(" + objVal + ")");
-						 */
+				if (field == null || field.javaClassName == null || field.javaClassName.equals("java.lang.Object")) {
+					switch (type) {
+					case "Decimal":
+						type = "java.math.BigDecimal";
+						break;
+					case "Unsignedlong":
+					case "Integer":
+						type = "java.math.BigInteger";
+						break;
+					case "Int":
+					case "Unsignedshort":
+						type = "Integer";
+						break;
+					case "Unsignedbyte":
+						type = "Short";
+						break;
+					case "Unsignedint":
+						type = "Long";
+						break;
+					default:
+						if (isPrimitive(lctype)) {
+							/**
+							 * return newVal = eval(type + ".valueOf$S(" + objVal + ")");
+							 */
+						}
+						break;
 					}
-					break;
+				} else {
+					type = field.javaClassName;
 				}
 			}
 
@@ -720,7 +724,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 				return newVal = DatatypeConverter.parseQName(val, null);
 			case "unsignedlong":
 				type = "java.math.BigInteger";
-				break;				
+				break;
 			}
 			Class<?> cl = null;
 			try {
@@ -738,8 +742,8 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 
 			// all Numbers and Enum
 			/**
-			 * @j2sNative if (cl.$clazz$.valueOf$S) return newVal =
-			 *            cl.$clazz$.valueOf$S(objVal);
+			 * @j2sNative if (cl.$clazz$.valueOf$S) return (objVal == null || objVal == "" ? null : 
+			 *            cl.$clazz$.valueOf$S(objVal));
 			 */
 
 			// BigInteger, BigDecimal
