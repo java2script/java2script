@@ -149,6 +149,10 @@ public class Test_ {
 		Test_J8_Generic2.main(args);
 		Test_J8_Stream.main(args);
 		Test_Java8.main(args);
+		Test_JAXB_Marshall.main(args);
+		Test_JAXB_NONE.main(args);
+		Test_JAXB_Obj.main(args);
+		Test_JAXB_ORDERED.main(args);
 		Test_Map.main(args);
 		Test_Math.main(args);
 		Test_Native.main(args);
