@@ -26,9 +26,7 @@ class JSJAXBClass implements Cloneable {
 	 * This class's accessorType. We need explicit propOrder or XmlAttribute or
 	 * XmlElement.
 	 * 
-	 * This field is not used, because all this is determined during transpilation.
-	 * BUT... Note that the Java2Script transpiler currently does not honor
-	 * package-info.java annotations for this. TODO
+	 * The java2script transpiler will add !XmlPublic(true|false) to the annotation information. 
 	 * 
 	 */
 	int accessorType = TYPE_PUBLIC_MEMBER;
@@ -83,8 +81,7 @@ class JSJAXBClass implements Cloneable {
 	QName declaredTypeName;
 
 	private static String packageNamespace;
-	// TODO: allow for package accessor type. 
-	private static String packageAccessorType;
+	private static int packageAccessorType = TYPE_PUBLIC_MEMBER;
 
 	private final static Map<String, String> marshallerNamespacePrefixes = new Hashtable<String, String>();
 	@SuppressWarnings("rawtypes")
@@ -93,21 +90,32 @@ class JSJAXBClass implements Cloneable {
 	static void clearStatics() {
 		prefixIndex = 1;
 		packageNamespace = null;
-		packageAccessorType = null;
+		packageAccessorType = TYPE_PUBLIC_MEMBER;
 		marshallerNamespacePrefixes.clear();
 		adapterMap.clear();
 	}
 
-	private static void getDefaultNamespaceFromPackageInfo(Class<?> javaClass) {
-		if (packageNamespace != null)
-			return;
-		packageNamespace = "";
-		InputStream is = javaClass.getResourceAsStream("_$.js");
-		if (is != null) {
-			String data = Rdr.streamToUTF8String(new BufferedInputStream(is));
-			data = PT.getQuotedAttribute(data, "namespace");
-			if (data != null)
-				packageNamespace = data;
+	static int parseAccessorType(String data) {
+		return (data.indexOf("XmlAccessType.FIELD") >= 0 ? TYPE_FIELD
+				: data.indexOf("XmlAccessType.PUBLIC_MEMBER") >= 0 ? TYPE_PUBLIC_MEMBER
+						: data.indexOf("XmlAccessType.PROPERTY") >= 0 ? TYPE_PROPERTY : TYPE_NONE);
+	}
+
+	private static void getPackageInfo(Class<?> javaClass) {
+		if (packageNamespace == null) {
+			// just keeping this simple; could really read the _$ class and do this
+			// properly.
+			packageNamespace = "";
+			packageAccessorType = TYPE_PUBLIC_MEMBER;
+			// Keeping this simple for now.
+			InputStream is = javaClass.getResourceAsStream("_$.js");
+			if (is != null) {
+				String data = Rdr.streamToUTF8String(new BufferedInputStream(is));
+				packageAccessorType = parseAccessorType(data);
+				data = PT.getQuotedAttribute(data, "namespace");
+				if (data != null)
+					packageNamespace = data;
+			}
 		}
 	}
 
@@ -132,7 +140,9 @@ class JSJAXBClass implements Cloneable {
 	@SuppressWarnings("unused")
 	static boolean checkC$__ANN__(JSJAXBClass jsjaxbClass, Class<?> javaClass, boolean haveJavaObject,
 			boolean isXmlIDREF) {
-		getDefaultNamespaceFromPackageInfo(javaClass);
+		getPackageInfo(javaClass);
+		if (jsjaxbClass != null)
+			jsjaxbClass.accessorType = packageAccessorType;
 		boolean isTop = true;
 		while (javaClass != null) {
 
@@ -184,12 +194,31 @@ class JSJAXBClass implements Cloneable {
 			else
 				lastClassName = (String) adata[0][1];
 			JSJAXBField field = new JSJAXBField(this, adata, clazz, fields.size(), propOrder);
-			if (i == 0 && !isSuperclass || field.javaName != null)
+			if (field.ignore == true) {
+				removeField(field.javaName);
+			} else if (i == 0 && !isSuperclass || field.javaName != null) {
 				addField(field);
+			}
 		}
 //		if (isMarshaller)
 //			processPropOrder(javaObject);
 		return this;
+	}
+
+	/**
+	 * !XMLpublic? 
+	 * 
+	 * @param javaName
+	 */
+	private void removeField(String javaName) {
+		for (int i = fields.size(); --i >= 0;) {
+			if (javaName.equals(fields.get(i).javaName)) {
+				fields.remove(i);
+				System.out.println("jsjaxbclass (ignored)");
+				marshallerFieldMap.remove(javaName);
+				break;
+			}
+		}
 	}
 
 	public void addSeeAlso(String... javaClassName) {
@@ -205,8 +234,11 @@ class JSJAXBClass implements Cloneable {
 				addField(field.listFields.get(i));
 		}
 		fields.add(field);
-		if (isMarshaller && field.javaName != null)
+		if (isMarshaller && field.javaName != null) {
+			System.out.println("jsjaxbclass adding " 
+					+ (field.methodName == null ? "field " + field.javaName : field.methodName + "()"));
 			marshallerFieldMap.put(field.javaName, field);
+		}
 	}
 
 	JSJAXBField getFieldFromJavaNameForMarshaller(String javaName) {
@@ -282,10 +314,10 @@ class JSJAXBClass implements Cloneable {
 			@SuppressWarnings("unused")
 			Class<?> cl = value.getClass();
 			return (/**
-					 * @j2sNative value.$clazz$ 
-					 * && value.$clazz$.$getAnn$ 
-					 * && cl.$clazz$ 
-					 * && !!cl.$clazz$.$getAnn$ ||
+					 * @j2sNative (value.$clazz$ ? 
+					 * !!value.$clazz$.$getAnn$ 
+					 * : cl.$clazz$ ?
+					 *            !!cl.$clazz$.$getAnn$: 0) ||
 					 */
 			false);
 		} catch (Throwable t) {

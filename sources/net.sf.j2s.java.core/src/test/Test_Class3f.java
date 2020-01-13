@@ -1,11 +1,5 @@
 package test;
 
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.Hashtable;
-
 class Test_Class3f extends Test_ implements Test_Class3fint1 {
 
 //	Test_Class3f static init 

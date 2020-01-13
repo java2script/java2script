@@ -486,7 +486,6 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 			@Override
 			public void menuSelected(MenuEvent e) {
 				JMenu m = (JMenu) e.getSource();
-				System.out.println("JalviewJSText remove/add failure!");
 				if (haveCb4m) {
 					m.remove(cb4m);
 				} else {

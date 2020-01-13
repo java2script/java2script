@@ -47,6 +47,12 @@ public class Test_Enum extends Test_{
 	}
 
 	public static void main(String[] args) {
+		
+		
+		 for (Day day: Day.values()) {
+			 System.out.println(day.ordinal() + " " + day.name());			 
+		 }
+		 
 		Day[] a = new Day[0];
  		Day[] dd = Day.values();
 		for (int i = 0; i < dd.length; i++)

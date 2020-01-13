@@ -203,7 +203,7 @@ public class Root_FIELD extends ROOT_super {
 //        <item xsi:nil="true"/>
 //    </lst>
 
-	String Ang;
+	public String Ang;
 	// <Ang>[3 bytes here]</Ang>
 	public String getPropertyAng() {
 		return Ang;

@@ -217,7 +217,7 @@ Clazz.assert = function(clazz, obj, tf, msg) {
   try {
     ok = tf.apply(obj)
     if (!ok)
-      msg = msg.apply(obj);  
+      msg && (msg = msg.apply(obj));  
   } catch (e) {
     ok = false;
   }
@@ -440,7 +440,6 @@ Clazz.load = function(cName, from$clinit$) {
 
 //create  and $init0$
 var initClass0 = function(c) {
-    c.$synth$ && c.$synth$(); // add synthetic bridges for generics
 	var fields = c.$fields$;
 	var objects = fields && fields[0];
 	createDefaults(c, objects, false);
@@ -534,6 +533,9 @@ var getFields = function(c, data, andDefaults) {
 	  	  		continue;
 	  		case 'C':
 	  			defval = '\0';
+	  			break;
+	  		case 'Z':
+	  			defval = false;
 	  			break;
 	  		default:
 	  			defval = 0;
@@ -1484,7 +1486,6 @@ var excludeSuper = function(o) {
       || o == "$Class$"
       || o == "$getMembers$"
       || o == "$getAnn$"
-      || o == "$synth$"
       || o == "prototype" 
       || o == "__PARAMCODE" 
       || o == "__CLASS_NAME__" 
@@ -3245,8 +3246,12 @@ ps.println = ps.println$ = ps.println$O = ps.println$Z = ps.println$I = ps.print
 
 ps.println$F = ps.println$D = function(f) {var s = "" + f; ps.println(s.indexOf(".") < 0 && s.indexOf("Inf") < 0 ? s + ".0" : s)};
 
+ps.write$BA = function (buf) {
+	  ps.write$BA$I$I(buf, 0, buf.length);
+	};
+
 ps.write$BA$I$I = function (buf, offset, len) {
-  ps.print(String.instantialize(buf).substring(offset, offset+len));
+  ps.print(String.instantialize(buf, offset, len));
 };
 
 }

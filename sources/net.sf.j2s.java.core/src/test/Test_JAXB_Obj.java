@@ -37,10 +37,11 @@ public class Test_JAXB_Obj extends Test_ {
 			Date d = new Date(1373360175539L);
 			System.out.println(d);
 			
-	        Root_FIELD root = new Root_FIELD();
+	        Root_FIELD root = new Root_FIELD(true);
 			System.out.println("c is " + root.C());
 			System.out.println("getPropertyC is " + root.getPropertyC());
 			System.out.println("DEFVAL is " + root.DEFVAL);
+			System.out.println("Sym is " + root.Ang);
 	        Marshaller marshaller = jc.createMarshaller();
 	        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 	        ByteArrayOutputStream bos = new ByteArrayOutputStream();	        

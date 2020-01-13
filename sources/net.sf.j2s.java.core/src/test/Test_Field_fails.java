@@ -38,6 +38,8 @@ public class Test_Field_fails extends Test_Field1 implements Iterator<String> {
 		System.out.println(f.next());
 		// TypeError: f.next is not a function!
 		
+		System.out.println("Test_Field OK");
+		
 	}
 
 	@Override

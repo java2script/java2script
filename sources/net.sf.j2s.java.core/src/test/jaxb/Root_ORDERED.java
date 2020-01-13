@@ -39,7 +39,7 @@ import javax.xml.namespace.QName;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(propOrder = {
 //		"qname",
-		"position",
+		"f5", "position",
 		"iii",
 		"IFArray", "IFList",
 		"hm","hm2",
@@ -59,7 +59,7 @@ import javax.xml.namespace.QName;
 	    "Ilist",
 	    "list",
 	    "bi","bd",
-	    "f","f2","f3","f4","f6","Ilist2","f5",
+	    "f","f2","f3","f4","f6","Ilist2",
 	    "extraElem", "date"
 	})
 public class Root_ORDERED {
@@ -168,7 +168,7 @@ public class Root_ORDERED {
 		assert(position.toString().equals("12345678910"));
 		assert(extraAttr.equals("more&amp;"));
 		assert(extraElem.equals("more&amp;"));
-		assert(bd.equals(new BigDecimal("123.456")));	
+		assert(bd.equals(new BigDecimal("123.456")));
 		assert(f2 == 1.2f);
 		assert(f3[0] == 1.2f);
 		assert(f4 == 1.3f);
