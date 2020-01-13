@@ -217,7 +217,7 @@ Clazz.assert = function(clazz, obj, tf, msg) {
   try {
     ok = tf.apply(obj)
     if (!ok)
-      msg = msg.apply(obj);  
+      msg && (msg = msg.apply(obj));  
   } catch (e) {
     ok = false;
   }
