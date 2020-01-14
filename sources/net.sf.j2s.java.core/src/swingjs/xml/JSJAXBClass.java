@@ -235,8 +235,8 @@ class JSJAXBClass implements Cloneable {
 		}
 		fields.add(field);
 		if (isMarshaller && field.javaName != null) {
-			System.out.println("jsjaxbclass adding " 
-					+ (field.methodName == null ? "field " + field.javaName : field.methodName + "()"));
+//			System.out.println("jsjaxbclass adding " 
+//					+ (field.methodName == null ? "field " + field.javaName : field.methodName + "()"));
 			marshallerFieldMap.put(field.javaName, field);
 		}
 	}

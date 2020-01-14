@@ -291,6 +291,11 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 	}
 
 	private void writeField(JSJAXBField field, Object value, boolean addXsiType) throws JAXBException {
+//		System.out.println(field.qualifiedName 
+//				+ " xs=" + addXsiType
+//				+ " isattr=" + field.isAttribute 
+//				+ " isxval=" + field.isXmlValue 
+//				+ " nillable=" + field.isNillable);
 		if (field.isAttribute) {
 			writeAttribute(field, value);
 		} else if (field.isXmlValue) {
@@ -330,15 +335,15 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 	private String getEntryType(QName qname, Object value) throws JAXBException {
 		String className = value.getClass().getName();
 		switch (className) {
-		case "Integer":
+		case "java.lang.Integer":
 			return "xs:int";
-		case "Boolean":
-		case "Byte":
-		case "Short":
-		case "Long":
-		case "Float":
-		case "Double":
-			return "xs:" + className.toLowerCase();
+		case "java.lang.Boolean":
+		case "java.lang.Byte":
+		case "java.lang.Short":
+		case "java.lang.Long":
+		case "java.lang.Float":
+		case "java.lang.Double":
+			return "xs:" + className.substring(10).toLowerCase();
 		case "java.lang.String":
 			return "xs:string";
 		case "java.math.BigInteger":
@@ -572,18 +577,19 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 		output(">\n");
 		QName qn = field.qualifiedName;
 		Object eval = field.mapEntryValue;
-		boolean addXsiType = ((field.holdsObjects & JSJAXBField.MAP_KEY_OBJECT) != 0);
+		boolean addXsiTypeKey = ((field.holdsObjects & JSJAXBField.MAP_KEY_OBJECT) != 0);
+		boolean addXsiTypeVal = ((field.holdsObjects & JSJAXBField.MAP_VALUE_OBJECT) != 0);
 		for (Entry<?, ?> e : map.entrySet()) {
 			Object key = e.getKey();
 			Object value = e.getValue();
 			output("<entry>");
 			field.qualifiedName = qnEntryKey;
 			field.mapEntryValue = key;
-			addFieldListable(jaxbClass, field, key, addXsiType);
+			addFieldListable(jaxbClass, field, key, addXsiTypeKey);
 			if (value != null || isNillable) {
 				field.mapEntryValue = value;
 				field.qualifiedName = qnEntryValue;
-				addFieldListable(jaxbClass, field, value, addXsiType);
+				addFieldListable(jaxbClass, field, value, addXsiTypeVal);
 			}
 			output("\n</entry>\n");
 		}
