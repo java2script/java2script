@@ -17,19 +17,16 @@ import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlID;
-import javax.xml.bind.annotation.XmlIDREF;
 import javax.xml.bind.annotation.XmlList;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.XmlValue;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-import javax.xml.namespace.QName;
 
 
 // adapted source: http://blog.bdoughan.com/2011/06/using-jaxbs-xmlaccessortype-to.html
@@ -180,6 +177,7 @@ public class Root_ORDERED {
 		assert(b.equals("b"));
 		assert(c.equals("c"));
 		assert(hm.containsKey("null") && hm.get("null") == null);
+		assert(hm.containsKey("map") && hm.get("map").getClass().getName().equals("test.jaxb.Root_ORDERED$SomewhatComplex"));
 
 		assert(getCreationDate().toString().indexOf("T") < 0 && getCreationDate().toString().indexOf("0") > 0);
 		assert(((test.jaxb.Obj) f5[1]).obj1.equals("jaxb#Obj1"));
@@ -191,9 +189,9 @@ public class Root_ORDERED {
 		assert(IFArray[0].equals(Integer.valueOf(2)) && IFArray[1].equals(Float.valueOf(2.1f)));
 		assert(IFList.get(0).equals(Integer.valueOf(2)) && IFList.get(1).equals(Float.valueOf(2.1f)));
 
-		
 		System.out.println(date);
 		assert(date.equals(new Date("10/20/2018")));
+		System.out.println("validation for " + getClass().getName() + " OK");
 	}
 
 //	private QName qname;
@@ -248,8 +246,7 @@ public class Root_ORDERED {
 	
 
 		public SomewhatComplex() {
-			System.out.println("new somewhatcomplex");
-			
+			System.out.println("new somewhatcomplex");			
 		}
 		
 		public SomewhatComplex(String id) {
@@ -273,6 +270,10 @@ public class Root_ORDERED {
 		@XmlAttribute
 		public byte[] bytes;
 
+		@Override
+		public String toString() {
+			return "SomewhatComplex:" + id;
+		}
 	}
 
 	private final static String x = "date";

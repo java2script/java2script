@@ -2,24 +2,22 @@ package test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.UnsupportedEncodingException;
-import java.util.GregorianCalendar;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.XmlRegistry;
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import test.jaxb.Root_ORDERED;
-import test.jaxb.Root_ORDERED.SomewhatComplex;
 
 /**
  * tests:
@@ -45,39 +43,59 @@ import test.jaxb.Root_ORDERED.SomewhatComplex;
 public class Test_JAXB_ORDERED extends Test_ {
 
 	public static void main(String[] args) {
-		JAXBContext jc;
+		// test read/write of own type
+		readWrite(null, null);
 		try {
-			jc = JAXBContext.newInstance("test.jaxb");
-			Root_ORDERED root = new Root_ORDERED("test");
-			Marshaller marshaller = jc.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			marshaller.marshal(root, bos);
-			String s = null;
-			try {
-				s = new String(bos.toByteArray(), "UTF-8");
-				System.out.println(s);
-				Unmarshaller unmarshaller = jc.createUnmarshaller();
-				ByteArrayInputStream is = new ByteArrayInputStream(s.getBytes("UTF-8"));
-				XMLStreamReader streamReader;
-				Root_ORDERED r = null;
-
-				try {
-					streamReader = XMLInputFactory.newInstance().createXMLStreamReader(is);
-					r = (Root_ORDERED) unmarshaller.unmarshal(streamReader, Root_ORDERED.class).getValue();
-				} catch (XMLStreamException | FactoryConfigurationError e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-				r.validate();
-				
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			}
-
+			boolean isJS = /**@j2sNative true || */false;
+			// test read/write of xml written by Java if JS; JS if Java
+			String prefix = (isJS ? "swingjs/j2s/" : "src/");
+			String fjs = prefix +"test/jaxb_ordered_from_JS.xml";
+			String fjava = prefix + "test/jaxb_ordered_from_Java.xml";
+			String outfile = isJS ? fjs : fjava;
+			String infile = isJS? fjava : fjs;
+			FileOutputStream fos = new FileOutputStream(outfile);
+			readWrite(null, fos);
+			fos.close();
+			FileInputStream fis = new FileInputStream(infile);
+			readWrite(fis, null);
+			System.out.println("File written to " + outfile);
+			System.out.println("File read from " + infile);
+			fis.close();
 			System.out.println("Test_JAXB_ORDERED OK");
-		} catch (JAXBException e) {
+		} catch (IOException e) {
+			e.printStackTrace();
+			assert(false);
+		}		
+	}
+
+	/**
+	 * read from a file OR write to a file
+	 * 
+	 * @param in
+	 * @param out ignored if in is not null
+	 */
+	private static void readWrite(InputStream in, OutputStream out) {
+		try {
+			JAXBContext jc = JAXBContext.newInstance("test.jaxb");
+			if (in == null) {
+				Root_ORDERED root = new Root_ORDERED("test");
+				Marshaller marshaller = jc.createMarshaller();
+				marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				marshaller.marshal(root, bos);
+				byte[] bytes = bos.toByteArray();
+				if (out != null)
+					out.write(bos.toByteArray());
+				String s = new String(bytes, "UTF-8");
+				System.out.println(s);
+				in = new ByteArrayInputStream(s.getBytes("UTF-8"));
+			}
+			XMLStreamReader streamReader;
+			streamReader = XMLInputFactory.newInstance().createXMLStreamReader(in);
+			Unmarshaller unmarshaller = jc.createUnmarshaller();
+			Root_ORDERED r = (Root_ORDERED) unmarshaller.unmarshal(streamReader, Root_ORDERED.class).getValue();
+			r.validate();
+		} catch (JAXBException | XMLStreamException | FactoryConfigurationError | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
