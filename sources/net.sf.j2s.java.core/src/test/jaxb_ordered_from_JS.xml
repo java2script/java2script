@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <ns2:Root_ORDERED xmlns:ns2="root.ordered" xmlns:ns3="package-namespace" xmlns:ns4="testing" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xs="http://www.w3.org/2001/XMLSchema" date="2018-10-20T05:00:00.000Z" byteshex="6465" bytes64="ZGU=" moreAttr="more&amp;amp;" ok="ok" id="test" type="cust">
+<ns3:filter xmlns:ns5="www.jalview.org/colours">byLabel</ns3:filter>
 <ns3:f5 xsi:type="xs:float">1.25</ns3:f5>
-<ns3:f5 xmlns:ns5="stolaf.edu" xsi:type="ns5:objclass" xmlns:ns6="www.jalview.org" id="jaxb2.obj">
-<ns6:Obj1>jaxb#Obj1</ns6:Obj1></ns3:f5>
+<ns3:f5 xmlns:ns6="stolaf.edu" xsi:type="ns6:objclass" xmlns:ns7="www.jalview.org" id="jaxb2.obj">
+<ns7:Obj1>jaxb#Obj1</ns7:Obj1></ns3:f5>
 <ns3:position>12345678910</ns3:position>
 <ns4:what xsi:type="xs:int">3</ns4:what>
 <ns3:int>2</ns3:int>
@@ -19,9 +20,9 @@
 </entry>
 <entry>
 <key>map</key>
-<value xmlns:ns7="st.Olaf" xsi:type="ns7:MoreComplex" xmlns:ns8="www.jalview.org2" ns8:cb="c&quot;&amp;lt;&amp;gt;b&amp;amp; &#8491;" bytes="ZGU=">
-<ns7:id>id#map</ns7:id>
-<ns7:ca>c"&amp;lt;&amp;gt;b&amp;amp; &#8491;</ns7:ca></value>
+<value xmlns:ns8="st.Olaf" xsi:type="ns8:MoreComplex" xmlns:ns9="www.jalview.org2" ns9:cb="c&quot;&amp;lt;&amp;gt;b&amp;amp; &#8491;" bytes="ZGU=">
+<ns8:id>id#map</ns8:id>
+<ns8:ca>c"&amp;lt;&amp;gt;b&amp;amp; &#8491;</ns8:ca></value>
 </entry>
 </ns3:hm1>
 <ns3:hm2>
@@ -37,15 +38,15 @@
 <value>V3</value>
 </entry>
 </ns3:hm2>
-<ns3:cx xmlns:ns7="st.Olaf" xmlns:ns8="www.jalview.org2" ns8:cb="c&quot;&amp;lt;&amp;gt;b&amp;amp; &#8491;" bytes="Y2U=">
-<ns7:id>id##??</ns7:id>
-<ns7:ca>c"&amp;lt;&amp;gt;b&amp;amp; &#8491;</ns7:ca></ns3:cx>
-<ns3:list0 xmlns:ns7="st.Olaf" xsi:type="ns7:MoreComplex" xmlns:ns8="www.jalview.org2" ns8:cb="c&quot;&amp;lt;&amp;gt;b&amp;amp; &#8491;" bytes="ZGU=">
-<ns7:id>id#List</ns7:id>
-<ns7:ca>c"&amp;lt;&amp;gt;b&amp;amp; &#8491;</ns7:ca></ns3:list0>
+<ns3:cx xmlns:ns8="st.Olaf" xmlns:ns9="www.jalview.org2" ns9:cb="c&quot;&amp;lt;&amp;gt;b&amp;amp; &#8491;" bytes="Y2U=">
+<ns8:id>id##??</ns8:id>
+<ns8:ca>c"&amp;lt;&amp;gt;b&amp;amp; &#8491;</ns8:ca></ns3:cx>
+<ns3:list0 xmlns:ns8="st.Olaf" xsi:type="ns8:MoreComplex" xmlns:ns9="www.jalview.org2" ns9:cb="c&quot;&amp;lt;&amp;gt;b&amp;amp; &#8491;" bytes="ZGU=">
+<ns8:id>id#List</ns8:id>
+<ns8:ca>c"&amp;lt;&amp;gt;b&amp;amp; &#8491;</ns8:ca></ns3:list0>
 <ns3:list0 xsi:type="xs:string">list0[1]</ns3:list0>
 <ns3:list0 xsi:type="xs:string">list0[2]</ns3:list0>
-<creationDate>2020-01-13-06:00</creationDate>
+<creationDate>2020-01-14-06:00</creationDate>
 <ns3:c>c</ns3:c>
 <ns3:b>b</ns3:b>
 <ns3:a>a</ns3:a>
@@ -57,9 +58,9 @@
 <ns3:list1>
 <ns3:list xsi:type="xs:string">TESTING</ns3:list>
 <ns3:list xsi:type="xs:string">null</ns3:list>
-<ns3:list xmlns:ns7="st.Olaf" xsi:type="ns7:MoreComplex" xmlns:ns8="www.jalview.org2" ns8:cb="c&quot;&amp;lt;&amp;gt;b&amp;amp; &#8491;" bytes="ZGU=">
-<ns7:id>id#idList#1</ns7:id>
-<ns7:ca>c"&amp;lt;&amp;gt;b&amp;amp; &#8491;</ns7:ca></ns3:list>
+<ns3:list xmlns:ns8="st.Olaf" xsi:type="ns8:MoreComplex" xmlns:ns9="www.jalview.org2" ns9:cb="c&quot;&amp;lt;&amp;gt;b&amp;amp; &#8491;" bytes="ZGU=">
+<ns8:id>id#idList#1</ns8:id>
+<ns8:ca>c"&amp;lt;&amp;gt;b&amp;amp; &#8491;</ns8:ca></ns3:list>
 <ns3:list xsi:type="xs:boolean">true</ns3:list>
 <ns3:list xsi:type="xs:byte">1</ns3:list>
 <ns3:list xsi:type="xs:short">2</ns3:list>

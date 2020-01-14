@@ -36,6 +36,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(propOrder = {
 //		"qname",
+		"filter",
 		"f5", "position",
 		"iii",
 		"IFArray", "IFList",
@@ -74,6 +75,8 @@ public class Root_ORDERED {
 
 		id = "id#1";
 
+		filter = FilterBy.BY_LABEL;
+		
 		hm.put("testing", "TESTING");
 		hm.put("null", null); 
 		hm.put("map",  new SomewhatComplex("map"));
@@ -162,6 +165,7 @@ public class Root_ORDERED {
 //		assert(qname.getLocalPart().equals("name"));
 //		assert(qname.getNamespaceURI().equals("namespace"));
 		assert(id.equals("test"));
+		assert(filter == FilterBy.BY_LABEL);
 		assert(position.toString().equals("12345678910"));
 		assert(extraAttr.equals("more&amp;"));
 		assert(extraElem.equals("more&amp;"));
@@ -200,6 +204,7 @@ public class Root_ORDERED {
     @XmlSchemaType(name = "xs:unsignedLong") // ignored by JAXB?
     private BigInteger position;
 
+	
 	@XmlElements({
 			@XmlElement(name="int", type = Integer.class),
 			@XmlElement(name="float", type = Float.class)
@@ -278,6 +283,9 @@ public class Root_ORDERED {
 
 	private final static String x = "date";
 	
+	@XmlElement
+	private FilterBy filter;
+
     @XmlElement(namespace="")
     @XmlSchemaType(name=x)
     protected XMLGregorianCalendar creationDate;
