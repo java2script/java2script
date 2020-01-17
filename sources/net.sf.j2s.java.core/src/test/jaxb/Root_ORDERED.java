@@ -76,6 +76,7 @@ public class Root_ORDERED {
 		id = "id#1";
 
 		filter = FilterBy.BY_LABEL;
+		filtera = FilterBy.BY_ATTRIBUTE;
 		
 		hm.put("testing", "TESTING");
 		hm.put("null", null); 
@@ -166,6 +167,7 @@ public class Root_ORDERED {
 //		assert(qname.getNamespaceURI().equals("namespace"));
 		assert(id.equals("test"));
 		assert(filter == FilterBy.BY_LABEL);
+		assert(filtera == FilterBy.BY_ATTRIBUTE);
 		assert(position.toString().equals("12345678910"));
 		assert(extraAttr.equals("more&amp;"));
 		assert(extraElem.equals("more&amp;"));
@@ -285,6 +287,9 @@ public class Root_ORDERED {
 	
 	@XmlElement
 	private FilterBy filter;
+
+	@XmlAttribute
+	private FilterBy filtera;
 
     @XmlElement(namespace="")
     @XmlSchemaType(name=x)

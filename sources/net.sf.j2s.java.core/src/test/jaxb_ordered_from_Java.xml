@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ns8:RootO xmlns:ns2="www.jalview.org" xmlns:ns3="root.field" xmlns:ns4="package-namespace" xmlns:ns5="testing" xmlns:ns6="st.Olaf" xmlns:ns7="www.jalview.org2" xmlns:ns8="root.ordered" type="cust" id="test" bytes64="ZGU=" byteshex="6465" date="2018-10-20T00:00:00-05:00" moreAttr="more&amp;amp;" ok="ok">
+<ns8:RootO xmlns:ns2="www.jalview.org" xmlns:ns3="root.field" xmlns:ns4="package-namespace" xmlns:ns5="testing" xmlns:ns6="st.Olaf" xmlns:ns7="www.jalview.org2" xmlns:ns8="root.ordered" type="cust" id="test" bytes64="ZGU=" byteshex="6465" date="2018-10-20T00:00:00-05:00" filtera="byAttribute" moreAttr="more&amp;amp;" ok="ok">
     <ns4:filter>byLabel</ns4:filter>
     <ns4:f5 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xs="http://www.w3.org/2001/XMLSchema" xsi:type="xs:float">1.25</ns4:f5>
     <ns4:f5 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ns10="stolaf.edu" xsi:type="ns10:objclass" id="jaxb2.obj">
@@ -50,7 +50,7 @@
     </ns4:list0>
     <ns4:list0 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xs="http://www.w3.org/2001/XMLSchema" xsi:type="xs:string">list0[1]</ns4:list0>
     <ns4:list0 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xs="http://www.w3.org/2001/XMLSchema" xsi:type="xs:string">list0[2]</ns4:list0>
-    <creationDate>2020-01-14-06:00</creationDate>
+    <creationDate>2020-01-16-06:00</creationDate>
     <ns4:c>c</ns4:c>
     <ns4:b>b</ns4:b>
     <ns4:a>a</ns4:a>
