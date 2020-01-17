@@ -381,7 +381,8 @@ public class AnnotationParser {
 			return val;
 		}
 
-		static Map<Class<? extends Annotation>, Annotation> parseAnnotations(String name, Class<?> c, boolean isMethod) {
+		static Map<Class<? extends Annotation>, Annotation> parseAnnotations(String name, Class<?> c,
+				boolean isMethod) {
 			Object[][] __ANN_REC__ = getAnnotations(name, c.$clazz$, isMethod);
 			if (__ANN_REC__ == null)
 				return Collections.EMPTY_MAP;
@@ -390,15 +391,17 @@ public class AnnotationParser {
 			Map<Class<? extends Annotation>, Annotation> result = new LinkedHashMap<Class<? extends Annotation>, Annotation>();
 			// note that qnames will be one longer than atData after fixing
 			String[] qnames = getQNames(__ANN_REC__);
-			String[] atData = getAtCodes(__ANN_REC__);
-			for (int i = atData.length; --i >= 0;) {
-				Annotation a = createAnnotation(qnames[i], atData[i]);
-				if (a != null) {
-					Class<? extends Annotation> klass = a.getClass();
-					if (
-					// AnnotationType.getInstance(klass).retention() == RetentionPolicy.RUNTIME &&
-					result.put(klass, a) != null) {
-						throw new AnnotationFormatError("Duplicate annotation for class: " + klass + ": " + a);
+			if (qnames != null) { // @Xml... may have no qname data
+				String[] atData = getAtCodes(__ANN_REC__);
+				for (int i = atData.length; --i >= 0;) {
+					Annotation a = createAnnotation(qnames[i], atData[i]);
+					if (a != null) {
+						Class<? extends Annotation> klass = a.getClass();
+						if (
+						// AnnotationType.getInstance(klass).retention() == RetentionPolicy.RUNTIME &&
+						result.put(klass, a) != null) {
+							throw new AnnotationFormatError("Duplicate annotation for class: " + klass + ": " + a);
+						}
 					}
 				}
 			}

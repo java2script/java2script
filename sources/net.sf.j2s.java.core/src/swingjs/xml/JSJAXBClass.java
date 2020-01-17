@@ -214,7 +214,6 @@ class JSJAXBClass implements Cloneable {
 		for (int i = fields.size(); --i >= 0;) {
 			if (javaName.equals(fields.get(i).javaName)) {
 				fields.remove(i);
-				System.out.println("jsjaxbclass (ignored)");
 				marshallerFieldMap.remove(javaName);
 				break;
 			}
