@@ -2527,7 +2527,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		String retName = (ret.isPrimitive() ? ret.getName() : j2sNonPrimitiveName(ret, true));
 		buffer.append("a.push(['" + name + "','" + retName + (isArray ? "[]" : "") + "',");
 		if (def == null) {
-			if (ret.isPrimitive()) {
+			if (!isArray && ret.isPrimitive()) {
 				switch (ret.getName()) {
 				case "char":
 					buffer.append("'\0'");
@@ -2546,7 +2546,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				//	buffer.append("\"" + mbinding.getAnnotations() + "\"");
 				//}
 			}
-		} else if (ret.isAnnotation()){
+		} else if (!isArray && ret.isAnnotation()){
 			buffer.append("'@" + getFinalJ2SClassName(getUnreplacedJavaClassNameQualified(def.resolveTypeBinding()), FINAL_RAW) + "'");
 		} else {
 			def.accept(this);
