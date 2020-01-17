@@ -14458,8 +14458,16 @@ Clazz.new_ = function(c, args, cl) {
   
   if (c.__CLASS_NAME__ && c.c$) 
     c = c.c$;
-  else if (typeof c == "string")
-    return Clazz.new_(Clazz.load(c));
+  else if (typeof c == "string") {
+	  // Clazz.new_("path.className")
+	  // Clazz.new_("path.className","$I$O...",[3,"test"]);
+	  switch(arguments.length) {
+	  case 1:
+		    return Clazz.new_(Clazz.load(c));
+	  case 3:
+		  return Clazz.new_(Clazz.load(c)["c$" + args], cl)
+	  }
+  }
     
   // an inner class will attach arguments to the arguments returned
   // Integer will be passed as is here, without c.exClazz, or cl

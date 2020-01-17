@@ -135,6 +135,7 @@ import org.eclipse.jdt.core.dom.WildcardType;
 
 // TODO: superclass inheritance for JAXB XmlAccessorType
 
+//BH 2020.01.16 -- 3.2.7-v4 replaces extends java.awt.Component and javax.swing.JComponent 
 //BH 2020.01.12 -- 3.2.7-v3 fixes JAXB annotation marshalling for 3.2.7 
 //BH 2020.01.11 -- 3.2.7-v3 corrects and rewrites synthetic bridge creation with much cleaner heap usage 
 //BH 2020.01.09 -- 3.2.7-v2 introduces @j2sAlias as a way of adding a custom method name, as in exports. 
@@ -2004,7 +2005,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			this$0Name0 = this$0Name;
 			this$0Name = null;
 			finalShortClassName = getFinalJ2SClassName(
-					(isLambda ? getMyJavaClassNameLambda(true) : getUnreplacedJavaClassNameQualified(binding)), FINAL_P);
+					(isLambda ? getMyJavaClassNameLambda(true) : getUnreplacedJavaClassNameQualified(binding)),
+					FINAL_P);
 			if (finalShortClassName.startsWith("P$.")) {
 				// java.lang.x will return x, not P$.x
 				finalShortClassName = finalShortClassName.substring(3);
@@ -2143,14 +2145,24 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		} else {
 			hasDependents = true;
 			String superclassName = getUnreplacedJavaClassNameQualified(superclass);
-			if (superclassName == null || superclassName.length() == 0 || "java.lang.Object".equals(superclassName)) {
+			switch (superclassName == null ? "" : superclassName) {
+			case "":
+			case "java.lang.Object":
 				buffer.append("null");
-			} else {
+				break;				
+			case "java.awt.Component":
+				buffer.append("'java.awt.Label'");
+				break;
+			case "javax.swing.JComponent":
+				buffer.append("'javax.swing.JLabel'");
+				break;
+			default:
 				if (isAnonymous) {
 					buffer.append(getFinalJ2SClassNameQualifier(null, superclass, superclassName, FINAL_ESCAPE));
 				} else {
 					buffer.append(getFinalInnerClassList(superclass, superclassName));
 				}
+				break;
 			}
 		}
 
@@ -2183,7 +2195,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					int pt = buffer.length();
 					while (!b.isTopLevel()) {
 						b = b.getDeclaringClass();
-						buffer.insert(pt, "'" + getFinalJ2SClassName(getUnreplacedJavaClassNameQualified(b), FINAL_RAW) + "',");
+						buffer.insert(pt,
+								"'" + getFinalJ2SClassName(getUnreplacedJavaClassNameQualified(b), FINAL_RAW) + "',");
 					}
 				}
 				buffer.append("'");
@@ -2527,7 +2540,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		String retName = (ret.isPrimitive() ? ret.getName() : j2sNonPrimitiveName(ret, true));
 		buffer.append("a.push(['" + name + "','" + retName + (isArray ? "[]" : "") + "',");
 		if (def == null) {
-			if (ret.isPrimitive()) {
+			if (!isArray && ret.isPrimitive()) {
 				switch (ret.getName()) {
 				case "char":
 					buffer.append("'\0'");
@@ -2546,7 +2559,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				//	buffer.append("\"" + mbinding.getAnnotations() + "\"");
 				//}
 			}
-		} else if (ret.isAnnotation()){
+		} else if (!isArray && ret.isAnnotation()){
 			buffer.append("'@" + getFinalJ2SClassName(getUnreplacedJavaClassNameQualified(def.resolveTypeBinding()), FINAL_RAW) + "'");
 		} else {
 			def.accept(this);
