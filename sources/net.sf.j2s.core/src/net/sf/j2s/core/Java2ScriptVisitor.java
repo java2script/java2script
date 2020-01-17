@@ -2151,11 +2151,13 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				buffer.append("null");
 				break;				
 			case "java.awt.Component":
-				buffer.append("'java.awt.Label'");
-				break;
 			case "javax.swing.JComponent":
-				buffer.append("'javax.swing.JLabel'");
-				break;
+				if (!class_fullName.startsWith("java.") && !class_fullName.startsWith("javax.")) {
+					String s = superclassName.replace("Component", "Label");
+					log(">>class " + class_fullName + " extended " + superclassName + " now extends " + s);
+					superclassName = s;
+				}
+				//$FALL-THROUGH$
 			default:
 				if (isAnonymous) {
 					buffer.append(getFinalJ2SClassNameQualifier(null, superclass, superclassName, FINAL_ESCAPE));
