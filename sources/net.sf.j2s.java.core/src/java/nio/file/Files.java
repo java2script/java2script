@@ -77,6 +77,8 @@ import java.util.function.BiPredicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import swingjs.JSFileSystem.JSPath;
+
 /**
  * This class consists exclusively of static methods that operate on files,
  * directories, or other types of files.
@@ -3125,40 +3127,41 @@ public final class Files {
         return (capacity == nread) ? buf : Arrays.copyOf(buf, nread);
     }
 
-    /**
-     * Reads all the bytes from a file. The method ensures that the file is
-     * closed when all bytes have been read or an I/O error, or other runtime
-     * exception, is thrown.
-     *
-     * <p> Note that this method is intended for simple cases where it is
-     * convenient to read all bytes into a byte array. It is not intended for
-     * reading in large files.
-     *
-     * @param   path
-     *          the path to the file
-     *
-     * @return  a byte array containing the bytes read from the file
-     *
-     * @throws  IOException
-     *          if an I/O error occurs reading from the stream
-     * @throws  OutOfMemoryError
-     *          if an array of the required size cannot be allocated, for
-     *          example the file is larger that {@code 2GB}
-     * @throws  SecurityException
-     *          In the case of the default provider, and a security manager is
-     *          installed, the {@link SecurityManager#checkRead(String) checkRead}
-     *          method is invoked to check read access to the file.
-     */
-    public static byte[] readAllBytes(Path path) throws IOException {
-        try (SeekableByteChannel sbc = Files.newByteChannel(path);
-             InputStream in = Channels.newInputStream(sbc)) {
-            long size = sbc.size();
-            if (size > (long)MAX_BUFFER_SIZE)
-                throw new OutOfMemoryError("Required array size too large");
-
-            return read(in, (int)size);
-        }
-    }
+	/**
+	 * Reads all the bytes from a file. The method ensures that the file is closed
+	 * when all bytes have been read or an I/O error, or other runtime exception, is
+	 * thrown.
+	 *
+	 * <p>
+	 * Note that this method is intended for simple cases where it is convenient to
+	 * read all bytes into a byte array. It is not intended for reading in large
+	 * files.
+	 *
+	 * @param path the path to the file
+	 *
+	 * @return a byte array containing the bytes read from the file
+	 *
+	 * @throws IOException       if an I/O error occurs reading from the stream
+	 * @throws OutOfMemoryError  if an array of the required size cannot be
+	 *                           allocated, for example the file is larger that
+	 *                           {@code 2GB}
+	 * @throws SecurityException In the case of the default provider, and a security
+	 *                           manager is installed, the
+	 *                           {@link SecurityManager#checkRead(String) checkRead}
+	 *                           method is invoked to check read access to the file.
+	 */
+	public static byte[] readAllBytes(Path path) throws IOException {
+		byte[] bytes = ((JSPath) path).秘bytes;
+		if (bytes == null) {
+			try (SeekableByteChannel sbc = Files.newByteChannel(path); InputStream in = Channels.newInputStream(sbc)) {
+				long size = sbc.size();
+				if (size > (long) MAX_BUFFER_SIZE) // 2.1 GB; no reason that could not be higher?
+					throw new OutOfMemoryError("Required array size too large");
+				((JSPath) path).秘bytes = bytes = read(in, (int) size);
+			}
+		}
+		return bytes;
+	}
 
     /**
      * Read all lines from a file. This method ensures that the file is

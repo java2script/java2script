@@ -506,6 +506,12 @@ public final class URI
     private volatile String string;             // The only serializable field
 
 
+    /**
+     * Possibly transmitted from File object
+     */
+	public byte[] 秘bytes;
+
+
 
     // -- Constructors and factories --
 
