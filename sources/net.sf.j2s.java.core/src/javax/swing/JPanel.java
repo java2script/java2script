@@ -27,6 +27,7 @@
  */
 package javax.swing;
 
+import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.LayoutManager;
 
@@ -124,5 +125,19 @@ public class JPanel extends JComponent
         setUIProperty("opaque", Boolean.TRUE);
         updateUI();
 	}
+	
+	@Override
+	public Component add(Component comp) {
+		return super.add(秘transferFrameTo((JComponent) comp));
+	}
+	
+    @Override
+	public Component add(String name, Component comp) {
+		return super.add(name, 秘transferFrameTo((JComponent) comp));
+    }
 
+    @Override
+	public Component add(Component comp, int index) {
+		return super.add(秘transferFrameTo((JComponent) comp), index);
+    }
 }

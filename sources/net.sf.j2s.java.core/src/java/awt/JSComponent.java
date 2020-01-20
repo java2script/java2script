@@ -105,8 +105,8 @@ public abstract class JSComponent extends Component {
 	 */
 	public Action 秘keyAction;
 
-	protected boolean 秘isAppletFrame;
-	public boolean 秘isFramedApplet;
+//	protected boolean 秘isAppletFrame;
+//	public boolean 秘isFramedApplet;
 
 	public String 秘htmlName;
 
@@ -746,6 +746,7 @@ public abstract class JSComponent extends Component {
 			// applet or frame or window of some sort
 			// take just the content pane
 			jc = (JComponent) jc.getRootPane().getContentPane();
+			jc.秘isContentPane = false;
 			jc.getRootPane().setContentPane(new JPanel());
 		}
 		jc.秘frameViewer = 秘frameViewer;
