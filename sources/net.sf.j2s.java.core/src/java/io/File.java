@@ -701,11 +701,12 @@ public class File
 //     */
     public URI toURI() {
         try {
-            File f = getAbsoluteFile();
-            String sp = slashify(f.getPath(), f.isDirectory());
+            String sp = slashify(getAbsoluteFile().getPath(), false);
             if (sp.startsWith("//"))
                 sp = "//" + sp;
-            return new URI("file", null, sp, null);
+            URI uri = new URI("file", null, sp, null);
+            uri.秘bytes = 秘bytes;
+            return uri;
         } catch (URISyntaxException x) {
             throw new Error(x);         // Can't happen
         }

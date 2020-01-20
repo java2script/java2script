@@ -150,14 +150,14 @@ RootPaneContainer// TransferHandler.HasGetTransferHandler
 	 */
 	protected JRootPane rootPane;
 
-    @Override
-	public void add(Component comp, Object constraints) {
-    	if (comp instanceof JApplet) {
-    		秘isAppletFrame = true;
-    		((JApplet) comp).getLayeredPane().秘isFramedApplet = true;
-    	}
-    	super.add(comp, constraints);
-     }
+//    @Override
+//	public void add(Component comp, Object constraints) {
+//    	if (comp instanceof JApplet) {
+//    		秘isAppletFrame = true;
+//    		((JApplet) comp).getLayeredPane().秘isFramedApplet = true;
+//    	}
+//    	super.add(comp, constraints);
+//     }
 
 	/**
 	 * If true then calls to <code>add</code> and <code>setLayout</code> will be

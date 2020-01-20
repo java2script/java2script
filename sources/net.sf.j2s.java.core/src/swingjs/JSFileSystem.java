@@ -933,7 +933,9 @@ public class JSFileSystem extends FileSystem {
 
 		@Override
 		public Path getPath(URI uri) {
-			return getFileSystem(uri).getPath(uri.toString());
+			JSPath p = (JSPath) getFileSystem(uri).getPath(uri.toString());
+			p.秘bytes = uri.秘bytes;
+			return p;
 		}
 
 		@Override

@@ -1955,20 +1955,25 @@ public final class Class<T> {
 		// note that we cannot check the method at this time, as it could be an interface, 
 		// and interfaces will not have elaborated methods.
 		
-		Method m = new Method(this, name, paramTypes, null, null, 0);
+		Method m = new Method(this, name, paramTypes, null, null, Modifier.PUBLIC);
 		if (!isInterface()) {
-			Object o = null;
+			Object o = $clazz$;
+			boolean isStatic = false;
 			String qname = m.getSignature();
 			/**
 			 * @j2sNative
 			 * 
-			 * o = this.$clazz$;
-			 * o = o[qname] || o.prototype && o.prototype[qname];
+			 * if (o[qname]) {
+			 *   isStatic = true;
+			 *   o = o[qname];
+			 * } else {
+			 *     o = o.prototype && o.prototype[qname];
+			 * }
 			 * 
 			 */
-			m._setJSMethod(o);
 			if (o == null)
-			  throw new NoSuchMethodException(getName() + "." + qname);
+				  throw new NoSuchMethodException(getName() + "." + qname);
+			m._setJSMethod(o, (isStatic ? Modifier.STATIC : 0));
 		}
 		return m;
 //		/**
@@ -3063,7 +3068,7 @@ public final class Class<T> {
 		 */
 		
 		Method m = new Method(this, attr, UNKNOWN_PARAMETERS, Void.class, NO_PARAMETERS, Modifier.PUBLIC);
-		m._setJSMethod(o);
+		m._setJSMethod(o, Modifier.PUBLIC);
 
 		/**
 		 * @j2sNative
@@ -3075,8 +3080,8 @@ public final class Class<T> {
 		 *            "function" && o.exName && !o.__CLASS_NAME__ &&
 		 *            o.exClazz == this.$clazz$) {
 		 */
-		m = new Method(this, attr, UNKNOWN_PARAMETERS, Void.class, NO_PARAMETERS, Modifier.PUBLIC | Modifier.STATIC);
-		m._setJSMethod(o);
+		m = new Method(this, attr, UNKNOWN_PARAMETERS, Void.class, NO_PARAMETERS, Modifier.PUBLIC);
+		m._setJSMethod(o, Modifier.STATIC);
 		/**
 		 * @j2sNative
 		 * 

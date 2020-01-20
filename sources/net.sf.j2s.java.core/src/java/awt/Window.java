@@ -3081,14 +3081,16 @@ public class Window extends JComponent {
 			}
 		}
 
-		if ((c != null && !c.isShowing()) || root == null || !root.isShowing()) {
+		Point invokerScreenLocation;
+		if (c != null && !c.isShowing() 
+				|| root == null 
+				|| !root.isShowing() 
+				|| (invokerScreenLocation = c.getLocationOnScreen()) == null) {
 			Dimension paneSize = getSize();
 			Point centerPoint = GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint();
 			setLocation(centerPoint.x - paneSize.width / 2, centerPoint.y - paneSize.height / 2);
 		} else {
 			Dimension invokerSize = c.getSize();
-			Point invokerScreenLocation = c.getLocationOnScreen();
-
 			Rectangle windowBounds = getBounds();
 			int dx = invokerScreenLocation.x + ((invokerSize.width - windowBounds.width) >> 1);
 			int dy = invokerScreenLocation.y + ((invokerSize.height - windowBounds.height) >> 1);

@@ -2153,6 +2153,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			case "java.awt.Component":
 			case "javax.swing.JComponent":
 				if (!class_fullName.startsWith("java.") && !class_fullName.startsWith("javax.")) {
+					// Component and Label are not opaque, Panel is, so we choose Label here
 					String s = superclassName.replace("Component", "Label");
 					log(">>class " + class_fullName + " extended " + superclassName + " now extends " + s);
 					superclassName = s;

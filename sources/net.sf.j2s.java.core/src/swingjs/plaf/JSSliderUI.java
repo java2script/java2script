@@ -118,7 +118,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 			setTainted();
 			setInnerComponentBounds(jc.getWidth(), jc.getHeight());
 		}
-		setup(isNew || isChanged);
+ 		setup(isNew || isChanged);
 		setSlider();
 		setBackground(getBackground());
 		setForeground(getForeground());
@@ -324,7 +324,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		 *  jsslider.j2sslider("option",key,val);
 		 */
 		} catch (Throwable t) {
-			System.out.println(key + ":" + val + " could not be set for " + id);
+			// System.out.println(key + ":" + val + " could not be set for " + id);
 			// ignore -- disposal problem?
 		}
 		noSnapping = isScrollBar;
@@ -490,7 +490,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 
 
 	void setScrollBarExtentAndCSS() {
-		// scrollbar subclass only
+		// overridden in JSScrollBarUI
 	}
 
 	
@@ -532,7 +532,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	public Dimension getPreferredVerticalSize() {
 		Dimension vertDim = (Dimension) DefaultLookup.get(slider, this,
 				"Slider.verticalSize");
-		return new Dimension(Math.max(vertDim.height, myHeight), vertDim.width);
+		return new Dimension(Math.max(vertDim.width, myHeight), vertDim.height);
 	}
 
 	/**
@@ -645,6 +645,8 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		} else {
 			DOMNode.setStyles(domNode, "left", ((width - myHeight) / 2) + "px", "width", myHeight + "px");
 		}
+		if (!isScrollBar)
+			setSlider();
 	}
 
 //	@Override

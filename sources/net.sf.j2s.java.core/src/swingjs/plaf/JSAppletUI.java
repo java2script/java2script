@@ -2,10 +2,13 @@ package swingjs.plaf;
 
 import java.beans.PropertyChangeEvent;
 
+import javax.swing.JApplet;
 import javax.swing.JComponent;
+import javax.swing.JMenuBar;
 import javax.swing.LookAndFeel;
 
 import swingjs.api.js.DOMNode;
+import swingjs.api.js.HTML5Canvas;
 
 public class JSAppletUI extends JSLightweightUI {
 
@@ -18,6 +21,12 @@ public class JSAppletUI extends JSLightweightUI {
 		return updateDOMNodeCUI();
 	}
 	
+	void checkMenuBar(int h) {
+		JMenuBar mb = ((JApplet) c).getJMenuBar();
+		HTML5Canvas canvas = c.getAppContext().getThreadGroup().秘html5Applet._getHtml5Canvas();
+		DOMNode.setStyles(canvas, "top", h + "px", "position", "absolute");
+	}
+
 	@Override
 	public void installUI(JComponent jc) {
     LookAndFeel.installColorsAndFont(jc,
@@ -37,10 +46,9 @@ public class JSAppletUI extends JSLightweightUI {
 	
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
-// nothing to do here?
-//		Object value = e.getNewValue();
-//		String prop = e.getPropertyName();
-//		System.out.println("JSAPpletUI prop val " + prop + " " + value);
+		Object value = e.getNewValue();
+		String prop = e.getPropertyName();
+		System.out.println("JSAPpletUI prop val " + prop + " " + value);
 	}
 
 //	@Override
