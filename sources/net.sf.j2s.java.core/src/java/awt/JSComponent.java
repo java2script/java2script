@@ -34,7 +34,9 @@ import java.beans.PropertyChangeListener;
 import java.util.Arrays;
 
 import javax.swing.Action;
+import javax.swing.JApplet;
 import javax.swing.JComponent;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JRootPane;
 import javax.swing.RootPaneContainer;
@@ -116,7 +118,7 @@ public abstract class JSComponent extends Component {
 	public boolean 秘isRootPane, 秘isContentPane;
 	// initially, we go with the current thread, but later we will pick up the actual JSAppletViewer
 	public JSAppletViewer 秘appletViewer = Thread.currentThread().getThreadGroup().秘appletViewer;
-	private JSFrameViewer 秘frameViewer, 秘topFrameViewer;
+	public JSFrameViewer 秘frameViewer, 秘topFrameViewer;
 	public HTML5Canvas 秘canvas;
 	public ComponentUI ui; // from JComponent
 
@@ -284,6 +286,7 @@ public abstract class JSComponent extends Component {
 		return 秘frameViewer = (viewer == null ? viewer = new JSFrameViewer().setForWindow((RootPaneContainer) this) : viewer);
 	}
 
+	
 	public JSFrameViewer getFrameViewer() {
 		JSComponent parent = null;
 		return (秘topFrameViewer != null ? 秘topFrameViewer
@@ -734,5 +737,22 @@ public abstract class JSComponent extends Component {
 		addNotify(); // BH added; applet will not do this automatically
 		rootPane.addNotify(); // builds a peer for the root pane
 	} 
+
+	public JComponent 秘transferFrameTo(JComponent jc) {
+		if (jc.秘frameViewer == 秘frameViewer)
+			return jc;
+		if (jc.getUIClassID() == "AppletUI") {
+			System.out.println("JSComponent setContentPane to applet; using content.contentPane instead");
+			// applet or frame or window of some sort
+			// take just the content pane
+			jc = (JComponent) jc.getRootPane().getContentPane();
+			jc.getRootPane().setContentPane(new JPanel());
+		}
+		jc.秘frameViewer = 秘frameViewer;
+		jc.秘topFrameViewer = 秘topFrameViewer;
+		return jc;
+	}
+
+
 
 }

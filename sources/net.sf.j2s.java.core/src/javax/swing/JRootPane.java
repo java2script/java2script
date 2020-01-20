@@ -594,9 +594,9 @@ public class JRootPane extends JComponent {
 					"contentPane cannot be set to null.");
 		if (contentPane != null && contentPane.getParent() == layeredPane)
 			layeredPane.remove(contentPane);
-		contentPane = content;
+		content = 秘transferFrameTo((JComponent)content);
 		content.秘isContentPane = true;
-
+		contentPane = content;
 		layeredPane.add(contentPane, JLayeredPane.FRAME_CONTENT_LAYER);
 	}
 
