@@ -166,7 +166,6 @@ import swingjs.plaf.JSComponentUI;
  * @author Hans Muller
  * @author Arnaud Weber
  */
-@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public abstract class JComponent extends Container {
 
 	/**

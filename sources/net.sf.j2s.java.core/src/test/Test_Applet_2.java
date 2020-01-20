@@ -24,6 +24,7 @@ import java.awt.event.MouseMotionListener;
 import java.util.Enumeration;
 
 import javax.swing.AbstractButton;
+import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JApplet;
@@ -32,6 +33,9 @@ import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
@@ -58,11 +62,20 @@ public class Test_Applet_2 extends JApplet {
 	@Override
 	public void init() {
 		setLayout(new BorderLayout());
+//		JMenuBar mb = new JMenuBar();
+//		mb.add(new JMenuItem("ok"));
+//		mb.add(new JMenu("menu"));
+//		setJMenuBar(mb);
+		JPanel p = new JPanel();
+		p.setLayout(new BoxLayout(p, BoxLayout.LINE_AXIS));
+		p.add(new JButton("test1"));
+		p.add(new JButton("test2"));
 		canvas = new Test_2Canvas();
+		add(p, BorderLayout.SOUTH);
 		canvas.setSize(850, 500);
 		Container c = getContentPane();
 		((JPanel) c).setBorder(new TitledBorder("testing"));
-		c.setSize(850, 500);
+		c.setSize(850, 530);
 		((JPanel) c).setOpaque(false);
 		c.add(canvas, BorderLayout.CENTER);
 		c.add(controls = new Test_2Controls(canvas), BorderLayout.NORTH);

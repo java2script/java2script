@@ -1222,10 +1222,10 @@ public class JSComponentUI extends ComponentUI
 	public void stateChanged(ChangeEvent e) {
 	}
 
-	private void updatePropertyAncestor(boolean fromButtonListener) {
+	private void updatePropertyAncestor(boolean andSetHTML) {
 		// Q: Why is setTainted() within fromButtonListener -- here only, not below?
-		if (fromButtonListener) {
-			setTainted();
+		setTainted();
+		if (andSetHTML) {
 			setHTMLElement();
 		}
 		JComponent p = (JComponent) jc.getParent();
@@ -1233,7 +1233,7 @@ public class JSComponentUI extends ComponentUI
 			JSComponentUI parentui = (p == null ? null : p.秘getUI());
 			if (parentui != null) {
 				parentui.setTainted();
-				if (fromButtonListener) {
+				if (andSetHTML) {
 					parentui.setHTMLElement();
 					if (parentui.menu != null) {
 						((JSPopupMenuUI) parentui).updateMenu(false);
@@ -1308,7 +1308,8 @@ public class JSComponentUI extends ComponentUI
 		case "ancestor":
 			if (cellComponent != null)
 				return;
-			updatePropertyAncestor(true);
+			Container anc = JSComponent.秘getTopInvokableAncestor(c, false);
+			updatePropertyAncestor(anc != null && anc.isVisible());
 			break;
 		}
 		propertyChangedCUI(e, prop);

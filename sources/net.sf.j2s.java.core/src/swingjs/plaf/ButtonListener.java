@@ -29,6 +29,7 @@
 package swingjs.plaf;
 
 import java.awt.Container;
+import java.awt.JSComponent;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;

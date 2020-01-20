@@ -601,6 +601,16 @@ public class SwingJSUtils {
 						levelNext == UNCHANGED ? me.level : levelNext);
 			return true;
 		}
+		
+		/**
+		 * sleep and then execute the next state
+		 * @param ms
+		 */
+		public void sleep(int ms) {
+			int next = stateNext;
+			delayedState(ms, next);
+		}
+
 	}
 	
 	/**

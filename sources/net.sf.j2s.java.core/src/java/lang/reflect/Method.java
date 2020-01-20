@@ -446,9 +446,10 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 		return declaredAnnotations;
 	}
 
-	public void _setJSMethod(Object o) {
+	public void _setJSMethod(Object o, int modifiers) {
 		$meth$ = (JSFunction) o;
 		signature = /** @j2sNative	o && o.exName || */ null;
+		this.modifiers |= modifiers;
 	}
 
 	public Object _getJSMethod() {

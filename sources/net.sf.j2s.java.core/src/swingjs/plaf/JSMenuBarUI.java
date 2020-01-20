@@ -40,6 +40,7 @@ import java.beans.PropertyChangeEvent;
 
 import javax.swing.BoxLayout;
 import javax.swing.InputMap;
+import javax.swing.JApplet;
 import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -111,7 +112,16 @@ public class JSMenuBarUI extends JSPanelUI implements ContainerListener {
 	@Override
 	protected int getContainerHeight() {
 		Insets m = menuBar.getInsets();
-		return height = getFont().getFontMetrics().getHeight() + m.top + m.bottom;
+		height = getFont().getFontMetrics().getHeight() + m.top + m.bottom;
+		return height;
+	}
+
+	@Override
+	public void setVisible(boolean b) {
+		super.setVisible(b);
+		Component top = menuBar.getTopLevelAncestor();
+		if ( top instanceof JApplet)
+			((JSAppletUI)((JApplet) top).getUI()).checkMenuBar(b ? height : 0);		
 	}
 
 	@Override
