@@ -1867,10 +1867,12 @@ public abstract class Component implements ImageObserver/*
 	 */
 	final Point getLocationOnScreen_NoTreeLock() {
 		if (isShowing()) {
-			if (isLightweight()) {// peer instanceof LightweightPeer) { // SwingJS will return FALSE
+			if (isLightweight()) {
 				// lightweight component location needs to be translated
 				// relative to a native component.
 				Container host = getNativeContainer();
+				if (host.peer == null)
+					return null;
 				Point pt = host.peer.getLocationOnScreen();
 				for (Component c = this; c != host; c = c.getParent()) {
 					pt.x += c.x;
@@ -1878,6 +1880,8 @@ public abstract class Component implements ImageObserver/*
 				}
 				return pt;
 			} else {
+				if (peer == null)
+					return null;
 				Point pt = peer.getLocationOnScreen();
 				return pt;
 			}
