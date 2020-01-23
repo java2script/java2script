@@ -121,6 +121,8 @@ public class JSFileSystem extends FileSystem {
 			this.fd = fd;
 			this.parent = parent;
 			this.path = (JSPath) new File(path).toPath();
+			if (fd != null && (readable || append))
+				this.path.秘bytes = fd._getBytes(true);
 			this.path.setIsTempFile(fd._isTempFile());
 			Set<StandardOpenOption> options = new HashSet<>();
 			if (readable)
@@ -406,6 +408,10 @@ public class JSFileSystem extends FileSystem {
 			boolean truncate = options.contains(StandardOpenOption.TRUNCATE_EXISTING);
 			boolean create = options.contains(StandardOpenOption.CREATE);
 			boolean createNew = options.contains(StandardOpenOption.CREATE_NEW);
+			if ((read ||append)  && path.秘bytes == null && fd != null) {
+				path.秘bytes = fd._getBytes(true);
+			}
+
 			if (read && write) {
 				秘bytes = getBytes();
 				if (秘bytes == null) {
