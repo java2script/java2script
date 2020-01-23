@@ -86,10 +86,10 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		if (!isScrollBar) {
 			minorSpacing = slider.getMinorTickSpacing();
 			majorSpacing = slider.getMajorTickSpacing();
-			paintTicks = slider.getPaintTicks();
-			paintLabels = slider.getPaintLabels();
+			paintTicks = (majorSpacing > 0 && slider.getPaintTicks());
+			paintLabels = (majorSpacing > 0 && slider.getPaintLabels());
 			paintTrack = slider.getPaintTrack();
-			snapToTicks = slider.getSnapToTicks();
+			snapToTicks = (majorSpacing > 0 && slider.getSnapToTicks());
 		}
 		orientation = (slider.getOrientation() == SwingConstants.VERTICAL ? "vertical" : "horizontal");
 		model = slider.getModel();

@@ -215,8 +215,12 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener, Mouse
 		p.setOpaque(false);
 		mkBar(p, tf, Adjustable.VERTICAL, 20, 200);
 		mkSlider(p, tf, Adjustable.VERTICAL, 20, 200);
-		mkSlider(p, tf, Adjustable.VERTICAL, 20, 200).setInverted(true);
-		p.add(label);
+		JSlider slider = mkSlider(p, tf, Adjustable.VERTICAL, 70, 200);
+		slider.setInverted(false);
+        slider.setPaintTicks(true);
+        slider.setPaintLabels(true);
+        slider.setMajorTickSpacing(100);
+        p.add(label);
 		p.add(tf);
 		p.add(button);
 		p.add(button2);
@@ -226,11 +230,11 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener, Mouse
 	    formatChoice.insertItemAt("hex", 1);
 	    p.add(formatChoice);
 		mkBar(p, tf, Adjustable.HORIZONTAL, 100, 20);
-		JSlider slider = mkSlider(p, tf, Adjustable.HORIZONTAL, 100, 20);
+		slider = mkSlider(p, tf, Adjustable.HORIZONTAL, 100, 20);
         slider.setPaintTicks(true);
         slider.setPaintLabels(true);
-        slider.setPreferredSize(new Dimension(100, 100));
         slider.setMajorTickSpacing(200);
+        slider.setPreferredSize(new Dimension(100, 100));
         slider.setBackground(Color.WHITE);
         slider.setForeground(Color.BLUE);
 
