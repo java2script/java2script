@@ -43,6 +43,8 @@ import javax.swing.JApplet;
 import javax.swing.JRootPane;
 import javax.swing.RepaintManager;
 
+import swingjs.plaf.JSAppletUI;
+
 /**
  * SwingJS note: This class is the original java.applet.Applet class. 
  * It is subclassed by JApplet. The replacement java.applet.Applet class
@@ -290,6 +292,7 @@ public class JSApplet extends JSPanel {
 //				((JSComponentUI)root.getUI()).setPainted(null);
 //				root.秘isBackgroundPainted = false;
 				RepaintManager.currentManager(this).addInvalidComponent(root);
+				((JSAppletUI)getUI()).adjustCanvasForMenuBar();
 			}
 		}
     }
