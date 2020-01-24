@@ -96,7 +96,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		boolean isHoriz = (slider.getOrientation() == SwingConstants.HORIZONTAL);
 		boolean isVerticalScrollBar = (isScrollBar && !isHoriz);
 		boolean isInverted = isVerticalScrollBar || !isScrollBar && slider.getInverted();
-		boolean isChanged = false;
+		boolean isChanged = sliderDisposed;
 		if (isHoriz != this.isHoriz || isVerticalScrollBar != this.isVerticalScrollBar
 				|| isInverted != this.isInverted) {
 			this.isHoriz = isHoriz;
@@ -107,8 +107,6 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		boolean isNew = (domNode == null);
 		if (isNew) {
 			domNode = wrap("div", id + "_wrap", jqSlider = DOMNode.createElement("div", id));
-			$(domNode).addClass("swingjs"); // ??
-			$(domNode).addClass("ui-j2sslider-wrap"); // ??
 			setJQuerySliderAndEvents();
 			setTainted();
 		} else if (isChanged) {
@@ -126,6 +124,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	}
 	
 	private String foreColor = null;
+	private boolean sliderDisposed;
 	@Override
 	public void setForeground(Color c) {
 		if (!paintTicks && !paintLabels)
@@ -188,11 +187,17 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	}
 
 	private void disposeSlider() {
-		Object slider = $(jqSlider);
-		/**
-		 * @j2sNative slider.j2sslider("destroy");
-		 * 
-		 */
+		if (sliderInitialized()) {
+			Object slider = $(jqSlider);
+			/**
+			 * 
+			 * @j2sNative
+			 * 
+			 * 
+			 * 			slider.j2sslider("destroy");
+			 *
+			 */
+		}
 		DOMNode.dispose(jqSlider);
 	}
 
@@ -209,8 +214,15 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 			jScrollBar = (JScrollBar) jc;
 	}
 
-	private void setJQuerySliderAndEvents() {
+	@Override
+	public void dispose() {
+		sliderDisposed = true;
+		super.dispose();
+	}
 
+	void setJQuerySliderAndEvents() {
+		$(domNode).addClass("swingjs");
+		$(domNode).addClass("ui-j2sslider-wrap"); // for mouse-down event in jquery-ui-j2sslider.js
 		Object slider = $(jqSlider);
 		/**
 		 * @j2sNative
@@ -306,6 +318,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 			setDataComponent(domNode);
 			setDataComponent(sliderHandle);
 		}
+		sliderDisposed = false;
 	}
 
 	/**
@@ -314,13 +327,15 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	 * @param val
 	 */
 	protected void setSliderAttr(String key, float val) {
+		if (!sliderInitialized())
 		noSnapping = true;
 		String id = null;
 		try {
 		Object jsslider = $(jqSlider);
 		/**
 		 * @j2sNative
-		 *   id = this.jqSlider.id;
+		 * 
+		 *  id = this.jqSlider.id;
 		 *  jsslider.j2sslider("option",key,val);
 		 */
 		} catch (Throwable t) {
@@ -328,6 +343,10 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 			// ignore -- disposal problem?
 		}
 		noSnapping = isScrollBar;
+	}
+
+	private boolean sliderInitialized() {
+		return ($data(jqSlider, "ui-j2sslider") != null);
 	}
 
 	public void setSlider() {

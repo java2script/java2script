@@ -65,6 +65,10 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener, Mouse
 
 	private JPanel panel2;
 
+	private JSlider vslider;
+
+	private JPanel vp;
+
 	void setSize(JComponent c, int x, int y) {
 		if (preferred)
 			c.setPreferredSize(new Dimension(x, y));
@@ -157,6 +161,8 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener, Mouse
 				label.setBackground(button2.isSelected() ? Color.green : Color.yellow);
 				tf.setBackground(Color.green);
 				label.setText("btn2");
+				vp.remove(vslider);
+				vp.add(vslider);
 				JFrame frame1 = new JFrame();
 				frame1.setLocationRelativeTo(button2);
 				JPanel jp = new JPanel();
@@ -216,6 +222,8 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener, Mouse
 		mkBar(p, tf, Adjustable.VERTICAL, 20, 200);
 		mkSlider(p, tf, Adjustable.VERTICAL, 20, 200);
 		JSlider slider = mkSlider(p, tf, Adjustable.VERTICAL, 70, 200);
+		vslider = slider;
+		vp = p;
 		slider.setInverted(false);
         slider.setPaintTicks(true);
         slider.setPaintLabels(true);
