@@ -121,7 +121,7 @@ public class JSMenuBarUI extends JSPanelUI implements ContainerListener {
 		super.setVisible(b);
 		Component top = menuBar.getTopLevelAncestor();
 		if ( top instanceof JApplet)
-			((JSAppletUI)((JApplet) top).getUI()).checkMenuBar(b ? height : 0);		
+			((JSAppletUI)((JApplet) top).getUI()).adjustCanvasForMenuBar();		
 	}
 
 	@Override

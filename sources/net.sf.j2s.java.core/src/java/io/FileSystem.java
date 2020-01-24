@@ -115,7 +115,7 @@ class FileSystem {
 	}
 
 	boolean _exists(File file) {
-		return (file.秘bytes != null || JSUtil.getFileAsBytes(file) != null);
+		return (file.秘bytes != null || (file.秘bytes=JSUtil.getFileAsBytes(file)) != null);
 	}
 
 	boolean _isDir(File file) {

@@ -18,15 +18,10 @@ public class JSAppletUI extends JSLightweightUI {
 			containerNode = domNode = newDOMObject("div", id);
 			addClass(domNode, "swingjs-window");
 		}
+		adjustCanvasForMenuBar();
 		return updateDOMNodeCUI();
 	}
 	
-	void checkMenuBar(int h) {
-		JMenuBar mb = ((JApplet) c).getJMenuBar();
-		HTML5Canvas canvas = c.getAppContext().getThreadGroup().秘html5Applet._getHtml5Canvas();
-		DOMNode.setStyles(canvas, "top", h + "px", "position", "absolute");
-	}
-
 	@Override
 	public void installUI(JComponent jc) {
     LookAndFeel.installColorsAndFont(jc,
@@ -50,6 +45,20 @@ public class JSAppletUI extends JSLightweightUI {
 		String prop = e.getPropertyName();
 		System.out.println("JSAPpletUI prop val " + prop + " " + value);
 	}
+
+	/**
+	 * The JMenuBar on an applet pushes its canvas down typically about 20 pixels.
+	 */
+	public void adjustCanvasForMenuBar() {
+		JMenuBar mb = ((JApplet) c).getJMenuBar();
+		int h = (mb == null || !mb.isVisible() ? 0 : ((JSMenuBarUI) mb.getUI()).height);
+		DOMNode.setStyles(getCanvas(), "top", h + "px", "position", "absolute");
+	}
+
+	public HTML5Canvas getCanvas() {
+		return c.getAppContext().getThreadGroup().秘html5Applet._getHtml5Canvas();
+	}
+
 
 //	@Override
 //	public boolean isFocusable() {

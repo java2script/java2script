@@ -1155,7 +1155,8 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 		Object n = data[4];
 		JQueryObject m = j2smenu.activeMenu;
 		String mid = (m == null ? null : m.attr("id"));
-		DOMNode base = (t == null ? null : t == e ? (DOMNode) DOMNode.getAttr(e, "target") : t.get(0));
+		DOMNode target = (DOMNode) data[5];
+		DOMNode base = (t == null ? null : target != null ? target : t == e ? (DOMNode) DOMNode.getAttr(e, "target") : t.get(0));
 		String id = (base == null ? null : (String) DOMNode.getAttr(base, "id"));
 		JComponent c = (base == null ? null : (JComponent) DOMNode.getAttr(base, "data-component"));
 		JSComponentUI tui = (base == null ? null : (JSComponentUI) DOMNode.getAttr(base, "data-ui"));

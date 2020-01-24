@@ -56,6 +56,14 @@ public final class FileDescriptor {
 	 */
 	File _file;
 	
+	public byte[] _getBytes(boolean checkDisk) {
+		if (_file.秘bytes == null && checkDisk) {
+			// a check for file existence sets the bytes
+			_file.exists();
+		}
+		return _file.秘bytes;
+	}
+
 	private int pos, len = -1;
 
 	public void _setPosAndLen(int pos, int len) {
@@ -282,6 +290,5 @@ public final class FileDescriptor {
             }
         }
     }
-
 
 }

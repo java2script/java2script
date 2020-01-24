@@ -10669,6 +10669,9 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// Note if this character 秘 does not look like a Chinese character, 
+// then DON'T SAVE THIS FILE. Open it again with a default UTF-8 editor.
+
 // J2S._version set to "3.2.4.09" 2019.10.31
 
 // BH 2019.11.06 adds JFileChooser.setMultipleMode(true) and multiple-file DnD
@@ -12053,13 +12056,8 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 		obj._j2sPath = Info.j2sPath;
 		obj._coverImage = Info.coverImage;
 		obj._isCovered = !!obj._coverImage;
-		obj._deferApplet = Info.deferApplet || obj._isCovered && obj._isJava; // must
-																				// do
-																				// this
-																				// if
-																				// covered
-																				// in
-																				// Java
+		obj._deferApplet = Info.deferApplet || obj._isCovered && obj._isJava; 
+		// must do this if covered in Java
 		obj._deferUncover = Info.deferUncover && !obj._isJava; // can't do this
 																// with Java
 		obj._coverScript = Info.coverScript;
@@ -16443,7 +16441,7 @@ Clazz.loadScript = function(file) {
   //removeArrayItem(classQueue, file);
 
   var file0 = file;
-  if (Clazz._nozcore) {
+  if (J2S._nozcore) {
     file = file.replace(/\.z\.js/,".js");
   }
   var data = "";
