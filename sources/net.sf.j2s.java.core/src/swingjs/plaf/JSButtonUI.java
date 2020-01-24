@@ -109,7 +109,22 @@ public class JSButtonUI extends JSLightweightUI {
 		setDataComponent(textNode); // needed for mac safari/chrome
 		setEnabled(c.isEnabled());
 	}
+	
+	/**
+	 * We need to also set the data-component object for the mnemonic
+	 */
+	@Override
+	protected DOMNode setJSText(DOMNode obj, String prop, String val) {
+		DOMNode node = DOMNode.setAttr(obj, prop, val);
+		if (val.indexOf("<u>") >= 0) {
+			setDataComponent(DOMNode.firstChild(node));
+		}
+		return node;
+	}
 
+
+
+	
 	/**
 	 * 
 	 * @param type       "_item" or "_menu" (unused)

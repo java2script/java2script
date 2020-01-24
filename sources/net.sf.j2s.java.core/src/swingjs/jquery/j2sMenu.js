@@ -1,8 +1,7 @@
 // J2SMenu.js from JSmolMenu.js
 // Original version for JSmol Bob Hanson 2/17/2014 
 // author: Bob Hanson, hansonr@stolaf.edu
-// last edited 1/23/2019 -- fixes for mouse-down effector (mac) operation
-
+// last edited 1/24/2020 = fix for <u> in text
 // NOTE: If you change this file, then you need to touch and save JQueryUI.java, as only then
 //       will the transpiler copy this file to site/swingjs/j2s/swingjs/jquery/
 
@@ -94,12 +93,13 @@ try{
  var doCmd = function(trigger,me,t,n,why) {
 	 why || (why = "");
 	 var event = t;
+	 var target = (!t || !t.target ? null : $(t.target).closest(".ui-j2smenu-item")[0]);
 	 switch(trigger) {
 	 case "onoutn":
 		 me._closeMe();
 		 break;
 	 case "onmoven":
-		 if ($(t && t.target).hasClass("ui-j2smenu")) {
+		 if ($(target).hasClass("ui-j2smenu")) {
 			 // this is the most likely way we will leave, via a mousemove on the border
 			 me._closeMe();  
 			 break;
@@ -111,7 +111,7 @@ try{
 		 // BH 2018
 		 // -- added stopPropagation
 		 // -- changed to mouseover from mouseenter, since we have children
-		 var a = e(t.target).closest("li")
+		 var a = e(target).closest("li")
 		 if (a.hasClass(".ui-state-focus"))
 			 return;		 
 		 if (!a.hasClass("j2s-popup-menu")) {
@@ -128,10 +128,8 @@ try{
 		 break;
 	 case "onrelease":
 	 case "onpress":
-		 // t.preventDefault();
-// break;
 	 case "onclick":
-		var n=e(t.target).closest(".ui-j2smenu-item");
+		var n=e(target).closest(".ui-j2smenu-item");
 		if (n.has(".ui-state-disabled").length)
 			return;
 		if (trigger != "onclick")
@@ -144,8 +142,7 @@ try{
 				me.element.trigger("setFocus",[!0]);
 				me.active&&me.active.parents(".ui-j2smenu").length===1&&clearMe(me.timer, trigger);
 			} 
-   		 doCmd("collapseAll", me, 0, 1);			 
-// doCmd("_hide", me, e(".ui-j2smenu"));
+			doCmd("collapseAll", me, 0, 1);			 
 		}
 		break;
 	 case "clearClickOut":
@@ -166,8 +163,8 @@ try{
 			 doCmd("clearClickOut", me);
 			 return;
 		 }		 
-		 e(t.target).closest(".j2s-menuBar-menu").length == 0 
-		    && (e(t.target).closest(".ui-j2smenu").length||me.collapseAll(t));
+		 e(target).closest(".j2s-menuBar-menu").length == 0 
+		    && (e(target).closest(".ui-j2smenu").length||me.collapseAll(t));
 	 	return;
 	 case "onleave":
 		 me._closeMe("onleave");
@@ -283,7 +280,7 @@ try{
 		 if ( me.closed
 //				 
 //				 || !n && (!someMenuOpen() ||
-//			  ((u=e(t&&t.target)).hasClass("ui-j2smenu-node") || u.hasClass("ui-j2smenu"))
+//			  ((u=e(t&&target)).hasClass("ui-j2smenu-node") || u.hasClass("ui-j2smenu"))
 //			)
 //			
 		 )
@@ -325,11 +322,12 @@ try{
 		 t = a;
 		 break;
 	 case "select":
-		 me.active=me.active||e(t.target).closest(".ui-j2smenu-item");
+		 me.active=me.active||e(target).closest(".ui-j2smenu-item");
 		 me.active.has(".ui-j2smenu").length||me.collapseAll(t,!0);
 		 me._trigger("select",t,{item:me.active});
-		 if (!t[0])
+		 if (!t[0]) {
 			 return;
+		 }
 		 break;
 	 case "refresh":
 		 n=me.options.icons.submenu;
@@ -375,7 +373,7 @@ try{
 	 }
 	 
 	 var ui = me.activeMenu && me.activeMenu[0] && me.activeMenu[0]["data-ui"];
- 	 ui && ui.processJ2SMenuCmd$OA([trigger,me,event,t,n,why]);
+ 	 ui && ui.processJ2SMenuCmd$OA([trigger,me,event,t,n,target,why]);
  }
  
 $.widget("ui.j2smenu",{

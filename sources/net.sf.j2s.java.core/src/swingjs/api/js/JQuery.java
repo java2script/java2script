@@ -10,4 +10,6 @@ public interface JQuery {
 
   Object parseJSON(String json);
 
+  Object data(Object node, String attr);
+
 }
