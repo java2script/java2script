@@ -6,12 +6,16 @@
  * A relatively simple ComboBox that supports actual objects, not just strings
  * 
  */
-// BH 2019.08.26 text area set to <button> to manage vertical centering. 
 
 // NOTE: If you change this file, then you need to touch and save JQueryUI.java, as only then
 //       will the transpiler copy this file to site/swingjs/j2s/swingjs/jquery/
 
-$( function() {
+;(function($) {
+
+J2S.__makeComboBox = function() {
+  J2S.__makeComboBox = function(){};	
+  
+  $( function() {
     $('head').append('<style>.j2scb-sel {background-color:#B8CFE5;}'
     		+'\n.j2scb-unsel {background-color:white;}'
     		+'\n.j2scb-hov {background-color:lightblue;}'
@@ -298,6 +302,8 @@ $( function() {
       
     });
  
-} );
+  });
+  
+};  
 
-
+})(J2S.__$);

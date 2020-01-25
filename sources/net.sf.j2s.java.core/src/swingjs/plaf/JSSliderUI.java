@@ -27,7 +27,13 @@ import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 import swingjs.jquery.JQueryUI;
 
-@SuppressWarnings({"rawtypes", "unchecked", "unused"})
+/**
+ * A jQuery-based slider with lots of additional functionality.
+ * See swingjs/jquery/j2sSlider.js for jQuery widget and css.
+ * 
+ * @author hansonr
+ */
+@SuppressWarnings({"unused"})
 public class JSSliderUI extends JSLightweightUI implements PropertyChangeListener, ChangeListener {
 
     public static final int POSITIVE_SCROLL = +1;
@@ -36,10 +42,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
     public static final int MAX_SCROLL = +2;
 
 	static {
-		Object jqueryui = JQueryUI.class; // loads jQuery.ui
-		// this static call allows for the CSS to be loaded only once and only when needed
-		JSUtil.loadStaticResource("swingjs/jquery/jquery-ui-j2sslider.css");
-		JSUtil.loadStaticResource("swingjs/jquery/jquery-ui-j2sslider.js");
+		JQueryUI.loadJQSlider();
 	}
 
 	protected JSlider slider;
@@ -166,7 +169,8 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 				// they are painted with FOREground
 			} else {
 				DOMNode node = (myScrollPaneUI == null && !paintTicks ? jqSlider : sliderTrack);
-				DOMNode.setStyles(node, "background-color", JSToolkit.getCSSColor(c));
+				if (isScrollBar)
+					DOMNode.setStyles(node, "background-color", JSToolkit.getCSSColor(c));
 				if (isScrollBar&& (Color.WHITE.equals(c) || c.getRGB() == (0xFFEEEEEE & -1)))
 					DOMNode.setStyles(sliderHandle, "background", "#ccc");
 			}

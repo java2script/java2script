@@ -1,42 +1,22 @@
-// J2SMenu.js from JSmolMenu.js
-// Original version for JSmol Bob Hanson 2/17/2014 
-// author: Bob Hanson, hansonr@stolaf.edu
-// last edited 1/24/2020 = fix for <u> in text
+// based on jQuery UI - v1.9.2 - 2012-12-17
 // NOTE: If you change this file, then you need to touch and save JQueryUI.java, as only then
 //       will the transpiler copy this file to site/swingjs/j2s/swingjs/jquery/
 
-/*! jQuery UI - v1.9.2 - 2012-12-17
-* http://jqueryui.com
-* Includes: jquery.ui.core.js, jquery.ui.widget.js, jquery.ui.mouse.js, jquery.ui.position.js, jquery.ui.menu.js
-* Copyright (c) 2012 jQuery Foundation and other contributors Licensed MIT */
+;(function(Swing, $) {
 
-;(function(Swing) {
+J2S.__makeMenu = function() {
+// run once; set to NOP
+J2S.__makeMenu = function(){};	
 
-if (J2S.isResourceLoaded("swingjs/jquery/j2sMenu.js", true))return;
+ var outActive;
+ var vart;
 
+ var n=!1, e = $;
 
-var outActive;
-var vart;
-
-;(function($) {
-
-	
-var n=!1, e = $;
-/*
- * ! jQuery UI - v1.9.2 - 2012-12-17 http://jqueryui.com Includes:
- * jquery.ui.core.css, jquery.ui.menu.css To view and modify this theme, visit
- * http://jqueryui.com/themeroller/?ffDefault=Lucida%20Grande%2CLucida%20Sans%2CArial%2Csans-serif&fwDefault=bold&fsDefault=1.1em&cornerRadius=5px&bgColorHeader=5c9ccc&bgTextureHeader=12_gloss_wave.png&bgImgOpacityHeader=55&borderColorHeader=4297d7&fcHeader=ffffff&iconColorHeader=d8e7f3&bgColorContent=fcfdfd&bgTextureContent=06_inset_hard.png&bgImgOpacityContent=100&borderColorContent=a6c9e2&fcContent=222222&iconColorContent=469bdd&bgColorDefault=dfeffc&bgTextureDefault=03_highlight_soft.png&bgImgOpacityDefault=85&borderColorDefault=c5dbec&fcDefault=2e6e9e&iconColorDefault=6da8d5&bgColorHover=d0e5f5&bgTextureHover=03_highlight_soft.png&bgImgOpacityHover=75&borderColorHover=79b7e7&fcHover=1d5987&iconColorHover=217bc0&bgColorActive=f5f8f9&bgTextureActive=06_inset_hard.png&bgImgOpacityActive=100&borderColorActive=79b7e7&fcActive=e17009&iconColorActive=f9bd01&bgColorHighlight=fbec88&bgTextureHighlight=01_flat.png&bgImgOpacityHighlight=55&borderColorHighlight=fad42e&fcHighlight=363636&iconColorHighlight=2e83ff&bgColorError=fef1ec&bgTextureError=02_glass.png&bgImgOpacityError=95&borderColorError=cd0a0a&fcError=cd0a0a&iconColorError=cd0a0a&bgColorOverlay=aaaaaa&bgTextureOverlay=01_flat.png&bgImgOpacityOverlay=0&opacityOverlay=30&bgColorShadow=aaaaaa&bgTextureShadow=01_flat.png&bgImgOpacityShadow=0&opacityShadow=30&thicknessShadow=8px&offsetTopShadow=-8px&offsetLeftShadow=-8px&cornerRadiusShadow=8px
- * Copyright (c) 2012 jQuery Foundation and other contributors Licensed MIT
- */
-
-if (!$.ui.j2smenu)
-try{
-
-// local methods here for help with debugging
+ // local methods here for help with debugging
 	
  
- // BH note that swingjs.plaf.JSButton will set and clear ui-state-disabled
-	// on its own
+ // BH note that swingjs.plaf.JSButton will set and clear ui-state-disabled on its own
  
 
  var delayMe = function(element, f, ms) {
@@ -526,9 +506,6 @@ $.widget("ui.j2smenu",{
  _move:function(a,b,t){ doCmd("_move", this, t, [a,b]);},
  _hasScroll:function(){return this.element.outerHeight()<this.element.prop("scrollHeight")}
  })
-}catch (e) {
-	System.err.println("JSmolMenu failed to load jQuery.ui.j2smenu. jQuery version conflict? should be at least 1.9.2 " + e.ui.version);
-}
 
 Swing.menuCounter = 0;
 Swing.menuInitialized = 0;
@@ -580,7 +557,7 @@ Swing.setMenu = function(menu) {
     menu._visible = false;
     menu._j2sname = menu.id = menu.ui.id + '_' + (++Swing.menuCounter);
     menu.$ulTop = J2S.__$(); // empty jQuery selector
-    var proto = menu.$init$.exClazz.prototype;
+    var proto = menu.$init$.exClazz["prototype"];
     proto._hideJSMenu = function(){Swing.hideMenu(this)};
     proto.dragBind || ( proto.dragBind = function(isBind){} );
     proto.setContainer || ( proto.setContainer = function(c){ this.$ulTop = c } );
@@ -653,7 +630,7 @@ Swing.hideMenu = function(menu, force) {
 	menu.dragBind(false);
 	menu.$ulTop.hide();
 	menu._visible = menu.isDragging = false;
-};
+}
 
 Swing.disposeMenu = function(menu) {
   // called by javajs.swing.JPopupMenu
@@ -670,7 +647,9 @@ Swing.disposeMenu = function(menu) {
 }
 
 
-})(J2S.__$);
+};
 
-})(J2S.Swing);
+})(J2S.Swing, J2S.__$);
 
+
+// end of j2sMenu.js 2020.01.25
