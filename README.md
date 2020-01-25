@@ -113,7 +113,7 @@ Synchronized with https://github.com/BobHanson/java2script as the stable master 
 
 Examples include:
 
-Phet, Falstad, and other tests https://chemapps.stolaf.edu/swingjs/phet/site/swingjs/examples  Initial SwingJS tests converting AWT to Swing in Java, then transpiling.
+PhET, Falstad, and other tests https://chemapps.stolaf.edu/swingjs/phet/site/swingjs/examples  Initial SwingJS tests converting AWT to Swing in Java, then transpiling.
 
 JSmol: https://chemapps.stolaf.edu/jmol/jsmol  Non-AWT, Non-Swing version, our initial application of Java2Script technology.
   
