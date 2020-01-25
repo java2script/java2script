@@ -94,9 +94,7 @@ public class JSComboBoxUI extends JSLightweightUI {
 	}
 
 	static {
-		@SuppressWarnings("unused")
-		Object jqueryui = JQueryUI.class; // loads jQuery.ui
-		JSUtil.loadStaticResource("swingjs/jquery/j2sComboBox.js");
+		JQueryUI.loadJQComboBox();
 	}
 
 	@Override
