@@ -84,7 +84,7 @@ Version 3 also implements real-time creation of HTML test files for immediate Ja
 
 Unlike Version 2, Version 3 requires minimal reworking of Java classes - primarily just for performance and threading* reasons, maximizing JavaScript performance without compromising any Java performance and making Java-to-JavaScript conversion almost trivial. (Of course, we are still finding occasional bugs in the transpiler and run-time "JavaScript-JVM.") 
 
-*Note that java2script/SwingJS cannot not support Thread.wait(), Thread.notify(), or Thread.sleep(). Nonetheless, in all cases we have found simple state-based alternatives that essentially reproduce this behavior in JavaScript using javax.Swing.Timer. These methods work equally well in Java and JavaScript, requiring just a bit of redesign of Java methods.
+*Note that java2script/SwingJS cannot support Thread.wait(), Thread.notify(), or Thread.sleep(). Nonetheless, in all cases we have found simple state-based alternatives that essentially reproduce this behavior in JavaScript using javax.Swing.Timer. These methods work equally well in Java and JavaScript, requiring just a bit of redesign of Java methods.
 
 Examples include:
 
