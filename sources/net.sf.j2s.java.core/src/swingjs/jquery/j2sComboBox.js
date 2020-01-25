@@ -10,10 +10,10 @@
 // NOTE: If you change this file, then you need to touch and save JQueryUI.java, as only then
 //       will the transpiler copy this file to site/swingjs/j2s/swingjs/jquery/
 
+;(function($) {
 
 J2S.__makeComboBox = function() {
   J2S.__makeComboBox = function(){};	
-  ;(function($) {
   
   $( function() {
     $('head').append('<style>.j2scb-sel {background-color:#B8CFE5;}'
@@ -303,7 +303,7 @@ J2S.__makeComboBox = function() {
     });
  
   });
- 
- })(J2S.__$);
   
 };  
+
+})(J2S.__$);

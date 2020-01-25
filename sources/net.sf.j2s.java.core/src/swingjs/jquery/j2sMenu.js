@@ -2,18 +2,15 @@
 // NOTE: If you change this file, then you need to touch and save JQueryUI.java, as only then
 //       will the transpiler copy this file to site/swingjs/j2s/swingjs/jquery/
 
+;(function(Swing, $) {
+
 J2S.__makeMenu = function() {
-
+// run once; set to NOP
 J2S.__makeMenu = function(){};	
-
-;(function(Swing) {
 
  var outActive;
  var vart;
 
- ;(function($) {
-
-	
  var n=!1, e = $;
 
  // local methods here for help with debugging
@@ -633,7 +630,7 @@ Swing.hideMenu = function(menu, force) {
 	menu.dragBind(false);
 	menu.$ulTop.hide();
 	menu._visible = menu.isDragging = false;
-};
+}
 
 Swing.disposeMenu = function(menu) {
   // called by javajs.swing.JPopupMenu
@@ -650,8 +647,9 @@ Swing.disposeMenu = function(menu) {
 }
 
 
-})(J2S.__$);
+};
 
-})(J2S.Swing);
+})(J2S.Swing, J2S.__$);
 
-}
+
+// end of j2sMenu.js 2020.01.25
