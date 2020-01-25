@@ -85,8 +85,7 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 //	}
 //
 	static {
-		@SuppressWarnings("unused")
-		Object jqueryui = JQueryUI.class; // loads jQuery.ui
+		JQueryUI.loadJQMenu();
 	}
 
 	// a frameless independent window
@@ -101,7 +100,6 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 
 	public JSPopupMenuUI() {
 		if (j2sSwingMenu == null) {
-			JSUtil.loadStaticResource("swingjs/jquery/j2sMenu.js");
 			j2sSwingMenu = J2S.getSwing();
 		}
 		isContainer = true;	
