@@ -1,5 +1,6 @@
 # Note
 
+java2script/java2script is the overall master of the project. However, all active devlopment should be forked from BobHanson/java2script, as that is the current development fork. That said, pushing to java2script/java2script is done regularly, so BobHanson/java2script should not ever be too far ahead of java2script/java2script.
 
 These notes are for Java developers who want to convert their Java applets or Java applications to 
 JavaScript, allowing continued, simultaneous one-source development of both Java and JavaScript. 
