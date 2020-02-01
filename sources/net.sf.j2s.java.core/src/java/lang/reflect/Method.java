@@ -42,7 +42,7 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 	private Class<?> returnType;
 	private Class<?>[] parameterTypes;
 	private Class<?>[] exceptionTypes;
-	private int modifiers = Member.PUBLIC;
+	private int modifiers = PUBLIC;
     boolean isProxy;
     
 //    private Annotation[]              annotations;
@@ -57,7 +57,8 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 	public Method(Class<?> declaringClass, String name, Class<?>[] paramTypes, Class<?> returnType,
 			Class<?>[] checkedExceptions, int modifiers) {
 		this.Class_ = declaringClass;
-		this.name = name;
+		int pt = name.indexOf("$");
+		this.name = (pt >= 0 ? name.substring(0, pt) : name);
 		this.parameterTypes = (paramTypes == null ? Class.NO_PARAMETERS : paramTypes);
 		this.returnType = returnType;
 		this.exceptionTypes = checkedExceptions;
@@ -396,7 +397,11 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 	}
 
 
-//	@Override
+	/**
+	 * SwingJS method to retrieve actual JavaScript name.
+	 * 
+	 * @return
+	 */
 	public String getSignature() {
 		return (String) signature;
 	}

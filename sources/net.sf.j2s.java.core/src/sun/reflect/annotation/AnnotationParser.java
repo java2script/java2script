@@ -461,26 +461,27 @@ public class AnnotationParser {
 
 		@SuppressWarnings("null")
 		public static Class<?>[] guessMethodParameterTypes(String signature) {
-			String[] args = /** @j2sNative signature.split("$")|| */
+			if (signature.startsWith("c$$"))
+				signature = signature.substring(2);
+			String[] args = /** @j2sNative signature.split("$") || */
 					null;
-			Class<?>[] classes = new Class<?>[args.length - 1];
-			if (args.length > 1) {
-				for (int i = 0; i < classes.length; i++) {
-					String param = args[i + 1];
-					String arrays = "";
-					int len = param.length();
-					while (len > 1 && param.endsWith("A")) {
-						arrays += "[]";
-						param = param.substring(0, --len);
-					}
-					param += arrays;
-					// in case we have __ initially due to non-packaged classes being put in package _. 
-					param = param.substring(0, 1) + param.substring(1).replace('_', '.');
-					classes[i] = typeForString(param, true);
-					if (classes[i] == null) {
-						classes[i] = Object.class;
-						System.err.println("JSAnnotationObject - method parameter typing failed for " + signature);
-					}
+			Class<?>[] classes = new Class<?>[args.length == 2 && args[1] == "" ? 0 : args.length - 1];
+			for (int i = 0; i < classes.length; i++) {
+				String param = args[i + 1];
+				String arrays = "";
+				int len = param.length();
+				while (len > 1 && param.endsWith("A")) {
+					arrays += "[]";
+					param = param.substring(0, --len);
+				}
+				param += arrays;
+				// in case we have __ initially due to non-packaged classes being put in package
+				// _.
+				param = param.substring(0, 1) + param.substring(1).replace('_', '.');
+				classes[i] = typeForString(param, true);
+				if (classes[i] == null) {
+					classes[i] = Object.class;
+					System.err.println("JSAnnotationObject - method parameter typing failed for " + signature);
 				}
 			}
 			return classes;
