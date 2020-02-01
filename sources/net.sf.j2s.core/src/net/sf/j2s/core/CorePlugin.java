@@ -25,7 +25,10 @@ public class CorePlugin extends Plugin {
 	 * "net.sf.j2s.core.jar" not "net.sf.j2s.core.3.2.5"
 	 * 
 	 */
-	public static String VERSION = "3.2.7-v3";
+	public static String VERSION = "3.2.7-v5";
+	// BH 2020.01.31 -- 3.2.7-v5 'L' used instead of 'J' in $fields$
+	// BH 2020.01.31 -- 3.2.7-v5 java.lang.reflect.* should not be truncated to reflect.* in parameters
+	// BH 2020.01.16 -- 3.2.7-v4 replaces extends java.awt.Component and javax.swing.JComponent 
 	// BH 2020.01.12 -- 3.2.7-v3 fixes JAXB annotation marshalling for 3.2.7 
 	// BH 2020.01.11 -- 3.2.7-v3 corrects and rewrites synthetic bridge creation with much cleaner heap usage 
 	// BH 2020.01.09 -- 3.2.7-v2 introduces @j2sAlias as a way of adding a custom method name, as in exports. 

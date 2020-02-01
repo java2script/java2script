@@ -135,6 +135,8 @@ import org.eclipse.jdt.core.dom.WildcardType;
 
 // TODO: superclass inheritance for JAXB XmlAccessorType
 
+//BH 2020.01.31 -- 3.2.7-v5 'L' used instead of 'J' in $fields$
+//BH 2020.01.31 -- 3.2.7-v5 java.lang.reflect.* should not be truncated to reflect.*
 //BH 2020.01.16 -- 3.2.7-v4 replaces extends java.awt.Component and javax.swing.JComponent 
 //BH 2020.01.12 -- 3.2.7-v3 fixes JAXB annotation marshalling for 3.2.7 
 //BH 2020.01.11 -- 3.2.7-v3 corrects and rewrites synthetic bridge creation with much cleaner heap usage 
@@ -535,7 +537,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	// order above can be changed, but typeCode order must then be adapted
 	
-	private final static String typeCodes = "ZBCDFILHSO";
+	private final static String typeCodes = "ZBCDFIJHSO";
 	
 	private class FieldInfo {
 		@SuppressWarnings("unchecked")
@@ -2656,7 +2658,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * 
 	 * 
 	 * @param field  the field being declared
-	 * @param fields
 	 * @param isStatic
 	 * @return true if anything was written to the buffer
 	 */
@@ -4831,9 +4832,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	static String stripJavaLang(String name) {
 		// shorten java.lang.XXX.YYY but not java.lang.xxx.YYY
-		String s = (!name.startsWith("java.lang.") || name.equals("java.lang.Object")
-				|| name.length() > 10 && !Character.isUpperCase(name.charAt(10)) ? name : name.substring(10));
-		return s;
+		return (
+				!name.startsWith("java.lang.") 
+				|| name.equals("java.lang.Object")
+				|| name.length() > 10 && !Character.isUpperCase(name.charAt(10)) ? 
+						name :
+						name.substring(10));
 	}
 
 	/**
@@ -5563,7 +5567,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			name = "S";
 			break;
 		default:
-			name = NameMapper.checkClassReplacement(name).replace("java.lang.", "").replace('.', '_');
+			name = stripJavaLang(NameMapper.checkClassReplacement(name)).replace('.', '_');
 			break;
 		}
 		if (arrays != null) {
