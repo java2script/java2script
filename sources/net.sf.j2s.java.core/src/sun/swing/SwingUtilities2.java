@@ -31,7 +31,9 @@ package sun.swing;
 import static java.awt.RenderingHints.KEY_TEXT_ANTIALIASING;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.FocusTraversalPolicy;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -62,7 +64,9 @@ import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.event.TreeModelEvent;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.text.DefaultCaret;
 import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Highlighter;
 import javax.swing.text.JTextComponent;
@@ -83,6 +87,8 @@ import javax.swing.text.JTextComponent;
 //import java.awt.event.KeyEvent;
 //import javax.swing.UIDefaults;
 //import javax.swing.text.DefaultCaret;
+import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreePath;
 
 /**
  * A collection of utility methods for Swing.
@@ -122,11 +128,11 @@ public class SwingUtilities2 {
      */
     public static final Object AA_TEXT_PROPERTY_KEY = new Object(); // AATextInfoPropertyKey
 
-//    /**
-//     * Used to tell a text component, being used as an editor for table
-//     * or tree, how many clicks it took to start editing.
-//     */
-//    private static final Object SKIP_CLICK_COUNT = new Object(); // skipClickCount
+    /**
+     * Used to tell a text component, being used as an editor for table
+     * or tree, how many clicks it took to start editing.
+     */
+    private static final Object SKIP_CLICK_COUNT = new Object(); // skipClickCount
 
     /* Presently this class assumes default fractional metrics.
      * This may need to change to emulate future platform L&Fs.
@@ -1611,37 +1617,37 @@ public class SwingUtilities2 {
     }
 
 // SwingJS X: Key Focus
-//    // At this point we need this method here. But we assume that there
-//    // will be a common method for this purpose in the future releases.
-//    public static Component compositeRequestFocus(Component component) {
-//        if (component instanceof Container) {
-//            Container container = (Container)component;
-//            if (container.isFocusCycleRoot()) {
-//                FocusTraversalPolicy policy = container.getFocusTraversalPolicy();
-//                Component comp = policy.getDefaultComponent(container);
-//                if (comp!=null) {
-//                    comp.requestFocus();
-//                    return comp;
-//                }
-//            }
-//            Container rootAncestor = container.getFocusCycleRootAncestor();
-//            if (rootAncestor!=null) {
-//                FocusTraversalPolicy policy = rootAncestor.getFocusTraversalPolicy();
-//                Component comp = policy.getComponentAfter(rootAncestor, container);
-//
-//                if (comp!=null && SwingUtilities.isDescendingFrom(comp, container)) {
-//                    comp.requestFocus();
-//                    return comp;
-//                }
-//            }
-//        }
-//        if (component.isFocusable()) {
-//            component.requestFocus();
-//            return component;
-//        }
-//        return null;
-//    }
-//
+    // At this point we need this method here. But we assume that there
+    // will be a common method for this purpose in the future releases.
+    public static Component compositeRequestFocus(Component component) {
+        if (component instanceof Container) {
+            Container container = (Container)component;
+            if (container.isFocusCycleRoot()) {
+                FocusTraversalPolicy policy = container.getFocusTraversalPolicy();
+                Component comp = policy.getDefaultComponent(container);
+                if (comp!=null) {
+                    comp.requestFocus();
+                    return comp;
+                }
+            }
+            Container rootAncestor = container.getFocusCycleRootAncestor();
+            if (rootAncestor!=null) {
+                FocusTraversalPolicy policy = rootAncestor.getFocusTraversalPolicy();
+                Component comp = policy.getComponentAfter(rootAncestor, container);
+
+                if (comp!=null && SwingUtilities.isDescendingFrom(comp, container)) {
+                    comp.requestFocus();
+                    return comp;
+                }
+            }
+        }
+        if (component.isFocusable()) {
+            component.requestFocus();
+            return component;
+        }
+        return null;
+    }
+
     /**
      * Change focus to the visible component in {@code JTabbedPane}.
      * This is not a general-purpose method and is here only to permit
@@ -1705,20 +1711,20 @@ public class SwingUtilities2 {
 //    private static void execute(Runnable command) {
 //        SwingUtilities.invokeLater(command);
 //    }
-//    /**
-//     * Sets the {@code SKIP_CLICK_COUNT} client property on the component
-//     * if it is an instance of {@code JTextComponent} with a
-//     * {@code DefaultCaret}. This property, used for text components acting
-//     * as editors in a table or tree, tells {@code DefaultCaret} how many
-//     * clicks to skip before starting selection.
-//     */
-//    public static void setSkipClickCount(Component comp, int count) {
-//        if (comp instanceof JTextComponent
-//                && ((JTextComponent) comp).getCaret() instanceof DefaultCaret) {
-//
-//            ((JTextComponent) comp).putClientProperty(SKIP_CLICK_COUNT, count);
-//        }
-//    }
+    /**
+     * Sets the {@code SKIP_CLICK_COUNT} client property on the component
+     * if it is an instance of {@code JTextComponent} with a
+     * {@code DefaultCaret}. This property, used for text components acting
+     * as editors in a table or tree, tells {@code DefaultCaret} how many
+     * clicks to skip before starting selection.
+     */
+    public static void setSkipClickCount(Component comp, int count) {
+        if (comp instanceof JTextComponent
+                && ((JTextComponent) comp).getCaret() instanceof DefaultCaret) {
+
+            ((JTextComponent) comp).putClientProperty(SKIP_CLICK_COUNT, count);
+        }
+    }
 
 //    /**
 //     * Return the MouseEvent's click count, possibly reduced by the value of
@@ -1896,8 +1902,22 @@ public class SwingUtilities2 {
         return liesIn(rect, p, false, false, three);
     }
 
-	public static void compositeRequestFocus(Component editorComponent) {
-		// TODO Auto-generated method stub
-		
-	}
+    /**
+     * Returns the {@link TreePath} that identifies the changed nodes.
+     *
+     * @param event  changes in a tree model
+     * @param model  corresponing tree model
+     * @return  the path to the changed nodes
+     */
+    public static TreePath getTreePath(TreeModelEvent event, TreeModel model) {
+        TreePath path = event.getTreePath();
+        if ((path == null) && (model != null)) {
+            Object root = model.getRoot();
+            if (root != null) {
+                path = new TreePath(root);
+            }
+        }
+        return path;
+    }
+
 }
