@@ -26,4 +26,16 @@ class Test_Class_1 extends Test_ implements Test_Class_int {
     public static void main(String[] args) {
     	new Test_Class_1("main");
     }
+
+	@Override
+	public void testClassInt(int i) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void testClassLong(long i) {
+		// TODO Auto-generated method stub
+		
+	}
 }

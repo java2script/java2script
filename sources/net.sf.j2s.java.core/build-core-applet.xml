@@ -49,7 +49,7 @@
 
 	  <target name="call-core" id="call-core">
 	   	<echo>......Creating core${call-core.name}.js</echo>
-	   	<concat destfile="${site.path}/js/core/tmp.js">
+	   	<concat destfile="${site.path}/js/core/tmp.js" fixlastline="yes">
 	   		<filelist dir="${site.path}/j2s" files="${call-core.list}" />
 	   	</concat> 
 

@@ -9,7 +9,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Hashtable;
 
-@SuppressWarnings("rawtypes")
 class Test_Class extends Test_Class2<Integer> {
 
 	Test_Class(byte[]...d) {
@@ -267,37 +266,43 @@ class Test_Class extends Test_Class2<Integer> {
 	public static void main(String[] args) {
 
 		
+		System.out.println("===========");
+		showMethods(Test_Class.class.getDeclaredMethods());
+		System.out.println("-----------");
+		showMethods(Test_Class.class.getMethods());
+		System.out.println("===========");
+		showMethods(Test_Class_int.class.getDeclaredMethods());
+		System.out.println("-----------");
+
 		new C(new byte[0], new byte[100], new byte[1000]);
-		
+
 		new C(new byte[3][5]);
 
 		try {
-		new C((byte[][])null);
+			new C((byte[][]) null);
 		} catch (Throwable t) {
 			System.out.println("Right!");
 		}
-		
-		
+
 		Class<?> type = Object.class;
-	    assert(type instanceof Class<?>);
+		assert (type instanceof Class<?>);
 
 		System.out.println(Test_Class.Singleton.instance);
 		String ss = "testing \10\13a \7777  \u0052";
-		System.out.println(ss + " "+ ss.length());
+		System.out.println(ss + " " + ss.length());
 		try {
 			System.out.println(new String(ss.getBytes(), "UTF-8"));
 		} catch (UnsupportedEncodingException e2) {
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
-		//System.out.println("Test_Class.main() " + cl1);
-		 try {
-			Constructor<Test_Class> constr = Test_Class.class.getConstructor(new Class[] {Test_.class});
+		// System.out.println("Test_Class.main() " + cl1);
+		try {
+			Constructor<Test_Class> constr = Test_Class.class.getConstructor(new Class[] { Test_.class });
 		} catch (NoSuchMethodException | SecurityException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-			
 
 		class LocalClass {
 
@@ -307,16 +312,14 @@ class Test_Class extends Test_Class2<Integer> {
 		}
 
 		try {
-			
+
 			System.out.println("main istatic=" + istatic);
 
-			Class<?> cls = Class.forName("test.Test_Call",false, test.Test_Class.class.getClassLoader());
+			Class<?> cls = Class.forName("test.Test_Call", false, test.Test_Class.class.getClassLoader());
 			Method m = cls.getMethod("main", String[].class);
-			String[] params = null; 
-			m.invoke(null, (Object) params); 
-			
-			
-			
+			String[] params = null;
+			m.invoke(null, (Object) params);
+
 			String s = new LocalClass().hello();
 			System.out.println(s);
 			assert (s.equals("LocalClass says hello"));
@@ -373,6 +376,17 @@ class Test_Class extends Test_Class2<Integer> {
 
 	}
 
+	private static void showMethods(Method[] methods) {
+		for (int i = 0; i < methods.length; i++) {
+			System.out.print("name=" + methods[i].getName());
+			Class<?>[] parameters = methods[i].getParameterTypes();
+			for (int j = 0; j < parameters.length; j++)
+				System.out.print(" " + parameters[j].getName());
+			System.out.println();
+		}
+
+	}
+
 	public static void testStatic() {
 		// TODO Auto-generated method stub
 		
@@ -389,6 +403,19 @@ class Test_Class extends Test_Class2<Integer> {
 		//assert(false);
 		
 	}
+
+	@Override
+	public void testClassInt(int i) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void testClassLong(long i) {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 
 }

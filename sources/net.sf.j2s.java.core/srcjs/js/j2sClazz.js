@@ -173,7 +173,7 @@ var _array = function(baseClass, paramType, ndims, params, isClone) {
       case "B":
       case "H": // short
       case "I":
-      case "L":
+      case "J":
       case "F":
       case "D":
         initValue = 0;
@@ -199,7 +199,7 @@ var _array = function(baseClass, paramType, ndims, params, isClone) {
       nbits = 16;
       break;
     case "I":
-    case "L":
+    case "J":
       nbits = 32;
       break;
     case "F":
@@ -796,6 +796,15 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
 };
 
 
+var stripJavaLang = function(s) {
+	return (
+			s.indexOf("java.lang.") != 0 
+			|| s == "java.lang.Object"
+			|| s.length > 10 && !Character.isUpperCase$C(s.charAt(10)) ? 
+					s :
+					s.substring(10));
+};
+
 var addB$Keys = function(clazz, isNew, b, outerObj, objThis) {
   var cl = clazz;
   do {
@@ -1167,7 +1176,7 @@ var shiftArray = function(a, i0, k) {
 
 var getParamCode = Clazz._getParamCode = function(cl) {
   cl.$clazz$ && (cl = cl.$clazz$);
-  return cl.__PARAMCODE || (cl.__PARAMCODE = cl.__CLASS_NAME__.replace(/java\.lang\./, "").replace(/\./g, '_'));
+  return cl.__PARAMCODE || (cl.__PARAMCODE = stripJavaLang(cl.__CLASS_NAME__).replace(/\./g, '_'));
 }
 
 var newTypedA = function(baseClass, args, nBits, ndims, isClone) {
@@ -2586,7 +2595,7 @@ Clazz.loadScript = function(file) {
   //removeArrayItem(classQueue, file);
 
   var file0 = file;
-  if (Clazz._nozcore) {
+  if (J2S._nozcore) {
     file = file.replace(/\.z\.js/,".js");
   }
   var data = "";
@@ -3677,7 +3686,7 @@ Clazz._setDeclared("java.lang.Long", java.lang.Long=Long=function(){
 if (typeof arguments[0] != "object")this.c$(arguments[0]);
 });
 
-decorateAsNumber(Long, "Long", "long", "L");
+decorateAsNumber(Long, "Long", "long", "J");
 Long.toString=Long.toString$J=Long.toString$J$I = Long.prototype.toString=function(i, radix){
 	switch(arguments.length) {
 	case 2:
