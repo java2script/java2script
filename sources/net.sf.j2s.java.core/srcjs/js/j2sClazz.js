@@ -3500,7 +3500,7 @@ var setJ2STypeclass = function(cl, type, paramCode) {
   cl.TYPE.toString = cl.TYPE.getName$ = cl.TYPE.getTypeName$ 
     = cl.TYPE.getCanonicalName$ = cl.TYPE.getSimpleName$ = function() {return type};
   cl.TYPE.isAssignableFrom$Class = (function(t) {return function(c) {return c == t}})(cl.TYPE);
-  cl.TYPE.getSuperclass$ = NULL_FUNC;
+  cl.TYPE.getSuperclass$ = cl.TYPE.getComponentType$ = NULL_FUNC;
   cl.TYPE.getInterfaces$ = EMPTY_CLASSES;
 }
 
