@@ -262,13 +262,29 @@ class Test_Class extends Test_Class2<Integer> {
 	
 	
 	
+	public short testShort(short s) {return 0;}
 
 	public static void main(String[] args) {
 
+		try {
+			assert (new String().getClass().getName().equals("java.lang.String"));
+			assert (Class.forName("java.lang.String") == String.class);
+			assert (Test_Class.class.getMethod("testShort",Short.TYPE).getParameterTypes()[0] == Short.TYPE);
+			assert (Class.forName("java.lang.String") == String.class);
+			assert (new String[0].getClass().getName().equals("[Ljava.lang.String;"));
+			assert (Class.forName("[Ljava.lang.String;").getComponentType() == String.class);
+			assert (new short[0].getClass().getName().equals("[S"));
+			assert (Class.forName("[S").getComponentType() == Short.TYPE);
+		} catch (Throwable t) {
+			t.printStackTrace();
+			assert(false);
+		}
 		
 		System.out.println("===========");
+		// these won't be the same, because Java declares synthetic access$n methods
 		showMethods(Test_Class.class.getDeclaredMethods());
 		System.out.println("-----------");
+		// these won't be the same, because SwingJS returns public and package-private methods
 		showMethods(Test_Class.class.getMethods());
 		System.out.println("===========");
 		showMethods(Test_Class_int.class.getDeclaredMethods());
