@@ -281,8 +281,10 @@ class Test_Class extends Test_Class2<Integer> {
 		}
 		
 		System.out.println("===========");
+		// these won't be the same, because Java declares synthetic access$n methods
 		showMethods(Test_Class.class.getDeclaredMethods());
 		System.out.println("-----------");
+		// these won't be the same, because SwingJS returns public and package-private methods
 		showMethods(Test_Class.class.getMethods());
 		System.out.println("===========");
 		showMethods(Test_Class_int.class.getDeclaredMethods());
