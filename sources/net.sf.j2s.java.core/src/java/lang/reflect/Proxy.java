@@ -660,14 +660,13 @@ public class Proxy implements java.io.Serializable {
     	 * 
     	 *  cl$.$clinit$ = 1;
     	 *  Clazz.newMeth(cl$, '$init$', function () {}, 1);
-    	 *  Clazz.newMeth(cl$, "c$$reflect_InvocationHandler", function(h) {
-    	 *  cl$.superclazz.c$$reflect_InvocationHandler.apply(this, [h]);
+    	 *  Clazz.newMeth(cl$, "c$$java_lang_reflect_InvocationHandler", function(h) {
+    	 *  cl$.superclazz.c$$java_lang_reflect_InvocationHandler.apply(this, [h]);
 		 *  cl$.$init$.apply(this);
     	 *  }, 1);
     	 *  
     	 *  
     	 */
-    	{}
     	for (int i = 0; i < interfaces.length; i++) {
     		Method[] methods = interfaces[i].getDeclaredMethods();
     		for (int j = 0; j < methods.length; j++) {
@@ -681,7 +680,7 @@ public class Proxy implements java.io.Serializable {
 
     @SuppressWarnings("unused")
 	private static void setJSPrototype(Class<?> cl, Method m, boolean add$) {
-		String mname = m.getName();
+		String mname = m.getSignature();
 		
 		// SwingJS transfers the invocation to a temporary method, then invokes it
 		/**
@@ -692,7 +691,7 @@ public class Proxy implements java.io.Serializable {
 		 *            cl.$clazz$.prototype[mname] = cl.$clazz$.prototype[mname1] =
 		 *            function() { var args = new Array(arguments.length); for (var k =
 		 *            arguments.length; --k >= 0;)args[k] = arguments[k];
-		 *            return(this.h.invoke$O$reflect_Method$OA(this, m, args)); }
+		 *            return(this.h.invoke$O$java_lang_reflect_Method$OA(this, m, args)); }
 		 */
 	}
 }

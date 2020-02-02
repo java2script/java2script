@@ -723,11 +723,14 @@ public final class Class<T> {
 		case "B":
 			code = "Byte";
 			break;
-		case "L":
+		case "J":
 			code = "Long";
 			break;
 		case "C":
 			code = "Character";
+			break;
+		case "O":
+			code = "Object";
 			break;
 		default:
 			return null;
@@ -1725,7 +1728,7 @@ public final class Class<T> {
 	 * @since JDK1.1
 	 */
 	public Method[] getMethods() throws SecurityException {
-		return /*copyMethods*/(privateGetPublicMethods());
+		return /*copyMethods*/(privateGetPublicMethods(true));
 	}
 
 	/**
@@ -2169,7 +2172,7 @@ public final class Class<T> {
 	 * @since JDK1.1
 	 */
 	public Method[] getDeclaredMethods() throws SecurityException {
-		return getMethods();
+		return /*copyMethods*/(privateGetPublicMethods(false));
 //		// be very careful not to change the stack depth of this
 //		// checkMemberAccess call for security reasons
 //		// see java.lang.SecurityManager.checkMemberAccess
@@ -2630,7 +2633,7 @@ public final class Class<T> {
 		case "I":
 		case "int":
 			return Integer.TYPE;
-		case "L":
+		case "J":
 		case "long":
 			return Long.TYPE;
 		case "F":
@@ -2639,6 +2642,8 @@ public final class Class<T> {
 		case "D":
 		case "double":
 			return Double.TYPE;
+		case "O":
+			return Object.class;
 		default:
 			return null;					
 		}
@@ -3034,7 +3039,7 @@ public final class Class<T> {
 	// Returns an array of "root" methods. These Method objects must NOT
 	// be propagated to the outside world, but must instead be copied
 	// via ReflectionFactory.copyMethod.
-	private Method[] privateGetPublicMethods() {
+	private Method[] privateGetPublicMethods(boolean isAll) {
 		if (isAnnotation()) {
 			if ($members$ == null) {
 				$members$ = AnnotationParser.JSAnnotationObject.createMethods((Class<? extends Annotation>) this);
@@ -3062,9 +3067,14 @@ public final class Class<T> {
 		 * 
 		 * 			var p = this.$clazz$.prototype;
 		 * 
-		 *            for (attr in p) { o = p[attr]; if (typeof o == "function" &&
-		 *            o.exName && !o.__CLASS_NAME__ && o != this.$clazz$[attr] &&
-		 *            o.exClazz == this.$clazz$) { // there are polynormical methods.
+		 *            for (attr in p) { o = p[attr]; if (
+		 *            typeof o == "function" 
+		 *            && o.exName 
+		 *            && !o.__CLASS_NAME__ 
+		 *            && o != this.$clazz$[attr] 
+		 *            && (isAll || o.exClazz == this.$clazz$)
+		 *            && !o.exName.startsWith("c$")
+		 *            ) { // there are polynormical methods.
 		 */
 		
 		Method m = new Method(this, attr, UNKNOWN_PARAMETERS, Void.class, NO_PARAMETERS, Modifier.PUBLIC);
@@ -3076,9 +3086,13 @@ public final class Class<T> {
 		 * 			ms.push(m);
 		 * }} 
 		 *            p = this.$clazz$; 
-		 *            for (attr in p) { o = p[attr];if (typeof o ==
-		 *            "function" && o.exName && !o.__CLASS_NAME__ &&
-		 *            o.exClazz == this.$clazz$) {
+		 *            for (attr in p) { o = p[attr];if (
+		 *            typeof o == "function" 
+		 *            && o.exName && !o.__CLASS_NAME__ 
+		 *            && (isAll || o.exClazz == this.$clazz$)
+		 *            && o.exName.indexOf("$") != 0
+		 *            && !o.exName.startsWith("c$")
+		 *            ) {
 		 */
 		m = new Method(this, attr, UNKNOWN_PARAMETERS, Void.class, NO_PARAMETERS, Modifier.PUBLIC);
 		m._setJSMethod(o, Modifier.STATIC);
