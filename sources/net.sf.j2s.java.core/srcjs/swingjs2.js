@@ -13862,12 +13862,13 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2019.02.02 3.2.7-v5 fixes array.getClass().getName() and getArrayClass() for short -- should be [S, not [H, for Java
 // BH 2019.12.29 3.2.6 fixes Float.parseFloat$S("NaN") [and Double]
 // BH 2019.12.23 3.2.6 update of System
 // BH 2019.12.19 3.2.6 revision of $clinit$
-// BH 2019.12.16 3.2.5.v4 adds ClassLoader static methods for system resources (just j2s/...)
-// BH 2019.12.15 3.2.5.v4 Character.prototype.valueOf() missing 
-// BH 2019.12.14 3.2.5.v3 Clazz._4Name initialization should be full static initialization 
+// BH 2019.12.16 3.2.5-v4 adds ClassLoader static methods for system resources (just j2s/...)
+// BH 2019.12.15 3.2.5-v4 Character.prototype.valueOf() missing 
+// BH 2019.12.14 3.2.5-v3 Clazz._4Name initialization should be full static initialization 
 
 // see earlier notes at net.sf.j2s.java.core.srcjs/js/devnotes.txt
 
@@ -13935,7 +13936,9 @@ var getArrayClass = function(name){
 	var n = 0;
 	while (name.charAt(n) == "[") n++;
 	var type = name.substring(n);
-	var clazz = (type.length == 1 ? primTypes[type].TYPE : Clazz._4Name(type.split(";")[0].substring(1)).$clazz$); 
+	if (type == "S")
+		type = "H"; // [S is short[] in Java
+	var clazz = (type.length == 1 ? primTypes[type].TYPE : Clazz._4Name(type.split(";")[0].substring(1),null,null,true)); 
 	return Clazz.array(clazz,-n);
 }
 
@@ -14871,14 +14874,20 @@ var arrayClass = function(baseClass, ndim) {
   o.__COMPONENTTYPE = (o.__NDIM == 1 ? baseClass : null);
   var oclass = Clazz.getClass(o);
   oclass.getComponentType$ = function() { 
-    return o.__COMPONENTTYPE 
-      || (o.__COMPONENTTYPE = arrayClass(baseClass, ndim - 1)); 
+	  if (!o.__COMPONENTTYPE)
+		  o.__COMPONENTTYPE = arrayClass(baseClass, ndim - 1);
+    return (o.__COMPONENTTYPE.__PRIMITIVE 
+    		|| o.__COMPONENTTYPE.$clazz$ ? o.__COMPONENTTYPE 
+    		: Clazz.getClass(o.__COMPONENTTYPE)); 
   };
-  oclass.getName$ = function() {return o.__NAME || (o__NAME = (function() {
+  oclass.getName$ = function() {return o.__NAME || (o__NAME = (function(stub) {
     switch (stub) {
     case "O":
       stub = "Object";
       break;
+    case "H": // SwingJS -> Java
+    	stub = "S";
+    	break;
     case "S":
       stub = "String";
       break;
@@ -14892,8 +14901,8 @@ var arrayClass = function(baseClass, ndim) {
     else if (stub.length > 1)
       stub = "Ljava.lang." + stub + ";";
     return aaa.replace(/A/g,"[") + stub;
-  })())};
-  arrayClasses[key] = oclass;  
+  })(stub))};
+  arrayClasses[key] = oclass;
   return oclass;  
 }
 
@@ -16393,8 +16402,11 @@ Clazz._initClass = function(c,clinit,status,objThis) {
 }
 
 Clazz._4Name = function(clazzName, applet, state, asClazz, initialize, isQuiet) {
-  if (clazzName.indexOf("[") == 0)
-	return getArrayClass(clazzName);
+  var cl;
+  if (clazzName.indexOf("[") == 0) {
+   cl = getArrayClass(clazzName);
+   return (asClazz ? cl.$clazz$ : cl);
+  }
   if (clazzName.indexOf(".") < 0)
     clazzName = "java.lang." + clazzName;  
   var isok = Clazz._isClassDefined(clazzName);
@@ -16425,7 +16437,7 @@ Clazz._4Name = function(clazzName, applet, state, asClazz, initialize, isQuiet) 
       _Loader.loadClass(clazzName);
     }    
   }
-  var cl = evalType(clazzName);
+  cl = evalType(clazzName);
   if (!cl){
 	if (isQuiet || Clazz._isQuietLoad)
 		return null;
