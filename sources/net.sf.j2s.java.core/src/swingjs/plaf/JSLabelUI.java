@@ -136,4 +136,7 @@ public class JSLabelUI extends JSLightweightUI {
 		return new Dimension(fm.stringWidth(s) + 14, fm.getHeight() + adj);
 	}
 
+	public void setVisible(boolean b) {
+		super.setVisible(b);
+	}
 }

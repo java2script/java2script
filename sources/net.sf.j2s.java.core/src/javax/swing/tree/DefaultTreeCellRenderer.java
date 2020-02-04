@@ -34,9 +34,12 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Insets;
+import java.awt.JSComponent;
 import java.awt.Rectangle;
+import java.net.URL;
 
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JTree;
 import javax.swing.border.EmptyBorder;
@@ -44,6 +47,8 @@ import javax.swing.plaf.ColorUIResource;
 import javax.swing.plaf.FontUIResource;
 
 import sun.swing.DefaultLookup;
+import swingjs.api.js.DOMNode;
+import swingjs.plaf.JSLabelUI;
 
 /**
  * Displays an entry in a tree.
@@ -161,7 +166,7 @@ public class DefaultTreeCellRenderer extends JLabel implements TreeCellRenderer
         drawDashedFocusIndicator = DefaultLookup.getBoolean(
                 this, ui, "Tree.drawDashedFocusIndicator", false);
 
-        fillBackground = DefaultLookup.getBoolean(this, ui, "Tree.rendererFillBackground", true);
+        fillBackground = false;//DefaultLookup.getBoolean(this, ui, "Tree.rendererFillBackground", true);
         Insets margins = DefaultLookup.getInsets(this, ui, "Tree.rendererMargins");
         if (margins != null) {
             setBorder(new EmptyBorder(margins.top, margins.left,
@@ -172,20 +177,43 @@ public class DefaultTreeCellRenderer extends JLabel implements TreeCellRenderer
     }
 
 
+    private static Icon defOpenIcon, defClosedIcon, defLeafIcon;
     /**
       * Returns the default icon, for the current laf, that is used to
       * represent non-leaf nodes that are expanded.
       */
     public Icon getDefaultOpenIcon() {
-        return DefaultLookup.getIcon(this, ui, "Tree.openIcon");
+    	// SwingJS
+    	return (defOpenIcon == null ? (defOpenIcon = newImageIcon("open")) : defOpenIcon);
+//    	return DefaultLookup.getIcon(this, ui, "Tree.openIcon");
     }
 
-    /**
+    private Icon newImageIcon(String type) {
+    	// SwingJS
+    	String f = null;
+    	switch (type) {
+    	case "open":
+    		f = "TreeOpen.gif";
+    		break;
+    	case "closed":
+    		f = "TreeClosed.gif";
+    		break;
+    	case "leaf":
+    		f = "TreeLeaf.gif";
+    		break;
+    	}
+    	URL resource = ui.getClass().getResource(f);
+    	return new ImageIcon(resource, type);
+	}
+
+	/**
       * Returns the default icon, for the current laf, that is used to
       * represent non-leaf nodes that are not expanded.
       */
     public Icon getDefaultClosedIcon() {
-        return DefaultLookup.getIcon(this, ui, "Tree.closedIcon");
+    	// SwingJS
+    	return (defClosedIcon == null ? (defClosedIcon = newImageIcon("closed")) : defClosedIcon);
+//        return DefaultLookup.getIcon(this, ui, "Tree.closedIcon");
     }
 
     /**
@@ -193,7 +221,10 @@ public class DefaultTreeCellRenderer extends JLabel implements TreeCellRenderer
       * represent leaf nodes.
       */
     public Icon getDefaultLeafIcon() {
-        return DefaultLookup.getIcon(this, ui, "Tree.leafIcon");
+    	// SwingJS
+    	return null;
+//    	return (defLeafIcon == null ? (defLeafIcon = newImageIcon("leaf")) : defLeafIcon);
+//        return DefaultLookup.getIcon(this, ui, "Tree.leafIcon");
     }
 
     /**

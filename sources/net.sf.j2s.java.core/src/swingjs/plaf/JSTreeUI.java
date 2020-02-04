@@ -61,6 +61,7 @@ import javax.swing.CellRendererPane;
 import javax.swing.Icon;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
+import javax.swing.JList;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -104,6 +105,7 @@ import sun.swing.DefaultLookup;
 import sun.swing.SwingUtilities2;
 import sun.swing.UIAction;
 import swingjs.api.js.DOMNode;
+import swingjs.api.js.JQueryObject;
 
 /**
  * SwingJS starting point was BasicTreeUI;
@@ -117,7 +119,7 @@ import swingjs.api.js.DOMNode;
  * @author Shannon Hickey (drag and drop)
  */
 
-public class JSTreeUI extends JSComponentUI {
+public class JSTreeUI extends JSPanelUI {
 	private static final StringBuilder BASELINE_COMPONENT_KEY = new StringBuilder("Tree.baselineComponent");
 
 	// Old actions forward to an instance of this.
@@ -364,13 +366,22 @@ public class JSTreeUI extends JSComponentUI {
 		super();
 	}
 
+	@Override
 	public DOMNode updateDOMNode() {
-		// TODO
-		super.updateDOMNode();
 		if (domNode == null) {
-			domNode = DOMNode.createElement("div", id);
+			
+			domNode = focusNode = enableNode = newDOMObject("div", id);
+			// maybe DOMNode.setAttrInt(domNode, "tabIndex", 1);
+			//innerNode = newDOMObject("div", id + "_inner");
+			addFocusHandler();
+
+//			domNode.appendChild(innerNode);
+			// tell j2sApplet.js that we will handle all the mouse clicks here
+//			setDataComponent(focusNode);
+//			bindJSKeyEvents(focusNode, false);
 		}
-		return domNode;
+	    setBackgroundImpl(jc.getBackground());
+		return updateDOMNodeCUI();
 	}
 
 	protected Color getHashColor() {
@@ -1181,6 +1192,7 @@ public class JSTreeUI extends JSComponentUI {
 	//
 
 	public void paint(Graphics g, JComponent c) {
+		super.paint(g, c);
 		if (tree != c) {
 			throw new InternalError("incorrect component");
 		}
@@ -1269,9 +1281,23 @@ public class JSTreeUI extends JSComponentUI {
 		paintDropLine(g);
 
 		// Empty out the renderer pane, allowing renderers to be gc'ed.
-		rendererPane.removeAll();
+		
+		//rendererPane.removeAll();
 
 		drawingCache.clear();
+	}
+
+	private String getPathID(TreePath path) {
+		String s = "";
+		do {
+			s = "_" + getNodeId(path) + s;
+		} while ((path = path.getParentPath()) != null);
+		return id + s;
+	}
+
+	
+	private String getNodeId(TreePath path) {
+		return "" + path.hashCode();
 	}
 
 	/**
@@ -1524,13 +1550,49 @@ public class JSTreeUI extends JSComponentUI {
 			leadIndex = getLeadSelectionRow();
 		} else
 			leadIndex = -1;
+		updateItem(g, path, row, isExpanded, isLeaf, leadIndex == row, bounds, true);
+	}
 
-		Component component;
+	private void hideItem(JComponent c, TreePath path) {
+		c.setVisible(false);
+	}
+	
+	private void updateItem(Graphics g, TreePath path, int row, boolean isExpanded, boolean isLeaf, boolean isLead,
+			Rectangle bounds, boolean isVisible) {
+		Component component = currentCellRenderer.getTreeCellRendererComponent(tree, path.getLastPathComponent(),
+				tree.isRowSelected(row), isExpanded, isLeaf, row, isLead);
+		int cx = bounds.x;
+		int cy = bounds.y;
+		int cw = bounds.width;
+		int ch = bounds.height;
+		if (isVisible)
+			rendererPane.paintComponent(g, component, tree, cx, cy, cw, ch, true);
+		updateItemHTML((JComponent) component, path, cx, cy, cw, tree.getRowHeight());
+	}
 
-		component = currentCellRenderer.getTreeCellRendererComponent(tree, path.getLastPathComponent(),
-				tree.isRowSelected(row), isExpanded, isLeaf, row, (leadIndex == row));
-
-		rendererPane.paintComponent(g, component, tree, bounds.x, bounds.y, bounds.width, bounds.height, true);
+	private void updateItemHTML(JComponent c, TreePath path, int left, int top, int width, int height) {
+		c.setSize(width, height);
+		c.setVisible(true);
+		JSComponentUI ui = c.秘getUI();
+		DOMNode node = ui.getListNode();
+		ui.updateDOMNode();
+		String myid = id + "_" + getNodeId(path);
+		System.out.println(">>>" + " " + myid + " " + getPathID(path) + " " + path);
+		JQueryObject jnode = $((DOMNode) (Object) ("#" + myid));
+		if (((DOMNode[]) (Object) jnode)[0] == null) {
+			DOMNode div = newDOMObject("div", myid);
+			div.appendChild(node);
+			domNode.appendChild(div);
+		} else {
+			jnode.empty();
+			if (node != null)
+				jnode.append(node);
+		}
+		// Rectangle r = getCellBounds1(list, index);
+		DOMNode.setSize(node, width, height);
+		DOMNode.setTopLeftAbsolute(node, top, left);
+		DOMNode.setStyles(node, "display", null);
+		DOMNode.setStyles(DOMNode.firstChild(node), "visibility", "visible");
 	}
 
 	/**
@@ -2337,11 +2399,7 @@ public class JSTreeUI extends JSComponentUI {
 	 */
 	protected boolean isLeaf(int row) {
 		TreePath path = getPathForRow(tree, row);
-
-		if (path != null)
-			return treeModel.isLeaf(path.getLastPathComponent());
-		// Have to return something here...
-		return true;
+		return (path == null || treeModel.isLeaf(path.getLastPathComponent()));
 	}
 
 	//
