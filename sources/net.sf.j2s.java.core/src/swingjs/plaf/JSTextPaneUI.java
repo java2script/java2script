@@ -26,6 +26,13 @@ package swingjs.plaf;
 
 public class JSTextPaneUI extends JSEditorPaneUI {
 
+	
+	public JSTextPaneUI() {
+		super();
+		isTextPane = true;
+	}
+	
+
     @Override
 	protected String getPropertyPrefix() {
         return "TextPane";

@@ -476,7 +476,9 @@ public class ScrollPaneLayout
         vsbPolicy = scrollPane.getVerticalScrollBarPolicy();
         hsbPolicy = scrollPane.getHorizontalScrollBarPolicy();
 
-        Insets insets = parent.getInsets();
+        // BH -- this was a problem when the scrollpane was in a split pane in SetXMLControlElement test OSP
+        Insets insets = new Insets(0,0,0,0);//
+        // parent.getInsets(); because these are interior?
         int prefWidth = insets.left + insets.right;
         int prefHeight = insets.top + insets.bottom;
 

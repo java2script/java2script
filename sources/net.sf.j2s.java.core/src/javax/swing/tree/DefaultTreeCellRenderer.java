@@ -512,6 +512,9 @@ public class DefaultTreeCellRenderer extends JLabel implements TreeCellRenderer
     }
 
 	private void paintFocus(Graphics g, int x, int y, int w, int h, Color notColor) {
+		
+		if (true)
+			return;
 		Color bsColor = getBorderSelectionColor();
 
 		if (bsColor != null && (selected || !drawDashedFocusIndicator)) {
