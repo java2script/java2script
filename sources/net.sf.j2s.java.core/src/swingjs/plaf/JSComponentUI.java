@@ -332,7 +332,7 @@ public class JSComponentUI extends ComponentUI
 	 * for a JLabel or AbstractButton, including JMenuItems
 	 * 
 	 */
-	protected DOMNode centeringNode;
+	public DOMNode centeringNode;
 
 	/**
 	 * an icon image -- non-null means we do have an icon

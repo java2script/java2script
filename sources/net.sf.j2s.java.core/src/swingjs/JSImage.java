@@ -8,38 +8,29 @@ import javajs.util.Base64;
 import swingjs.api.js.DOMNode;
 
 /**
- * A JavaScript version of BufferedImage. 
+ * A JavaScript version of BufferedImage.
  * 
- * Created from JSImagekit when creating an image 
- * from byte[] or from loading a GIF, PNG, or JPG image.
+ * Created from JSImagekit when creating an image from byte[] or from loading a
+ * GIF, PNG, or JPG image.
  * 
- * The difference is that when from byte[] data, the 
- * field 秘pix will be initialized to the raster data, 
- * but 秘imgNode will be null; when an image is used, then
- * 秘pix will be there, but it will not be populated unless
- * a call to setRGB is made. Until then, JSGraphics2D.drawImage will
- * simply use the image itself. But the 秘pix data will still
- * be available as 秘imgNode.pbuf32.
+ * The difference is that when from byte[] data, the field 秘pix will be
+ * initialized to the raster data, but 秘imgNode will be null.
  * 
- * Only integer raster data RGB and ARGB have been implemented.
+ * When an image is used, then 秘pix will be there, but it will not be populated
+ * unless a call to setRGB is made. Until then, JSGraphics2D.drawImage will
+ * simply use the image itself.
  * 
- * useful states:
+ * useful states: (needs checking)
  * 
- * _domNode != null ==> came from an image node (image file)
- * 秘canvas != null ==> an image has been created from raster data 
- * 
- * 
- * 
+ * a) 秘imgNode != null implies came from an image node (image file)
+ *
+ * b) 秘canvas != null implies an image has been created from raster data
  * 
  * @author Bob Hanson
  *
  */
 public class JSImage extends BufferedImage {
 
-	// a BufferedImage in name only, actually;
-	
-	// TODO: implement simple ColorModel and Raster
-	
 	public String src;
 
 	public JSImage(int[] argb, int width, int height, String src) {
@@ -65,7 +56,7 @@ public class JSImage extends BufferedImage {
 		 *   //if (this.callback) img.onload = this.callback;
 		 *   img.src = dataurl;
 		 */
-		{}
+		
 		秘imgNode = img;
 	}
 
@@ -78,5 +69,11 @@ public class JSImage extends BufferedImage {
 		秘component = c;
 		return this;
 	}
+
+	@Override
+	public DOMNode 秘updateNode(DOMNode imgNode) {
+		return imgNode;
+	}
+
 
 }

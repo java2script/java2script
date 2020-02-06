@@ -476,7 +476,7 @@ public class JEditorPane extends JTextComponent {
                 // Either we do not have POST data, or should submit the data
                 // synchronously.
                 InputStream in = getStream(page);
-                if (kit != null) {
+                if (getEditorKit() != null) { // BH SwingJS was just kit != null, but then initial page in TreeDemo does not load
                     Document doc = initializeModel(kit, page);
 
                     // At this point, one could either load up the model with no

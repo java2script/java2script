@@ -100,6 +100,10 @@ public interface JQueryObject {
 		
 		
 	}
+
+	public static DOMNode getDOMNode(JQueryObject jnode) {
+		return (jnode == null ? null : ((DOMNode[]) (Object) jnode)[0]);
+	}
 	
 
 }

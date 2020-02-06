@@ -268,7 +268,7 @@ public class RescaleOp implements BufferedImageOp, RasterOp {
         //
         int datatype = src.getDataBuffer().getDataType();
         if(datatype != DataBuffer.TYPE_BYTE 
-//        		&& datatype != DataBuffer.TYPE_USHORT
+        		&& datatype != DataBuffer.TYPE_USHORT
            ) {
             return false;
         }

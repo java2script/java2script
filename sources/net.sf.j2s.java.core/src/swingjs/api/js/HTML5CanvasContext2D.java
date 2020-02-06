@@ -115,6 +115,10 @@ public abstract class HTML5CanvasContext2D {
 
 	public static double[] getMatrix(HTML5CanvasContext2D ctx, AffineTransform transform) {
 		double[] m = /**  @j2sNative ctx._m || */ null;
+		if (transform == null) {
+			/** @j2sNative ctx._m = null; */
+			return null;			
+		}
 		if (m == null) {
 			m = new double[6];
 			/**

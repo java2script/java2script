@@ -111,7 +111,7 @@ public class SinglePixelPackedSampleModel extends SampleModel
                                    int bitMasks[]) {
         this(dataType, w, h, w, bitMasks);
         if (dataType != DataBuffer.TYPE_BYTE &&
-//            dataType != DataBuffer.TYPE_USHORT &&
+            dataType != DataBuffer.TYPE_USHORT &&
             dataType != DataBuffer.TYPE_INT) {
             throw new IllegalArgumentException("Unsupported data type "+
                                                dataType);
@@ -144,7 +144,7 @@ public class SinglePixelPackedSampleModel extends SampleModel
                                    int scanlineStride, int bitMasks[]) {
         super(dataType, w, h, bitMasks.length);
         if (dataType != DataBuffer.TYPE_BYTE &&
-//            dataType != DataBuffer.TYPE_USHORT &&
+            dataType != DataBuffer.TYPE_USHORT &&
             dataType != DataBuffer.TYPE_INT) {
             throw new IllegalArgumentException("Unsupported data type "+
                                                dataType);
@@ -237,9 +237,9 @@ public class SinglePixelPackedSampleModel extends SampleModel
         case DataBuffer.TYPE_BYTE:
             dataBuffer = new DataBufferByte(size);
             break;
-//        case DataBuffer.TYPE_USHORT:
-//            dataBuffer = new DataBufferUShort(size);
-//            break;
+        case DataBuffer.TYPE_USHORT:
+            dataBuffer = new DataBufferUShort(size);
+            break;
         case DataBuffer.TYPE_INT:
             dataBuffer = new DataBufferInt(size);
             break;
@@ -407,20 +407,20 @@ public class SinglePixelPackedSampleModel extends SampleModel
             obj = (Object)bdata;
             break;
 
-//        case DataBuffer.TYPE_USHORT:
-//
-//            short[] sdata;
-//
-//            if (obj == null)
-//                sdata = new short[1];
-//            else
-//                sdata = (short[])obj;
-//
-//            sdata[0] = (short)data.getElem(y * scanlineStride + x);
-//
-//            obj = (Object)sdata;
-//            break;
-//
+        case DataBuffer.TYPE_USHORT:
+
+            short[] sdata;
+
+            if (obj == null)
+                sdata = new short[1];
+            else
+                sdata = (short[])obj;
+
+            sdata[0] = (short)data.getElem(y * scanlineStride + x);
+
+            obj = (Object)sdata;
+            break;
+
         case DataBuffer.TYPE_INT:
 
             int[] idata;
@@ -633,12 +633,12 @@ public class SinglePixelPackedSampleModel extends SampleModel
             data.setElem(y*scanlineStride+x, ((int)barray[0])&0xff);
             break;
 
-//        case DataBuffer.TYPE_USHORT:
-//
-//            short[] sarray = (short[])obj;
-//            data.setElem(y*scanlineStride+x, ((int)sarray[0])&0xffff);
-//            break;
-//
+        case DataBuffer.TYPE_USHORT:
+
+            short[] sarray = (short[])obj;
+            data.setElem(y*scanlineStride+x, ((int)sarray[0])&0xffff);
+            break;
+
         case DataBuffer.TYPE_INT:
 
             int[] iarray = (int[])obj;
