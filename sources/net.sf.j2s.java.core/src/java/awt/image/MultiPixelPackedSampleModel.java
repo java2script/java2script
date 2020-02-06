@@ -113,7 +113,7 @@ public class MultiPixelPackedSampleModel extends SampleModel
                 DataBuffer.getDataTypeSize(dataType),
              0);
         if (dataType != DataBuffer.TYPE_BYTE &&
-//            dataType != DataBuffer.TYPE_USHORT &&
+            dataType != DataBuffer.TYPE_USHORT &&
             dataType != DataBuffer.TYPE_INT) {
             throw new IllegalArgumentException("Unsupported data type "+
                                                dataType);
@@ -149,7 +149,7 @@ public class MultiPixelPackedSampleModel extends SampleModel
                                        int dataBitOffset) {
         super(dataType, w, h, 1);
         if (dataType != DataBuffer.TYPE_BYTE &&
-//            dataType != DataBuffer.TYPE_USHORT &&
+            dataType != DataBuffer.TYPE_USHORT &&
             dataType != DataBuffer.TYPE_INT) {
             throw new IllegalArgumentException("Unsupported data type "+
                                                dataType);
@@ -208,9 +208,9 @@ public class MultiPixelPackedSampleModel extends SampleModel
         case DataBuffer.TYPE_BYTE:
             dataBuffer = new DataBufferByte(size+(dataBitOffset+7)/8);
             break;
-//        case DataBuffer.TYPE_USHORT:
-//            dataBuffer = new DataBufferUShort(size+(dataBitOffset+15)/16);
-//            break;
+        case DataBuffer.TYPE_USHORT:
+            dataBuffer = new DataBufferUShort(size+(dataBitOffset+15)/16);
+            break;
         case DataBuffer.TYPE_INT:
             dataBuffer = new DataBufferInt(size+(dataBitOffset+31)/32);
             break;
@@ -312,13 +312,12 @@ public class MultiPixelPackedSampleModel extends SampleModel
      */
     @Override
 		public int getTransferType() {
-// SwingJS - everything is done in ints here
-//        if (pixelBitStride > 16)
+        if (pixelBitStride > 16)
             return DataBuffer.TYPE_INT;
-//        else if (pixelBitStride > 8)
-//            return DataBuffer.TYPE_USHORT;
-//        else
-//            return DataBuffer.TYPE_BYTE;
+        else if (pixelBitStride > 8)
+            return DataBuffer.TYPE_USHORT;
+        else
+            return DataBuffer.TYPE_BYTE;
     }
 
     /**
@@ -493,22 +492,22 @@ public class MultiPixelPackedSampleModel extends SampleModel
             obj = (Object)bdata;
             break;
 
-//        case DataBuffer.TYPE_USHORT:
-//
-//            short[] sdata;
-//
-//            if (obj == null)
-//                sdata = new short[1];
-//            else
-//                sdata = (short[])obj;
-//
-//            element = data.getElem(y*scanlineStride +
-//                                   bitnum/dataElementSize);
-//            sdata[0] = (short)((element >> shift) & bitMask);
-//
-//            obj = (Object)sdata;
-//            break;
-//
+        case DataBuffer.TYPE_USHORT:
+
+            short[] sdata;
+
+            if (obj == null)
+                sdata = new short[1];
+            else
+                sdata = (short[])obj;
+
+            element = data.getElem(y*scanlineStride +
+                                   bitnum/dataElementSize);
+            sdata[0] = (short)((element >> shift) & bitMask);
+
+            obj = (Object)sdata;
+            break;
+
         case DataBuffer.TYPE_INT:
 
             int[] idata;
@@ -628,13 +627,13 @@ public class MultiPixelPackedSampleModel extends SampleModel
             data.setElem(index, element);
             break;
 
-//        case DataBuffer.TYPE_USHORT:
-//
-//            short[] sarray = (short[])obj;
-//            element |= ( ((int)(sarray[0])&0xffff) & bitMask) << shift;
-//            data.setElem(index, element);
-//            break;
-//
+        case DataBuffer.TYPE_USHORT:
+
+            short[] sarray = (short[])obj;
+            element |= ( ((int)(sarray[0])&0xffff) & bitMask) << shift;
+            data.setElem(index, element);
+            break;
+
         case DataBuffer.TYPE_INT:
 
             int[] iarray = (int[])obj;

@@ -31,6 +31,7 @@ package java.awt.image;
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
 //import java.math.BigInteger;
+import java.math.BigInteger;
 
 /**
  * The <code>IndexColorModel</code> class is a <code>ColorModel</code>
@@ -130,7 +131,7 @@ public class IndexColorModel extends ColorModel {
     private int pixel_mask;
     private int transparent_index = -1;
     private boolean allgrayopaque;
-//    private BigInteger validBits;
+    private BigInteger validBits;
 
 //    private sun.awt.image.BufImgSurfaceData .ICMColorData colorData = null;
 
@@ -433,79 +434,79 @@ public class IndexColorModel extends ColorModel {
         calculatePixelMask();
     }
 
-//    /**
-//     * Constructs an <code>IndexColorModel</code> from an
-//     * <code>int</code> array where each <code>int</code> is
-//     * comprised of red, green, blue, and alpha
-//     * components in the default RGB color model format.
-//     * The array must have enough values in it to fill all
-//     * of the needed component arrays of the specified size.
-//     * The <code>ColorSpace</code> is the default sRGB space.
-//     * The transparency value may be any of <code>Transparency.OPAQUE</code>,
-//     * <code>Transparency.BITMASK</code>,
-//     * or <code>Transparency.TRANSLUCENT</code>
-//     * depending on the arguments, as specified
-//     * in the <a href="#transparency">class description</a> above.
-//     * The transfer type must be one of <code>DataBuffer.TYPE_BYTE</code>
-//     * <code>DataBuffer.TYPE_USHORT</code>.
-//     * The <code>BigInteger</code> object specifies the valid/invalid pixels
-//     * in the <code>cmap</code> array.  A pixel is valid if the
-//     * <code>BigInteger</code> value at that index is set, and is invalid
-//     * if the <code>BigInteger</code> bit  at that index is not set.
-//     * @param bits the number of bits each pixel occupies
-//     * @param size the size of the color component array
-//     * @param cmap the array of color components
-//     * @param start the starting offset of the first color component
-//     * @param transferType the specified data type
-//     * @param validBits a <code>BigInteger</code> object.  If a bit is
-//     *    set in the BigInteger, the pixel at that index is valid.
-//     *    If a bit is not set, the pixel at that index
-//     *    is considered invalid.  If null, all pixels are valid.
-//     *    Only bits from 0 to the map size are considered.
-//     * @throws IllegalArgumentException if <code>bits</code> is less
-//     *           than 1 or greater than 16
-//     * @throws IllegalArgumentException if <code>size</code> is less
-//     *           than 1
-//     * @throws IllegalArgumentException if <code>transferType</code> is not
-//     *           one of <code>DataBuffer.TYPE_BYTE</code> or
-//     *           <code>DataBuffer.TYPE_USHORT</code>
-//     *
-//     * @since 1.3
-//     */
-//    public IndexColorModel(int bits, int size, int cmap[], int start,
-//                           int transferType, BigInteger validBits) {
-//        super (bits, alphaBits,
-//               ColorSpace.getInstance(ColorSpace.CS_sRGB),
-//               true, false, TRANSLUCENT,
-//               transferType);
-//
-//        if (bits < 1 || bits > 16) {
-//            throw new IllegalArgumentException("Number of bits must be between"
-//                                               +" 1 and 16.");
-//        }
-//        if (size < 1) {
-//            throw new IllegalArgumentException("Map size ("+size+
-//                                               ") must be >= 1");
-//        }
-//        if ((transferType != DataBuffer.TYPE_BYTE) &&
-//            (transferType != DataBuffer.TYPE_USHORT)) {
-//            throw new IllegalArgumentException("transferType must be either" +
-//                "DataBuffer.TYPE_BYTE or DataBuffer.TYPE_USHORT");
-//        }
-//
-//        if (validBits != null) {
-//            // Check to see if it is all valid
-//            for (int i=0; i < size; i++) {
-//                if (!validBits.testBit(i)) {
-//                    this.validBits = validBits;
-//                    break;
-//                }
-//            }
-//        }
-//
-//        setRGBs(size, cmap, start, true);
-//        calculatePixelMask();
-//    }
+    /**
+     * Constructs an <code>IndexColorModel</code> from an
+     * <code>int</code> array where each <code>int</code> is
+     * comprised of red, green, blue, and alpha
+     * components in the default RGB color model format.
+     * The array must have enough values in it to fill all
+     * of the needed component arrays of the specified size.
+     * The <code>ColorSpace</code> is the default sRGB space.
+     * The transparency value may be any of <code>Transparency.OPAQUE</code>,
+     * <code>Transparency.BITMASK</code>,
+     * or <code>Transparency.TRANSLUCENT</code>
+     * depending on the arguments, as specified
+     * in the <a href="#transparency">class description</a> above.
+     * The transfer type must be one of <code>DataBuffer.TYPE_BYTE</code>
+     * <code>DataBuffer.TYPE_USHORT</code>.
+     * The <code>BigInteger</code> object specifies the valid/invalid pixels
+     * in the <code>cmap</code> array.  A pixel is valid if the
+     * <code>BigInteger</code> value at that index is set, and is invalid
+     * if the <code>BigInteger</code> bit  at that index is not set.
+     * @param bits the number of bits each pixel occupies
+     * @param size the size of the color component array
+     * @param cmap the array of color components
+     * @param start the starting offset of the first color component
+     * @param transferType the specified data type
+     * @param validBits a <code>BigInteger</code> object.  If a bit is
+     *    set in the BigInteger, the pixel at that index is valid.
+     *    If a bit is not set, the pixel at that index
+     *    is considered invalid.  If null, all pixels are valid.
+     *    Only bits from 0 to the map size are considered.
+     * @throws IllegalArgumentException if <code>bits</code> is less
+     *           than 1 or greater than 16
+     * @throws IllegalArgumentException if <code>size</code> is less
+     *           than 1
+     * @throws IllegalArgumentException if <code>transferType</code> is not
+     *           one of <code>DataBuffer.TYPE_BYTE</code> or
+     *           <code>DataBuffer.TYPE_USHORT</code>
+     *
+     * @since 1.3
+     */
+    public IndexColorModel(int bits, int size, int cmap[], int start,
+                           int transferType, BigInteger validBits) {
+        super (bits, alphaBits,
+               ColorSpace.getInstance(ColorSpace.CS_sRGB),
+               true, false, TRANSLUCENT,
+               transferType);
+
+        if (bits < 1 || bits > 16) {
+            throw new IllegalArgumentException("Number of bits must be between"
+                                               +" 1 and 16.");
+        }
+        if (size < 1) {
+            throw new IllegalArgumentException("Map size ("+size+
+                                               ") must be >= 1");
+        }
+        if ((transferType != DataBuffer.TYPE_BYTE) &&
+            (transferType != DataBuffer.TYPE_USHORT)) {
+            throw new IllegalArgumentException("transferType must be either" +
+                "DataBuffer.TYPE_BYTE or DataBuffer.TYPE_USHORT");
+        }
+
+        if (validBits != null) {
+            // Check to see if it is all valid
+            for (int i=0; i < size; i++) {
+                if (!validBits.testBit(i)) {
+                    this.validBits = validBits;
+                    break;
+                }
+            }
+        }
+
+        setRGBs(size, cmap, start, true);
+        calculatePixelMask();
+    }
 
     private void setRGBs(int size, byte r[], byte g[], byte b[], byte a[]) {
         if (size < 1) {
@@ -550,11 +551,11 @@ public class IndexColorModel extends ColorModel {
         int j = start;
         int transparency = OPAQUE;
         boolean allgray = true;
-//        BigInteger validBits = this.validBits;
+        BigInteger validBits = this.validBits;
         for (int i = 0; i < size; i++, j++) {
-//            if (validBits != null && !validBits.testBit(i)) {
-//                continue;
-//            }
+            if (validBits != null && !validBits.testBit(i)) {
+                continue;
+            }
             int cmaprgb = cmap[j];
             int r = (cmaprgb >> 16) & 0xff;
             int g = (cmaprgb >>  8) & 0xff;
@@ -589,15 +590,15 @@ public class IndexColorModel extends ColorModel {
         return Math.max(newSize, 256);
     }
 
-//    private BigInteger getAllValid() {
-//        int numbytes = (map_size+7)/8;
-//        byte[] valid = new byte[numbytes];
-//        java.util.Arrays.fill(valid, (byte)0xff);
-//        valid[0] = (byte)(0xff >>> (numbytes*8 - map_size));
-//
-//        return new BigInteger(1, valid);
-//    }
-//
+    private BigInteger getAllValid() {
+        int numbytes = (map_size+7)/8;
+        byte[] valid = new byte[numbytes];
+        java.util.Arrays.fill(valid, (byte)0xff);
+        valid[0] = (byte)(0xff >>> (numbytes*8 - map_size));
+
+        return new BigInteger(1, valid);
+    }
+
     /**
      * Returns the transparency.  Returns either OPAQUE, BITMASK,
      * or TRANSLUCENT
@@ -1318,14 +1319,14 @@ public class IndexColorModel extends ColorModel {
             raster = Raster.createPackedRaster(DataBuffer.TYPE_BYTE,
                                                w, h, 1, pixel_bits, null);
         }
-//        else if (pixel_bits <= 8) {
-//            raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE,
-//                                                  w,h,1,null);
-//        }
-//        else if (pixel_bits <= 16) {
-//            raster = Raster.createInterleavedRaster(DataBuffer.TYPE_USHORT,
-//                                                  w,h,1,null);
-//        }
+        else if (pixel_bits <= 8) {
+            raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE,
+                                                  w,h,1,null);
+        }
+        else if (pixel_bits <= 16) {
+            raster = Raster.createInterleavedRaster(DataBuffer.TYPE_USHORT,
+                                                  w,h,1,null);
+        }
         else {
             throw new
                 UnsupportedOperationException("This method is not supported "+
@@ -1494,25 +1495,25 @@ public class IndexColorModel extends ColorModel {
         return true;//(validBits == null);
     }
 
-//    /**
-//     * Returns a <code>BigInteger</code> that indicates the valid/invalid
-//     * pixels in the colormap.  A bit is valid if the
-//     * <code>BigInteger</code> value at that index is set, and is invalid
-//     * if the <code>BigInteger</code> value at that index is not set.
-//     * The only valid ranges to query in the <code>BigInteger</code> are
-//     * between 0 and the map size.
-//     * @return a <code>BigInteger</code> indicating the valid/invalid pixels.
-//     * @since 1.3
-//     */
-//    public BigInteger getValidPixels() {
-//        if (validBits == null) {
-//            return getAllValid();
-//        }
-//        else {
-//            return validBits;
-//        }
-//    }
-//
+    /**
+     * Returns a <code>BigInteger</code> that indicates the valid/invalid
+     * pixels in the colormap.  A bit is valid if the
+     * <code>BigInteger</code> value at that index is set, and is invalid
+     * if the <code>BigInteger</code> value at that index is not set.
+     * The only valid ranges to query in the <code>BigInteger</code> are
+     * between 0 and the map size.
+     * @return a <code>BigInteger</code> indicating the valid/invalid pixels.
+     * @since 1.3
+     */
+    public BigInteger getValidPixels() {
+        if (validBits == null) {
+            return getAllValid();
+        }
+        else {
+            return validBits;
+        }
+    }
+
     /**
      * Disposes of system resources associated with this
      * <code>ColorModel</code> once this <code>ColorModel</code> is no

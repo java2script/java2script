@@ -30,6 +30,7 @@ package java.awt.image;
 
 import java.awt.color.ColorSpace;
 //import java.awt.color.ICC_ColorSpace;
+import java.awt.color.ICC_ColorSpace;
 
 /**
  * A <CODE>ColorModel</CODE> class that works with pixel values that
@@ -194,7 +195,7 @@ public class ComponentColorModel extends ColorModel {
     private byte[] tosRGB8LUT;
     private byte[] fromsRGB8LUT8;
     private short[] fromsRGB8LUT16;
-//    private byte[] fromLinearGray16ToOtherGray8LUT;
+    private byte[] fromLinearGray16ToOtherGray8LUT;
     private short[] fromLinearGray16ToOtherGray16LUT;
     private boolean needScaleInit;
     private boolean noUnnorm;
@@ -288,13 +289,13 @@ public class ComponentColorModel extends ColorModel {
                 signed = true;
                 needScaleInit = true;
                 break;
-//            case DataBuffer.TYPE_FLOAT:
-//            case DataBuffer.TYPE_DOUBLE:
-//                signed = true;
-//                needScaleInit = false;
-//                noUnnorm = true;
-//                nonStdScale = false;
-//                break;
+            case DataBuffer.TYPE_FLOAT:
+            case DataBuffer.TYPE_DOUBLE:
+                signed = true;
+                needScaleInit = false;
+                noUnnorm = true;
+                nonStdScale = false;
+                break;
             default:
                 throw new IllegalArgumentException("This constructor is not "+
                          "compatible with transferType " + transferType);
@@ -414,48 +415,48 @@ public class ComponentColorModel extends ColorModel {
         if (is_sRGB) {
             is_sRGB_stdScale = true;
             nonStdScale = false;
-//        } else if (ColorModel.isLinearRGBspace(colorSpace)) {
-//            // Note that the built-in Linear RGB space has a normalized
-//            // range of 0.0 - 1.0 for each coordinate.  Usage of these
-//            // LUTs makes that assumption.
-//            is_LinearRGB_stdScale = true;
-//            nonStdScale = false;
-//            if (transferType == DataBuffer.TYPE_BYTE) {
-//                tosRGB8LUT = ColorModel.getLinearRGB8TosRGB8LUT();
-//                fromsRGB8LUT8 = ColorModel.getsRGB8ToLinearRGB8LUT();
-//            } else {
-//                tosRGB8LUT = ColorModel.getLinearRGB16TosRGB8LUT();
-//                fromsRGB8LUT16 = ColorModel.getsRGB8ToLinearRGB16LUT();
-//            }
-//        } else if ((colorSpaceType == ColorSpace.TYPE_GRAY) &&
-//                   (colorSpace instanceof ICC_ColorSpace) &&
-//                   (colorSpace.getMinValue(0) == 0.0f) &&
-//                   (colorSpace.getMaxValue(0) == 1.0f)) {
-//            // Note that a normalized range of 0.0 - 1.0 for the gray
-//            // component is required, because usage of these LUTs makes
-//            // that assumption.
-//            ICC_ColorSpace ics = (ICC_ColorSpace) colorSpace;
-//            is_ICCGray_stdScale = true;
-//            nonStdScale = false;
-//            fromsRGB8LUT16 = ColorModel.getsRGB8ToLinearRGB16LUT();
-//            if (ColorModel.isLinearGRAYspace(ics)) {
-//                is_LinearGray_stdScale = true;
-//                if (transferType == DataBuffer.TYPE_BYTE) {
-//                    tosRGB8LUT = ColorModel.getGray8TosRGB8LUT(ics);
-//                } else {
-//                    tosRGB8LUT = ColorModel.getGray16TosRGB8LUT(ics);
-//                }
-//            } else {
-//                if (transferType == DataBuffer.TYPE_BYTE) {
-//                    tosRGB8LUT = ColorModel.getGray8TosRGB8LUT(ics);
-//                    fromLinearGray16ToOtherGray8LUT =
-//                        ColorModel.getLinearGray16ToOtherGray8LUT(ics);
-//                } else {
-//                    tosRGB8LUT = ColorModel.getGray16TosRGB8LUT(ics);
-//                    fromLinearGray16ToOtherGray16LUT =
-//                        ColorModel.getLinearGray16ToOtherGray16LUT(ics);
-//                }
-//            }
+        } else if (ColorModel.isLinearRGBspace(colorSpace)) {
+            // Note that the built-in Linear RGB space has a normalized
+            // range of 0.0 - 1.0 for each coordinate.  Usage of these
+            // LUTs makes that assumption.
+            is_LinearRGB_stdScale = true;
+            nonStdScale = false;
+            if (transferType == DataBuffer.TYPE_BYTE) {
+                tosRGB8LUT = ColorModel.getLinearRGB8TosRGB8LUT();
+                fromsRGB8LUT8 = ColorModel.getsRGB8ToLinearRGB8LUT();
+            } else {
+                tosRGB8LUT = ColorModel.getLinearRGB16TosRGB8LUT();
+                fromsRGB8LUT16 = ColorModel.getsRGB8ToLinearRGB16LUT();
+            }
+        } else if ((colorSpaceType == ColorSpace.TYPE_GRAY) &&
+                   (colorSpace instanceof ICC_ColorSpace) &&
+                   (colorSpace.getMinValue(0) == 0.0f) &&
+                   (colorSpace.getMaxValue(0) == 1.0f)) {
+            // Note that a normalized range of 0.0 - 1.0 for the gray
+            // component is required, because usage of these LUTs makes
+            // that assumption.
+            ICC_ColorSpace ics = (ICC_ColorSpace) colorSpace;
+            is_ICCGray_stdScale = true;
+            nonStdScale = false;
+            fromsRGB8LUT16 = ColorModel.getsRGB8ToLinearRGB16LUT();
+            if (ColorModel.isLinearGRAYspace(ics)) {
+                is_LinearGray_stdScale = true;
+                if (transferType == DataBuffer.TYPE_BYTE) {
+                    tosRGB8LUT = ColorModel.getGray8TosRGB8LUT(ics);
+                } else {
+                    tosRGB8LUT = ColorModel.getGray16TosRGB8LUT(ics);
+                }
+            } else {
+                if (transferType == DataBuffer.TYPE_BYTE) {
+                    tosRGB8LUT = ColorModel.getGray8TosRGB8LUT(ics);
+                    fromLinearGray16ToOtherGray8LUT =
+                        ColorModel.getLinearGray16ToOtherGray8LUT(ics);
+                } else {
+                    tosRGB8LUT = ColorModel.getGray16TosRGB8LUT(ics);
+                    fromLinearGray16ToOtherGray16LUT =
+                        ColorModel.getLinearGray16ToOtherGray16LUT(ics);
+                }
+            }
         } else if (needScaleInit) {
             // if transferType is byte, ushort, int, or short and we
             // don't already know the ColorSpace has minVlaue == 0.0f and
@@ -822,34 +823,34 @@ public class ComponentColorModel extends ColorModel {
                     return (int) ((sdata[idx] / 32767.0f) * scalefactor + 0.5f);
                 }
             }
-//            case DataBuffer.TYPE_FLOAT: {
-//                float fdata[] = (float[]) inData;
-//                float scalefactor = (float) ((1 << precision) - 1);
-//                if (needAlpha) {
-//                    float f = fdata[numColorComponents];
-//                    if (f != 0.0f) {
-//                        return (int) (((fdata[idx] / f) * scalefactor) + 0.5f);
-//                    } else {
-//                        return 0;
-//                    }
-//                } else {
-//                    return (int) (fdata[idx] * scalefactor + 0.5f);
-//                }
-//            }
-//            case DataBuffer.TYPE_DOUBLE: {
-//                double ddata[] = (double[]) inData;
-//                double scalefactor = (double) ((1 << precision) - 1);
-//                if (needAlpha) {
-//                    double d = ddata[numColorComponents];
-//                    if (d != 0.0) {
-//                        return (int) (((ddata[idx] / d) * scalefactor) + 0.5);
-//                    } else {
-//                        return 0;
-//                    }
-//                } else {
-//                    return (int) (ddata[idx] * scalefactor + 0.5);
-//                }
-//            }
+            case DataBuffer.TYPE_FLOAT: {
+                float fdata[] = (float[]) inData;
+                float scalefactor = (float) ((1 << precision) - 1);
+                if (needAlpha) {
+                    float f = fdata[numColorComponents];
+                    if (f != 0.0f) {
+                        return (int) (((fdata[idx] / f) * scalefactor) + 0.5f);
+                    } else {
+                        return 0;
+                    }
+                } else {
+                    return (int) (fdata[idx] * scalefactor + 0.5f);
+                }
+            }
+            case DataBuffer.TYPE_DOUBLE: {
+                double ddata[] = (double[]) inData;
+                double scalefactor = (double) ((1 << precision) - 1);
+                if (needAlpha) {
+                    double d = ddata[numColorComponents];
+                    if (d != 0.0) {
+                        return (int) (((ddata[idx] / d) * scalefactor) + 0.5);
+                    } else {
+                        return 0;
+                    }
+                } else {
+                    return (int) (ddata[idx] * scalefactor + 0.5);
+                }
+            }
             case DataBuffer.TYPE_BYTE:
                byte bdata[] = (byte[])inData;
                comp = bdata[idx] & mask;
@@ -1067,14 +1068,14 @@ public class ComponentColorModel extends ColorModel {
                 short sdata[] = (short[])inData;
                 alpha = (int) ((sdata[aIdx] / 32767.0f) * 255.0f + 0.5f);
                 return alpha;
-//            case DataBuffer.TYPE_FLOAT:
-//                float fdata[] = (float[])inData;
-//                alpha = (int) (fdata[aIdx] * 255.0f + 0.5f);
-//                return alpha;
-//            case DataBuffer.TYPE_DOUBLE:
-//                double ddata[] = (double[])inData;
-//                alpha = (int) (ddata[aIdx] * 255.0 + 0.5);
-//                return alpha;
+            case DataBuffer.TYPE_FLOAT:
+                float fdata[] = (float[])inData;
+                alpha = (int) (fdata[aIdx] * 255.0f + 0.5f);
+                return alpha;
+            case DataBuffer.TYPE_DOUBLE:
+                double ddata[] = (double[])inData;
+                alpha = (int) (ddata[aIdx] * 255.0 + 0.5);
+                return alpha;
             case DataBuffer.TYPE_BYTE:
                byte bdata[] = (byte[])inData;
                alpha = bdata[aIdx] & mask;
@@ -1310,168 +1311,168 @@ public class ComponentColorModel extends ColorModel {
                     }
                     return sdata;
                 }
-//            case DataBuffer.TYPE_FLOAT:
-//                {
-//                    float fdata[];
-//                    if (pixel == null) {
-//                        fdata = new float[numComponents];
-//                    } else {
-//                        fdata = (float[])pixel;
-//                    }
-//                    float factor;
-//                    if (is_sRGB_stdScale || is_LinearRGB_stdScale) {
-//                        if (is_LinearRGB_stdScale) {
-//                            red = fromsRGB8LUT16[red] & 0xffff;
-//                            grn = fromsRGB8LUT16[grn] & 0xffff;
-//                            blu = fromsRGB8LUT16[blu] & 0xffff;
-//                            factor = 1.0f / 65535.0f;
-//                        } else {
-//                            factor = 1.0f / 255.0f;
-//                        }
-//                        if (supportsAlpha) {
-//                            alp = (rgb>>24) & 0xff;
-//                            fdata[3] = alp * (1.0f / 255.0f);
-//                            if (isAlphaPremultiplied) {
-//                                factor *= fdata[3];
-//                            }
-//                        }
-//                        fdata[0] = red * factor;
-//                        fdata[1] = grn * factor;
-//                        fdata[2] = blu * factor;
-//                    } else if (is_LinearGray_stdScale) {
-//                        red = fromsRGB8LUT16[red] & 0xffff;
-//                        grn = fromsRGB8LUT16[grn] & 0xffff;
-//                        blu = fromsRGB8LUT16[blu] & 0xffff;
-//                        fdata[0] = ((0.2125f * red) +
-//                                    (0.7154f * grn) +
-//                                    (0.0721f * blu)) / 65535.0f;
-//                        if (supportsAlpha) {
-//                            alp = (rgb>>24) & 0xff;
-//                            fdata[1] = alp * (1.0f / 255.0f);
-//                            if (isAlphaPremultiplied) {
-//                                fdata[0] *= fdata[1];
-//                            }
-//                        }
-//                    } else if (is_ICCGray_stdScale) {
-//                        red = fromsRGB8LUT16[red] & 0xffff;
-//                        grn = fromsRGB8LUT16[grn] & 0xffff;
-//                        blu = fromsRGB8LUT16[blu] & 0xffff;
-//                        int gray = (int) ((0.2125f * red) +
-//                                          (0.7154f * grn) +
-//                                          (0.0721f * blu) + 0.5f);
-//                        fdata[0] = (fromLinearGray16ToOtherGray16LUT[gray] &
-//                                    0xffff) / 65535.0f;
-//                        if (supportsAlpha) {
-//                            alp = (rgb>>24) & 0xff;
-//                            fdata[1] = alp * (1.0f / 255.0f);
-//                            if (isAlphaPremultiplied) {
-//                                fdata[0] *= fdata[1];
-//                            }
-//                        }
-//                    } else {
-//                        float norm[] = new float[3];
-//                        factor = 1.0f / 255.0f;
-//                        norm[0] = red * factor;
-//                        norm[1] = grn * factor;
-//                        norm[2] = blu * factor;
-//                        norm = colorSpace.fromRGB(norm);
-//                        if (supportsAlpha) {
-//                            alp = (rgb>>24) & 0xff;
-//                            fdata[numColorComponents] = alp * factor;
-//                            if (isAlphaPremultiplied) {
-//                                factor *= alp;
-//                                for (int i = 0; i < numColorComponents; i++) {
-//                                    norm[i] *= factor;
-//                                }
-//                            }
-//                        }
-//                        for (int i = 0; i < numColorComponents; i++) {
-//                            fdata[i] = norm[i];
-//                        }
-//                    }
-//                    return fdata;
-//                }
-//            case DataBuffer.TYPE_DOUBLE:
-//                {
-//                    double ddata[];
-//                    if (pixel == null) {
-//                        ddata = new double[numComponents];
-//                    } else {
-//                        ddata = (double[])pixel;
-//                    }
-//                    if (is_sRGB_stdScale || is_LinearRGB_stdScale) {
-//                        double factor;
-//                        if (is_LinearRGB_stdScale) {
-//                            red = fromsRGB8LUT16[red] & 0xffff;
-//                            grn = fromsRGB8LUT16[grn] & 0xffff;
-//                            blu = fromsRGB8LUT16[blu] & 0xffff;
-//                            factor = 1.0 / 65535.0;
-//                        } else {
-//                            factor = 1.0 / 255.0;
-//                        }
-//                        if (supportsAlpha) {
-//                            alp = (rgb>>24) & 0xff;
-//                            ddata[3] = alp * (1.0 / 255.0);
-//                            if (isAlphaPremultiplied) {
-//                                factor *= ddata[3];
-//                            }
-//                        }
-//                        ddata[0] = red * factor;
-//                        ddata[1] = grn * factor;
-//                        ddata[2] = blu * factor;
-//                    } else if (is_LinearGray_stdScale) {
-//                        red = fromsRGB8LUT16[red] & 0xffff;
-//                        grn = fromsRGB8LUT16[grn] & 0xffff;
-//                        blu = fromsRGB8LUT16[blu] & 0xffff;
-//                        ddata[0] = ((0.2125 * red) +
-//                                    (0.7154 * grn) +
-//                                    (0.0721 * blu)) / 65535.0;
-//                        if (supportsAlpha) {
-//                            alp = (rgb>>24) & 0xff;
-//                            ddata[1] = alp * (1.0 / 255.0);
-//                            if (isAlphaPremultiplied) {
-//                                ddata[0] *= ddata[1];
-//                            }
-//                        }
-//                    } else if (is_ICCGray_stdScale) {
-//                        red = fromsRGB8LUT16[red] & 0xffff;
-//                        grn = fromsRGB8LUT16[grn] & 0xffff;
-//                        blu = fromsRGB8LUT16[blu] & 0xffff;
-//                        int gray = (int) ((0.2125f * red) +
-//                                          (0.7154f * grn) +
-//                                          (0.0721f * blu) + 0.5f);
-//                        ddata[0] = (fromLinearGray16ToOtherGray16LUT[gray] &
-//                                    0xffff) / 65535.0;
-//                        if (supportsAlpha) {
-//                            alp = (rgb>>24) & 0xff;
-//                            ddata[1] = alp * (1.0 / 255.0);
-//                            if (isAlphaPremultiplied) {
-//                                ddata[0] *= ddata[1];
-//                            }
-//                        }
-//                    } else {
-//                        float factor = 1.0f / 255.0f;
-//                        float norm[] = new float[3];
-//                        norm[0] = red * factor;
-//                        norm[1] = grn * factor;
-//                        norm[2] = blu * factor;
-//                        norm = colorSpace.fromRGB(norm);
-//                        if (supportsAlpha) {
-//                            alp = (rgb>>24) & 0xff;
-//                            ddata[numColorComponents] = alp * (1.0 / 255.0);
-//                            if (isAlphaPremultiplied) {
-//                                factor *= alp;
-//                                for (int i = 0; i < numColorComponents; i++) {
-//                                    norm[i] *= factor;
-//                                }
-//                            }
-//                        }
-//                        for (int i = 0; i < numColorComponents; i++) {
-//                            ddata[i] = norm[i];
-//                        }
-//                    }
-//                    return ddata;
-//                }
+            case DataBuffer.TYPE_FLOAT:
+                {
+                    float fdata[];
+                    if (pixel == null) {
+                        fdata = new float[numComponents];
+                    } else {
+                        fdata = (float[])pixel;
+                    }
+                    float factor;
+                    if (is_sRGB_stdScale || is_LinearRGB_stdScale) {
+                        if (is_LinearRGB_stdScale) {
+                            red = fromsRGB8LUT16[red] & 0xffff;
+                            grn = fromsRGB8LUT16[grn] & 0xffff;
+                            blu = fromsRGB8LUT16[blu] & 0xffff;
+                            factor = 1.0f / 65535.0f;
+                        } else {
+                            factor = 1.0f / 255.0f;
+                        }
+                        if (supportsAlpha) {
+                            alp = (rgb>>24) & 0xff;
+                            fdata[3] = alp * (1.0f / 255.0f);
+                            if (isAlphaPremultiplied) {
+                                factor *= fdata[3];
+                            }
+                        }
+                        fdata[0] = red * factor;
+                        fdata[1] = grn * factor;
+                        fdata[2] = blu * factor;
+                    } else if (is_LinearGray_stdScale) {
+                        red = fromsRGB8LUT16[red] & 0xffff;
+                        grn = fromsRGB8LUT16[grn] & 0xffff;
+                        blu = fromsRGB8LUT16[blu] & 0xffff;
+                        fdata[0] = ((0.2125f * red) +
+                                    (0.7154f * grn) +
+                                    (0.0721f * blu)) / 65535.0f;
+                        if (supportsAlpha) {
+                            alp = (rgb>>24) & 0xff;
+                            fdata[1] = alp * (1.0f / 255.0f);
+                            if (isAlphaPremultiplied) {
+                                fdata[0] *= fdata[1];
+                            }
+                        }
+                    } else if (is_ICCGray_stdScale) {
+                        red = fromsRGB8LUT16[red] & 0xffff;
+                        grn = fromsRGB8LUT16[grn] & 0xffff;
+                        blu = fromsRGB8LUT16[blu] & 0xffff;
+                        int gray = (int) ((0.2125f * red) +
+                                          (0.7154f * grn) +
+                                          (0.0721f * blu) + 0.5f);
+                        fdata[0] = (fromLinearGray16ToOtherGray16LUT[gray] &
+                                    0xffff) / 65535.0f;
+                        if (supportsAlpha) {
+                            alp = (rgb>>24) & 0xff;
+                            fdata[1] = alp * (1.0f / 255.0f);
+                            if (isAlphaPremultiplied) {
+                                fdata[0] *= fdata[1];
+                            }
+                        }
+                    } else {
+                        float norm[] = new float[3];
+                        factor = 1.0f / 255.0f;
+                        norm[0] = red * factor;
+                        norm[1] = grn * factor;
+                        norm[2] = blu * factor;
+                        norm = colorSpace.fromRGB(norm);
+                        if (supportsAlpha) {
+                            alp = (rgb>>24) & 0xff;
+                            fdata[numColorComponents] = alp * factor;
+                            if (isAlphaPremultiplied) {
+                                factor *= alp;
+                                for (int i = 0; i < numColorComponents; i++) {
+                                    norm[i] *= factor;
+                                }
+                            }
+                        }
+                        for (int i = 0; i < numColorComponents; i++) {
+                            fdata[i] = norm[i];
+                        }
+                    }
+                    return fdata;
+                }
+            case DataBuffer.TYPE_DOUBLE:
+                {
+                    double ddata[];
+                    if (pixel == null) {
+                        ddata = new double[numComponents];
+                    } else {
+                        ddata = (double[])pixel;
+                    }
+                    if (is_sRGB_stdScale || is_LinearRGB_stdScale) {
+                        double factor;
+                        if (is_LinearRGB_stdScale) {
+                            red = fromsRGB8LUT16[red] & 0xffff;
+                            grn = fromsRGB8LUT16[grn] & 0xffff;
+                            blu = fromsRGB8LUT16[blu] & 0xffff;
+                            factor = 1.0 / 65535.0;
+                        } else {
+                            factor = 1.0 / 255.0;
+                        }
+                        if (supportsAlpha) {
+                            alp = (rgb>>24) & 0xff;
+                            ddata[3] = alp * (1.0 / 255.0);
+                            if (isAlphaPremultiplied) {
+                                factor *= ddata[3];
+                            }
+                        }
+                        ddata[0] = red * factor;
+                        ddata[1] = grn * factor;
+                        ddata[2] = blu * factor;
+                    } else if (is_LinearGray_stdScale) {
+                        red = fromsRGB8LUT16[red] & 0xffff;
+                        grn = fromsRGB8LUT16[grn] & 0xffff;
+                        blu = fromsRGB8LUT16[blu] & 0xffff;
+                        ddata[0] = ((0.2125 * red) +
+                                    (0.7154 * grn) +
+                                    (0.0721 * blu)) / 65535.0;
+                        if (supportsAlpha) {
+                            alp = (rgb>>24) & 0xff;
+                            ddata[1] = alp * (1.0 / 255.0);
+                            if (isAlphaPremultiplied) {
+                                ddata[0] *= ddata[1];
+                            }
+                        }
+                    } else if (is_ICCGray_stdScale) {
+                        red = fromsRGB8LUT16[red] & 0xffff;
+                        grn = fromsRGB8LUT16[grn] & 0xffff;
+                        blu = fromsRGB8LUT16[blu] & 0xffff;
+                        int gray = (int) ((0.2125f * red) +
+                                          (0.7154f * grn) +
+                                          (0.0721f * blu) + 0.5f);
+                        ddata[0] = (fromLinearGray16ToOtherGray16LUT[gray] &
+                                    0xffff) / 65535.0;
+                        if (supportsAlpha) {
+                            alp = (rgb>>24) & 0xff;
+                            ddata[1] = alp * (1.0 / 255.0);
+                            if (isAlphaPremultiplied) {
+                                ddata[0] *= ddata[1];
+                            }
+                        }
+                    } else {
+                        float factor = 1.0f / 255.0f;
+                        float norm[] = new float[3];
+                        norm[0] = red * factor;
+                        norm[1] = grn * factor;
+                        norm[2] = blu * factor;
+                        norm = colorSpace.fromRGB(norm);
+                        if (supportsAlpha) {
+                            alp = (rgb>>24) & 0xff;
+                            ddata[numColorComponents] = alp * (1.0 / 255.0);
+                            if (isAlphaPremultiplied) {
+                                factor *= alp;
+                                for (int i = 0; i < numColorComponents; i++) {
+                                    norm[i] *= factor;
+                                }
+                            }
+                        }
+                        for (int i = 0; i < numColorComponents; i++) {
+                            ddata[i] = norm[i];
+                        }
+                    }
+                    return ddata;
+                }
             }
         }
 
@@ -2268,49 +2269,49 @@ public class ComponentColorModel extends ColorModel {
                 }
             }
             return spixel;
-//        case DataBuffer.TYPE_FLOAT:
-//            float[] fpixel;
-//            if (obj == null) {
-//                fpixel = new float[numComponents];
-//            } else {
-//                fpixel = (float[]) obj;
-//            }
-//            if (needAlpha) {
-//                float alpha = normComponents[numColorComponents + normOffset];
-//                for (int c = 0, nc = normOffset; c < numColorComponents;
-//                     c++, nc++) {
-//                    fpixel[c] = normComponents[nc] * alpha;
-//                }
-//                fpixel[numColorComponents] = alpha;
-//            } else {
-//                for (int c = 0, nc = normOffset; c < numComponents;
-//                     c++, nc++) {
-//                    fpixel[c] = normComponents[nc];
-//                }
-//            }
-//            return fpixel;
-//        case DataBuffer.TYPE_DOUBLE:
-//            double[] dpixel;
-//            if (obj == null) {
-//                dpixel = new double[numComponents];
-//            } else {
-//                dpixel = (double[]) obj;
-//            }
-//            if (needAlpha) {
-//                double alpha =
-//                    (double) (normComponents[numColorComponents + normOffset]);
-//                for (int c = 0, nc = normOffset; c < numColorComponents;
-//                     c++, nc++) {
-//                    dpixel[c] = normComponents[nc] * alpha;
-//                }
-//                dpixel[numColorComponents] = alpha;
-//            } else {
-//                for (int c = 0, nc = normOffset; c < numComponents;
-//                     c++, nc++) {
-//                    dpixel[c] = (double) normComponents[nc];
-//                }
-//            }
-//            return dpixel;
+        case DataBuffer.TYPE_FLOAT:
+            float[] fpixel;
+            if (obj == null) {
+                fpixel = new float[numComponents];
+            } else {
+                fpixel = (float[]) obj;
+            }
+            if (needAlpha) {
+                float alpha = normComponents[numColorComponents + normOffset];
+                for (int c = 0, nc = normOffset; c < numColorComponents;
+                     c++, nc++) {
+                    fpixel[c] = normComponents[nc] * alpha;
+                }
+                fpixel[numColorComponents] = alpha;
+            } else {
+                for (int c = 0, nc = normOffset; c < numComponents;
+                     c++, nc++) {
+                    fpixel[c] = normComponents[nc];
+                }
+            }
+            return fpixel;
+        case DataBuffer.TYPE_DOUBLE:
+            double[] dpixel;
+            if (obj == null) {
+                dpixel = new double[numComponents];
+            } else {
+                dpixel = (double[]) obj;
+            }
+            if (needAlpha) {
+                double alpha =
+                    (double) (normComponents[numColorComponents + normOffset]);
+                for (int c = 0, nc = normOffset; c < numColorComponents;
+                     c++, nc++) {
+                    dpixel[c] = normComponents[nc] * alpha;
+                }
+                dpixel[numColorComponents] = alpha;
+            } else {
+                for (int c = 0, nc = normOffset; c < numComponents;
+                     c++, nc++) {
+                    dpixel[c] = (double) normComponents[nc];
+                }
+            }
+            return dpixel;
         default:
             throw new UnsupportedOperationException("This method has not been "+
                                         "implemented for transferType " +
@@ -2397,18 +2398,18 @@ public class ComponentColorModel extends ColorModel {
                 normComponents[nc] = ((float) spixel[c]) / 32767.0f;
             }
             break;
-//        case DataBuffer.TYPE_FLOAT:
-//            float[] fpixel = (float[]) pixel;
-//            for (int c = 0, nc = normOffset; c < numComponents; c++, nc++) {
-//                normComponents[nc] = fpixel[c];
-//            }
-//            break;
-//        case DataBuffer.TYPE_DOUBLE:
-//            double[] dpixel = (double[]) pixel;
-//            for (int c = 0, nc = normOffset; c < numComponents; c++, nc++) {
-//                normComponents[nc] = (float) dpixel[c];
-//            }
-//            break;
+        case DataBuffer.TYPE_FLOAT:
+            float[] fpixel = (float[]) pixel;
+            for (int c = 0, nc = normOffset; c < numComponents; c++, nc++) {
+                normComponents[nc] = fpixel[c];
+            }
+            break;
+        case DataBuffer.TYPE_DOUBLE:
+            double[] dpixel = (double[]) pixel;
+            for (int c = 0, nc = normOffset; c < numComponents; c++, nc++) {
+                normComponents[nc] = (float) dpixel[c];
+            }
+            break;
         default:
             throw new UnsupportedOperationException("This method has not been "+
                                         "implemented for transferType " +
@@ -2598,56 +2599,56 @@ public class ComponentColorModel extends ColorModel {
                     }
                 }
                 break;
-//                case DataBuffer.TYPE_FLOAT: {
-//                    float pixel[] = null;
-//                    float zpixel[] = null;
-//                    for (int y = 0; y < h; y++, rY++) {
-//                        rX = rminX;
-//                        for (int x = 0; x < w; x++, rX++) {
-//                            pixel = (float[]) raster.getDataElements(rX, rY,
-//                                                                     pixel);
-//                            normAlpha = pixel[aIdx];
-//                            if (normAlpha != 0.0f) {
-//                                for (int c=0; c < aIdx; c++) {
-//                                    pixel[c] *= normAlpha;
-//                                }
-//                                raster.setDataElements(rX, rY, pixel);
-//                            } else {
-//                                if (zpixel == null) {
-//                                    zpixel = new float[numComponents];
-//                                    java.util.Arrays.fill(zpixel, 0.0f);
-//                                }
-//                                raster.setDataElements(rX, rY, zpixel);
-//                            }
-//                        }
-//                    }
-//                }
-//                break;
-//                case DataBuffer.TYPE_DOUBLE: {
-//                    double pixel[] = null;
-//                    double zpixel[] = null;
-//                    for (int y = 0; y < h; y++, rY++) {
-//                        rX = rminX;
-//                        for (int x = 0; x < w; x++, rX++) {
-//                            pixel = (double[]) raster.getDataElements(rX, rY,
-//                                                                      pixel);
-//                            double dnormAlpha = pixel[aIdx];
-//                            if (dnormAlpha != 0.0) {
-//                                for (int c=0; c < aIdx; c++) {
-//                                    pixel[c] *= dnormAlpha;
-//                                }
-//                                raster.setDataElements(rX, rY, pixel);
-//                            } else {
-//                                if (zpixel == null) {
-//                                    zpixel = new double[numComponents];
-//                                    java.util.Arrays.fill(zpixel, 0.0);
-//                                }
-//                                raster.setDataElements(rX, rY, zpixel);
-//                            }
-//                        }
-//                    }
-//                }
-//                break;
+                case DataBuffer.TYPE_FLOAT: {
+                    float pixel[] = null;
+                    float zpixel[] = null;
+                    for (int y = 0; y < h; y++, rY++) {
+                        rX = rminX;
+                        for (int x = 0; x < w; x++, rX++) {
+                            pixel = (float[]) raster.getDataElements(rX, rY,
+                                                                     pixel);
+                            normAlpha = pixel[aIdx];
+                            if (normAlpha != 0.0f) {
+                                for (int c=0; c < aIdx; c++) {
+                                    pixel[c] *= normAlpha;
+                                }
+                                raster.setDataElements(rX, rY, pixel);
+                            } else {
+                                if (zpixel == null) {
+                                    zpixel = new float[numComponents];
+                                    java.util.Arrays.fill(zpixel, 0.0f);
+                                }
+                                raster.setDataElements(rX, rY, zpixel);
+                            }
+                        }
+                    }
+                }
+                break;
+                case DataBuffer.TYPE_DOUBLE: {
+                    double pixel[] = null;
+                    double zpixel[] = null;
+                    for (int y = 0; y < h; y++, rY++) {
+                        rX = rminX;
+                        for (int x = 0; x < w; x++, rX++) {
+                            pixel = (double[]) raster.getDataElements(rX, rY,
+                                                                      pixel);
+                            double dnormAlpha = pixel[aIdx];
+                            if (dnormAlpha != 0.0) {
+                                for (int c=0; c < aIdx; c++) {
+                                    pixel[c] *= dnormAlpha;
+                                }
+                                raster.setDataElements(rX, rY, pixel);
+                            } else {
+                                if (zpixel == null) {
+                                    zpixel = new double[numComponents];
+                                    java.util.Arrays.fill(zpixel, 0.0);
+                                }
+                                raster.setDataElements(rX, rY, zpixel);
+                            }
+                        }
+                    }
+                }
+                break;
                 default:
                     throw new UnsupportedOperationException("This method has not been "+
                          "implemented for transferType " + transferType);
@@ -2740,44 +2741,44 @@ public class ComponentColorModel extends ColorModel {
                     }
                 }
                 break;
-//                case DataBuffer.TYPE_FLOAT: {
-//                    float pixel[] = null;
-//                    for (int y = 0; y < h; y++, rY++) {
-//                        rX = rminX;
-//                        for (int x = 0; x < w; x++, rX++) {
-//                            pixel = (float[])raster.getDataElements(rX, rY,
-//                                                                    pixel);
-//                            normAlpha = pixel[aIdx];
-//                            if (normAlpha != 0.0f) {
-//                                float invAlpha = 1.0f / normAlpha;
-//                                for (int c=0; c < aIdx; c++) {
-//                                    pixel[c] *= invAlpha;
-//                                }
-//                                raster.setDataElements(rX, rY, pixel);
-//                            }
-//                        }
-//                    }
-//                }
-//                break;
-//                case DataBuffer.TYPE_DOUBLE: {
-//                    double pixel[] = null;
-//                    for (int y = 0; y < h; y++, rY++) {
-//                        rX = rminX;
-//                        for (int x = 0; x < w; x++, rX++) {
-//                            pixel = (double[])raster.getDataElements(rX, rY,
-//                                                                     pixel);
-//                            double dnormAlpha = pixel[aIdx];
-//                            if (dnormAlpha != 0.0) {
-//                                double invAlpha = 1.0 / dnormAlpha;
-//                                for (int c=0; c < aIdx; c++) {
-//                                    pixel[c] *= invAlpha;
-//                                }
-//                                raster.setDataElements(rX, rY, pixel);
-//                            }
-//                        }
-//                    }
-//                }
-//                break;
+                case DataBuffer.TYPE_FLOAT: {
+                    float pixel[] = null;
+                    for (int y = 0; y < h; y++, rY++) {
+                        rX = rminX;
+                        for (int x = 0; x < w; x++, rX++) {
+                            pixel = (float[])raster.getDataElements(rX, rY,
+                                                                    pixel);
+                            normAlpha = pixel[aIdx];
+                            if (normAlpha != 0.0f) {
+                                float invAlpha = 1.0f / normAlpha;
+                                for (int c=0; c < aIdx; c++) {
+                                    pixel[c] *= invAlpha;
+                                }
+                                raster.setDataElements(rX, rY, pixel);
+                            }
+                        }
+                    }
+                }
+                break;
+                case DataBuffer.TYPE_DOUBLE: {
+                    double pixel[] = null;
+                    for (int y = 0; y < h; y++, rY++) {
+                        rX = rminX;
+                        for (int x = 0; x < w; x++, rX++) {
+                            pixel = (double[])raster.getDataElements(rX, rY,
+                                                                     pixel);
+                            double dnormAlpha = pixel[aIdx];
+                            if (dnormAlpha != 0.0) {
+                                double invAlpha = 1.0 / dnormAlpha;
+                                for (int c=0; c < aIdx; c++) {
+                                    pixel[c] *= invAlpha;
+                                }
+                                raster.setDataElements(rX, rY, pixel);
+                            }
+                        }
+                    }
+                }
+                break;
                 default:
                     throw new UnsupportedOperationException("This method has not been "+
                          "implemented for transferType " + transferType);

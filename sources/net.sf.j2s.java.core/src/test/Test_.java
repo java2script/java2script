@@ -138,6 +138,7 @@ public class Test_ {
 		Test_GenericAnon.main(args);
 		Test_GenericEABIXY2.main(args);
 		Test_GenericExt2.main(args);
+		Test_Image.main(args);
 		Test_Init.main(args);
 		Test_Inner.main(args);
 		Test_Instance.main(args);

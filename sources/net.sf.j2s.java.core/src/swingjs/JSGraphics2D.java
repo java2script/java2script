@@ -7,7 +7,6 @@ import java.awt.Composite;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.Image;
 import java.awt.Paint;
@@ -47,7 +46,6 @@ import swingjs.api.js.HTML5CanvasContext2D.ImageData;
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-@SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
 public class JSGraphics2D implements
 		// Graphics2D,
 		Cloneable {
@@ -505,7 +503,7 @@ public class JSGraphics2D implements
 	private DOMNode getImageNode(Image img) {
 //		backgroundPainted = true;
 		DOMNode imgNode = DOMNode.getImageNode(img);
-		return (imgNode == null ? JSGraphicsCompositor.createImageNode(img) : imgNode);
+		return (imgNode == null ? JSGraphicsCompositor.createImageNode(img) : ((BufferedImage) img).秘updateNode(imgNode));
 	}
 
 	private void observe(Image img, ImageObserver observer, boolean isOK) {
@@ -572,56 +570,62 @@ public class JSGraphics2D implements
 
 	@SuppressWarnings("unused")
 	public boolean drawImagePriv(Image img, int x, int y, ImageObserver observer) {
-//		backgroundPainted = true;
 		if (img != null) {
-			int[] pixels = null;
-			boolean isRGB = false; // usually RGBA
-			/**
-			 * @j2sNative
-			 * 
-			 * 			pixels = img.raster.秘pix ||img.秘pix; isRGB = (img.imageType == 1);
-			 *
-			 */
-			DOMNode imgNode = null;
 			int width = ((BufferedImage) img).getRaster().getWidth();
 			int height = ((BufferedImage) img).getRaster().getHeight();
-
+			double[] m = HTML5CanvasContext2D.getMatrix(ctx, transform);
+			int type = ((BufferedImage) img).getType();
+			boolean isOpaque = ((BufferedImage) img).秘isOpaque();
+			int[] pixels = (isTranslationOnly(m) ? ((BufferedImage) img).get秘pix() : null);
+			DOMNode imgNode = null;
 			if (pixels == null) {
 				if ((imgNode = getImageNode(img)) != null)
 					ctx.drawImage(imgNode, x, y, width, height);
 			} else {
-				drawDirect(pixels, x, y, width, height, isRGB);
+				boolean isPerPixel = (pixels.length == width * height);
+				if (buf8 == null || x != lastx || y != lasty || nx != width || ny != height) {
+					imageData = ctx.getImageData(x, y, width, height);
+					buf8 = imageData.data;
+					lastx = x;
+					lasty = y;
+					nx = width;
+					ny = height;
+				}
+				if (isPerPixel) {
+					for (int pt = 0, i = 0, n = Math.min(buf8.length / 4, pixels.length); i < n; i++) {
+						int argb = pixels[i];
+						buf8[pt++] = (argb >> 16) & 0xFF;
+						buf8[pt++] = (argb >> 8) & 0xFF;
+						buf8[pt++] = argb & 0xFF;
+						buf8[pt++] = (isOpaque ? 0xFF : (argb >> 24) & 0xFF);
+					}
+				} else if (isOpaque) {
+					for (int i = 0, n = Math.min(buf8.length, pixels.length); i < n; i++) {
+						buf8[i] = pixels[i++];
+						buf8[i] = pixels[i++];
+						buf8[i] = pixels[i++];
+						buf8[i] = 0xFF;
+					}
+				} else {
+					for (int i = 0, n = Math.min(buf8.length, pixels.length); i < n; i++) {
+						buf8[i] = pixels[i];
+					}
+				}
+				x += m[4];
+				y += m[5];
+				ctx.putImageData(imageData, x, y);
 			}
 			if (observer != null)
-				observe(img, observer, imgNode != null);
+				observe(img, observer, imgNode != null || pixels != null);
 		}
 		return true;
 	}
 
-	public void drawDirect(int[] pixels, int x, int y, int width, int height, boolean isRGB) {
-		if (buf8 == null || x != lastx || y != lasty || nx != width || ny != height) {
-			imageData = ctx.getImageData(x, y, width, height);
-			buf8 = imageData.data;
-			lastx = x;
-			lasty = y;
-			nx = width;
-			ny = height;
-		}
-		for (int pt = 0, i = 0, n = Math.min(buf8.length / 4, pixels.length); i < n; i++) {
-			int argb = pixels[i];
-			buf8[pt++] = (argb >> 16) & 0xFF;
-			buf8[pt++] = (argb >> 8) & 0xFF;
-			buf8[pt++] = argb & 0xFF;
-			buf8[pt++] = (isRGB ? 0xFF : (argb >> 24) & 0xFF);
-		}
-		double[] m = HTML5CanvasContext2D.getMatrix(ctx, transform);
-		if (m[0] != 1 || m[1] != 0 || m[2] != 0 || m[3] != 1)
-			System.err.println("Unsupported transform");
-		x += m[4];
-		y += m[5];
-		ctx.putImageData(imageData, x, y);
+	private static boolean isTranslationOnly(double[] m) {
+		return (   m[0] == 1 && m[1] == 0 
+				&& m[2] == 0 && m[3] == 1);
 	}
-
+	
 	public boolean hit(Rectangle rect, Shape s, boolean onStroke) {
 		JSUtil.notImplemented(null);
 		return false;
@@ -880,6 +884,7 @@ public class JSGraphics2D implements
 	public void transform(AffineTransform t) {
 		transformCTX(t);
 		transform.concatenate(t);
+		HTML5CanvasContext2D.getMatrix(ctx, null);
 	}
 
 	private void transformCTX(AffineTransform t) {

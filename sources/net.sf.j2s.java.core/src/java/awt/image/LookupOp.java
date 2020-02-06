@@ -30,6 +30,7 @@
 package java.awt.image;
 
 import java.awt.RenderingHints;
+import java.awt.Transparency;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import sun.awt.image.ImagingLib;
@@ -304,10 +305,10 @@ public class LookupOp implements BufferedImageOp, RasterOp {
             byteFilter ((ByteLookupTable) ltable, src, dst,
                         width, height, numBands);
         }
-//        else if (ltable instanceof ShortLookupTable) {
-//            shortFilter ((ShortLookupTable) ltable, src, dst, width,
-//                         height, numBands);
-//        }
+        else if (ltable instanceof ShortLookupTable) {
+            shortFilter ((ShortLookupTable) ltable, src, dst, width,
+                         height, numBands);
+        }
         else {
             // Not one we recognize so do it slowly
             int sminX = src.getMinX();
@@ -373,60 +374,59 @@ public class LookupOp implements BufferedImageOp, RasterOp {
         BufferedImage image;
         int w = src.getWidth();
         int h = src.getHeight();
-//        int transferType = DataBuffer.TYPE_BYTE;
+        int transferType = DataBuffer.TYPE_BYTE;
         if (destCM == null) {
             ColorModel cm = src.getColorModel();
-//            Raster raster = src.getRaster();
-// SwingJS not supported
-//            if (cm instanceof ComponentColorModel) {
-//                DataBuffer db = raster.getDataBuffer();
-//                boolean hasAlpha = cm.hasAlpha();
-//                boolean isPre    = cm.isAlphaPremultiplied();
-//                int trans        = cm.getTransparency();
-//                int[] nbits = null;
-//                if (ltable instanceof ByteLookupTable) {
-//                    if (db.getDataType() == db.TYPE_USHORT) {
-//                        // Dst raster should be of type byte
-//                        if (hasAlpha) {
-//                            nbits = new int[2];
-//                            if (trans == cm.BITMASK) {
-//                                nbits[1] = 1;
-//                            }
-//                            else {
-//                                nbits[1] = 8;
-//                            }
-//                        }
-//                        else {
-//                            nbits = new int[1];
-//                        }
-//                        nbits[0] = 8;
-//                    }
-//                    // For byte, no need to change the cm
-//                }
-//                else if (ltable instanceof ShortLookupTable) {
-//                    transferType = DataBuffer.TYPE_USHORT;
-//                    if (db.getDataType() == db.TYPE_BYTE) {
-//                        if (hasAlpha) {
-//                            nbits = new int[2];
-//                            if (trans == cm.BITMASK) {
-//                                nbits[1] = 1;
-//                            }
-//                            else {
-//                                nbits[1] = 16;
-//                            }
-//                        }
-//                        else {
-//                            nbits = new int[1];
-//                        }
-//                        nbits[0] = 16;
-//                    }
-//                }
-//                if (nbits != null) {
-//                    cm = new ComponentColorModel(cm.getColorSpace(),
-//                                                 nbits, hasAlpha, isPre,
-//                                                 trans, transferType);
-//                }
-//            }
+            Raster raster = src.getRaster();
+            if (cm instanceof ComponentColorModel) {
+                DataBuffer db = raster.getDataBuffer();
+                boolean hasAlpha = cm.hasAlpha();
+                boolean isPre    = cm.isAlphaPremultiplied();
+                int trans        = cm.getTransparency();
+                int[] nbits = null;
+                if (ltable instanceof ByteLookupTable) {
+                    if (db.getDataType() == DataBuffer.TYPE_USHORT) {
+                        // Dst raster should be of type byte
+                        if (hasAlpha) {
+                            nbits = new int[2];
+                            if (trans == Transparency.BITMASK) {
+                                nbits[1] = 1;
+                            }
+                            else {
+                                nbits[1] = 8;
+                            }
+                        }
+                        else {
+                            nbits = new int[1];
+                        }
+                        nbits[0] = 8;
+                    }
+                    // For byte, no need to change the cm
+                }
+                else if (ltable instanceof ShortLookupTable) {
+                    transferType = DataBuffer.TYPE_USHORT;
+                    if (db.getDataType() == DataBuffer.TYPE_BYTE) {
+                        if (hasAlpha) {
+                            nbits = new int[2];
+                            if (trans == Transparency.BITMASK) {
+                                nbits[1] = 1;
+                            }
+                            else {
+                                nbits[1] = 16;
+                            }
+                        }
+                        else {
+                            nbits = new int[1];
+                        }
+                        nbits[0] = 16;
+                    }
+                }
+                if (nbits != null) {
+                    cm = new ComponentColorModel(cm.getColorSpace(),
+                                                 nbits, hasAlpha, isPre,
+                                                 trans, transferType);
+                }
+            }
             image = new BufferedImage(cm,
                                       cm.createCompatibleWritableRaster(w, h),
                                       cm.isAlphaPremultiplied(),
@@ -534,49 +534,49 @@ public class LookupOp implements BufferedImageOp, RasterOp {
         }
     }
 
-//    private final void shortFilter(ShortLookupTable lookup, Raster src,
-//                                   WritableRaster dst,
-//                                   int width, int height, int numBands) {
-//        int band;
-//        int[] srcPix = null;
-//
-//        // Find the ref to the table and the offset
-//        short[][] table = lookup.getTable();
-//        int offset = lookup.getOffset();
-//        int tidx;
-//        int step=1;
-//
-//        // Check if it is one lookup applied to all bands
-//        if (table.length == 1) {
-//            step=0;
-//        }
-//
-//        int x = 0;
-//        int y = 0;
-//        int index;
-//        int maxShort = (1<<16)-1;
-//        // Loop through the data
-//        for (y=0; y < height; y++) {
-//            tidx = 0;
-//            for ( band=0; band < numBands; band++, tidx+=step) {
-//                // Find data for this band, scanline
-//                srcPix = src.getSamples(0, y, width, 1, band, srcPix);
-//
-//                for ( x=0; x < width; x++) {
-//                    index = srcPix[x]-offset;
-//                    if (index < 0 || index > maxShort) {
-//                        throw new
-//                            IllegalArgumentException("index out of range "+
-//                                                     index+" x is "+x+
-//                                                     "srcPix[x]="+srcPix[x]
-//                                                     +" offset="+ offset);
-//                    }
-//                    // Do the lookup
-//                    srcPix[x] = table[tidx][index];
-//                }
-//                // Put it back
-//                dst.setSamples(0, y, width, 1, band, srcPix);
-//            }
-//        }
-//    }
+    private final void shortFilter(ShortLookupTable lookup, Raster src,
+                                   WritableRaster dst,
+                                   int width, int height, int numBands) {
+        int band;
+        int[] srcPix = null;
+
+        // Find the ref to the table and the offset
+        short[][] table = lookup.getTable();
+        int offset = lookup.getOffset();
+        int tidx;
+        int step=1;
+
+        // Check if it is one lookup applied to all bands
+        if (table.length == 1) {
+            step=0;
+        }
+
+        int x = 0;
+        int y = 0;
+        int index;
+        int maxShort = (1<<16)-1;
+        // Loop through the data
+        for (y=0; y < height; y++) {
+            tidx = 0;
+            for ( band=0; band < numBands; band++, tidx+=step) {
+                // Find data for this band, scanline
+                srcPix = src.getSamples(0, y, width, 1, band, srcPix);
+
+                for ( x=0; x < width; x++) {
+                    index = srcPix[x]-offset;
+                    if (index < 0 || index > maxShort) {
+                        throw new
+                            IllegalArgumentException("index out of range "+
+                                                     index+" x is "+x+
+                                                     "srcPix[x]="+srcPix[x]
+                                                     +" offset="+ offset);
+                    }
+                    // Do the lookup
+                    srcPix[x] = table[tidx][index];
+                }
+                // Put it back
+                dst.setSamples(0, y, width, 1, band, srcPix);
+            }
+        }
+    }
 }
