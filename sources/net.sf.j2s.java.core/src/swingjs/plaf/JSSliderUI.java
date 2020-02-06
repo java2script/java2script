@@ -438,7 +438,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 					left = 28;
 				}
 				DOMNode.setTopLeftAbsolute(labelNode, top, left);
-				addClass(labelNode, ".jslider-label");
+				addClass(labelNode, "jslider-label");
 				domNode.insertBefore(labelNode, sliderTrack);
 			}
 
