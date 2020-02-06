@@ -469,8 +469,8 @@ public class WritableRaster extends Raster {
 
         switch (srcRaster.getSampleModel().getDataType()) {
         case DataBuffer.TYPE_BYTE:
-//        case DataBuffer.TYPE_SHORT:
-//        case DataBuffer.TYPE_USHORT:
+        case DataBuffer.TYPE_SHORT:
+        case DataBuffer.TYPE_USHORT:
         case DataBuffer.TYPE_INT:
             int[] iData = null;
             for (int startY=0; startY < height; startY++) {
@@ -482,26 +482,26 @@ public class WritableRaster extends Raster {
             }
             break;
 
-//        case DataBuffer.TYPE_FLOAT:
-//            float[] fData = null;
-//            for (int startY=0; startY < height; startY++) {
-//                fData =
-//                    srcRaster.getPixels(srcOffX, srcOffY+startY, width, 1,
-//                                        fData);
-//                setPixels(dstOffX, dstOffY+startY, width, 1, fData);
-//            }
-//            break;
-//
-//        case DataBuffer.TYPE_DOUBLE:
-//            double[] dData = null;
-//            for (int startY=0; startY < height; startY++) {
-//                // Grab one scanline at a time
-//                dData =
-//                    srcRaster.getPixels(srcOffX, srcOffY+startY, width, 1,
-//                                        dData);
-//                setPixels(dstOffX, dstOffY+startY, width, 1, dData);
-//            }
-//            break;
+        case DataBuffer.TYPE_FLOAT:
+            float[] fData = null;
+            for (int startY=0; startY < height; startY++) {
+                fData =
+                    srcRaster.getPixels(srcOffX, srcOffY+startY, width, 1,
+                                        fData);
+                setPixels(dstOffX, dstOffY+startY, width, 1, fData);
+            }
+            break;
+
+        case DataBuffer.TYPE_DOUBLE:
+            double[] dData = null;
+            for (int startY=0; startY < height; startY++) {
+                // Grab one scanline at a time
+                dData =
+                    srcRaster.getPixels(srcOffX, srcOffY+startY, width, 1,
+                                        dData);
+                setPixels(dstOffX, dstOffY+startY, width, 1, dData);
+            }
+            break;
         }
     }
 

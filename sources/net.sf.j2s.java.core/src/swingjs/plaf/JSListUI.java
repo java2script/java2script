@@ -115,7 +115,7 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 		me = this;
 	}
 
-	String itemHTML = null;
+//	String itemHTML = null;
 
 	@Override
 	public DOMNode updateDOMNode() {
@@ -405,7 +405,7 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 		// to new x,y coordinates.
 
 		needFilling = false;
-		itemHTML = "";
+//		itemHTML = "";
 		switch (layoutOrientation) {
 		case JList.VERTICAL_WRAP:
 			if (list.getHeight() != listHeight) {

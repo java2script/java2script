@@ -28,15 +28,10 @@
 
 package java.awt.image;
 
-import java.awt.image.ImageConsumer;
-import java.awt.image.ImageProducer;
-import java.awt.Graphics;
-import java.awt.image.ColorModel;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
-import java.util.Enumeration;
 
-import javajs.util.AU;
 import swingjs.JSGraphics2D;
 
 /**
@@ -111,7 +106,6 @@ import swingjs.JSGraphics2D;
  * @author      Animation capabilities inspired by the
  *              MemoryAnimationSource class written by Garth Dickie
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
 public class MemoryImageSource implements ImageProducer {
     int width;
     int height;
@@ -461,7 +455,7 @@ public class MemoryImageSource implements ImageProducer {
      * @see #setAnimated
      * @see #setFullBufferUpdates
      */
-    @SuppressWarnings({ "unused", "null" })
+    @SuppressWarnings({ "unused" })
 	public synchronized void newPixels(int x, int y, int w, int h,
                                        boolean framenotify) {
     	

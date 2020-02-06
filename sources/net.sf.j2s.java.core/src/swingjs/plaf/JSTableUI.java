@@ -1760,7 +1760,8 @@ public class JSTableUI extends JSPanelUI {
 
 	private JScrollPane getScrollPane() {
 		Container parent;
-		return (JScrollPane) ((parent = table.getParent()) == null ? null : parent.getParent()); // should be the scrollpane
+		parent = ((parent = table.getParent()) == null ? null : parent.getParent());
+		return (parent instanceof JScrollPane ? (JScrollPane) parent : null);
 	}
 
 	private void installDefaults2() {

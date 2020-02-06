@@ -135,6 +135,7 @@ import org.eclipse.jdt.core.dom.WildcardType;
 
 // TODO: superclass inheritance for JAXB XmlAccessorType
 
+//BH 2020.02.05 -- 3.2.8-v1 reworking of functional interfaces; no longer unqualified
 //BH 2020.01.31 -- 3.2.7-v5 'L' used instead of 'J' in $fields$
 //BH 2020.01.31 -- 3.2.7-v5 java.lang.reflect.* should not be truncated to reflect.*
 //BH 2020.01.16 -- 3.2.7-v4 replaces extends java.awt.Component and javax.swing.JComponent 
@@ -281,6 +282,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	private final static int METHOD_NOTSPECIAL = 0;
 	private final static int METHOD_LITERAL = 1;
+	private final static int METHOD_LAMBDA_M = 2;
 	private final static int METHOD_LAMBDA_C = 3;
 
 	private final static int METHOD_CONSTRUCTOR = 4;
@@ -429,12 +431,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 */
 	private boolean temp_processingArrayIndex;
 
-	/**
-	 * functionalInterface methods add the name$ qualifier even if they are
-	 * parameterized
-	 * 
-	 */
-	private boolean temp_add$UnqualifiedMethod;
+//	/**
+//	 * functionalInterface methods add the name$ qualifier even if they are
+//	 * parameterized
+//	 * 
+//	 */
+//	private boolean temp_add$UnqualifiedMethod;
 
 	// the three key elements of any class
 
@@ -1297,8 +1299,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		boolean isStatic = isStatic(mBinding);
 		boolean isAbstract = (body == null && !isNative && lambdaType == NOT_LAMBDA);
 		boolean addGeneric = (!isPrivate && !isConstructor && isSynthesizable(mBinding));
-		int qualification = (lambdaType != NOT_LAMBDA ? METHOD_FULLY_QUALIFIED
-				: temp_add$UnqualifiedMethod ? METHOD_$_QUALIFIED : METHOD_FULLY_QUALIFIED);
+		int qualification = (
+				//lambdaType != NOT_LAMBDA ? METHOD_FULLY_QUALIFIED
+				//: temp_add$UnqualifiedMethod ? METHOD_$_QUALIFIED : 
+					METHOD_FULLY_QUALIFIED);
 		if (isUserApplet && lambdaType == NOT_LAMBDA && !isConstructor && !isStatic && isPublic)
 			qualification |= METHOD_UNQUALIFIED;
 		if (addGeneric) {
@@ -1311,7 +1315,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			// allows us to catalog method names for an interface or abstract class
 			return;
 		}
-		String quotedFinalNameOrArray = getMethodNameWithSyntheticBridgeForDeclaration(mBinding, isConstructor, alias, qualification);
+		String quotedFinalNameOrArray = getMethodNameWithSyntheticBridgeForDeclaration(mBinding, isConstructor, alias, qualification, lambdaType);
 		boolean isMain = (isStatic && isPublic && mBinding.getName().equals("main")
 				&& mBinding.getKey().indexOf(";.main([Ljava/lang/String;)V") >= 0);
 		if (isMain) {
@@ -1414,6 +1418,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @param arguments
 	 * @param mBinding
 	 * @param expression
+	 * @param lambdaArity
 	 */
 	private boolean addMethodInvocation(SimpleName javaQualifier, List<?> arguments, IMethodBinding mBinding,
 			Expression expression, int lambdaArity) {
@@ -1503,6 +1508,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					(expression == null ? METHOD_NULLEXPRESSION : 0) | METHOD_ISQUALIFIED
 							| (lambdaArity >= 0 ? LAMBDA_METHOD : 0) | (isStatic ? FINAL_STATIC : 0));
 
+			//bufferDebug(">>ami " + j2sName + " lambdaArity=" + lambdaArity + " class_localType=" + this.class_localType);
 			String finalMethodNameWith$Params = getFinalMethodNameWith$Params(j2sName, mBinding,
 					null, true, METHOD_NOTSPECIAL);
 
@@ -2072,7 +2078,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 		boolean hasDependents = isEnum;
 		buffer.append(", ");
-		List<IMethodBinding> unqualifiedMethods = getUnqualifiedMethods(binding, null);
+//		List<IMethodBinding> unqualifiedMethods = null;//(isLambda ? binding.getFunctionalInterfaceMethod() : null);
+//				getUnqualifiedMethods(binding, null) : null);
 		List<AbstractTypeDeclaration> innerClasses = new ArrayList<>();
 		String innerTypes = "";
 		if (isAnonymous) {
@@ -2409,25 +2416,25 @@ public class Java2ScriptVisitor extends ASTVisitor {
 						// log("default method " + method.getKey());
 						defpt = buffer.length();
 					}
-					boolean addUnqualifiedCurrent = temp_add$UnqualifiedMethod;
-					if (unqualifiedMethods != null) {
-						// check for all methods that override a functional interface abstract method,
-						// as those methods are to be qualified only with $
-
-						for (int i = unqualifiedMethods.size(); --i >= 0;) {
-							if (method.overrides(unqualifiedMethods.get(i))) {
-								temp_add$UnqualifiedMethod = true;
-								break;
-							}
-						}
-					}
+//					boolean addUnqualifiedCurrent = temp_add$UnqualifiedMethod;
+//					if (unqualifiedMethods != null) {
+//						// check for all methods that override a functional interface abstract method,
+//						// as those methods are to be qualified only with $
+//
+//						for (int i = unqualifiedMethods.size(); --i >= 0;) {
+//							if (method.overrides(unqualifiedMethods.get(i))) {
+//								temp_add$UnqualifiedMethod = true;
+//								break;
+//							}
+//						}
+//					}
 					processMethodDeclaration(mnode, method, mnode.parameters(), mnode.getBody(), mnode.isConstructor(),
 							abstractMethodList, NOT_LAMBDA);
 					if (defpt >= 0) {
 						defaults.append(buffer.substring(defpt));
 						buffer.setLength(defpt);
 					}
-					temp_add$UnqualifiedMethod = addUnqualifiedCurrent;
+	//				temp_add$UnqualifiedMethod = addUnqualifiedCurrent;
 				} else if (element instanceof AnnotationTypeMemberDeclaration) {
 					processAnnotationTypeMemberDeclaration((AnnotationTypeMemberDeclaration) element);
 				}
@@ -2574,34 +2581,34 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		buffer.setLength(pt);
 	}
 
-	/**
-	 * Collect all names of all functional interface abstract methods that this
-	 * class might refer to so that their unqualified. This is not perfect, as it is
-	 * possible to have implementations of specific subtypes of parameterized
-	 * methods. However, it will have to do for now.
-	 * 
-	 * @param type
-	 * @param unqualifiedMethods
-	 * @return List of methods that should have raw unparameterized alias
-	 */
-	private List<IMethodBinding> getUnqualifiedMethods(ITypeBinding type, List<IMethodBinding> unqualifiedMethods) {
-		if (type.isArray() || type.isPrimitive()) {
-			return unqualifiedMethods;
-		}
-		ITypeBinding superClass = type.getSuperclass();
-		if (superClass != null)
-			unqualifiedMethods = getUnqualifiedMethods(superClass, unqualifiedMethods);
-		ITypeBinding[] superInterfaces = type.getInterfaces();
-		for (int i = 0; i < superInterfaces.length; i++)
-			unqualifiedMethods = getUnqualifiedMethods(superInterfaces[i], unqualifiedMethods);
-		IMethodBinding functionalMethod = type.getFunctionalInterfaceMethod();
-		if (functionalMethod != null) {
-			if (unqualifiedMethods == null)
-				unqualifiedMethods = new ArrayList<IMethodBinding>();
-			unqualifiedMethods.add(functionalMethod);
-		}
-		return unqualifiedMethods;
-	}
+//	/**
+//	 * Collect all names of all functional interface abstract methods that this
+//	 * class might refer to so that their unqualified. This is not perfect, as it is
+//	 * possible to have implementations of specific subtypes of parameterized
+//	 * methods. However, it will have to do for now.
+//	 * 
+//	 * @param type
+//	 * @param unqualifiedMethods
+//	 * @return List of methods that should have raw unparameterized alias
+//	 */
+//	private List<IMethodBinding> getUnqualifiedMethods(ITypeBinding type, List<IMethodBinding> unqualifiedMethods) {
+//		if (type.isArray() || type.isPrimitive()) {
+//			return unqualifiedMethods;
+//		}
+//		ITypeBinding superClass = type.getSuperclass();
+//		if (superClass != null)
+//			unqualifiedMethods = getUnqualifiedMethods(superClass, unqualifiedMethods);
+//		ITypeBinding[] superInterfaces = type.getInterfaces();
+//		for (int i = 0; i < superInterfaces.length; i++)
+//			unqualifiedMethods = getUnqualifiedMethods(superInterfaces[i], unqualifiedMethods);
+//		IMethodBinding functionalMethod = type.getFunctionalInterfaceMethod();
+//		if (functionalMethod != null) {
+//			if (unqualifiedMethods == null)
+//				unqualifiedMethods = new ArrayList<IMethodBinding>();
+//			unqualifiedMethods.add(functionalMethod);
+//		}
+//		return unqualifiedMethods;
+//	}
 
 	/**
 	 * If there is no Foo() or Foo(xxx... array), then we need to provide our own
@@ -3775,6 +3782,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		ITypeBinding declaringClass = mBinding.getMethodDeclaration().getDeclaringClass();
 		String name = mBinding.getName();
 		if (node == null) {
+			// not possible?
 			// lambda::method needs to be qualified here only if it is a functional
 			// interface method
 			// otherwise it will be qualified in getQualifiedSimpleNameForinvocation
@@ -5307,16 +5315,22 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @param alias  name provided using at_j2sAlias 
 	 * @param mode
 	 * @param abstractMethodList 
+	 * @param lambdaType
 	 * @return j2s-qualified name or an array of j2s-qualified names
 	 */
 	String getMethodNameWithSyntheticBridgeForDeclaration(IMethodBinding mBinding, boolean isConstructor,
-			String alias, int mode) {
+			String alias, int mode, int lambdaType) {
 		List<String> names = new ArrayList<String>();
 		String nodeName = mBinding.getName();
 		String methodName = (isConstructor ? "c$" : nodeName);
 		ITypeBinding methodClass = mBinding.getDeclaringClass();
+		int mtype = (lambdaType == LAMBDA_METHOD || lambdaType == LAMBDA_EXPRESSION ? METHOD_LAMBDA_M : METHOD_NOTSPECIAL);
 		String qname = getFinalMethodNameWith$Params(methodName, mBinding, null, false, METHOD_NOTSPECIAL);
 		names.add(qname);
+		if (mtype != METHOD_NOTSPECIAL && !qname.endsWith("$")) {
+			// $O$O$O for lambda as well
+			names.add(getFinalMethodNameWith$Params(methodName, mBinding, null, false, mtype));
+		}
 		if (alias != null)
 			names.add(alias);
 		if((mode & METHOD_ADD_GENERIC) != 0) {
@@ -5481,6 +5495,14 @@ public class Java2ScriptVisitor extends ASTVisitor {
 //		return className.length() > 5 && "java.javax".contains(className.substring(0, 5));
 //	}
 
+	/**
+	 * Construct the method parameter string $B$I$O...
+	 * @param nParams
+	 * @param genericTypes
+	 * @param paramTypes
+	 * @param toObject
+	 * @return
+	 */
 	private String getParamsAsString(int nParams, String[] genericTypes, ITypeBinding[] paramTypes, boolean toObject) {
 		StringBuffer sbParams = new StringBuffer();
 		// if this is a method invocation and has generics, then we alias that
@@ -6296,13 +6318,25 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// functional interface methods are qualified only by "$", not their parameters.
 		// This is not ideal.
 
-		IMethodBinding fm = (
-				specialType != METHOD_NOTSPECIAL || javaClassName.equals("java.lang.reflect.Proxy") ? null
-				: declaringClass.getFunctionalInterfaceMethod());
-		if (fm != null && methodName.equals(fm.getName()))
-			return ensureMethod$Name(j2sName, mBinding, null);
+		// temporarily disabled
+		
+		if (specialType == METHOD_LAMBDA_M) {
+			for (int i = 0; i < nParams; i++)
+				j2sName += "$O";
+			return j2sName;
+		}
+		
+		IMethodBinding fm = null;
+//		(specialType != METHOD_NOTSPECIAL 
+//				|| javaClassName.equals("java.lang.reflect.Proxy") ? null
+//				: declaringClass.getFunctionalInterfaceMethod());
+		if (fm != null && methodName.equals(fm.getName())) {
+			String s = ensureMethod$Name(j2sName, mBinding, null);
+			//bufferDebug(">>s=" + s + " localtype=" + class_localType + " name=" + javaClassName + " declclass=" + declaringClass.getName());
+			return s;
+		}
 
-		String s = getParamsAsString(nParams, genericTypes, paramTypes, false);
+		return j2sName + getParamsAsString(nParams, genericTypes, paramTypes, false);
 
 //		if (specialType != METHOD_ALIAS && addCallingOption$O && s.indexOf("$T") >= 0 && isJava(javaClassName) && !isJava(class_fullName)) {
 //
@@ -6323,8 +6357,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 //			// thus, this determination must be made very early.
 //
 //		}
-
-		return j2sName + s;
+//		return j2sName + s;
 	}
 
 	public static class NameMapper {
@@ -6739,7 +6772,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 							continue;
 						varName = "M:" + mBinding.getName();
 						methodSignature = visitor.getMethodNameWithSyntheticBridgeForDeclaration(mBinding,
-								mBinding.isConstructor(), null, METHOD_FULLY_QUALIFIED);
+								mBinding.isConstructor(), null, METHOD_FULLY_QUALIFIED, NOT_LAMBDA);
 						type = mBinding.getReturnType();
 					} else if (a.node instanceof AnnotationTypeMemberDeclaration) {
 						MethodDeclaration method = (MethodDeclaration) a.node;

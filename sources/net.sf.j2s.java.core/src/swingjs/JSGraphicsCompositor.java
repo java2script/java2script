@@ -308,31 +308,18 @@ public class JSGraphicsCompositor {
 	 * @return
 	 */
 	public static DOMNode createImageNode(Image img) {
-	  DOMNode imgNode = null;
-	  /**
-	   * @j2sNative
-	   * 
-	   * imgNode = img.秘imgNode;
-	   * 
-	   */
-	  {}
+	  JSImage jsi = (JSImage) img;
+	  DOMNode imgNode = (DOMNode) jsi.秘imgNode;
 		if (imgNode == null && img instanceof BufferedImage) {
-			int w = ((JSImage)img).getWidth();
-			int h = ((JSImage)img).getHeight();
-		  /**
-		   * @j2sNative
-		   * 
-		   * var canvas = img.秘canvas;
-		   * if (canvas == null) {
-		   *   img.getGraphics$();
-		   *   canvas = img.秘canvas;
-		   * }
-		   * imgNode = canvas;
-		   * imgNode.style.width = w + "px";
-		   * imgNode.style.height = h + "px";
-		   * 
-		   */
-		  {}
+			int w = jsi.getWidth();
+			int h = jsi.getHeight();
+			DOMNode canvas = (DOMNode) jsi.秘canvas;
+			if (canvas == null) {
+				img.getGraphics();
+				canvas = (DOMNode) jsi.秘canvas;
+			}
+			imgNode = canvas;
+			DOMNode.setSize(imgNode,  w,  h);
 		  // note: images created some other way are presumed to have int[] pix defined and possibly byte[pix]
 		}
 		return imgNode;

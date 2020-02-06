@@ -84,6 +84,9 @@ package java.awt.image;
 public abstract class SampleModel
 {
 
+	
+	public int[] 秘pix;
+
     /** Width in pixels of the region of image data that this SampleModel
      *  describes.
      */
@@ -389,7 +392,7 @@ public abstract class SampleModel
             obj = (Object)bdata;
             break;
 
-//        case DataBuffer.TYPE_USHORT:
+        case DataBuffer.TYPE_USHORT:
         case DataBuffer.TYPE_SHORT:
 
             short[] sdata;
@@ -604,23 +607,23 @@ public abstract class SampleModel
             }
             break;
 
-//        case DataBuffer.TYPE_USHORT:
-//        case DataBuffer.TYPE_SHORT:
-//
-//            short[] sarray = (short[])obj;
-//            short[] stemp = new short[numDataElems];
-//
-//            for (int i=y; i<y+h; i++) {
-//                for (int j=x; j<x+w; j++) {
-//                    for (int k=0; k<numDataElems; k++) {
-//                        stemp[k] = sarray[cnt++];
-//                    }
-//
-//                    setDataElements(j, i, stemp, data);
-//                }
-//            }
-//            break;
-//
+        case DataBuffer.TYPE_USHORT:
+        case DataBuffer.TYPE_SHORT:
+
+            short[] sarray = (short[])obj;
+            short[] stemp = new short[numDataElems];
+
+            for (int i=y; i<y+h; i++) {
+                for (int j=x; j<x+w; j++) {
+                    for (int k=0; k<numDataElems; k++) {
+                        stemp[k] = sarray[cnt++];
+                    }
+
+                    setDataElements(j, i, stemp, data);
+                }
+            }
+            break;
+
         case DataBuffer.TYPE_INT:
 
             int[] iArray = (int[])obj;
@@ -636,38 +639,38 @@ public abstract class SampleModel
                 }
             }
             break;
-//
-//        case DataBuffer.TYPE_FLOAT:
-//
-//            float[] fArray = (float[])obj;
-//            float[] ftemp = new float[numDataElems];
-//
-//            for (int i=y; i<y+h; i++) {
-//                for (int j=x; j<x+w; j++) {
-//                    for (int k=0; k<numDataElems; k++) {
-//                        ftemp[k] = fArray[cnt++];
-//                    }
-//
-//                    setDataElements(j, i, ftemp, data);
-//                }
-//            }
-//            break;
-//
-//        case DataBuffer.TYPE_DOUBLE:
-//
-//            double[] dArray = (double[])obj;
-//            double[] dtemp = new double[numDataElems];
-//
-//            for (int i=y; i<y+h; i++) {
-//                for (int j=x; j<x+w; j++) {
-//                    for (int k=0; k<numDataElems; k++) {
-//                        dtemp[k] = dArray[cnt++];
-//                    }
-//
-//                    setDataElements(j, i, dtemp, data);
-//                }
-//            }
-//            break;
+
+        case DataBuffer.TYPE_FLOAT:
+
+            float[] fArray = (float[])obj;
+            float[] ftemp = new float[numDataElems];
+
+            for (int i=y; i<y+h; i++) {
+                for (int j=x; j<x+w; j++) {
+                    for (int k=0; k<numDataElems; k++) {
+                        ftemp[k] = fArray[cnt++];
+                    }
+
+                    setDataElements(j, i, ftemp, data);
+                }
+            }
+            break;
+
+        case DataBuffer.TYPE_DOUBLE:
+
+            double[] dArray = (double[])obj;
+            double[] dtemp = new double[numDataElems];
+
+            for (int i=y; i<y+h; i++) {
+                for (int j=x; j<x+w; j++) {
+                    for (int k=0; k<numDataElems; k++) {
+                        dtemp[k] = dArray[cnt++];
+                    }
+
+                    setDataElements(j, i, dtemp, data);
+                }
+            }
+            break;
         }
 
     }

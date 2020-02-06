@@ -738,11 +738,11 @@ public class DefaultTreeCellEditor implements ActionListener, TreeCellEditor,
             }
 
             // Border selection color
-            Color       background = getBorderSelectionColor();
-            if(background != null) {
-                g.setColor(background);
-                g.drawRect(0, 0, width - 1, height - 1);
-            }
+//            Color       background = getBorderSelectionColor();
+//            if(background != null) {
+//                g.setColor(background);
+//                g.drawRect(0, 0, width - 1, height - 1);
+//            }
             super.paint(g);
         }
 

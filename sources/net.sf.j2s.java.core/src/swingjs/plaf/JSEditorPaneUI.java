@@ -61,6 +61,8 @@ public class JSEditorPaneUI extends JSTextUI {
 	
 	private static final String JSTAB = "<span class='j2stab'>&nbsp;&nbsp;&nbsp;&nbsp;</span>";
 	private static final int SPACES_PER_TAB = 4;
+	
+	protected boolean isTextPane = false;
 
 	public JSEditorPaneUI() {
 		isEditorPane = isTextView = true;
@@ -203,7 +205,7 @@ public class JSEditorPaneUI extends JSTextUI {
 		}
 		textListener.checkDocument();
 		setCssFont(domNode, c.getFont());
-		DOMNode.setAttrs(domNode, "contentEditable", TRUE, "spellcheck", FALSE);
+		DOMNode.setAttrs(domNode, "contentEditable", editor.isEditable() ? TRUE : FALSE, "spellcheck", FALSE);
 		if (jc.getTopLevelAncestor() != null) {
 			if (editor.getText() != mytext) {
 				setText(null);
@@ -290,7 +292,7 @@ public class JSEditorPaneUI extends JSTextUI {
 //
 	private int getJSDocOffset(DOMNode node) {
 		int pt = 0;
-		while (node != domNode) {
+		while (node != domNode && node != null) {
 			DOMNode sib = DOMNode.getPreviousSibling(node);
 			while (sib != null) {
 				 pt += getJSCharCount(sib);
@@ -328,12 +330,19 @@ public class JSEditorPaneUI extends JSTextUI {
 		if (text == null)
 			text = editor.getText();
 		mytext = text;
+		isHTML = text.startsWith("<html");
+		String html;
+		if (isHTML) {
+			DOMNode.setAttrs(domNode, "contentEditable", FALSE);
+			html = getInner(text, "body");
+		} else {
 		isStyled = ((JEditorPane)editor).getEditorKit() instanceof StyledEditorKit;
 		fromJava(text, sb, d.getRootElements()[0], true, null);
 		//System.out.println("JSEPUI setText " + text.replace('\n', '.').replace('\t', '^'));
 		// This added 5 px is necessary for the last line when scrolled to appear in full. 
 		// Don't know why. Maybe the scrollbar just needs one last div?
-		String html = sb.toString() + "<div style='height:5px'><br></div>";
+		 html = sb.toString() + "<div style='height:5px'><br></div>";
+		}
 		//System.out.println(html);
 		if (html == currentHTML)
 			return;
@@ -350,6 +359,17 @@ public class JSEditorPaneUI extends JSTextUI {
 		{
 			updateJSCursor("editortext");
 		}
+	}
+
+	private String getInner(String html, String body) {
+		int pt = html.indexOf("<" + body);
+		if (pt >= 0) {
+			html = html.substring(html.indexOf(">", pt) + 1);
+			pt = html.lastIndexOf("</" + body + ">");
+			if (pt >= 0)
+				html = html.substring(0, pt);
+		}
+		return html;
 	}
 
 	/**
@@ -419,6 +439,9 @@ public class JSEditorPaneUI extends JSTextUI {
 				t = t.replace(' ', '\u00A0');
 			if (t.indexOf('\t') >= 0) {
 				t = PT.rep(t,  "\t", JSTAB);
+			}
+			if (t.indexOf('<') >= 0) {
+				t = PT.rep(t,  "<", "&lt;");
 			}
 			sb.append(t);
 		}
@@ -764,7 +787,6 @@ public class JSEditorPaneUI extends JSTextUI {
 		DOMNode node = (DOMNode)r[0];
 		boolean isStart = /** @j2sNative r[1] == 0|| */false;
 		if (isJSTAB(node)) {
-			System.out.println("fixtab");
 			if (isStart) {
 				
 			} else {
