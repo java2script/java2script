@@ -814,23 +814,28 @@ var addB$Keys = function(clazz, isNew, b, outerObj, objThis) {
     var key = getClassName(cl, true);
     if (!isNew && b[key])
       break;
-    b[key] = outerObj; 
-    if (key.indexOf("java.lang.") == 0)
-    	b[key.substring(10)] = outerObj;
+    setB$key(key, b, outerObj);
   if (cl.implementz) {
   	var impl = cl.implementz;
   	for (var i = impl.length; --i >= 0;) {
       var key = getClassName(impl[i], true);
       if (isNew || !b[key]) {
-        b[key] = outerObj; 
-	    if (key.indexOf("java.lang.") == 0)
-	    	b[key.substring(10)] = outerObj;
+    	  setB$key(key, b, outerObj);
       }
   	}
   }
   } while ((cl = cl.superclazz));
 };
 
+var setB$key = function(key, b, outerObj) {
+    b[key] = outerObj; 
+    if (key.indexOf("java.lang.") == 0)
+    	b[key.substring(10)] = outerObj;
+    if (key == "javax.swing.JDialog")
+    	b["java.awt.Dialog"] = outerObj;
+    if (key == "javax.swing.JFrame")
+    	b["java.awt.Frame"] = outerObj;
+};
 
 /**
 		// arg1 is the package name
@@ -2546,6 +2551,12 @@ Clazz._initClass = function(c,clinit,status,objThis) {
 	c;
 }
 
+Clazz._getClassCount = function() {
+	var n = 0;
+	for (var c in Clazz.allClasses){n++};
+	return n;
+}
+
 Clazz._4Name = function(clazzName, applet, state, asClazz, initialize, isQuiet) {
   var cl;
   if (clazzName.indexOf("[") == 0) {
@@ -3111,10 +3122,14 @@ C$.setIn$java_io_InputStream=function ($in) {
 
 C$.setOut$java_io_PrintStream=function (out) {
 	C$.out=out;
+	out.println = out.println$S;
+	out.print = out.print$S;
 }
 
 C$.setErr$java_io_PrintStream=function (err) {
 	C$.err=err;
+	err.println = err.println$S;
+	err.print = err.print$S;
 }
 
 C$.console$=function () {
@@ -3236,14 +3251,6 @@ Sys.out.__CLASS_NAME__ = "java.io.PrintStream";
 Sys.err = new Clazz._O ();
 Sys.err.__CLASS_NAME__ = "java.io.PrintStream";
 
-Sys.setOut$java_io_PrintStream = function(ps) {
-  System.out = ps;
-};
-
-Sys.setErr$java_io_PrintStream = function(ps) {
-  System.err = ps;
-};
-
 var checkTrace = function(s) {
 	  if (J2S._nooutput || J2S._traceFilter && s.indexOf(J2S._traceFilter) < 0) return;
 	  if (!J2S._traceFilter && J2S._traceOutput && s && 
@@ -3255,7 +3262,7 @@ var checkTrace = function(s) {
 
 var setps = function(ps, f) {
 
-ps.print = ps.print$O = ps.print$Z = ps.print$I = ps.println$J = ps.print$S = ps.print$C = ps.print = function (s) { 
+ps.print = ps.print$O = ps.print$Z = ps.print$I = ps.print$J = ps.print$S = ps.print$C = function (s) { 
   checkTrace(s);
   f(s);
 };
@@ -3274,6 +3281,10 @@ ps.println = ps.println$ = ps.println$O = ps.println$Z = ps.println$I = ps.print
 };
 
 ps.println$F = ps.println$D = function(f) {var s = "" + f; ps.println(s.indexOf(".") < 0 && s.indexOf("Inf") < 0 ? s + ".0" : s)};
+
+ps.write$I = function(ch) {
+  ps.print(String.fromCharCode(ch));	
+}
 
 ps.write$BA = function (buf) {
 	  ps.write$BA$I$I(buf, 0, buf.length);
