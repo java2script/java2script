@@ -64,11 +64,11 @@ public interface LayoutManager {
     /**
      * Calculates the preferred size dimensions for the specified
      * container, given the components it contains.
-     * @param parent the container to be laid out
+     * @param container the container to be laid out
      *
      * @see #minimumLayoutSize
      */
-    Dimension preferredLayoutSize(Container parent);
+    Dimension preferredLayoutSize(Container container);
 
     /**
      * Calculates the minimum size dimensions for the specified
