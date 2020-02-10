@@ -613,7 +613,7 @@ public final class AlphaComposite implements Composite {
     int rule;
 
     private AlphaComposite(int rule) {
-        this(rule, 1.0f);
+        this(rule, rule == CLEAR ? 0 : 1);
     }
 
     private AlphaComposite(int rule, float alpha) {
