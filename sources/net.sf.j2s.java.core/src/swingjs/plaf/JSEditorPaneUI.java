@@ -2,6 +2,7 @@ package swingjs.plaf;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
@@ -12,6 +13,7 @@ import javax.swing.JEditorPane;
 import javax.swing.event.CaretEvent;
 import javax.swing.plaf.InputMapUIResource;
 import javax.swing.text.AbstractDocument.BranchElement;
+import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Caret;
@@ -21,6 +23,7 @@ import javax.swing.text.JTextComponent;
 import javax.swing.text.Keymap;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledEditorKit;
+import javax.swing.text.View;
 
 import javajs.util.PT;
 import javajs.util.SB;
@@ -1047,5 +1050,24 @@ public class JSEditorPaneUI extends JSTextUI {
 		}
 	}
 
+	@Override
+	public Dimension getMinimumSize(JComponent jc) {
+		getPreferredSize(jc);
+//        Document doc = editor.getDocument();
+        Insets i = jc.getInsets();
+        Dimension d = new Dimension();
+//        if (doc instanceof AbstractDocument) {
+//            ((AbstractDocument)doc).readLock();
+//        }
+//        try {
+            d.width = (int) rootView.getMinimumSpan(View.X_AXIS) + i.left + i.right;
+            d.height = (int)  rootView.getMinimumSpan(View.Y_AXIS) + i.top + i.bottom;
+//        } finally {
+//            if (doc instanceof AbstractDocument) {
+//                ((AbstractDocument)doc).readUnlock();
+//            }
+//        }
+        return d;
+	}
 
 }
