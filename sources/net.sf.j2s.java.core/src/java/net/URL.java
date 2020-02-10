@@ -1113,7 +1113,7 @@ public/* SwingJS final */class URL {// implements Serializable {
 	/**
 	 * The URLStreamHandler factory.
 	 */
-	static URLStreamHandlerFactory factory;
+	public static URLStreamHandlerFactory 秘factory;
 
 	/**
 	 * Sets an application's <code>URLStreamHandlerFactory</code>. This method can
@@ -1142,7 +1142,7 @@ public/* SwingJS final */class URL {// implements Serializable {
 	 */
 	public static void setURLStreamHandlerFactory(URLStreamHandlerFactory fac) {
 		synchronized (streamHandlerLock) {
-			if (factory != null) {
+			if (秘factory != null) {
 				throw new Error("factory already defined");
 			}
 			SecurityManager security = System.getSecurityManager();
@@ -1150,7 +1150,7 @@ public/* SwingJS final */class URL {// implements Serializable {
 				security.checkSetFactory();
 			}
 			handlers.clear();
-			factory = fac;
+			秘factory = fac;
 		}
 	}
 
@@ -1173,7 +1173,7 @@ public/* SwingJS final */class URL {// implements Serializable {
 		URLStreamHandler handler = handlers.get(protocol);
 		if (handler == null) {
 			// Use the factory (if any)
-			if (factory == null) {
+			if (秘factory == null) {
 				// SwingJS -- we always use javajs.util.AjaxURLStreamHandlerFactory
 				try {
 					URL.setURLStreamHandlerFactory((URLStreamHandlerFactory) Class.forName("javajs.util.AjaxURLStreamHandlerFactory").newInstance());
@@ -1181,12 +1181,11 @@ public/* SwingJS final */class URL {// implements Serializable {
 					
 				}
 			}
-			if (factory != null) {
-				handler = factory.createURLStreamHandler(protocol);
+			if (秘factory != null) {
+				handler = 秘factory.createURLStreamHandler(protocol);
 			}
 
 		}
-
 		return handler;
 
 	}
