@@ -41,6 +41,8 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -68,6 +70,8 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener, Mouse
 	private JSlider vslider;
 
 	private JPanel vp;
+
+	private JScrollPane sp;
 
 	void setSize(JComponent c, int x, int y) {
 		if (preferred)
@@ -201,12 +205,11 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener, Mouse
 		JPanel p = new JPanel();
 
 		// p.setLayout(new GridLayout(2, 2, 2, 2));
-		JScrollPane sp = new JScrollPane();
-		
+		sp = new JScrollPane();
+		sp.setBorder(new LineBorder(Color.GREEN,5));
+		sp.setViewportBorder(new EmptyBorder(5,5,5,5));
 		sp.addMouseMotionListener(this);
 		sp.addMouseListener(this);
-
-
 		panel2 = new JPanel();
 		panel2.add(new JTextArea(10,10));
 		panel2.setSize(100,100);
@@ -247,6 +250,8 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener, Mouse
         slider.setForeground(Color.BLUE);
 
 		mkSlider(p, tf, Adjustable.HORIZONTAL, 100, 20).setInverted(true);
+		System.out.println("Test_AppletScroll sp pref size " + sp.getPreferredSize());
+
 	}
 
 	JScrollBar mkBar(JPanel p, final JTextField tf, int orient, int x, int y) {
@@ -360,6 +365,7 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener, Mouse
 
 	@Override
 	public void mouseEntered(MouseEvent e) {
+		System.out.println("Test_AppletScroll sp size " + sp.getSize());
 		System.out.println("Test_Applet_Scroll mouseEntered " + e);
 		
 	}
