@@ -118,6 +118,7 @@ public class InputStreamReader extends Reader {
         super(in);
         if (cs == null)
             throw new NullPointerException("charset");
+        this.in = in;
 //        sd = StreamDecoder.forInputStreamReader(in, this, cs);
     }
 
@@ -135,6 +136,7 @@ public class InputStreamReader extends Reader {
         System.err.println("SwingJS java.io.InputStreamReader(InputStream, CharsetDecoder) is not implemented");
         if (dec == null)
             throw new NullPointerException("charset decoder");
+        this.in = in;
 //        sd = StreamDecoder.forInputStreamReader(in, this, dec);
     }
 
