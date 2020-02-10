@@ -208,7 +208,6 @@ public class JSplitPane extends JComponent {
 	 * different value.
 	 */
 	private int dividerLocation;
-	private boolean dividerLocationSetByUser; // SwingJS
 
 	/**
 	 * Creates a new <code>JSplitPane</code> configured to arrange the child
@@ -671,12 +670,7 @@ public class JSplitPane extends JComponent {
 	 * @beaninfo bound: true description: The location of the divider.
 	 */
 	public void setDividerLocation(int location) {
-	  dividerLocationSetByUser = true; // SwingJS
 	  setDividerLocationIntImpl(location);
-	}
-	
-	public boolean isDividerLocationSetByUser() {
-		return dividerLocationSetByUser;
 	}
 	
 	public void setDividerLocationIntImpl(int location) {
