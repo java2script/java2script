@@ -679,6 +679,8 @@ public abstract class JSTextUI extends JSLightweightUI {
 		// }
 		// try {
 
+		// TODO: check that we really do not want these insets here.
+		
 		//d.width += i.left + i.right;
 		//d.height = jc.getFont().getSize() + i.top + i.bottom;
 
