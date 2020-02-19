@@ -114,6 +114,13 @@ public class ComponentEvent extends AWTEvent {
      */
     public ComponentEvent(Component source, int id) {
         super(source, id);
+        /**
+         * from ?j2sevents
+         * 
+         * @j2sNative 
+         * if (J2S._traceEvents)
+         *    System.out.println("ComponentEvent " + id + " " + source.__CLASS_NAME__);
+         */
     }
 
     public ComponentEvent() {
