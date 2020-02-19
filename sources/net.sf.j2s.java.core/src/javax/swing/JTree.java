@@ -675,6 +675,7 @@ public class JTree extends JComponent implements Scrollable
      */
     public JTree(TreeModel newModel) {
         super();
+    	秘setPaintsSelf(PAINTS_SELF_ALWAYS);
         expandedStack = new Stack();
         toggleClickCount = 2;
         expandedState = new Hashtable();

@@ -208,7 +208,6 @@ J2S.__makeComboBox = function() {
           	left: (w - 20) + 'px',
           	height: h
           });
-          this.btn.css(font);
           h = (this.options.height ? this.options.height + 'px' : null);
           this.popup.css({
             width: w + 'px',
@@ -221,6 +220,8 @@ J2S.__makeComboBox = function() {
           	overflowY: (h ? null : 'auto')
           }); 
           this.list.css(font);
+          font["font-size"] = "0.7em";
+          this.btn.css(font);
       },
       
       setSelectedIndex: function(n) { return this._clickOpt({target: $('#' + this.id() + '_opt' + n)}, false) },

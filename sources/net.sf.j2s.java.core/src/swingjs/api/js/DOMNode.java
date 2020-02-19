@@ -126,7 +126,7 @@ public abstract class DOMNode {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			attr && (node[attr] = (val == "TRUE" ? true : val == "FALSE" ? false : val));
+		 * 			attr && (node[attr] = (val == "秘TRUE" ? true : val == "秘FALSE" ? false : val));
 		 * 
 		 */
 		return node;

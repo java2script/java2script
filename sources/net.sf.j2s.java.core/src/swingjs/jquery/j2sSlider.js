@@ -18,12 +18,12 @@ J2S.__makeSlider = function() {
 	.ui-j2sslider-tick-mark-vert { display:inline-block; width:1px; background: black; border:1px; height:5px; position:absolute; top:12px; }\
 	.ui-j2sscrollbar-horizontal { color:black;border-style:none solid none solid; border-width: 0px 5px; height: .3em; top: 40%;margin:0px 2px}\
 	.ui-j2sscrollbar-vertical { color:black;border-style:solid none solid none; border-width: 5px 0px; width: .3em; left: 40%; margin:2px 0px }\
-	.ui-j2sslider-horizontal .ui-j2sslider-handle { margin-left: -.4em; }\
+	.ui-j2sslider-horizontal .ui-j2sslider-handle { margin-left: -.4em; border:1px solid blue; box-sizing:border-box;}\
 	.ui-j2sslider-horizontal .ui-j2sslider-range-max { right: 0; }\
 	.ui-j2sslider-horizontal .ui-j2sslider-range-min { left: 0; }\
 	.ui-j2sslider-horizontal .ui-j2sslider-range { top: 0.1em; height: 30%; }\
 	.ui-j2sslider-horizontal { height: .3em; top: 40%;margin:0px 9px}\
-	.ui-j2sslider-vertical .ui-j2sslider-handle { margin-left: 0; margin-bottom: -.3em; }\
+	.ui-j2sslider-vertical .ui-j2sslider-handle { margin-left: 0; margin-bottom: -.3em;border:1px solid blue; box-sizing:border-box; }\
 	.ui-j2sslider-vertical .ui-j2sslider-range-max { top: 0; }\
 	.ui-j2sslider-vertical .ui-j2sslider-range-min { bottom: 0; }\
 	.ui-j2sslider-vertical .ui-j2sslider-range { left: 0.1em; width: 30%; }\

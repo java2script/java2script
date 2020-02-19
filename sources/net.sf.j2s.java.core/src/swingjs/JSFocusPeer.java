@@ -142,7 +142,8 @@ public class JSFocusPeer implements KeyboardFocusManagerPeer {
 
 	public void checkFrameFocusOnMouseDown(AWTEvent e) {
 		Container p = JSComponent.秘getTopInvokableAncestor((Container) e.getSource(), true);
-		if (getCurrentFocusOwner() != null && p == currentWindow) 
+		// Table editor mouse down may have p == null
+		if (p == null || getCurrentFocusOwner() != null && p == currentWindow) 
 			return;
 		Window w = currentWindow;
 		p.dispatchEvent(new WindowEvent((Window) p, WindowEvent.WINDOW_ACTIVATED));

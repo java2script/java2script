@@ -86,7 +86,7 @@ public class DefaultCellEditor extends AbstractCellEditor implements TableCellEd
 	 * @param textField a <code>JTextField</code> object
 	 */
 	public DefaultCellEditor(final JTextField textField) {
-		setComponent(textField);
+		秘setComponent(textField);
 		this.clickCountToStart = 2;
 		delegate = new EditorDelegate() {
 			@Override
@@ -108,7 +108,7 @@ public class DefaultCellEditor extends AbstractCellEditor implements TableCellEd
 	 * @param checkBox a <code>JCheckBox</code> object
 	 */
 	public DefaultCellEditor(final JCheckBox checkBox) {
-		setComponent(checkBox);
+		秘setComponent(checkBox);
 
 		delegate = new EditorDelegate() {
 			@Override
@@ -137,7 +137,7 @@ public class DefaultCellEditor extends AbstractCellEditor implements TableCellEd
 	 * @param comboBox a <code>JComboBox</code> object
 	 */
 	public DefaultCellEditor(final JComboBox comboBox) {
-		setComponent(comboBox);
+		秘setComponent(comboBox);
 		comboBox.putClientProperty("JComboBox.isTableCellEditor", Boolean.TRUE);
 		delegate = new EditorDelegate() {
 			@Override
@@ -380,7 +380,6 @@ public class DefaultCellEditor extends AbstractCellEditor implements TableCellEd
 		 * @return true
 		 */
 		public boolean stopCellEditing() {
-			//System.out.println("DefaultCellEditor stop");
 			fireEditingStopped();
 			return true;
 		}
@@ -389,7 +388,6 @@ public class DefaultCellEditor extends AbstractCellEditor implements TableCellEd
 		 * Cancels editing. This method calls <code>fireEditingCanceled</code>.
 		 */
 		public void cancelCellEditing() {
-			//System.out.println("DefaultCellEditor cancel");
 			fireEditingCanceled();
 		}
 
@@ -401,7 +399,6 @@ public class DefaultCellEditor extends AbstractCellEditor implements TableCellEd
 		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			//System.out.println("DefaultCellEditor action Performed");
 			DefaultCellEditor.this.stopCellEditing();
 		}
 
@@ -417,7 +414,7 @@ public class DefaultCellEditor extends AbstractCellEditor implements TableCellEd
 		}
 	}
 
-	private void setComponent(JComponent comp) {
+	private void 秘setComponent(JComponent comp) {
 		CellHolder.setJ2SRendererComponent(editorComponent = comp);
 	}
 

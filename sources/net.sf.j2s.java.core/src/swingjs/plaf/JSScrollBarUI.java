@@ -138,10 +138,10 @@ public class JSScrollBarUI extends JSSliderUI {
 		}
 		if (isVertical) {
 			DOMNode.setStyles(sliderTrack, "transform", transform, "left", left, "width", thickness);
-			DOMNode.setStyles(sliderHandle, "border", "none", "left", leftt, "margin-bottom", "0px","width", thickness);
+			DOMNode.setStyles(sliderHandle, "border", "1px solid blue", "box-sizing", "border-box", "left", leftt, "margin-bottom", "0px","width", thickness);
 		} else {
 			DOMNode.setStyles(sliderTrack, "top", top, "height", thickness);
-			DOMNode.setStyles(sliderHandle, "border", "none", "top", leftt, "margin-left", "0px","height", thickness);
+			DOMNode.setStyles(sliderHandle, "border", "1px solid blue", "box-sizing","border-box", "top", leftt, "margin-left", "0px","height", thickness);
 		}
 	}
 

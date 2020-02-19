@@ -276,7 +276,12 @@ public class JSComponentUI extends ComponentUI
 	private void updateTableCell(DOMNode td, boolean andAdd) {
 		DOMNode node = DOMNode.firstChild(td);
 		if (node != domNode) {
-			$(td).empty();
+			if (isLabel || buttonNode != null) {
+				$(td).empty();
+			} else {
+				DOMNode.detachAll(td);
+				setHTMLElement();
+			}
 			node = null;
 			//if (andAdd) 
 				td.appendChild(domNode);
@@ -748,8 +753,9 @@ public class JSComponentUI extends ComponentUI
 	 */
 	public DOMNode reInit(boolean getNew) {
 		setTainted();
-		if (domNode != null)
+		if (domNode != null) {
 			DOMNode.dispose(domNode);
+		}
 		domNode = null;
 		keysEnabled = false;
 		newID(true);
@@ -1068,7 +1074,9 @@ public class JSComponentUI extends ComponentUI
 	 * Internal: Directly fire KFM events for button press from JComponent.doClick() 
 	 */
 	@SuppressWarnings("unused")
-	public void abstractButtonFocusHack() {    	
+	public void abstractButtonFocusHack() {
+		if (jc == null)
+			return;
 		JComponent focused = (JComponent) JSToolkit.getCurrentFocusOwner(null);
     	JSComponentUI focusedUI = /** @j2sNative focused && focused.ui || */ null;
     	// This is important for a button that is responding to a formatted text box input.
@@ -1088,8 +1096,8 @@ public class JSComponentUI extends ComponentUI
 	/**
 	 * for DOMNode will be turning into boolean true/false for attribute
 	 */
-	protected final static String TRUE = "TRUE";
-	protected final static String FALSE = "FALSE";
+	protected final static String TRUE = "秘TRUE";
+	protected final static String FALSE = "秘FALSE";
 	/**
 	 * for jQuery return
 	 */
@@ -1309,7 +1317,8 @@ public class JSComponentUI extends ComponentUI
 			return;
 		switch (prop) {
 		case "ancestor":
-			if (cellComponent != null)
+			// remove will be too soon to update ancestor
+			if (cellComponent != null || e.getNewValue() == null)
 				return;
 			Container anc = JSComponent.秘getTopInvokableAncestor(c, false);
 			updatePropertyAncestor(anc != null && anc.isVisible());
@@ -1927,7 +1936,7 @@ public class JSComponentUI extends ComponentUI
 			if (!isTable && children[i] == null)
 				break;
 			JSComponentUI ui = JSToolkit.getUI(children[i], false);
-			if (ui == null || ui.isNull || ui.isPaintedOnly) {
+			if (ui == null || ui.jc == null || ui.isNull || ui.isPaintedOnly) {
 				// Box.Filler has no ui.
 				continue;
 			}
@@ -2165,7 +2174,13 @@ public class JSComponentUI extends ComponentUI
 	 * @return
 	 */
 	protected DOMNode setJSText(DOMNode obj, String prop, String val) {
-		return DOMNode.setAttr(obj, prop, val);
+		// Don't use DOMNode.setAttr here, because that converts TRUE to true
+		/**
+		 * @j2sNative
+		 * 
+		 * obj[prop] = val;
+		 */
+		return obj;
 	}
 
 	@Override
@@ -2245,7 +2260,8 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	@Override
-	public void setBounds(int x, int y, int width, int height, int op) {
+	final public void setBounds(int x, int y, int width, int height, int op) {
+		// note that x and y are completely ignored.
 		if (isUIDisabled)
 			return;
 		boolean isBounded = (width > 0 && height > 0);
@@ -2275,7 +2291,7 @@ public class JSComponentUI extends ComponentUI
 			if (scrollPaneUI != null) {
 				width = Math.min(width, scrollPaneUI.c.getWidth());
 				height = Math.min(height, scrollPaneUI.c.getHeight());
-			}
+			}	
 			if (width > 0 && height > 0)
 				setSizeFromComponent(width, height, op);
 			break;
@@ -2546,7 +2562,7 @@ public class JSComponentUI extends ComponentUI
 			margins = zeroInsets;
 		Insets myInsets = (isLabel || !isSimpleButton || justGetPreferred ? zeroInsets : getButtonOuterInsets(b));
 		int h = (dimText == null ? 0 : dimText.height);
-		int ih = (dimIcon == null ? 0 : dimIcon.height);
+		int ih = (this.actionNode != null  ? 15 : dimIcon == null ? 0 : dimIcon.height);
 		int hCtr = Math.max(h, ih);
 		int wCtr = wIcon + gap + wText;
 		int wAccel = 0;
@@ -2625,7 +2641,8 @@ public class JSComponentUI extends ComponentUI
 							"margin", "0px 5px", "transform", "translateY(15%)");
 				}
 			}
-			DOMNode.setStyles(menuAnchorNode, "width", "95%", "min-width",
+			if (!isMenu || isMenuItem)
+				DOMNode.setStyles(menuAnchorNode, "width", "95%", "min-width",
 					Math.max(75, (wCtr + wAccel + margins.left + margins.right) * 1.1) + "px");
 		}
 
@@ -2838,7 +2855,7 @@ public class JSComponentUI extends ComponentUI
 		
 		//System.out.println("jscui.updateCellNode " + id + " " + DOMNode.getAttr(actionNode, "outerHTML"));
 
-		if (allowPaintedBackground)
+		if (allowPaintedBackground || isMenu && !isMenuItem)
 			DOMNode.setStyles(domNode, "background", "transparent");
 		if (cellComponent instanceof BooleanRenderer || cellComponent.getClientProperty("_jsBooleanEditor") != null) {
 
@@ -2988,6 +3005,8 @@ public class JSComponentUI extends ComponentUI
 	 * @param nodef
 	 */
 	protected void undisposeUI(DOMNode node) {
+		if (!isDisposed)
+			return;
 		Container parent = c.getParent();
 		// node will be null for Window, including Dialog
 		if (node != null && parent != null) {
@@ -3014,7 +3033,7 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	@Override
-	public void setFont(Font f) {
+	final public void setFont(Font f) {
 //		if (domNode != null && !isUIDisabled) {
 //		if (textNode != null)
 //			setCssFont(textNode, f);
@@ -3089,7 +3108,9 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	@Override
-	public void layout() {
+	@Deprecated
+	final public void layout() {
+		// called by Component.validate() only; totally ignored
 	}
 
 	@Override
@@ -3160,9 +3181,11 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	public void beginValidate() {
+		// only used in JSWindowUI
 	}
 
 	public void endValidate() {
+		// only used in JSWindowUI
 	}
 
 	public void beginLayout() {
@@ -3348,9 +3371,11 @@ public class JSComponentUI extends ComponentUI
 			updateTableCell(td, true);
 			return;
 		}
+		// while in the CellRendererPane, we save that information or clear it
 		cellComponent = (JComponent) rendererComponent;		
 		if (width == 0)
 			return;
+		// saves the most recent cell width and height
 		cellWidth = width;
 		cellHeight = height;
 	}
@@ -3499,6 +3524,11 @@ public class JSComponentUI extends ComponentUI
 
 	public boolean processKeyEvent(KeyEvent e) {
 		return NOT_HANDLED;
+	}
+
+
+	public boolean isDisplayable() {
+		return domNode != null;
 	}
 
 

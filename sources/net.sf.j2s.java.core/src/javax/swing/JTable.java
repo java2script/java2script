@@ -35,6 +35,8 @@ import java.awt.Dimension;
 import java.awt.HeadlessException;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeListener;
@@ -82,6 +84,7 @@ import swingjs.plaf.CellHolder;
 // SwingJS  TODO import java.text.DateFormat;
 //import sun.swing.SwingLazyValue;
 import swingjs.plaf.JSComponentUI;
+import swingjs.plaf.JSTableUI;
 
 /**
  * SwingJS TODO: print/printable all not implemented
@@ -3664,22 +3667,18 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 
 	/**
 	 * Programmatically starts editing the cell at <code>row</code> and
-	 * <code>column</code>, if those indices are in the valid range, and the
-	 * cell at those indices is editable. To prevent the <code>JTable</code>
-	 * from editing a particular table, column or cell value, return false from
-	 * the <code>isCellEditable</code> method in the <code>TableModel</code>
-	 * interface.
+	 * <code>column</code>, if those indices are in the valid range, and the cell at
+	 * those indices is editable. To prevent the <code>JTable</code> from editing a
+	 * particular table, column or cell value, return false from the
+	 * <code>isCellEditable</code> method in the <code>TableModel</code> interface.
 	 *
-	 * @param row
-	 *            the row to be edited
-	 * @param column
-	 *            the column to be edited
-	 * @param e
-	 *            event to pass into <code>shouldSelectCell</code>; note that as
-	 *            of Java 2 platform v1.2, the call to
-	 *            <code>shouldSelectCell</code> is no longer made
-	 * @return false if for any reason the cell cannot be edited, or if the
-	 *         indices are invalid
+	 * @param row    the row to be edited
+	 * @param column the column to be edited
+	 * @param e      event to pass into <code>shouldSelectCell</code>; note that as
+	 *               of Java 2 platform v1.2, the call to
+	 *               <code>shouldSelectCell</code> is no longer made
+	 * @return false if for any reason the cell cannot be edited, or if the indices
+	 *         are invalid
 	 */
 	public boolean editCellAt(int row, int column, EventObject e) {
 		if (cellEditor != null && !cellEditor.stopCellEditing()) {
@@ -3708,28 +3707,31 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 				removeEditor();
 				return false;
 			}
-			_getCellRect(row, column, false, tmpRect);
-			if (comp instanceof JTextField) {
-				tmpRect.y -= 3;
-				tmpRect.width -= 2;
-				tmpRect.height -= 3;
-			}
-			comp.setBounds(tmpRect);
-			_addingEditor = true;
-			// SwingJS don't invalidate the table itself
-			add(comp);
-			comp.validate();
-			comp.秘repaint();
-			comp.setVisible(true);
-			// force domNode to be visible as well as outer node
-			comp.秘getUI().setVisible(null, true);
-			SwingUtilities.invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					comp.requestFocus();
+			// in SwingJS we can edit a checkbox in place
+			boolean isInPlace = (editor instanceof BooleanInPlaceEditor);
+			if (!isInPlace) {
+				_getCellRect(row, column, false, tmpRect);
+				_addingEditor = true;
+				if (comp instanceof JTextField) {
+					tmpRect.y -= 3;
+					tmpRect.width -= 2;
+					tmpRect.height -= 3;
 				}
-			});
-
+				comp.setBounds(tmpRect);
+				// SwingJS don't invalidate the table itself
+				add(comp);
+				comp.validate();
+				comp.秘repaint();
+				comp.setVisible(true);
+				// force domNode to be visible as well as outer node
+				comp.秘getUI().setVisible(null, true);
+				SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						comp.requestFocus();
+					}
+				});
+			}
 			// BH SwingJS - moved these next two lines up so that we have that
 			// info in JSTableUI
 			setEditingRow(row);
@@ -5550,9 +5552,11 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		}
 	}
 
-	public static class BooleanRenderer extends JCheckBox implements TableCellRenderer, UIResource {
+	public static class BooleanRenderer extends JCheckBox implements TableCellRenderer, UIResource, ActionListener {
 		private static final Border noFocusBorder = new EmptyBorder(1, 1, 1, 1);
 
+		private JTable 秘table;
+		
 		public BooleanRenderer() {
 			super();
 			setHorizontalAlignment(JLabel.CENTER);
@@ -5562,6 +5566,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 				int row, int column) {
+			this.秘table = table;
 			if (isSelected) {
 				setForeground(table.getSelectionForeground());
 				setBackground(table.getSelectionBackground());
@@ -5576,15 +5581,32 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 			} else {
 				setBorder(noFocusBorder);
 			}
-
-			return this;
-		}
-		
-		public Component getComponent() {
 			return this;
 		}
 
+		private boolean 秘haveListener;
+		/**
+		 * Used by JSTableUI to recognize this as a renderer that needs no preparation
+		 * @return this
+		 */
+		public Component 秘getComponent() {
+			if (!秘haveListener) {
+				秘haveListener = true;
+				addActionListener(this);
+			}
+			return this;
+		}
 
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if (秘table.isEditing()) {
+				JComponent jc = (JComponent) 秘table.getEditorComponent();
+				if (jc instanceof JCheckBox && jc != this) {
+					((JCheckBox)jc).setSelected(isSelected());
+				}
+				秘table.getCellEditor().stopCellEditing();
+			}
+		}
 	}
 
 	private void setLazyEditor(Class c, String s) {
@@ -5808,7 +5830,6 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 	 * @beaninfo bound: true description: The table's active cell editor.
 	 */
 	public void setCellEditor(TableCellEditor anEditor) {
-		//System.out.println("JTable setting Cell Editor " + anEditor);
 		TableCellEditor oldEditor = cellEditor;
 		cellEditor = anEditor;
 		boolean a = _addingEditor;
@@ -5917,32 +5938,53 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 	}
 
 	/**
-	 * Returns an appropriate editor for the cell specified by <code>row</code>
-	 * and <code>column</code>. If the <code>TableColumn</code> for this column
-	 * has a non-null editor, returns that. If not, finds the class of the data
-	 * in this column (using <code>getColumnClass</code>) and returns the
-	 * default editor for this type of data.
+	 * Returns an appropriate editor for the cell specified by <code>row</code> and
+	 * <code>column</code>. If the <code>TableColumn</code> for this column has a
+	 * non-null editor, returns that. If not, finds the class of the data in this
+	 * column (using <code>getColumnClass</code>) and returns the default editor for
+	 * this type of data.
 	 * <p>
 	 * <b>Note:</b> Throughout the table package, the internal implementations
-	 * always use this method to provide editors so that this default behavior
-	 * can be safely overridden by a subclass.
+	 * always use this method to provide editors so that this default behavior can
+	 * be safely overridden by a subclass.
 	 *
-	 * @param row
-	 *            the row of the cell to edit, where 0 is the first row
-	 * @param column
-	 *            the column of the cell to edit, where 0 is the first column
+	 * @param row    the row of the cell to edit, where 0 is the first row
+	 * @param column the column of the cell to edit, where 0 is the first column
 	 * @return the editor for this cell; if <code>null</code> return the default
 	 *         editor for this type of cell
 	 * @see DefaultCellEditor
 	 */
 	public TableCellEditor getCellEditor(int row, int column) {
 		TableColumn tableColumn = getColumnModel().getColumn(column);
-		TableCellEditor editor = tableColumn.getCellEditor();
-		if (editor == null) {
-			editor = getDefaultEditor(getColumnClass(column));
-		}
-		return editor;
+		TableCellEditor editor = 秘getDefaultEditor(row, column);
+		return (editor != null ? editor
+				: (editor = tableColumn.getCellEditor()) != null ? editor
+						: getDefaultEditor(getColumnClass(column)));
 	}
+
+	private TableCellEditor 秘getDefaultEditor(int row, int column) {
+		Object renderer = null;
+		if (this.getValueAt(row, column) instanceof Boolean
+				&& (renderer = this.getCellRenderer(row, column)) instanceof JCheckBox) {
+			boolean value = ((Boolean)getValueAt(row, column)).booleanValue();
+			BooleanInPlaceEditor editor = new BooleanInPlaceEditor((JCheckBox) renderer, value);
+			return editor;
+		}
+		return null;
+	}
+
+	/**
+	 * SwingJS enables editing using the JCheckbox also used for rendering
+	 * @author hansonr
+	 *
+	 */
+	static class BooleanInPlaceEditor extends DefaultCellEditor {
+		public boolean 秘inPlace = true;
+		public BooleanInPlaceEditor(JCheckBox c, boolean value) {
+			super(秘clearDelegateListeners(c));
+		}
+	}
+
 
 	/**
 	 * Prepares the editor by querying the data model for the value and
@@ -5966,8 +6008,6 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		JComponent comp = (JComponent) editor.getTableCellEditorComponent(this, value, isSelected, row, column);
 		if (editor.getClass().getName() == "javax.swing.JTable$BooleanEditor")
 			comp.putClientProperty("_jsBooleanEditor", Boolean.TRUE);
-		
-		
 		// if (comp instanceof JComponent) {
 		// JComponent jComp = (JComponent)comp;
 		// if (jComp.getNextFocusableComponent() == null) {
@@ -5976,6 +6016,15 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		// }
 		CellHolder.setJ2SRendererComponent(comp);
 		return comp;
+	}
+
+    static JCheckBox 秘clearDelegateListeners(JCheckBox c) {
+		ActionListener[] list = c.getActionListeners();
+		for (int i = list.length; --i >= 0;) {
+			if (list[i] instanceof DefaultCellEditor.EditorDelegate)
+				c.removeActionListener(list[i]);
+		}
+		return c;
 	}
 
 	/**
@@ -5989,27 +6038,30 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		_addingEditor = true;
 		TableCellEditor editor = getCellEditor();
 		if (editor != null) {
+			Rectangle cellRect = null;
 			editor.removeCellEditorListener(this);
-			if (editorComp != null) {
-				// Component focusOwner =
-				// KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
-				// boolean isFocusOwnerInTheTable = focusOwner != null?
-				// SwingUtilities.isDescendingFrom(focusOwner, this):false;
-				remove(editorComp);
-				// if(isFocusOwnerInTheTable) {
-				// requestFocusInWindow();
-				// }
+			if (!(editor instanceof BooleanInPlaceEditor)) {
+				if (editorComp != null) {
+					// Component focusOwner =
+					// KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+					// boolean isFocusOwnerInTheTable = focusOwner != null?
+					// SwingUtilities.isDescendingFrom(focusOwner, this):false;
+					remove(editorComp);
+					// if(isFocusOwnerInTheTable) {
+					// requestFocusInWindow();
+					// }
+				}
+
+
 			}
-
-			Rectangle cellRect = getCellRect(editingRow, editingColumn, false);
-
+			cellRect = getCellRect(editingRow, editingColumn, false);
 			setCellEditor(null);
 			setEditingColumn(-1);
 			setEditingRow(-1);
 			editorComp = null;
 			_addingEditor = false;
-
-			repaint(cellRect);
+			if (cellRect != null)
+				repaint(cellRect);
 		}
 	}
 
