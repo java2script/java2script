@@ -336,7 +336,38 @@ the original Java developers did not see that option. But we have a hindsight ad
 Working with Files
 ==================
 
-SwingJS will always return File.exists() == true. If this is being tested, provide a J2sNative 
+Simple String file names are not optimal for passing information about
+read files within SwingJS applications. 
+ 
+All work with files should either use Path or File objects exclusively. 
+These objects, after a file is read or checked for existence, will already 
+contain the file byte[] data. Doing something like this:
+
+File f = File("./test.dat");
+boolean isOK = f.exists();
+
+will load f with its byte[] data, if the file exists. 
+
+But if after that, we use:
+
+File f2 = new File(f.getAbsolutePath());
+
+f2 will not contain that data. Such copying should be done as:
+
+File f2 = new File(f);
+
+in which case, the byte[] data will be transferred.
+
+
+SwingJS uses the following criteria to determine if File.exists() returns true:
+
+(1) if this File object has been used directly to read data, or 
+(2) if reading data using this File object is successful.
+
+Note that you cannot check to see if a file exists before input or if it 
+was actually written or if it already exists prior to writing in SwingJS.  
+
+Thus, you should check each use of file.exists() carefully, and if necessary, provide a J2sNative 
 block that gives an appropriate "OK" message, for example:
 
 (/** @j2sNative 1 ? false : */ outputfile.exits())

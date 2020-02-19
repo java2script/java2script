@@ -10769,7 +10769,7 @@ if (getFlag("j2s")) {
 	J2S._nozcore = getFlag("j2snozcore");        // no compressed core.z.js files
 	J2S._strict = getFlag("j2sstrict");          // strict mode -- experimental
 	J2S._startProfiling = getFlag("j2sprofile"); // track object creation
-	J2S._traceEvents = getFlag("j2sevents");     // event queue messages 
+	J2S._traceEvents = getFlag("j2sevents");     // reports ComponentEvent instances 
 	J2S._traceMouse = getFlag("j2smouse");       // mouse events, but not move
 	J2S._traceMouseMove = getFlag("j2smousemove"); // mouse messages including move
 	J2S._traceOutput = getURIField("j2strace");  // look only for these
@@ -13748,22 +13748,31 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0
 		})
 		var zbase = z = J2S._z.rear + 2000;
+		var modalZ = 1e10;
 		for (var i = 0, i1 = a.length; i < i1; i++) {
 			var n = a[i][1];
 			if (n == node)
 				z = zbase;
 			if (!n.ui || !n.ui.embeddingNode) {
 			  n.style.zIndex = zbase;
-			  if (n.ui && n.ui.outerNode && !n.ui.embeddingNode)
+			  if (n.ui && n.ui.outerNode && !n.ui.embeddingNode) {
 				  n.ui.outerNode.style.zIndex = zbase;
+				  if (n.ui.jc.isVisible$() && n.ui.modalNode) {
+					  if (zbase < modalZ)
+						  modalZ = zbase;
+					  n.ui.modalNode.style.zIndex = zbase - 1;
+				  } 
+			  }
 			}
 			zbase += 1000;
 		}
 		if (!found)
 			z += 1000;
 		node.style.position = "absolute";
-		if (J2S._checkLoading) 
-			System.out.println("setting z-index to " + z + " for " + node.id);
+		if (!node.ui.jc.modal && modalZ < 1e10 && z > modalZ) {
+			z = modalZ - 500;
+		}
+		node.ui.outerNode.style.zIndex = z;
 		return z;
 	}
 
@@ -13862,7 +13871,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
-// BH 2019.02.02 3.2.7-v5 fixes array.getClass().getName() and getArrayClass() for short -- should be [S, not [H, for Java
+// BH 2020.02.12 3.2.8-v1 new Throwable().getStackTrace() should not include j2sClazz methods
+// BH 2020.02.02 3.2.7-v5 fixes array.getClass().getName() and getArrayClass() for short -- should be [S, not [H, for Java
 // BH 2019.12.29 3.2.6 fixes Float.parseFloat$S("NaN") [and Double]
 // BH 2019.12.23 3.2.6 update of System
 // BH 2019.12.19 3.2.6 revision of $clinit$
@@ -15813,7 +15823,7 @@ Clazz.newInterface(java.lang,"Runnable");
 
 
 
-(function(){var P$=java.lang,I$=[[0,'java.util.stream.StreamSupport','java.util.Spliterators','java.lang.CharSequence$lambda1','java.lang.CharSequence$lambda2']],$I$=function(i){return I$[i]||(I$[i]=Clazz.load(I$[0][i]))};
+;(function(){var P$=java.lang,I$=[[0,'java.util.stream.StreamSupport','java.util.Spliterators','java.lang.CharSequence$lambda1','java.lang.CharSequence$lambda2']],$I$=function(i){return I$[i]||(I$[i]=Clazz.load(I$[0][i]))};
 var C$=Clazz.newInterface(P$, "CharSequence");
 C$.$defaults$ = function(C$){
 
@@ -16021,6 +16031,7 @@ _Loader.getSystemClassLoader$ = function() {
   return (_Loader.sysLoader ? _Loader.sysLoader : (_Loader.sysLoader = new Class().getClassLoader$()));
 };
 
+
 var assertionStatus = {};
 
 _Loader.getSystemResource$S = function(name) {
@@ -16048,6 +16059,9 @@ _Loader.getClassAssertionStatus$ = function(clazz) { // harmony
 }
 
 _Loader.prototype.hashCode$ = function(){return 1};
+
+
+_Loader.prototype.getPackage$S = function (name) { return Clazz.new_(Clazz.load("java.lang.Package").c$$S$O, [name, Clazz._allPackage[name]]); };
 
 
 _Loader.prototype.setDefaultAssertionStatus$Z = function(tf) {
@@ -18091,6 +18105,42 @@ String.format$S$OA = function(format, args) {
   return f.format$S$OA.apply(f,arguments).toString();
  };
 
+ // Java8
+ String.lastIndexOf$CA$I$I$S$I = function(source, sourceOffset, sourceCount, target, fromIndex) {
+	 return C$.lastIndexOf$CA$I$I$CA$I$I$I(source, sourceOffset, sourceCount, target.value, 0, target.value.length, fromIndex);
+ };
+ 
+ // Java8
+ String.lastIndexOf$CA$I$I$CA$I$I$I = function(source, sourceOffset, sourceCount, target, targetOffset, targetCount, fromIndex) {
+	 var rightIndex=sourceCount - targetCount;
+	 if (fromIndex < 0) {
+	 return -1;
+	 }if (fromIndex > rightIndex) {
+	 fromIndex=rightIndex;
+	 }if (targetCount == 0) {
+	 return fromIndex;
+	 }var strLastIndex=targetOffset + targetCount - 1;
+	 var strLastChar=target[strLastIndex];
+	 var min=sourceOffset + targetCount - 1;
+	 var i=min + fromIndex;
+	  searching : while (true){
+	 while (i >= min && source[i] != strLastChar ){
+	 i--;
+	 }
+	 if (i < min) {
+	 return -1;
+	 }var j=i - 1;
+	 var start=j - (targetCount - 1);
+	 var k=strLastIndex - 1;
+	 while (j > start){
+	 if (source[j--] != target[k--]) {
+	 i--;
+	 continue searching;
+	 }}
+	 return start - sourceOffset + 1;
+	 }
+	 };
+
  
  String.CASE_INSENSITIVE_ORDER = {
 	 compare$: function(s1, s2){
@@ -18479,6 +18529,7 @@ String(StringBuffer buffer)
 String(StringBuilder builder)
 String(String original)
 
+String(char[] value, boolean share) // Java8
 String(byte[] ascii, int hibyte)
 String(byte[] bytes, Charset charset)
 String(byte[] bytes, String charsetName)
@@ -18510,13 +18561,14 @@ case 1:
   }
   return x.toString();
 case 2:  
+  // String(char[] value, boolean share)
   // String(byte[] ascii, int hibyte)
   // String(byte[] bytes, Charset charset)
   // String(byte[] bytes, String charsetName)
 
   var hibyte=arguments[1];
   return (typeof hibyte=="number" ? String.instantialize(x,hibyte,0,x.length) 
-	: self.TextDecoder && (textDecoder || (textDecoder = new TextDecoder())) && arguments[1].toString().toUpperCase() == "UTF-8" ? textDecoder.decode(arguments[0])
+	: typeof hibyte == "boolean" ? x.join('') : self.TextDecoder && (textDecoder || (textDecoder = new TextDecoder())) && arguments[1].toString().toUpperCase() == "UTF-8" ? textDecoder.decode(arguments[0])
 	: String.instantialize(x,0,x.length,hibyte));
 case 3:
   // String(byte[] bytes, int offset, int length)
@@ -18606,6 +18658,7 @@ String.copyValueOf$CA = function(data) {
  return sp.copyValueOf$CA$I$I(data, 0, data.length);
 }
 
+// Java8
 String.join$CharSequence$CharSequenceA = function(sep,array) {
  var ret = "";
  var s = "";
@@ -18616,6 +18669,7 @@ String.join$CharSequence$CharSequenceA = function(sep,array) {
  return ret;
 }
 
+//Java8
 String.join$CharSequence$Iterable = function(sep,iterable) {
  var ret = "";
  var s = "";
@@ -19063,6 +19117,12 @@ Clazz.newMeth(C$, 'fillInStackTrace$', function () {
 this.stackTrace = Clazz.array(StackTraceElement);
 try {
 var caller = arguments.callee.caller;
+var i = 0;
+while (caller.caller) {
+	caller = caller.caller;
+	if (++i > 3 && caller.exClazz)
+		break;
+}
 var superCaller = null;
 var callerList = [];
 var index = 0;
@@ -19266,7 +19326,29 @@ newEx(java.lang,"NoSuchFieldException",ReflectiveOperationException);
 newEx(java.lang,"NoSuchMethodException",ReflectiveOperationException);
 newEx(java.lang,"NoSuchMethodError",IncompatibleClassChangeError);
 newEx(java.lang,"NullPointerException",RuntimeException);
-newEx(java.lang,"NumberFormatException",IllegalArgumentException);
+
+;(function(){
+
+var C$=Clazz.newClass(java.lang, "NumberFormatException", null, 'IllegalArgumentException');
+
+C$.$clinit$=2;
+
+Clazz.newMeth(C$, '$init$', function () {
+},1);
+
+Clazz.newMeth(C$, 'c$', function () {
+;C$.superclazz.c$.apply(this,[]);C$.$init$.apply(this);
+}, 1);
+
+Clazz.newMeth(C$, 'c$$S', function (s) {
+;C$.superclazz.c$$S.apply(this,[s]);C$.$init$.apply(this);
+}, 1);
+
+Clazz.newMeth(C$, 'forInputString$S', function (s) {
+return Clazz.new_(C$.c$$S,["For input string: \"" + s + "\"" ]);
+}, 1);
+})();
+
 newEx(java.lang,"OutOfMemoryError",VirtualMachineError);
 newEx(java.lang,"SecurityException",RuntimeException);
 newEx(java.lang,"StackOverflowError",VirtualMachineError);
@@ -19304,6 +19386,7 @@ C$.superclazz.c$$S.apply(this,["String index out of range: "+index]);
 
 ;(function() {
 var C$=Clazz.newClass(java.lang.reflect,"InvocationTargetException",function(){this.target=null;},ReflectiveOperationException);
+C$.$clinit$ = 2;
 m$(C$, "c$$Throwable", function(exception){
 C$.superclazz.c$$Throwable.apply(this, arguments);
 this.target=exception;
@@ -19324,6 +19407,7 @@ return this.target;
 
 ;(function(){
 var C$=Clazz.newClass(java.lang.reflect,"UndeclaredThrowableException",function(){this.undeclaredThrowable=null;},RuntimeException);
+C$.$clinit$ = 2;
 m$(C$, "c$$Throwable", function(exception){
 Clazz.super_(C$, this);
 C$.superclazz.c$$Throwable.apply(this, arguments);
@@ -19359,9 +19443,11 @@ newEx(java.io,"NotActiveException",java.io.ObjectStreamException);
 newEx(java.io,"NotSerializableException",java.io.ObjectStreamException);
 newEx(java.io,"StreamCorruptedException",java.io.ObjectStreamException);
 
-C$=Clazz.newClass(java.io,"InterruptedIOException",function(){
+;(function() {
+var C$=Clazz.newClass(java.io,"InterruptedIOException",function(){
 this.bytesTransferred=0;
 },java.io.IOException);
+})();
 
 
 ;(function() {
@@ -19384,10 +19470,12 @@ msg=this.classname+';' + ' '+msg;
 })();
 
 
-C$=Clazz.newClass(java.io,"OptionalDataException",function(){
+;(function(){
+var C$=Clazz.newClass(java.io,"OptionalDataException",function(){
 this.eof=false;
 this.length=0;
 },java.io.ObjectStreamException);
+})();
 
 ;(function() {
 var C$=Clazz.newClass(java.io,"WriteAbortedException",function(){

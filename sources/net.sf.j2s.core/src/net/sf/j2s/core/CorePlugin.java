@@ -25,10 +25,12 @@ public class CorePlugin extends Plugin {
 	 * "net.sf.j2s.core.jar" not "net.sf.j2s.core.3.2.5"
 	 * 
 	 */
-	public static String VERSION = "3.2.8-v1";
+	public static String VERSION = "3.2.8-v2";
 	
 	// if you change the x.x.x number, be sure to also indicate that in 
 	// j2sApplet.js and also (Bob only) update.bat, update-clean.bat
+
+	// BH 2020.02.18 -- 3.2.8-v2 fixes import static missing $I$ defs.
 	// BH 2020.02.05 -- 3.2.8-v1 reworking of functional interfaces; no longer unqualified
 	// BH 2020.01.31 -- 3.2.7-v5 'L' used instead of 'J' in $fields$
 	// BH 2020.01.31 -- 3.2.7-v5 java.lang.reflect.* should not be truncated to reflect.* in parameters
