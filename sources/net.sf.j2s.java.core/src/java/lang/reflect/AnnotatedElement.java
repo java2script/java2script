@@ -427,7 +427,7 @@ public interface AnnotatedElement {
      * @throws NullPointerException if the given annotation class is null
      * @since 1.8
      */
-    // SwingJS implemented directly in Class; already overridded in Field, Constructor, and Method
+    // SwingJS implemented directly in Class; already overridden in Field, Constructor, and Method
     //default 
     <T extends Annotation> T[] getDeclaredAnnotationsByType(Class<T> annotationClass);
 //    {
