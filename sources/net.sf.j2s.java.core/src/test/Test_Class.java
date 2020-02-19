@@ -1,18 +1,42 @@
 package test;
 
+import static java.awt.Color.getColor;
+import static java.awt.Toolkit.getDefaultToolkit;
+
+import java.awt.Color;
+import java.awt.Toolkit;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Hashtable;
-
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import static java.lang.String.format
+;
 class Test_Class extends Test_Class2<Integer> {
-
-	Test_Class(byte[]...d) {
+	Test_Class(byte[]...d) { 
 		super(d);
+		
+		assert(getClass().getPackage().toString().equals("package test"));
+		
+		getDefaultToolkit();
+		Toolkit.getDefaultToolkit();
+		String f = format("testing");
+		assert(f.equals("testing"));
+		Color c1 = Color.getColor("green");
+		
+		Color c = getColor("red");
+	// just for testing transpiler bug	main(null);
+
 		System.out.println("Test_Class len = " + d.length);
 	}
 	
@@ -83,6 +107,17 @@ class Test_Class extends Test_Class2<Integer> {
 		static char c = 'c';
 		static Character c2 = 'c';
 		static char c3 = new Character('c');
+		
+		Test_Class_Inner(String... s) {
+			System.out.println(s.length);
+		}
+		
+		public static Test_Class newInstance(Object... objects) {
+			System.out.println("This is static Test_Class.newInstance(Object... objects");
+			return null;
+		}
+
+
 	}
 
 
@@ -265,7 +300,7 @@ class Test_Class extends Test_Class2<Integer> {
 	public short testShort(short s) {return 0;}
 
 	public static void main(String[] args) {
-
+		
 		try {
 			assert (new String().getClass().getName().equals("java.lang.String"));
 			assert (Class.forName("java.lang.String") == String.class);

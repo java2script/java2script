@@ -20,6 +20,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.net.URL;
 
 import javax.swing.AbstractButton;
 import javax.swing.ImageIcon;
@@ -642,7 +643,9 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 	int ntest = 0;
 
 	private ImageIcon getImage(String name) {
-		ImageIcon icon = new ImageIcon(getClass().getResource(name));
+		URL file = getClass().getResource(name);
+		System.out.println(file.toString());
+		ImageIcon icon = new ImageIcon(file);
 
 		while (icon.getImageLoadStatus() == MediaTracker.LOADING)
 			try {

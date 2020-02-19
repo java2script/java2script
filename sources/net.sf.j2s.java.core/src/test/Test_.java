@@ -175,6 +175,7 @@ public class Test_ {
 		Test_Void.main(args);
 		Test_Zipin.main(args);
 		Test_Zipout.main(args);
+		System.out.println("Test_ all tests completed successfully.");
 	}
 
 	public String toString() {
