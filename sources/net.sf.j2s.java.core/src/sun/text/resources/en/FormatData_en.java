@@ -1,8 +1,5 @@
 /*
- * Some portions of this file have been modified by Robert Hanson hansonr.at.stolaf.edu 2012-2017
- * for use in SwingJS via transpilation into JavaScript using Java2Script.
- *
- * Copyright (c) 1996, 2005, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -26,11 +23,9 @@
  * questions.
  */
 
-
-
 /*
  * (C) Copyright Taligent, Inc. 1996, 1997 - All Rights Reserved
- * (C) Copyright IBM Corp. 1996 - 1999 - All Rights Reserved
+ * (C) Copyright IBM Corp. 1996 - 1998 - All Rights Reserved
  *
  * The original version of this source code and documentation
  * is copyrighted and owned by Taligent, Inc., a wholly-owned
@@ -43,181 +38,45 @@
  *
  */
 
-package sun.text.resources;
+package sun.text.resources.en;
 
-import java.util.ListResourceBundle;
+import sun.util.resources.ParallelListResourceBundle;
 
-public class FormatData_en extends ListResourceBundle {
+public class FormatData_en extends ParallelListResourceBundle {
     /**
-     * Overrides ListResourceBundle
+     * Overrides ParallelListResourceBundle
      */
-    @Override
-		protected final Object[][] getContents() {
+    protected final Object[][] getContents() {
+        // This locale inherits almost everything from the root default locale.  However,
+        // even if it inherited everything, we would still need this locale to exist
+        // to make the resource-bundle lookup mechanism work right.  In that case, we'd
+        // define this method as follows:
+        //    return new Object[][] { };
         return new Object[][] {
-            { "MonthNames",
+            { "MonthNarrows",
                 new String[] {
-                    "January", // january
-                    "February", // february
-                    "March", // march
-                    "April", // april
-                    "May", // may
-                    "June", // june
-                    "July", // july
-                    "August", // august
-                    "September", // september
-                    "October", // october
-                    "November", // november
-                    "December", // december
-                    "" // month 13 if applicable
+                    "J",
+                    "F",
+                    "M",
+                    "A",
+                    "M",
+                    "J",
+                    "J",
+                    "A",
+                    "S",
+                    "O",
+                    "N",
+                    "D",
+                    "",
                 }
             },
-            { "MonthAbbreviations",
-                new String[] {
-                    "Jan", // abb january
-                    "Feb", // abb february
-                    "Mar", // abb march
-                    "Apr", // abb april
-                    "May", // abb may
-                    "Jun", // abb june
-                    "Jul", // abb july
-                    "Aug", // abb august
-                    "Sep", // abb september
-                    "Oct", // abb october
-                    "Nov", // abb november
-                    "Dec", // abb december
-                    "" // abb month 13 if applicable
-                }
-            },
-            { "DayNames",
-                new String[] {
-                    "Sunday", // Sunday
-                    "Monday", // Monday
-                    "Tuesday", // Tuesday
-                    "Wednesday", // Wednesday
-                    "Thursday", // Thursday
-                    "Friday", // Friday
-                    "Saturday" // Saturday
-                }
-            },
-            { "DayAbbreviations",
-                new String[] {
-                    "Sun", // abb Sunday
-                    "Mon", // abb Monday
-                    "Tue", // abb Tuesday
-                    "Wed", // abb Wednesday
-                    "Thu", // abb Thursday
-                    "Fri", // abb Friday
-                    "Sat" // abb Saturday
-                }
-            },
-            { "AmPmMarkers",
-                new String[] {
-                    "AM", // am marker
-                    "PM" // pm marker
-                }
-            },
-            { "Eras",
-                new String[] { // era strings for GregorianCalendar
-                    "BC",
-                    "AD"
-                }
-            },
-//            { "sun.util.BuddhistCalendar.Eras",
-//                new String[] { // Thai Buddhist calendar era strings
-//                    "BC",     // BC
-//                    "B.E."    // Buddhist Era
-//                }
-//            },
-//            { "sun.util.BuddhistCalendar.short.Eras",
-//                new String[] { // Thai Buddhist calendar era strings
-//                    "BC",     // BC
-//                    "B.E."    // Buddhist Era
-//                }
-//            },
-//            { "java.util.JapaneseImperialCalendar.Eras",
-//                new String[] { // Japanese imperial calendar era strings
-//                    "",
-//                    "Meiji",
-//                    "Taisho",
-//                    "Showa",
-//                    "Heisei",
-//                }
-//            },
-//            { "java.util.JapaneseImperialCalendar.short.Eras",
-//                new String[] { // Japanese imperial calendar era abbreviations
-//                    "",
-//                    "M",
-//                    "T",
-//                    "S",
-//                    "H",
-//                }
-//            },
-//            { "java.util.JapaneseImperialCalendar.FirstYear",
-//                new String[] { // Japanese imperial calendar year name
-//                    // empty in English
-//                }
-//            },
             { "NumberPatterns",
                 new String[] {
                     "#,##0.###;-#,##0.###", // decimal pattern
-                    "\u00a4#,##0.00;(\u00a4#,##0.00)", // currency pattern
+                    "\u00A4#,##0.00;-\u00A4#,##0.00", // currency pattern
                     "#,##0%" // percent pattern
                 }
             },
-            { "NumberElements",
-                new String[] {
-                    ".", // decimal separator
-                    ",", // group (thousands) separator
-                    ";", // list separator
-                    "%", // percent sign
-                    "0", // native 0 digit
-                    "#", // pattern digit
-                    "-", // minus sign
-                    "E", // exponential
-                    "\u2030", // per mille
-                    "\u221e", // infinity
-                    "\ufffd" // NaN
-                }
-            },
-            { "DateTimePatterns",
-                new String[] {
-                    "h:mm:ss a z",        // full time pattern
-                    "h:mm:ss a z",        // long time pattern
-                    "h:mm:ss a",          // medium time pattern
-                    "h:mm a",             // short time pattern
-                    "EEEE, MMMM d, yyyy", // full date pattern
-                    "MMMM d, yyyy",       // long date pattern
-                    "MMM d, yyyy",        // medium date pattern
-                    "M/d/yy",             // short date pattern
-                    "{1} {0}"             // date-time pattern
-                }
-            },
-//            { "sun.util.BuddhistCalendar.DateTimePatterns",
-//                new String[] {
-//                    "H:mm:ss z",          // full time pattern
-//                    "H:mm:ss z",          // long time pattern
-//                    "H:mm:ss",            // medium time pattern
-//                    "H:mm",               // short time pattern
-//                    "EEEE d MMMM G yyyy", // full date pattern
-//                    "d MMMM yyyy",        // long date pattern
-//                    "d MMM yyyy",         // medium date pattern
-//                    "d/M/yyyy",           // short date pattern
-//                    "{1}, {0}"            // date-time pattern
-//                }
-//            },
-//            { "java.util.JapaneseImperialCalendar.DateTimePatterns",
-//                new String[] {
-//                    "h:mm:ss a z",             // full time pattern
-//                    "h:mm:ss a z",             // long time pattern
-//                    "h:mm:ss a",               // medium time pattern
-//                    "h:mm a",                  // short time pattern
-//                    "GGGG yyyy MMMM d (EEEE)", // full date pattern
-//                    "GGGG yyyy MMMM d",        // long date pattern
-//                    "GGGG yyyy MMM d",         // medium date pattern
-//                    "Gy.MM.dd",                // short date pattern
-//                    "{1} {0}"                  // date-time pattern
-//                }
-//            },
             { "DateTimePatternChars", "GyMdkHmsSEDFwWahKzZ" },
         };
     }

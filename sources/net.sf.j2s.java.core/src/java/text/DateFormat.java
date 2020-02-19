@@ -1,8 +1,5 @@
 /*
- * Some portions of this file have been modified by Robert Hanson hansonr.at.stolaf.edu 2012-2017
- * for use in SwingJS via transpilation into JavaScript using Java2Script.
- *
- * Copyright (c) 1996, 2005, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1996, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -42,89 +39,101 @@
 package java.text;
 
 import java.io.InvalidObjectException;
+import java.text.spi.DateFormatProvider;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
-
-import java.util.Calendar;
-import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.TimeZone;
-//import sun.util.LocaleServiceProviderPool;
+import java.util.spi.LocaleServiceProvider;
+import sun.util.locale.provider.LocaleProviderAdapter;
+import sun.util.locale.provider.LocaleServiceProviderPool;
 
 /**
- * DateFormat is an abstract class for date/time formatting subclasses which
+ * {@code DateFormat} is an abstract class for date/time formatting subclasses which
  * formats and parses dates or time in a language-independent manner.
- * The date/time formatting subclass, such as SimpleDateFormat, allows for
- * formatting (i.e., date -> text), parsing (text -> date), and
+ * The date/time formatting subclass, such as {@link SimpleDateFormat}, allows for
+ * formatting (i.e., date &rarr; text), parsing (text &rarr; date), and
  * normalization.  The date is represented as a <code>Date</code> object or
  * as the milliseconds since January 1, 1970, 00:00:00 GMT.
  *
- * <p>DateFormat provides many class methods for obtaining default date/time
+ * <p>{@code DateFormat} provides many class methods for obtaining default date/time
  * formatters based on the default or a given locale and a number of formatting
- * styles. The formatting styles include FULL, LONG, MEDIUM, and SHORT. More
+ * styles. The formatting styles include {@link #FULL}, {@link #LONG}, {@link #MEDIUM}, and {@link #SHORT}. More
  * detail and examples of using these styles are provided in the method
  * descriptions.
  *
- * <p>DateFormat helps you to format and parse dates for any locale.
+ * <p>{@code DateFormat} helps you to format and parse dates for any locale.
  * Your code can be completely independent of the locale conventions for
  * months, days of the week, or even the calendar format: lunar vs. solar.
  *
  * <p>To format a date for the current Locale, use one of the
  * static factory methods:
- * <pre>
- *  myString = DateFormat.getDateInstance().format(myDate);
- * </pre>
+ * <blockquote>
+ * <pre>{@code
+ * myString = DateFormat.getDateInstance().format(myDate);
+ * }</pre>
+ * </blockquote>
  * <p>If you are formatting multiple dates, it is
  * more efficient to get the format and use it multiple times so that
  * the system doesn't have to fetch the information about the local
  * language and country conventions multiple times.
- * <pre>
- *  DateFormat df = DateFormat.getDateInstance();
- *  for (int i = 0; i < myDate.length; ++i) {
- *    output.println(df.format(myDate[i]) + "; ");
- *  }
- * </pre>
+ * <blockquote>
+ * <pre>{@code
+ * DateFormat df = DateFormat.getDateInstance();
+ * for (int i = 0; i < myDate.length; ++i) {
+ *     output.println(df.format(myDate[i]) + "; ");
+ * }
+ * }</pre>
+ * </blockquote>
  * <p>To format a date for a different Locale, specify it in the
- * call to getDateInstance().
- * <pre>
- *  DateFormat df = DateFormat.getDateInstance(DateFormat.LONG, Locale.FRANCE);
- * </pre>
+ * call to {@link #getDateInstance(int, Locale) getDateInstance()}.
+ * <blockquote>
+ * <pre>{@code
+ * DateFormat df = DateFormat.getDateInstance(DateFormat.LONG, Locale.FRANCE);
+ * }</pre>
+ * </blockquote>
  * <p>You can use a DateFormat to parse also.
- * <pre>
- *  myDate = df.parse(myString);
- * </pre>
- * <p>Use getDateInstance to get the normal date format for that country.
+ * <blockquote>
+ * <pre>{@code
+ * myDate = df.parse(myString);
+ * }</pre>
+ * </blockquote>
+ * <p>Use {@code getDateInstance} to get the normal date format for that country.
  * There are other static factory methods available.
- * Use getTimeInstance to get the time format for that country.
- * Use getDateTimeInstance to get a date and time format. You can pass in
+ * Use {@code getTimeInstance} to get the time format for that country.
+ * Use {@code getDateTimeInstance} to get a date and time format. You can pass in
  * different options to these factory methods to control the length of the
- * result; from SHORT to MEDIUM to LONG to FULL. The exact result depends
+ * result; from {@link #SHORT} to {@link #MEDIUM} to {@link #LONG} to {@link #FULL}. The exact result depends
  * on the locale, but generally:
- * <ul><li>SHORT is completely numeric, such as 12.13.52 or 3:30pm
- * <li>MEDIUM is longer, such as Jan 12, 1952
- * <li>LONG is longer, such as January 12, 1952 or 3:30:32pm
- * <li>FULL is pretty completely specified, such as
- * Tuesday, April 12, 1952 AD or 3:30:42pm PST.
+ * <ul><li>{@link #SHORT} is completely numeric, such as {@code 12.13.52} or {@code 3:30pm}
+ * <li>{@link #MEDIUM} is longer, such as {@code Jan 12, 1952}
+ * <li>{@link #LONG} is longer, such as {@code January 12, 1952} or {@code 3:30:32pm}
+ * <li>{@link #FULL} is pretty completely specified, such as
+ * {@code Tuesday, April 12, 1952 AD or 3:30:42pm PST}.
  * </ul>
  *
  * <p>You can also set the time zone on the format if you wish.
  * If you want even more control over the format or parsing,
  * (or want to give your users more control),
- * you can try casting the DateFormat you get from the factory methods
- * to a SimpleDateFormat. This will work for the majority
- * of countries; just remember to put it in a try block in case you
+ * you can try casting the {@code DateFormat} you get from the factory methods
+ * to a {@link SimpleDateFormat}. This will work for the majority
+ * of countries; just remember to put it in a {@code try} block in case you
  * encounter an unusual one.
  *
  * <p>You can also use forms of the parse and format methods with
- * ParsePosition and FieldPosition to
+ * {@link ParsePosition} and {@link FieldPosition} to
  * allow you to
  * <ul><li>progressively parse through pieces of a string.
  * <li>align any particular field, or find out where it is for selection
  * on the screen.
  * </ul>
  *
- * <h4><a name="synchronization">Synchronization</a></h4>
+ * <h3><a name="synchronization">Synchronization</a></h3>
  *
  * <p>
  * Date formats are not synchronized.
@@ -143,10 +152,13 @@ import java.util.TimeZone;
 public abstract class DateFormat extends Format {
 
     /**
-     * The calendar that <code>DateFormat</code> uses to produce the time field
-     * values needed to implement date and time formatting.  Subclasses should
-     * initialize this to a calendar appropriate for the locale associated with
-     * this <code>DateFormat</code>.
+     * The {@link Calendar} instance used for calculating the date-time fields
+     * and the instant of time. This field is used for both formatting and
+     * parsing.
+     *
+     * <p>Subclasses should initialize this field to a {@link Calendar}
+     * appropriate for the {@link Locale} associated with this
+     * <code>DateFormat</code>.
      * @serial
      */
     protected Calendar calendar;
@@ -286,8 +298,7 @@ public abstract class DateFormat extends Format {
      * pattern character 'z'.
      * @see java.text.Format
      */
-    @Override
-		public final StringBuffer format(Object obj, StringBuffer toAppendTo,
+    public final StringBuffer format(Object obj, StringBuffer toAppendTo,
                                      FieldPosition fieldPosition)
     {
         if (obj instanceof Date)
@@ -359,15 +370,21 @@ public abstract class DateFormat extends Format {
 
     /**
      * Parse a date/time string according to the given parse position.  For
-     * example, a time text "07/10/96 4:5 PM, PDT" will be parsed into a Date
-     * that is equivalent to Date(837039928046).
+     * example, a time text {@code "07/10/96 4:5 PM, PDT"} will be parsed into a {@code Date}
+     * that is equivalent to {@code Date(837039900000L)}.
      *
      * <p> By default, parsing is lenient: If the input is not in the form used
      * by this object's format method but can still be parsed as a date, then
      * the parse succeeds.  Clients may insist on strict adherence to the
-     * format by calling setLenient(false).
+     * format by calling {@link #setLenient(boolean) setLenient(false)}.
      *
-     * @see java.text.DateFormat#setLenient(boolean)
+     * <p>This parsing operation uses the {@link #calendar} to produce
+     * a {@code Date}. As a result, the {@code calendar}'s date-time
+     * fields and the {@code TimeZone} value may have been
+     * overwritten, depending on subclass implementations. Any {@code
+     * TimeZone} value that has previously been set by a call to
+     * {@link #setTimeZone(java.util.TimeZone) setTimeZone} may need
+     * to be restored for further operations.
      *
      * @param source  The date/time string to be parsed
      *
@@ -375,7 +392,7 @@ public abstract class DateFormat extends Format {
      *              output, the position at which parsing terminated, or the
      *              start position if the parse failed.
      *
-     * @return      A Date, or null if the input could not be parsed
+     * @return      A {@code Date}, or {@code null} if the input could not be parsed
      */
     public abstract Date parse(String source, ParsePosition pos);
 
@@ -403,8 +420,7 @@ public abstract class DateFormat extends Format {
      *         error, returns null.
      * @exception NullPointerException if <code>pos</code> is null.
      */
-    @Override
-		public Object parseObject(String source, ParsePosition pos) {
+    public Object parseObject(String source, ParsePosition pos) {
         return parse(source, pos);
     }
 
@@ -431,24 +447,34 @@ public abstract class DateFormat extends Format {
 
     /**
      * Gets the time formatter with the default formatting style
-     * for the default locale.
+     * for the default {@link java.util.Locale.Category#FORMAT FORMAT} locale.
+     * <p>This is equivalent to calling
+     * {@link #getTimeInstance(int, Locale) getTimeInstance(DEFAULT,
+     *     Locale.getDefault(Locale.Category.FORMAT))}.
+     * @see java.util.Locale#getDefault(java.util.Locale.Category)
+     * @see java.util.Locale.Category#FORMAT
      * @return a time formatter.
      */
     public final static DateFormat getTimeInstance()
     {
-        return get(DEFAULT, 0, 1, Locale.getDefault());
+        return get(DEFAULT, 0, 1, Locale.getDefault(Locale.Category.FORMAT));
     }
 
     /**
      * Gets the time formatter with the given formatting style
-     * for the default locale.
+     * for the default {@link java.util.Locale.Category#FORMAT FORMAT} locale.
+     * <p>This is equivalent to calling
+     * {@link #getTimeInstance(int, Locale) getTimeInstance(style,
+     *     Locale.getDefault(Locale.Category.FORMAT))}.
+     * @see java.util.Locale#getDefault(java.util.Locale.Category)
+     * @see java.util.Locale.Category#FORMAT
      * @param style the given formatting style. For example,
      * SHORT for "h:mm a" in the US locale.
      * @return a time formatter.
      */
     public final static DateFormat getTimeInstance(int style)
     {
-        return get(style, 0, 1, Locale.getDefault());
+        return get(style, 0, 1, Locale.getDefault(Locale.Category.FORMAT));
     }
 
     /**
@@ -467,24 +493,34 @@ public abstract class DateFormat extends Format {
 
     /**
      * Gets the date formatter with the default formatting style
-     * for the default locale.
+     * for the default {@link java.util.Locale.Category#FORMAT FORMAT} locale.
+     * <p>This is equivalent to calling
+     * {@link #getDateInstance(int, Locale) getDateInstance(DEFAULT,
+     *     Locale.getDefault(Locale.Category.FORMAT))}.
+     * @see java.util.Locale#getDefault(java.util.Locale.Category)
+     * @see java.util.Locale.Category#FORMAT
      * @return a date formatter.
      */
     public final static DateFormat getDateInstance()
     {
-        return get(0, DEFAULT, 2, Locale.getDefault());
+        return get(0, DEFAULT, 2, Locale.getDefault(Locale.Category.FORMAT));
     }
 
     /**
      * Gets the date formatter with the given formatting style
-     * for the default locale.
+     * for the default {@link java.util.Locale.Category#FORMAT FORMAT} locale.
+     * <p>This is equivalent to calling
+     * {@link #getDateInstance(int, Locale) getDateInstance(style,
+     *     Locale.getDefault(Locale.Category.FORMAT))}.
+     * @see java.util.Locale#getDefault(java.util.Locale.Category)
+     * @see java.util.Locale.Category#FORMAT
      * @param style the given formatting style. For example,
      * SHORT for "M/d/yy" in the US locale.
      * @return a date formatter.
      */
     public final static DateFormat getDateInstance(int style)
     {
-        return get(0, style, 2, Locale.getDefault());
+        return get(0, style, 2, Locale.getDefault(Locale.Category.FORMAT));
     }
 
     /**
@@ -503,17 +539,27 @@ public abstract class DateFormat extends Format {
 
     /**
      * Gets the date/time formatter with the default formatting style
-     * for the default locale.
+     * for the default {@link java.util.Locale.Category#FORMAT FORMAT} locale.
+     * <p>This is equivalent to calling
+     * {@link #getDateTimeInstance(int, int, Locale) getDateTimeInstance(DEFAULT,
+     *     DEFAULT, Locale.getDefault(Locale.Category.FORMAT))}.
+     * @see java.util.Locale#getDefault(java.util.Locale.Category)
+     * @see java.util.Locale.Category#FORMAT
      * @return a date/time formatter.
      */
     public final static DateFormat getDateTimeInstance()
     {
-        return get(DEFAULT, DEFAULT, 3, Locale.getDefault());
+        return get(DEFAULT, DEFAULT, 3, Locale.getDefault(Locale.Category.FORMAT));
     }
 
     /**
      * Gets the date/time formatter with the given date and time
-     * formatting styles for the default locale.
+     * formatting styles for the default {@link java.util.Locale.Category#FORMAT FORMAT} locale.
+     * <p>This is equivalent to calling
+     * {@link #getDateTimeInstance(int, int, Locale) getDateTimeInstance(dateStyle,
+     *     timeStyle, Locale.getDefault(Locale.Category.FORMAT))}.
+     * @see java.util.Locale#getDefault(java.util.Locale.Category)
+     * @see java.util.Locale.Category#FORMAT
      * @param dateStyle the given date formatting style. For example,
      * SHORT for "M/d/yy" in the US locale.
      * @param timeStyle the given time formatting style. For example,
@@ -523,7 +569,7 @@ public abstract class DateFormat extends Format {
     public final static DateFormat getDateTimeInstance(int dateStyle,
                                                        int timeStyle)
     {
-        return get(timeStyle, dateStyle, 3, Locale.getDefault());
+        return get(timeStyle, dateStyle, 3, Locale.getDefault(Locale.Category.FORMAT));
     }
 
     /**
@@ -543,35 +589,42 @@ public abstract class DateFormat extends Format {
     /**
      * Get a default date/time formatter that uses the SHORT style for both the
      * date and the time.
+     *
+     * @return a date/time formatter
      */
     public final static DateFormat getInstance() {
         return getDateTimeInstance(SHORT, SHORT);
     }
 
-//    /**
-//     * Returns an array of all locales for which the
-//     * <code>get*Instance</code> methods of this class can return
-//     * localized instances.
-//     * The returned array represents the union of locales supported by the Java
-//     * runtime and by installed
-//     * {@link java.text.spi.DateFormatProvider DateFormatProvider} implementations.
-//     * It must contain at least a <code>Locale</code> instance equal to
-//     * {@link java.util.Locale#US Locale.US}.
-//     *
-//     * @return An array of locales for which localized
-//     *         <code>DateFormat</code> instances are available.
-//     */
-//    public static Locale[] getAvailableLocales()
-//    {
-//        LocaleServiceProviderPool pool =
-//            LocaleServiceProviderPool.getPool(DateFormatProvider.class);
-//        return pool.getAvailableLocales();
-//    }
+    /**
+     * Returns an array of all locales for which the
+     * <code>get*Instance</code> methods of this class can return
+     * localized instances.
+     * The returned array represents the union of locales supported by the Java
+     * runtime and by installed
+     * {@link java.text.spi.DateFormatProvider DateFormatProvider} implementations.
+     * It must contain at least a <code>Locale</code> instance equal to
+     * {@link java.util.Locale#US Locale.US}.
+     *
+     * @return An array of locales for which localized
+     *         <code>DateFormat</code> instances are available.
+     */
+    public static Locale[] getAvailableLocales()
+    {
+        LocaleServiceProviderPool pool =
+            LocaleServiceProviderPool.getPool(DateFormatProvider.class);
+        return pool.getAvailableLocales();
+    }
 
     /**
      * Set the calendar to be used by this date format.  Initially, the default
      * calendar for the specified or default locale is used.
-     * @param newCalendar the new Calendar to be used by the date format
+     *
+     * <p>Any {@link java.util.TimeZone TimeZone} and {@linkplain
+     * #isLenient() leniency} values that have previously been set are
+     * overwritten by {@code newCalendar}'s values.
+     *
+     * @param newCalendar the new {@code Calendar} to be used by the date format
      */
     public void setCalendar(Calendar newCalendar)
     {
@@ -580,6 +633,7 @@ public abstract class DateFormat extends Format {
 
     /**
      * Gets the calendar associated with this date/time formatter.
+     *
      * @return the calendar associated with this date/time formatter.
      */
     public Calendar getCalendar()
@@ -607,7 +661,18 @@ public abstract class DateFormat extends Format {
     }
 
     /**
-     * Sets the time zone for the calendar of this DateFormat object.
+     * Sets the time zone for the calendar of this {@code DateFormat} object.
+     * This method is equivalent to the following call.
+     * <blockquote><pre>{@code
+     * getCalendar().setTimeZone(zone)
+     * }</pre></blockquote>
+     *
+     * <p>The {@code TimeZone} set by this method is overwritten by a
+     * {@link #setCalendar(java.util.Calendar) setCalendar} call.
+     *
+     * <p>The {@code TimeZone} set by this method may be overwritten as
+     * a result of a call to the parse method.
+     *
      * @param zone the given new time zone.
      */
     public void setTimeZone(TimeZone zone)
@@ -617,6 +682,11 @@ public abstract class DateFormat extends Format {
 
     /**
      * Gets the time zone.
+     * This method is equivalent to the following call.
+     * <blockquote><pre>{@code
+     * getCalendar().getTimeZone()
+     * }</pre></blockquote>
+     *
      * @return the time zone associated with the calendar of DateFormat.
      */
     public TimeZone getTimeZone()
@@ -629,8 +699,17 @@ public abstract class DateFormat extends Format {
      * lenient parsing, the parser may use heuristics to interpret inputs that
      * do not precisely match this object's format.  With strict parsing,
      * inputs must match this object's format.
-     * @param lenient when true, parsing is lenient
-     * @see java.util.Calendar#setLenient
+     *
+     * <p>This method is equivalent to the following call.
+     * <blockquote><pre>{@code
+     * getCalendar().setLenient(lenient)
+     * }</pre></blockquote>
+     *
+     * <p>This leniency value is overwritten by a call to {@link
+     * #setCalendar(java.util.Calendar) setCalendar()}.
+     *
+     * @param lenient when {@code true}, parsing is lenient
+     * @see java.util.Calendar#setLenient(boolean)
      */
     public void setLenient(boolean lenient)
     {
@@ -639,6 +718,14 @@ public abstract class DateFormat extends Format {
 
     /**
      * Tell whether date/time parsing is to be lenient.
+     * This method is equivalent to the following call.
+     * <blockquote><pre>{@code
+     * getCalendar().isLenient()
+     * }</pre></blockquote>
+     *
+     * @return {@code true} if the {@link #calendar} is lenient;
+     *         {@code false} otherwise.
+     * @see java.util.Calendar#isLenient()
      */
     public boolean isLenient()
     {
@@ -648,8 +735,7 @@ public abstract class DateFormat extends Format {
     /**
      * Overrides hashCode
      */
-    @Override
-		public int hashCode() {
+    public int hashCode() {
         return numberFormat.hashCode();
         // just enough fields for a reasonable distribution
     }
@@ -657,8 +743,7 @@ public abstract class DateFormat extends Format {
     /**
      * Overrides equals
      */
-    @Override
-		public boolean equals(Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         DateFormat other = (DateFormat) obj;
@@ -673,8 +758,7 @@ public abstract class DateFormat extends Format {
     /**
      * Overrides Cloneable
      */
-    @Override
-		public Object clone()
+    public Object clone()
     {
         DateFormat other = (DateFormat) super.clone();
         other.calendar = (Calendar) calendar.clone();
@@ -709,27 +793,28 @@ public abstract class DateFormat extends Format {
         } else {
             dateStyle = -1;
         }
-        try {
-//            // Check whether a provider can provide an implementation that's closer
-//            // to the requested locale than what the Java runtime itself can provide.
-//            LocaleServiceProviderPool pool =
-//                LocaleServiceProviderPool.getPool(DateFormatProvider.class);
-//            if (pool.hasProviders()) {
-//                DateFormat providersInstance = pool.getLocalizedObject(
-//                                                    DateFormatGetter.INSTANCE,
-//                                                    loc,
-//                                                    timeStyle,
-//                                                    dateStyle,
-//                                                    flags);
-//                if (providersInstance != null) {
-//                    return providersInstance;
-//                }
-//            }
 
-            return new SimpleDateFormat(timeStyle, dateStyle, loc);
-        } catch (MissingResourceException e) {
-            return new SimpleDateFormat("M/d/yy h:mm a");
+        LocaleProviderAdapter adapter = LocaleProviderAdapter.getAdapter(DateFormatProvider.class, loc);
+        DateFormat dateFormat = get(adapter, timeStyle, dateStyle, loc);
+        if (dateFormat == null) {
+            dateFormat = get(LocaleProviderAdapter.forJRE(), timeStyle, dateStyle, loc);
         }
+        return dateFormat;
+    }
+
+    private static DateFormat get(LocaleProviderAdapter adapter, int timeStyle, int dateStyle, Locale loc) {
+        DateFormatProvider provider = adapter.getDateFormatProvider();
+        DateFormat dateFormat;
+        if (timeStyle == -1) {
+            dateFormat = provider.getDateInstance(dateStyle, loc);
+        } else {
+            if (dateStyle == -1) {
+                dateFormat = provider.getTimeInstance(timeStyle, loc);
+            } else {
+                dateFormat = provider.getDateTimeInstance(dateStyle, timeStyle, loc);
+            }
+        }
+        return dateFormat;
     }
 
     /**
@@ -755,8 +840,7 @@ public abstract class DateFormat extends Format {
         private static final long serialVersionUID = 7441350119349544720L;
 
         // table of all instances in this class, used by readResolve
-        @SuppressWarnings("rawtypes")
-		private static final Map instanceMap = new HashMap(18);
+        private static final Map<String, Field> instanceMap = new HashMap<>(18);
         // Maps from Calendar constant (such as Calendar.ERA) to Field
         // constant (such as Field.ERA).
         private static final Field[] calendarToFieldMapping =
@@ -796,8 +880,7 @@ public abstract class DateFormat extends Format {
          *        be used, but <code>-1</code> should be used for values
          *        that don't correspond to legal <code>Calendar</code> values
          */
-        @SuppressWarnings("unchecked")
-		protected Field(String name, int calendarField) {
+        protected Field(String name, int calendarField) {
             super(name);
             this.calendarField = calendarField;
             if (this.getClass() == DateFormat.Field.class) {
@@ -831,7 +914,7 @@ public abstract class DateFormat extends Format {
          * @return resolved DateFormat.Field constant
          */
         @Override
-				protected Object readResolve() throws InvalidObjectException {
+        protected Object readResolve() throws InvalidObjectException {
             if (this.getClass() != DateFormat.Field.class) {
                 throw new InvalidObjectException("subclass didn't correctly implement readResolve");
             }
@@ -954,37 +1037,4 @@ public abstract class DateFormat extends Format {
          */
         public final static Field TIME_ZONE = new Field("time zone", -1);
     }
-
-//    /**
-//     * Obtains a DateFormat instance from a DateFormatProvider
-//     * implementation.
-//     */
-//    private static class DateFormatGetter
-//        implements LocaleServiceProviderPool.LocalizedObjectGetter<DateFormatProvider, DateFormat> {
-//        private static final DateFormatGetter INSTANCE = new DateFormatGetter();
-//
-//        public DateFormat getObject(DateFormatProvider dateFormatProvider,
-//                                Locale locale,
-//                                String key,
-//                                Object... params) {
-//            assert params.length == 3;
-//
-//            int timeStyle = (Integer)params[0];
-//            int dateStyle = (Integer)params[1];
-//            int flags = (Integer)params[2];
-//
-//            switch (flags) {
-//            case 1:
-//                return dateFormatProvider.getTimeInstance(timeStyle, locale);
-//            case 2:
-//                return dateFormatProvider.getDateInstance(dateStyle, locale);
-//            case 3:
-//                return dateFormatProvider.getDateTimeInstance(dateStyle, timeStyle, locale);
-//            default:
-//                assert false : "should not happen";
-//            }
-//
-//            return null;
-//        }
-//    }
 }

@@ -17,7 +17,7 @@
 
 package java.lang.annotation;
 
-import org.apache.harmony.luni.util.Msg;
+//import org.apache.harmony.luni.util.Msg;
 
 /**
  * <p>
@@ -47,7 +47,8 @@ public class IncompleteAnnotationException extends RuntimeException {
      */
     public IncompleteAnnotationException(
             Class<? extends Annotation> annotationType, String elementName) {
-        super(Msg.getString("annotation.0", elementName, annotationType)); //$NON-NLS-1$
+        super(annotationType.getName() + " missing element " +
+                elementName.toString());
         this.annotationType = annotationType;
         this.elementName = elementName;
     }
