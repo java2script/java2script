@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.GraphicsConfiguration;
 import java.awt.Image;
@@ -21,6 +22,7 @@ import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
+import java.awt.geom.Point2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
@@ -726,7 +728,15 @@ public class JSGraphics2D implements
 	}
 
 	public void setPaint(Paint paint) {
-		setColor((Color) paint);
+		if (paint instanceof Color) {
+			setColor((Color) paint);
+		} else if (paint instanceof GradientPaint) {
+			GradientPaint p = (GradientPaint) paint;
+			Point2D.Float p1 = (Point2D.Float) p.getPoint1();
+			Point2D.Float p2 = (Point2D.Float) p.getPoint2();
+			HTML5CanvasContext2D.createLinearGradient(ctx, p1, p2, 
+					JSToolkit.getCSSColor(p.getColor1()), JSToolkit.getCSSColor(p.getColor2()));
+		}		
 	}
 
 	public Font getFont() {

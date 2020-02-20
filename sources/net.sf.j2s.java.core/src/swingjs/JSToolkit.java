@@ -943,7 +943,7 @@ public class JSToolkit extends SunToolkit
 
 	@Override
 	public Map<? extends Attribute, ?> mapInputMethodHighlight(InputMethodHighlight hl) {
-		// Java 7
+	    JSUtil.notImplemented(null);
 		return null;
 	}
 

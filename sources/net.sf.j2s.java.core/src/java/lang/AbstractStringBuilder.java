@@ -665,17 +665,19 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @return  a reference to this object.
      */
     public AbstractStringBuilder append(long l) {
-        if (l == Long.MIN_VALUE) {
-            append("-9223372036854775808");
-            return this;
-        }
-        int appendedLength = (l < 0) ? Long.stringSize(-l) + 1
-                                     : Long.stringSize(l);
-        int spaceNeeded = count + appendedLength;
-        ensureCapacityInternal(spaceNeeded);
-        Long.getChars(l, spaceNeeded, value);
-        count = spaceNeeded;
-        return this;
+    	append("" + l);
+    	return this;
+//        if (l == Long.MIN_VALUE) {
+//            append("-9223372036854775808");
+//            return this;
+//        }
+//        int appendedLength = (l < 0) ? Long.stringSize(-l) + 1
+//                                     : Long.stringSize(l);
+//        int spaceNeeded = count + appendedLength;
+//        ensureCapacityInternal(spaceNeeded);
+//        Long.getChars(l, spaceNeeded, value);
+//        count = spaceNeeded;
+//        return this;
     }
 
     /**

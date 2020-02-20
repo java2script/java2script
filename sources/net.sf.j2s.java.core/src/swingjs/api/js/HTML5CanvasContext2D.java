@@ -1,6 +1,10 @@
 package swingjs.api.js;
 
+import java.awt.Color;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D.Float;
+
+import swingjs.JSToolkit;
 
 public abstract class HTML5CanvasContext2D {
 
@@ -129,6 +133,16 @@ public abstract class HTML5CanvasContext2D {
 		}
 		return m;
 	}
+
+	public static void createLinearGradient(HTML5CanvasContext2D ctx, Float p1, Float p2, String css1, String css2) {
+		/**
+		 * @j2sNative
+		 * 
+		 *   var grd = ctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
+		 *   grd.addColorStop(0,css1);
+		 *   grd.addColorStop(1,css2);
+		 */
+		}
 
 
 }
