@@ -23,46 +23,27 @@
  * questions.
  */
 
-package sun.util.locale.provider;
+package sun.util.spi;
 
 import java.util.Calendar;
-//import java.util.Calendar.Builder;
 import java.util.Locale;
-import java.util.Set;
 import java.util.TimeZone;
-import sun.util.spi.CalendarProvider;
+import java.util.spi.LocaleServiceProvider;
 
 /**
- * Concrete implementation of the  {@link sun.util.spi.CalendarProvider
- * CalendarProvider} class for the JRE LocaleProviderAdapter.
+ * An abstract class for service providers that
+ * provide instances of the
+ * {@link java.util.Calendar Calendar} class.
  *
- * @author Naoto Sato
+ * @since        1.8
  */
-public class CalendarProviderImpl extends CalendarProvider implements AvailableLanguageTags {
-    private final LocaleProviderAdapter.Type type;
-    private final Set<String> langtags;
-
-    public CalendarProviderImpl(LocaleProviderAdapter.Type type, Set<String> langtags) {
-        this.type = type;
-        this.langtags = langtags;
-    }
+public abstract class CalendarProvider extends LocaleServiceProvider {
 
     /**
-     * Returns an array of all locales for which this locale service provider
-     * can provide localized objects or names.
-     *
-     * @return An array of all locales for which this locale service provider
-     * can provide localized objects or names.
+     * Sole constructor.  (For invocation by subclass constructors, typically
+     * implicit.)
      */
-    @Override
-    public Locale[] getAvailableLocales() {
-        return LocaleProviderAdapter.toLocaleArray(langtags);
-    }
-
-    @Override
-    public boolean isSupportedLocale(Locale locale) {
-        // Support any locales.
-        return true;
+    protected CalendarProvider() {
     }
 
     /**
@@ -79,17 +60,5 @@ public class CalendarProviderImpl extends CalendarProvider implements AvailableL
      * @return a <code>Calendar</code> instance.
      * @see java.util.Calendar#getInstance(java.util.Locale)
      */
-    @Override
-    public Calendar getInstance(TimeZone zone, Locale locale) {
-        return new Calendar.Builder()
-                     .setLocale(locale)
-                     .setTimeZone(zone)
-                     .setInstant(System.currentTimeMillis())
-                     .build();
-    }
-
-    @Override
-    public Set<String> getAvailableLanguageTags() {
-        return langtags;
-    }
+    public abstract Calendar getInstance(TimeZone zone, Locale locale);
 }

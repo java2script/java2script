@@ -83,8 +83,8 @@ public class FontRenderContext {
      *
      */
     protected FontRenderContext() {
-//        aaHintValue = VALUE_TEXT_ANTIALIAS_DEFAULT;
-//        fmHintValue = VALUE_FRACTIONALMETRICS_DEFAULT;
+        aaHintValue = VALUE_TEXT_ANTIALIAS_DEFAULT;
+        fmHintValue = VALUE_FRACTIONALMETRICS_DEFAULT;
         defaulting = true;
     }
 
@@ -114,16 +114,16 @@ public class FontRenderContext {
         if (tx != null && !tx.isIdentity()) {
             this.tx = new AffineTransform(tx);
         }
-//        if (isAntiAliased) {
-//            aaHintValue = VALUE_TEXT_ANTIALIAS_ON;
-//        } else {
-//            aaHintValue = VALUE_TEXT_ANTIALIAS_OFF;
-//        }
-//        if (usesFractionalMetrics) {
-//            fmHintValue = VALUE_FRACTIONALMETRICS_ON;
-//        } else {
-//            fmHintValue = VALUE_FRACTIONALMETRICS_OFF;
-//        }
+        if (isAntiAliased) {
+            aaHintValue = VALUE_TEXT_ANTIALIAS_ON;
+        } else {
+            aaHintValue = VALUE_TEXT_ANTIALIAS_OFF;
+        }
+        if (usesFractionalMetrics) {
+            fmHintValue = VALUE_FRACTIONALMETRICS_ON;
+        } else {
+            fmHintValue = VALUE_FRACTIONALMETRICS_OFF;
+        }
     }
 
     /**

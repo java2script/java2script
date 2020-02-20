@@ -163,16 +163,16 @@ public final class FontUtilities {
      */
     public static final int MAX_LAYOUT_CHARCODE = 0x206F;
 
-//    /**
-//     * Calls the private getFont2D() method in java.awt.Font objects.
-//     *
-//     * @param font the font object to call
-//     *
-//     * @return the Font2D object returned by Font.getFont2D()
-//     */
-//    public static Font2D getFont2D(Font font) {
-//        return FontAccess.getFontAccess().getFont2D(font);
-//    }
+    /**
+     * Calls the private getFont2D() method in java.awt.Font objects.
+     *
+     * @param font the font object to call
+     *
+     * @return the Font2D object returned by Font.getFont2D()
+     */
+    public static Font2D getFont2D(Font font) {
+        return FontAccess.getFontAccess().getFont2D(font);
+    }
 
 //    /**
 //     * If there is anything in the text which triggers a case

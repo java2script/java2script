@@ -81,8 +81,8 @@ public abstract class SunToolkit extends Toolkit implements
 //		WindowClosingSupport, 
 //		WindowClosingListener, 
 		ComponentFactory {// ,
-																																		// InputMethodSupport
-																																		// {
+// InputMethodSupport
+// {
 
 	// 8014736: logging has been removed from SunToolkit
 

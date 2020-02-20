@@ -31,7 +31,9 @@ package java.awt;
 import javajs.util.SB;
 import sun.font.AttributeMap;
 import sun.font.AttributeValues;
+import sun.font.CoreMetrics;
 import sun.font.Font2DHandle;
+import sun.font.FontLineMetrics;
 import swingjs.JSFontMetrics;
 import swingjs.JSLineMetrics;
 import swingjs.JSToolkit;
@@ -45,6 +47,8 @@ import java.awt.font.FontRenderContext;
 import java.awt.font.LineMetrics;
 import java.awt.font.TextAttribute;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
+
 import sun.font.AttributeValues;
 import static sun.font.EAttribute.*;
 import java.awt.geom.Rectangle2D;
@@ -397,13 +401,16 @@ public class Font
      */
     private transient boolean nonIdentityTx;
 
-//    /*
-//     * A cached value used when a transform is required for internal
-//     * use.  This must not be exposed to callers since AffineTransform
-//     * is mutable.
-//     */
-//    private static final AffineTransform identityTx = new AffineTransform();
+    /*
+     * A cached value used when a transform is required for internal
+     * use.  This must not be exposed to callers since AffineTransform
+     * is mutable.
+     */
+    private static AffineTransform identityTx;
 
+    private static AffineTransform getIdentityTx() {
+    	return (identityTx == null ? (identityTx = new AffineTransform()) : identityTx);
+    }
     /*
      * JDK 1.1 serialVersionUID
      */
@@ -1081,84 +1088,84 @@ public class Font
          * SUPERSCRIPT attributes.  Clients who want the actual transform
          * need to call getRequestedAttributes.
          */
-//        if (nonIdentityTx) {
-//            AttributeValues values = getAttributeValues();
-//
-//            AffineTransform at = values.isNonDefault(ETRANSFORM)
-//                ? new AffineTransform(values.getTransform())
-//                : new AffineTransform();
-//
-//            if (values.getSuperscript() != 0) {
-//                // can't get ascent and descent here, recursive call to this fn,
-//                // so use pointsize
-//                // let users combine super- and sub-scripting
-//
-//                int superscript = values.getSuperscript();
-//
-//                double trans = 0;
-//                int n = 0;
-//                boolean up = superscript > 0;
-//                int sign = up ? -1 : 1;
-//                int ss = up ? superscript : -superscript;
-//
-//                while ((ss & 7) > n) {
-//                    int newn = ss & 7;
-//                    trans += sign * (ssinfo[newn] - ssinfo[n]);
-//                    ss >>= 3;
-//                    sign = -sign;
-//                    n = newn;
-//                }
-//                trans *= pointSize;
-//                double scale = Math.pow(2./3., n);
-//
-//                at.preConcatenate(AffineTransform.getTranslateInstance(0, trans));
-//                at.scale(scale, scale);
-//
-//                // note on placement and italics
-//                // We preconcatenate the transform because we don't want to translate along
-//                // the italic angle, but purely perpendicular to the baseline.  While this
-//                // looks ok for superscripts, it can lead subscripts to stack on each other
-//                // and bring the following text too close.  The way we deal with potential
-//                // collisions that can occur in the case of italics is by adjusting the
-//                // horizontal spacing of the adjacent glyphvectors.  Examine the italic
-//                // angle of both vectors, if one is non-zero, compute the minimum ascent
-//                // and descent, and then the x position at each for each vector along its
-//                // italic angle starting from its (offset) baseline.  Compute the difference
-//                // between the x positions and use the maximum difference to adjust the
-//                // position of the right gv.
-//            }
-//
-//            if (values.isNonDefault(EWIDTH)) {
-//                at.scale(values.getWidth(), 1f);
-//            }
-//
-//            return at;
-//        }
-//
+        if (nonIdentityTx) {
+            AttributeValues values = getAttributeValues();
+
+            AffineTransform at = values.isNonDefault(ETRANSFORM)
+                ? new AffineTransform(values.getTransform())
+                : new AffineTransform();
+
+            if (values.getSuperscript() != 0) {
+                // can't get ascent and descent here, recursive call to this fn,
+                // so use pointsize
+                // let users combine super- and sub-scripting
+
+                int superscript = values.getSuperscript();
+
+                double trans = 0;
+                int n = 0;
+                boolean up = superscript > 0;
+                int sign = up ? -1 : 1;
+                int ss = up ? superscript : -superscript;
+
+                while ((ss & 7) > n) {
+                    int newn = ss & 7;
+                    trans += sign * (ssinfo[newn] - ssinfo[n]);
+                    ss >>= 3;
+                    sign = -sign;
+                    n = newn;
+                }
+                trans *= pointSize;
+                double scale = Math.pow(2./3., n);
+
+                at.preConcatenate(AffineTransform.getTranslateInstance(0, trans));
+                at.scale(scale, scale);
+
+                // note on placement and italics
+                // We preconcatenate the transform because we don't want to translate along
+                // the italic angle, but purely perpendicular to the baseline.  While this
+                // looks ok for superscripts, it can lead subscripts to stack on each other
+                // and bring the following text too close.  The way we deal with potential
+                // collisions that can occur in the case of italics is by adjusting the
+                // horizontal spacing of the adjacent glyphvectors.  Examine the italic
+                // angle of both vectors, if one is non-zero, compute the minimum ascent
+                // and descent, and then the x position at each for each vector along its
+                // italic angle starting from its (offset) baseline.  Compute the difference
+                // between the x positions and use the maximum difference to adjust the
+                // position of the right gv.
+            }
+
+            if (values.isNonDefault(EWIDTH)) {
+                at.scale(values.getWidth(), 1f);
+            }
+
+            return at;
+        }
+
         return new AffineTransform();
     }
 
-//    // x = r^0 + r^1 + r^2... r^n
-//    // rx = r^1 + r^2 + r^3... r^(n+1)
-//    // x - rx = r^0 - r^(n+1)
-//    // x (1 - r) = r^0 - r^(n+1)
-//    // x = (r^0 - r^(n+1)) / (1 - r)
-//    // x = (1 - r^(n+1)) / (1 - r)
-//
-//    // scale ratio is 2/3
-//    // trans = 1/2 of ascent * x
-//    // assume ascent is 3/4 of point size
-//
-//    private static final float[] ssinfo = {
-//        0.0f,
-//        0.375f,
-//        0.625f,
-//        0.7916667f,
-//        0.9027778f,
-//        0.9768519f,
-//        1.0262346f,
-//        1.0591564f,
-//    };
+    // x = r^0 + r^1 + r^2... r^n
+    // rx = r^1 + r^2 + r^3... r^(n+1)
+    // x - rx = r^0 - r^(n+1)
+    // x (1 - r) = r^0 - r^(n+1)
+    // x = (r^0 - r^(n+1)) / (1 - r)
+    // x = (1 - r^(n+1)) / (1 - r)
+
+    // scale ratio is 2/3
+    // trans = 1/2 of ascent * x
+    // assume ascent is 3/4 of point size
+
+    private static final float[] ssinfo = {
+        0.0f,
+        0.375f,
+        0.625f,
+        0.7916667f,
+        0.9027778f,
+        0.9768519f,
+        1.0262346f,
+        1.0591564f,
+    };
 
     /**
      * Returns the family name of this <code>Font</code>.
@@ -1931,40 +1938,40 @@ public class Font
 //        return new Font(newValues, null, oldStyle, createdFont, font2DHandle);
 //    }
 
+	/**
+	 * Creates a new <code>Font</code> object by replicating the current
+	 * <code>Font</code> object and applying a new size to it.
+	 * 
+	 * @param size the size for the new <code>Font</code>.
+	 * @return a new <code>Font</code> object.
+	 * @since 1.2
+	 */
+	public Font deriveFont(float sizePts) {
+		if (values == null) {
+			Font f = new Font(name, style, (int) (sizePts + 0.5));
+			f.pointSize = sizePts;
+			return f;
+		}
+		AttributeValues newValues = getAttributeValues().clone();
+		newValues.setSize(size);
+		return new Font(newValues, null, -1, createdFont, font2DHandle);
+	}
+
     /**
      * Creates a new <code>Font</code> object by replicating the current
-     * <code>Font</code> object and applying a new size to it.
-     * @param size the size for the new <code>Font</code>.
+     * <code>Font</code> object and applying a new transform to it.
+     * @param trans the <code>AffineTransform</code> associated with the
+     * new <code>Font</code>
      * @return a new <code>Font</code> object.
+     * @throws IllegalArgumentException if <code>trans</code> is
+     *         <code>null</code>
      * @since 1.2
      */
-    public Font deriveFont(float sizePts){
-    	// SwingJS  -- MUST FIX SIGNATURE
-		// if (values == null) {
-      Font f =  new Font(name, style, (int)(sizePts + 0.5));
-      f.pointSize = sizePts;
-      return f;
-//        }
-//        AttributeValues newValues = getAttributeValues().clone();
-//        newValues.setSize(size);
-//        return new Font(newValues, null, -1, createdFont, font2DHandle);
+    public Font deriveFont(AffineTransform trans){
+        AttributeValues newValues = getAttributeValues().clone();
+        applyTransform(trans, newValues);
+        return new Font(newValues, null, -1, createdFont, font2DHandle);
     }
-
-//    /**
-//     * Creates a new <code>Font</code> object by replicating the current
-//     * <code>Font</code> object and applying a new transform to it.
-//     * @param trans the <code>AffineTransform</code> associated with the
-//     * new <code>Font</code>
-//     * @return a new <code>Font</code> object.
-//     * @throws IllegalArgumentException if <code>trans</code> is
-//     *         <code>null</code>
-//     * @since 1.2
-//     */
-//    public Font deriveFont(AffineTransform trans){
-//        AttributeValues newValues = getAttributeValues().clone();
-//        applyTransform(trans, newValues);
-//        return new Font(newValues, null, -1, createdFont, font2DHandle);
-//    }
 
     /**
      * Creates a new <code>Font</code> object by replicating the current
@@ -1974,143 +1981,142 @@ public class Font
      * @since 1.2
      */
     public Font deriveFont(int style){
-    	// SwingJS  -- MUST FIX SIGNATURE
-//        if (values == null) {
+        if (values == null) {
            return new Font(name, style, size);
-//        }
-//        AttributeValues newValues = getAttributeValues().clone();
-//        int oldStyle = (this.style != style) ? this.style : -1;
-//        applyStyle(style, newValues);
-//        return new Font(newValues, null, oldStyle, createdFont, font2DHandle);
+        }
+        AttributeValues newValues = getAttributeValues().clone();
+        int oldStyle = (this.style != style) ? this.style : -1;
+        applyStyle(style, newValues);
+        return new Font(newValues, null, oldStyle, createdFont, font2DHandle);
     }
 
-//    /**
-//     * Creates a new <code>Font</code> object by replicating the current
-//     * <code>Font</code> object and applying a new set of font attributes
-//     * to it.
-//     *
-//     * @param attributes a map of attributes enabled for the new
-//     * <code>Font</code>
-//     * @return a new <code>Font</code> object.
-//     * @since 1.2
-//     */
-//    public Font deriveFont(Map<? extends Attribute, ?> attributes) {
-//        if (attributes == null) {
-//            return this;
-//        }
-//        AttributeValues newValues = getAttributeValues().clone();
-//        newValues.merge(attributes, RECOGNIZED_MASK);
-//
-//        return new Font(newValues, name, style, createdFont, font2DHandle);
-//    }
+    /**
+     * Creates a new <code>Font</code> object by replicating the current
+     * <code>Font</code> object and applying a new set of font attributes
+     * to it.
+     *
+     * @param attributes a map of attributes enabled for the new
+     * <code>Font</code>
+     * @return a new <code>Font</code> object.
+     * @since 1.2
+     */
+    public Font deriveFont(Map<? extends Attribute, ?> attributes) {
+        if (attributes == null) {
+            return this;
+        }
+        AttributeValues newValues = getAttributeValues().clone();
+        newValues.merge(attributes, RECOGNIZED_MASK);
 
-//    /**
-//     * Checks if this <code>Font</code> has a glyph for the specified
-//     * character.
-//     *
-//     * <p> <b>Note:</b> This method cannot handle <a
-//     * href="../../java/lang/Character.html#supplementary"> supplementary
-//     * characters</a>. To support all Unicode characters, including
-//     * supplementary characters, use the {@link #canDisplay(int)}
-//     * method or <code>canDisplayUpTo</code> methods.
-//     *
-//     * @param c the character for which a glyph is needed
-//     * @return <code>true</code> if this <code>Font</code> has a glyph for this
-//     *          character; <code>false</code> otherwise.
-//     * @since 1.2
-//     */
-//    public boolean canDisplay(char c){
-//        return getFont2D().canDisplay(c);
-//    }
+        return new Font(newValues, name, style, createdFont, font2DHandle);
+    }
 
-//    /**
-//     * Checks if this <code>Font</code> has a glyph for the specified
-//     * character.
-//     *
-//     * @param codePoint the character (Unicode code point) for which a glyph
-//     *        is needed.
-//     * @return <code>true</code> if this <code>Font</code> has a glyph for the
-//     *          character; <code>false</code> otherwise.
-//     * @throws IllegalArgumentException if the code point is not a valid Unicode
-//     *          code point.
-//     * @see Character#isValidCodePoint(int)
-//     * @since 1.5
-//     */
-//    public boolean canDisplay(int codePoint) {
-//        if (!Character.isValidCodePoint(codePoint)) {
-//            throw new IllegalArgumentException("invalid code point: " +
-//                                               Integer.toHexString(codePoint));
-//        }
-//        return getFont2D().canDisplay(codePoint);
-//    }
+    /**
+     * Checks if this <code>Font</code> has a glyph for the specified
+     * character.
+     *
+     * <p> <b>Note:</b> This method cannot handle <a
+     * href="../../java/lang/Character.html#supplementary"> supplementary
+     * characters</a>. To support all Unicode characters, including
+     * supplementary characters, use the {@link #canDisplay(int)}
+     * method or <code>canDisplayUpTo</code> methods.
+     *
+     * @param c the character for which a glyph is needed
+     * @return <code>true</code> if this <code>Font</code> has a glyph for this
+     *          character; <code>false</code> otherwise.
+     * @since 1.2
+     */
+    public boolean canDisplay(char c){
+        return true;//getFont2D().canDisplay(c);
+    }
 
-//    /**
-//     * Indicates whether or not this <code>Font</code> can display a
-//     * specified <code>String</code>.  For strings with Unicode encoding,
-//     * it is important to know if a particular font can display the
-//     * string. This method returns an offset into the <code>String</code>
-//     * <code>str</code> which is the first character this
-//     * <code>Font</code> cannot display without using the missing glyph
-//     * code. If the <code>Font</code> can display all characters, -1 is
-//     * returned.
-//     * @param str a <code>String</code> object
-//     * @return an offset into <code>str</code> that points
-//     *          to the first character in <code>str</code> that this
-//     *          <code>Font</code> cannot display; or <code>-1</code> if
-//     *          this <code>Font</code> can display all characters in
-//     *          <code>str</code>.
-//     * @since 1.2
-//     */
-//    public int canDisplayUpTo(String str) {
-//        return canDisplayUpTo(new StringCharacterIterator(str), 0,
-//            str.length());
-//    }
-//
-//    /**
-//     * Indicates whether or not this <code>Font</code> can display
-//     * the characters in the specified <code>text</code>
-//     * starting at <code>start</code> and ending at
-//     * <code>limit</code>.  This method is a convenience overload.
-//     * @param text the specified array of <code>char</code> values
-//     * @param start the specified starting offset (in
-//     *              <code>char</code>s) into the specified array of
-//     *              <code>char</code> values
-//     * @param limit the specified ending offset (in
-//     *              <code>char</code>s) into the specified array of
-//     *              <code>char</code> values
-//     * @return an offset into <code>text</code> that points
-//     *          to the first character in <code>text</code> that this
-//     *          <code>Font</code> cannot display; or <code>-1</code> if
-//     *          this <code>Font</code> can display all characters in
-//     *          <code>text</code>.
-//     * @since 1.2
-//     */
-//    public int canDisplayUpTo(char[] text, int start, int limit) {
-//        while (start < limit && canDisplay(text[start])) {
-//            ++start;
-//        }
-//
-//        return start == limit ? -1 : start;
-//    }
+    /**
+     * Checks if this <code>Font</code> has a glyph for the specified
+     * character.
+     *
+     * @param codePoint the character (Unicode code point) for which a glyph
+     *        is needed.
+     * @return <code>true</code> if this <code>Font</code> has a glyph for the
+     *          character; <code>false</code> otherwise.
+     * @throws IllegalArgumentException if the code point is not a valid Unicode
+     *          code point.
+     * @see Character#isValidCodePoint(int)
+     * @since 1.5
+     */
+    public boolean canDisplay(int codePoint) {
+        if (!Character.isValidCodePoint(codePoint)) {
+            throw new IllegalArgumentException("invalid code point: " +
+                                               Integer.toHexString(codePoint));
+        }
+        return true;//getFont2D().canDisplay(codePoint);
+    }
 
-//    /**
-//     * Indicates whether or not this <code>Font</code> can display the
-//     * text specified by the <code>iter</code> starting at
-//     * <code>start</code> and ending at <code>limit</code>.
-//     *
-//     * @param iter  a {@link CharacterIterator} object
-//     * @param start the specified starting offset into the specified
-//     *              <code>CharacterIterator</code>.
-//     * @param limit the specified ending offset into the specified
-//     *              <code>CharacterIterator</code>.
-//     * @return an offset into <code>iter</code> that points
-//     *          to the first character in <code>iter</code> that this
-//     *          <code>Font</code> cannot display; or <code>-1</code> if
-//     *          this <code>Font</code> can display all characters in
-//     *          <code>iter</code>.
-//     * @since 1.2
-//     */
-//    public int canDisplayUpTo(CharacterIterator iter, int start, int limit) {
+    /**
+     * Indicates whether or not this <code>Font</code> can display a
+     * specified <code>String</code>.  For strings with Unicode encoding,
+     * it is important to know if a particular font can display the
+     * string. This method returns an offset into the <code>String</code>
+     * <code>str</code> which is the first character this
+     * <code>Font</code> cannot display without using the missing glyph
+     * code. If the <code>Font</code> can display all characters, -1 is
+     * returned.
+     * @param str a <code>String</code> object
+     * @return an offset into <code>str</code> that points
+     *          to the first character in <code>str</code> that this
+     *          <code>Font</code> cannot display; or <code>-1</code> if
+     *          this <code>Font</code> can display all characters in
+     *          <code>str</code>.
+     * @since 1.2
+     */
+    public int canDisplayUpTo(String str) {
+        return -1;//canDisplayUpTo(new StringCharacterIterator(str), 0,str.length());
+    }
+
+    /**
+     * Indicates whether or not this <code>Font</code> can display
+     * the characters in the specified <code>text</code>
+     * starting at <code>start</code> and ending at
+     * <code>limit</code>.  This method is a convenience overload.
+     * @param text the specified array of <code>char</code> values
+     * @param start the specified starting offset (in
+     *              <code>char</code>s) into the specified array of
+     *              <code>char</code> values
+     * @param limit the specified ending offset (in
+     *              <code>char</code>s) into the specified array of
+     *              <code>char</code> values
+     * @return an offset into <code>text</code> that points
+     *          to the first character in <code>text</code> that this
+     *          <code>Font</code> cannot display; or <code>-1</code> if
+     *          this <code>Font</code> can display all characters in
+     *          <code>text</code>.
+     * @since 1.2
+     */
+    public int canDisplayUpTo(char[] text, int start, int limit) {
+        while (start < limit && canDisplay(text[start])) {
+            ++start;
+        }
+
+        return start == limit ? -1 : start;
+    }
+
+    /**
+     * Indicates whether or not this <code>Font</code> can display the
+     * text specified by the <code>iter</code> starting at
+     * <code>start</code> and ending at <code>limit</code>.
+     *
+     * @param iter  a {@link CharacterIterator} object
+     * @param start the specified starting offset into the specified
+     *              <code>CharacterIterator</code>.
+     * @param limit the specified ending offset into the specified
+     *              <code>CharacterIterator</code>.
+     * @return an offset into <code>iter</code> that points
+     *          to the first character in <code>iter</code> that this
+     *          <code>Font</code> cannot display; or <code>-1</code> if
+     *          this <code>Font</code> can display all characters in
+     *          <code>iter</code>.
+     * @since 1.2
+     */
+    public int canDisplayUpTo(CharacterIterator iter, int start, int limit) {
+    	return -1;
 //        for (char c = iter.setIndex(start);
 //             iter.getIndex() < limit && canDisplay(c);
 //             c = iter.next()) {
@@ -2118,29 +2124,30 @@ public class Font
 //
 //        int result = iter.getIndex();
 //        return result == limit ? -1 : result;
-//    }
+    }
 
-//    /**
-//     * Returns the italic angle of this <code>Font</code>.  The italic angle
-//     * is the inverse slope of the caret which best matches the posture of this
-//     * <code>Font</code>.
-//     * @see TextAttribute#POSTURE
-//     * @return the angle of the ITALIC style of this <code>Font</code>.
-//     */
-//    public float getItalicAngle() {
-//        return getItalicAngle(null);
-//    }
-//
-//    /* The FRC hints don't affect the value of the italic angle but
-//     * we need to pass them in to look up a strike.
-//     * If we can pass in ones already being used it can prevent an extra
-//     * strike from being allocated. Note that since italic angle is
-//     * a property of the font, the font transform is needed not the
-//     * device transform. Finally, this is private but the only caller of this
-//     * in the JDK - and the only likely caller - is in this same class.
-//     */
-//    private float getItalicAngle(FontRenderContext frc) {
-//        AffineTransform at = (isTransformed()) ? getTransform() : identityTx;
+    /**
+     * Returns the italic angle of this <code>Font</code>.  The italic angle
+     * is the inverse slope of the caret which best matches the posture of this
+     * <code>Font</code>.
+     * @see TextAttribute#POSTURE
+     * @return the angle of the ITALIC style of this <code>Font</code>.
+     */
+    public float getItalicAngle() {
+    	return 0; // standard fonts return 0 for this, even if italic
+    }
+
+    /* The FRC hints don't affect the value of the italic angle but
+     * we need to pass them in to look up a strike.
+     * If we can pass in ones already being used it can prevent an extra
+     * strike from being allocated. Note that since italic angle is
+     * a property of the font, the font transform is needed not the
+     * device transform. Finally, this is private but the only caller of this
+     * in the JDK - and the only likely caller - is in this same class.
+     */
+    private float getItalicAngle(FontRenderContext frc) {
+//    	return 0; // standard fonts return 0 for this, even if italic
+//        AffineTransform at = (isTransformed() ? getTransform() : getIdentityTx());
 //        Object aa, fm;
 //        if (frc == null) {
 //            aa = RenderingHints.VALUE_TEXT_ANTIALIAS_OFF;
@@ -2149,8 +2156,8 @@ public class Font
 //            aa = frc.getAntiAliasingHint();
 //            fm = frc.getFractionalMetricsHint();
 //        }
-//        return getFont2D().getItalicAngle(this, at, aa, fm);
-//    }
+        return 0f;//getFont2D().getItalicAngle(this, at, aa, fm);
+    }
 
     /**
      * Checks whether or not this <code>Font</code> has uniform
@@ -2167,152 +2174,151 @@ public class Font
         return false;   // REMIND always safe, but prevents caller optimize
     }
 
-//    private transient SoftReference flmref;
-//    private FontLineMetrics defaultLineMetrics(FontRenderContext frc) {
-//        FontLineMetrics flm = null;
-//        if (flmref == null
-//            || (flm = (FontLineMetrics)flmref.get()) == null
-//            //|| !flm.frc.equals(frc)
-//            ) {
-//
-//            /* The device transform in the frc is not used in obtaining line
-//             * metrics, although it probably should be: REMIND find why not?
-//             * The font transform is used but its applied in getFontMetrics, so
-//             * just pass identity here
-//             */
-//            float [] metrics = new float[8];
-//            getFont2D().getFontMetrics(this, identityTx,
-//                                       frc.getAntiAliasingHint(),
-//                                       frc.getFractionalMetricsHint(),
-//                                       metrics);
-//            float ascent  = metrics[0];
-//            float descent = metrics[1];
-//            float leading = metrics[2];
-//            float ssOffset = 0;
-//            if (values != null && values.getSuperscript() != 0) {
-//                ssOffset = (float)getTransform().getTranslateY();
-//                ascent -= ssOffset;
-//                descent += ssOffset;
-//            }
-//            float height = ascent + descent + leading;
-//
-//            int baselineIndex = 0; // need real index, assumes roman for everything
-//            // need real baselines eventually
-//            float[] baselineOffsets = { 0, (descent/2f - ascent) / 2f, -ascent };
-//
-//            float strikethroughOffset = metrics[4];
-//            float strikethroughThickness = metrics[5];
-//
-//            float underlineOffset = metrics[6];
-//            float underlineThickness = metrics[7];
-//
-//            float italicAngle = getItalicAngle(frc);
-//
-//            if (isTransformed()) {
-//                AffineTransform ctx = values.getCharTransform(); // extract rotation
-//                if (ctx != null) {
-//                    Point2D.Float pt = new Point2D.Float();
-//                    pt.setLocation(0, strikethroughOffset);
-//                    ctx.deltaTransform(pt, pt);
-//                    strikethroughOffset = pt.y;
-//                    pt.setLocation(0, strikethroughThickness);
-//                    ctx.deltaTransform(pt, pt);
-//                    strikethroughThickness = pt.y;
-//                    pt.setLocation(0, underlineOffset);
-//                    ctx.deltaTransform(pt, pt);
-//                    underlineOffset = pt.y;
-//                    pt.setLocation(0, underlineThickness);
-//                    ctx.deltaTransform(pt, pt);
-//                    underlineThickness = pt.y;
-//                }
-//            }
-//            strikethroughOffset += ssOffset;
-//            underlineOffset += ssOffset;
-//
-//            CoreMetrics cm = new CoreMetrics(ascent, descent, leading, height,
-//                                             baselineIndex, baselineOffsets,
-//                                             strikethroughOffset, strikethroughThickness,
-//                                             underlineOffset, underlineThickness,
-//                                             ssOffset, italicAngle);
-//
-//            flm = new FontLineMetrics(0, cm);//, frc);  
-//            flmref = new SoftReference(flm);
-//        }
-//
-//        return (FontLineMetrics)flm.clone();
-//    }
+    private transient FontLineMetrics flmref;
 
-//    /**
-//     * Returns a {@link LineMetrics} object created with the specified
-//     * <code>String</code> and {@link FontRenderContext}.
-//     * @param str the specified <code>String</code>
-//     * @param frc the specified <code>FontRenderContext</code>
-//     * @return a <code>LineMetrics</code> object created with the
-//     * specified <code>String</code> and {@link FontRenderContext}.
-//     */
-//    public LineMetrics getLineMetrics( String str, FontRenderContext frc) {
-//        FontLineMetrics flm = defaultLineMetrics(frc);
-//        flm.numchars = str.length();
-//        return flm;
-//    }
-//
-//    /**
-//     * Returns a <code>LineMetrics</code> object created with the
-//     * specified arguments.
-//     * @param str the specified <code>String</code>
-//     * @param beginIndex the initial offset of <code>str</code>
-//     * @param limit the end offset of <code>str</code>
-//     * @param frc the specified <code>FontRenderContext</code>
-//     * @return a <code>LineMetrics</code> object created with the
-//     * specified arguments.
-//     */
-//    public LineMetrics getLineMetrics( String str,
-//                                    int beginIndex, int limit,
-//                                    FontRenderContext frc) {
-//        FontLineMetrics flm = defaultLineMetrics(frc);
-//        int numChars = limit - beginIndex;
-//        flm.numchars = (numChars < 0)? 0: numChars;
-//        return flm;
-//    }
-//
-//    /**
-//     * Returns a <code>LineMetrics</code> object created with the
-//     * specified arguments.
-//     * @param chars an array of characters
-//     * @param beginIndex the initial offset of <code>chars</code>
-//     * @param limit the end offset of <code>chars</code>
-//     * @param frc the specified <code>FontRenderContext</code>
-//     * @return a <code>LineMetrics</code> object created with the
-//     * specified arguments.
-//     */
-//    public LineMetrics getLineMetrics(char [] chars,
-//                                    int beginIndex, int limit,
-//                                    FontRenderContext frc) {
-//        FontLineMetrics flm = defaultLineMetrics(frc);
-//        int numChars = limit - beginIndex;
-//        flm.numchars = (numChars < 0)? 0: numChars;
-//        return flm;
-//    }
-//
-//    /**
-//     * Returns a <code>LineMetrics</code> object created with the
-//     * specified arguments.
-//     * @param ci the specified <code>CharacterIterator</code>
-//     * @param beginIndex the initial offset in <code>ci</code>
-//     * @param limit the end offset of <code>ci</code>
-//     * @param frc the specified <code>FontRenderContext</code>
-//     * @return a <code>LineMetrics</code> object created with the
-//     * specified arguments.
-//     */
-//    public LineMetrics getLineMetrics(CharacterIterator ci,
-//                                    int beginIndex, int limit,
-//                                    FontRenderContext frc) {
-//        FontLineMetrics flm = defaultLineMetrics(frc);
-//        int numChars = limit - beginIndex;
-//        flm.numchars = (numChars < 0)? 0: numChars;
-//        return flm;
-//    }
-//
+    private FontLineMetrics defaultLineMetrics(FontRenderContext frc) {
+        FontLineMetrics flm = null;
+        if (flmref == null || !(flm = flmref).frc.equals(frc)) {
+
+            /* The device transform in the frc is not used in obtaining line
+             * metrics, although it probably should be: REMIND find why not?
+             * The font transform is used but its applied in getFontMetrics, so
+             * just pass identity here
+             */
+            float [] metrics = new float[8];
+            ((JSFontMetrics)getFontMetrics()).//getFont2D().
+            getMetrics(getIdentityTx(),
+                                       frc.getAntiAliasingHint(),
+                                       frc.getFractionalMetricsHint(),
+                                       metrics);
+            float ascent  = metrics[0];
+            float descent = metrics[1];
+            float leading = metrics[2];
+            float ssOffset = 0;
+            if (values != null && values.getSuperscript() != 0) {
+                ssOffset = (float)getTransform().getTranslateY();
+                ascent -= ssOffset;
+                descent += ssOffset;
+            }
+            float height = ascent + descent + leading;
+
+            int baselineIndex = 0; // need real index, assumes roman for everything
+            // need real baselines eventually
+            float[] baselineOffsets = { 0, (descent/2f - ascent) / 2f, -ascent };
+
+            float strikethroughOffset = metrics[4];
+            float strikethroughThickness = metrics[5];
+
+            float underlineOffset = metrics[6];
+            float underlineThickness = metrics[7];
+
+            float italicAngle = getItalicAngle(frc);
+
+            if (isTransformed()) {
+                AffineTransform ctx = values.getCharTransform(); // extract rotation
+                if (ctx != null) {
+                    Point2D.Float pt = new Point2D.Float();
+                    pt.setLocation(0, strikethroughOffset);
+                    ctx.deltaTransform(pt, pt);
+                    strikethroughOffset = pt.y;
+                    pt.setLocation(0, strikethroughThickness);
+                    ctx.deltaTransform(pt, pt);
+                    strikethroughThickness = pt.y;
+                    pt.setLocation(0, underlineOffset);
+                    ctx.deltaTransform(pt, pt);
+                    underlineOffset = pt.y;
+                    pt.setLocation(0, underlineThickness);
+                    ctx.deltaTransform(pt, pt);
+                    underlineThickness = pt.y;
+                }
+            }
+            strikethroughOffset += ssOffset;
+            underlineOffset += ssOffset;
+
+            CoreMetrics cm = new CoreMetrics(ascent, descent, leading, height,
+                                             baselineIndex, baselineOffsets,
+                                             strikethroughOffset, strikethroughThickness,
+                                             underlineOffset, underlineThickness,
+                                             ssOffset, italicAngle);
+
+            flm = new FontLineMetrics(0, cm, frc);  
+            flmref = flm;
+        }
+
+        return (FontLineMetrics)flm.clone();
+    }
+
+    /**
+     * Returns a {@link LineMetrics} object created with the specified
+     * <code>String</code> and {@link FontRenderContext}.
+     * @param str the specified <code>String</code>
+     * @param frc the specified <code>FontRenderContext</code>
+     * @return a <code>LineMetrics</code> object created with the
+     * specified <code>String</code> and {@link FontRenderContext}.
+     */
+    public LineMetrics getLineMetrics( String str, FontRenderContext frc) {
+        FontLineMetrics flm = defaultLineMetrics(frc);
+        flm.numchars = str.length();
+        return flm;
+    }
+
+    /**
+     * Returns a <code>LineMetrics</code> object created with the
+     * specified arguments.
+     * @param str the specified <code>String</code>
+     * @param beginIndex the initial offset of <code>str</code>
+     * @param limit the end offset of <code>str</code>
+     * @param frc the specified <code>FontRenderContext</code>
+     * @return a <code>LineMetrics</code> object created with the
+     * specified arguments.
+     */
+    public LineMetrics getLineMetrics( String str,
+                                    int beginIndex, int limit,
+                                    FontRenderContext frc) {
+        FontLineMetrics flm = defaultLineMetrics(frc);
+        int numChars = limit - beginIndex;
+        flm.numchars = (numChars < 0)? 0: numChars;
+        return flm;
+    }
+
+    /**
+     * Returns a <code>LineMetrics</code> object created with the
+     * specified arguments.
+     * @param chars an array of characters
+     * @param beginIndex the initial offset of <code>chars</code>
+     * @param limit the end offset of <code>chars</code>
+     * @param frc the specified <code>FontRenderContext</code>
+     * @return a <code>LineMetrics</code> object created with the
+     * specified arguments.
+     */
+    public LineMetrics getLineMetrics(char [] chars,
+                                    int beginIndex, int limit,
+                                    FontRenderContext frc) {
+        FontLineMetrics flm = defaultLineMetrics(frc);
+        int numChars = limit - beginIndex;
+        flm.numchars = (numChars < 0)? 0: numChars;
+        return flm;
+    }
+
+    /**
+     * Returns a <code>LineMetrics</code> object created with the
+     * specified arguments.
+     * @param ci the specified <code>CharacterIterator</code>
+     * @param beginIndex the initial offset in <code>ci</code>
+     * @param limit the end offset of <code>ci</code>
+     * @param frc the specified <code>FontRenderContext</code>
+     * @return a <code>LineMetrics</code> object created with the
+     * specified arguments.
+     */
+    public LineMetrics getLineMetrics(CharacterIterator ci,
+                                    int beginIndex, int limit,
+                                    FontRenderContext frc) {
+        FontLineMetrics flm = defaultLineMetrics(frc);
+        int numChars = limit - beginIndex;
+        flm.numchars = (numChars < 0)? 0: numChars;
+        return flm;
+    }
+
     /**
      * Returns the logical bounds of the specified <code>String</code> in
      * the specified <code>FontRenderContext</code>.  The logical bounds
@@ -2438,8 +2444,7 @@ public class Font
         	int dec = fm.getDescent();
         	int asc = fm.getAscent();
         	int width = fm.stringWidth(s);
-        	return new Rectangle2D.Float(0, -dec, width, asc + dec);
-        	
+        	return new Rectangle2D.Float(0, -dec, width, asc + dec);        	
 //            return null;//gv.getLogicalBounds();
 //        } else {
 //            // need char array constructor on textlayout
@@ -2452,82 +2457,82 @@ public class Font
 //    	return  null;
     }
 //
-//   /**
-//     * Returns the logical bounds of the characters indexed in the  
-//     * specified {@link CharacterIterator} in the
-//     * specified <code>FontRenderContext</code>.  The logical bounds
-//     * contains the origin, ascent, advance, and height, which includes
-//     * the leading.  The logical bounds does not always enclose all the
-//     * text.  For example, in some languages and in some fonts, accent
-//     * marks can be positioned above the ascent or below the descent.
-//     * To obtain a visual bounding box, which encloses all the text,
-//     * use the {@link TextLayout#getBounds() getBounds} method of
-//     * <code>TextLayout</code>.
-//     * <p>Note: The returned bounds is in baseline-relative coordinates
-//     * (see {@link java.awt.Font class notes}).
-//     * @param ci the specified <code>CharacterIterator</code>
-//     * @param beginIndex the initial offset in <code>ci</code>
-//     * @param limit the end offset in <code>ci</code>
-//     * @param frc the specified <code>FontRenderContext</code>
-//     * @return a <code>Rectangle2D</code> that is the bounding box of the
-//     * characters indexed in the specified <code>CharacterIterator</code>
-//     * in the specified <code>FontRenderContext</code>.
-//     * @see FontRenderContext
-//     * @see Font#createGlyphVector
-//     * @since 1.2
-//     * @throws IndexOutOfBoundsException if <code>beginIndex</code> is
-//     *         less than the start index of <code>ci</code>, or
-//     *         <code>limit</code> is greater than the end index of
-//     *         <code>ci</code>, or <code>beginIndex</code> is greater
-//     *         than <code>limit</code>
-//     */
-//    public Rectangle2D getStringBounds(CharacterIterator ci,
-//                                    int beginIndex, int limit,
-//                                       FontRenderContext frc) {
-//        int start = ci.getBeginIndex();
-//        int end = ci.getEndIndex();
-//
-//        if (beginIndex < start) {
-//            throw new IndexOutOfBoundsException("beginIndex: " + beginIndex);
-//        }
-//        if (limit > end) {
-//            throw new IndexOutOfBoundsException("limit: " + limit);
-//        }
-//        if (beginIndex > limit) {
-//            throw new IndexOutOfBoundsException("range length: " +
-//                                                (limit - beginIndex));
-//        }
-//
-//        char[]  arr = new char[limit - beginIndex];
-//
-//        ci.setIndex(beginIndex);
-//        for(int idx = 0; idx < arr.length; idx++) {
-//            arr[idx] = ci.current();
-//            ci.next();
-//        }
-//
-//        return getStringBounds(arr,0,arr.length,frc);
-//    }
-//
-//    /**
-//     * Returns the bounds for the character with the maximum
-//     * bounds as defined in the specified <code>FontRenderContext</code>.
-//     * <p>Note: The returned bounds is in baseline-relative coordinates
-//     * (see {@link java.awt.Font class notes}).
-//     * @param frc the specified <code>FontRenderContext</code>
-//     * @return a <code>Rectangle2D</code> that is the bounding box
-//     * for the character with the maximum bounds.
-//     */
-//    public Rectangle2D getMaxCharBounds(FontRenderContext frc) {
-//        float [] metrics = new float[4];
-//
-//        getFont2D().getFontMetrics(this, frc, metrics);
-//
-//        return new Rectangle2D.Float(0, -metrics[0],
-//                                metrics[3],
-//                                metrics[0] + metrics[1] + metrics[2]);
-//    }
-//
+   /**
+     * Returns the logical bounds of the characters indexed in the  
+     * specified {@link CharacterIterator} in the
+     * specified <code>FontRenderContext</code>.  The logical bounds
+     * contains the origin, ascent, advance, and height, which includes
+     * the leading.  The logical bounds does not always enclose all the
+     * text.  For example, in some languages and in some fonts, accent
+     * marks can be positioned above the ascent or below the descent.
+     * To obtain a visual bounding box, which encloses all the text,
+     * use the {@link TextLayout#getBounds() getBounds} method of
+     * <code>TextLayout</code>.
+     * <p>Note: The returned bounds is in baseline-relative coordinates
+     * (see {@link java.awt.Font class notes}).
+     * @param ci the specified <code>CharacterIterator</code>
+     * @param beginIndex the initial offset in <code>ci</code>
+     * @param limit the end offset in <code>ci</code>
+     * @param frc the specified <code>FontRenderContext</code>
+     * @return a <code>Rectangle2D</code> that is the bounding box of the
+     * characters indexed in the specified <code>CharacterIterator</code>
+     * in the specified <code>FontRenderContext</code>.
+     * @see FontRenderContext
+     * @see Font#createGlyphVector
+     * @since 1.2
+     * @throws IndexOutOfBoundsException if <code>beginIndex</code> is
+     *         less than the start index of <code>ci</code>, or
+     *         <code>limit</code> is greater than the end index of
+     *         <code>ci</code>, or <code>beginIndex</code> is greater
+     *         than <code>limit</code>
+     */
+    public Rectangle2D getStringBounds(CharacterIterator ci,
+                                    int beginIndex, int limit,
+                                       FontRenderContext frc) {
+        int start = ci.getBeginIndex();
+        int end = ci.getEndIndex();
+
+        if (beginIndex < start) {
+            throw new IndexOutOfBoundsException("beginIndex: " + beginIndex);
+        }
+        if (limit > end) {
+            throw new IndexOutOfBoundsException("limit: " + limit);
+        }
+        if (beginIndex > limit) {
+            throw new IndexOutOfBoundsException("range length: " +
+                                                (limit - beginIndex));
+        }
+
+        char[]  arr = new char[limit - beginIndex];
+
+        ci.setIndex(beginIndex);
+        for(int idx = 0; idx < arr.length; idx++) {
+            arr[idx] = ci.current();
+            ci.next();
+        }
+
+        return getStringBounds(arr,0,arr.length,frc);
+    }
+
+    /**
+     * Returns the bounds for the character with the maximum
+     * bounds as defined in the specified <code>FontRenderContext</code>.
+     * <p>Note: The returned bounds is in baseline-relative coordinates
+     * (see {@link java.awt.Font class notes}).
+     * @param frc the specified <code>FontRenderContext</code>
+     * @return a <code>Rectangle2D</code> that is the bounding box
+     * for the character with the maximum bounds.
+     */
+    public Rectangle2D getMaxCharBounds(FontRenderContext frc) {
+        float [] metrics = new float[4];
+
+        ((JSFontMetrics) getFontMetrics()).getMetrics(frc, metrics);
+
+        return new Rectangle2D.Float(0, -metrics[0],
+                                metrics[3],
+                                metrics[0] + metrics[1] + metrics[2]);
+    }
+
 ////    /**
 ////     * Creates a {@link java.awt.font.GlyphVector GlyphVector} by
 ////     * mapping characters to glyphs one-to-one based on the
@@ -2686,19 +2691,19 @@ public class Font
     public static final int LAYOUT_NO_LIMIT_CONTEXT = 4;
 
 
-//    private static void applyTransform(AffineTransform trans, AttributeValues values) {
-//        if (trans == null) {
-//            throw new IllegalArgumentException("transform must not be null");
-//        }
-//        values.setTransform(trans);
-//    }
-//
-//    private static void applyStyle(int style, AttributeValues values) {
-//        // WEIGHT_BOLD, WEIGHT_REGULAR
-//        values.setWeight((style & BOLD) != 0 ? 2f : 1f);
-//        // POSTURE_OBLIQUE, POSTURE_REGULAR
-//        values.setPosture((style & ITALIC) != 0 ? .2f : 0f);
-//    }
+    private static void applyTransform(AffineTransform trans, AttributeValues values) {
+        if (trans == null) {
+            throw new IllegalArgumentException("transform must not be null");
+        }
+        values.setTransform(trans);
+    }
+
+    private static void applyStyle(int style, AttributeValues values) {
+        // WEIGHT_BOLD, WEIGHT_REGULAR
+        values.setWeight((style & BOLD) != 0 ? 2f : 1f);
+        // POSTURE_OBLIQUE, POSTURE_REGULAR
+        values.setPosture((style & ITALIC) != 0 ? .2f : 0f);
+    }
 
     /*
      * Initialize JNI field and method IDs
