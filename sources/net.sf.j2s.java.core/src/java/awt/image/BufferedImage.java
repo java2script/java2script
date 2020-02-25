@@ -693,6 +693,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @return the <code>WriteableRaster</code> of this <code>BufferedImage</code> .
 	 */
 	public WritableRaster getRaster() {
+		// NO!!!  checkHavePixels();
 		return raster;
 	}
 
@@ -1535,7 +1536,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		case TYPE_BYTE_BINARY:
 		case TYPE_USHORT_565_RGB:
 		case TYPE_USHORT_555_RGB:
-			JSUtil.notImplemented("BufferedImage type " + imageType);
+			JSUtil.notImplemented("BufferedImage setPixels for type " + imageType);
 			break;
 		case TYPE_BYTE_INDEXED:
 
