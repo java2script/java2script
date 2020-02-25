@@ -2197,7 +2197,7 @@ public abstract class ResourceBundle {
 			if (baseName == null) {
 				throw new NullPointerException();
 			}
-			return FORMAT_PROPERTIES;// SwingJS was FORMAT_DEFAULT;
+			return FORMAT_DEFAULT;
 		}
 
 		/**
