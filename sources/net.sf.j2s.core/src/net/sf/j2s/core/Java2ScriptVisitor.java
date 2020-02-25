@@ -135,6 +135,7 @@ import org.eclipse.jdt.core.dom.WildcardType;
 
 // TODO: superclass inheritance for JAXB XmlAccessorType
 
+//BH 2020.02.18 -- 3.2.9-v1a order of 1st two parameters in new_ should be reversed
 //BH 2020.02.18 -- 3.2.8-v2 fixes no-argument call to varargs constructor
 //BH 2020.02.18 -- 3.2.8-v2 fixes import static missing $I$ defs
 //BH 2020.02.05 -- 3.2.8-v1 reworking of functional interfaces; no longer unqualified
@@ -806,6 +807,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 		String finalQualifiedClassName = getFinalJ2SClassName(javaClassName, FINAL_RAW);
 		String prefix = null, postfix = null;
+		int pt = -1, pt1 = -1;
 		boolean isDefault = false;
 		if ("String".equals(finalQualifiedClassName)) {
 			// special treatment for String -- see j2sSwingJS.js
@@ -822,7 +824,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			else
 				buffer.append(" new ").append(finalQualifiedClassName).append("(");
 		} else {
-			openNew(javaClass, javaClassName, null, constructorMethodBinding, lambdaArity);
+			pt = openNew(javaClass, javaClassName, null, constructorMethodBinding, 
+					lambdaArity >= 0 ? METHOD_LAMBDA_C : METHOD_NOTSPECIAL);
+			pt1 = buffer.length();
 			isDefault = (arguments != null && arguments.isEmpty() && !constructorMethodBinding.isVarargs());
 			prefix = ",[";
 			postfix = "]";
@@ -840,14 +844,60 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		} else if (!isDefault) {
 			IMethodBinding constructorMethodDeclaration = (constructorMethodBinding == null ? null
 					: constructorMethodBinding.getMethodDeclaration());
-			addMethodParameterList(arguments, constructorMethodDeclaration, prefix, postfix, METHOD_CONSTRUCTOR);
+			addMethodParameterList(arguments, constructorMethodDeclaration, prefix, postfix, METHOD_CONSTRUCTOR);			
+			checkStaticParams(pt, pt1, true);
 		}
 		buffer.append(")");
 	}
 
 	/**
-	 * Start a new Clazz.new_() call for class creation or inner classes. Uses
-	 * Clazz.load for dynamic loading
+	 * 3.2.9.v1 
+	 * 
+	 * Static method invocations must process parameters before initializing the method's class
+	 * if any parameter either calls a method or defines a static variable. We do this by changing
+	 *  
+	 *  $I(3).xxxx(x,y,z)
+	 *  
+	 *    to 
+	 *    
+	 *  (function(a,b){b.apply(null,a)})([x,y,z],$I(3).xxxx)
+	 * 
+	 * In addition, for constructors, Clazz.new_ needs to have the parameters as the first
+	 * parameter and the constructor method as the second parameter:
+	 * 
+	 *   Clazz.new_([args],constr)
+	 * 
+	 * The method invocation has not been closed at this point.
+	 * 
+	 * @param pt   start of method name
+	 * @param pt1  end of method name
+	 */
+	private void checkStaticParams(int pt, int pt1, boolean isConstructor) {
+		String args;
+		// must switch from Clazz.new_($I(3).xxxx,[x,y,z] to Clazz.new([x,y,z],$I(3).xxxx
+	    // ............................^pt.......^pt1           
+		// must switch from $I(3).xxxx(x,y,z  to (function(a,f){return f.apply(null,a)})([x,y,z],$I(3).xxxx
+		// .................^pt.......^pt1
+		if (pt1 == pt 
+				|| buffer.charAt(pt) != '$' 
+				|| (args = buffer.substring(pt1 + 1)).indexOf("(") < 0 && args.indexOf("=") < 0)
+			return;
+		String f = buffer.substring(pt, pt1);
+		buffer.setLength(pt);
+		if (!isConstructor) {
+			args = "(function(a,f){return f.apply(null,a)})([" + args + "]";			
+		}
+		buffer.append(args).append(",").append(f);
+	}
+
+	/**
+	 * Start a new Clazz.new_(cl,[args],innerClass) call for class creation or inner classes
+	 * and adds the construtor reference. 
+	 * 
+	 * Starting in 3.2.9 we allow for the more correct sequence of ([args],cl,innerClass)
+	 * since then it is certain that the arguments will be processed prior to static initialization 
+	 * (Java <clinit>) of cl. Clazz.new_ will use Array.isArray() to check that order, since cl itself
+	 * cannot be an array.
 	 * 
 	 * @param javaClassName            the class name to use if there is no
 	 *                                 anonymous class name
@@ -855,26 +905,14 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 *                                 class that has just been defined
 	 * @param constructorMethodBinding the specified constructor for this
 	 *                                 instantiation
-	 * @param lambdaArity              parameterTypes[].length for a lambda method
-	 *                                 or -1 for non-lambda classes
+	 * @param specialType              METHOD_LAMBDA_C or METHOD_NOTSPECIAL
+	 * 
+	 * @return buffer pt to the first parameter of Clazz.new_
 	 */
-	private void openNew(ITypeBinding javaClass, String javaClassName, String anonJavaName,
-			IMethodBinding constructorMethodBinding, int lambdaArity) {
-
+	private int openNew(ITypeBinding javaClass, String javaClassName, String anonJavaName,
+			IMethodBinding constructorMethodBinding, int specialType) {
 		buffer.append("Clazz.new_(");
-		// 3.2.6 idea, I think, but no longer relevant
-//		if (javaClass.isParameterizedType()) {
-//			Iterator<String> map = getGenericClassTypes(javaClass).keySet().iterator();
-//			ITypeBinding[] args = javaClass.getTypeArguments();
-//			buffer.append("1,{");
-//			String sep = "";
-//			for (int i = 0; i < args.length; i++) {
-//				buffer.append(sep).append(map.next()).append(":\"").append(j2sNonPrimitiveName(args[i], true)).append("\"");
-//				sep = ",";
-//			}
-//			buffer.append("},");
-//		}
-
+		int pt = buffer.length();
 		String finalQualifiedName;
 		if (anonJavaName == null) {
 			// not inner
@@ -889,12 +927,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if (constructorMethodBinding == null) {
 			// an interface instance, so no constructor
 			buffer.append(finalQualifiedName + ".$init$");
-			return;
+		} else {
+			String qName = getFinalMethodNameWith$Params(finalQualifiedName + ".c$", constructorMethodBinding, null, false, specialType);
+			// if no parameters, we just give the name of the class, not the constructor
+			buffer.append(qName.endsWith(".c$") ? finalQualifiedName : qName);
 		}
-		String qName = getFinalMethodNameWith$Params(finalQualifiedName + ".c$", constructorMethodBinding, null, false,
-				lambdaArity >= 0 ? METHOD_LAMBDA_C : METHOD_NOTSPECIAL);
-		// if no parameters, we just give the name of the class, not the constructor
-		buffer.append(qName.endsWith(".c$") ? finalQualifiedName : qName);
+		return pt;
 	}
 
 	/**
@@ -1432,7 +1470,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				: expression instanceof ThisExpression && ((ThisExpression) expression).getQualifier() != null));
 		String bname = (needBname ? getThisRefOrSyntheticReference(javaQualifier, declaringClass, null) : null);
 		// add the qualifier
-		boolean isQualifiedAlready = false;
 		int pt = buffer.length();
 		if (isPrivateAndNotStatic) {
 			// note that the following expression will not work if the method is private:
@@ -1441,7 +1478,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			buffer.append(privateVar).append(".");
 		} else if (lambdaArity >= 0) {
 			doLogMethodCalled = false;
-			isQualifiedAlready = true;
 		} else if (expression == null) {
 			doLogMethodCalled = false;
 			if (bname != null) {
@@ -1458,10 +1494,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					(isStatic && !isPrivate ? FINAL_ESCAPECACHE : FINAL_CACHE) | (isStatic ? FINAL_STATIC : 0));
 			buffer.append(".");
 		}
-		isQualifiedAlready |= (buffer.length() > pt);
-
-		// keep a pointer, because we may rewrite this
-		int ptLog = (doLogMethodCalled ? buffer.length() : 0);
+		int ptlog = buffer.length() - 1;
 
 		// check for special Clazz.array or Clazz.forName
 		// as well as special treatment for String.indexOf and String.lastIndexOf
@@ -1537,7 +1570,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			}
 
 			if (doLogMethodCalled) {
-				String name = declaringClassJavaClassName + "." + buffer.substring(ptLog);
+				String name = declaringClassJavaClassName + buffer.substring(ptlog);
 				logMethodCalled(name);
 			}
 			if (isPrivateAndNotStatic || bname != null) {
@@ -1551,11 +1584,15 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				appendFinalMethodQualifier(expression, declaringClass, bname, FINAL_CACHE);
 				buffer.append(", [");
 				term = "])";
-			}
+			} 
 		}
+		int pt1 = buffer.length();
 		if (term == ")")
 			buffer.append("(");
 		addMethodParameterList(arguments, mBinding, null, null, isIndexOf ? METHOD_INDEXOF : METHOD_NOTSPECIAL);
+		if (isStatic && lambdaArity < 0 && term == ")") {
+			checkStaticParams(pt, pt1, false);
+		}
 		buffer.append(term);
 		return true;
 	}
@@ -2720,13 +2757,13 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private void addInnerTypeInstance(ASTNode node, ITypeBinding binding, ITypeBinding superAnonOrInnerClass,
 			String javaInnerClassName, Expression outerClassExpr, IMethodBinding constructorMethodDeclaration,
 			String superAnonName, String anonName) {
-		openNew(superAnonOrInnerClass == null ? binding : superAnonOrInnerClass,
-				(superAnonName == null ? javaInnerClassName : superAnonName), anonName, constructorMethodDeclaration,
-				-1);
-
+		// Clazz.new_(constructor, [args], innerClass)
+		// or Clazz.new_([args], constructor, innerClass);
+		int pt = openNew(superAnonOrInnerClass == null ? binding : superAnonOrInnerClass,
+					(superAnonName == null ? javaInnerClassName : superAnonName), anonName, constructorMethodDeclaration, METHOD_NOTSPECIAL);
+		int pt1 = buffer.length();
 		// add constructor application arguments: [object, parameters]
-
-		buffer.append(", [");
+		buffer.append(",[");
 
 		if (outerClassExpr == null) {
 			buffer.append("this");
@@ -2748,10 +2785,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					METHOD_CONSTRUCTOR);
 		}
 		buffer.append("]");
+		checkStaticParams(pt, pt1, true);
 
 		// an anonymous class will be calling a constructor in another
-		// class, so
-		// we need to indicate its actual call explicitly
+		// class, so we need to indicate its actual call explicitly with a third parameter
 
 		if (superAnonName != null && javaInnerClassName != null)
 			buffer.append(",").append(getFinalJ2SClassName(javaInnerClassName, FINAL_PC));

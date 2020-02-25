@@ -587,6 +587,9 @@ Clazz._newCount = 0;
 Clazz.new_ = function(c, args, cl) {
   if (!c)
     return new Clazz._O();
+	if (Array.isArray(c)) {
+		var a = args;args = c;c = a;
+	}
   var generics;
   var a = arguments;
   if (c === 1) { // new for 3.2.6 {K:"java.lang.String",...}

@@ -45,15 +45,21 @@ class Test_Class extends Test_Class2<Integer> {
 	static int istatic = 5;
 	static String sstatic = "test5";
 	
+	static String tstatic = "initial";
 	String same$ = null;
 	String same() {return null;}
 	
 	static class Singleton {
+		static {
+			tstatic = "changed by static";
+		}
 		// reference to Test_Class.Singleton.instance 
 		// lazily initializes a new instance of Test_Class() 
 		static Test_Class instance = new Test_Class();
 		// actually, not recommended for JavaScript, because this
 		// instance would be shared among applications, unlike in Java.
+		public static void test(String s) {
+		}
 	}
 	
 	static  {
@@ -299,9 +305,24 @@ class Test_Class extends Test_Class2<Integer> {
 	
 	public short testShort(short s) {return 0;}
 
+	public static String localtest() {
+		return tstatic = "changed by localtest";
+	}
+	
 	public static void main(String[] args) {
 		
+		// tricky situation where a parameter changes a value that is also changed by the static initializer of a class:
+		boolean test1 = false;
+		if (test1) {
+			Test_Class.Singleton.test(tstatic = "changed by parameters");			
+		} else {
+			Test_Class.Singleton.test(localtest());			
+		}
+		boolean isOK = tstatic.equals("changed by static");
+		System.out.println("testing static load order " + isOK + " " + tstatic);
+
 		try {
+			assert(isOK);
 			assert (new String().getClass().getName().equals("java.lang.String"));
 			assert (Class.forName("java.lang.String") == String.class);
 			assert (Test_Class.class.getMethod("testShort",Short.TYPE).getParameterTypes()[0] == Short.TYPE);

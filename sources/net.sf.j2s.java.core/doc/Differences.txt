@@ -939,7 +939,7 @@ component.getGraphics(), graphics.dispose()
 
 Use of component.getGraphics() is discouraged in Java and in SwingJS. 
 Specifically in SwingJS, any call to component.getGraphics() or 
-component.createGraphics() should be matched with graphics.dispose(), 
+BufferedImage.createGraphics() or Graphics.create(...) should be matched with graphics.dispose(), 
 particularly when it is called outside the context of a paint(Graphics)
 call from the system. 
 
