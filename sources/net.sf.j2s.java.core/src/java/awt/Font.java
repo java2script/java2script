@@ -28,6 +28,44 @@
 
 package java.awt;
 
+import static sun.font.EAttribute.EBACKGROUND;
+import static sun.font.EAttribute.EBIDI_EMBEDDING;
+import static sun.font.EAttribute.ECHAR_REPLACEMENT;
+import static sun.font.EAttribute.EFAMILY;
+import static sun.font.EAttribute.EFONT;
+import static sun.font.EAttribute.EFOREGROUND;
+import static sun.font.EAttribute.EINPUT_METHOD_HIGHLIGHT;
+import static sun.font.EAttribute.EINPUT_METHOD_UNDERLINE;
+import static sun.font.EAttribute.EJUSTIFICATION;
+import static sun.font.EAttribute.EKERNING;
+import static sun.font.EAttribute.ELIGATURES;
+import static sun.font.EAttribute.ENUMERIC_SHAPING;
+import static sun.font.EAttribute.EPOSTURE;
+import static sun.font.EAttribute.ERUN_DIRECTION;
+import static sun.font.EAttribute.ESIZE;
+import static sun.font.EAttribute.ESTRIKETHROUGH;
+import static sun.font.EAttribute.ESUPERSCRIPT;
+import static sun.font.EAttribute.ESWAP_COLORS;
+import static sun.font.EAttribute.ETRACKING;
+import static sun.font.EAttribute.ETRANSFORM;
+import static sun.font.EAttribute.EUNDERLINE;
+import static sun.font.EAttribute.EWEIGHT;
+import static sun.font.EAttribute.EWIDTH;
+
+import java.awt.font.FontRenderContext;
+import java.awt.font.LineMetrics;
+import java.awt.font.TextAttribute;
+import java.awt.font.TextLayout;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.text.AttributedCharacterIterator.Attribute;
+//import java.util.Hashtable;
+//import java.util.Locale;
+import java.text.CharacterIterator;
+import java.util.Hashtable;
+import java.util.Map;
+
 import javajs.util.SB;
 import sun.font.AttributeMap;
 import sun.font.AttributeValues;
@@ -37,21 +75,6 @@ import sun.font.FontLineMetrics;
 import swingjs.JSFontMetrics;
 import swingjs.JSLineMetrics;
 import swingjs.JSToolkit;
-import java.text.AttributedCharacterIterator.Attribute;
-//import java.util.Hashtable;
-//import java.util.Locale;
-import java.text.CharacterIterator;
-import java.util.Hashtable;
-import java.util.Map;
-import java.awt.font.FontRenderContext;
-import java.awt.font.LineMetrics;
-import java.awt.font.TextAttribute;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
-
-import sun.font.AttributeValues;
-import static sun.font.EAttribute.*;
-import java.awt.geom.Rectangle2D;
 
 /**
  * The <code>Font</code> class represents fonts, which are used to
@@ -1141,8 +1164,11 @@ public class Font
 
             return at;
         }
-
         return new AffineTransform();
+    }
+
+    public AffineTransform 秘getRawTransformOrNull() {
+    	return (nonIdentityTx ? getAttributeValues().getTransform() : null);
     }
 
     // x = r^0 + r^1 + r^2... r^n
@@ -2722,32 +2748,12 @@ public class Font
          */
      }
 
-     private Map<String, LineMetrics> mapLineMetrics;
-     private LineMetrics getLineMetrics(String s) {
-   	  if (mapLineMetrics == null)
-   		  mapLineMetrics = new Hashtable<String, LineMetrics>();
-   	  LineMetrics lm = mapLineMetrics.get(s);
-   	  return (lm == null ? new JSLineMetrics(this, s) : lm);
-     }
+//     private Map<String, LineMetrics> mapLineMetrics;
+//     private LineMetrics getLineMetrics(String s) {
+//   	  if (mapLineMetrics == null)
+//   		  mapLineMetrics = new Hashtable<String, LineMetrics>();
+//   	  LineMetrics lm = mapLineMetrics.get(s);
+//   	  return (lm == null ? new JSLineMetrics(this, s) : lm);
+//     }
      
-	public LineMetrics getLineMetrics(CharacterIterator ci, int beginIndex, int limit, Object object) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public LineMetrics getLineMetrics(char[] chars, int beginIndex, int limit, Object object) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public LineMetrics getLineMetrics(String str, int beginIndex, int limit, Object object) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public LineMetrics getLineMetrics(String str, Object object) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }

@@ -8,6 +8,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.Image;
 import java.awt.Paint;
@@ -19,14 +20,17 @@ import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.Toolkit;
 import java.awt.font.FontRenderContext;
+import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.awt.image.ImageObserver;
+import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.renderable.RenderableImage;
 import java.text.AttributedCharacterIterator;
@@ -34,6 +38,7 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import sun.font.TextSource;
 import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Canvas;
 import swingjs.api.js.HTML5CanvasContext2D;
@@ -87,6 +92,9 @@ public class JSGraphics2D implements
 	private AffineTransform transform;
 
 	private Color backgroundColor;
+	private AffineTransform fontTransform;
+
+	private RenderingHints aa;
 
 	// private Color currentColor;
 
@@ -356,8 +364,11 @@ public class JSGraphics2D implements
 		if (font == this.font)
 			return;
 		this.font = font;
-		if (font != null)
+		this.fontTransform = null;
+		if (font != null) {
+			this.fontTransform = font.秘getRawTransformOrNull();
 			ctx.font = JSToolkit.getCanvasFont(font);
+		}
 	}
 
 	public void setStrokeBold(boolean tf) {
@@ -375,7 +386,7 @@ public class JSGraphics2D implements
 	boolean inPath;
 
 	private Color foregroundColor;
-
+	
 	public void doStroke(boolean isBegin) {
 		inPath = isBegin;
 		if (isBegin) {
@@ -410,6 +421,24 @@ public class JSGraphics2D implements
 		doStroke(false);
 	}
 
+	public void drawText(char[] chars, Font font, float x, float y) {
+
+		ctx.save();
+		Font f = getFont();
+		setFont(font);
+		AffineTransform tx = fontTransform;
+		if (tx != null && !tx.isIdentity()) {
+			ctx.transform(tx.getScaleX(), tx.getShearX(), tx.getTranslateX(), tx.getShearY(), tx.getScaleX(), tx.getTranslateY());
+		}
+		fillText(/** @j2sNative chars.join("") || */null, x, y);
+		setFont(f);
+		ctx.restore();
+	}
+	
+	public void drawGlyphVector(GlyphVector gv, float x, float y) {
+		JSUtil.notImplemented(null);
+	}
+	
 	private int doShape(Shape s) {
 		double[] pts = new double[6];
 		PathIterator pi = s.getPathIterator(null);
@@ -438,16 +467,64 @@ public class JSGraphics2D implements
 	}
 
 	public void fill(Shape s) {
+
+		if (shader != null) {
+			ctx.save();
+			ctx.beginPath();
+			doShape(s);
+			ctx.clip();
+			if (shader instanceof GradientPaint) {
+				GradientPaint p = (GradientPaint) shader;
+				Point2D.Float p1 = (Point2D.Float) p.getPoint1();
+				Point2D.Float p2 = (Point2D.Float) p.getPoint2();
+				HTML5CanvasContext2D.createLinearGradient(ctx, p1, p2, JSToolkit.getCSSColor(p.getColor1()),
+						JSToolkit.getCSSColor(p.getColor2()));
+				ctx.beginPath();
+				doShape(s);
+				ctx.fill();
+			} else {
+				Rectangle2D yourRect = s.getBounds2D();
+				double sx = transform.getScaleX();
+				double sy = transform.getScaleY();
+				double w = Math.ceil(sx * yourRect.getWidth());
+				double h = Math.ceil(sy * yourRect.getHeight());
+				if (aa == null)
+					aa = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+				HTML5Canvas shaderCanvas = /** @j2sNative this.shader.秘canvas || */
+						null;
+				if (shaderCanvas == null || DOMNode.getWidth(shaderCanvas) < w || DOMNode.getHeight(shaderCanvas) < h) {
+					Rectangle myRect = new Rectangle(0, 0, (int) w, (int) h);
+					JSGraphics2D g2 = JSImagekit.createCanvasGraphics((int) w, (int) h, null);
+					Raster raster = shader.createContext(null, myRect, yourRect, this.transform, aa).getRaster(0, 0,
+							width, height);
+					g2.getBuf8(0, 0, (int) w, (int) h);
+					raster.getPixels(0, 0, (int) w, (int) h, g2.buf8);
+					g2.ctx.putImageData(g2.imageData, 0, 0);
+					shaderCanvas = g2.canvas;
+				}
+				/**
+				 * @j2sNative this.shader.秘canvas = shaderCanvas; var a =
+				 *            this.ctx.globalCompositeOperation;
+				 *            this.ctx.globalCompositionOperation = "source-atop";
+				 */
+				ctx.drawImage(shaderCanvas, 0, 0, (int) w, (int) h, yourRect.getX(), yourRect.getY(),
+						yourRect.getWidth(), yourRect.getHeight());
+				/**
+				 * @j2sNative this.ctx.globalCompositeOperation = a;
+				 */
+			}
+
+			ctx.restore();
+			return;
+		}
 		ctx.beginPath();
-		if (doShape(s) == Path2D.WIND_EVEN_ODD)
-		/**
-		 * @j2sNative
-		 * 
-		 * 			this.ctx.fill("evenodd");
-		 */
-		{
-		} else
+		int winding = doShape(s);
+		if (winding == Path2D.WIND_EVEN_ODD) {
+			ctx.fill("evenodd");
+		} else {
 			ctx.fill();
+		}
+
 	}
 
 	public void drawRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight) {
@@ -569,13 +646,14 @@ public class JSGraphics2D implements
 	private ImageData imageData;
 	private int[] buf8;
 	private int lastx, lasty, nx, ny;
+	private Paint shader;
 
 	@SuppressWarnings("unused")
 	public boolean drawImagePriv(Image img, int x, int y, ImageObserver observer) {
 		if (img != null) {
 			int width = ((BufferedImage) img).getRaster().getWidth();
 			int height = ((BufferedImage) img).getRaster().getHeight();
-			double[] m = HTML5CanvasContext2D.getMatrix(ctx, transform);
+			double[] m = HTML5CanvasContext2D.setMatrix(ctx, transform);
 			int type = ((BufferedImage) img).getType();
 			boolean isOpaque = ((BufferedImage) img).秘isOpaque();
 			int[] pixels = (isTranslationOnly(m) ? ((BufferedImage) img).get秘pix() : null);
@@ -584,15 +662,8 @@ public class JSGraphics2D implements
 				if ((imgNode = getImageNode(img)) != null)
 					ctx.drawImage(imgNode, x, y, width, height);
 			} else {
+				getBuf8(x, y, width, height);
 				boolean isPerPixel = (pixels.length == width * height);
-				if (buf8 == null || x != lastx || y != lasty || nx != width || ny != height) {
-					imageData = ctx.getImageData(x, y, width, height);
-					buf8 = imageData.data;
-					lastx = x;
-					lasty = y;
-					nx = width;
-					ny = height;
-				}
 				if (isPerPixel) {
 					for (int pt = 0, i = 0, n = Math.min(buf8.length / 4, pixels.length); i < n; i++) {
 						int argb = pixels[i];
@@ -621,6 +692,21 @@ public class JSGraphics2D implements
 				observe(img, observer, imgNode != null || pixels != null);
 		}
 		return true;
+	}
+
+	private void getBuf8(int x, int y, int w, int h) {
+		if (buf8 == null || x != lastx || y != lasty || nx != w || ny != h) {
+			imageData = ctx.getImageData(x, y, w, h);
+			buf8 = imageData.data;
+			lastx = x;
+			lasty = y;
+			nx = w;
+			ny = h;
+		}
+	}
+
+	private void loadCTX(int x, int y, int w, int h, int[] pixels, double m4, double m5,
+			boolean isOpaque) {
 	}
 
 	private static boolean isTranslationOnly(double[] m) {
@@ -728,15 +814,12 @@ public class JSGraphics2D implements
 	}
 
 	public void setPaint(Paint paint) {
+		shader = null;
 		if (paint instanceof Color) {
 			setColor((Color) paint);
-		} else if (paint instanceof GradientPaint) {
-			GradientPaint p = (GradientPaint) paint;
-			Point2D.Float p1 = (Point2D.Float) p.getPoint1();
-			Point2D.Float p2 = (Point2D.Float) p.getPoint2();
-			HTML5CanvasContext2D.createLinearGradient(ctx, p1, p2, 
-					JSToolkit.getCSSColor(p.getColor1()), JSToolkit.getCSSColor(p.getColor2()));
-		}		
+		} else {
+			shader = paint;
+		}
 	}
 
 	public Font getFont() {
@@ -857,11 +940,13 @@ public class JSGraphics2D implements
 	}
 
 	public void translate(double tx, double ty) {
-		JSUtil.notImplemented(null);
+		ctx.translate(tx, ty);
+		transform.translate(tx, ty);
 	}
 
 	public void shear(double shx, double shy) {
-		JSUtil.notImplemented(null);
+		ctx.transform(1.0, shx, 0.0, shy, 1.0, 0.0);
+		transform.shear(shx, shy);
 	}
 
 	public void translate(int x, int y) {
@@ -894,7 +979,7 @@ public class JSGraphics2D implements
 	public void transform(AffineTransform t) {
 		transformCTX(t);
 		transform.concatenate(t);
-		HTML5CanvasContext2D.getMatrix(ctx, null);
+		HTML5CanvasContext2D.setMatrix(ctx, null);
 	}
 
 	private void transformCTX(AffineTransform t) {
@@ -1096,6 +1181,7 @@ public class JSGraphics2D implements
 			if (alpha != null) {
 				setAlpha(alpha.floatValue());
 			}
+			shader = null;
 			setStroke((Stroke) map[SAVE_STROKE]);
 			setTransform((AffineTransform) map[SAVE_TRANSFORM]);
 			setFont((Font) map[SAVE_FONT]);

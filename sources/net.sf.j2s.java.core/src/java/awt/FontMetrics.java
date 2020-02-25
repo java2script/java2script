@@ -616,11 +616,10 @@ public abstract class FontMetrics {
 //    }
 //
     private FontRenderContext myFRC(Graphics context) {
-    	return  null;
 //        if (context instanceof Graphics2D) {
 //            return ((Graphics2D)context).getFontRenderContext();
 //        }
-//        return DEFAULT_FRC;
+        return DEFAULT_FRC;
     }
 
 

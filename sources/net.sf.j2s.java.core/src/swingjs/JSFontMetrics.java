@@ -151,7 +151,7 @@ public class JSFontMetrics extends FontMetrics {
 	 * @see java.awt.Font#getLineMetrics(String, FontRenderContext)
 	 */
 	public LineMetrics getLineMetrics(String str, Graphics context) {
-		return font.getLineMetrics(str, null);
+		return font.getLineMetrics(str, getFontRenderContext());
 	}
 
 	/**
