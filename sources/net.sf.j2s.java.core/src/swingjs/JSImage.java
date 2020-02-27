@@ -33,47 +33,54 @@ public class JSImage extends BufferedImage {
 
 	public String src;
 
+	/**
+	 * Frome JSImageKit reading pixels from an image file.
+	 * 
+	 * @param argb
+	 * @param width
+	 * @param height
+	 * @param src
+	 */
 	public JSImage(int[] argb, int width, int height, String src) {
 		super(width, height, TYPE_INT_ARGB);
 		this.src = src;
-		秘pix = argb;		
+		秘setPixels(argb);
 	}
-	
-  
-  /**
-   * Use HTML5 to load PNG, JPG, or GIF image in order to extract its pixels
-   * 
-   * @param b
-   * @param type
-   */
+
+	public JSImage(byte[] pixelBytes, int width, int height, String src) {
+		// Actually do not know what I am supposed to do with this.
+		super(width, height, TYPE_INT_ARGB);
+		this.src = src;
+		秘setPixels((int[]) (Object) pixelBytes);
+	}
+
+	/**
+	 * Use HTML5 to load PNG, JPG, or GIF image in order to extract its pixels
+	 * 
+	 * @param b
+	 * @param type
+	 */
 	@SuppressWarnings("unused")
 	public void getDOMImage(byte[] b, String type) {
-		String dataurl = "data:image/" + type + ";base64,"  + Base64.getBase64(b).toString();
+		String dataurl = "data:image/" + type + ";base64," + Base64.getBase64(b).toString();
 		DOMNode img = null;
 		/**
-		 * @j2sNative
-		 *   img = new Image(this.width, this.height);
-		 *   //if (this.callback) img.onload = this.callback;
-		 *   img.src = dataurl;
+		 * @j2sNative img = new Image(this.width, this.height); //if (this.callback)
+		 *            img.onload = this.callback; img.src = dataurl;
 		 */
-		
+
 		秘imgNode = img;
 	}
 
-    /**
-     * font will be derived from this component when graphics is created
-     * @param c
-     * @return
-     */
+	/**
+	 * font will be derived from this component when graphics is created
+	 * 
+	 * @param c
+	 * @return
+	 */
 	public Image setComponent(Component c) {
 		秘component = c;
 		return this;
 	}
-
-	@Override
-	public DOMNode 秘updateNode(DOMNode imgNode) {
-		return imgNode;
-	}
-
 
 }

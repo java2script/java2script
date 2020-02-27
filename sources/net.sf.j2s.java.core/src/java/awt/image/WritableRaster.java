@@ -50,17 +50,6 @@ import java.awt.Point;
  * in the Raster class.
  */
 public class WritableRaster extends Raster {
-	
-	public void setParams(SampleModel model,
-			DataBuffer dataBuffer, Point origin) {
-		// for subclasses IntegerInterleaved and ByteInterleaved 
-		// created from Raster reflection
-	}
-
-	
-	protected WritableRaster() {
-		// for reflection
-	}
 
     /**
      *  Constructs a WritableRaster with the given SampleModel.  The
@@ -76,7 +65,7 @@ public class WritableRaster extends Raster {
      */
     protected WritableRaster(SampleModel sampleModel,
                              Point origin) {
-        setRaster(sampleModel,
+        this(sampleModel,
              sampleModel.createDataBuffer(),
              new Rectangle(origin.x,
                            origin.y,
@@ -102,7 +91,7 @@ public class WritableRaster extends Raster {
     protected WritableRaster(SampleModel sampleModel,
                              DataBuffer dataBuffer,
                              Point origin) {
-        setRaster(sampleModel,
+        this(sampleModel,
              dataBuffer,
              new Rectangle(origin.x,
                            origin.y,
@@ -139,8 +128,8 @@ public class WritableRaster extends Raster {
                              DataBuffer dataBuffer,
                              Rectangle aRegion,
                              Point sampleModelTranslate,
-                             Raster parent){
-        setRaster(sampleModel,dataBuffer,aRegion,sampleModelTranslate,parent);
+                             WritableRaster parent){
+        super(sampleModel,dataBuffer,aRegion,sampleModelTranslate,parent);
     }
 
     /** Returns the parent WritableRaster (if any) of this WritableRaster,
@@ -386,13 +375,13 @@ public class WritableRaster extends Raster {
      * integral type and less than or equal to 32 bits in size, then calling
      * this method is equivalent to executing the following code for all
      * <code>x,y</code> addresses valid in both Rasters.
-     * <pre>
+     * <pre>{@code
      *       Raster srcRaster;
      *       WritableRaster dstRaster;
      *       for (int b = 0; b < srcRaster.getNumBands(); b++) {
      *           dstRaster.setSample(x, y, b, srcRaster.getSample(x, y, b));
      *       }
-     * </pre>
+     * }</pre>
      * Thus, when copying an integral type source to an integral type
      * destination, if the source sample size is greater than the destination
      * sample size for a particular band, the high order bits of the source

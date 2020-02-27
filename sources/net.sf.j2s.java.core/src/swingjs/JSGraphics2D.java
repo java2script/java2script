@@ -34,7 +34,9 @@ import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.renderable.RenderableImage;
 import java.text.AttributedCharacterIterator;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -56,6 +58,8 @@ import swingjs.api.js.HTML5CanvasContext2D.ImageData;
 public class JSGraphics2D implements
 		// Graphics2D,
 		Cloneable {
+
+	static boolean debugClip = JSUtil.J2S.debugClip();
 
 	private static final int DRAW_NOCLOSE = 0;
 	private static final int DRAW_CLOSE = 1;
@@ -386,7 +390,7 @@ public class JSGraphics2D implements
 	boolean inPath;
 
 	private Color foregroundColor;
-	
+
 	public void doStroke(boolean isBegin) {
 		inPath = isBegin;
 		if (isBegin) {
@@ -428,17 +432,19 @@ public class JSGraphics2D implements
 		setFont(font);
 		AffineTransform tx = fontTransform;
 		if (tx != null && !tx.isIdentity()) {
-			ctx.transform(tx.getScaleX(), tx.getShearX(), tx.getTranslateX(), tx.getShearY(), tx.getScaleX(), tx.getTranslateY());
+			ctx.transform(tx.getScaleX(), tx.getShearX(), tx.getTranslateX(), tx.getShearY(), tx.getScaleX(),
+					tx.getTranslateY());
 		}
-		fillText(/** @j2sNative chars.join("") || */null, x, y);
+		fillText(/** @j2sNative chars.join("") || */
+				null, x, y);
 		setFont(f);
 		ctx.restore();
 	}
-	
+
 	public void drawGlyphVector(GlyphVector gv, float x, float y) {
 		JSUtil.notImplemented(null);
 	}
-	
+
 	private int doShape(Shape s) {
 		double[] pts = new double[6];
 		PathIterator pi = s.getPathIterator(null);
@@ -548,8 +554,14 @@ public class JSGraphics2D implements
 			draw(rrect);
 	}
 
+	public boolean drawImage(Image img, int x, int y, Color background, ImageObserver observer) {
+		JSUtil.notImplemented("transparent image pixel background fill is not supported in SwingJS");
+		return drawImage(img, x, y, observer);
+	}
+
 	/**
 	 * Allows for direct image transfer by buffer
+	 * 
 	 * @param img
 	 * @param x
 	 * @param y
@@ -557,12 +569,12 @@ public class JSGraphics2D implements
 	 * @return
 	 */
 	public boolean drawImage(Image img, int x, int y, ImageObserver observer) {
-		return drawImagePriv(img, x, y, observer);
+		return drawImage(img, x, y, img.getWidth(null), img.getHeight(null), observer);
 	}
 
-	public boolean drawImage(Image img, int x, int y, Color background, ImageObserver observer) {
+	public boolean drawImage(Image img, int x, int y, int width, int height, Color bgcolor, ImageObserver observer) {
 		JSUtil.notImplemented("transparent image pixel background fill is not supported in SwingJS");
-		return drawImagePriv(img, x, y, observer);
+		return drawImage(img, x, y, width, height, observer);
 	}
 
 	public boolean drawImage(Image img, int x, int y, int width, int height, ImageObserver observer) {
@@ -570,47 +582,11 @@ public class JSGraphics2D implements
 			return true;
 //		backgroundPainted = true;
 		if (img != null) {
-			DOMNode imgNode = getImageNode(img);
-			if (imgNode != null)
+			DOMNode imgNode = ((BufferedImage)img).秘getImageNode();
+			if (imgNode == null) {
+				drawImagePriv(img, x, y, width, height, observer);
+			}
 				ctx.drawImage(imgNode, x, y, width, height);
-			if (observer != null)
-				observe(img, observer, imgNode != null);
-		}
-		return true;
-	}
-
-	private DOMNode getImageNode(Image img) {
-//		backgroundPainted = true;
-		DOMNode imgNode = DOMNode.getImageNode(img);
-		return (imgNode == null ? JSGraphicsCompositor.createImageNode(img) : ((BufferedImage) img).秘updateNode(imgNode));
-	}
-
-	private void observe(Image img, ImageObserver observer, boolean isOK) {
-		observer.imageUpdate(img, (isOK ? 0 : ImageObserver.ABORT | ImageObserver.ERROR), -1, -1, -1, -1);
-	}
-
-//	public boolean drawImage(Image img, int x, int y, Color bgcolor, ImageObserver observer) {
-////		backgroundPainted = true;
-//		return drawImage(img, x, y, observer);
-//	}
-
-	public boolean drawImage(Image img, int x, int y, int width, int height, Color bgcolor, ImageObserver observer) {
-		if (width <= 0 || height <= 0)
-			return false;
-//		backgroundPainted = true;
-		return drawImage(img, x, y, width, height, observer);
-	}
-
-	@SuppressWarnings("unused")
-
-	public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2, int sx1, int sy1, int sx2, int sy2,
-			ImageObserver observer) {
-//		backgroundPainted = true;
-		if (img != null) {
-			byte[] bytes = null;
-			DOMNode imgNode = getImageNode(img);
-			if (imgNode != null)
-				ctx.drawImage(imgNode, sx1, sy1, sx2 - sx1, sy2 - sy1, dx1, dy1, dx2 - dx1, dy2 - dy1);
 			if (observer != null)
 				observe(img, observer, imgNode != null);
 		}
@@ -619,8 +595,26 @@ public class JSGraphics2D implements
 
 	public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2, int sx1, int sy1, int sx2, int sy2,
 			Color bgcolor, ImageObserver observer) {
-		JSUtil.notImplemented(null);
+		JSUtil.notImplemented("transparent image pixel background fill is not supported in SwingJS");
 		return drawImage(img, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, observer);
+	}
+
+	@SuppressWarnings("unused")
+	public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2, int sx1, int sy1, int sx2, int sy2,
+			ImageObserver observer) {
+//		backgroundPainted = true;
+		if (img != null) {
+			byte[] bytes = null;
+			DOMNode imgNode = ((BufferedImage)img).秘getImageNode();
+			if (imgNode == null) {
+				JSUtil.notImplemented("JSGraphics2D.drawImage cannot could not create an image node");
+			} else {
+				ctx.drawImage(imgNode, sx1, sy1, sx2 - sx1, sy2 - sy1, dx1, dy1, dx2 - dx1, dy2 - dy1);
+			}
+			if (observer != null)
+				observe(img, observer, imgNode != null);
+		}
+		return true;
 	}
 
 	public boolean drawImage(Image img, AffineTransform xform, ImageObserver obs) {
@@ -648,50 +642,68 @@ public class JSGraphics2D implements
 	private int lastx, lasty, nx, ny;
 	private Paint shader;
 
+	/**
+	 * This method first checks to see if we have pixels. For example, from a
+	 * user-derived raster.
+	 * 
+	 * @param img
+	 * @param x
+	 * @param y
+	 * @param observer
+	 * @return
+	 */
 	@SuppressWarnings("unused")
 	public boolean drawImagePriv(Image img, int x, int y, ImageObserver observer) {
-		if (img != null) {
-			int width = ((BufferedImage) img).getRaster().getWidth();
-			int height = ((BufferedImage) img).getRaster().getHeight();
-			double[] m = HTML5CanvasContext2D.setMatrix(ctx, transform);
-			int type = ((BufferedImage) img).getType();
-			boolean isOpaque = ((BufferedImage) img).秘isOpaque();
-			int[] pixels = (isTranslationOnly(m) ? ((BufferedImage) img).get秘pix() : null);
-			DOMNode imgNode = null;
-			if (pixels == null) {
-				if ((imgNode = getImageNode(img)) != null)
-					ctx.drawImage(imgNode, x, y, width, height);
-			} else {
-				getBuf8(x, y, width, height);
-				boolean isPerPixel = (pixels.length == width * height);
-				if (isPerPixel) {
-					for (int pt = 0, i = 0, n = Math.min(buf8.length / 4, pixels.length); i < n; i++) {
-						int argb = pixels[i];
-						buf8[pt++] = (argb >> 16) & 0xFF;
-						buf8[pt++] = (argb >> 8) & 0xFF;
-						buf8[pt++] = argb & 0xFF;
-						buf8[pt++] = (isOpaque ? 0xFF : (argb >> 24) & 0xFF);
-					}
-				} else if (isOpaque) {
-					for (int i = 0, n = Math.min(buf8.length, pixels.length); i < n; i++) {
-						buf8[i] = pixels[i++];
-						buf8[i] = pixels[i++];
-						buf8[i] = pixels[i++];
-						buf8[i] = 0xFF;
-					}
-				} else {
-					for (int i = 0, n = Math.min(buf8.length, pixels.length); i < n; i++) {
-						buf8[i] = pixels[i];
-					}
+		if (img == null)
+			return true;
+		return drawImagePriv(img, x, y, ((BufferedImage) img).getRaster().getWidth(), ((BufferedImage) img).getRaster().getHeight(), observer);
+	}
+
+	private boolean drawImagePriv(Image img, int x, int y, int width, int height, ImageObserver observer) {
+		double[] m = HTML5CanvasContext2D.setMatrix(ctx, transform);
+		int type = ((BufferedImage) img).getType();
+		boolean isOpaque = ((BufferedImage) img).秘isOpaque();
+		// if get秘pix returns pixels, we use them. Otherwise we turn this into an image
+		int[] pixels = (isTranslationOnly(m) ? ((BufferedImage) img).get秘pix() : null);
+		DOMNode imgNode = null;
+		if (pixels == null) {
+			imgNode = ((BufferedImage)img).秘getImageNode();
+			if (imgNode != null)
+				ctx.drawImage(imgNode, x, y, width, height);
+		} else {
+			getBuf8(x, y, width, height);
+			boolean isPerPixel = (pixels.length == width * height);
+			if (isPerPixel) {
+				for (int pt = 0, i = 0, n = Math.min(buf8.length / 4, pixels.length); i < n; i++) {
+					int argb = pixels[i];
+					buf8[pt++] = (argb >> 16) & 0xFF;
+					buf8[pt++] = (argb >> 8) & 0xFF;
+					buf8[pt++] = argb & 0xFF;
+					buf8[pt++] = (isOpaque ? 0xFF : (argb >> 24) & 0xFF);
 				}
-				x += m[4];
-				y += m[5];
-				ctx.putImageData(imageData, x, y);
+			} else if (isOpaque) {
+				for (int i = 0, n = Math.min(buf8.length, pixels.length); i < n; i++) {
+					buf8[i] = pixels[i++];
+					buf8[i] = pixels[i++];
+					buf8[i] = pixels[i++];
+					buf8[i] = 0xFF;
+				}
+			} else {
+				for (int i = 0, n = Math.min(buf8.length, pixels.length); i < n; i++) {
+					buf8[i] = pixels[i];
+				}
 			}
-			if (observer != null)
-				observe(img, observer, imgNode != null || pixels != null);
+			x += m[4];
+			y += m[5];
+			ctx.putImageData(imageData, x, y);
 		}
+		if (observer != null)
+			observe(img, observer, imgNode != null || pixels != null);
 		return true;
+	}
+
+	private void observe(Image img, ImageObserver observer, boolean isOK) {
+		observer.imageUpdate(img, (isOK ? 0 : ImageObserver.ABORT | ImageObserver.ERROR), -1, -1, -1, -1);
 	}
 
 	private void getBuf8(int x, int y, int w, int h) {
@@ -705,15 +717,13 @@ public class JSGraphics2D implements
 		}
 	}
 
-	private void loadCTX(int x, int y, int w, int h, int[] pixels, double m4, double m5,
-			boolean isOpaque) {
+	private void loadCTX(int x, int y, int w, int h, int[] pixels, double m4, double m5, boolean isOpaque) {
 	}
 
 	private static boolean isTranslationOnly(double[] m) {
-		return (   m[0] == 1 && m[1] == 0 
-				&& m[2] == 0 && m[3] == 1);
+		return (m[0] == 1 && m[1] == 0 && m[2] == 0 && m[3] == 1);
 	}
-	
+
 	public boolean hit(Rectangle rect, Shape s, boolean onStroke) {
 		JSUtil.notImplemented(null);
 		return false;
@@ -793,7 +803,7 @@ public class JSGraphics2D implements
 
 	public void setBackground(Color c) {
 		// for clearRect only
-			backgroundColor = c;
+		backgroundColor = c;
 	}
 
 	public Color getBackground() {
@@ -856,21 +866,29 @@ public class JSGraphics2D implements
 		ctx.clip();
 	}
 
-	private void setCurrentClip(int x, int y, int width, int height) {
-		Rectangle r = (currentClip instanceof Rectangle ? (Rectangle) currentClip : null);
-		if (r == null || r.x != x || r.y != y || r.width != width || r.height != height)
-			currentClip = new Rectangle(x, y, width, height);
-	}
-
 	public void setClip(Shape clip) {
 		if (clip == null) {
 			setClip(0, 0, width, height);
 			return;
 		}
+		if (debugClip) {
+			System.out.println("JSGraphics2D currentClip now " + clip + " was " + currentClip);
+		}
 		currentClip = clip;
 		ctx.beginPath();
 		doShape(clip);
 		ctx.clip();
+	}
+
+	private void setCurrentClip(int x, int y, int width, int height) {
+		Rectangle r = (currentClip instanceof Rectangle ? (Rectangle) currentClip : null);
+		Object o = currentClip;
+		if (r == null || r.x != x || r.y != y || r.width != width || r.height != height) {
+			currentClip = new Rectangle(x, y, width, height);
+		}
+		if (debugClip) {
+			System.out.println("JSGraphics2D currentClip now " + currentClip + " was " + o);
+		}
 	}
 
 	public boolean hitClip(int x, int y, int width, int height) {
@@ -887,6 +905,7 @@ public class JSGraphics2D implements
 	}
 
 	private int alpha;
+
 	private void setGraphicsColor(Color c) {
 		if (c == null)
 			return; // this was the case with a JRootPanel graphic call
@@ -1152,7 +1171,14 @@ public class JSGraphics2D implements
 	 * @return the length of the ctx._aSaved array after the push
 	 */
 	public int mark() {
+		return mark(false);
+	}
+
+	private int mark(boolean isClone) {
 		// note: This method is referred to in JComponent.java j2snative block as mark$
+		if (debugClip) {
+			System.out.println("save " + transform);
+		}
 		ctx.save();
 		Object[] map = new Object[SAVE_MAX];
 		map[SAVE_ALPHA] = Float.valueOf(ctx.globalAlpha);
@@ -1167,6 +1193,41 @@ public class JSGraphics2D implements
 	}
 
 	/**
+	 * 
+	 * Just clear the clip for the specified number of levels.
+	 * 
+	 * This method should be called in pairs on the method's Graphic parameter
+	 * 
+	 * g.unclip$I(-3); ... g.unclip$I(3);
+	 * 
+	 * 
+	 * @param n before code, use n < 0 ("undo") to unclip that many levels, then
+	 *          after code use n > 0 to reset the clip to what is was before
+	 */
+	public void unclip(int n) {
+		if (debugClip) {
+			System.out.println("JSGraphics2D.unclip " + n);
+		}
+
+		Object[][] stack = HTML5CanvasContext2D.getSavedStack(ctx);
+		boolean isBefore = (n < 0);
+		if (isBefore)
+			n = -n;
+
+		for (int i = 0; i < n; i++) {
+			ctx.restore();
+			if (isBefore)
+				setClip((Shape) stack[stack.length - 1 - i][SAVE_CLIP]);
+		}
+		for (int i = n; --i >= 0;) {
+			setState(stack[stack.length - 1 - i]);
+			if (!isBefore)
+				setClip((Shape) stack[stack.length - 1 - i][SAVE_CLIP]);
+			ctx.save();
+		}
+	}
+
+	/**
 	 * try to equate g.dispose() with ctx.restore().
 	 * 
 	 * @param n0
@@ -1174,21 +1235,28 @@ public class JSGraphics2D implements
 	public void reset(int n0) {
 		if (n0 < 1)
 			n0 = 1;
-		while (HTML5CanvasContext2D.getSavedLevel(ctx) >= n0) {
-			Object[] map = HTML5CanvasContext2D.pop(ctx);
-			setComposite((Composite) map[SAVE_COMPOSITE]);
-			Float alpha = (Float) map[SAVE_ALPHA];
-			if (alpha != null) {
-				setAlpha(alpha.floatValue());
-			}
-			shader = null;
-			setStroke((Stroke) map[SAVE_STROKE]);
-			setTransform((AffineTransform) map[SAVE_TRANSFORM]);
-			setFont((Font) map[SAVE_FONT]);
-			currentClip = (Shape) map[SAVE_CLIP];
-//			backgroundPainted = ((Boolean) map[SAVE_BACKGROUND_PAINTED]).booleanValue();
+		int n;
+		while ((n = HTML5CanvasContext2D.getSavedLevel(ctx)) >= n0) {
+			setState(HTML5CanvasContext2D.pop(ctx));
 			ctx.restore();
+			if (debugClip) {
+				System.out.println("restore n=" + n + " " + transform);
+			}
 		}
+	}
+
+	private void setState(Object[] map) {
+		setComposite((Composite) map[SAVE_COMPOSITE]);
+		Float alpha = (Float) map[SAVE_ALPHA];
+		if (alpha != null) {
+			setAlpha(alpha.floatValue());
+		}
+		shader = null;
+		setStroke((Stroke) map[SAVE_STROKE]);
+		setTransform((AffineTransform) map[SAVE_TRANSFORM]);
+		setFont((Font) map[SAVE_FONT]);
+		currentClip = (Shape) map[SAVE_CLIP];
+//		backgroundPainted = ((Boolean) map[SAVE_BACKGROUND_PAINTED]).booleanValue();
 	}
 
 	public Graphics create(int x, int y, int width, int height) {
@@ -1208,7 +1276,10 @@ public class JSGraphics2D implements
 
 	@Override
 	public Object clone() {
-		int n = mark();
+		int n = mark(false);
+		if (debugClip) {
+			System.out.println("clone to " + n);
+		}
 		JSGraphics2D g = this;
 		/**
 		 * avoid super call to Object.clone();
@@ -1249,6 +1320,9 @@ public class JSGraphics2D implements
 	}
 
 	public void dispose() {
+		if (debugClip) {
+			System.out.println("dispose to " + initialState);
+		}
 		reset(initialState);
 	}
 

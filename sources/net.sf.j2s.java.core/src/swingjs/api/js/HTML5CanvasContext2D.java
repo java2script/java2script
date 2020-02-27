@@ -122,6 +122,18 @@ public abstract class HTML5CanvasContext2D {
 			return 0;
 		}
 	}
+	
+	public static Object[][] getSavedStack(HTML5CanvasContext2D ctx) {
+	   /**
+	    * @j2sNative
+	    * 
+	    * return (ctx._aSaved || []);
+	    */
+		{
+			return null;
+		}
+		
+	}
 
 	public static double[] setMatrix(HTML5CanvasContext2D ctx, AffineTransform transform) {
 		double[] m = /**  @j2sNative ctx._m || */ null;

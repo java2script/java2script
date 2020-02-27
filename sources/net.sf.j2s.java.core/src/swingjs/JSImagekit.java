@@ -40,15 +40,6 @@ public class JSImagekit implements ImageConsumer {
 	private static final int JPG_SOF2 = 0xC2FF;
 
 	/**
-	 * Used by JSToolkit.createImage()
-	 * 
-	 * @see JSToolkit 
-	 */
-	public JSImagekit() {
-		// for reflection
-	}
-
-	/**
 	 * Create a buffered image that contains the data, at least getting the width
 	 * and height of a JPG, GIF, PNG, or BMP file and possibly generating a
 	 * JavaScript callback to load the image into an off-screen buffer in order to
@@ -85,7 +76,10 @@ public class JSImagekit implements ImageConsumer {
 		//
 		//TODO: not considering pixelbytes
 		//
-		jsimage = new JSImage(pixels, width, height, null);
+		if (pixels != null)
+			jsimage = new JSImage(pixels, width, height, null);
+		else
+			jsimage = new JSImage(pixelBytes, width, height, null);
   }
 
 	public Image getCreatedImage() {
@@ -117,6 +111,8 @@ public class JSImagekit implements ImageConsumer {
 	@Override
 	public void setPixels(int x, int y, int w, int h, ColorModel model,
 			int[] pixels, int off, int scansize) {
+		// assumes a standard ARGB color model.
+		pixelBytes = null;
         if(this.pixels == null) {
             colorModel = model;
             this.pixels  = new int[width*height];
@@ -135,6 +131,13 @@ public class JSImagekit implements ImageConsumer {
 //		this.pixels = pixels;
 	}
 
+	/**
+	 * Main entry point for ImageFilters and MemoryImageSource that delivers
+	 * bytes to a consumer. 
+	 * 
+	 * Not yet implemented. 
+	 * 
+	 */
 	@Override
 	public void setPixels(int x, int y, int w, int h, ColorModel model,
 			byte[] pixels, int off, int scansize) {
@@ -146,6 +149,7 @@ public class JSImagekit implements ImageConsumer {
 		this.off = off;
 		this.scansize = scansize;
 		this.pixelBytes = pixels;
+		this.pixels = null;
 		JSUtil.notImplemented("byte-based image pixels");
 	}
 

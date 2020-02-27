@@ -1,8 +1,5 @@
 /*
- * Some portions of this file have been modified by Robert Hanson hansonr.at.stolaf.edu 2012-2017
- * for use in SwingJS via transpilation into JavaScript using Java2Script.
- *
- * Copyright (c) 1997, 2007, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -43,12 +40,12 @@ import swingjs.api.Interface;
 import java.awt.Rectangle;
 import java.awt.Point;
 
-import sun.awt.image.ByteBandedRaster;
 import sun.awt.image.ByteInterleavedRaster;
-import sun.awt.image.BytePackedRaster;
-import sun.awt.image.IntegerInterleavedRaster;
-import sun.awt.image.ShortBandedRaster;
 import sun.awt.image.ShortInterleavedRaster;
+import sun.awt.image.IntegerInterleavedRaster;
+import sun.awt.image.ByteBandedRaster;
+import sun.awt.image.ShortBandedRaster;
+import sun.awt.image.BytePackedRaster;
 import sun.awt.image.SunWritableRaster;
 
 /**
@@ -128,7 +125,6 @@ import sun.awt.image.SunWritableRaster;
  * @see java.awt.image.SinglePixelPackedSampleModel
  * @see java.awt.image.MultiPixelPackedSampleModel
  */
-
 public class Raster {
 
 	private BufferedImage image;
@@ -184,7 +180,7 @@ public class Raster {
 //        ColorModel.loadLibraries();
 //        initIDs();
 //    }
-//
+
     /**
      * Creates a Raster based on a PixelInterleavedSampleModel with the
      * specified data type, width, height, and number of bands.
@@ -277,6 +273,7 @@ public class Raster {
         case DataBuffer.TYPE_BYTE:
             d = new DataBufferByte(size);
             break;
+
         case DataBuffer.TYPE_USHORT:
             d = new DataBufferUShort(size);
             break;
@@ -404,7 +401,8 @@ public class Raster {
             }
         }
         int banks = maxBank + 1;
-        int size = scanlineStride * (h - 1) + // fisrt (h - 1) scans
+        int size = maxBandOff +
+            scanlineStride * (h - 1) + // fisrt (h - 1) scans
             w; // last scan
 
         switch(dataType) {
@@ -659,7 +657,6 @@ public class Raster {
             return new ByteInterleavedRaster(csm, dataBuffer, location);
 
         case DataBuffer.TYPE_USHORT:
-        	JSUtil.notImplemented("USHORT-interleaved raster");
             return new ShortInterleavedRaster(csm, dataBuffer, location);
 
         default:
@@ -788,16 +785,18 @@ public class Raster {
 
         switch(dataType) {
         case DataBuffer.TYPE_BYTE:
-        case DataBuffer.TYPE_INT:
+            return new ByteInterleavedRaster(sppsm, dataBuffer, location);
+
         case DataBuffer.TYPE_USHORT:
-        	break;
+            return new ShortInterleavedRaster(sppsm, dataBuffer, location);
+
+        case DataBuffer.TYPE_INT:
+            return new IntegerInterleavedRaster(sppsm, dataBuffer, location);
+
         default:
             throw new IllegalArgumentException("Unsupported data type " +
                                                 dataType);
         }
-      	WritableRaster r = (WritableRaster) Interface.getInstance("sun.awt.image." + (dataType == DataBuffer.TYPE_BYTE ? "Byte" : "Integer") + "InterleavedRaster", true);
-      	r.setParams(sppsm, dataBuffer, location);
-        return r;
     }
 
     /**
@@ -917,8 +916,7 @@ public class Raster {
                 case DataBuffer.TYPE_INT:
                     return new IntegerInterleavedRaster(sm, db, location);
             }
-        } else 
-        	if (sm instanceof MultiPixelPackedSampleModel &&
+        } else if (sm instanceof MultiPixelPackedSampleModel &&
                    dataType == DataBuffer.TYPE_BYTE &&
                    sm.getSampleSize(0) < 8) {
             return new BytePackedRaster(sm, db, location);
@@ -952,75 +950,77 @@ public class Raster {
         return createWritableRaster(sm, sm.createDataBuffer(), location);
     }
 
-	/**
-	 * Creates a WritableRaster with the specified SampleModel and DataBuffer. The
-	 * upper left corner of the Raster is given by the location argument. If
-	 * location is null, (0, 0) will be used.
-	 * 
-	 * @param sm       the specified <code>SampleModel</code>
-	 * @param db       the specified <code>DataBuffer</code>
-	 * @param location the upper-left corner of the <code>WritableRaster</code>
-	 * @return a <code>WritableRaster</code> with the specified
-	 *         <code>SampleModel</code>, <code>DataBuffer</code>, and location.
-	 * @throws RasterFormatException if computing either
-	 *                               <code>location.x + sm.getWidth()</code> or
-	 *                               <code>location.y + sm.getHeight()</code>
-	 *                               results in integer overflow
-	 * @throws RasterFormatException if <code>db</code> has more than one bank and
-	 *                               <code>sm</code> is a
-	 *                               PixelInterleavedSampleModel,
-	 *                               SinglePixelPackedSampleModel, or
-	 *                               MultiPixelPackedSampleModel.
-	 * @throws NullPointerException  if either SampleModel or DataBuffer is null
-	 */
-	public static WritableRaster createWritableRaster(SampleModel sm, DataBuffer db, Point location) {
-		if ((sm == null) || (db == null)) {
-			throw new NullPointerException("SampleModel and DataBuffer cannot be null");
-		}
-		if (location == null) {
-			location = new Point(0, 0);
-		}
+    /**
+     *  Creates a WritableRaster with the specified SampleModel and DataBuffer.
+     *  The upper left corner of the Raster is given by the location argument.
+     *  If location is null, (0, 0) will be used.
+     *  @param sm the specified <code>SampleModel</code>
+     *  @param db the specified <code>DataBuffer</code>
+     *  @param location the upper-left corner of the
+     *         <code>WritableRaster</code>
+     *  @return a <code>WritableRaster</code> with the specified
+     *          <code>SampleModel</code>, <code>DataBuffer</code>, and
+     *          location.
+     * @throws RasterFormatException if computing either
+     *         <code>location.x + sm.getWidth()</code> or
+     *         <code>location.y + sm.getHeight()</code> results in integer
+     *         overflow
+     * @throws RasterFormatException if <code>db</code> has more
+     *         than one bank and <code>sm</code> is a
+     *         PixelInterleavedSampleModel, SinglePixelPackedSampleModel,
+     *         or MultiPixelPackedSampleModel.
+     * @throws NullPointerException if either SampleModel or DataBuffer is null
+     */
+    public static WritableRaster createWritableRaster(SampleModel sm,
+                                                      DataBuffer db,
+                                                      Point location) {
+        if ((sm == null) || (db == null)) {
+            throw new NullPointerException("SampleModel and DataBuffer cannot be null");
+        }
+        if (location == null) {
+           location = new Point(0,0);
+        }
 
-		int dataType = sm.getDataType();
+        int dataType = sm.getDataType();
 
 		SunWritableRaster r = null;
 
-		if (sm instanceof PixelInterleavedSampleModel) {
-			switch (dataType) {
-			case DataBuffer.TYPE_BYTE:
+        if (sm instanceof PixelInterleavedSampleModel) {
+            switch(dataType) {
+                case DataBuffer.TYPE_BYTE:
 				r = new ByteInterleavedRaster(sm, db, location);
 				break;
-			case DataBuffer.TYPE_USHORT:
+                case DataBuffer.TYPE_USHORT:
 				r = new ShortInterleavedRaster(sm, db, location);
 				break;
-			}
-		} else if (sm instanceof SinglePixelPackedSampleModel) {
-			switch (dataType) {
-			case DataBuffer.TYPE_BYTE:
+            }
+        } else if (sm instanceof SinglePixelPackedSampleModel) {
+            switch(dataType) {
+                case DataBuffer.TYPE_BYTE:
 				r = new ByteInterleavedRaster(sm, db, location);
 				break;
-			case DataBuffer.TYPE_USHORT:
+                case DataBuffer.TYPE_USHORT:
 				r = new ShortInterleavedRaster(sm, db, location);
 				break;
-			case DataBuffer.TYPE_INT:
+                case DataBuffer.TYPE_INT:
 				r = new IntegerInterleavedRaster(sm, db, location);
 					//r = new SunWritableRaster(sm, db, location);
 					// TODO -- THIS IS NOT GENERALLY RIGHT
 				r.秘pix = SunWritableRaster.stealData((DataBufferInt) db, 0);
 				break;
-			}
+            }
 		} else if (sm instanceof MultiPixelPackedSampleModel && dataType == DataBuffer.TYPE_BYTE
 				&& sm.getSampleSize(0) < 8) {
 			r = new BytePackedRaster(sm, db, location);
-		} 
-		
-		if (r == null) {
-			// we couldn't do anything special - do the generic thing
+        }
 
-			r = new BytePackedRaster(sm, db, location);
+		if (r == null) {
+        // we couldn't do anything special - do the generic thing
+
+			r = new SunWritableRaster(sm,db,location);
 		}
 		return r;
-	}
+    }
 
     /**
      *  Constructs a Raster with the given SampleModel.  The Raster's
@@ -1038,7 +1038,7 @@ public class Raster {
      */
     protected Raster(SampleModel sampleModel,
                      Point origin) {
-        setRaster(sampleModel,
+        this(sampleModel,
              sampleModel.createDataBuffer(),
              new Rectangle(origin.x,
                            origin.y,
@@ -1066,7 +1066,7 @@ public class Raster {
     protected Raster(SampleModel sampleModel,
                      DataBuffer dataBuffer,
                      Point origin) {
-        setRaster(sampleModel,
+        this(sampleModel,
              dataBuffer,
              new Rectangle(origin.x,
                            origin.y,
@@ -1076,9 +1076,6 @@ public class Raster {
              null);
     }
 
-    protected Raster() {
-    	// for reflection
-    }
     /**
      * Constructs a Raster with the given SampleModel, DataBuffer, and
      * parent.  aRegion specifies the bounding rectangle of the new
@@ -1110,45 +1107,41 @@ public class Raster {
                      Rectangle aRegion,
                      Point sampleModelTranslate,
                      Raster parent) {
-    	setRaster(sampleModel, dataBuffer, aRegion, sampleModelTranslate, parent);
+
+        if ((sampleModel == null) || (dataBuffer == null) ||
+            (aRegion == null) || (sampleModelTranslate == null)) {
+            throw new NullPointerException("SampleModel, dataBuffer, aRegion and " +
+                                           "sampleModelTranslate cannot be null");
+        }
+       this.sampleModel = sampleModel;
+       this.dataBuffer = dataBuffer;
+       minX = aRegion.x;
+       minY = aRegion.y;
+       width = aRegion.width;
+       height = aRegion.height;
+       if (width <= 0 || height <= 0) {
+           throw new RasterFormatException("negative or zero " +
+               ((width <= 0) ? "width" : "height"));
+       }
+       if ((minX + width) < minX) {
+           throw new RasterFormatException(
+               "overflow condition for X coordinates of Raster");
+       }
+       if ((minY + height) < minY) {
+           throw new RasterFormatException(
+               "overflow condition for Y coordinates of Raster");
+       }
+
+       sampleModelTranslateX = sampleModelTranslate.x;
+       sampleModelTranslateY = sampleModelTranslate.y;
+
+       numBands = sampleModel.getNumBands();
+       numDataElements = sampleModel.getNumDataElements();
+       this.parent = parent;
     }
 
 
-    protected void setRaster(SampleModel sampleModel, DataBuffer dataBuffer,
-				Rectangle aRegion, Point sampleModelTranslate, Raster parent) {
-      if ((sampleModel == null) || (dataBuffer == null) ||
-          (aRegion == null) || (sampleModelTranslate == null)) {
-          throw new NullPointerException("SampleModel, dataBuffer, aRegion and " +
-                                         "sampleModelTranslate cannot be null");
-      }
-     this.sampleModel = sampleModel;
-     this.dataBuffer = dataBuffer;
-     minX = aRegion.x;
-     minY = aRegion.y;
-     width = aRegion.width;
-     height = aRegion.height;
-     if (width <= 0 || height <= 0) {
-         throw new RasterFormatException("negative or zero " +
-             ((width <= 0) ? "width" : "height"));
-     }
-     if ((minX + width) < minX) {
-         throw new RasterFormatException(
-             "overflow condition for X coordinates of Raster");
-     }
-     if ((minY + height) < minY) {
-         throw new RasterFormatException(
-             "overflow condition for Y coordinates of Raster");
-     }
-
-     sampleModelTranslateX = sampleModelTranslate.x;
-     sampleModelTranslateY = sampleModelTranslate.y;
-
-     numBands = sampleModel.getNumBands();
-     numDataElements = sampleModel.getNumDataElements();
-     this.parent = parent;
-		}
-
-		/**
+    /**
      * Returns the parent Raster (if any) of this Raster or null.
      * @return the parent Raster or <code>null</code>.
      */
@@ -1601,7 +1594,7 @@ public class Raster {
      * @throws ArrayIndexOutOfBoundsException if the coordinates are not
      * in bounds, or if iArray is too small to hold the output.
      */
-    public int[] getPixels(int x, int y, int w, int h, int iArray[]) {
+    public int[] getPixels(int x, int y, int w, int h, int[] iArray) {
         return sampleModel.getPixels(x - sampleModelTranslateX,
                                      y - sampleModelTranslateY, w, h,
                                      iArray, dataBuffer);

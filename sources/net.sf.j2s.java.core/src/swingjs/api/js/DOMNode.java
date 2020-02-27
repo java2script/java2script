@@ -203,14 +203,6 @@ public abstract class DOMNode {
 		 */
 	}
 
-	public static DOMNode getImageNode(Image img) {
-		// note that canvas takes precedence over imgNode, because
-		// imgNode is a placeholder for the original image, but canvas
-		// will be an op-filtered image
-		return (/** @j2sNative img.秘canvas || img.秘imgNode || */
-		(DOMNode) (Object) ((JSGraphics2D) (Object) img.getGraphics()).getCanvas());
-	}
-
 	public static void addHorizontalGap(DOMNode domNode, int gap) {
 		DOMNode label = DOMNode.setStyles(DOMNode.createElement("label", null), 
 				"letter-spacing", gap + "px", "font-size", "0pt");

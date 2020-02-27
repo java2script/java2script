@@ -47,11 +47,48 @@ import sun.awt.image.OffScreenImageSource;
 import sun.awt.image.ShortComponentRaster;
 import sun.awt.image.SunWritableRaster;
 import swingjs.JSGraphics2D;
+import swingjs.JSGraphicsCompositor;
 import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Canvas;
 
 /**
+ * SwingJS note:
+ * 
+ * Besides a Raster and ColorModel, a BufferedImage in SwingJS will also have associated 
+ * with it one or more of:
+ * 
+ * a) A JSGraphics2D object
+ * 
+ * b) An HTML5 canvas element associated with that graphics object
+ * 
+ * c) An ARGB int[] or [B,G,R,A] byte[] pixel array that is not necessarily in the form of the raster
+ * associated with this image. 
+ * 
+ * Thus, fast general purpose images can be created by:
+ * 
+ * 1) loading an image from disk into an HTML5 canvas directly. Note that one clock tick is required for 
+ * reading pixels from this image;
+ * 
+ * 2) starting with a blank image and using createGraphics() to generate an HTML5 canvas and draw to it;
+ * 
+ * 3) creating the image from scratch, with no associated graphics object, directly accessing its raster;
+ * 
+ * 4) starting with an image and then from that utilizing its raster to read or write to.
+ * 
+ * 5) creating the image from scratch, providing the raw raster in the constructor;
+ * 
+ * 
+ * So the states are:
+ * 
+ * IMAGE_HAS_CANVAS (from 1 and 2 directly, 4 if not written to)
+ * IMAGE_LOCAL_RASTER  (from 3 and 4)
+ * IMAGE_FOREIGN_RASTER (from 5)
+ * 
+ * CANVAS_TAINTED
+ * RASTER_TAINTED
+ * 
+ * 
  * 
  * The <code>BufferedImage</code> subclass describes an {@link java.awt.Image
  * Image} with an accessible buffer of image data. A <code>BufferedImage</code>
@@ -84,15 +121,66 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 
 	boolean isAlphaPremultiplied;// If true, alpha has been premultiplied in
 	// color channels in standard r g b a format
-	protected int[] 秘pix;
-	public Object 秘imgNode; // used by JSGraphics2D directly
+
 	protected int width, height;
-	private boolean 秘havePix;
-	public Object 秘canvas; // created in setRGB
-	public Component 秘component; // for context from component.createImage()
-	private int[] 秘pixSaved;
+
+	/**
+	 * the JSGrpahics2D object associated with this image
+	 */
 	JSGraphics2D 秘g; // a JSGraphics2D instance
+
+	/**
+	 * if an image is used just for graphics that the HTML5 canvas can use, we back
+	 * the BufferedImage with an HTML5 canvas and just draw to it, never using the
+	 * raster associated with this image.
+	 */
+	public Object 秘imgNode; // used by JSGraphics2D directly
+
+	/**
+	 * pixels associated with this image
+	 * 
+	 * int_ARGB or int_(FF)RGB or byte_interleaved_ARGB
+	 * 
+	 */
+	protected int[] 秘pix;
+	
+
+	/**
+	 * set to true if pixels have been generated from an HTML5 canvas
+	 * 
+	 */
+	private boolean 秘haveCanvasPixels;
+	
+	/**
+	 * the HTML5 canvas that originated 秘pix or that was created from them.
+	 * 
+	 */
+	public Object 秘canvas; // created in setRGB
+	
+	/**
+	 * the Component associated with this image;
+	 *  used to set font, background, and foreground color 
+	 */
+	public Component 秘component; // for context from component.createImage()
+
+	
+
+	/**
+	 * cached pixels created by setRGB(int,int,int,int,int[],int,int) and used by
+	 * setRGB(int,int,int) and the getRGB and getRangeRGB methods for faster processing
+	 * 
+	 * it is not clear at all that this works -- it is not being cleared ever
+	 * 
+	 */
+	private int[] 秘pixSaved;
+	
 	// private static int rangeIndex;
+	
+	/**
+	 * a flag to indicate that the user provided a raw raster in the constructor,
+	 * so we have no idea if it has been changed or not.
+	 * 
+	 */
 	private boolean 秘userRaster;
 
 	/**
@@ -693,7 +781,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @return the <code>WriteableRaster</code> of this <code>BufferedImage</code> .
 	 */
 	public WritableRaster getRaster() {
-		// NO!!!  checkHavePixels();
+		// NO!!! checkHavePixels();
 		return raster;
 	}
 
@@ -742,7 +830,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @see #setRGB(int, int, int, int, int[], int, int)
 	 */
 	public int getRGB(int x, int y) {
-		checkHavePixels();
+		秘ensureHavePixels(true);
 		if (秘pix == null)
 			秘pix = 秘pixSaved;
 		return 秘pix[y * this.width + x];
@@ -779,27 +867,43 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @see #setRGB(int, int, int, int, int[], int, int)
 	 */
 	public int[] getRGB(int startX, int startY, int w, int h, int[] rgbArray, int offset, int scansize) {
-		checkHavePixels();
+		秘ensureHavePixels(true);
 		if (秘pix == null)
 			秘pix = 秘pixSaved;
 		return getRangeRGB(startX, startY, w, h, rgbArray, offset, scansize);
 	}
 
 	/**
+	 * Ensure that we do have pixels, either because they were there already, or by
+	 * generating them from the associated HTML5 canvas.
 	 * 
+	 * @param andSetImageNode to set 秘imgNode to the graphics canvas.
+	 *
 	 * @return true if pixels had to be set
 	 */
-	public boolean checkHavePixels() {
-		if ((秘imgNode != null || 秘g != null) && !秘havePix) {
-			setPixels();
+	public boolean 秘ensureHavePixels(boolean andSetImageNode) {
+		if (!秘haveCanvasPixels && (秘imgNode != null || 秘g != null)) {
+			秘setPixelsFromHTML5Canavas(andSetImageNode);
 			return true;
 		}
 		return false;
 	}
 
+	/**
+	 * Read a range of pixels as int_ARGB[].
+	 * 
+	 * @param startX
+	 * @param startY
+	 * @param w
+	 * @param h
+	 * @param rgbArray
+	 * @param offset
+	 * @param scansize
+	 * @return
+	 */
 	public int[] getRangeRGB(int startX, int startY, int w, int h, int[] rgbArray, int offset, int scansize) {
 		if (秘pix == null && 秘pixSaved == null)
-			checkHavePixels();
+			秘ensureHavePixels(false);
 		int[] pixels = (秘pix == null ? 秘pixSaved : 秘pix);
 		for (int y = startY, yoff = offset; y < startY + h; y++, yoff += scansize)
 			for (int off = yoff, x = startX; x < startX + w; x++)
@@ -825,8 +929,8 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @see #getRGB(int, int, int, int, int[], int, int)
 	 */
 	public synchronized void setRGB(int x, int y, int rgb) {
-		if (checkHavePixels())
-			秘imgNode = null;
+		if (秘ensureHavePixels(false))
+			;
 		int[] pixels = (秘pix == null ? 秘pixSaved : 秘pix);
 		pixels[y * this.width + x] = rgb;
 	}
@@ -863,8 +967,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @see #getRGB(int, int, int, int, int[], int, int)
 	 */
 	public void setRGB(int startX, int startY, int w, int h, int[] rgbArray, int offset, int scansize) {
-		if (checkHavePixels())
-			秘imgNode = null;
+		秘ensureHavePixels(false); // don't set 秘imgNode
 		int[] pixels = (秘pix == null ? 秘pixSaved : 秘pix);
 		int width = this.width;
 		for (int y = startY, yoff = offset; y < startY + h; y++, yoff += scansize)
@@ -1007,8 +1110,9 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @return a <code>Graphics2D</code>, used for drawing into this image.
 	 */
 	public Graphics2D createGraphics() {
-		GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
-		return (Graphics2D) env.createGraphics(this);
+		return (Graphics2D) getImageGraphic().create();
+//		GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
+//		return (Graphics2D) env.createGraphics(this);
 	}
 
 	/**
@@ -1264,7 +1368,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 				new Point(raster.getSampleModelTranslateX(), raster.getSampleModelTranslateY()));
 
 		Object tdata = null;
-		checkHavePixels();
+		秘ensureHavePixels(true);
 		for (int i = startY; i < startY + height; i++) {
 			tdata = raster.getDataElements(startX, i, width, 1, tdata);
 			wr.setDataElements(startX, i, width, 1, tdata);
@@ -1481,7 +1585,8 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	}
 
 	/**
-	 * Set the underlying graphics object coming from painting this image
+	 * Set the underlying graphics object coming from painting this image and also
+	 * creates 秘pix and 秘imgNode
 	 * 
 	 * 
 	 */
@@ -1490,59 +1595,156 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		this.秘g = g;
 		width = raster.width;
 		height = raster.height;
-		setPixels();
+		秘setPixelsFromHTML5Canavas(true);
 	}
 
 	/**
 	 * Extract the int[] data from this image by installing it in a canvas. Note
-	 * that if img.complete == false, then this will result in a black rectangle.
+	 * that if Java's img.complete == false, then this will result in a black
+	 * rectangle.
+	 * 
+	 * If successful, 秘imgNode will be set to the canvas if it is not already, and
+	 * 秘havePix will be set to true;
+	 *
 	 * 
 	 */
 	@SuppressWarnings("unused")
-	private void setPixels() {
-		DOMNode canvas = (秘g == null ? null : /** @j2sNative this.秘g.canvas || */
+	private void 秘setPixelsFromHTML5Canavas(boolean andSetImgNode) {
+		JSGraphics2D g;
+		Object node;
+		if ((g = 秘g) == null && (node = 秘imgNode) == null) {
+			System.err.println("BufferedImage.setPixelsFromHTML5Canvas: Pixels cannot be generated from this image. ");
+		}
+
+		DOMNode canvas = (g == null ? null : /** @j2sNative g.canvas || */
 				null);
 		if (canvas == null)
 			canvas = DOMNode.createElement("canvas", null);
 		int w = width;
 		int h = height;
-		int[] data = null;
+		byte[] data = null;
 		/**
 		 * note that setting canvas.width clears it
 		 * 
 		 * @j2sNative
 		 * 
-		 * 			if (!this.秘g) { canvas.width = w; canvas.height = h; } var ctx =
-		 *            canvas.getContext("2d"); if (!this.秘g)
-		 *            ctx.drawImage(this.秘imgNode, 0, 0, w, h); data =
-		 *            ctx.getImageData(0, 0, w, h).data;
+		 * 			if (!g) { canvas.width = w; canvas.height = h; } var ctx =
+		 *            canvas.getContext("2d"); if (!g) ctx.drawImage(node, 0, 0, w, h);
+		 *            data = ctx.getImageData(0, 0, w, h).data;
 		 * 
 		 */
 		DataBuffer buf = raster.getDataBuffer();
+		// from
+		秘pix = null;
 		switch (imageType) {
 		case TYPE_INT_RGB:
-//			case TYPE_INT_ARGB_PRE:
+		case TYPE_INT_ARGB_PRE:// #3
 		case TYPE_INT_ARGB:
-			DataBufferInt buffer = (DataBufferInt) buf;
-			toIntARGB(data, 秘pix = buffer.data);
+			// convert canvas [r g b a r g b a ...] into [argb argb argb ...]
+			toIntARGB(data, 秘pix = ((DataBufferInt) buf).data);
 			break;
-		case TYPE_INT_ARGB_PRE:
-		case TYPE_INT_BGR:
-		case TYPE_3BYTE_BGR:
-		case TYPE_4BYTE_ABGR:
-		case TYPE_4BYTE_ABGR_PRE:
+		case TYPE_INT_BGR: // #4
+			// convert canvas [r g b a r g b a ...] into [0bgr 0bgr 0bgr ...]
+			toInt3BGR(data, ((DataBufferInt) buf).data);
+			break;
+		case TYPE_3BYTE_BGR: // #5
+			// convert canvas [r g b a r g b a ...] into [ b g r b g r b g r ...]
+			toByte3BGR(data, ((DataBufferByte) buf).data);
+			break;
+		// unusual type see above
+		case TYPE_4BYTE_ABGR: // #6
+		case TYPE_4BYTE_ABGR_PRE: // #7
+			// convert canvas [r g b a r g b a ...] into [ b g r a b g r a b g r a...]
+			toByteABGR(data, ((DataBufferByte) buf).data);
+			break;
 		case TYPE_BYTE_GRAY:
-		case TYPE_USHORT_GRAY:
+			toByteGray(data, ((DataBufferByte) buf).data);
+			break;
 		case TYPE_BYTE_BINARY:
+			toByteBinary(data, ((DataBufferByte) buf).data);
+			break;
+		case TYPE_USHORT_GRAY:
 		case TYPE_USHORT_565_RGB:
 		case TYPE_USHORT_555_RGB:
+		case TYPE_BYTE_INDEXED:
 			JSUtil.notImplemented("BufferedImage setPixels for type " + imageType);
 			break;
-		case TYPE_BYTE_INDEXED:
-
 		}
-		秘imgNode = canvas;
-		秘havePix = true;
+		if (秘pix == null)
+			toIntARGB(data, 秘pix = new int[data.length >> 2]);
+		秘imgNode = (andSetImgNode ? canvas : null);
+		秘haveCanvasPixels = true;
+	}
+
+	/**
+	 * convert canvas [r g b a r g b a ...] into [argb argb argb ...]
+	 * 
+	 * currently does not respect transparency, just sets any transparent pixel to
+	 * 0000
+	 * 
+	 * @param ctxData HTML5 canvas.context.imageData.data
+	 * @return array of ARGB values
+	 * 
+	 */
+	private static void toIntARGB(byte[] ctxData, int[] iData) {
+		// red=imgData.data[0];
+		// green=imgData.data[1];
+		// blue=imgData.data[2];
+		// alpha=imgData.data[3];
+
+		// convert canvas [r g b a r g b a ...] into [argb argb argb ...]
+		int n = ctxData.length >> 2;
+		for (int i = 0, j = 0; i < n;) {
+			int argb = (ctxData[j++] << 16) | (ctxData[j++] << 8) | ctxData[j++] | 0xFF000000;
+			iData[i++] = (ctxData[j++] == 0 ? 0 : argb);
+		}
+	}
+
+	private void toByteABGR(byte[] ctxData, byte[] buf) {
+		// convert canvas [r g b a r g b a ...] into [ b g r a b g r a b g r a...]
+		int n = ctxData.length;
+		for (int i = 0, j = 0; i < n; j += 4) {
+			buf[i++] = ctxData[j + 2];
+			buf[i++] = ctxData[j + 1];
+			buf[i++] = ctxData[j];
+			buf[i++] = ctxData[j + 3];
+		}
+	}
+
+	private void toByte3BGR(byte[] ctxData, byte[] buf) {
+		int[] t = (int[]) (Object) buf;
+		// MAYBE?
+		// convert canvas [r g b a r g b a ...] into [ b g r b g r b g r ...]
+		int n = (ctxData.length >> 2) * 3;
+		for (int i = 0, j = 0; i < n; j += 4) {
+			t[i++] = ctxData[j + 2];
+			t[i++] = ctxData[j + 1];
+			t[i++] = ctxData[j];
+		}
+	}
+
+	private void toByteBinary(byte[] ctxData, byte[] buf) {
+		// TODO Auto-generated method stub
+
+	}
+
+	private void toByteGray(byte[] ctxData, byte[] buf) {
+		// TODO Auto-generated method stub
+
+	}
+
+	private void toInt3BGR(byte[] ctxData, int[] buf) {
+		// convert canvas [r g b a r g b a ...] into [0bgr 0bgr 0bgr ...]
+		// red=imgData.data[0];
+		// green=imgData.data[1];
+		// blue=imgData.data[2];
+		// alpha=imgData.data[3];
+
+		int n = ctxData.length >> 2;
+		for (int i = 0, j = 0; i < n;) {
+			int argb = (ctxData[j++]) | (ctxData[j++] << 8) | (ctxData[j++] << 16) | 0xFF000000;
+			buf[i++] = (ctxData[j++] == 0 ? 0 : argb);
+		}
 	}
 
 	@Override
@@ -1550,30 +1752,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		// call this method after drawing to ensure that
 		// pixels are recreated from the HTML5 canvas
 		秘pix = null;
-		秘havePix = false;
-	}
-
-	/**
-	 * convert [r g b a r g b a ...] into [argb argb argb ...]
-	 * 
-	 * currently does not respect transparency
-	 * 
-	 * @param imgData HTML5 canvas.context.imageData.data
-	 * @return array of ARGB values
-	 * 
-	 */
-	private static void toIntARGB(int[] imgData, int[] iData) {
-		// red=imgData.data[0];
-		// green=imgData.data[1];
-		// blue=imgData.data[2];
-		// alpha=imgData.data[3];
-
-		int n = imgData.length / 4;
-		int a;
-		for (int i = 0, j = 0; i < n;) {
-			int argb = (imgData[j++] << 16) | (imgData[j++] << 8) | imgData[j++] | 0xFF000000;
-			iData[i++] = (imgData[j++] == 0 ? 0 : argb);
-		}
+		秘haveCanvasPixels = false;
 	}
 
 	/**
@@ -1643,37 +1822,102 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		}
 	}
 
+	/**
+	 * For JSGraphics2D only. 
+	 * 
+	 * @return a int[] array that is actually bytes [b g r a...] in the form 
+	 * the HTML5 canvas can process directly. 
+	 * 
+	 */
 	public int[] get秘pix() {
 		int[] pixels = null;
 		Raster r = raster;
+		@SuppressWarnings("unused")
 		int[] p = 秘pix;
 
 		if (getColorModel() == ColorModel.秘RGBdefault) {
+			@SuppressWarnings("unused")
 			int[] rp = ((SunWritableRaster) r).秘pix;
 			/**
 			 * @j2sNative
 			 * 
-			 * 			return rp || p;
+			 * 			pixels = rp || p;
 			 *
 			 */
 		} else {
-			int n = width * height;
-		    int[] a = new int[n];
-		    getRaster().getPixels(0,  0, width,  height, a);
-			秘pix = pixels = new int[n * 4];
-			for (int i = 0, pt = 0; i < n; i++, pt += 4) {
-				getColorModel().getComponents(a[i], pixels, pt);
-			}
+			// a more complex exercise
+			pixels = 秘getPixelsFromRaster();
 		}
 		return pixels;
 	}
 
-	public DOMNode 秘updateNode(DOMNode imgNode) {
-		if (秘userRaster) {
-			Graphics g = getGraphics();
-			g.drawImage(this, 0,  0,  null);
+	/**
+	 * Creates an HTML5 Canvas-compatible int[] {b g r a...} array. We use int[]
+	 * here just because that is what ColorModel.getComponents uses
+	 * 
+	 * @return
+	 */
+	private int[] 秘getPixelsFromRaster() {
+		int n = width * height;
+		if (秘pix == null || 秘pix.length != n * 4)
+			秘pix = new int[n * 4];
+		ColorModel cm = getColorModel();
+		boolean isPacked = cm instanceof PackedColorModel;
+		int nc = cm.getNumComponents();
+		int[] a = new int[isPacked ? n : n * nc];
+		getRaster().getPixels(0, 0, width, height, a);
+		int[] p = 秘pix;
+		if (isPacked) {
+			for (int i = 0, pt = 0; i < n; i++, pt += 4) {
+				cm.getComponents(a[i], p, pt);
+			}
+		} else {
+			int[] pixel = new int[nc];
+			for (int i = 0, apt = 0, pt = 0; i < n; i++, pt += 4) {
+				for (int j = 0; j < nc; j++)
+					pixel[j] = a[apt++];
+				cm.getComponents(pixel, p, pt);
+				if (nc < 4)
+					p[pt + 3] = 0xFF;
+			}			
 		}
-		return imgNode;
+		return p;
 	}
+
+	/**
+	 * Called only from JSGraphics2D when creating an image, ensuring that we have a
+	 * canvas associated with this image, particularly if this is from a
+	 * user-provided raster.
+	 * 
+	 * @param imgNode
+	 * @return
+	 */
+
+	public DOMNode 秘getImageNode() {
+		Object node = (秘canvas != null ? 秘canvas : 秘imgNode);
+		if (node == null)
+			node = JSGraphicsCompositor.createImageNode(this);
+		else if (秘userRaster) {
+			秘getPixelsFromRaster();
+			秘g = null;
+			createGraphics();
+			秘g.drawImagePriv(this, 0, 0, null);
+			node = 秘g.getCanvas();			
+		}
+		return (DOMNode) node;
+	}
+
+	/**
+	 * From JSImage, reading an image file.
+	 * 
+	 * @param argb
+	 */
+	protected void 秘setPixels(int[] argb) {
+		秘pix = argb;
+		秘haveCanvasPixels = true;
+	}
+
+
+	
 
 }

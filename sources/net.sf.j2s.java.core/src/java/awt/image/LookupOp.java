@@ -189,7 +189,7 @@ public class LookupOp implements BufferedImageOp, RasterOp {
             // Do it the slow way
         
         // added 2002.02.24 PhET AbstractMediaButtons
-        	src.checkHavePixels();
+        	src.秘ensureHavePixels(false);
         	
             WritableRaster srcRaster = src.getRaster();
             WritableRaster dstRaster = dst.getRaster();
