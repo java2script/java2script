@@ -30,6 +30,7 @@ public class CorePlugin extends Plugin {
 	// if you change the x.x.x number, be sure to also indicate that in 
 	// j2sApplet.js and also (Bob only) update.bat, update-clean.bat
 
+	// BH 2020.02.26 -- 3.2.9-v1b allows (byte) = (byte) to not use |0 
 	// BH 2020.02.20 -- 3.2.9-v1a reverses c,args order in new_(c,args,...) when both have expressions
 	// BH 2020.02.18 -- 3.2.8-v2 fixes import static missing $I$ defs.
 	// BH 2020.02.05 -- 3.2.8-v1 reworking of functional interfaces; no longer unqualified

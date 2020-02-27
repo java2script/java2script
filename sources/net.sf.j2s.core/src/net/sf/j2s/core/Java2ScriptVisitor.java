@@ -135,7 +135,8 @@ import org.eclipse.jdt.core.dom.WildcardType;
 
 // TODO: superclass inheritance for JAXB XmlAccessorType
 
-//BH 2020.02.18 -- 3.2.9-v1a order of 1st two parameters in new_ should be reversed
+//BH 2020.02.26 -- 3.2.9-v1b allows (byte) = (byte) to not use |0 
+//BH 2020.02.20 -- 3.2.9-v1a order of 1st two parameters in new_ should be reversed
 //BH 2020.02.18 -- 3.2.8-v2 fixes no-argument call to varargs constructor
 //BH 2020.02.18 -- 3.2.8-v2 fixes import static missing $I$ defs
 //BH 2020.02.05 -- 3.2.8-v1 reworking of functional interfaces; no longer unqualified
@@ -4503,7 +4504,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			// double, float
 			break;
 		case "long":
-			if (!fromIntType || isDiv) {
+			if (isDiv || !fromIntType) {
 				more = "|0)";
 				addParens = true;
 			} else {
@@ -4511,8 +4512,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			}
 			break;
 		case "int":
-			if (!isDiv && (op != null && (!isDiv && fromIntType) || fromChar || rightName.equals("short")
-					|| rightName.equals("byte"))) {
+			if (!isDiv && (op != null && fromIntType 
+						|| fromChar 
+						|| rightName.equals("short")
+						|| rightName.equals("byte")
+						)
+				) {
 				left = null;
 			} else {
 				more = "|0)";
@@ -4520,12 +4525,17 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			}
 			break;
 		case "short":
-			if ((rightName.equals("short") || rightName.equals("byte")) && !isDiv) {
+			if (!isDiv && (rightName.equals("short") || rightName.equals("byte"))) {
 				left = null;
 				break;
 			}
 			//$FALL-THROUGH$
 		case "byte":
+			//
+			if (!isDiv && rightName.equals("byte")) {
+				left = null;
+				break;
+			}
 			if (temp_processingArrayIndex) {
 				more = "|0)";
 				addParens = true;
@@ -4540,7 +4550,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if (isAssignment && left == null) {
 			buffer.append(op);
 		}
-//		buffer.append("OP_" + op + " " + isAssignment + " left=" + left + "PREFIX_" + prefix + "_PREFIX");
 		buffer.append(prefix);
 		if (classIntArray != null) {
 			if (addParens)
@@ -4567,13 +4576,17 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			buffer.append(")");
 		}
 		if (classIntArray != null) {
-			// this is necessary because in JavaScript, (a=3.5) will be 3.5, not
-			// a:
+			// this is necessary because in JavaScript, 
 			// a = new Int8Array(1)
-			// (a[0]=3.4, a[0])
-			// 3
+			// (a[0]=3.4) will be 3.4, not 3:
+			//
 			// (a[0]=3.4)
 			// 3.4
+			//
+			// so we need:
+			//
+			// (a[0]=3.4, a[0])
+			// 3
 			buffer.append(", ").append(classIntArray);
 			if (addParens)
 				buffer.append(")");

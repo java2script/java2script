@@ -1,7 +1,6 @@
 package test;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.Arrays;
 
 class Test_Byte extends Test_ {
