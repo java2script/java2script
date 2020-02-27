@@ -15,6 +15,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
@@ -43,6 +44,7 @@ import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -95,7 +97,20 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener, Mouse
 	
 	@Override
 	public void init() {
-		final JLabel label = new JLabel("hello");
+		final JLabel label = new JLabel("hello") {
+			public void paintComponent(Graphics g) {
+				//super.paintComponent(g);
+				/**@j2sNative g.unclip$I(-4);*/
+				Graphics2D g2 = (Graphics2D) g.create();
+				g2.setColor(Color.red);
+				g2.setClip(-60,-60, 70,70);
+				g2.fillRect(-60,-60,70,70);
+				//g2.dispose();
+				/**@j2sNative g.unclip$I(4);*/
+				
+				
+			}
+		};
 		// label.setBounds(0, 60, 200, 60);
 		setSize(label, 80, 50);
 		label.setBackground(Color.yellow);
@@ -241,13 +256,17 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener, Mouse
 	    formatChoice.insertItemAt("hex", 1);
 	    p.add(formatChoice);
 		mkBar(p, tf, Adjustable.HORIZONTAL, 100, 20);
+		
+		
 		slider = mkSlider(p, tf, Adjustable.HORIZONTAL, 100, 20);
+		slider.setBorder(new TitledBorder("testing"));
         slider.setPaintTicks(true);
         slider.setPaintLabels(true);
         slider.setMajorTickSpacing(200);
         slider.setPreferredSize(new Dimension(100, 100));
-        slider.setBackground(Color.WHITE);
+        slider.setBackground(Color.YELLOW);
         slider.setForeground(Color.BLUE);
+        //slider.setBorder(new LineBorder(Color.black,10));
 
 		mkSlider(p, tf, Adjustable.HORIZONTAL, 100, 20).setInverted(true);
 		System.out.println("Test_AppletScroll sp pref size " + sp.getPreferredSize());

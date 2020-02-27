@@ -87,7 +87,7 @@ J2S.__makeComboBox = function() {
         this.btn.addClass("swingjs-ui");
         this.popup = $( '<div>', {'class': 'j2scbpopup', 'id':id+'_popup' });
         this.popup.css({
-        	display:'none',
+        	display:'none'
         });
         this.list = $( '<ul>', {'class': 'j2scblist', 'id':id+'_list' });
         this.on2(this.list, 'click mousedown touchstart mousemove touchmove mouseup touchend mousewheel mouseover mouseout mouseenter mouseexit'.split(' '), '_mouse');

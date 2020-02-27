@@ -1549,7 +1549,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				new Dimension(36, 21),
 				"Slider.minimumVerticalSize",
 				new Dimension(21, 36),
-				// "Slider.focusInsets", sliderFocusInsets,
+				"Slider.focusInsets", twoInsets,//sliderFocusInsets,
 				 "Slider.focusInputMap",
 				 new UIDefaults.LazyInputMap(new Object[] {
 				 "RIGHT", "positiveUnitIncrement",

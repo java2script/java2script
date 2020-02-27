@@ -21,6 +21,7 @@ import java.awt.dnd.DropTarget;
 import java.awt.dnd.peer.DropTargetPeer;
 import java.awt.event.KeyEvent;
 import java.awt.event.PaintEvent;
+import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.ImageObserver;
 import java.awt.image.ImageProducer;
@@ -1335,6 +1336,10 @@ public class JSComponentUI extends ComponentUI
 		
 		
 		switch (prop) {
+		case "border":
+			jc.秘setPaintsSelf(JSComponent.PAINTS_SELF_UNKNOWN);
+			setTainted();
+			break;
 		case "preferredSize":
 			// size has been set by JComponent layout
 			preferredSize = (Dimension) e.getNewValue(); 
@@ -2386,7 +2391,7 @@ public class JSComponentUI extends ComponentUI
 			icon = currentIcon = getIcon(jc, icon);
 			$(iconNode).empty();
 			if (currentIcon != null) {
-				imageNode = DOMNode.getImageNode(currentIcon.getImage());
+				imageNode = ((BufferedImage)currentIcon.getImage()).秘getImageNode();
 				iconNode.appendChild(imageNode);
 				iconHeight = icon.getIconHeight();
 				DOMNode.setStyles(imageNode, "visibility", (isLabel ? "hidden" : null));
