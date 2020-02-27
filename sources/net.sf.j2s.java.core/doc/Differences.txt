@@ -6,7 +6,7 @@ Notes
 It is critical that all development work in Java2Script 
 be done in UTF-8. This means:
 
-- making sure your Exclipse project is set up for UTF-8 (not the Eclipse default?)
+- making sure your Eclipse project is set up for UTF-8 (not the Eclipse default?)
 - making sure your server can serve up UTF-8 by default for any browser-loaded files
 - making sure you don't edit a Java2Script class file or one of the site .js files
     using a non-UTF-8 editor. It may replace non-Latin characters with "?" or garbage.
@@ -32,6 +32,7 @@ ever be overridden by subclasses. As in java.lang.Thread.java:
 ----------------------------------
 
 
+updated 2/26/2020 -- adds Graphics.setClip issue
 updated 12/22/19 -- additional issues
 updated 11/03/19 -- adds information about File.exists() and points to src/javajs/async
 updated 10/26/19 -- adds information about File.createTempFile()
@@ -428,7 +429,8 @@ myClass.getField not implemented
 "window" and other reserved JavaScript names
 qualified field and method names
 missing Math methods
-component.getGraphics(), graphics.dispose()
+Component.getGraphics(), Graphics.dispose()
+Graphics.setClip()
 
 MAJOR ISSUES--for Bob and Udo within SwingJS
 ============================================
@@ -934,7 +936,7 @@ It is easy enough to add these methods if you have the source. They go into j2sC
 which is combined with other initial libraries into swingjs2.js by build_site.xml
 
 
-component.getGraphics(), graphics.dispose()
+Component.getGraphics(), Graphics.dispose()
 -------------------------------------------
 
 Use of component.getGraphics() is discouraged in Java and in SwingJS. 
@@ -956,6 +958,22 @@ Instead, if you really do not want to use repaint(), use this:
   Graphics g = getGraphics();
   paint(g);
   g.dispose();
+
+
+
+Graphics.setClip()
+------------------
+
+The HTML5 canvas.clip() method is permanent. You can only reset the clip using
+save/restore. This is different from Java, where you can temporarily change it using
+
+  Shape oldClip = Graphics.getClip();
+  Graphics.setClip(newClip);
+   ...
+  Graphics.setClip(oldClip); 
+
+If you need to do something like this, you must schedule the paints
+to not have overlapping clip needs.
 
 
 MAJOR ISSUES--for Bob and Udo within SwingJS
