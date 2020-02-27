@@ -40,6 +40,7 @@ var $ = jQuery;
 	
 J2S || (J2S = {
 		_version: VERSION,
+		_debugClip: false,
 		_debugCode: false,
 		_debugCore: false,
 		_debugPaint: false,
@@ -90,6 +91,7 @@ var getFlag = function(flag) {
 if (getFlag("j2s")) {
 	// note: these flag checks are purposely loose. "?j2smouse" will set j2smouse and j2smousemove. 
 	J2S._appArgs = getURIField("j2sargs", null); // to be passed on to application
+	J2S._debugClip = getFlag("j2sdebugclip");    // shows all show/restore and clip operations in JSGraphics2D
 	J2S._debugCode = getFlag("j2sdebugcode");    // same as j2snocore?
 	J2S._debugCore = getFlag("j2sdebugcore");    // same as j2snozcore?
 	J2S._debugPaint = getFlag("j2sdebugpaint");  // repaint manager information
@@ -2343,6 +2345,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		__nextExecution();
 	};
 
+	J2S.debugClip = function() { return J2S._debugClip };
+	
 	var __loadClass = function(applet, javaClass) {
 		Clazz._Loader.loadClass(javaClass, function() {
 			__nextExecution()
