@@ -2374,6 +2374,11 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		// It is not clear how this would play with other concurrent
 		// apps. So this will take some thinking. But the basic idea is that
 		// core file to load is
+		
+		if (Array.isArray(type)) {
+			more = type;
+			type = null;
+		}
 
 		if (type) {
 			type = type.toLowerCase().split(".")[0]; // package name only
@@ -2391,9 +2396,9 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			J2S._coreFiles = [ path + "/core/core" + __coreSet.join("")
 					+ ".z.js" ];
 		}
-		if (more && (more = more.split(" ")))
+		if (more && (Array.isArray(more) || (more = more.split(" "))))
 			for (var i = 0; i < more.length; i++)
-				if (__coreMore.join("").indexOf(more[i]) < 0)
+				if (more[i] && __coreMore.join("").indexOf(more[i]) < 0)
 					__coreMore.push(path + "/core/core" + more[i] + ".z.js")
 		for (var i = 0; i < __coreMore.length; i++)
 			J2S._coreFiles.push(__coreMore[i]);

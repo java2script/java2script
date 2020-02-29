@@ -44,6 +44,7 @@ import sun.awt.image.ByteComponentRaster;
 import sun.awt.image.BytePackedRaster;
 import sun.awt.image.IntegerComponentRaster;
 import sun.awt.image.OffScreenImageSource;
+import sun.awt.image.PixelConverter;
 import sun.awt.image.ShortComponentRaster;
 import sun.awt.image.SunWritableRaster;
 import swingjs.JSGraphics2D;
@@ -181,7 +182,8 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * so we have no idea if it has been changed or not.
 	 * 
 	 */
-	private boolean 秘userRaster;
+	private boolean 秘hasRasterData;
+	private int 秘wxh;
 
 	/**
 	 * Image Type Constants
@@ -389,6 +391,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	public BufferedImage(int width, int height, int imageType) {
 		this.width = width;
 		this.height = height;
+		秘wxh = width * height;
 		switch (imageType) {
 		case TYPE_INT_RGB:
 			colorModel = new DirectColorModel(24, 0x00ff0000, // Red
@@ -450,7 +453,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 					DataBuffer.TYPE_BYTE);
 			raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE, width, height, width * 4, 4, bOffs, null);
 			秘pix = ((DataBufferInt) raster.getDataBuffer()).data;
-			this.秘havePixels = true;
+			秘havePixels = 秘hasRasterData = true;	
 		}
 			break;
 
@@ -553,6 +556,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		}
 		this.width = width;
 		this.height = height;
+		秘wxh = width * height;
 		switch (imageType) {
 		case TYPE_BYTE_BINARY:
 			int bits; // Will be set below
@@ -637,11 +641,12 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		this.raster = raster;
 		this.width = raster.getWidth();
 		this.height = raster.getHeight();
+		秘wxh = width * height;
 		raster.setImage(this);
 		if (getColorModel() == ColorModel.秘RGBdefault)
 			秘pix = ((DataBufferInt) raster.getDataBuffer()).data;
 		else
-			秘userRaster = true;
+			秘hasRasterData = true;
 		this.properties = properties;
 		int numBands = raster.getNumBands();
 		boolean isAlphaPre = cm.isAlphaPremultiplied();
@@ -802,6 +807,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @return the <code>WriteableRaster</code> of this <code>BufferedImage</code> .
 	 */
 	public WritableRaster getRaster() {
+		秘hasRasterData = true;
 		// NO!!! checkHavePixels();
 		return raster;
 	}
@@ -907,6 +913,10 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 			秘setPixelsFromHTML5Canavas(andSetImageNode);
 			return true;
 		}
+		if (秘hasRasterData) {
+			秘getPixelsFromRaster();
+			return true;
+		}
 		return false;
 	}
 
@@ -926,9 +936,21 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		if (秘pix == null && 秘pixSaved == null)
 			秘ensureHavePixels(false);
 		int[] pixels = (秘pix == null ? 秘pixSaved : 秘pix);
+		if (pixels == null)
+			return rgbArray;
+		if (pixels.length == 秘wxh) {
 		for (int y = startY, yoff = offset; y < startY + h; y++, yoff += scansize)
 			for (int off = yoff, x = startX; x < startX + w; x++)
-				rgbArray[off++] = pixels[y * this.width + x];
+				rgbArray[off++] = pixels[y * width + x];
+		} else {
+			// already in HTML5 format
+			for (int y = startY, yoff = offset; y < startY + h; y++, yoff += scansize) {
+				for (int off = yoff, x = startX, pt = (y * width)<<2 ; x < startX + w; x++) {
+					// r g b a to argb
+					rgbArray[off++] = (pixels[pt++] << 16) | (pixels[pt++] << 8) | pixels[pt++] | (pixels[pt++] << 24);
+				}
+			}
+		}
 		return rgbArray;
 	}
 
@@ -1879,9 +1901,9 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @return
 	 */
 	private int[] 秘getPixelsFromRaster() {
-		int n = width * height;
 		if (imageType == TYPE_4BYTE_HTML5)
 			return 秘pix;
+		int n = 秘wxh;
 		if (秘pix == null || 秘pix.length != n * 4)
 			秘pix = new int[n * 4];
 		ColorModel cm = getColorModel();
@@ -1894,8 +1916,31 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 			}
 		} else {
 			int nc = cm.getNumComponents();
-			getRaster().getPixels(0, 0, width, height, 秘pix);
+			raster.getPixels(0, 0, width, height, p);
 			switch (nc) {
+			case 1:
+				PixelConverter pc = PixelConverter.UshortGray.instance;
+				// gray -- first get those into the first 1/4
+				for (int i = n, pt = n * 4; --i >= 0;) {
+					int val = p[i];
+					p[--pt] = 0xFF;
+					switch (val) {
+					case 0xFFFF:
+					case 0:
+						p[--pt] = val;
+						p[--pt] = val;
+						p[--pt] = val;
+						break;
+					default:
+						int rgb = (val == 0 ? 0xFF000000 : val == 0xFFFF ? 0xFFFFFFFF : pc.pixelToRgb(val, null));
+						p[--pt] = rgb & 0xFF; // b
+						p[--pt] = (rgb >> 8) & 0xFF; // g
+						p[--pt] = (rgb >> 16) & 0xFF; // r
+						break;
+					}	
+					
+				}
+				break;
 			case 3:
 				for (int i = n * 4, j = n * 3; --i >= 0;) {
 					if (i % 4 == 3)
@@ -1904,7 +1949,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 				}
 				break;
 			case 4:
-				getRaster().getPixels(0, 0, width, height, 秘pix);
+				getRaster().getPixels(0, 0, width, height, p);
 				break;
 			}
 		}
@@ -1920,13 +1965,13 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @return
 	 */
 
-	public DOMNode 秘getImageNode() {
-		if (imageType == TYPE_4BYTE_HTML5)
+	public DOMNode 秘getImageNode(boolean force) {
+		if (!force && 秘hasRasterData || imageType == TYPE_4BYTE_HTML5)
 			return null; 
 		Object node = (秘canvas != null ? 秘canvas : 秘imgNode);
-		if (node == null)
-			node = JSGraphicsCompositor.createImageNode(this);
-		else if (秘userRaster) {
+		if (node == null && (force || !秘hasRasterData))
+			return JSGraphicsCompositor.createImageNode(this);
+		if (秘hasRasterData) {
 			秘getPixelsFromRaster();
 			秘g = null;
 			createGraphics();
@@ -1944,6 +1989,15 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	protected void 秘setPixels(int[] argb) {
 		秘pix = argb;
 		秘havePixels = true;
+	}
+
+	/**
+	 * This private method does not trigger actual conversion to a rastered image.
+	 * 
+	 * @return
+	 */
+	public WritableRaster 秘getRaster() {
+		return raster;
 	}
 
 

@@ -13043,6 +13043,11 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		// It is not clear how this would play with other concurrent
 		// apps. So this will take some thinking. But the basic idea is that
 		// core file to load is
+		
+		if (Array.isArray(type)) {
+			more = type;
+			type = null;
+		}
 
 		if (type) {
 			type = type.toLowerCase().split(".")[0]; // package name only
@@ -13060,9 +13065,9 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			J2S._coreFiles = [ path + "/core/core" + __coreSet.join("")
 					+ ".z.js" ];
 		}
-		if (more && (more = more.split(" ")))
+		if (more && (Array.isArray(more) || (more = more.split(" "))))
 			for (var i = 0; i < more.length; i++)
-				if (__coreMore.join("").indexOf(more[i]) < 0)
+				if (more[i] && __coreMore.join("").indexOf(more[i]) < 0)
 					__coreMore.push(path + "/core/core" + more[i] + ".z.js")
 		for (var i = 0; i < __coreMore.length; i++)
 			J2S._coreFiles.push(__coreMore[i]);
@@ -17554,6 +17559,10 @@ return d._numberToString(16);
 Integer.toOctalString$I=function(d){return d._numberToString(8);};
 Integer.toBinaryString$I=function(d){return d._numberToString(2);};
 
+Integer.toUnsignedLong$I=function(x){return (x > 0 ? x : x + 0x100000000);};
+Integer.toUnsignedString$I=function(x){return "" + Integer.toUnsignedLong$I(x);};
+Integer.toUnsignedString$I$I=function(x,r){return Long.toString$J(Integer.toUnsignedLong$I(x),r);};
+
 m$(Integer,"decodeRaw$S", function(n){
 if (n.indexOf(".") >= 0)n = "";
 var i = (n.startsWith("-") ? 1 : 0);
@@ -17607,6 +17616,10 @@ m$(Long, ["c$", "c$$S", "c$$J"], function(v){
 //Long.MIN_VALUE=Long.prototype.MIN_VALUE=-0x8000000000000000;
 //Long.MAX_VALUE=Long.prototype.MAX_VALUE=0x7fffffffffffffff;
 //Long.TYPE=Long.prototype.TYPE=Long;
+// Note that the largest usable "Long" in JavaScript is 53 digits:
+
+var maxLong =  0x20000000000000; // 53 digits, plus 1
+var minLong = -0x20000000000000;
 
 m$(Long,["parseLong$S", "parseLong$S$I"],
 function(s,radix){
@@ -17623,15 +17636,6 @@ function(s){
 return (s instanceof Long) && s.valueOf()==this.valueOf();
 }, 1);
 
-Long.toHexString$J=function(i){
-return i.toString(16);
-};
-Long.toOctalString$J=function(i){
-return i.toString(8);
-};
-Long.toBinaryString$J=function(i){
-return i.toString(2);
-};
 
 m$(Long,"decode$S",
 function(n){
@@ -17643,6 +17647,38 @@ function(n){
 
 Long.sum$J$J = Integer.sum$I$I;
 
+Long.toHexString$J=Integer.toHexString$I;
+Long.toOctalString$J=Integer.toOctalString$I;
+Long.toBinaryString$J=Integer.toBinaryString$I;
+Long.toUnsignedString$J=Long.toUnsignedString$J$I = function(i,r) {
+	if (i <= minLong)
+		return "" + minLong;
+	if (i >= maxLong)
+		return "" + maxLong;
+	if (i >= 0)
+		return Long.toString$J$I(i,r || 10);
+    switch (r || 10) {
+    case 2:
+        return Long.toBinaryString$J(i);
+    case 8:
+        return Long.toOctalString$J(i);
+    case 16:
+        return Long.toHexString$J(i);
+    case 32:
+    default:
+        return Long.toUnsignedBigInteger$J(i).toString$I(r);
+    }
+};
+
+var bi;
+Long.toUnsignedBigInteger$J = function(i) {
+    bi || (bi=(Clazz.load("java.math.BigInteger"), Clazz.new_(java.math.BigInteger.c$$S,["18446744073709551616"])));
+    if (i >= 0)
+        return bi.valueOf$J(i);
+    return bi.valueOf$J(i).add$java_math_BigInteger(bi).toString();
+}
+
+    
 m$(Long,"signum$J", function(i){ return i < 0 ? -1 : i > 0 ? 1 : 0; }, 1);
 
 Clazz._setDeclared("java.lang.Short", java.lang.Short = Short = function(){
@@ -17688,14 +17724,8 @@ function (s) {
 return (s instanceof Short) && s.valueOf() == this.valueOf();
 });
 
-Short.toHexString$H = function (i) {
-  return i.toString(16);
-};
-Short.toOctalString$H = function (i) {
-  return i.toString(8);
-};
-Short.toBinaryString$H = function (i) {
-  return i.toString (2);
+Short.toUnsignedInt$H = Short.toUnsignedLong$H = function (i) {
+  return (i < 0 ? i + 0x10000 : i);
 };
 
 m$(Short, "decode$S",
@@ -17750,9 +17780,9 @@ function(s){
 return (s instanceof Byte) && s.valueOf()==this.valueOf();
 });
 
-Byte.toHexString$B=function(i){return i.toString(16);};
-Byte.toOctalString$B=function(i){return i.toString(8);};
-Byte.toBinaryString$B=function(i){return i.toString(2);};
+Byte.toUnsignedInt$B = Byte.toUnsignedLong$B = function (i) {
+	  return (i < 0 ? i + 0x100 : i);
+};
 
 m$(Byte,"decode$S",
 function(n){

@@ -582,7 +582,7 @@ public class JSGraphics2D implements
 			return true;
 //		backgroundPainted = true;
 		if (img != null) {
-			DOMNode imgNode = ((BufferedImage)img).秘getImageNode();
+			DOMNode imgNode = ((BufferedImage)img).秘getImageNode(false);
 			if (imgNode == null) {
 				drawImagePriv(img, x, y, width, height, observer);
 			} else {
@@ -606,7 +606,7 @@ public class JSGraphics2D implements
 //		backgroundPainted = true;
 		if (img != null) {
 			byte[] bytes = null;
-			DOMNode imgNode = ((BufferedImage)img).秘getImageNode();
+			DOMNode imgNode = ((BufferedImage)img).秘getImageNode(true);
 			if (imgNode == null) {
 				if (sx2 - sx1 != dx2 - dx1 || sy2 - sy1 != dy2 - dy1
 						|| sx1 != 0 || sx2 != img.getWidth(null)
@@ -664,7 +664,7 @@ public class JSGraphics2D implements
 	public boolean drawImagePriv(Image img, int x, int y, ImageObserver observer) {
 		if (img == null)
 			return true;
-		return drawImagePriv(img, x, y, ((BufferedImage) img).getRaster().getWidth(), ((BufferedImage) img).getRaster().getHeight(), observer);
+		return drawImagePriv(img, x, y, img.getWidth(observer), img.getHeight(observer), observer);
 	}
 
 	private boolean drawImagePriv(Image img, int x, int y, int width, int height, ImageObserver observer) {
@@ -675,7 +675,7 @@ public class JSGraphics2D implements
 		int[] pixels = (isTranslationOnly(m) ? ((BufferedImage) img).get秘pix() : null);
 		DOMNode imgNode = null;
 		if (pixels == null) {
-			imgNode = ((BufferedImage)img).秘getImageNode();
+			imgNode = ((BufferedImage)img).秘getImageNode(true);
 			if (imgNode != null)
 				ctx.drawImage(imgNode, x, y, width, height);
 		} else {
