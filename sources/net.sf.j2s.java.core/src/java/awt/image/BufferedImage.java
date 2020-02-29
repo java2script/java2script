@@ -149,7 +149,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * set to true if pixels have been generated from an HTML5 canvas
 	 * 
 	 */
-	private boolean 秘haveCanvasPixels;
+	private boolean 秘havePixels;
 	
 	/**
 	 * the HTML5 canvas that originated 秘pix or that was created from them.
@@ -240,6 +240,15 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 */
 	public static final int TYPE_3BYTE_BGR = 5;
 
+	/**
+	 * Represents an image with 8-bit RGBA color components with the colors Blue,
+	 * Green, and Red stored in 3 bytes and 1 byte of alpha. The image has a
+	 * <code>ComponentColorModel</code> with alpha. The color data in this image is
+	 * considered not to be premultiplied with alpha. The byte data is interleaved
+	 * in a single byte array in the order B, G, R, A from lower to higher byte
+	 * addresses within each pixel.
+	 */
+	public static final int TYPE_4BYTE_HTML5 = -6;
 	/**
 	 * Represents an image with 8-bit RGBA color components with the colors Blue,
 	 * Green, and Red stored in 3 bytes and 1 byte of alpha. The image has a
@@ -430,6 +439,18 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 			colorModel = new ComponentColorModel(cs, nBits, true, false, Transparency.TRANSLUCENT,
 					DataBuffer.TYPE_BYTE);
 			raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE, width, height, width * 4, 4, bOffs, null);
+		}
+			break;
+
+		case TYPE_4BYTE_HTML5: { // [r g b a...]
+			ColorSpace cs = ColorSpace.getInstance(ColorSpace.CS_sRGB);
+			int[] nBits = { 8, 8, 8, 8 };
+			int[] bOffs = { 0, 1, 2, 3 };
+			colorModel = new ComponentColorModel(cs, nBits, true, false, Transparency.TRANSLUCENT,
+					DataBuffer.TYPE_BYTE);
+			raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE, width, height, width * 4, 4, bOffs, null);
+			秘pix = ((DataBufferInt) raster.getDataBuffer()).data;
+			this.秘havePixels = true;
 		}
 			break;
 
@@ -882,7 +903,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @return true if pixels had to be set
 	 */
 	public boolean 秘ensureHavePixels(boolean andSetImageNode) {
-		if (!秘haveCanvasPixels && (秘imgNode != null || 秘g != null)) {
+		if (!秘havePixels && (秘imgNode != null || 秘g != null)) {
 			秘setPixelsFromHTML5Canavas(andSetImageNode);
 			return true;
 		}
@@ -929,8 +950,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @see #getRGB(int, int, int, int, int[], int, int)
 	 */
 	public synchronized void setRGB(int x, int y, int rgb) {
-		if (秘ensureHavePixels(false))
-			;
+		if (秘ensureHavePixels(false));
 		int[] pixels = (秘pix == null ? 秘pixSaved : 秘pix);
 		pixels[y * this.width + x] = rgb;
 	}
@@ -1673,7 +1693,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		if (秘pix == null)
 			toIntARGB(data, 秘pix = new int[data.length >> 2]);
 		秘imgNode = (andSetImgNode ? canvas : null);
-		秘haveCanvasPixels = true;
+		秘havePixels = true;
 	}
 
 	/**
@@ -1752,7 +1772,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		// call this method after drawing to ensure that
 		// pixels are recreated from the HTML5 canvas
 		秘pix = null;
-		秘haveCanvasPixels = false;
+		秘havePixels = false;
 	}
 
 	/**
@@ -1806,6 +1826,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		case TYPE_INT_ARGB:
 		case TYPE_INT_ARGB_PRE:
 		case TYPE_4BYTE_ABGR:
+		case TYPE_4BYTE_HTML5:
 		case TYPE_4BYTE_ABGR_PRE:
 			return false;
 		case TYPE_INT_RGB:
@@ -1859,27 +1880,33 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 */
 	private int[] 秘getPixelsFromRaster() {
 		int n = width * height;
+		if (imageType == TYPE_4BYTE_HTML5)
+			return 秘pix;
 		if (秘pix == null || 秘pix.length != n * 4)
 			秘pix = new int[n * 4];
 		ColorModel cm = getColorModel();
 		boolean isPacked = cm instanceof PackedColorModel;
-		int nc = cm.getNumComponents();
-		int[] a = new int[isPacked ? n : n * nc];
-		getRaster().getPixels(0, 0, width, height, a);
 		int[] p = 秘pix;
 		if (isPacked) {
+			int[] a = new int[n];
 			for (int i = 0, pt = 0; i < n; i++, pt += 4) {
 				cm.getComponents(a[i], p, pt);
 			}
 		} else {
-			int[] pixel = new int[nc];
-			for (int i = 0, apt = 0, pt = 0; i < n; i++, pt += 4) {
-				for (int j = 0; j < nc; j++)
-					pixel[j] = a[apt++];
-				cm.getComponents(pixel, p, pt);
-				if (nc < 4)
-					p[pt + 3] = 0xFF;
-			}			
+			int nc = cm.getNumComponents();
+			getRaster().getPixels(0, 0, width, height, 秘pix);
+			switch (nc) {
+			case 3:
+				for (int i = n * 4, j = n * 3; --i >= 0;) {
+					if (i % 4 == 3)
+						p[i--] = 0xFF;
+					p[i] = p[--j];
+				}
+				break;
+			case 4:
+				getRaster().getPixels(0, 0, width, height, 秘pix);
+				break;
+			}
 		}
 		return p;
 	}
@@ -1894,6 +1921,8 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 */
 
 	public DOMNode 秘getImageNode() {
+		if (imageType == TYPE_4BYTE_HTML5)
+			return null; 
 		Object node = (秘canvas != null ? 秘canvas : 秘imgNode);
 		if (node == null)
 			node = JSGraphicsCompositor.createImageNode(this);
@@ -1914,7 +1943,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 */
 	protected void 秘setPixels(int[] argb) {
 		秘pix = argb;
-		秘haveCanvasPixels = true;
+		秘havePixels = true;
 	}
 
 

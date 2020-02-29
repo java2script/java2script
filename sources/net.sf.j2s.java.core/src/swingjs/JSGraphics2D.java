@@ -585,8 +585,9 @@ public class JSGraphics2D implements
 			DOMNode imgNode = ((BufferedImage)img).秘getImageNode();
 			if (imgNode == null) {
 				drawImagePriv(img, x, y, width, height, observer);
-			}
+			} else {
 				ctx.drawImage(imgNode, x, y, width, height);
+			}
 			if (observer != null)
 				observe(img, observer, imgNode != null);
 		}
@@ -607,9 +608,16 @@ public class JSGraphics2D implements
 			byte[] bytes = null;
 			DOMNode imgNode = ((BufferedImage)img).秘getImageNode();
 			if (imgNode == null) {
-				JSUtil.notImplemented("JSGraphics2D.drawImage cannot could not create an image node");
+				if (sx2 - sx1 != dx2 - dx1 || sy2 - sy1 != dy2 - dy1
+						|| sx1 != 0 || sx2 != img.getWidth(null)
+						|| sy1 != 0 || sy2 != img.getHeight(null)) {
+					this.drawImage(img, dx1, dy1, sx2 - sx1, sy2 - sy1, observer);
+				} else {
+					JSUtil.notImplemented("JSGraphics2D.drawImage cannot could not create an image node");
+				}
 			} else {
-				ctx.drawImage(imgNode, sx1, sy1, sx2 - sx1, sy2 - sy1, dx1, dy1, dx2 - dx1, dy2 - dy1);
+				// we would need an image to do this
+				ctx.drawImage(imgNode, sx1, sy1, sx2 - sx1, sy2 - sy1, 0, 0, dx2 - dx1, dy2 - dy1);
 			}
 			if (observer != null)
 				observe(img, observer, imgNode != null);
@@ -690,7 +698,7 @@ public class JSGraphics2D implements
 				}
 			} else {
 				for (int i = 0, n = Math.min(buf8.length, pixels.length); i < n; i++) {
-					buf8[i] = pixels[i];
+					buf8[i] = pixels[i] & 0xFF;
 				}
 			}
 			x += m[4];

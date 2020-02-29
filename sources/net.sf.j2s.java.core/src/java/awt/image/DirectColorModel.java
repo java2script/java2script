@@ -186,7 +186,7 @@ public class DirectColorModel extends PackedColorModel {
                bits, rmask, gmask, bmask, amask, false,
                amask == 0 ? Transparency.OPAQUE : Transparency.TRANSLUCENT,
                ColorModel.getDefaultTransferType(bits));
-        setFields();
+// SwingJS for native code only        setFields();
     }
 
     /**
@@ -238,28 +238,28 @@ public class DirectColorModel extends PackedColorModel {
                isAlphaPremultiplied,
                amask == 0 ? Transparency.OPAQUE : Transparency.TRANSLUCENT,
                transferType);
-// SwingJS          if (ColorModel.isLinearRGBspace(colorSpace)) {
-//            is_LinearRGB = true;
-//            if (maxBits <= 8) {
-//                lRGBprecision = 8;
-//                tosRGB8LUT = ColorModel.getLinearRGB8TosRGB8LUT();
-//                fromsRGB8LUT8 = ColorModel.getsRGB8ToLinearRGB8LUT();
-//            } else {
-//                lRGBprecision = 16;
-//                tosRGB8LUT = ColorModel.getLinearRGB16TosRGB8LUT();
-//                fromsRGB8LUT16 = ColorModel.getsRGB8ToLinearRGB16LUT();
-//            }
-//        } else if (!is_sRGB) {
-//            for (int i = 0; i < 3; i++) {
-//                // super constructor checks that space is TYPE_RGB
-//                // check here that min/max are all 0.0/1.0
-//                if ((space.getMinValue(i) != 0.0f) ||
-//                    (space.getMaxValue(i) != 1.0f)) {
-//                    throw new IllegalArgumentException(
-//                        "Illegal min/max RGB component value");
-//                }
-//            }
-//        }
+        if (ColorModel.isLinearRGBspace(colorSpace)) {
+            is_LinearRGB = true;
+            if (maxBits <= 8) {
+                lRGBprecision = 8;
+                tosRGB8LUT = ColorModel.getLinearRGB8TosRGB8LUT();
+                fromsRGB8LUT8 = ColorModel.getsRGB8ToLinearRGB8LUT();
+            } else {
+                lRGBprecision = 16;
+                tosRGB8LUT = ColorModel.getLinearRGB16TosRGB8LUT();
+                fromsRGB8LUT16 = ColorModel.getsRGB8ToLinearRGB16LUT();
+            }
+        } else if (!is_sRGB) {
+            for (int i = 0; i < 3; i++) {
+                // super constructor checks that space is TYPE_RGB
+                // check here that min/max are all 0.0/1.0
+                if ((space.getMinValue(i) != 0.0f) ||
+                    (space.getMaxValue(i) != 1.0f)) {
+                    throw new IllegalArgumentException(
+                        "Illegal min/max RGB component value");
+                }
+            }
+        }
 //		setFields();
     }
 
@@ -1392,32 +1392,32 @@ public class DirectColorModel extends PackedColorModel {
         return (raster.getTransferType() == transferType);
     }
 
-    private void setFields() {
-        // Set the private fields
-        // REMIND: Get rid of these from the native code
-        red_mask     = maskArray[0];
-        red_offset   = maskOffsets[0];
-        green_mask   = maskArray[1];
-        green_offset = maskOffsets[1];
-        blue_mask    = maskArray[2];
-        blue_offset  = maskOffsets[2];
-        if (nBits[0] < 8) {
-            red_scale = (1 << nBits[0]) - 1;
-        }
-        if (nBits[1] < 8) {
-            green_scale = (1 << nBits[1]) - 1;
-        }
-        if (nBits[2] < 8) {
-            blue_scale = (1 << nBits[2]) - 1;
-        }
-        if (supportsAlpha) {
-            alpha_mask   = maskArray[3];
-            alpha_offset = maskOffsets[3];
-            if (nBits[3] < 8) {
-                alpha_scale = (1 << nBits[3]) - 1;
-            }
-        }
-    }
+//    private void setFields() {
+//        // Set the private fields
+//        // REMIND: Get rid of these from the native code
+//        red_mask     = maskArray[0];
+//        red_offset   = maskOffsets[0];
+//        green_mask   = maskArray[1];
+//        green_offset = maskOffsets[1];
+//        blue_mask    = maskArray[2];
+//        blue_offset  = maskOffsets[2];
+//        if (nBits[0] < 8) {
+//            red_scale = (1 << nBits[0]) - 1;
+//        }
+//        if (nBits[1] < 8) {
+//            green_scale = (1 << nBits[1]) - 1;
+//        }
+//        if (nBits[2] < 8) {
+//            blue_scale = (1 << nBits[2]) - 1;
+//        }
+//        if (supportsAlpha) {
+//            alpha_mask   = maskArray[3];
+//            alpha_offset = maskOffsets[3];
+//            if (nBits[3] < 8) {
+//                alpha_scale = (1 << nBits[3]) - 1;
+//            }
+//        }
+//    }
 
     /**
      * Returns a <code>String</code> that represents this

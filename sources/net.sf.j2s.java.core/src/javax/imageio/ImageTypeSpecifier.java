@@ -1177,6 +1177,13 @@ public class ImageTypeSpecifier {
                                        true,
                                        false);
 
+          case BufferedImage.TYPE_4BYTE_HTML5:
+              return createInterleaved(sRGB,
+                                       new int[] { 0, 3, 2, 1 },
+                                       DataBuffer.TYPE_BYTE,
+                                       true,
+                                       false);
+
           case BufferedImage.TYPE_4BYTE_ABGR_PRE:
               return createInterleaved(sRGB,
                                        new int[] { 3, 2, 1, 0 },

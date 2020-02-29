@@ -35,17 +35,15 @@
 
 
 package java.awt.image;
-import swingjs.JSUtil;
-import swingjs.api.Interface;
-import java.awt.Rectangle;
 import java.awt.Point;
+import java.awt.Rectangle;
 
-import sun.awt.image.ByteInterleavedRaster;
-import sun.awt.image.ShortInterleavedRaster;
-import sun.awt.image.IntegerInterleavedRaster;
 import sun.awt.image.ByteBandedRaster;
-import sun.awt.image.ShortBandedRaster;
+import sun.awt.image.ByteInterleavedRaster;
 import sun.awt.image.BytePackedRaster;
+import sun.awt.image.IntegerInterleavedRaster;
+import sun.awt.image.ShortBandedRaster;
+import sun.awt.image.ShortInterleavedRaster;
 import sun.awt.image.SunWritableRaster;
 
 /**
@@ -127,7 +125,7 @@ import sun.awt.image.SunWritableRaster;
  */
 public class Raster {
 
-	private BufferedImage image;
+	private BufferedImage image; // SwingJS -- necessary?
 
 	public void setImage(BufferedImage image) {
 		this.image = image;
