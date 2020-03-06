@@ -1,4 +1,6 @@
 /*
+ * SwingJS Note: This code is not used in SwingJS. j2sClazz.js contains a bootstrap String object that extends JavaScript String
+ * 
  * Copyright (c) 1994, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
