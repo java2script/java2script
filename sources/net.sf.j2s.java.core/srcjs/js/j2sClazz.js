@@ -95,7 +95,7 @@ Clazz.array = function(baseClass, paramType, ndims, params, isClone) {
 
 	var ret = _array.apply(null, arguments);
 	
-	  _profileNew && addProfileNew(baseClass, t0 - window.performance.now() - 0.01);
+	  _profileNew && addProfileNew(baseClass == -1 ? paramType.__BASECLASS : baseClass, -1);
 
 	return ret;
 }
@@ -1120,8 +1120,10 @@ Clazz.getProfile = function() {
 
 var addProfileNew = function(c, t) {
   var s = c.__CLASS_NAME__ || c.__PARAMCODE;
-  if (t < 0)
+  if (t < 0) {
 	  s += "[]";
+	  t = 0;
+  }
   var p = _profileNew[s]; 
   p || (p = _profileNew[s] = [0,0]);
   p[0]++;
@@ -3342,8 +3344,7 @@ Math.signum||(Math.signum=function(d){return(d==0.0||isNaN(d))?d:d < 0 ? -1 : 1}
 
 Math.scalb||(Math.scalb=function(d,scaleFactor){return d*Math.pow(2,scaleFactor)});
 
-//var 
-a64 = null, a32 = null, i32 = null, i64 = null;
+var a64 = null, a32 = null, i32 = null, i64 = null;
 
 Math.nextAfter||
 (Math.nextAfter=function(start,direction){
@@ -4901,6 +4902,15 @@ return this.value.charCodeAt(0)==obj.value.charCodeAt(0);
 m$(C$,"charCodeAt$I",
 function(i){
 return(this.value).charCodeAt(i);
+});
+m$(C$,"isValidCodePoint$I",
+function(i){
+	try {
+	  String.fromCodePoint(i);
+	  return true;
+	} catch(e) {
+	  return false;
+	}
 });
 
 m$(C$,["compareTo$C","compareTo$","compareTo$O"],
