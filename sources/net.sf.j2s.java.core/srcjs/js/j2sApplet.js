@@ -668,16 +668,24 @@ window.J2S = J2S = (function() {
 		// the IMAGE option, which has been abandoned.
 
 console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
- 
-		var s = "?call=getRawDataFromDatabase&database="
+if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
+	  J2S.say("Info.serverURL has not been set. The url " + query + " is in a domain that requires Cross Origin Resource Sharing (CORS) access from this page, " +
+	  		"and that domain is not recognized by SwingJS as allowing CORS access. If the server does allow CORS, " +
+	  		"then the developer of this page must make sure that " +
+	  		"J2S.addDirectDatabaseCall(path)" +
+	  		" is called for that domain -- for example, J2S.addDirectDatabaseCall('stolaf.edu')." +
+	  		" And if that domain does not allow CORS, then the developer should set Info.serverURL appropriately or contact the administrator of that domain to see if CORS can be allowed.");
+	  return "";
+	}
+
+	var s = "?call=getRawDataFromDatabase&database="
 				+ database
 				+ (query.indexOf("?POST?") >= 0 ? "?POST?" : "")
 				+ "&query="
 				+ encodeURIComponent(query)
 				+ (asBase64 ? "&encoding=base64" : "")
 				+ (noScript ? "" : "&script="
-						+ encodeURIComponent(J2S
-								._getScriptForDatabase(database)));
+						+ encodeURIComponent(J2S._getScriptForDatabase(database)));
 		return J2S._contactServer(s, fSuccess, fError, infoRet);
 	}
 
