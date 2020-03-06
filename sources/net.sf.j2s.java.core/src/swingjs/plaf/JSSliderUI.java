@@ -648,6 +648,8 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 
 
     protected void calculateGeometry() {
+    	if (isScrollBar)
+    		return;
         calculateFocusRect();
         calculateContentRect();
         calculateThumbSize();
