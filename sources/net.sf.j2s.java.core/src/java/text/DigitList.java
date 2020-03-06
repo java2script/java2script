@@ -41,6 +41,8 @@
 
 package java.text;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 //import java.math.BigDecimal;
 //import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -162,13 +164,7 @@ final class DigitList implements Cloneable {
         if (count == 0) {
             return 0.0;
         }
-
-        StringBuffer temp = getStringBuffer();
-        temp.append('.');
-        temp.append(digits, 0, count);
-        temp.append('E');
-        temp.append("" + decimalAt);
-        return Double.parseDouble(temp.toString());
+        return Double.parseDouble("." + 秘join(digits, 0, count) + "E" + decimalAt);
     }
 
     /**
@@ -189,29 +185,33 @@ final class DigitList implements Cloneable {
             return Long.MIN_VALUE;
         }
 
-        StringBuffer temp = getStringBuffer();
-        temp.append(digits, 0, count);
+        String temp = "";
+        temp += 秘join(digits, 0, count);
         for (int i = count; i < decimalAt; ++i) {
-            temp.append('0');
+            temp += '0';
         }
-        return Long.parseLong(temp.toString());
+        return Long.parseLong(temp);
     }
 
-//    public final BigDecimal getBigDecimal() {
-//        if (count == 0) {
-//            if (decimalAt == 0) {
-//                return BigDecimal.ZERO;
-//            } else {
-//                return new BigDecimal("0E" + decimalAt);
-//            }
-//        }
-//
-//       if (decimalAt == count) {
-//           return new BigDecimal(digits, 0, count);
-//       } else {
-//           return new BigDecimal(digits, 0, count).scaleByPowerOfTen(decimalAt - count);
-//       }
-//    }
+    private String 秘join(char[] digits, int i, int count) {
+    	return (/** @j2sNative digits.slice(i, i + count).join("") || */null);
+	}
+
+	public final BigDecimal getBigDecimal() {
+        if (count == 0) {
+            if (decimalAt == 0) {
+                return BigDecimal.ZERO;
+            } else {
+                return new BigDecimal("0E" + decimalAt);
+            }
+        }
+
+       if (decimalAt == count) {
+           return new BigDecimal(digits, 0, count);
+       } else {
+           return new BigDecimal(digits, 0, count).scaleByPowerOfTen(decimalAt - count);
+       }
+    }
 
     /**
      * Return true if the number represented by this object can fit into
@@ -534,7 +534,6 @@ final class DigitList implements Cloneable {
             int left = MAX_COUNT;
             int right;
             while (source >= 1) {
-// SwingJS  -- integers will not go to 0 upon div by 10            while (source > 0) {
                 digits[--left] = (char)('0' + (source % 10));
                 source = source / 10;
             }
@@ -548,48 +547,48 @@ final class DigitList implements Cloneable {
         if (maximumDigits > 0) round(maximumDigits);
     }
 
-//    /**
-//     * Set the digit list to a representation of the given BigDecimal value.
-//     * This method supports both fixed-point and exponential notation.
-//     * @param isNegative Boolean value indicating whether the number is negative.
-//     * @param source Value to be converted; must not be a value <= 0.
-//     * @param maximumDigits The most fractional or total digits which should
-//     * be converted.
-//     * @param fixedPoint If true, then maximumDigits is the maximum
-//     * fractional digits to be converted.  If false, total digits.
-//     */
-//    final void set(boolean isNegative, BigDecimal source, int maximumDigits, boolean fixedPoint) {
-//        String s = source.toString();
-//        extendDigits(s.length());
-//
-//        set(isNegative, s, maximumDigits, fixedPoint);
-//    }
-//
-//    /**
-//     * Set the digit list to a representation of the given BigInteger value.
-//     * @param isNegative Boolean value indicating whether the number is negative.
-//     * @param source Value to be converted; must be >= 0.
-//     * @param maximumDigits The most digits which should be converted.
-//     * If maximumDigits is lower than the number of significant digits
-//     * in source, the representation will be rounded.  Ignored if <= 0.
-//     */
-//    final void set(boolean isNegative, BigInteger source, int maximumDigits) {
-//        this.isNegative = isNegative;
-//        String s = source.toString();
-//        int len = s.length();
-//        extendDigits(len);
-//        s.getChars(0, len, digits, 0);
-//
-//        decimalAt = len;
-//        int right;
-//        for (right = len - 1; right >= 0 && digits[right] == '0'; --right)
-//            ;
-//        count = right + 1;
-//
-//        if (maximumDigits > 0) {
-//            round(maximumDigits);
-//        }
-//    }
+    /**
+     * Set the digit list to a representation of the given BigDecimal value.
+     * This method supports both fixed-point and exponential notation.
+     * @param isNegative Boolean value indicating whether the number is negative.
+     * @param source Value to be converted; must not be a value <= 0.
+     * @param maximumDigits The most fractional or total digits which should
+     * be converted.
+     * @param fixedPoint If true, then maximumDigits is the maximum
+     * fractional digits to be converted.  If false, total digits.
+     */
+    final void set(boolean isNegative, BigDecimal source, int maximumDigits, boolean fixedPoint) {
+        String s = source.toString();
+        extendDigits(s.length());
+
+        set(isNegative, s, maximumDigits, fixedPoint);
+    }
+
+    /**
+     * Set the digit list to a representation of the given BigInteger value.
+     * @param isNegative Boolean value indicating whether the number is negative.
+     * @param source Value to be converted; must be >= 0.
+     * @param maximumDigits The most digits which should be converted.
+     * If maximumDigits is lower than the number of significant digits
+     * in source, the representation will be rounded.  Ignored if <= 0.
+     */
+    final void set(boolean isNegative, BigInteger source, int maximumDigits) {
+        this.isNegative = isNegative;
+        String s = source.toString();
+        int len = s.length();
+        extendDigits(len);
+        s.getChars(0, len, digits, 0);
+
+        decimalAt = len;
+        int right;
+        for (right = len - 1; right >= 0 && digits[right] == '0'; --right)
+            ;
+        count = right + 1;
+
+        if (maximumDigits > 0) {
+            round(maximumDigits);
+        }
+    }
 
     /**
      * equality test between two digit lists.
@@ -635,7 +634,6 @@ final class DigitList implements Cloneable {
             char[] newDigits = new char[digits.length];
             System.arraycopy(digits, 0, newDigits, 0, digits.length);
             other.digits = newDigits;
-            other.tempBuffer = null;
             return other;
         } catch (CloneNotSupportedException e) {
             throw new InternalError();
@@ -688,31 +686,15 @@ final class DigitList implements Cloneable {
         if (isZero()) {
             return "0";
         }
-        StringBuffer buf = getStringBuffer();
-        buf.append("0.");
-        buf.append(digits, 0, count);
-        buf.append("x10^");
-        buf.append("" + decimalAt);
-        return buf.toString();
+        return "0." + 秘join(digits, 0, count) + "x10^" + decimalAt;
     }
 
-    private StringBuffer tempBuffer;
-
-    private StringBuffer getStringBuffer() {
-        if (tempBuffer == null) {
-            tempBuffer = new StringBuffer(MAX_COUNT);
-        } else {
-            tempBuffer.setLength(0);
+	private void extendDigits(int len) {
+        if (len > digits.length) {
+            digits = new char[len];
         }
-        return tempBuffer;
     }
 
-//    private void extendDigits(int len) {
-//        if (len > digits.length) {
-//            digits = new char[len];
-//        }
-//    }
-//
     private final char[] getDataChars(int length) {
         if (data == null || data.length < length) {
             data = new char[length];

@@ -27,6 +27,7 @@
  */
 package java.text;
 
+import java.text.Format.Field;
 import java.util.ArrayList;
 
 /**
@@ -130,4 +131,50 @@ class CharacterIteratorFieldDelegate implements Format.FieldDelegate {
         }
         return new AttributedString(iterators).getIterator();
     }
+
+	@Override
+	public void formatted(Field attr, Object value, int start, int end, String[] buffer) {
+        if (start != end) {
+            if (start < size) {
+                // Adjust attributes of existing runs
+                int index = size;
+                int asIndex = attributedStrings.size() - 1;
+
+                while (start < index) {
+                    AttributedString as = (AttributedString)attributedStrings.
+                                           get(asIndex--);
+                    int newIndex = index - as.length();
+                    int aStart = Math.max(0, start - newIndex);
+
+                    as.addAttribute(attr, value, aStart, Math.min(
+                                    end - start, as.length() - aStart) +
+                                    aStart);
+                    index = newIndex;
+                }
+            }
+            if (size < start) {
+                // Pad attributes
+                attributedStrings.add(new AttributedString(
+                                          buffer[0].substring(size, start)));
+                size = start;
+            }
+            if (size < end) {
+                // Add new string
+                int aStart = Math.max(start, size);
+                AttributedString string = new AttributedString(
+                                   buffer[0].substring(aStart, end));
+
+                string.addAttribute(attr, value);
+                attributedStrings.add(string);
+                size = end;
+            }
+        }
+	}
+
+	@Override
+	public void formatted(int fieldID, Field attr, Object value, int start, int end, String[] buffer) {
+		formatted(attr, value, start, end, buffer);
+	}
+    
+
 }

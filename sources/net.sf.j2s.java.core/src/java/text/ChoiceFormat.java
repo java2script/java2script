@@ -174,10 +174,11 @@ public class ChoiceFormat extends NumberFormat {
      * @param newPattern See the class description.
      */
     public void applyPattern(String newPattern) {
-        StringBuffer[] segments = new StringBuffer[2];
-        for (int i = 0; i < segments.length; ++i) {
-            segments[i] = new StringBuffer();
-        }
+        String[] segments = new String[] {"",""};
+//        StringBuffer[] segments = new StringBuffer[2];
+//        for (int i = 0; i < segments.length; ++i) {
+//            segments[i] = new StringBuffer();
+//        }
         double[] newChoiceLimits = new double[30];
         String[] newChoiceFormats = new String[30];
         int count = 0;
@@ -190,13 +191,13 @@ public class ChoiceFormat extends NumberFormat {
             if (ch=='\'') {
                 // Check for "''" indicating a literal quote
                 if ((i+1)<newPattern.length() && newPattern.charAt(i+1)==ch) {
-                    segments[part].append(ch);
+                    segments[part] += ch;
                     ++i;
                 } else {
                     inQuote = !inQuote;
                 }
             } else if (inQuote) {
-                segments[part].append(ch);
+                segments[part] += ch;
             } else if (ch == '<' || ch == '#' || ch == '\u2264') {
                 if (segments[0].length() == 0) {
                     throw new IllegalArgumentException();
@@ -220,7 +221,7 @@ public class ChoiceFormat extends NumberFormat {
                 if (startValue <= oldStartValue) {
                     throw new IllegalArgumentException();
                 }
-                segments[0].setLength(0);
+                segments[0] = "";
                 part = 1;
             } else if (ch == '|') {
                 if (count == newChoiceLimits.length) {
@@ -231,10 +232,10 @@ public class ChoiceFormat extends NumberFormat {
                 newChoiceFormats[count] = segments[1].toString();
                 ++count;
                 oldStartValue = startValue;
-                segments[1].setLength(0);
+                segments[1] = "";
                 part = 0;
             } else {
-                segments[part].append(ch);
+                segments[part] += ch;
             }
         }
         // clean up last one
@@ -259,10 +260,11 @@ public class ChoiceFormat extends NumberFormat {
      * @return the pattern string
      */
     public String toPattern() {
-        StringBuffer result = new StringBuffer();
+    	String result = "";
+//        StringBuffer result = new StringBuffer();
         for (int i = 0; i < choiceLimits.length; ++i) {
             if (i != 0) {
-                result.append('|');
+                result += '|';
             }
             // choose based upon which has less precision
             // approximate that by choosing the closest one to an integer.
@@ -272,17 +274,16 @@ public class ChoiceFormat extends NumberFormat {
             double tryLess = Math.abs(Math.IEEEremainder(less, 1.0d));
 
             if (tryLessOrEqual < tryLess) {
-                result.append(""+choiceLimits[i]);
-                result.append('#');
+                result += choiceLimits[i] + "#";
             } else {
                 if (choiceLimits[i] == Double.POSITIVE_INFINITY) {
-                    result.append("\u221E");
+                    result += ("\u221E");
                 } else if (choiceLimits[i] == Double.NEGATIVE_INFINITY) {
-                    result.append("-\u221E");
+                    result += ("-\u221E");
                 } else {
-                    result.append(""+less);
+                    result += (""+less);
                 }
-                result.append('<');
+                result += ('<');
             }
             // Append choiceFormats[i], using quotes if there are special characters.
             // Single quotes themselves must be escaped in either case.
@@ -291,18 +292,18 @@ public class ChoiceFormat extends NumberFormat {
                 || text.indexOf('#') >= 0
                 || text.indexOf('\u2264') >= 0
                 || text.indexOf('|') >= 0;
-            if (needQuote) result.append('\'');
-            if (text.indexOf('\'') < 0) result.append(text);
+            if (needQuote) result += ('\'');
+            if (text.indexOf('\'') < 0) result += (text);
             else {
                 for (int j=0; j<text.length(); ++j) {
                     char c = text.charAt(j);
-                    result.append(c);
-                    if (c == '\'') result.append(c);
+                    result += (c);
+                    if (c == '\'') result += (c);
                 }
             }
-            if (needQuote) result.append('\'');
+            if (needQuote) result += ('\'');
         }
-        return result.toString();
+        return result;
     }
 
     /**
@@ -367,8 +368,6 @@ public class ChoiceFormat extends NumberFormat {
         return newFormats;
     }
 
-    // Overrides
-
     /**
      * Specialization of format. This method really calls
      * <code>format(double, StringBuffer, FieldPosition)</code>
@@ -376,7 +375,8 @@ public class ChoiceFormat extends NumberFormat {
      * the range that can be stored by double. This will never be
      * a practical limitation.
      */
-    public StringBuffer format(long number, StringBuffer toAppendTo,
+    @Override
+	public StringBuffer format(long number, StringBuffer toAppendTo,
                                FieldPosition status) {
         return format((double)number, toAppendTo, status);
     }
@@ -387,6 +387,7 @@ public class ChoiceFormat extends NumberFormat {
      * @param toAppendTo where text is appended.
      * @param status ignore no useful status is returned.
      */
+   @Override
    public StringBuffer format(double number, StringBuffer toAppendTo,
                                FieldPosition status) {
         // find the number
@@ -399,8 +400,16 @@ public class ChoiceFormat extends NumberFormat {
         }
         --i;
         if (i < 0) i = 0;
+        String s = choiceFormats[i];
         // return either a formatted number, or a string
-        return toAppendTo.append(choiceFormats[i]);
+        /**
+         * @j2sNative
+         * 
+         * if (Array.isArray(toAppendTo)) {
+         *   toAppendTo[0] += s;
+         *   return toAppendTo; 
+         */
+        return toAppendTo.append(s);
     }
 
     /**
@@ -415,7 +424,8 @@ public class ChoiceFormat extends NumberFormat {
      * first index of the character that caused the parse to fail.
      * @return A Number representing the value of the number parsed.
      */
-    public Number parse(String text, ParsePosition status) {
+    @Override
+	public Number parse(String text, ParsePosition status) {
         // find the best number (defined as the one with the longest parse)
         int start = status.index;
         int furthest = start;
@@ -468,7 +478,8 @@ public class ChoiceFormat extends NumberFormat {
     /**
      * Overrides Cloneable
      */
-    public Object clone()
+    @Override
+	public Object clone()
     {
         ChoiceFormat other = (ChoiceFormat) super.clone();
         // for primitives or immutables, shallow clone is enough
@@ -480,7 +491,8 @@ public class ChoiceFormat extends NumberFormat {
     /**
      * Generates a hash code for the message format object.
      */
-    public int hashCode() {
+    @Override
+	public int hashCode() {
         int result = choiceLimits.length;
         if (choiceFormats.length > 0) {
             // enough for reasonable distribution
@@ -492,7 +504,8 @@ public class ChoiceFormat extends NumberFormat {
     /**
      * Equality comparision between two
      */
-    public boolean equals(Object obj) {
+    @Override
+	public boolean equals(Object obj) {
         if (obj == null) return false;
         if (this == obj)                      // quick check
             return true;

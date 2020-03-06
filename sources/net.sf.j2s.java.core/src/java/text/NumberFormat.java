@@ -286,11 +286,13 @@ public abstract class NumberFormat extends Format  {
      * @see java.text.Format#format
      */
     public final String format(double number) {
-        return format(number, new StringBuffer(),
+        return format(number, 秘newStringBuffer(true),
                       DontCareFieldPosition.INSTANCE).toString();
     }
 
-   /**
+
+
+/**
      * Specialization of format.
      * @exception        ArithmeticException if rounding is needed with rounding
      *                   mode being set to RoundingMode.UNNECESSARY
@@ -298,7 +300,7 @@ public abstract class NumberFormat extends Format  {
      * 
      */
     public final String format(long number) {
-        return format(number, new StringBuffer(),
+        return format(number, 秘newStringBuffer(false),
                       DontCareFieldPosition.INSTANCE).toString();
     }
 
@@ -1172,4 +1174,39 @@ public abstract class NumberFormat extends Format  {
 //            return null;
 //        }
 //    }
+    
+    /**
+     * Minimalist "StringBuffer" for performance
+     * 
+     * @return [""]
+     */
+   protected StringBuffer 秘newStringBuffer(boolean isDouble) {
+	   /**
+	    * @j2sNative
+	    *  var c = (isDouble ? this.format$D$StringBuffer$java_text_FieldPosition.exClazz.__CLASS_NAME__
+	    *    : this.format$J$StringBuffer$java_text_FieldPosition.exClazz.__CLASS_NAME__);
+	    * if (c && c.indexOf("java.text.") == 0)return [""];
+	    */
+	return new StringBuffer();
+   }
+   
+   protected String[] 秘toArray(StringBuffer ret) {
+		return /** @j2sNative Array.isArray(ret) ? ret :*/new String[] {ret.toString()};
+	}
+
+   protected String[] 秘newSA() {
+		return /** @j2sNative [""] || */null;
+	}
+
+   protected StringBuffer 秘toSB(String[] ret, StringBuffer result) {
+   	/**
+   	 * @j2sNative if (Array.isArray(result)) return ret;
+   	 */
+	result.setLength(0);
+   	result.append(ret[0]);
+		return result;
+	}
+
+
+
 }
