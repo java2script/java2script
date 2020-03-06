@@ -142,10 +142,9 @@ public abstract class HTML5CanvasContext2D {
 			return null;			
 		}
 		if (m == null) {
-			m = new double[6];
 			/**
 			 * @j2sNative
-			 * ctx._m = m;
+			 * ctx._m = m = new Array(6);
 			 */
 			transform.getMatrix(m);
 		}

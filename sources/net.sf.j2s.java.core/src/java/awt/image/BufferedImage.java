@@ -128,7 +128,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	/**
 	 * the JSGrpahics2D object associated with this image
 	 */
-	JSGraphics2D 秘g; // a JSGraphics2D instance
+	public JSGraphics2D 秘g; // a JSGraphics2D instance
 
 	/**
 	 * if an image is used just for graphics that the HTML5 canvas can use, we back
@@ -1877,8 +1877,10 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		Raster r = raster;
 		@SuppressWarnings("unused")
 		int[] p = 秘pix;
-
-		if (getColorModel() == ColorModel.秘RGBdefault) {
+		switch (imageType) {
+		case TYPE_INT_RGB:
+		case TYPE_INT_ARGB:
+		case TYPE_4BYTE_HTML5:
 			@SuppressWarnings("unused")
 			int[] rp = ((SunWritableRaster) r).秘pix;
 			/**
@@ -1887,9 +1889,10 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 			 * 			pixels = rp || p;
 			 *
 			 */
-		} else {
-			// a more complex exercise
+			break;
+		default:
 			pixels = 秘getPixelsFromRaster();
+			break;
 		}
 		return pixels;
 	}
@@ -1901,8 +1904,9 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @return
 	 */
 	private int[] 秘getPixelsFromRaster() {
-		if (imageType == TYPE_4BYTE_HTML5)
-			return 秘pix;
+		// Coerse byte[] to int[] for SwingJS
+		if (imageType == TYPE_4BYTE_HTML5) 
+			return 秘pix = (int[])(Object) ((DataBufferByte) raster.getDataBuffer()).getData();
 		int n = 秘wxh;
 		if (秘pix == null || 秘pix.length != n * 4)
 			秘pix = new int[n * 4];
@@ -1911,6 +1915,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		int[] p = 秘pix;
 		if (isPacked) {
 			int[] a = new int[n];
+			raster.getDataElements(0, 0, width, height, a);
 			for (int i = 0, pt = 0; i < n; i++, pt += 4) {
 				cm.getComponents(a[i], p, pt);
 			}
@@ -1966,19 +1971,15 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 */
 
 	public DOMNode 秘getImageNode(boolean force) {
-		if (!force && 秘hasRasterData || imageType == TYPE_4BYTE_HTML5)
-			return null; 
-		Object node = (秘canvas != null ? 秘canvas : 秘imgNode);
-		if (node == null && (force || !秘hasRasterData))
-			return JSGraphicsCompositor.createImageNode(this);
-		if (秘hasRasterData) {
-			秘getPixelsFromRaster();
-			秘g = null;
-			createGraphics();
-			秘g.drawImagePriv(this, 0, 0, null);
-			node = 秘g.getCanvas();			
-		}
-		return (DOMNode) node;
+		if (!秘hasRasterData)
+			return (DOMNode) (秘canvas != null ? 秘canvas
+					: 秘imgNode != null ? 秘imgNode : JSGraphicsCompositor.createImageNode(this));
+		if (!force)// || imageType == TYPE_4BYTE_HTML5)
+			return null;
+		秘getPixelsFromRaster();
+		秘g = null;
+		getImageGraphic();
+		return 秘g.getCanvas();
 	}
 
 	/**

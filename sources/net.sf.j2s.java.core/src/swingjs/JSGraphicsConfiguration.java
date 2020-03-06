@@ -51,15 +51,11 @@ public class JSGraphicsConfiguration extends GraphicsConfiguration {
     return newBufferedImage(cm, wr, false, null);
 	}
 
-	@Override
-	protected BufferedImage newBufferedImage(ColorModel cm, WritableRaster wr,
-			boolean alphaPremultiplied, Hashtable<?, ?> properties) {
-		return (BufferedImage) Interface.getInstanceWithParams(
-				"java.awt.image.BufferedImage", new Class<?>[] { ColorModel.class,
-						WritableRaster.class, boolean.class, Hashtable.class },
-				new Object[] { cm, wr,
-						alphaPremultiplied, properties });
-	}
+//	@Override
+//	protected BufferedImage newBufferedImage(ColorModel cm, WritableRaster wr,
+//			boolean alphaPremultiplied, Hashtable<?, ?> properties) {
+//		return new BufferedImage(cm, wr, alphaPremultiplied, properties);
+//	}
 
 	@Override
 	public ColorModel getColorModel() {
