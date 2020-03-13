@@ -145,12 +145,13 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 
 	static {
 
-		try {
-			URL.setURLStreamHandlerFactory(
-					(URLStreamHandlerFactory) Interface.getInstance("javajs.util.AjaxURLStreamHandlerFactory", false));
-		} catch (Throwable e) {
-			// that's fine -- already created
-		}
+		if (URL.秘factory == null)
+			try {
+				URL.setURLStreamHandlerFactory((URLStreamHandlerFactory) Interface
+						.getInstance("javajs.util.AjaxURLStreamHandlerFactory", false));
+			} catch (Throwable e) {
+				// that's fine -- already created
+			}
 
 	}
 

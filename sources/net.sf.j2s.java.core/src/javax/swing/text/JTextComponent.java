@@ -74,6 +74,7 @@ import javax.swing.plaf.TextUI;
 import javax.swing.plaf.UIResource;
 
 import sun.awt.AppContext;
+import swingjs.JSHTMLHelper;
 import swingjs.JSUtil;
 //import java.text.AttributedCharacterIterator;
 //import java.text.AttributedString;
@@ -312,6 +313,10 @@ import swingjs.plaf.JSTextUI;
 @SuppressWarnings({"rawtypes", "unchecked", "unused"})
 public abstract class JTextComponent extends JComponent implements TextComponent, Scrollable
 {
+	
+	public JSHTMLHelper 秘jsHTMLHelper;
+
+
 	/**
 	 * Creates a new <code>JTextComponent</code>. Listeners for caret events are
 	 * established, and the pluggable UI installed. The component is marked as
@@ -452,7 +457,7 @@ public abstract class JTextComponent extends JComponent implements TextComponent
         }
 
         revalidate();
-        秘repaint();
+         秘repaint();
 //        if (accessibleContext != null) {
 //            model.addDocumentListener(
 //                ((AccessibleJTextComponent)accessibleContext));
@@ -4404,7 +4409,7 @@ public abstract class JTextComponent extends JComponent implements TextComponent
         }
     }
 
-    private static final Object FOCUSED_COMPONENT = new Object(); // JTextComponent_FocusedComponent
+    private static final String FOCUSED_COMPONENT = "JTextComponent_FocusedComponent";//new Object(); // 
 
     /**
      * The default keymap that will be shared by all

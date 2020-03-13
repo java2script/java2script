@@ -722,6 +722,18 @@ public class JSUtil {
 	
 	public static HTML5Applet getApplet() {
 		return Thread.currentThread().getThreadGroup().秘html5Applet;
+	}
+
+	public static String getJSID(Object o) {
+		
+		/** @j2sNative 
+		 * 
+		 * var t = typeof o;
+		 *  return (t == "string" ? o : (o.__CLASS_NAME__ == "java.lang.Class" ? o.getName$() : o.__CLASS_NAME__ || t)+ "_" + (o.__JSID__ || (o.hashCode$ ? o.hashCode$() : o.toString())));
+		 */
+		 {
+			 return null;
+		 }
 	} 
 
 }

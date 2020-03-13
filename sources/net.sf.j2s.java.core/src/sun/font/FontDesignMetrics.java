@@ -196,7 +196,7 @@ private float leading;
          */
         @SuppressWarnings("unused")
 				public void dispose() {
-            if (metricsCache.get(key) == this) {
+            if (metricsCache.get(key.toString()) == this) {
                 metricsCache.remove(key);
             }
         }
@@ -241,8 +241,8 @@ private float leading;
      * as incomplete operations on another thread would just lead to
      * harmless cache misses.
      */
-    private static final Hashtable<Object, KeyReference>
-        metricsCache = new Hashtable<Object, KeyReference>();
+    private static final Hashtable<String, KeyReference>
+        metricsCache = new Hashtable<>();
 
     private static final int MAXRECENT = 5;
     private static final FontDesignMetrics[]
@@ -282,7 +282,7 @@ private float leading;
 //        boolean usefontkey = frc.equals(getDefaultFrc());
 //
 //        if (usefontkey) {
-            r = metricsCache.get(font);
+            r = metricsCache.get(font.toString());
 //        } else /* use hybrid key */ {
 //            // NB synchronization is not needed here because of updates to
 //            // the metrics cache but is needed for the shared key.
@@ -305,7 +305,7 @@ private float leading;
              */
             m = new FontDesignMetrics(font);//, frc);
 //            if (usefontkey) {
-                metricsCache.put(font, new KeyReference(font, m));
+                metricsCache.put(font.toString(), new KeyReference(font, m));
 //            } else /* use hybrid key */ {
 //                MetricsKey newKey = new MetricsKey(font, frc);
 //                metricsCache.put(newKey, new KeyReference(newKey, m));

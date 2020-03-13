@@ -79,6 +79,7 @@ class JSJAXBClass implements Cloneable {
 	private boolean isInnerClass;
 
 	QName declaredTypeName;
+	QName qualifiedRootName;
 
 	private static String packageNamespace;
 	private static int packageAccessorType = TYPE_PUBLIC_MEMBER;
@@ -352,7 +353,7 @@ class JSJAXBClass implements Cloneable {
 		QName qname = new QName(namespace, name, JSJAXBClass.getPrefixFor(namespace));
 		switch (type) {
 		case JSJAXBField.TYPE_ROOT_ELEMENT:
-			return this.qname = qname;
+			return this.qname = qualifiedRootName = qname;
 		case JSJAXBField.TYPE_XML_TYPE:
 			return this.qname = qualifiedTypeName = qname;
 		default:

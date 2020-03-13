@@ -1,833 +1,1660 @@
 /*
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
+ * Copyright (c) 2003, 2013, Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.lang;
 
-import java.io.InvalidObjectException;
-//import java.util.Arrays;
-
-import org.apache.harmony.luni.util.Msg;
-
 /**
+ * A mutable sequence of characters.
  * <p>
- * A modifiable {@link CharSequence sequence of characters} for use in creating
- * and modifying Strings. This class is intended as a base class for
- * {@link java.lang.StringBuffer} and {@link java.lang.StringBuilder}.
- * </p>
- * 
- * @see java.lang.StringBuffer
- * @see java.lang.StringBuilder
- * 
- * @since 1.5
+ * Implements a modifiable string. At any point in time it contains some
+ * particular sequence of characters, but the length and content of the
+ * sequence can be changed through certain method calls.
+ *
+ * <p>Unless otherwise noted, passing a {@code null} argument to a constructor
+ * or method in this class will cause a {@link NullPointerException} to be
+ * thrown.
+ *
+ * @author      Michael McCloskey
+ * @author      Martin Buchholz
+ * @author      Ulf Zibis
+ * @since       1.5
  */
-abstract class AbstractStringBuilder {
-
-    static final int INITIAL_CAPACITY = 16;
-
-    private char[] value;
-
-    private int count;
-
-    private boolean shared;
-
-    /*
-     * Returns the character array.
+abstract class AbstractStringBuilder implements Appendable, CharSequence {
+    /**
+     * The value is used for character storage.
      */
-    final char[] getValue() {
-        return value;
-    }
+    //char[] value;
 
-    /*
-     * Returns the underlying buffer and sets the shared flag.
+//    /**
+//     * The count is the number of characters used.
+//     */
+//    int count;
+
+	
+    String 秘s;
+
+    /**
+     * This no-arg constructor is necessary for serialization of subclasses.
      */
-    final char[] shareValue() {
-        shared = true;
-        return value;
-    }
-
-    /*
-     * Restores internal state after deserialization.
-     */
-    final void set(char[] val, int len) throws InvalidObjectException {
-        if (val == null)
-            val = new char[0];
-        if (val.length < len)
-            throw new InvalidObjectException(Msg.getString("K0199"));
-
-        shared = false;
-        value = val;
-        count = len;
-    }
-
     AbstractStringBuilder() {
-        value = new char[INITIAL_CAPACITY];
     }
 
+    /**
+     * Creates an AbstractStringBuilder of the specified capacity.
+     */
     AbstractStringBuilder(int capacity) {
-        if (capacity < 0)
-            throw new NegativeArraySizeException();
-        value = new char[capacity];
-    }
-
-    AbstractStringBuilder(String string) {
-    	if (string == null) // BH added
-    		throw new NullPointerException(); // BH added
-        count = string.length();
-        shared = false;
-        value = new char[count + INITIAL_CAPACITY];
-        string.getChars(0, count, value, 0);
-    }
-
-    private void enlargeBuffer(int min) {
-        int twice = (value.length << 1) + 2;
-        char[] newData = new char[min > twice ? min : twice];
-        System.arraycopy(value, 0, newData, 0, count);
-        value = newData;
-        shared = false;
-    }
-
-    final void appendNull() {
-        int newSize = count + 4;
-        if (newSize > value.length) {
-            enlargeBuffer(newSize);
-        } else if (shared) {
-            value = value.clone();
-            shared = false;
-        }
-        value[count++] = 'n';
-        value[count++] = 'u';
-        value[count++] = 'l';
-        value[count++] = 'l';
-    }
-
-    final void append0(char chars[]) {
-        int newSize = count + chars.length;
-        if (newSize > value.length) {
-            enlargeBuffer(newSize);
-        } else if (shared) {
-            value = value.clone();
-            shared = false;
-        }
-        System.arraycopy(chars, 0, value, count, chars.length);
-        count = newSize;
-    }
-
-    final void append0(char chars[], int start, int length) {
-        if (chars == null) {
-            throw new NullPointerException();
-        }
-        // start + length could overflow, start/length maybe MaxInt
-        if (start >= 0 && 0 <= length && length <= chars.length - start) {
-            int newSize = count + length;
-            if (newSize > value.length) {
-                enlargeBuffer(newSize);
-            } else if (shared) {
-                value = value.clone();
-                shared = false;
-            }
-            System.arraycopy(chars, start, value, count, length);
-            count = newSize;
-        } else {
-            throw new ArrayIndexOutOfBoundsException();
-        }
-    }
-
-    final void append0(char ch) {
-        if (count == value.length) {
-            enlargeBuffer(count + 1);
-        }
-        if (shared) {
-            value = value.clone();
-            shared = false;
-        }
-        value[count++] = ch;
-    }
-
-    final void append0(String string) {
-        if (string == null) {
-            appendNull();
-            return;
-        }
-        int adding = string.length();
-        int newSize = count + adding;
-        if (newSize > value.length) {
-            enlargeBuffer(newSize);
-        } else if (shared) {
-            value = value.clone();
-            shared = false;
-        }
-        string.getChars(0, adding, value, count);
-        count = newSize;
-    }
-
-    final void append0(CharSequence s, int start, int end) {
-        if (s == null)
-            s = "null";
-        if (start < 0 || end < 0 || start > end || end > s.length())
-            throw new IndexOutOfBoundsException();
-
-        append0(s.subSequence(start, end).toString());
+    	秘s = "";
+        //value = new char[capacity];
     }
 
     /**
-     * Answers the number of characters this StringBuffer can hold without
-     * growing.
-     * 
-     * @return the capacity of this StringBuffer
-     * 
-     * @see #ensureCapacity
-     * @see #length
-     */
-    public int capacity() {
-        return value.length;
-    }
-
-    /**
-     * <p>
-     * Retrieves the character at the <code>index</code>.
-     * </p>
-     * 
-     * @param The index of character in this object to retrieve.
-     * @return The char value.
-     * @throws IndexOutOfBoundsException if <code>index</code> is negative or
-     *         greater than or equal to the current {@link #length()}.
-     */
-    public char charAt(int index) {
-        if (index < 0 || index >= count)
-            throw new StringIndexOutOfBoundsException(index);
-        return value[index];
-    }
-
-    final void delete0(int start, int end) {
-        if (start >= 0) {
-            if (end > count) {
-                end = count;
-            }
-            if (end == start) {
-                return;
-            }
-            if (end > start) {
-                int length = count - end;
-                if (length > 0) {
-                    if (!shared) {
-                        System.arraycopy(value, end, value, start, length);
-                    } else {
-                        char[] newData = new char[value.length];
-                        System.arraycopy(value, 0, newData, 0, start);
-                        System.arraycopy(value, end, newData, start, length);
-                        value = newData;
-                        shared = false;
-                    }
-                }
-                count -= end - start;
-                return;
-            }
-        }
-        throw new StringIndexOutOfBoundsException();
-    }
-
-    final void deleteCharAt0(int location) {
-        if (0 > location || location >= count)
-            throw new StringIndexOutOfBoundsException(location);
-        int length = count - location - 1;
-        if (length > 0) {
-            if (!shared) {
-                System.arraycopy(value, location + 1, value, location, length);
-            } else {
-                char[] newData = new char[value.length];
-                System.arraycopy(value, 0, newData, 0, location);
-                System
-                        .arraycopy(value, location + 1, newData, location,
-                                length);
-                value = newData;
-                shared = false;
-            }
-        }
-        count--;
-    }
-
-    /**
-     * <p>
-     * Ensures that this object has a minimum capacity available before
-     * requiring the internal buffer to be enlarged. The general policy of this
-     * method is that if the <code>minimumCapacity</code> is larger than the
-     * current {@link #capacity()}, then the capacity will be increased to the
-     * largest value of either the <code>minimumCapacity</code> or the current
-     * capacity multiplied by two plus two. Although this is the general policy,
-     * there is no guarantee that the capacity will change.
-     * </p>
-     * 
-     * @param minimumCapacity The new minimum capacity to set.
-     */
-    public void ensureCapacity(int min) {
-        if (min > value.length) {
-            enlargeBuffer(min);
-        }
-    }
-
-    /**
-     * <p>
-     * Copies the requested sequence of characters to be copied to the
-     * <code>char[]</code> passed.
-     * </p>
-     * 
-     * @param start The inclusive start index of the characters to copy from
-     *        this object.
-     * @param end The exclusive end index of the characters to copy from this
-     *        object.
-     * @param dest The <code>char[]</code> to copy the characters to.
-     * @param destStart The inclusive start index of the <code>dest</code>
-     *        parameter to begin copying to.
-     * @throws IndexOutOfBoundsException if the <code>start</code> is
-     *         negative, the <code>destStart</code> is negative, the
-     *         <code>start</code> is greater than <code>end</code>, the
-     *         <code>end</code> is greater than the current {@link #length()}
-     *         or <code>destStart + end - begin</code> is greater than
-     *         <code>dest.length</code>.
-     */
-    public void getChars(int start, int end, char[] dest, int destStart) {
-        if (start > count || end > count || start > end) {
-            throw new StringIndexOutOfBoundsException();
-        }
-        System.arraycopy(value, start, dest, destStart, end - start);
-    }
-
-    final void insert0(int index, char[] chars) {
-        if (0 > index || index > count) {
-            throw new StringIndexOutOfBoundsException(index);
-        }
-        if (chars.length != 0) {
-            move(chars.length, index);
-            System.arraycopy(chars, 0, value, index, chars.length);
-            count += chars.length;
-        }
-    }
-
-    final void insert0(int index, char chars[], int start, int length) {
-        if (0 <= index && index <= count) {
-            // start + length could overflow, start/length maybe MaxInt
-            if (start >= 0 && 0 <= length && length <= chars.length - start) {
-                if (length != 0) {
-                    move(length, index);
-                    System.arraycopy(chars, start, value, index, length);
-                    count += length;
-                }
-                return;
-            }
-            throw new StringIndexOutOfBoundsException("offset " + start + ", len " + length + ", array.length " + chars.length);
-        }
-        throw new StringIndexOutOfBoundsException(index);
-    }
-
-    final void insert0(int index, char ch) {
-        if (0 > index || index > count) {
-            // RI compatible exception type
-            throw new ArrayIndexOutOfBoundsException(index);
-        }
-        move(1, index);
-        value[index] = ch;
-        count++;
-    }
-
-    final void insert0(int index, String string) {
-        if (0 <= index && index <= count) {
-            if (string == null)
-                string = "null";
-            int min = string.length();
-            if (min != 0) {
-                move(min, index);
-                string.getChars(0, min, value, index);
-                count += min;
-            }
-        } else {
-            throw new StringIndexOutOfBoundsException(index);
-        }
-    }
-
-    final void insert0(int index, CharSequence s, int start, int end) {
-        if (s == null)
-            s = "null";
-        if (index < 0 || index > count || start < 0 || end < 0 || start > end
-                || end > s.length())
-            throw new IndexOutOfBoundsException();
-        insert0(index, s.subSequence(start, end).toString());
-    }
-
-    /**
-     * <p>
-     * The current length of this object.
-     * </p>
-     * 
-     * @return the number of characters in this StringBuffer
-     */
-    public int length() {
-        return count;
-    }
-
-    private void move(int size, int index) {
-        int newSize;
-        if (value.length - count >= size) {
-            if (!shared) {
-                System.arraycopy(value, index, value, index + size, count
-                        - index); // index == count case is no-op
-                return;
-            }
-            newSize = value.length;
-        } else {
-            int a = count + size, b = (value.length << 1) + 2;
-            newSize = a > b ? a : b;
-        }
-
-        char[] newData = new char[newSize];
-        System.arraycopy(value, 0, newData, 0, index);
-        // index == count case is no-op
-        System.arraycopy(value, index, newData, index + size, count - index);
-        value = newData;
-        shared = false;
-    }
-
-    final void replace0(int start, int end, String string) {
-        if (start >= 0) {
-            if (end > count)
-                end = count;
-            if (end > start) {
-                int stringLength = string.length();
-                int diff = end - start - stringLength;
-                if (diff > 0) { // replacing with fewer characters
-                    if (!shared) {
-                        // index == count case is no-op
-                        System.arraycopy(value, end, value, start
-                                + stringLength, count - end);
-                    } else {
-                        char[] newData = new char[value.length];
-                        System.arraycopy(value, 0, newData, 0, start);
-                        // index == count case is no-op
-                        System.arraycopy(value, end, newData, start
-                                + stringLength, count - end);
-                        value = newData;
-                        shared = false;
-                    }
-                } else if (diff < 0) {
-                    // replacing with more characters...need some room
-                    move(-diff, end);
-                } else if (shared) {
-                    value = value.clone();
-                    shared = false;
-                }
-                string.getChars(0, stringLength, value, start);
-                count -= diff;
-                return;
-            }
-            if (start == end) {
-                if (string == null)
-                    throw new NullPointerException();
-                insert0(start, string);
-                return;
-            }
-        }
-        throw new StringIndexOutOfBoundsException();
-    }
-
-    final void reverse0() {
-        if (count < 2) {
-            return;
-        }
-        if (!shared) {
-            for (int i = 0, end = count, mid = count / 2; i < mid; i++) {
-                char temp = value[--end];
-                value[end] = value[i];
-                value[i] = temp;
-            }
-        } else {
-            char[] newData = new char[value.length];
-            for (int i = 0, end = count; i < count; i++) {
-                newData[--end] = value[i];
-            }
-            value = newData;
-            shared = false;
-        }
-    }
-
-    /**
-     * <p>
-     * Sets the character at the <code>index</code> in this object.
-     * </p>
-     * 
-     * @param index the zero-based index of the character to replace.
-     * @param ch the character to set.
-     * @throws IndexOutOfBoundsException if <code>index</code> is negative or
-     *         greater than or equal to the current {@link #length()}.
-     */
-    public void setCharAt(int index, char ch) {
-        if (0 > index || index >= count) {
-            throw new StringIndexOutOfBoundsException(index);
-        }
-        if (shared) {
-            value = value.clone();
-            shared = false;
-        }
-        value[index] = ch;
-    }
-
-    /**
-     * <p>
-     * Sets the current length to a new value. If the new length is larger than
-     * the current length, then the new characters at the end of this object
-     * will contain the <code>char</code> value of <code>\u0000</code>.
-     * </p>
-     * 
-     * @param length the new length of this StringBuffer
-     * 
-     * @exception IndexOutOfBoundsException when <code>length < 0</code>
-     * 
-     * @see #length
-     */
-    public void setLength(int length) {
-        if (length < 0)
-            throw new StringIndexOutOfBoundsException(length);
-        if (count < length) {
-            if (length > value.length) {
-                enlargeBuffer(length);
-            } else {
-                if (shared) {
-                    char[] newData = new char[value.length];
-                    System.arraycopy(value, 0, newData, 0, count);
-                    value = newData;
-                    shared = false;
-                } else {
-                    //Arrays.fill(value, count, length, (char) 0);
-                    for (int i = count; i < length; i++) {
-						value[i] = 0;
-					}
-                }
-            }
-        }
-        count = length;
-    }
-
-    /**
-     * <p>
-     * Returns the String value of the subsequence of this object from the
-     * <code>start</code> index to the current end.
-     * </p>
-     * 
-     * @param start The inclusive start index to begin the subsequence.
-     * @return A String containing the subsequence.
-     * @throws StringIndexOutOfBoundsException if <code>start</code> is
-     *         negative or greater than the current {@link #length()}.
-     */
-    public String substring(int start) {
-        if (0 <= start && start <= count) {
-            if (start == count)
-                return "";
-
-            shared = true;
-            return new String(value, start, count - start);
-        }
-        throw new StringIndexOutOfBoundsException(start);
-    }
-
-    /**
-     * <p>
-     * Returns the String value of the subsequence of this object from the
-     * <code>start</code> index to the <code>start</code> index.
-     * </p>
-     * 
-     * @param start The inclusive start index to begin the subsequence.
-     * @param end The exclusive end index to end the subsequence.
-     * @return A String containing the subsequence.
-     * @throws StringIndexOutOfBoundsException if <code>start</code> is
-     *         negative, greater than the current {@link #length()} or greater
-     *         than <code>end</code>.
-     */
-    public String substring(int start, int end) {
-        if (0 <= start && start <= end && end <= count) {
-            if (start == end)
-                return "";
-
-            shared = true;
-            return new String(value, start, end - start);
-        }
-        throw new StringIndexOutOfBoundsException();
-    }
-
-    /**
-     * <p>
-     * Returns the current String representation of this object.
-     * </p>
-     * 
-     * @return a String containing the characters in this StringBuilder.
+     * Returns the length (character count).
+     *
+     * @return  the length of the sequence of characters currently
+     *          represented by this object
      */
     @Override
-    public String toString() {
-        if (count == 0)
-            return "";
-
-        if (count >= 256 && count <= (value.length >> 1))
-            return new String(value, 0, count);
-        shared = true;
-        return new String(value, 0, count);
+    public int length() {
+        return 秘s.length();//count;
     }
 
     /**
-     * <p>
-     * Returns a <code>CharSequence</code> of the subsequence of this object
-     * from the <code>start</code> index to the <code>start</code> index.
-     * </p>
-     * 
-     * @param start The inclusive start index to begin the subsequence.
-     * @param end The exclusive end index to end the subsequence.
-     * @return A CharSequence containing the subsequence.
-     * @throws IndexOutOfBoundsException if <code>start</code> is negative,
-     *         greater than the current {@link #length()} or greater than
-     *         <code>end</code>.
-     * 
-     * @since 1.4
+     * Returns the current capacity. The capacity is the amount of storage
+     * available for newly inserted characters, beyond which an allocation
+     * will occur.
+     *
+     * @return  the current capacity
      */
+    public int capacity() {
+    	return Integer.MAX_VALUE;
+//        return value.length;
+    }
+
+    /**
+     * Ensures that the capacity is at least equal to the specified minimum.
+     * If the current capacity is less than the argument, then a new internal
+     * array is allocated with greater capacity. The new capacity is the
+     * larger of:
+     * <ul>
+     * <li>The {@code minimumCapacity} argument.
+     * <li>Twice the old capacity, plus {@code 2}.
+     * </ul>
+     * If the {@code minimumCapacity} argument is nonpositive, this
+     * method takes no action and simply returns.
+     * Note that subsequent operations on this object can reduce the
+     * actual capacity below that requested here.
+     *
+     * @param   minimumCapacity   the minimum desired capacity.
+     */
+    public void ensureCapacity(int minimumCapacity) {
+//        if (minimumCapacity > 0)
+//            ensureCapacityInternal(minimumCapacity);
+    }
+
+    /**
+     * This method has the same contract as ensureCapacity, but is
+     * never synchronized.
+     */
+    private void ensureCapacityInternal(int minimumCapacity) {
+//        // overflow-conscious code
+//        if (minimumCapacity - s.length() > 0)
+//            expandCapacity(minimumCapacity);
+    }
+
+    /**
+     * This implements the expansion semantics of ensureCapacity with no
+     * size check or synchronization.
+     */
+    void expandCapacity(int minimumCapacity) {
+//        int newCapacity = s.length() * 2 + 2;
+//        if (newCapacity - minimumCapacity < 0)
+//            newCapacity = minimumCapacity;
+//        if (newCapacity < 0) {
+//            if (minimumCapacity < 0) // overflow
+//                throw new OutOfMemoryError();
+//            newCapacity = Integer.MAX_VALUE;
+//        }
+//        value = Arrays.copyOf(value, newCapacity);
+    }
+
+    /**
+     * Attempts to reduce storage used for the character sequence.
+     * If the buffer is larger than necessary to hold its current sequence of
+     * characters, then it may be resized to become more space efficient.
+     * Calling this method may, but is not required to, affect the value
+     * returned by a subsequent call to the {@link #capacity()} method.
+     */
+    public void trimToSize() {
+//    	
+//        if (count < value.length) {
+//            value = Arrays.copyOf(value, count);
+//        }
+    }
+
+    /**
+     * Sets the length of the character sequence.
+     * The sequence is changed to a new character sequence
+     * whose length is specified by the argument. For every nonnegative
+     * index <i>k</i> less than {@code newLength}, the character at
+     * index <i>k</i> in the new character sequence is the same as the
+     * character at index <i>k</i> in the old sequence if <i>k</i> is less
+     * than the length of the old character sequence; otherwise, it is the
+     * null character {@code '\u005Cu0000'}.
+     *
+     * In other words, if the {@code newLength} argument is less than
+     * the current length, the length is changed to the specified length.
+     * <p>
+     * If the {@code newLength} argument is greater than or equal
+     * to the current length, sufficient null characters
+     * ({@code '\u005Cu0000'}) are appended so that
+     * length becomes the {@code newLength} argument.
+     * <p>
+     * The {@code newLength} argument must be greater than or equal
+     * to {@code 0}.
+     *
+     * @param      newLength   the new length
+     * @throws     IndexOutOfBoundsException  if the
+     *               {@code newLength} argument is negative.
+     */
+    public void setLength(int newLength) {
+        if (newLength < 0)
+            throw new StringIndexOutOfBoundsException(newLength);
+        ensureCapacityInternal(newLength);
+        if (秘s.length() > newLength)
+        	秘s = 秘s.substring(0, newLength);
+//        if (count < newLength) {
+//            Arrays.fill(value, count, newLength, '\0');
+//        }
+//
+//        count = newLength;
+    }
+
+    /**
+     * Returns the {@code char} value in this sequence at the specified index.
+     * The first {@code char} value is at index {@code 0}, the next at index
+     * {@code 1}, and so on, as in array indexing.
+     * <p>
+     * The index argument must be greater than or equal to
+     * {@code 0}, and less than the length of this sequence.
+     *
+     * <p>If the {@code char} value specified by the index is a
+     * <a href="Character.html#unicode">surrogate</a>, the surrogate
+     * value is returned.
+     *
+     * @param      index   the index of the desired {@code char} value.
+     * @return     the {@code char} value at the specified index.
+     * @throws     IndexOutOfBoundsException  if {@code index} is
+     *             negative or greater than or equal to {@code length()}.
+     */
+    @Override
+    public char charAt(int index) {
+        if ((index < 0) || (index >= 秘s.length()))
+            throw new StringIndexOutOfBoundsException(index);
+        return 秘s.charAt(index);
+//        return value[index];
+    }
+
+    /**
+     * Returns the character (Unicode code point) at the specified
+     * index. The index refers to {@code char} values
+     * (Unicode code units) and ranges from {@code 0} to
+     * {@link #length()}{@code  - 1}.
+     *
+     * <p> If the {@code char} value specified at the given index
+     * is in the high-surrogate range, the following index is less
+     * than the length of this sequence, and the
+     * {@code char} value at the following index is in the
+     * low-surrogate range, then the supplementary code point
+     * corresponding to this surrogate pair is returned. Otherwise,
+     * the {@code char} value at the given index is returned.
+     *
+     * @param      index the index to the {@code char} values
+     * @return     the code point value of the character at the
+     *             {@code index}
+     * @exception  IndexOutOfBoundsException  if the {@code index}
+     *             argument is negative or not less than the length of this
+     *             sequence.
+     */
+    public int codePointAt(int index) {
+        if ((index < 0) || (index >= 秘s.length())) {
+            throw new StringIndexOutOfBoundsException(index);
+        }
+        return 秘s.codePointAt(index);
+//        return Character.codePointAtImpl(value, index, count);
+    }
+
+    /**
+     * Returns the character (Unicode code point) before the specified
+     * index. The index refers to {@code char} values
+     * (Unicode code units) and ranges from {@code 1} to {@link
+     * #length()}.
+     *
+     * <p> If the {@code char} value at {@code (index - 1)}
+     * is in the low-surrogate range, {@code (index - 2)} is not
+     * negative, and the {@code char} value at {@code (index -
+     * 2)} is in the high-surrogate range, then the
+     * supplementary code point value of the surrogate pair is
+     * returned. If the {@code char} value at {@code index -
+     * 1} is an unpaired low-surrogate or a high-surrogate, the
+     * surrogate value is returned.
+     *
+     * @param     index the index following the code point that should be returned
+     * @return    the Unicode code point value before the given index.
+     * @exception IndexOutOfBoundsException if the {@code index}
+     *            argument is less than 1 or greater than the length
+     *            of this sequence.
+     */
+    public int codePointBefore(int index) {
+        int i = index - 1;
+        if ((i < 0) || (i >= 秘s.length())) {
+            throw new StringIndexOutOfBoundsException(index);
+        }
+        return 秘s.codePointAt(i);
+//        return Character.codePointBeforeImpl(value, index, 0);
+    }
+
+    /**
+     * Returns the number of Unicode code points in the specified text
+     * range of this sequence. The text range begins at the specified
+     * {@code beginIndex} and extends to the {@code char} at
+     * index {@code endIndex - 1}. Thus the length (in
+     * {@code char}s) of the text range is
+     * {@code endIndex-beginIndex}. Unpaired surrogates within
+     * this sequence count as one code point each.
+     *
+     * @param beginIndex the index to the first {@code char} of
+     * the text range.
+     * @param endIndex the index after the last {@code char} of
+     * the text range.
+     * @return the number of Unicode code points in the specified text
+     * range
+     * @exception IndexOutOfBoundsException if the
+     * {@code beginIndex} is negative, or {@code endIndex}
+     * is larger than the length of this sequence, or
+     * {@code beginIndex} is larger than {@code endIndex}.
+     */
+    public int codePointCount(int beginIndex, int endIndex) {
+        if (beginIndex < 0 || endIndex > 秘s.length() || beginIndex > endIndex) {
+            throw new IndexOutOfBoundsException();
+        }
+        return endIndex - beginIndex;
+//        return Character.codePointCountImpl(value, beginIndex, endIndex-beginIndex);
+    }
+
+    /**
+     * Returns the index within this sequence that is index from the
+     * given {@code index} by {@code codePointOffset} code
+     * points. Unpaired surrogates within the text range given by
+     * {@code index} and {@code codePointOffset} count as
+     * one code point each.
+     *
+     * @param index the index to be offset
+     * @param codePointOffset the offset in code points
+     * @return the index within this sequence
+     * @exception IndexOutOfBoundsException if {@code index}
+     *   is negative or larger then the length of this sequence,
+     *   or if {@code codePointOffset} is positive and the subsequence
+     *   starting with {@code index} has fewer than
+     *   {@code codePointOffset} code points,
+     *   or if {@code codePointOffset} is negative and the subsequence
+     *   before {@code index} has fewer than the absolute value of
+     *   {@code codePointOffset} code points.
+     */
+    public int offsetByCodePoints(int index, int codePointOffset) {
+        if (index < 0 || index + codePointOffset > 秘s.length()) {
+            throw new IndexOutOfBoundsException();
+        }
+        return index + codePointOffset;
+//        return Character.offsetByCodePointsImpl(value, 0, count, index, codePointOffset);
+    }
+
+    /**
+     * Characters are copied from this sequence into the
+     * destination character array {@code dst}. The first character to
+     * be copied is at index {@code srcBegin}; the last character to
+     * be copied is at index {@code srcEnd-1}. The total number of
+     * characters to be copied is {@code srcEnd-srcBegin}. The
+     * characters are copied into the subarray of {@code dst} starting
+     * at index {@code dstBegin} and ending at index:
+     * <pre>{@code
+     * dstbegin + (srcEnd-srcBegin) - 1
+     * }</pre>
+     *
+     * @param      srcBegin   start copying at this offset.
+     * @param      srcEnd     stop copying at this offset.
+     * @param      dst        the array to copy the data into.
+     * @param      pt   offset into {@code dst}.
+     * @throws     IndexOutOfBoundsException  if any of the following is true:
+     *             <ul>
+     *             <li>{@code srcBegin} is negative
+     *             <li>{@code dstBegin} is negative
+     *             <li>the {@code srcBegin} argument is greater than
+     *             the {@code srcEnd} argument.
+     *             <li>{@code srcEnd} is greater than
+     *             {@code this.length()}.
+     *             <li>{@code dstBegin+srcEnd-srcBegin} is greater than
+     *             {@code dst.length}
+     *             </ul>
+     */
+    public void getChars(int srcBegin, int srcEnd, char[] dst, int pt)
+    {
+        if (srcBegin < 0)
+            throw new StringIndexOutOfBoundsException(srcBegin);
+        if ((srcEnd < 0) || (srcEnd > 秘s.length()))
+            throw new StringIndexOutOfBoundsException(srcEnd);
+        if (srcBegin > srcEnd || pt < 0 || pt + (srcEnd - srcBegin) > dst.length) {
+            throw new StringIndexOutOfBoundsException(srcBegin > srcEnd ? 
+            		"srcBegin > srcEnd" : pt < 0 ? "pt < 0" : "pt + len > dst.length");
+        }
+        
+        String s = 秘s;
+        for (int i = srcBegin; i < srcEnd; i++) {
+        	
+            /**
+             * @j2sNative
+             * 
+             *    dst[pt++] = s[i];
+             */
+        }
+//        System.arraycopy(value, srcBegin, dst, dstBegin, srcEnd - srcBegin);
+    }
+
+    /**
+     * The character at the specified index is set to {@code ch}. This
+     * sequence is altered to represent a new character sequence that is
+     * identical to the old character sequence, except that it contains the
+     * character {@code ch} at position {@code index}.
+     * <p>
+     * The index argument must be greater than or equal to
+     * {@code 0}, and less than the length of this sequence.
+     *
+     * @param      index   the index of the character to modify.
+     * @param      ch      the new character.
+     * @throws     IndexOutOfBoundsException  if {@code index} is
+     *             negative or greater than or equal to {@code length()}.
+     */
+    public void setCharAt(int index, char ch) {
+        if ((index < 0) || (index >= 秘s.length()))
+            throw new StringIndexOutOfBoundsException(index);
+        
+        
+        /**
+         * @j2sNative
+         * this.秘s = this.秘s.substring(0, index) + ch + this.秘s.substring(index + 1);
+         */
+//        value[index] = ch;
+    }
+
+    /**
+     * Appends the string representation of the {@code Object} argument.
+     * <p>
+     * The overall effect is exactly as if the argument were converted
+     * to a string by the method {@link String#valueOf(Object)},
+     * and the characters of that string were then
+     * {@link #append(String) appended} to this character sequence.
+     *
+     * @param   obj   an {@code Object}.
+     * @return  a reference to this object.
+     */
+    public AbstractStringBuilder append(Object obj) {
+        /**
+         * @j2sNative
+         *  this.秘s += obj;
+         */
+    	return this;
+    }
+
+    /**
+     * Appends the specified string to this character sequence.
+     * <p>
+     * The characters of the {@code String} argument are appended, in
+     * order, increasing the length of this sequence by the length of the
+     * argument. If {@code str} is {@code null}, then the four
+     * characters {@code "null"} are appended.
+     * <p>
+     * Let <i>n</i> be the length of this character sequence just prior to
+     * execution of the {@code append} method. Then the character at
+     * index <i>k</i> in the new character sequence is equal to the character
+     * at index <i>k</i> in the old character sequence, if <i>k</i> is less
+     * than <i>n</i>; otherwise, it is equal to the character at index
+     * <i>k-n</i> in the argument {@code str}.
+     *
+     * @param   str   a string.
+     * @return  a reference to this object.
+     */
+    public AbstractStringBuilder append(String str) {
+        /**
+         * @j2sNative
+         *  this.秘s += str;
+         */
+//      if (str == null)
+//      return appendNull();
+//    
+//        int len = str.length();
+//        ensureCapacityInternal(count + len);
+//        str.getChars(0, len, value, count);
+//        count += len;
+        return this;
+    }
+
+    // Documentation in subclasses because of synchro difference
+    public AbstractStringBuilder append(StringBuffer sb) {
+        if (sb == null)
+            return appendNull();
+        
+        
+        
+        /**
+         * @j2sNative
+         * this.秘s += sb.秘s;
+         */
+//        
+//        int len = sb.length();
+//        ensureCapacityInternal(count + len);
+//        sb.getChars(0, len, value, count);
+//        count += len;
+        return this;
+    }
+
+    /**
+     * @since 1.8
+     */
+    AbstractStringBuilder append(AbstractStringBuilder asb) {
+        if (asb == null)
+            return appendNull();
+        return append(asb.toString());
+//        int len = asb.length();
+//        ensureCapacityInternal(count + len);
+//        asb.getChars(0, len, value, count);
+//        count += len;
+//        return this;
+    }
+
+    // Documentation in subclasses because of synchro difference
+    @Override
+    public AbstractStringBuilder append(CharSequence s) {
+        if (s == null)
+            return appendNull();
+        if (s instanceof String)
+            return this.append((String)s);
+        if (s instanceof AbstractStringBuilder)
+            return this.append(((AbstractStringBuilder)s).toString());
+        return append(s.toString());
+//        return this.append(s, 0, s.length());
+    }
+
+    AbstractStringBuilder appendNull() {
+        
+        
+        /**
+         * @j2sNative
+         * this.秘s += "null";
+         */
+//        int c = count;
+//        ensureCapacityInternal(c + 4);
+//        final char[] value = this.value;
+//        value[c++] = 'n';
+//        value[c++] = 'u';
+//        value[c++] = 'l';
+//        value[c++] = 'l';
+//        count = c;
+        return this;
+    }
+
+    /**
+     * Appends a subsequence of the specified {@code CharSequence} to this
+     * sequence.
+     * <p>
+     * Characters of the argument {@code s}, starting at
+     * index {@code start}, are appended, in order, to the contents of
+     * this sequence up to the (exclusive) index {@code end}. The length
+     * of this sequence is increased by the value of {@code end - start}.
+     * <p>
+     * Let <i>n</i> be the length of this character sequence just prior to
+     * execution of the {@code append} method. Then the character at
+     * index <i>k</i> in this character sequence becomes equal to the
+     * character at index <i>k</i> in this sequence, if <i>k</i> is less than
+     * <i>n</i>; otherwise, it is equal to the character at index
+     * <i>k+start-n</i> in the argument {@code s}.
+     * <p>
+     * If {@code s} is {@code null}, then this method appends
+     * characters as if the s parameter was a sequence containing the four
+     * characters {@code "null"}.
+     *
+     * @param   cs the sequence to append.
+     * @param   start   the starting index of the subsequence to be appended.
+     * @param   end     the end index of the subsequence to be appended.
+     * @return  a reference to this object.
+     * @throws     IndexOutOfBoundsException if
+     *             {@code start} is negative, or
+     *             {@code start} is greater than {@code end} or
+     *             {@code end} is greater than {@code s.length()}
+     */
+    @Override
+    public AbstractStringBuilder append(CharSequence cs, int start, int end) {
+        if (cs == null)
+            cs = "null";
+        if ((start < 0) || (start > end) || (end > cs.length()))
+            throw new IndexOutOfBoundsException(
+                "start " + start + ", end " + end + ", s.length() "
+                + cs.length());
+        if (cs instanceof String) {
+        	return append(((String) cs).substring(start, end));
+        } 
+        if (cs instanceof AbstractStringBuilder) {
+        	return append(((String) cs).substring(start, end));
+        } 
+        for (int i = start; i < end; i++) {
+        	char c = cs.charAt(i);
+            /** @j2sNative
+             *   this.秘s += c;
+             */
+        }
+//        int len = end - start;
+//        ensureCapacityInternal(count + len);
+//        for (int i = start, j = count; i < end; i++, j++)
+//            value[j] = cs.charAt(i);
+//        count += len;        
+        return this;
+    }
+
+    /**
+     * Appends the string representation of the {@code char} array
+     * argument to this sequence.
+     * <p>
+     * The characters of the array argument are appended, in order, to
+     * the contents of this sequence. The length of this sequence
+     * increases by the length of the argument.
+     * <p>
+     * The overall effect is exactly as if the argument were converted
+     * to a string by the method {@link String#valueOf(char[])},
+     * and the characters of that string were then
+     * {@link #append(String) appended} to this character sequence.
+     *
+     * @param   str   the characters to be appended.
+     * @return  a reference to this object.
+     */
+    public AbstractStringBuilder append(char[] str) {
+        
+        
+    	/**
+    	 * @j2sNative
+    	 * 
+    	 * this.秘s += str.join("");
+    	 */
+//        int len = str.length;
+//        ensureCapacityInternal(count + len);
+//        System.arraycopy(str, 0, value, count, len);
+//        count += len;
+        return this;
+    }
+
+    /**
+     * Appends the string representation of a subarray of the
+     * {@code char} array argument to this sequence.
+     * <p>
+     * Characters of the {@code char} array {@code str}, starting at
+     * index {@code offset}, are appended, in order, to the contents
+     * of this sequence. The length of this sequence increases
+     * by the value of {@code len}.
+     * <p>
+     * The overall effect is exactly as if the arguments were converted
+     * to a string by the method {@link String#valueOf(char[],int,int)},
+     * and the characters of that string were then
+     * {@link #append(String) appended} to this character sequence.
+     *
+     * @param   str      the characters to be appended.
+     * @param   offset   the index of the first {@code char} to append.
+     * @param   len      the number of {@code char}s to append.
+     * @return  a reference to this object.
+     * @throws IndexOutOfBoundsException
+     *         if {@code offset < 0} or {@code len < 0}
+     *         or {@code offset+len > str.length}
+     */
+    public AbstractStringBuilder append(char str[], int offset, int len) {
+        
+        
+    	/**
+    	 * @j2sNative
+    	 * 
+    	 * this.秘s += str.slice(offset, offset + len).join("");
+    	 */
+//      if (len > 0)                // let arraycopy report AIOOBE for len < 0
+//      ensureCapacityInternal(count + len);
+//  System.arraycopy(str, offset, value, count, len);
+//  count += len;
+        return this;
+    }
+
+    /**
+     * Appends the string representation of the {@code boolean}
+     * argument to the sequence.
+     * <p>
+     * The overall effect is exactly as if the argument were converted
+     * to a string by the method {@link String#valueOf(boolean)},
+     * and the characters of that string were then
+     * {@link #append(String) appended} to this character sequence.
+     *
+     * @param   b   a {@code boolean}.
+     * @return  a reference to this object.
+     */
+    public AbstractStringBuilder append(boolean b) {
+        /**
+         * @j2sNative
+         *  this.秘s += b;
+         */
+//        if (b) {
+//            ensureCapacityInternal(count + 4);
+//            value[count++] = 't';
+//            value[count++] = 'r';
+//            value[count++] = 'u';
+//            value[count++] = 'e';
+//        } else {
+//            ensureCapacityInternal(count + 5);
+//            value[count++] = 'f';
+//            value[count++] = 'a';
+//            value[count++] = 'l';
+//            value[count++] = 's';
+//            value[count++] = 'e';
+//        }
+        return this;
+    }
+
+    /**
+     * Appends the string representation of the {@code char}
+     * argument to this sequence.
+     * <p>
+     * The argument is appended to the contents of this sequence.
+     * The length of this sequence increases by {@code 1}.
+     * <p>
+     * The overall effect is exactly as if the argument were converted
+     * to a string by the method {@link String#valueOf(char)},
+     * and the character in that string were then
+     * {@link #append(String) appended} to this character sequence.
+     *
+     * @param   c   a {@code char}.
+     * @return  a reference to this object.
+     */
+    @Override
+    public AbstractStringBuilder append(char c) {
+        
+        
+        	/**
+        	 * @j2sNative
+        	 * 
+        	 * this.秘s += c;
+        	 */ 
+//        ensureCapacityInternal(count + 1);
+//        value[count++] = c;
+        return this;
+    }
+
+    /**
+     * Appends the string representation of the {@code int}
+     * argument to this sequence.
+     * <p>
+     * The overall effect is exactly as if the argument were converted
+     * to a string by the method {@link String#valueOf(int)},
+     * and the characters of that string were then
+     * {@link #append(String) appended} to this character sequence.
+     *
+     * @param   i   an {@code int}.
+     * @return  a reference to this object.
+     */
+    public AbstractStringBuilder append(int i) {
+        /**
+         * @j2sNative
+         *  this.秘s += i;
+         */
+    	return this;
+//        if (i == Integer.MIN_VALUE) {
+//            append("-2147483648");
+//            return this;
+//        }
+//        int appendedLength = (i < 0) ? Integer.stringSize(-i) + 1
+//                                     : Integer.stringSize(i);
+//        int spaceNeeded = count + appendedLength;
+//        ensureCapacityInternal(spaceNeeded);
+//        Integer.getChars(i, spaceNeeded, value);
+//        count = spaceNeeded;
+//        return this;
+    }
+
+    /**
+     * Appends the string representation of the {@code long}
+     * argument to this sequence.
+     * <p>
+     * The overall effect is exactly as if the argument were converted
+     * to a string by the method {@link String#valueOf(long)},
+     * and the characters of that string were then
+     * {@link #append(String) appended} to this character sequence.
+     *
+     * @param   l   a {@code long}.
+     * @return  a reference to this object.
+     */
+    public AbstractStringBuilder append(long l) {
+        /**
+         * @j2sNative
+         *  this.秘s += l;
+         */
+    	return this;
+//        if (l == Long.MIN_VALUE) {
+//            append("-9223372036854775808");
+//            return this;
+//        }
+//        int appendedLength = (l < 0) ? Long.stringSize(-l) + 1
+//                                     : Long.stringSize(l);
+//        int spaceNeeded = count + appendedLength;
+//        ensureCapacityInternal(spaceNeeded);
+//        Long.getChars(l, spaceNeeded, value);
+//        count = spaceNeeded;
+//        return this;
+    }
+
+    /**
+     * Appends the string representation of the {@code float}
+     * argument to this sequence.
+     * <p>
+     * The overall effect is exactly as if the argument were converted
+     * to a string by the method {@link String#valueOf(float)},
+     * and the characters of that string were then
+     * {@link #append(String) appended} to this character sequence.
+     *
+     * @param   f   a {@code float}.
+     * @return  a reference to this object.
+     */
+    public AbstractStringBuilder append(float f) {
+        /**
+         * @j2sNative
+         *  this.秘s += f;
+         */
+    	return this;
+        //FloatingDecimal.appendTo(f,this);
+    }
+
+    /**
+     * Appends the string representation of the {@code double}
+     * argument to this sequence.
+     * <p>
+     * The overall effect is exactly as if the argument were converted
+     * to a string by the method {@link String#valueOf(double)},
+     * and the characters of that string were then
+     * {@link #append(String) appended} to this character sequence.
+     *
+     * @param   d   a {@code double}.
+     * @return  a reference to this object.
+     */
+    public AbstractStringBuilder append(double d) {
+        /**
+         * @j2sNative
+         *  this.秘s += d;
+         */
+        return this;
+        //FloatingDecimal.appendTo(d,this);
+    }
+
+    /**
+     * Removes the characters in a substring of this sequence.
+     * The substring begins at the specified {@code start} and extends to
+     * the character at index {@code end - 1} or to the end of the
+     * sequence if no such character exists. If
+     * {@code start} is equal to {@code end}, no changes are made.
+     *
+     * @param      start  The beginning index, inclusive.
+     * @param      end    The ending index, exclusive.
+     * @return     This object.
+     * @throws     StringIndexOutOfBoundsException  if {@code start}
+     *             is negative, greater than {@code length()}, or
+     *             greater than {@code end}.
+     */
+    public AbstractStringBuilder delete(int start, int end) {
+        if (start < 0)
+            throw new StringIndexOutOfBoundsException(start);
+        if (end > 秘s.length())
+            end = 秘s.length();
+        if (start > end)
+            throw new StringIndexOutOfBoundsException();
+        
+        
+        /**
+         * @j2sNative
+         * 
+         * this.秘s = this.秘s.substring(0, start)+s.substring(end);
+         */
+//
+//        int len = end - start;
+//        if (len > 0) {
+//            System.arraycopy(value, start+len, value, start, count-end);
+//            count -= len;
+//        }
+        return this;
+    }
+
+    /**
+     * Appends the string representation of the {@code codePoint}
+     * argument to this sequence.
+     *
+     * <p> The argument is appended to the contents of this sequence.
+     * The length of this sequence increases by
+     * {@link Character#charCount(int) Character.charCount(codePoint)}.
+     *
+     * <p> The overall effect is exactly as if the argument were
+     * converted to a {@code char} array by the method
+     * {@link Character#toChars(int)} and the character in that array
+     * were then {@link #append(char[]) appended} to this character
+     * sequence.
+     *
+     * @param   codePoint   a Unicode code point
+     * @return  a reference to this object.
+     * @exception IllegalArgumentException if the specified
+     * {@code c} isn't a valid Unicode code point
+     */
+    public AbstractStringBuilder appendCodePoint(int c) {
+//        final int count = this.count;
+
+//        if (Character.isBmpCodePoint(c)) {
+//            ensureCapacityInternal(count + 1);
+//            value[count] = (char) c;
+//            this.count = count + 1;
+//        } else 
+    	try {
+//            if (Character.isValidCodePoint(c)) {
+                
+                
+                /**
+                 * @j2sNative
+                 * 
+                 * this.秘s += String.fromCodePoint(c);
+                 */
+
+//                ensureCapacityInternal(count + 2);
+//                Character.toSurrogates(c, value, count);
+//                this.count = count + 2;
+//            } else {
+    		
+    	} catch (Throwable t) {
+            throw new IllegalArgumentException();
+        }
+        return this;
+    }
+
+    /**
+     * Removes the {@code char} at the specified position in this
+     * sequence. This sequence is shortened by one {@code char}.
+     *
+     * <p>Note: If the character at the given index is a supplementary
+     * character, this method does not remove the entire character. If
+     * correct handling of supplementary characters is required,
+     * determine the number of {@code char}s to remove by calling
+     * {@code Character.charCount(thisSequence.codePointAt(index))},
+     * where {@code thisSequence} is this sequence.
+     *
+     * @param       index  Index of {@code char} to remove
+     * @return      This object.
+     * @throws      StringIndexOutOfBoundsException  if the {@code index}
+     *              is negative or greater than or equal to
+     *              {@code length()}.
+     */
+    public AbstractStringBuilder deleteCharAt(int index) {
+        if ((index < 0) || (index >= 秘s.length()))
+            throw new StringIndexOutOfBoundsException(index);
+        
+        
+        /**
+         * @j2sNative
+         * 
+         * this.秘s = this.秘s.substring(0, index) + this.秘s.substring(index + 1);
+         */
+//        System.arraycopy(value, index+1, value, index, count-index-1);
+//        count--;
+        return this;
+    }
+
+    /**
+     * Replaces the characters in a substring of this sequence
+     * with characters in the specified {@code String}. The substring
+     * begins at the specified {@code start} and extends to the character
+     * at index {@code end - 1} or to the end of the
+     * sequence if no such character exists. First the
+     * characters in the substring are removed and then the specified
+     * {@code String} is inserted at {@code start}. (This
+     * sequence will be lengthened to accommodate the
+     * specified String if necessary.)
+     *
+     * @param      start    The beginning index, inclusive.
+     * @param      end      The ending index, exclusive.
+     * @param      str   String that will replace previous contents.
+     * @return     This object.
+     * @throws     StringIndexOutOfBoundsException  if {@code start}
+     *             is negative, greater than {@code length()}, or
+     *             greater than {@code end}.
+     */
+    public AbstractStringBuilder replace(int start, int end, String str) {
+        if (start < 0)
+            throw new StringIndexOutOfBoundsException(start);
+        
+        int len = this.秘s.length();
+        if (start > len)
+            throw new StringIndexOutOfBoundsException("start > length()");
+        if (start > end)
+            throw new StringIndexOutOfBoundsException("start > end");
+        if (end > len)
+            end = len;
+//        int len = str.length();
+//        int newCount = count + len - (end - start);
+//        ensureCapacityInternal(newCount);
+//
+//        System.arraycopy(value, end, value, start + len, count - end);
+//        str.getChars(value, start);
+//        count = newCount;
+        /**
+         * @j2sNative
+         * 
+         * this.秘s = this.秘s.substring(0, start) + str + this.秘s.substring(end);
+         */
+        return this;
+    }
+
+    /**
+     * Returns a new {@code String} that contains a subsequence of
+     * characters currently contained in this character sequence. The
+     * substring begins at the specified index and extends to the end of
+     * this sequence.
+     *
+     * @param      start    The beginning index, inclusive.
+     * @return     The new string.
+     * @throws     StringIndexOutOfBoundsException  if {@code start} is
+     *             less than zero, or greater than the length of this object.
+     */
+    public String substring(int start) {
+        return substring(start, 秘s.length());
+    }
+
+    /**
+     * Returns a new character sequence that is a subsequence of this sequence.
+     *
+     * <p> An invocation of this method of the form
+     *
+     * <pre>{@code
+     * sb.subSequence(begin,&nbsp;end)}</pre>
+     *
+     * behaves in exactly the same way as the invocation
+     *
+     * <pre>{@code
+     * sb.substring(begin,&nbsp;end)}</pre>
+     *
+     * This method is provided so that this class can
+     * implement the {@link CharSequence} interface.
+     *
+     * @param      start   the start index, inclusive.
+     * @param      end     the end index, exclusive.
+     * @return     the specified subsequence.
+     *
+     * @throws  IndexOutOfBoundsException
+     *          if {@code start} or {@code end} are negative,
+     *          if {@code end} is greater than {@code length()},
+     *          or if {@code start} is greater than {@code end}
+     * @spec JSR-51
+     */
+    @Override
     public CharSequence subSequence(int start, int end) {
         return substring(start, end);
     }
 
     /**
-     * Searches in this StringBuffer for the first index of the specified
-     * character. The search for the character starts at the beginning and moves
-     * towards the end.
-     * 
-     * 
-     * @param string the string to find
-     * @return the index in this StringBuffer of the specified character, -1 if
-     *         the character isn't found
-     * 
-     * @see #lastIndexOf(String)
-     * 
-     * @since 1.4
+     * Returns a new {@code String} that contains a subsequence of
+     * characters currently contained in this sequence. The
+     * substring begins at the specified {@code start} and
+     * extends to the character at index {@code end - 1}.
+     *
+     * @param      start    The beginning index, inclusive.
+     * @param      end      The ending index, exclusive.
+     * @return     The new string.
+     * @throws     StringIndexOutOfBoundsException  if {@code start}
+     *             or {@code end} are negative or greater than
+     *             {@code length()}, or {@code start} is
+     *             greater than {@code end}.
      */
-    public int indexOf(String string) {
-        return indexOf(string, 0);
-    }
-
-    /**
-     * Searches in this StringBuffer for the index of the specified character.
-     * The search for the character starts at the specified offset and moves
-     * towards the end.
-     * 
-     * @param subString the string to find
-     * @param start the starting offset
-     * @return the index in this StringBuffer of the specified character, -1 if
-     *         the character isn't found
-     * 
-     * @see #lastIndexOf(String,int)
-     * 
-     * @since 1.4
-     */
-    public int indexOf(String subString, int start) {
+    public String substring(int start, int end) {
         if (start < 0)
-            start = 0;
-        int subCount = subString.length();
-        if (subCount > 0) {
-            if (subCount + start > count)
-                return -1;
-            // TODO optimize charAt to direct array access
-            char firstChar = subString.charAt(0);
-            while (true) {
-                int i = start;
-                boolean found = false;
-                for (; i < count; i++)
-                    if (value[i] == firstChar) {
-                        found = true;
-                        break;
-                    }
-                if (!found || subCount + i > count)
-                    return -1; // handles subCount > count || start >= count
-                int o1 = i, o2 = 0;
-                while (++o2 < subCount && value[++o1] == subString.charAt(o2)) {
-                    // Intentionally empty
-                }
-                if (o2 == subCount)
-                    return i;
-                start = i + 1;
-            }
-        }
-        return (start < count || start == 0) ? start : count;
-    }
-
-    /**
-     * Searches in this StringBuffer for the last index of the specified
-     * character. The search for the character starts at the end and moves
-     * towards the beginning.
-     * 
-     * @param string the string to find
-     * @return the index in this StringBuffer of the specified character, -1 if
-     *         the character isn't found
-     * @throws NullPointerException if the <code>string</code> parameter is
-     *         <code>null</code>.
-     * 
-     * @see String#lastIndexOf(java.lang.String)
-     * 
-     * @since 1.4
-     */
-    public int lastIndexOf(String string) {
-        return lastIndexOf(string, count);
-    }
-
-    /**
-     * Searches in this StringBuffer for the index of the specified character.
-     * The search for the character starts at the specified offset and moves
-     * towards the beginning.
-     * 
-     * @param subString the string to find
-     * @param start the starting offset
-     * @return the index in this StringBuffer of the specified character, -1 if
-     *         the character isn't found
-     * @throws NullPointerException if the <code>subString</code> parameter is
-     *         <code>null</code>.
-     * @see String#lastIndexOf(java.lang.String,int)
-     * @since 1.4
-     */
-    public int lastIndexOf(String subString, int start) {
-        int subCount = subString.length();
-        if (subCount <= count && start >= 0) {
-            if (subCount > 0) {
-                if (start > count - subCount)
-                    start = count - subCount; // count and subCount are both
-                // >= 1
-                // TODO optimize charAt to direct array access
-                char firstChar = subString.charAt(0);
-                while (true) {
-                    int i = start;
-                    boolean found = false;
-                    for (; i >= 0; --i)
-                        if (value[i] == firstChar) {
-                            found = true;
-                            break;
-                        }
-                    if (!found)
-                        return -1;
-                    int o1 = i, o2 = 0;
-                    while (++o2 < subCount
-                            && value[++o1] == subString.charAt(o2)) {
-                        // Intentionally empty
-                    }
-                    if (o2 == subCount)
-                        return i;
-                    start = i - 1;
-                }
-            }
-            return start < count ? start : count;
-        }
-        return -1;
-    }
-
-    /**
-     * <p>
-     * Trims off any extra capacity beyond the current length. Note, this method
-     * is NOT guaranteed to change the capacity of this object.
-     * </p>
-     * 
-     * @since 1.5
-     */
-    public void trimToSize() {
-        if (count < value.length) {
-            char[] newValue = new char[count];
-            System.arraycopy(value, 0, newValue, 0, count);
-            value = newValue;
-            shared = false;
+            throw new StringIndexOutOfBoundsException(start);
+        if (end > 秘s.length())
+            throw new StringIndexOutOfBoundsException(end);
+        if (start > end)
+            throw new StringIndexOutOfBoundsException(end - start);
+        
+        
+        /**
+         * @j2sNative
+         * 
+         * return this.秘s.substring(start, end);
+         */
+        {
+        	return null;//new String(value, start, end - start);
         }
     }
 
     /**
-     * <p>
-     * Retrieves the Unicode code point value at the <code>index</code>.
-     * </p>
-     * 
-     * @param index The index to the <code>char</code> code unit within this
-     *        object.
-     * @return The Unicode code point value.
-     * @throws IndexOutOfBoundsException if <code>index</code> is negative or
-     *         greater than or equal to {@link #length()}.
-     * @see Character
-     * @see Character#codePointAt(char[], int, int)
-     * @since 1.5
+     * Inserts the string representation of a subarray of the {@code str}
+     * array argument into this sequence. The subarray begins at the
+     * specified {@code offset} and extends {@code len} {@code char}s.
+     * The characters of the subarray are inserted into this sequence at
+     * the position indicated by {@code index}. The length of this
+     * sequence increases by {@code len} {@code char}s.
+     *
+     * @param      index    position at which to insert subarray.
+     * @param      str       A {@code char} array.
+     * @param      offset   the index of the first {@code char} in subarray to
+     *             be inserted.
+     * @param      len      the number of {@code char}s in the subarray to
+     *             be inserted.
+     * @return     This object
+     * @throws     StringIndexOutOfBoundsException  if {@code index}
+     *             is negative or greater than {@code length()}, or
+     *             {@code offset} or {@code len} are negative, or
+     *             {@code (offset+len)} is greater than
+     *             {@code str.length}.
      */
-    public int codePointAt(int index) {
-        if (index < 0 || index >= count)
+    public AbstractStringBuilder insert(int index, char[] str, int offset,
+                                        int len)
+    {
+        if ((index < 0) || (index > 秘s.length()))
             throw new StringIndexOutOfBoundsException(index);
-        return Character.codePointAt(value, index, count);
+        if ((offset < 0) || (len < 0) || (offset + len > str.length))
+            throw new StringIndexOutOfBoundsException(
+                "offset " + offset + ", len " + len + ", str.length "
+                + str.length);
+        
+        
+        	/**
+        	 * @j2sNative
+        	 * 
+        	 * this.秘s = this.秘s.substring(0, index) + str.slice(offset, offset + len).join("") + this.秘s.substring(index);
+        	 */ 
+//        ensureCapacityInternal(count + len);
+//        System.arraycopy(value, index, value, index + len, count - index);
+//        System.arraycopy(str, offset, value, index, len);
+//        count += len;
+        return this;
     }
 
     /**
+     * Inserts the string representation of the {@code Object}
+     * argument into this character sequence.
      * <p>
-     * Retrieves the Unicode code point value that precedes the
-     * <code>index</code>.
-     * </p>
-     * 
-     * @param index The index to the <code>char</code> code unit within this
-     *        object.
-     * @return The Unicode code point value.
-     * @throws IndexOutOfBoundsException if <code>index</code> is less than 1
-     *         or greater than {@link #length()}.
-     * @see Character
-     * @see Character#codePointBefore(char[], int, int)
-     * @since 1.5
+     * The overall effect is exactly as if the second argument were
+     * converted to a string by the method {@link String#valueOf(Object)},
+     * and the characters of that string were then
+     * {@link #insert(int,String) inserted} into this character
+     * sequence at the indicated index.
+     * <p>
+     * The {@code index} argument must be greater than or equal to
+     * {@code 0}, and less than or equal to the {@linkplain #length() length}
+     * of this sequence.
+     *
+     * @param      index   the index.
+     * @param      obj      an {@code Object}.
+     * @return     a reference to this object.
+     * @throws     StringIndexOutOfBoundsException  if the index is invalid.
      */
-    public int codePointBefore(int index) {
-        if (index < 1 || index > count)
+    public AbstractStringBuilder insert(int index, Object obj) {
+        return insert(index, "" + obj);
+    }
+
+    /**
+     * Inserts the string into this character sequence.
+     * <p>
+     * The characters of the {@code String} argument are inserted, in
+     * order, into this sequence at the indicated index, moving up any
+     * characters originally above that position and increasing the length
+     * of this sequence by the length of the argument. If
+     * {@code str} is {@code null}, then the four characters
+     * {@code "null"} are inserted into this sequence.
+     * <p>
+     * The character at index <i>k</i> in the new character sequence is
+     * equal to:
+     * <ul>
+     * <li>the character at index <i>k</i> in the old character sequence, if
+     * <i>k</i> is less than {@code index}
+     * <li>the character at index <i>k</i>{@code -index} in the
+     * argument {@code str}, if <i>k</i> is not less than
+     * {@code index} but is less than {@code index+str.length()}
+     * <li>the character at index <i>k</i>{@code -str.length()} in the
+     * old character sequence, if <i>k</i> is not less than
+     * {@code index+str.length()}
+     * </ul><p>
+     * The {@code index} argument must be greater than or equal to
+     * {@code 0}, and less than or equal to the {@linkplain #length() length}
+     * of this sequence.
+     *
+     * @param      index   the index.
+     * @param      str      a string.
+     * @return     a reference to this object.
+     * @throws     StringIndexOutOfBoundsException  if the index is invalid.
+     */
+    public AbstractStringBuilder insert(int index, String str) {
+        if ((index < 0) || (index > 秘s.length()))
             throw new StringIndexOutOfBoundsException(index);
-        return Character.codePointBefore(value, index);
+        if (str == null)
+            str = "null";
+        
+        
+        	/**
+        	 * @j2sNative
+        	 * 
+        	 * this.秘s = this.秘s.substring(0, index) + str + this.秘s.substring(index);
+        	 */ 
+//        int len = str.length();
+//        ensureCapacityInternal(count + len);
+//        System.arraycopy(value, index, value, index + len, count - index);
+//        str.getChars(value, index);
+//        count += len;
+        return this;
     }
 
     /**
+     * Inserts the string representation of the {@code char} array
+     * argument into this sequence.
      * <p>
-     * Calculates the number of Unicode code points between
-     * <code>beginIndex</code> and <code>endIndex</code>.
-     * </p>
-     * 
-     * @param beginIndex The inclusive beginning index of the subsequence.
-     * @param endIndex The exclusive end index of the subsequence.
-     * @return The number of Unicode code points in the subsequence.
-     * @throws IndexOutOfBoundsException if <code>beginIndex</code> is
-     *         negative or greater than <code>endIndex</code> or
-     *         <code>endIndex</code> is greater than {@link #length()}.
-     * @since 1.5
+     * The characters of the array argument are inserted into the
+     * contents of this sequence at the position indicated by
+     * {@code index}. The length of this sequence increases by
+     * the length of the argument.
+     * <p>
+     * The overall effect is exactly as if the second argument were
+     * converted to a string by the method {@link String#valueOf(char[])},
+     * and the characters of that string were then
+     * {@link #insert(int,String) inserted} into this character
+     * sequence at the indicated index.
+     * <p>
+     * The {@code index} argument must be greater than or equal to
+     * {@code 0}, and less than or equal to the {@linkplain #length() length}
+     * of this sequence.
+     *
+     * @param      index   the index.
+     * @param      str      a character array.
+     * @return     a reference to this object.
+     * @throws     StringIndexOutOfBoundsException  if the index is invalid.
      */
-    public int codePointCount(int beginIndex, int endIndex) {
-        if (beginIndex < 0 || endIndex > count || beginIndex > endIndex)
-            throw new StringIndexOutOfBoundsException();
-        return Character.codePointCount(value, beginIndex, endIndex
-                - beginIndex);
+    public AbstractStringBuilder insert(int index, char[] str) {
+        if ((index < 0) || (index > length()))
+            throw new StringIndexOutOfBoundsException(index);
+        
+        
+        	/**
+        	 * @j2sNative
+        	 * 
+        	 * this.秘s = this.秘s.substring(0, index) + str.join() + this.秘s.substring(index);
+        	 */ 
+//        int len = str.length;
+//        ensureCapacityInternal(count + len);
+//        System.arraycopy(value, index, value, index + len, count - index);
+//        System.arraycopy(str, 0, value, index, len);
+//        count += len;
+        return this;
     }
 
     /**
+     * Inserts the specified {@code CharSequence} into this sequence.
      * <p>
-     * Returns the index within this object that is offset from
-     * <code>index</code> by <code>codePointOffset</code> code points.
-     * </p>
-     * 
-     * @param index The index within this object to calculate the offset from.
-     * @param codePointOffset The number of code points to count.
-     * @return The index within this object that is the offset.
-     * @throws IndexOutOfBoundsException if <code>index</code> is negative or
-     *         greater than {@link #length()} or if there aren't enough code
-     *         points before or after <code>index</code> to match
-     *         <code>codePointOffset</code>.
-     * @since 1.5
+     * The characters of the {@code CharSequence} argument are inserted,
+     * in order, into this sequence at the indicated offset, moving up
+     * any characters originally above that position and increasing the length
+     * of this sequence by the length of the argument s.
+     * <p>
+     * The result of this method is exactly the same as if it were an
+     * invocation of this object's
+     * {@link #insert(int,CharSequence,int,int) insert}(index, s, 0, s.length())
+     * method.
+     *
+     * <p>If {@code s} is {@code null}, then the four characters
+     * {@code "null"} are inserted into this sequence.
+     *
+     * @param      index   the offset.
+     * @param      s the sequence to be inserted
+     * @return     a reference to this object.
+     * @throws     IndexOutOfBoundsException  if the offset is invalid.
      */
-    public int offsetByCodePoints(int index, int codePointOffset) {
-        return Character.offsetByCodePoints(value, 0, count, index,
-                codePointOffset);
+    public AbstractStringBuilder insert(int index, CharSequence s) {
+        if (s == null)
+            s = "null";
+        if (s instanceof String)
+            return insert(index, (String)s);
+        if (s instanceof AbstractStringBuilder)
+            return this.insert(index, ((AbstractStringBuilder)s).toString());
+        return this.insert(index, s, 0, s.length());
     }
+
+    /**
+     * Inserts a subsequence of the specified {@code CharSequence} into
+     * this sequence.
+     * <p>
+     * The subsequence of the argument {@code s} specified by
+     * {@code start} and {@code end} are inserted,
+     * in order, into this sequence at the specified destination offset, moving
+     * up any characters originally above that position. The length of this
+     * sequence is increased by {@code end - start}.
+     * <p>
+     * The character at index <i>k</i> in this sequence becomes equal to:
+     * <ul>
+     * <li>the character at index <i>k</i> in this sequence, if
+     * <i>k</i> is less than {@code index}
+     * <li>the character at index <i>k</i>{@code +start-index} in
+     * the argument {@code s}, if <i>k</i> is greater than or equal to
+     * {@code index} but is less than {@code index+end-start}
+     * <li>the character at index <i>k</i>{@code -(end-start)} in this
+     * sequence, if <i>k</i> is greater than or equal to
+     * {@code index+end-start}
+     * </ul><p>
+     * The {@code index} argument must be greater than or equal to
+     * {@code 0}, and less than or equal to the {@linkplain #length() length}
+     * of this sequence.
+     * <p>The start argument must be nonnegative, and not greater than
+     * {@code end}.
+     * <p>The end argument must be greater than or equal to
+     * {@code start}, and less than or equal to the length of s.
+     *
+     * <p>If {@code s} is {@code null}, then this method inserts
+     * characters as if the s parameter was a sequence containing the four
+     * characters {@code "null"}.
+     *
+     * @param      index   the offset in this sequence.
+     * @param      cs       the sequence to be inserted.
+     * @param      start   the starting index of the subsequence to be inserted.
+     * @param      end     the end index of the subsequence to be inserted.
+     * @return     a reference to this object.
+     * @throws     IndexOutOfBoundsException  if {@code index}
+     *             is negative or greater than {@code this.length()}, or
+     *              {@code start} or {@code end} are negative, or
+     *              {@code start} is greater than {@code end} or
+     *              {@code end} is greater than {@code s.length()}
+     */
+     public AbstractStringBuilder insert(int index, CharSequence cs,
+                                         int start, int end) {
+        if (cs == null)
+            cs = "null";
+        if ((index < 0) || (index > this.length()))
+            throw new IndexOutOfBoundsException("index "+index);
+        if ((start < 0) || (end < 0) || (start > end) || (end > cs.length()))
+            throw new IndexOutOfBoundsException(
+                "start " + start + ", end " + end + ", s.length() "
+                + cs.length());
+        if (cs instanceof String)
+            return insert(index, ((String)cs).substring(start, end));
+        if (cs instanceof AbstractStringBuilder)
+            return insert(index, ((AbstractStringBuilder)cs).substring(start, end));
+        char[] c = new char[end - start];
+        for (int i=start, pt = 0; i<end; i++)
+        	c[pt++] = cs.charAt(i);
+        return insert(index, c);
+//      int len = end - start;
+//      ensureCapacityInternal(count + len);
+//      System.arraycopy(value, index, value, index + len,
+//                       count - index);
+//            value[index++] = s.charAt(i);
+//        }
+//        count += len;
+//        return this;
+    }
+
+    /**
+     * Inserts the string representation of the {@code boolean}
+     * argument into this sequence.
+     * <p>
+     * The overall effect is exactly as if the second argument were
+     * converted to a string by the method {@link String#valueOf(boolean)},
+     * and the characters of that string were then
+     * {@link #insert(int,String) inserted} into this character
+     * sequence at the indicated index.
+     * <p>
+     * The {@code index} argument must be greater than or equal to
+     * {@code 0}, and less than or equal to the {@linkplain #length() length}
+     * of this sequence.
+     *
+     * @param      index   the index.
+     * @param      b        a {@code boolean}.
+     * @return     a reference to this object.
+     * @throws     StringIndexOutOfBoundsException  if the index is invalid.
+     */
+    public AbstractStringBuilder insert(int index, boolean b) {
+        return insert(index, b ? "true" : "false");
+    }
+
+    /**
+     * Inserts the string representation of the {@code char}
+     * argument into this sequence.
+     * <p>
+     * The overall effect is exactly as if the second argument were
+     * converted to a string by the method {@link String#valueOf(char)},
+     * and the character in that string were then
+     * {@link #insert(int,String) inserted} into this character
+     * sequence at the indicated index.
+     * <p>
+     * The {@code index} argument must be greater than or equal to
+     * {@code 0}, and less than or equal to the {@linkplain #length() length}
+     * of this sequence.
+     *
+     * @param      index   the index.
+     * @param      c        a {@code char}.
+     * @return     a reference to this object.
+     * @throws     IndexOutOfBoundsException  if the index is invalid.
+     */
+    public AbstractStringBuilder insert(int index, char c) {
+        
+        
+        	/**
+        	 * @j2sNative
+        	 * 
+        	 * this.秘s = this.秘s.substring(0, index) + c + this.秘s.substring(index);
+        	 */ 
+//        ensureCapacityInternal(count + 1);
+//        System.arraycopy(value, index, value, index + 1, count - index);
+//        value[index] = c;
+//        count += 1;
+        return this;
+    }
+
+    /**
+     * Inserts the string representation of the second {@code int}
+     * argument into this sequence.
+     * <p>
+     * The overall effect is exactly as if the second argument were
+     * converted to a string by the method {@link String#valueOf(int)},
+     * and the characters of that string were then
+     * {@link #insert(int,String) inserted} into this character
+     * sequence at the indicated index.
+     * <p>
+     * The {@code index} argument must be greater than or equal to
+     * {@code 0}, and less than or equal to the {@linkplain #length() length}
+     * of this sequence.
+     *
+     * @param      index   the index.
+     * @param      i        an {@code int}.
+     * @return     a reference to this object.
+     * @throws     StringIndexOutOfBoundsException  if the index is invalid.
+     */
+    public AbstractStringBuilder insert(int index, int i) {
+        return insert(index, "" + i);
+    }
+
+    /**
+     * Inserts the string representation of the {@code long}
+     * argument into this sequence.
+     * <p>
+     * The overall effect is exactly as if the second argument were
+     * converted to a string by the method {@link String#valueOf(long)},
+     * and the characters of that string were then
+     * {@link #insert(int,String) inserted} into this character
+     * sequence at the indicated index.
+     * <p>
+     * The {@code index} argument must be greater than or equal to
+     * {@code 0}, and less than or equal to the {@linkplain #length() length}
+     * of this sequence.
+     *
+     * @param      index   the index.
+     * @param      l        a {@code long}.
+     * @return     a reference to this object.
+     * @throws     StringIndexOutOfBoundsException  if the index is invalid.
+     */
+    public AbstractStringBuilder insert(int index, long l) {
+        return insert(index, "" + l);
+    }
+
+    /**
+     * Inserts the string representation of the {@code float}
+     * argument into this sequence.
+     * <p>
+     * The overall effect is exactly as if the second argument were
+     * converted to a string by the method {@link String#valueOf(float)},
+     * and the characters of that string were then
+     * {@link #insert(int,String) inserted} into this character
+     * sequence at the indicated index.
+     * <p>
+     * The {@code index} argument must be greater than or equal to
+     * {@code 0}, and less than or equal to the {@linkplain #length() length}
+     * of this sequence.
+     *
+     * @param      index   the index.
+     * @param      f        a {@code float}.
+     * @return     a reference to this object.
+     * @throws     StringIndexOutOfBoundsException  if the index is invalid.
+     */
+    public AbstractStringBuilder insert(int index, float f) {
+        return insert(index, "" + f);
+    }
+
+    /**
+     * Inserts the string representation of the {@code double}
+     * argument into this sequence.
+     * <p>
+     * The overall effect is exactly as if the second argument were
+     * converted to a string by the method {@link String#valueOf(double)},
+     * and the characters of that string were then
+     * {@link #insert(int,String) inserted} into this character
+     * sequence at the indicated index.
+     * <p>
+     * The {@code index} argument must be greater than or equal to
+     * {@code 0}, and less than or equal to the {@linkplain #length() length}
+     * of this sequence.
+     *
+     * @param      index   the index.
+     * @param      d        a {@code double}.
+     * @return     a reference to this object.
+     * @throws     StringIndexOutOfBoundsException  if the index is invalid.
+     */
+    public AbstractStringBuilder insert(int index, double d) {
+        return insert(index, "" + d);
+    }
+
+    /**
+     * Returns the index within this string of the first occurrence of the
+     * specified substring. The integer returned is the smallest value
+     * <i>k</i> such that:
+     * <pre>{@code
+     * this.toString().startsWith(str, <i>k</i>)
+     * }</pre>
+     * is {@code true}.
+     *
+     * @param   str   any string.
+     * @return  if the string argument occurs as a substring within this
+     *          object, then the index of the first character of the first
+     *          such substring is returned; if it does not occur as a
+     *          substring, {@code -1} is returned.
+     */
+    public int indexOf(String str) {
+        return indexOf(str, 0);
+    }
+
+    /**
+     * Returns the index within this string of the first occurrence of the
+     * specified substring, starting at the specified index.  The integer
+     * returned is the smallest value {@code k} for which:
+     * <pre>{@code
+     *     k >= Math.min(fromIndex, this.length()) &&
+     *                   this.toString().startsWith(str, k)
+     * }</pre>
+     * If no such value of <i>k</i> exists, then -1 is returned.
+     *
+     * @param   str         the substring for which to search.
+     * @param   fromIndex   the index from which to start the search.
+     * @return  the index within this string of the first occurrence of the
+     *          specified substring, starting at the specified index.
+     */
+    public int indexOf(String str, int fromIndex) {
+        
+        
+        	/**
+        	 * @j2sNative
+        	 * 
+        	 * return this.秘s.indexOf(str, fromIndex);
+        	 */ 
+        {
+        return 0;//String.indexOf(value, 0, count, str, fromIndex);
+        }
+    }
+
+    /**
+     * Returns the index within this string of the rightmost occurrence
+     * of the specified substring.  The rightmost empty string "" is
+     * considered to occur at the index value {@code this.length()}.
+     * The returned index is the largest value <i>k</i> such that
+     * <pre>{@code
+     * this.toString().startsWith(str, k)
+     * }</pre>
+     * is true.
+     *
+     * @param   str   the substring to search for.
+     * @return  if the string argument occurs one or more times as a substring
+     *          within this object, then the index of the first character of
+     *          the last such substring is returned. If it does not occur as
+     *          a substring, {@code -1} is returned.
+     */
+    public int lastIndexOf(String str) {
+        return lastIndexOf(str, 秘s.length());
+    }
+
+    /**
+     * Returns the index within this string of the last occurrence of the
+     * specified substring. The integer returned is the largest value <i>k</i>
+     * such that:
+     * <pre>{@code
+     *     k <= Math.min(fromIndex, this.length()) &&
+     *                   this.toString().startsWith(str, k)
+     * }</pre>
+     * If no such value of <i>k</i> exists, then -1 is returned.
+     *
+     * @param   str         the substring to search for.
+     * @param   fromIndex   the index to start the search from.
+     * @return  the index within this sequence of the last occurrence of the
+     *          specified substring.
+     */
+    public int lastIndexOf(String str, int fromIndex) {
+        
+        
+        	/**
+        	 * @j2sNative
+        	 * 
+        	 * return this.秘s.lastIndexOf(str, fromIndex);
+        	 */ 
+        {
+        return 0;
+        }
+
+        //return String.lastIndexOf(value, 0, count, str, fromIndex);
+    }
+
+    /**
+     * Causes this character sequence to be replaced by the reverse of
+     * the sequence. If there are any surrogate pairs included in the
+     * sequence, these are treated as single characters for the
+     * reverse operation. Thus, the order of the high-low surrogates
+     * is never reversed.
+     *
+     * Let <i>n</i> be the character length of this character sequence
+     * (not the length in {@code char} values) just prior to
+     * execution of the {@code reverse} method. Then the
+     * character at index <i>k</i> in the new character sequence is
+     * equal to the character at index <i>n-k-1</i> in the old
+     * character sequence.
+     *
+     * <p>Note that the reverse operation may result in producing
+     * surrogate pairs that were unpaired low-surrogates and
+     * high-surrogates before the operation. For example, reversing
+     * "\u005CuDC00\u005CuD800" produces "\u005CuD800\u005CuDC00" which is
+     * a valid surrogate pair.
+     *
+     * @return  a reference to this object.
+     */
+    public AbstractStringBuilder reverse() {
+        
+        
+        	/**
+        	 * @j2sNative
+        	 * 
+        	 * this.秘s.split("").reverse().join("");
+        	 */ 
+//    	
+//    	
+//        boolean hasSurrogates = false;
+//        int n = count - 1;
+//        for (int j = (n-1) >> 1; j >= 0; j--) {
+//            int k = n - j;
+//            char cj = value[j];
+//            char ck = value[k];
+//            value[j] = ck;
+//            value[k] = cj;
+//            if (Character.isSurrogate(cj) ||
+//                Character.isSurrogate(ck)) {
+//                hasSurrogates = true;
+//            }
+//        }
+//        if (hasSurrogates) {
+//            reverseAllValidSurrogatePairs();
+//        }
+        return this;
+    }
+
+//    /** Outlined helper method for reverse() */
+//    private void reverseAllValidSurrogatePairs() {
+//        for (int i = 0; i < count - 1; i++) {
+//            char c2 = value[i];
+//            if (Character.isLowSurrogate(c2)) {
+//                char c1 = value[i + 1];
+//                if (Character.isHighSurrogate(c1)) {
+//                    value[i++] = c1;
+//                    value[i] = c2;
+//                }
+//            }
+//        }
+//    }
+//
+    /**
+     * Returns a string representing the data in this sequence.
+     * A new {@code String} object is allocated and initialized to
+     * contain the character sequence currently represented by this
+     * object. This {@code String} is then returned. Subsequent
+     * changes to this sequence do not affect the contents of the
+     * {@code String}.
+     *
+     * @return  a string representation of this sequence of characters.
+     */
+    @Override
+    public abstract String toString();
+
+    /**
+     * Needed by {@code String} for the contentEquals method.
+     */
+    final char[] getValue() {
+    	/**
+    	 * @j2sNative return this.秘s.split("");
+    	 */
+    	{
+    	return null;
+    	}
+        //return value;
+    }
+    
+
 }

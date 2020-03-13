@@ -64,7 +64,6 @@ import java.util.Date;
  * redirected host/URL.
  *
  * @see     java.net.HttpURLConnection#disconnect()
- * @since JDK1.1
  */
 abstract public class HttpURLConnection extends URLConnection {
     /* instance variables */

@@ -249,6 +249,10 @@ public class JDialog extends JSDialog implements WindowConstants,
         this(owner, null, modal);
     }
 
+    public JDialog(JFrame owner, boolean modal) {
+        this(owner, null, modal);
+    }
+
     public JDialog(Frame owner, boolean modal) {
         this(owner, null, modal);
     }

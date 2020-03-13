@@ -398,38 +398,36 @@ public abstract class GraphicsEnvironment {
      * @since 1.4
      */
     public Point getCenterPoint()  {
-    	return null; // TODO
-//    // Default implementation: return the center of the usable bounds of the
-//    // default screen device.
-//        Rectangle usableBounds =
-//         SunGraphicsEnvironment.getUsableBounds(getDefaultScreenDevice());
-//        return new Point((usableBounds.width / 2) + usableBounds.x,
-//                         (usableBounds.height / 2) + usableBounds.y);
+    	// SwingJS
+    	Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+    	return new Point(dim.width/2, dim.height/2);
     }
 
-//    /**
-//     * Returns the maximum bounds for centered Windows.
-//     * These bounds account for objects in the native windowing system such as
-//     * task bars and menu bars.  The returned bounds will reside on a single
-//     * display with one exception: on multi-screen systems where Windows should
-//     * be centered across all displays, this method returns the bounds of the
-//     * entire display area.
-//     * <p>
-//     * To get the usable bounds of a single display, use
-//     * <code>GraphicsConfiguration.getBounds()</code> and
-//     * <code>Toolkit.getScreenInsets()</code>.
-//     * @return  the maximum bounds for centered Windows
-//     *
-//     * @exception HeadlessException if isHeadless() returns true
-//     * @see #getCenterPoint
-//     * @see GraphicsConfiguration#getBounds
-//     * @see Toolkit#getScreenInsets
-//     * @since 1.4
-//     */
-//    public Rectangle getMaximumWindowBounds() {
-//    	return null; // toDO?
-////    // Default implementation: return the usable bounds of the default screen
-////    // device.  This is correct for Microsoft Windows and non-Xinerama X11.
-////        return SunGraphicsEnvironment.getUsableBounds(getDefaultScreenDevice());
-//    }
+    /**
+     * Returns the maximum bounds for centered Windows.
+     * These bounds account for objects in the native windowing system such as
+     * task bars and menu bars.  The returned bounds will reside on a single
+     * display with one exception: on multi-screen systems where Windows should
+     * be centered across all displays, this method returns the bounds of the
+     * entire display area.
+     * <p>
+     * To get the usable bounds of a single display, use
+     * <code>GraphicsConfiguration.getBounds()</code> and
+     * <code>Toolkit.getScreenInsets()</code>.
+     * @return  the maximum bounds for centered Windows
+     *
+     * @exception HeadlessException if isHeadless() returns true
+     * @see #getCenterPoint
+     * @see GraphicsConfiguration#getBounds
+     * @see Toolkit#getScreenInsets
+     * @since 1.4
+     */
+    public Rectangle getMaximumWindowBounds() {
+    	// SwingJS
+    	Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+    	return new Rectangle(0, 0, dim.width, dim.height);
+//    // Default implementation: return the usable bounds of the default screen
+//    // device.  This is correct for Microsoft Windows and non-Xinerama X11.
+//        return SunGraphicsEnvironment.getUsableBounds(getDefaultScreenDevice());
+    }
 }

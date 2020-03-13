@@ -468,8 +468,17 @@ public class JSToolkit extends SunToolkit
 //		// NO LONGER NECESSARY :)
 //	}
 	
+	/**
+	 * Get the applet associated with the specified component or, if that is null,
+	 * the current thread. This could be an important issue if one applet is running
+	 * code in a different applet.
+	 * 
+	 * @param c
+	 * @return
+	 */
 	public static HTML5Applet getHTML5Applet(Component c) {
-		return ((JSThreadGroup) c.getAppContext().getThreadGroup()).getHtmlApplet();
+		ThreadGroup g = (c == null ? Thread.currentThread().getThreadGroup() : c.getAppContext().getThreadGroup());
+		return ((JSThreadGroup) g).getHtmlApplet();
 	}
 
 	public static void taintUI(Component c) {
@@ -567,7 +576,9 @@ public class JSToolkit extends SunToolkit
 
 	@Override
 	public Image getImage(String filename) {
-		return createImage(filename);
+		if (filename.indexOf("/") != 0)
+			filename = "../" + filename;
+		return createImage(JSToolkit.class.getResource(filename));
 	}
 
 	@Override
@@ -578,12 +589,16 @@ public class JSToolkit extends SunToolkit
 	
 	@Override
 	public Image createImage(ImageProducer producer) {
-		JSImagekit kit = (JSImagekit) Interface.getInstance("swingjs.JSImagekit", true);
+		JSImagekit kit = new JSImagekit();
+		try {
 		producer.startProduction(kit); // JSImageKit is the ImageConsumer here
 		// we may create an image, but then later generate its pixels
 		// and then also draw to it using img.秘g
 		// If we are drawing to it and it has pixels, then we need to 
 		// "fix" those pixels to the image. 
+		} catch (Exception e) {
+			// will return empty image
+		}
 		return kit.getCreatedImage();
 	}
 
@@ -937,7 +952,7 @@ public class JSToolkit extends SunToolkit
 
 	@Override
 	public Map<? extends Attribute, ?> mapInputMethodHighlight(InputMethodHighlight hl) {
-		// Java 7
+	    JSUtil.notImplemented(null);
 		return null;
 	}
 

@@ -1,18 +1,42 @@
 package test;
 
+import static java.awt.Color.getColor;
+import static java.awt.Toolkit.getDefaultToolkit;
+
+import java.awt.Color;
+import java.awt.Toolkit;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Hashtable;
-
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import static java.lang.String.format
+;
 class Test_Class extends Test_Class2<Integer> {
-
-	Test_Class(byte[]...d) {
+	Test_Class(byte[]...d) { 
 		super(d);
+		
+		assert(getClass().getPackage().toString().equals("package test"));
+		
+		getDefaultToolkit();
+		Toolkit.getDefaultToolkit();
+		String f = format("testing");
+		assert(f.equals("testing"));
+		Color c1 = Color.getColor("green");
+		
+		Color c = getColor("red");
+	// just for testing transpiler bug	main(null);
+
 		System.out.println("Test_Class len = " + d.length);
 	}
 	
@@ -21,15 +45,21 @@ class Test_Class extends Test_Class2<Integer> {
 	static int istatic = 5;
 	static String sstatic = "test5";
 	
+	static String tstatic = "initial";
 	String same$ = null;
 	String same() {return null;}
 	
 	static class Singleton {
+		static {
+			tstatic = "changed by static";
+		}
 		// reference to Test_Class.Singleton.instance 
 		// lazily initializes a new instance of Test_Class() 
 		static Test_Class instance = new Test_Class();
 		// actually, not recommended for JavaScript, because this
 		// instance would be shared among applications, unlike in Java.
+		public static void test(String s) {
+		}
 	}
 	
 	static  {
@@ -83,6 +113,17 @@ class Test_Class extends Test_Class2<Integer> {
 		static char c = 'c';
 		static Character c2 = 'c';
 		static char c3 = new Character('c');
+		
+		Test_Class_Inner(String... s) {
+			System.out.println(s.length);
+		}
+		
+		public static Test_Class newInstance(Object... objects) {
+			System.out.println("This is static Test_Class.newInstance(Object... objects");
+			return null;
+		}
+
+
 	}
 
 
@@ -264,9 +305,24 @@ class Test_Class extends Test_Class2<Integer> {
 	
 	public short testShort(short s) {return 0;}
 
+	public static String localtest() {
+		return tstatic = "changed by localtest";
+	}
+	
 	public static void main(String[] args) {
+		
+		// tricky situation where a parameter changes a value that is also changed by the static initializer of a class:
+		boolean test1 = false;
+		if (test1) {
+			Test_Class.Singleton.test(tstatic = "changed by parameters");			
+		} else {
+			Test_Class.Singleton.test(localtest());			
+		}
+		boolean isOK = tstatic.equals("changed by static");
+		System.out.println("testing static load order " + isOK + " " + tstatic);
 
 		try {
+			assert(isOK);
 			assert (new String().getClass().getName().equals("java.lang.String"));
 			assert (Class.forName("java.lang.String") == String.class);
 			assert (Test_Class.class.getMethod("testShort",Short.TYPE).getParameterTypes()[0] == Short.TYPE);

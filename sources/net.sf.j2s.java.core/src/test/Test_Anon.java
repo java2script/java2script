@@ -5,6 +5,8 @@ import java.awt.event.MouseListener;
 import java.util.Enumeration;
 import java.util.NoSuchElementException;
 
+import test.Test_Class.Test_Class_Inner;
+
 class Test_Anon extends Test_ {
  
 	private static boolean b = !(true);
@@ -30,6 +32,9 @@ class Test_Anon extends Test_ {
   public static void main(String[] args) { 
 	  int z = x;
 	  boolean a = !(Test_Class.Test_Class_Inner.i == 3);
+	  new Test_Class.Test_Class_Inner();
+	  new Test_Class.Test_Class_Inner().newInstance();
+	  Test_Class_Inner.newInstance();
 	  System.out.println(EMPTY_ENUMERATION.hasMoreElements());
 	  assert(EMPTY_ENUMERATION.hasMoreElements());
 	  Object xx = new MouseListener() {

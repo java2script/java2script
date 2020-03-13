@@ -1,7 +1,0 @@
-3131 SwingJS 
- 1484 Jalview
-  641 Physlets
-  1135 Jmol
-  79 CIFtools
- 6674 VBRC 
-1197 MathePrisma  

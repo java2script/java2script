@@ -36,10 +36,20 @@ package test.components;
  */
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableModel;
+
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -69,7 +79,36 @@ public class SimpleTableDemo extends JPanel {
 	     "Pool", new Integer(10), new Boolean(false)}
         };
 
-        final JTable table = new JTable(data, columnNames);
+        final JTable table = new JTable();
+        table.setModel(new DefaultTableModel(data, columnNames) {
+    		
+        	@Override
+    		public void setValueAt(Object aValue, int row, int column) {
+    			super.setValueAt(aValue, row, column);
+    		}
+
+			@Override
+			public Class<?> getColumnClass(int columnIndex) {
+				return data[0][columnIndex].getClass();
+			}
+
+        	
+        });
+//        table.setDefaultRenderer(Object.class, new TableCellRenderer() {
+//
+//			@Override
+//			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+//					boolean hasFocus, int row, int column) {				
+//				JLabel c = new JLabel(("" + value).toUpperCase());
+//				if (column %2 == 0)
+//					return c;
+//				JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 0,-1));
+//				p.add(c);
+//				//p.setSize(new Dimension(100,20));
+//				return p;
+//			}
+//        	
+//        });
         table.setPreferredScrollableViewportSize(new Dimension(500, 70));
         table.setFillsViewportHeight(true);
 

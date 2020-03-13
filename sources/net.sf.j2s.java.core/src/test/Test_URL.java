@@ -12,8 +12,11 @@ import java.net.ProtocolException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -192,13 +195,22 @@ public class Test_URL extends Test_ {
 
 	public static void main(String[] args) { 
 
+		dumpHeaders("http://www.opensourcephysics.org");
+		dumpHeaders("https://www.compadre.org");
+
 		try {
-			URI uri = new URI("https://4virology.net/");
+			URI uriNoScheme = new URI("../../test");
+			URI uriRel = new URI("https://4virology.net:8080../../test/");
+			System.out.println(uriRel.getPort());
+			// can't do thi as port is -1 from trying to parse "8080.." : URL u = uriRel.toURL();
+			System.out.println(uriRel.getAuthority());
+			System.out.println(uriRel.getPath());		
+//			URI uri = new URI("https://4virology.net/");
 			URL url = new URL("https://asfadlkfj");
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			assert (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND);
-		} catch (IOException | URISyntaxException e1) {
-			// assert(false);
+		} catch (Exception e1) {
+			e1.printStackTrace();
 		}
 
 		try {
@@ -235,5 +247,24 @@ public class Test_URL extends Test_ {
 			e.printStackTrace();
 		}
 
+	}
+
+	private static void dumpHeaders(String url) {
+		try {
+			//URL u = new URL("https://physlets.org/tracker/library/cabrillo_collection.xml");
+			URL u = new URL(url);
+			URLConnection uc = u.openConnection();
+			Map<String, List<String>> fields = uc.getHeaderFields();
+			for (Entry<String, List<String>> e: fields.entrySet()) {
+				String key = e.getKey();
+				 List<String> list = e.getValue();
+				System.out.println(key + "  " + list);				
+			}
+			
+		
+		} catch (IOException e3) {
+			// TODO Auto-generated catch block
+			e3.printStackTrace();
+		}
 	}
 }

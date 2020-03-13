@@ -214,6 +214,24 @@ public class File
 
     /* -- Constructors -- */
 
+	/**
+     * Creates a new <code>File</code> instance by converting the given
+     * pathname string into an abstract pathname.  If the given string is
+     * the empty string, then the result is the empty abstract pathname.
+     *
+     * @param   pathname  A pathname string
+     * @throws  NullPointerException
+     *          If the <code>pathname</code> argument is <code>null</code>
+     */
+    public File(String pathname) {
+    	this("", pathname);
+//        if (pathname == null) {
+//            throw new NullPointerException();
+//        }
+//        this.path = fs.normalize(pathname);
+//        this.prefixLength = fs.prefixLength(this.path);
+    }
+
     /**
      * Internal constructor for already-normalized pathname strings.
      */
@@ -235,28 +253,12 @@ public class File
     }
 
     private String resolve(String path, String child) {
+    	if (path == "." && child.startsWith("./"))
+    		return child;
     	if (child.length() > 0 && !child.startsWith("/") && !path.endsWith("/"))
     			path += "/";
     	return path + child; 
 		}
-
-		/**
-     * Creates a new <code>File</code> instance by converting the given
-     * pathname string into an abstract pathname.  If the given string is
-     * the empty string, then the result is the empty abstract pathname.
-     *
-     * @param   pathname  A pathname string
-     * @throws  NullPointerException
-     *          If the <code>pathname</code> argument is <code>null</code>
-     */
-    public File(String pathname) {
-    	this("", pathname);
-//        if (pathname == null) {
-//            throw new NullPointerException();
-//        }
-//        this.path = fs.normalize(pathname);
-//        this.prefixLength = fs.prefixLength(this.path);
-    }
 
     /* Note: The two-argument File constructors do not interpret an empty
        parent abstract pathname as the current user directory.  An empty parent

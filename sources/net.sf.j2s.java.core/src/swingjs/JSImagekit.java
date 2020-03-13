@@ -40,15 +40,6 @@ public class JSImagekit implements ImageConsumer {
 	private static final int JPG_SOF2 = 0xC2FF;
 
 	/**
-	 * Used by JSToolkit.createImage()
-	 * 
-	 * @see JSToolkit 
-	 */
-	public JSImagekit() {
-		// for reflection
-	}
-
-	/**
 	 * Create a buffered image that contains the data, at least getting the width
 	 * and height of a JPG, GIF, PNG, or BMP file and possibly generating a
 	 * JavaScript callback to load the image into an off-screen buffer in order to
@@ -85,7 +76,10 @@ public class JSImagekit implements ImageConsumer {
 		//
 		//TODO: not considering pixelbytes
 		//
-		jsimage = new JSImage(pixels, width, height, null);
+		if (pixels != null)
+			jsimage = new JSImage(pixels, width, height, null);
+		else
+			jsimage = new JSImage(pixelBytes, width, height, null);
   }
 
 	public Image getCreatedImage() {
@@ -117,6 +111,8 @@ public class JSImagekit implements ImageConsumer {
 	@Override
 	public void setPixels(int x, int y, int w, int h, ColorModel model,
 			int[] pixels, int off, int scansize) {
+		// assumes a standard ARGB color model.
+		pixelBytes = null;
         if(this.pixels == null) {
             colorModel = model;
             this.pixels  = new int[width*height];
@@ -135,6 +131,13 @@ public class JSImagekit implements ImageConsumer {
 //		this.pixels = pixels;
 	}
 
+	/**
+	 * Main entry point for ImageFilters and MemoryImageSource that delivers
+	 * bytes to a consumer. 
+	 * 
+	 * Not yet implemented. 
+	 * 
+	 */
 	@Override
 	public void setPixels(int x, int y, int w, int h, ColorModel model,
 			byte[] pixels, int off, int scansize) {
@@ -146,6 +149,7 @@ public class JSImagekit implements ImageConsumer {
 		this.off = off;
 		this.scansize = scansize;
 		this.pixelBytes = pixels;
+		this.pixels = null;
 		JSUtil.notImplemented("byte-based image pixels");
 	}
 
@@ -258,7 +262,17 @@ public class JSImagekit implements ImageConsumer {
 	public static ImageIcon createImageIcon(Component c, Icon icon, String id) {
 		int width = icon.getIconWidth();
 		int height = icon.getIconHeight();
-		HTML5Canvas canvas = (HTML5Canvas) DOMNode.createElement("canvas", id + "");
+		JSGraphics2D g = createCanvasGraphics(width, height, id);
+		// A JSGraphics2D is not a real Graphics object - must coerce 
+		icon.paintIcon(c, (Graphics)(Object) g, 0, 0);
+		ColorModel cm = ColorModel.getRGBdefault();
+		BufferedImage img = new BufferedImage(cm, cm.createCompatibleWritableRaster(width, height), false, null);
+		img.setImageFromHTML5Canvas(g);
+		return new ImageIcon(img, "paintedIcon");
+	}
+
+	public static JSGraphics2D createCanvasGraphics(int width, int height, String id) {
+		HTML5Canvas canvas = (HTML5Canvas) DOMNode.createElement("canvas", (id == null ? "img" + Math.random() : id + ""));
 		DOMNode.setStyles(canvas, "width", width + "px", "height", height + "px");
 		/**
 		 * @j2sNative
@@ -267,13 +281,7 @@ public class JSImagekit implements ImageConsumer {
 		 * canvas.height = height;
 		 * 
 		 */
-		JSGraphics2D g = new JSGraphics2D(canvas);
-		// A JSGraphics2D is not a real Graphics object - must coerce 
-		icon.paintIcon(c, (Graphics)(Object) g, 0, 0);
-		ColorModel cm = ColorModel.getRGBdefault();
-		BufferedImage img = new BufferedImage(cm, cm.createCompatibleWritableRaster(width, height), false, null);
-		img.setImageFromHTML5Canvas(g);
-		return new ImageIcon(img, "paintedIcon");
+		return new JSGraphics2D(canvas);
 	}
 
 

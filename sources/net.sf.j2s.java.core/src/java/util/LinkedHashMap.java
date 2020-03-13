@@ -247,19 +247,22 @@ public class LinkedHashMap<K,V>
 
     // overrides of HashMap hook methods
 
-    void reinitialize() {
+    @Override
+	void reinitialize() {
         super.reinitialize();
         head = tail = null;
     }
 
-    Node<K,V> newNode(int hash, K key, V value, Node<K,V> e) {
+    @Override
+	Node<K,V> newNode(int hash, K key, V value, Node<K,V> e) {
         LinkedHashMap.Entry<K,V> p =
             new LinkedHashMap.Entry<K,V>(hash, key, value, e);
         linkNodeLast(p);
         return p;
     }
 
-    Node<K,V> replacementNode(Node<K,V> p, Node<K,V> next) {
+    @Override
+	Node<K,V> replacementNode(Node<K,V> p, Node<K,V> next) {
         LinkedHashMap.Entry<K,V> q = (LinkedHashMap.Entry<K,V>)p;
         LinkedHashMap.Entry<K,V> t =
             new LinkedHashMap.Entry<K,V>(q.hash, q.key, q.value, next);
@@ -267,20 +270,23 @@ public class LinkedHashMap<K,V>
         return t;
     }
 
-    TreeNode<K,V> newTreeNode(int hash, K key, V value, Node<K,V> next) {
+    @Override
+	TreeNode<K,V> newTreeNode(int hash, K key, V value, Node<K,V> next) {
         TreeNode<K,V> p = new TreeNode<K,V>(hash, key, value, next);
         linkNodeLast(p);
         return p;
     }
 
-    TreeNode<K,V> replacementTreeNode(Node<K,V> p, Node<K,V> next) {
+    @Override
+	TreeNode<K,V> replacementTreeNode(Node<K,V> p, Node<K,V> next) {
         LinkedHashMap.Entry<K,V> q = (LinkedHashMap.Entry<K,V>)p;
         TreeNode<K,V> t = new TreeNode<K,V>(q.hash, q.key, q.value, next);
         transferLinks(q, t);
         return t;
     }
 
-    void afterNodeRemoval(Node<K,V> e) { // unlink
+    @Override
+	void afterNodeRemoval(Node<K,V> e) { // unlink
         LinkedHashMap.Entry<K,V> p =
             (LinkedHashMap.Entry<K,V>)e, b = p.before, a = p.after;
         p.before = p.after = null;
@@ -292,17 +298,19 @@ public class LinkedHashMap<K,V>
             tail = b;
         else
             a.before = b;
-    }
+    } 
 
-    void afterNodeInsertion(boolean evict) { // possibly remove eldest
+    @Override
+	void afterNodeInsertion(boolean evict) { // possibly remove eldest
         LinkedHashMap.Entry<K,V> first;
         if (evict && (first = head) != null && removeEldestEntry(first)) {
             K key = first.key;
-            removeNode(hash(key), key, null, false, true);
+            removeNode(hash(key), key, null, false, true, NOT_SIMPLE);
         }
     }
 
-    void afterNodeAccess(Node<K,V> e) { // move node to last
+    @Override
+	void afterNodeAccess(Node<K,V> e) { // move node to last
         LinkedHashMap.Entry<K,V> last;
         if (accessOrder && (last = tail) != e) {
             LinkedHashMap.Entry<K,V> p =
@@ -327,7 +335,8 @@ public class LinkedHashMap<K,V>
         }
     }
 
-    void internalWriteEntries(java.io.ObjectOutputStream s) throws IOException {
+    @Override
+	void internalWriteEntries(java.io.ObjectOutputStream s) throws IOException {
         for (LinkedHashMap.Entry<K,V> e = head; e != null; e = e.after) {
             s.writeObject(e.key);
             s.writeObject(e.value);
@@ -411,7 +420,8 @@ public class LinkedHashMap<K,V>
      * @return <tt>true</tt> if this map maps one or more keys to the
      *         specified value
      */
-    public boolean containsValue(Object value) {
+    @Override
+	public boolean containsValue(Object value) {
         for (LinkedHashMap.Entry<K,V> e = head; e != null; e = e.after) {
             V v = e.value;
             if (v == value || (value != null && value.equals(v)))
@@ -435,7 +445,8 @@ public class LinkedHashMap<K,V>
      * The {@link #containsKey containsKey} operation may be used to
      * distinguish these two cases.
      */
-    public V get(Object key) {
+    @Override
+	public V get(Object key) {
         Node<K,V> e;
         if ((e = getNode(hash(key), key)) == null)
             return null;
@@ -447,7 +458,8 @@ public class LinkedHashMap<K,V>
     /**
      * {@inheritDoc}
      */
-    public V getOrDefault(Object key, V defaultValue) {
+    @Override
+	public V getOrDefault(Object key, V defaultValue) {
        Node<K,V> e;
        if ((e = getNode(hash(key), key)) == null)
            return defaultValue;
@@ -459,7 +471,8 @@ public class LinkedHashMap<K,V>
     /**
      * {@inheritDoc}
      */
-    public void clear() {
+    @Override
+	public void clear() {
         super.clear();
         head = tail = null;
     }
@@ -527,27 +540,44 @@ public class LinkedHashMap<K,V>
      *
      * @return a set view of the keys contained in this map
      */
-    public Set<K> keySet() {
+    @Override
+	public Set<K> keySet() {
         Set<K> ks;
         return (ks = keySet) == null ? (keySet = new LinkedKeySet()) : ks;
     }
 
     final class LinkedKeySet extends AbstractSet<K> {
-        public final int size()                 { return size; }
-        public final void clear()               { LinkedHashMap.this.clear(); }
-        public final Iterator<K> iterator() {
+        @Override
+		public final int size()                 { return size; }
+        @Override
+		public final void clear()               { LinkedHashMap.this.clear(); }
+        @Override
+		public final Iterator<K> iterator() {
             return new LinkedKeyIterator();
         }
-        public final boolean contains(Object o) { return containsKey(o); }
-        public final boolean remove(Object key) {
-            return removeNode(hash(key), key, null, false, true) != null;
+        @Override
+		public final boolean contains(Object o) { return containsKey(o); }
+        @Override
+		public final boolean remove(Object key) {
+            switch (Map.秘hasKey(LinkedHashMap.this, key)) {
+            case HAS_KEY:
+                return removeNode(HAS_KEY, key, null, false, true, HAS_KEY) != null;
+            default:
+            case INVALID_KEY:
+            case NO_SUCH_KEY:
+            	return false;
+            case NOT_SIMPLE:
+            	return removeNode(hash(key), key, null, false, true, NOT_SIMPLE) != null;
+            }
         }
-        public final Spliterator<K> spliterator()  {
+        @Override
+		public final Spliterator<K> spliterator()  {
             return Spliterators.spliterator(this, Spliterator.SIZED |
                                             Spliterator.ORDERED |
                                             Spliterator.DISTINCT);
         }
-        public final void forEach(Consumer<? super K> action) {
+        @Override
+		public final void forEach(Consumer<? super K> action) {
             if (action == null)
                 throw new NullPointerException();
             int mc = modCount;
@@ -576,23 +606,30 @@ public class LinkedHashMap<K,V>
      *
      * @return a view of the values contained in this map
      */
-    public Collection<V> values() {
+    @Override
+	public Collection<V> values() {
         Collection<V> vs;
         return (vs = values) == null ? (values = new LinkedValues()) : vs;
     }
 
     final class LinkedValues extends AbstractCollection<V> {
-        public final int size()                 { return size; }
-        public final void clear()               { LinkedHashMap.this.clear(); }
-        public final Iterator<V> iterator() {
+        @Override
+		public final int size()                 { return size; }
+        @Override
+		public final void clear()               { LinkedHashMap.this.clear(); }
+        @Override
+		public final Iterator<V> iterator() {
             return new LinkedValueIterator();
         }
-        public final boolean contains(Object o) { return containsValue(o); }
-        public final Spliterator<V> spliterator() {
+        @Override
+		public final boolean contains(Object o) { return containsValue(o); }
+        @Override
+		public final Spliterator<V> spliterator() {
             return Spliterators.spliterator(this, Spliterator.SIZED |
                                             Spliterator.ORDERED);
         }
-        public final void forEach(Consumer<? super V> action) {
+        @Override
+		public final void forEach(Consumer<? super V> action) {
             if (action == null)
                 throw new NullPointerException();
             int mc = modCount;
@@ -622,18 +659,23 @@ public class LinkedHashMap<K,V>
      *
      * @return a set view of the mappings contained in this map
      */
-    public Set<Map.Entry<K,V>> entrySet() {
+    @Override
+	public Set<Map.Entry<K,V>> entrySet() {
         Set<Map.Entry<K,V>> es;
         return (es = entrySet) == null ? (entrySet = new LinkedEntrySet()) : es;
     }
 
     final class LinkedEntrySet extends AbstractSet<Map.Entry<K,V>> {
-        public final int size()                 { return size; }
-        public final void clear()               { LinkedHashMap.this.clear(); }
-        public final Iterator<Map.Entry<K,V>> iterator() {
+        @Override
+		public final int size()                 { return size; }
+        @Override
+		public final void clear()               { LinkedHashMap.this.clear(); }
+        @Override
+		public final Iterator<Map.Entry<K,V>> iterator() {
             return new LinkedEntryIterator();
         }
-        public final boolean contains(Object o) {
+        @Override
+		public final boolean contains(Object o) {
             if (!(o instanceof Map.Entry))
                 return false;
             Map.Entry<?,?> e = (Map.Entry<?,?>) o;
@@ -641,21 +683,32 @@ public class LinkedHashMap<K,V>
             Node<K,V> candidate = getNode(hash(key), key);
             return candidate != null && candidate.equals(e);
         }
-        public final boolean remove(Object o) {
+        @Override
+		public final boolean remove(Object o) {
             if (o instanceof Map.Entry) {
                 Map.Entry<?,?> e = (Map.Entry<?,?>) o;
                 Object key = e.getKey();
                 Object value = e.getValue();
-                return removeNode(hash(key), key, value, true, true) != null;
+                switch (Map.秘hasKey(LinkedHashMap.this, key)) {
+                case HAS_KEY:
+                    return removeNode(HAS_KEY, key, value, true, true, HAS_KEY) != null;
+                case INVALID_KEY:
+                case NO_SUCH_KEY:
+                	return false;
+                case NOT_SIMPLE:
+                    return removeNode(hash(key), key, value, true, true, NOT_SIMPLE) != null;
+                }
             }
             return false;
         }
-        public final Spliterator<Map.Entry<K,V>> spliterator() {
+        @Override
+		public final Spliterator<Map.Entry<K,V>> spliterator() {
             return Spliterators.spliterator(this, Spliterator.SIZED |
                                             Spliterator.ORDERED |
                                             Spliterator.DISTINCT);
         }
-        public final void forEach(Consumer<? super Map.Entry<K,V>> action) {
+        @Override
+		public final void forEach(Consumer<? super Map.Entry<K,V>> action) {
             if (action == null)
                 throw new NullPointerException();
             int mc = modCount;
@@ -668,7 +721,8 @@ public class LinkedHashMap<K,V>
 
     // Map overrides
 
-    public void forEach(BiConsumer<? super K, ? super V> action) {
+    @Override
+	public void forEach(BiConsumer<? super K, ? super V> action) {
         if (action == null)
             throw new NullPointerException();
         int mc = modCount;
@@ -678,7 +732,8 @@ public class LinkedHashMap<K,V>
             throw new ConcurrentModificationException();
     }
 
-    public void replaceAll(BiFunction<? super K, ? super V, ? extends V> function) {
+    @Override
+	public void replaceAll(BiFunction<? super K, ? super V, ? extends V> function) {
         if (function == null)
             throw new NullPointerException();
         int mc = modCount;
@@ -725,25 +780,34 @@ public class LinkedHashMap<K,V>
                 throw new ConcurrentModificationException();
             current = null;
             K key = p.key;
-            removeNode(hash(key), key, null, false, false);
+            removeNode(hash(key), key, null, false, false, NOT_SIMPLE);
             expectedModCount = modCount;
         }
     }
 
     final class LinkedKeyIterator extends LinkedHashIterator
         implements Iterator<K> {
-        public final K next() { return nextNode().getKey(); }
+        @Override
+		public final K next() { return nextNode().getKey(); }
     }
 
     final class LinkedValueIterator extends LinkedHashIterator
         implements Iterator<V> {
-        public final V next() { return nextNode().value; }
+        @Override
+		public final V next() { return nextNode().value; }
     }
 
     final class LinkedEntryIterator extends LinkedHashIterator
         implements Iterator<Map.Entry<K,V>> {
-        public final Map.Entry<K,V> next() { return nextNode(); }
+        @Override
+		public final Map.Entry<K,V> next() { return nextNode(); }
     }
+
+	@Override
+	protected void 秘setJS() {
+		秘m = null;
+	}
+
 
 
 }

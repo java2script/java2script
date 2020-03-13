@@ -110,7 +110,6 @@ public class ButtonListener
 		String prop = e.getPropertyName();
 		if (ui.isUIDisabled)
 			return;
-		 //System.out.println("JSButtonListener property change: " + prop + " " +e.getSource());
 		AbstractButton b = (AbstractButton) e.getSource();
 
 		if (prop == AbstractButton.CONTENT_AREA_FILLED_CHANGED_PROPERTY) {
@@ -199,7 +198,6 @@ public class ButtonListener
 		}
 		if (m == lastMnemonic)
 			return;
-//		System.out.println("ButtonListener mnemonic " + m + " " + ui.id);
 		if (ui.isMenuItem || ui.isMenu) {
 			int[] shortcutKeys = (int[]) DefaultLookup.get(ui.menuItem, ui, "Menu.shortcutKeys");
 			if (shortcutKeys == null) {
@@ -339,11 +337,10 @@ public class ButtonListener
 	 * @return true
 	 */
 	boolean verifyButtonClick(AbstractButton b, boolean delayed) {
-		ButtonModel m = b.getModel();
 		DOMNode btn = ui.actionNode;
-		if (btn == null)
+		if (btn == null || ui.domNode == null)
 			return true;
-		boolean state = m.isSelected();
+		boolean state = b.getModel().isSelected();
 		/**
 		 * @j2sNative
 		 * 

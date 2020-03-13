@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import sun.awt.AppContext;
+import swingjs.JSUtil;
 
 /**
  * An <code>AWTKeyStroke</code> represents a key action on the keyboard, or
@@ -72,9 +73,9 @@ public class AWTKeyStroke {
 	private static VKCollection vks;
 
 	// A key for the collection of AWTKeyStrokes within AppContext.
-	private static Object APP_CONTEXT_CACHE_KEY = new Object();
+	private static String APP_CONTEXT_CACHE_KEY = "AWTKeyStroke_CACHE_KEY";//new Object();
 	// A key within the cache
-	private static AWTKeyStroke APP_CONTEXT_KEYSTROKE_KEY = new AWTKeyStroke();
+	private static String APP_CONTEXT_KEYSTROKE_KEY = "AWTKeyStroke_KEYSTROKE_KEY";//new AWTKeyStroke();
 
 	/*
 	 * Reads keystroke class from AppContext and if null, puts there the
@@ -261,10 +262,10 @@ public class AWTKeyStroke {
         cacheKey.modifiers = mapNewModifiers(mapOldModifiers(modifiers));
         cacheKey.onKeyRelease = onKeyRelease;
 
-        AWTKeyStroke stroke = (AWTKeyStroke)cache.get(cacheKey);
+        AWTKeyStroke stroke = (AWTKeyStroke)cache.get(cacheKey.toString());
         if (stroke == null) {
             stroke = cacheKey;
-            cache.put(stroke, stroke);
+            cache.put(stroke.toString(), stroke);
             AppContext.getAppContext().remove(APP_CONTEXT_KEYSTROKE_KEY);
         }
         return stroke;
@@ -828,22 +829,24 @@ public class AWTKeyStroke {
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 class VKCollection {
-	Map code2name;
-	Map name2code;
+	Map<String, String> code2name;
+	Map<String, Integer> name2code;
 
+	
 	public VKCollection() {
-		code2name = new HashMap();
-		name2code = new HashMap();
-		
+		code2name = new HashMap<>();
+		name2code = new HashMap<>();
+		Object[][] list = new Object[0][];
 		/**
 		 * @j2sNative
 		 * for (var k in C$)
-		 *   if (k.indexOf("VK_") == 0) {
-		 *     try {
-		 *     	this.put$S$Integer(k, Integer.valueOf$I(C$[k]));
-		 *     } catch (e) {}
-		 *   }
+		 *   if (("" + k).indexOf("VK_") == 0)
+		 *   	list.push([k, C$[k]]);
 		 */
+		for (int i = 0; i < list.length; i++)
+		{  
+			put((String) list[i][0], Integer.valueOf((String) list[i][1]));
+		}	
 		
 	}
 
@@ -851,7 +854,7 @@ class VKCollection {
 		// assert((name != null) && (code != null));
 		// assert(findName(code) == null);
 		// assert(findCode(name) == null);
-		code2name.put(code, name);
+		code2name.put("" + code, name);
 		name2code.put(name, code);
 	}
 
@@ -862,7 +865,7 @@ class VKCollection {
 
 	public synchronized String findName(Integer code) {
 		// assert(code != null);
-		return (String) code2name.get(code);
+		return (String) code2name.get("" + code);
 	}
 	
 	

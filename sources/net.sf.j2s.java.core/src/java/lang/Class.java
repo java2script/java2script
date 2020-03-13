@@ -3785,9 +3785,9 @@ public final class Class<T> {
 		return a;
 	}
 
-	public Object getPackage() {
-		return null;
-	}
+    public Package getPackage() {
+        return Package.getPackage(this);
+    }
 
 	public static Class<?> getJ2SSuperclassFor(Class<?> cl) {
 		Class<?> c = null;

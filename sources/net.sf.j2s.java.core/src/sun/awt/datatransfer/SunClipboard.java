@@ -86,7 +86,7 @@ public abstract class SunClipboard extends Clipboard
 
     public SunClipboard(String name) {
         super(name);
-        CLIPBOARD_FLAVOR_LISTENER_KEY = new StringBuffer(name + "_CLIPBOARD_FLAVOR_LISTENER_KEY");
+        CLIPBOARD_FLAVOR_LISTENER_KEY = /*new StringBuffer*/(name + "_CLIPBOARD_FLAVOR_LISTENER_KEY");
     }
 
     public synchronized void setContents(Transferable contents,

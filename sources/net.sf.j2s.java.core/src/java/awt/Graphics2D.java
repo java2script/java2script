@@ -36,6 +36,7 @@ import java.awt.image.BufferedImageOp;
 import java.awt.image.RenderedImage;
 import java.awt.image.renderable.RenderableImage;
 import java.awt.font.FontRenderContext;
+import java.awt.font.GlyphVector;
 import java.text.AttributedCharacterIterator;
 
 import java.util.Map;
@@ -754,33 +755,33 @@ public abstract class Graphics2D extends Graphics {
     public abstract void drawString(AttributedCharacterIterator iterator,
         float x, float y);
 
-//    /**
-//     * Renders the text of the specified
-//     * {@link GlyphVector} using
-//     * the <code>Graphics2D</code> context's rendering attributes.
-//     * The rendering attributes applied include the <code>Clip</code>,
-//     * <code>Transform</code>, <code>Paint</code>, and
-//     * <code>Composite</code> attributes.  The <code>GlyphVector</code>
-//     * specifies individual glyphs from a {@link Font}.
-//     * The <code>GlyphVector</code> can also contain the glyph positions.
-//     * This is the fastest way to render a set of characters to the
-//     * screen.
-//     * @param g the <code>GlyphVector</code> to be rendered
-//     * @param x the x position in User Space where the glyphs should
-//     * be rendered
-//     * @param y the y position in User Space where the glyphs should
-//     * be rendered
-//     * @throws NullPointerException if <code>g</code> is <code>null</code>.
-//     *
-//     * @see java.awt.Font#createGlyphVector
-//     * @see java.awt.font.GlyphVector
-//     * @see #setPaint
-//     * @see java.awt.Graphics#setColor
-//     * @see #setTransform
-//     * @see #setComposite
-//     * @see #setClip
-//     */
-//    public abstract void drawGlyphVector(GlyphVector g, float x, float y);
+    /**
+     * Renders the text of the specified
+     * {@link GlyphVector} using
+     * the <code>Graphics2D</code> context's rendering attributes.
+     * The rendering attributes applied include the <code>Clip</code>,
+     * <code>Transform</code>, <code>Paint</code>, and
+     * <code>Composite</code> attributes.  The <code>GlyphVector</code>
+     * specifies individual glyphs from a {@link Font}.
+     * The <code>GlyphVector</code> can also contain the glyph positions.
+     * This is the fastest way to render a set of characters to the
+     * screen.
+     * @param g the <code>GlyphVector</code> to be rendered
+     * @param x the x position in User Space where the glyphs should
+     * be rendered
+     * @param y the y position in User Space where the glyphs should
+     * be rendered
+     * @throws NullPointerException if <code>g</code> is <code>null</code>.
+     *
+     * @see java.awt.Font#createGlyphVector
+     * @see java.awt.font.GlyphVector
+     * @see #setPaint
+     * @see java.awt.Graphics#setColor
+     * @see #setTransform
+     * @see #setComposite
+     * @see #setClip
+     */
+    public abstract void drawGlyphVector(GlyphVector g, float x, float y);
 
     /**
      * Fills the interior of a <code>Shape</code> using the settings of the

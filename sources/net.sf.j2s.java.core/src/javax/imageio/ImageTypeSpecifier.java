@@ -27,17 +27,16 @@ package javax.imageio;
 
 import java.awt.Point;
 import java.awt.Transparency;
+import java.awt.color.ColorSpace;
 import java.awt.image.BandedSampleModel;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
-import java.awt.color.ColorSpace;
-import java.awt.image.IndexColorModel;
 import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.DirectColorModel;
+import java.awt.image.IndexColorModel;
 import java.awt.image.MultiPixelPackedSampleModel;
 import java.awt.image.PixelInterleavedSampleModel;
-import java.awt.image.SinglePixelPackedSampleModel;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.SampleModel;
@@ -327,7 +326,8 @@ public class ImageTypeSpecifier {
                                                 bandOffsets);
         }
 
-        public boolean equals(Object o) {
+        @Override
+		public boolean equals(Object o) {
             if ((o == null) ||
                 !(o instanceof ImageTypeSpecifier.Interleaved)) {
                 return false;
@@ -353,7 +353,8 @@ public class ImageTypeSpecifier {
             return true;
         }
 
-        public int hashCode() {
+        @Override
+		public int hashCode() {
             return (super.hashCode() +
                     (4 * bandOffsets.length) +
                     (25 * dataType) +
@@ -471,7 +472,8 @@ public class ImageTypeSpecifier {
                                                      bandOffsets);
         }
 
-        public boolean equals(Object o) {
+        @Override
+		public boolean equals(Object o) {
             if ((o == null) ||
                 !(o instanceof ImageTypeSpecifier.Banded)) {
                 return false;
@@ -504,7 +506,8 @@ public class ImageTypeSpecifier {
             return true;
         }
 
-        public int hashCode() {
+        @Override
+		public int hashCode() {
             return (super.hashCode() +
                     (3 * bandOffsets.length) +
                     (7 * bankIndices.length) +
@@ -1094,7 +1097,8 @@ public class ImageTypeSpecifier {
      * @return <code>true</code> if the given object is an equivalent
      * <code>ImageTypeSpecifier</code>.
      */
-    public boolean equals(Object o) {
+    @Override
+	public boolean equals(Object o) {
         if ((o == null) || !(o instanceof ImageTypeSpecifier)) {
             return false;
         }
@@ -1109,7 +1113,8 @@ public class ImageTypeSpecifier {
      *
      * @return a hash code for this ImageTypeSpecifier
      */
-    public int hashCode() {
+    @Override
+	public int hashCode() {
         return (9 * colorModel.hashCode()) + (14 * sampleModel.hashCode());
     }
 
@@ -1168,6 +1173,13 @@ public class ImageTypeSpecifier {
           case BufferedImage.TYPE_4BYTE_ABGR:
               return createInterleaved(sRGB,
                                        new int[] { 3, 2, 1, 0 },
+                                       DataBuffer.TYPE_BYTE,
+                                       true,
+                                       false);
+
+          case BufferedImage.TYPE_4BYTE_HTML5:
+              return createInterleaved(sRGB,
+                                       new int[] { 0, 3, 2, 1 },
                                        DataBuffer.TYPE_BYTE,
                                        true,
                                        false);

@@ -106,7 +106,7 @@ public class ColorSpace {
     private static ColorSpace sRGBspace;
 //    private static ColorSpace XYZspace;
 //    private static ColorSpace PYCCspace;
-//    private static ColorSpace GRAYspace;
+    public static ColorSpace GRAYspace; // SwingJS was private
 //    private static ColorSpace LINEAR_RGBspace;
 
     /**
@@ -330,19 +330,29 @@ public class ColorSpace {
 //            break;
 //
 //
-//        case CS_GRAY:
+        case CS_GRAY:
+          synchronized(ColorSpace.class) {
+              if (GRAYspace == null) {
+            	  GRAYspace = new ColorSpace(TYPE_GRAY, 1); // SwingJS
+//                  ICC_Profile theProfile = ICC_Profile.getInstance (CS_sRGB);
+//                  sRGBspace = new ICC_ColorSpace (theProfile);
+              }
+
+              theColorSpace = GRAYspace;
+          }
+          break;
 //            synchronized(ColorSpace.class) {
 //                if (GRAYspace == null) {
 //                    ICC_Profile theProfile = ICC_Profile.getInstance (CS_GRAY);
 //                    GRAYspace = new ICC_ColorSpace (theProfile);
-//                    /* to allow access from java.awt.ColorModel */
+//                   /* to allow access from java.awt.ColorModel */
 //                    CMSManager.GRAYspace = GRAYspace;
 //                }
 //
 //                theColorSpace = GRAYspace;
 //            }
 //            break;
-//
+
 //
 //        case CS_LINEAR_RGB:
 //            synchronized(ColorSpace.class) {

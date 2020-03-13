@@ -461,24 +461,25 @@ public class ScrollPaneLayout
      * <p>Note that the rowHeader is calculated as part of the preferred width
      * and the colHeader is calculated as part of the preferred size.
      *
-     * @param parent the <code>Container</code> that will be laid out
+     * @param container the <code>Container</code> that will be laid out
      * @return a <code>Dimension</code> object specifying the preferred size of the
      *         viewport and any scrollbars
      * @see ViewportLayout
      * @see LayoutManager
      */
-    public Dimension preferredLayoutSize(Container parent)
+    public Dimension preferredLayoutSize(Container container)
     {
         /* Sync the (now obsolete) policy fields with the
          * JScrollPane.
          */
-        JScrollPane scrollPane = (JScrollPane)parent;
+        JScrollPane scrollPane = (JScrollPane)container;
         vsbPolicy = scrollPane.getVerticalScrollBarPolicy();
         hsbPolicy = scrollPane.getHorizontalScrollBarPolicy();
 
         // BH -- this was a problem when the scrollpane was in a split pane in SetXMLControlElement test OSP
-        Insets insets = new Insets(0,0,0,0);//
-        // parent.getInsets(); because these are interior?
+        Insets insets = //new Insets(0,0,0,0);//
+        container.getInsets(); 
+        //because these are interior?
         int prefWidth = insets.left + insets.right;
         int prefHeight = insets.top + insets.bottom;
 
@@ -512,7 +513,7 @@ public class ScrollPaneLayout
 
         Border viewportBorder = scrollPane.getViewportBorder();
         if (viewportBorder != null) {
-            Insets vpbInsets = viewportBorder.getBorderInsets(parent);
+            Insets vpbInsets = viewportBorder.getBorderInsets(container);
             prefWidth += vpbInsets.left + vpbInsets.right;
             prefHeight += vpbInsets.top + vpbInsets.bottom;
         }

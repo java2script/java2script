@@ -68,12 +68,14 @@ import swingjs.plaf.JSComponentUI;
 public class CellRendererPane extends JPanel
 {
 	// SwingJS switched to JPanel instead of Container
-	
+	// This class is essentially final. Only UI classes create it.
+
     /**
      * Construct a CellRendererPane object.
      */
     public CellRendererPane() {
         super();
+    	秘isCRP = true;
     	秘paintClass = 秘updateClass = /**@j2sNative C$ || */null;
 
         setLayout(null);
@@ -87,6 +89,11 @@ public class CellRendererPane extends JPanel
     @Override
 		public void invalidate() { }
 
+
+    @Override
+		public void repaint() { 
+    	// called by 
+    }
 
     /**
      * Shouldn't be called.
@@ -124,8 +131,18 @@ public class CellRendererPane extends JPanel
      * The Container p is the component we're actually drawing on, typically it's
      * equal to this.getParent(). If shouldValidate is true the component c will be
      * validated before painted.
+     * 
+     * @param g
+     * @param c
+     * @param p
+     * @param x
+     * @param y
+     * @param w
+     * @param h
+     * @param shouldValidate  probably a NOP
      */
     public void paintComponent(Graphics g, Component c, Container p, int x, int y, int w, int h, boolean shouldValidate) {
+    	// p is the table, list, etc. 
       if (c == null) {
           if (p != null) {
               Color oldColor = g.getColor();
@@ -140,17 +157,19 @@ public class CellRendererPane extends JPanel
           this.add(c);
       }
 
-      c.setBounds(-w, -h, 0, 0); // force new bounds
-      c.setBounds(x, y, w, h);
+      c.秘reshape(-w, -h, 0, 0, false); // force new bounds
       
-      if(shouldValidate) {
-          c.validate();
-      } 
+//      if(shouldValidate) {
+//    	  // unlikely that this will do much; only JRootPane does anything significant here. 
+//          c.validate();
+//      } 
 	  JSComponentUI ui = ((JComponent) c).秘getUI();
-	  ui.updateDOMNode();
+      c.秘reshape(x, y, w, h, false);
+      ((JComponent) c).validateTree();
+      ui.updateDOMNode();
 //          if (!ui.doPaintBackground())
 //        	  return;
-	  ui.setTainted(false);
+//	  ui.setTainted(false);
       
 //      boolean wasDoubleBuffered = false;
 //      if ((c instanceof JComponent) && ((JComponent)c).isDoubleBuffered()) {
@@ -170,7 +189,7 @@ public class CellRendererPane extends JPanel
 //          ((JComponent)c).setDoubleBuffered(true);
 //      }
 //
-      c.setBounds(-w, -h, 0, 0);
+      c.秘reshape(-w, -h, 0, 0, false);
       
 		}
 

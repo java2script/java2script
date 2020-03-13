@@ -1,847 +1,718 @@
 /*
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
+ * Copyright (c) 1994, 2013, Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.lang;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.util.Arrays;
 
 /**
- * StringBuffer is a variable size contiguous indexable array of characters. The
- * length of the StringBuffer is the number of characters it contains. The
- * capacity of the StringBuffer is the number of characters it can hold.
+ * A thread-safe, mutable sequence of characters.
+ * A string buffer is like a {@link String}, but can be modified. At any
+ * point in time it contains some particular sequence of characters, but
+ * the length and content of the sequence can be changed through certain
+ * method calls.
  * <p>
- * Characters may be inserted at any position up to the length of the
- * StringBuffer, increasing the length of the StringBuffer. Characters at any
- * position in the StringBuffer may be replaced, which does not affect the
- * StringBuffer length.
+ * String buffers are safe for use by multiple threads. The methods
+ * are synchronized where necessary so that all the operations on any
+ * particular instance behave as if they occur in some serial order
+ * that is consistent with the order of the method calls made by each of
+ * the individual threads involved.
  * <p>
- * The capacity of a StringBuffer may be specified when the StringBuffer is
- * created. If the capacity of the StringBuffer is exceeded, the capacity is
- * increased.
- * 
- * @see String
- * @see StringBuilder
- * @since 1.0
+ * The principal operations on a {@code StringBuffer} are the
+ * {@code append} and {@code insert} methods, which are
+ * overloaded so as to accept data of any type. Each effectively
+ * converts a given datum to a string and then appends or inserts the
+ * characters of that string to the string buffer. The
+ * {@code append} method always adds these characters at the end
+ * of the buffer; the {@code insert} method adds the characters at
+ * a specified point.
+ * <p>
+ * For example, if {@code z} refers to a string buffer object
+ * whose current contents are {@code "start"}, then
+ * the method call {@code z.append("le")} would cause the string
+ * buffer to contain {@code "startle"}, whereas
+ * {@code z.insert(4, "le")} would alter the string buffer to
+ * contain {@code "starlet"}.
+ * <p>
+ * In general, if sb refers to an instance of a {@code StringBuffer},
+ * then {@code sb.append(x)} has the same effect as
+ * {@code sb.insert(sb.length(), x)}.
+ * <p>
+ * Whenever an operation occurs involving a source sequence (such as
+ * appending or inserting from a source sequence), this class synchronizes
+ * only on the string buffer performing the operation, not on the source.
+ * Note that while {@code StringBuffer} is designed to be safe to use
+ * concurrently from multiple threads, if the constructor or the
+ * {@code append} or {@code insert} operation is passed a source sequence
+ * that is shared across threads, the calling code must ensure
+ * that the operation has a consistent and unchanging view of the source
+ * sequence for the duration of the operation.
+ * This could be satisfied by the caller holding a lock during the
+ * operation's call, by using an immutable source sequence, or by not
+ * sharing the source sequence across threads.
+ * <p>
+ * Every string buffer has a capacity. As long as the length of the
+ * character sequence contained in the string buffer does not exceed
+ * the capacity, it is not necessary to allocate a new internal
+ * buffer array. If the internal buffer overflows, it is
+ * automatically made larger.
+ * <p>
+ * Unless otherwise noted, passing a {@code null} argument to a constructor
+ * or method in this class will cause a {@link NullPointerException} to be
+ * thrown.
+ * <p>
+ * As of  release JDK 5, this class has been supplemented with an equivalent
+ * class designed for use by a single thread, {@link StringBuilder}.  The
+ * {@code StringBuilder} class should generally be used in preference to
+ * this one, as it supports all of the same operations but it is faster, as
+ * it performs no synchronization.
+ *
+ * @author      Arthur van Hoff
+ * @see     java.lang.StringBuilder
+ * @see     java.lang.String
+ * @since   JDK1.0
  */
-public final class StringBuffer extends AbstractStringBuilder implements
-        Appendable, Serializable, CharSequence {
+ public final class StringBuffer
+    extends AbstractStringBuilder
+    implements java.io.Serializable, CharSequence
+{
 
-    private static final long serialVersionUID = 3388685877147921107L;
-
-    /*
-    private static final ObjectStreamField serialPersistentFields[] = {
-            new ObjectStreamField("count", int.class),
-            new ObjectStreamField("shared", boolean.class),
-            new ObjectStreamField("value", char[].class), };
-    */
+//    /**
+//     * A cache of the last value returned by toString. Cleared
+//     * whenever the StringBuffer is modified.
+//     */
+//    private transient char[] toStringCache;
+//
+    /** use serialVersionUID from JDK 1.0.2 for interoperability */
+    static final long serialVersionUID = 3388685877147921107L;
 
     /**
-     * Constructs a new StringBuffer using the default capacity.
+     * Constructs a string buffer with no characters in it and an
+     * initial capacity of 16 characters.
      */
     public StringBuffer() {
-        super();
+        super(16);
     }
 
     /**
-     * Constructs a new StringBuffer using the specified capacity.
-     * 
-     * @param capacity the initial capacity
+     * Constructs a string buffer with no characters in it and
+     * the specified initial capacity.
+     *
+     * @param      capacity  the initial capacity.
+     * @exception  NegativeArraySizeException  if the {@code capacity}
+     *               argument is less than {@code 0}.
      */
     public StringBuffer(int capacity) {
         super(capacity);
     }
 
     /**
-     * Constructs a new StringBuffer containing the characters in the specified
-     * string and the default capacity.
-     * 
-     * @param string the string content with which to initialize the new
-     *        <code>StringBuffer</code> instance
-     * @throws NullPointerException on supplying a <code>null</code> value of
-     *         <code>string</code>
+     * Constructs a string buffer initialized to the contents of the
+     * specified string. The initial capacity of the string buffer is
+     * {@code 16} plus the length of the string argument.
+     *
+     * @param   str   the initial contents of the buffer.
      */
-    public StringBuffer(String string) {
-        super(string);
+    public StringBuffer(String str) {
+        super(str.length() + 16);
+        append(str);
     }
 
     /**
+     * Constructs a string buffer that contains the same characters
+     * as the specified {@code CharSequence}. The initial capacity of
+     * the string buffer is {@code 16} plus the length of the
+     * {@code CharSequence} argument.
      * <p>
-     * Constructs a StringBuffer and initializes it with the characters in the
-     * <code>CharSequence</code>.
-     * </p>
-     * 
-     * @param cs The <code>CharSequence</code> to initialize the instance.
-     * @throws NullPointerException if the <code>cs</code> parameter is
-     *         <code>null</code>.
+     * If the length of the specified {@code CharSequence} is
+     * less than or equal to zero, then an empty buffer of capacity
+     * {@code 16} is returned.
+     *
+     * @param      seq   the sequence to copy.
      * @since 1.5
-     * 
      */
-    public StringBuffer(CharSequence cs) {
-        super(cs == null ? null : cs.toString());
+    public StringBuffer(CharSequence seq) {
+        this(seq.length() + 16);
+        append(seq);
     }
 
-    /**
-     * Adds the string representation of the specified boolean to the end of
-     * this StringBuffer.
-     * 
-     * @param b the boolean
-     * @return this StringBuffer
-     */
-    public StringBuffer append(boolean b) {
-        return append(b ? "true" : "false");
-    }
+//    @Override
+//    public synchronized int length() {
+//        return count;
+//    }
+//
+//    @Override
+//    public synchronized int capacity() {
+//        return value.length;
+//    }
+//
+//
+//    @Override
+//    public synchronized void ensureCapacity(int minimumCapacity) {
+//        if (minimumCapacity > value.length) {
+//            expandCapacity(minimumCapacity);
+//        }
+//    }
+//
+//    /**
+//     * @since      1.5
+//     */
+//    @Override
+//    public synchronized void trimToSize() {
+//        super.trimToSize();
+//    }
+//
+//    /**
+//     * @throws IndexOutOfBoundsException {@inheritDoc}
+//     * @see        #length()
+//     */
+//    @Override
+//    public synchronized void setLength(int newLength) {
+//        //toStringCache = null;
+//        super.setLength(newLength);
+//    }
+//
+//    /**
+//     * @throws IndexOutOfBoundsException {@inheritDoc}
+//     * @see        #length()
+//     */
+//    @Override
+//    public synchronized char charAt(int index) {
+//        if ((index < 0) || (index >= count))
+//            throw new StringIndexOutOfBoundsException(index);
+//        return value[index];
+//    }
+//
+//    /**
+//     * @since      1.5
+//     */
+//    @Override
+//    public synchronized int codePointAt(int index) {
+//        return super.codePointAt(index);
+//    }
+//
+//    /**
+//     * @since     1.5
+//     */
+//    @Override
+//    public synchronized int codePointBefore(int index) {
+//        return super.codePointBefore(index);
+//    }
+//
+//    /**
+//     * @since     1.5
+//     */
+//    @Override
+//    public synchronized int codePointCount(int beginIndex, int endIndex) {
+//        return super.codePointCount(beginIndex, endIndex);
+//    }
+//
+//    /**
+//     * @since     1.5
+//     */
+//    @Override
+//    public synchronized int offsetByCodePoints(int index, int codePointOffset) {
+//        return super.offsetByCodePoints(index, codePointOffset);
+//    }
+//
+//    /**
+//     * @throws IndexOutOfBoundsException {@inheritDoc}
+//     */
+//    @Override
+//    public synchronized void getChars(int srcBegin, int srcEnd, char[] dst,
+//                                      int dstBegin)
+//    {
+//        super.getChars(srcBegin, srcEnd, dst, dstBegin);
+//    }
+//
+//    /**
+//     * @throws IndexOutOfBoundsException {@inheritDoc}
+//     * @see        #length()
+//     */
+//    @Override
+//    public synchronized void setCharAt(int index, char ch) {
+//        if ((index < 0) || (index >= count))
+//            throw new StringIndexOutOfBoundsException(index);
+//        //toStringCache = null;
+//        value[index] = ch;
+//    }
 
-    /**
-     * Adds the specified character to the end of this StringBuffer.
-     * 
-     * @param ch a character
-     * @return this StringBuffer
-     */
-    public synchronized StringBuffer append(char ch) {
-        append0(ch);
-        return this;
-    }
-
-    /**
-     * Adds the string representation of the specified double to the end of this
-     * StringBuffer.
-     * 
-     * @param d the double
-     * @return this StringBuffer
-     */
-    public StringBuffer append(double d) {
-        return append(Double.toString(d));
-    }
-
-    /**
-     * Adds the string representation of the specified float to the end of this
-     * StringBuffer.
-     * 
-     * @param f the float
-     * @return this StringBuffer
-     * 
-     */
-    public StringBuffer append(float f) {
-        return append(Float.toString(f));
-    }
-
-    /**
-     * Adds the string representation of the specified integer to the end of
-     * this StringBuffer.
-     * 
-     * @param value the integer
-     * @return this StringBuffer
-     * 
-     */
-    public StringBuffer append(int i) {
-        return append(Integer.toString(i));
-    }
-
-    /**
-     * Adds the string representation of the specified long to the end of this
-     * StringBuffer.
-     * 
-     * @param l the long
-     * @return this StringBuffer
-     * 
-     */
-    public StringBuffer append(long l) {
-        return append(Long.toString(l));
-    }
-
-    /**
-     * Adds the string representation of the specified object to the end of this
-     * StringBuffer.
-     * 
-     * @param obj the object
-     * @return this StringBuffer
-     */
+    @Override
     public synchronized StringBuffer append(Object obj) {
-        if (obj == null) {
-            appendNull();
-        } else {
-            append0(obj.toString());
-        }
-        return this;
+        //toStringCache = null;
+        return (StringBuffer) super.append(obj);
+        
+    }
+
+    @Override
+    public synchronized StringBuffer append(String str) {
+        //toStringCache = null;
+        return (StringBuffer) super.append(str);
+        
     }
 
     /**
-     * Adds the specified string to the end of this StringBuffer.
-     * 
-     * @param string the string
-     * @return this StringBuffer
-     */
-    public synchronized StringBuffer append(String string) {
-        append0(string);
-        return this;
-    }
-
-    /**
-     * Adds the specified StringBuffer to the end of this StringBuffer.
-     * 
-     * @param sbuffer the StringBuffer
-     * @return this StringBuffer
-     * 
+     * Appends the specified {@code StringBuffer} to this sequence.
+     * <p>
+     * The characters of the {@code StringBuffer} argument are appended,
+     * in order, to the contents of this {@code StringBuffer}, increasing the
+     * length of this {@code StringBuffer} by the length of the argument.
+     * If {@code sb} is {@code null}, then the four characters
+     * {@code "null"} are appended to this {@code StringBuffer}.
+     * <p>
+     * Let <i>n</i> be the length of the old character sequence, the one
+     * contained in the {@code StringBuffer} just prior to execution of the
+     * {@code append} method. Then the character at index <i>k</i> in
+     * the new character sequence is equal to the character at index <i>k</i>
+     * in the old character sequence, if <i>k</i> is less than <i>n</i>;
+     * otherwise, it is equal to the character at index <i>k-n</i> in the
+     * argument {@code sb}.
+     * <p>
+     * This method synchronizes on {@code this}, the destination
+     * object, but does not synchronize on the source ({@code sb}).
+     *
+     * @param   sb   the {@code StringBuffer} to append.
+     * @return  a reference to this object.
      * @since 1.4
      */
-    public synchronized StringBuffer append(StringBuffer sb) {
-        if (sb == null) {
-            appendNull();
-        } else {
-            synchronized (sb) {
-                append0(sb.getValue(), 0, sb.length());
-            }
-        }
-        return this;
+    @Override
+	public synchronized StringBuffer append(StringBuffer sb) {
+        //toStringCache = null;
+        return (StringBuffer) super.append(sb == null ? "null" : "" + sb);        
     }
 
     /**
-     * Adds the character array to the end of this StringBuffer.
-     * 
-     * @param chars the character array
-     * @return this StringBuffer
-     * 
-     * @throws NullPointerException when chars is null
+     * @since 1.8
      */
-    public synchronized StringBuffer append(char chars[]) {
-        append0(chars);
-        return this;
+    @Override
+    synchronized StringBuffer append(AbstractStringBuilder asb) {
+        //toStringCache = null;
+        return (StringBuffer) super.append(asb == null ? "null" : "" + asb);
+        
     }
 
     /**
-     * Adds the specified sequence of characters to the end of this
-     * StringBuffer.
-     * 
-     * @param chars a character array
-     * @param start the starting offset
-     * @param length the number of characters
-     * @return this StringBuffer
-     * 
-     * @throws ArrayIndexOutOfBoundsException when
-     *         <code>length < 0, start < 0</code> or
-     *         <code>start + length > chars.length</code>
-     * @throws NullPointerException when chars is null
-     */
-    public synchronized StringBuffer append(char chars[], int start, int length) {
-        append0(chars, start, length);
-        return this;
-    }
-
-    /**
+     * Appends the specified {@code CharSequence} to this
+     * sequence.
      * <p>
-     * Appends the <code>CharSequence</code> to this buffer. If the
-     * <code>CharSequence</code> is <code>null</code>, then the string
-     * <code>"null"</code> is appended.
-     * </p>
-     * 
-     * @param s The <code>CharSequence</code> to append.
-     * @return A reference to this object.
+     * The characters of the {@code CharSequence} argument are appended,
+     * in order, increasing the length of this sequence by the length of the
+     * argument.
+     *
+     * <p>The result of this method is exactly the same as if it were an
+     * invocation of this.append(s, 0, s.length());
+     *
+     * <p>This method synchronizes on {@code this}, the destination
+     * object, but does not synchronize on the source ({@code s}).
+     *
+     * <p>If {@code s} is {@code null}, then the four characters
+     * {@code "null"} are appended.
+     *
+     * @param   s the {@code CharSequence} to append.
+     * @return  a reference to this object.
      * @since 1.5
      */
+    @Override
     public synchronized StringBuffer append(CharSequence s) {
-        if (s == null) {
-            appendNull();
-        } else {
-            append0(s.toString());
-        }
-        return this;
+        //toStringCache = null;
+        return (StringBuffer) super.append(s == null ? "null" : "" + s);
+        
     }
 
     /**
-     * <p>
-     * Appends the subsequence of the <code>CharSequence</code> to this
-     * buffer. If the <code>CharSequence</code> is <code>null</code>, then
-     * the string <code>"null"</code> is used to extract a subsequence.
-     * </p>
-     * 
-     * @param s The <code>CharSequence</code> to append.
-     * @param start The inclusive start index of the subsequence of the
-     *        <code>CharSequence</code>.
-     * @param end The exclusive end index of the subsequence of the
-     *        <code>CharSequence</code>.
-     * @return A reference to this object.
-     * @since 1.5
-     * @throws IndexOutOfBoundsException if <code>start</code> or
-     *         <code>end</code> are negative, <code>start</code> is greater
-     *         than <code>end</code> or <code>end</code> is greater than the
-     *         length of <code>s</code>.
-     */
-    public synchronized StringBuffer append(CharSequence s, int start, int end) {
-        append0(s, start, end);
-        return this;
-    }
-
-    /**
-     * <p>
-     * Appends the encoded Unicode code point to this object. The code point is
-     * converted to a <code>char[]</code> as defined by
-     * {@link Character#toChars(int)}.
-     * </p>
-     * 
-     * @param codePoint The Unicode code point to encode and append.
-     * @return A reference to this object.
-     * @see Character#toChars(int)
-     * @since 1.5
-     */
-    public StringBuffer appendCodePoint(int codePoint) {
-        return append(Character.toChars(codePoint));
-    }
-
-    /**
-     * Answers the character at the specified offset in this StringBuffer.
-     * 
-     * @param index the zero-based index in this StringBuffer
-     * @return the character at the index
-     * 
-     * @throws IndexOutOfBoundsException when <code>index < 0</code> or
-     *         <code>index >= length()</code>
+     * @throws IndexOutOfBoundsException {@inheritDoc}
+     * @since      1.5
      */
     @Override
-    public synchronized char charAt(int index) {
-        return super.charAt(index);
+    public synchronized StringBuffer append(CharSequence s, int start, int end)
+    {
+        //toStringCache = null;
+        return (StringBuffer) super.append(s, start, end);
+        
+    }
+
+    @Override
+    public synchronized StringBuffer append(char[] str) {
+        //toStringCache = null;
+        return (StringBuffer) super.append(str);
+        
     }
 
     /**
-     * <p>
-     * Retrieves the Unicode code point value at the <code>index</code>.
-     * </p>
-     * 
-     * @param index The index to the <code>char</code> code unit within this
-     *        object.
-     * @return The Unicode code point value.
-     * @throws IndexOutOfBoundsException if <code>index</code> is negative or
-     *         greater than or equal to {@link #length()}.
-     * @see Character
-     * @see Character#codePointAt(char[], int, int)
+     * @throws IndexOutOfBoundsException {@inheritDoc}
+     */
+    @Override
+    public synchronized StringBuffer append(char[] str, int offset, int len) {
+        //toStringCache = null;
+        return (StringBuffer) super.append(str, offset, len);
+        
+    }
+
+    @Override
+    public synchronized StringBuffer append(boolean b) {
+        //toStringCache = null;
+        return (StringBuffer) super.append(b ? "true" : "false");
+        
+    }
+
+    @Override
+    public synchronized StringBuffer append(char c) {
+        //toStringCache = null;
+        return (StringBuffer) super.append(c);
+        
+    }
+
+    @Override
+    public synchronized StringBuffer append(int i) {
+        //toStringCache = null;
+        return (StringBuffer) super.append(i);
+        
+    }
+
+    /**
      * @since 1.5
      */
     @Override
-    public synchronized int codePointAt(int index) {
-        return super.codePointAt(index);
+    public synchronized StringBuffer appendCodePoint(int codePoint) {
+        //toStringCache = null;
+        return (StringBuffer) super.appendCodePoint(codePoint);
+        
+    }
+
+    @Override
+    public synchronized StringBuffer append(long lng) {
+        //toStringCache = null;
+        return (StringBuffer) super.append(lng);
+        
+    }
+
+    @Override
+    public synchronized StringBuffer append(float f) {
+        //toStringCache = null;
+        return (StringBuffer) super.append(f);
+        
+    }
+
+    @Override
+    public synchronized StringBuffer append(double d) {
+        //toStringCache = null;
+        return (StringBuffer) super.append(d);
+        
     }
 
     /**
-     * <p>
-     * Retrieves the Unicode code point value that precedes the
-     * <code>index</code>.
-     * </p>
-     * 
-     * @param index The index to the <code>char</code> code unit within this
-     *        object.
-     * @return The Unicode code point value.
-     * @throws IndexOutOfBoundsException if <code>index</code> is less than 1
-     *         or greater than {@link #length()}.
-     * @see Character
-     * @see Character#codePointBefore(char[], int, int)
-     * @since 1.5
+     * @throws StringIndexOutOfBoundsException {@inheritDoc}
+     * @since      1.2
      */
     @Override
-    public synchronized int codePointBefore(int index) {
-        return super.codePointBefore(index);
-    }
-
-    /**
-     * <p>
-     * Calculates the number of Unicode code points between
-     * <code>beginIndex</code> and <code>endIndex</code>.
-     * </p>
-     * 
-     * @param beginIndex The inclusive beginning index of the subsequence.
-     * @param endIndex The exclusive end index of the subsequence.
-     * @return The number of Unicode code points in the subsequence.
-     * @throws IndexOutOfBoundsException if <code>beginIndex</code> is
-     *         negative or greater than <code>endIndex</code> or
-     *         <code>endIndex</code> is greater than {@link #length()}.
-     * @since 1.5
-     */
-    @Override
-    public synchronized int codePointCount(int beginIndex, int endIndex) {
-        return super.codePointCount(beginIndex, endIndex);
-    }
-
-    /**
-     * Deletes a range of characters.
-     * 
-     * @param start the offset of the first character
-     * @param end the offset one past the last character
-     * @return this StringBuffer
-     * 
-     * @throws StringIndexOutOfBoundsException when
-     *         <code>start < 0, start > end</code> or
-     *         <code>end > length()</code>
-     */
     public synchronized StringBuffer delete(int start, int end) {
-        delete0(start, end);
-        return this;
+        //toStringCache = null;
+        return (StringBuffer) super.delete(start, end);
+        
     }
 
     /**
-     * Deletes a single character
-     * 
-     * @param location the offset of the character to delete
-     * @return this StringBuffer
-     * 
-     * @throws StringIndexOutOfBoundsException when <code>location < 0</code>
-     *         or <code>location >= length()</code>
-     */
-    public synchronized StringBuffer deleteCharAt(int location) {
-        deleteCharAt0(location);
-        return this;
-    }
-
-    /**
-     * Ensures that this StringBuffer can hold the specified number of
-     * characters without growing.
-     * 
-     * @param min the minimum number of elements that this StringBuffer will
-     *        hold before growing
+     * @throws StringIndexOutOfBoundsException {@inheritDoc}
+     * @since      1.2
      */
     @Override
-    public synchronized void ensureCapacity(int min) {
-        super.ensureCapacity(min);
+    public synchronized StringBuffer deleteCharAt(int index) {
+        //toStringCache = null;
+        return (StringBuffer) super.deleteCharAt(index);
+        
     }
 
     /**
-     * Copies the specified characters in this StringBuffer to the character
-     * array starting at the specified offset in the character array.
-     * 
-     * @param start the starting offset of characters to copy
-     * @param end the ending offset of characters to copy
-     * @param buffer the destination character array
-     * @param index the starting offset in the character array
-     * 
-     * @throws IndexOutOfBoundsException when <code>start < 0, end > length(),
-     *				start > end, index < 0, end - start > buffer.length - index</code>
-     * @throws NullPointerException when buffer is null
+     * @throws StringIndexOutOfBoundsException {@inheritDoc}
+     * @since      1.2
      */
     @Override
-    public synchronized void getChars(int start, int end, char[] buffer, int idx) {
-        super.getChars(start, end, buffer, idx);
+    public synchronized StringBuffer replace(int start, int end, String str) {
+        //toStringCache = null;
+        return (StringBuffer) super.replace(start, end, str);
+        
     }
 
+//    /**
+//     * @throws StringIndexOutOfBoundsException {@inheritDoc}
+//     * @since      1.2
+//     */
+//    @Override
+//    public synchronized String substring(int start) {
+//        return substring(start, count);
+//    }
+//
+//    /**
+//     * @throws IndexOutOfBoundsException {@inheritDoc}
+//     * @since      1.4
+//     */
+//    @Override
+//    public synchronized CharSequence subSequence(int start, int end) {
+//        return super.substring(start, end);
+//    }
+//
+//    /**
+//     * @throws StringIndexOutOfBoundsException {@inheritDoc}
+//     * @since      1.2
+//     */
+//    @Override
+//    public synchronized String substring(int start, int end) {
+//        return super.substring(start, end);
+//    }
+//
     /**
-     * Searches in this StringBuffer for the index of the specified character.
-     * The search for the character starts at the specified offset and moves
-     * towards the end.
-     * 
-     * @param subString the string to find
-     * @param start the starting offset
-     * @return the index in this StringBuffer of the specified character, -1 if
-     *         the character isn't found
-     * 
-     * @see #lastIndexOf(String,int)
-     * 
-     * @since 1.4
+     * @throws StringIndexOutOfBoundsException {@inheritDoc}
+     * @since      1.2
      */
     @Override
-    public synchronized int indexOf(String subString, int start) {
-        return super.indexOf(subString, start);
+    public synchronized StringBuffer insert(int index, char[] str, int offset,
+                                            int len)
+    {
+        //toStringCache = null;
+        return (StringBuffer) super.insert(index, str, offset, len);
+        
     }
 
     /**
-     * Inserts the character at the specified offset in this StringBuffer.
-     * 
-     * @param index the index at which to insert
-     * @param ch the character to insert
-     * @return this StringBuffer
-     * 
-     * @throws ArrayIndexOutOfBoundsException when <code>index < 0</code> or
-     *         <code>index > length()</code>
-     */
-    public synchronized StringBuffer insert(int index, char ch) {
-        insert0(index, ch);
-        return this;
-    }
-
-    /**
-     * Inserts the string representation of the specified boolean at the
-     * specified offset in this StringBuffer.
-     * 
-     * @param index the index at which to insert
-     * @param b the boolean to insert
-     * @return this StringBuffer
-     * 
-     * @throws StringIndexOutOfBoundsException when <code>index < 0</code> or
-     *         <code>index > length()</code>
-     */
-    public StringBuffer insert(int index, boolean b) {
-        return insert(index, b ? "true" : "false");
-    }
-
-    /**
-     * Inserts the string representation of the specified integer at the
-     * specified offset in this StringBuffer.
-     * 
-     * @param index the index at which to insert
-     * @param i the integer to insert
-     * @return this StringBuffer
-     * 
-     * @throws StringIndexOutOfBoundsException when <code>index < 0</code> or
-     *         <code>index > length()</code>
-     */
-    public StringBuffer insert(int index, int i) {
-        return insert(index, Integer.toString(i));
-    }
-
-    /**
-     * Inserts the string representation of the specified long at the specified
-     * offset in this StringBuffer.
-     * 
-     * @param index the index at which to insert
-     * @param l the long to insert
-     * @return this StringBuffer
-     * 
-     * @throws StringIndexOutOfBoundsException when <code>index < 0</code> or
-     *         <code>index > length()</code>
-     */
-    public StringBuffer insert(int index, long l) {
-        return insert(index, Long.toString(l));
-    }
-
-    /**
-     * Inserts the string representation of the specified double at the
-     * specified offset in this StringBuffer.
-     * 
-     * @param index the index at which to insert
-     * @param d the double to insert
-     * @return this StringBuffer
-     * 
-     * @throws StringIndexOutOfBoundsException when <code>index < 0</code> or
-     *         <code>index > length()</code>
-     */
-    public StringBuffer insert(int index, double d) {
-        return insert(index, Double.toString(d));
-    }
-
-    /**
-     * Inserts the string representation of the specified float at the specified
-     * offset in this StringBuffer.
-     * 
-     * @param index the index at which to insert
-     * @param f the float to insert
-     * @return this StringBuffer
-     * 
-     * @throws StringIndexOutOfBoundsException when <code>index < 0</code> or
-     *         <code>index > length()</code>
-     */
-    public StringBuffer insert(int index, float f) {
-        return insert(index, Float.toString(f));
-    }
-
-    /**
-     * Inserts the string representation of the specified object at the
-     * specified offset in this StringBuffer.
-     * 
-     * @param index the index at which to insert
-     * @param obj the object to insert
-     * @return this StringBuffer
-     * 
-     * @throws StringIndexOutOfBoundsException when <code>index < 0</code> or
-     *         <code>index > length()</code>
-     */
-    public StringBuffer insert(int index, Object obj) {
-        return insert(index, obj == null ? "null" : obj.toString());
-    }
-
-    /**
-     * Inserts the string at the specified offset in this StringBuffer.
-     * 
-     * @param index the index at which to insert
-     * @param string the string to insert
-     * @return this StringBuffer
-     * 
-     * @throws StringIndexOutOfBoundsException when <code>index < 0</code> or
-     *         <code>index > length()</code>
-     */
-    public synchronized StringBuffer insert(int index, String string) {
-        insert0(index, string);
-        return this;
-    }
-
-    /**
-     * Inserts the character array at the specified offset in this StringBuffer.
-     * 
-     * @param index the index at which to insert
-     * @param chars the character array to insert
-     * @return this StringBuffer
-     * 
-     * @throws StringIndexOutOfBoundsException when <code>index < 0</code> or
-     *         <code>index > length()</code>
-     * @throws NullPointerException when chars is null
-     */
-    public synchronized StringBuffer insert(int index, char[] chars) {
-        insert0(index, chars);
-        return this;
-    }
-
-    /**
-     * Inserts the specified sequence of characters at the specified offset in
-     * this StringBuffer.
-     * 
-     * @param index the index at which to insert
-     * @param chars a character array
-     * @param start the starting offset
-     * @param length the number of characters
-     * @return this StringBuffer
-     * 
-     * @throws StringIndexOutOfBoundsException when
-     *         <code>length < 0, start < 0,</code>
-     *				<code>start + length > chars.length, index < 0</code>
-     *         or <code>index > length()</code>
-     * @throws NullPointerException when chars is null
-     */
-    public synchronized StringBuffer insert(int index, char chars[], int start,
-            int length) {
-        insert0(index, chars, start, length);
-        return this;
-    }
-
-    /**
-     * <p>
-     * Inserts the <code>CharSequence</code> into this buffer at the
-     * <code>index</code>. If <code>CharSequence</code> is
-     * <code>null</code>, then the string <code>"null"</code> is inserted.
-     * </p>
-     * 
-     * @param index The index of this buffer to insert the sequence.
-     * @param s The <code>CharSequence</code> to insert.
-     * @return A reference to this object.
-     * @since 1.5
-     * @throws IndexOutOfBoundsException if the index is invalid.
-     */
-    public synchronized StringBuffer insert(int index, CharSequence s) {
-        insert0(index, s == null ? "null" : s.toString());
-        return this;
-    }
-
-    /**
-     * <p>
-     * Inserts the <code>CharSequence</code> into this buffer at the
-     * <code>index</code>. If <code>CharSequence</code> is
-     * <code>null</code>, then the string <code>"null"</code> is inserted.
-     * </p>
-     * 
-     * @param index The index of this buffer to insert the sequence.
-     * @param s The <code>CharSequence</code> to insert.
-     * @param start The inclusive start index of the subsequence of the
-     *        <code>CharSequence</code>.
-     * @param end The exclusive end index of the subsequence of the
-     *        <code>CharSequence</code>.
-     * @return A reference to this object.
-     * @since 1.5
-     * @throws IndexOutOfBoundsException if <code>index</code> is negative or
-     *         greater than the current length, <code>start</code> or
-     *         <code>end</code> are negative, <code>start</code> is greater
-     *         than <code>end</code> or <code>end</code> is greater than the
-     *         length of <code>s</code>.
-     */
-    public synchronized StringBuffer insert(int index, CharSequence s,
-            int start, int end) {
-        insert0(index, s, start, end);
-        return this;
-    }
-
-    /**
-     * Searches in this StringBuffer for the index of the specified character.
-     * The search for the character starts at the specified offset and moves
-     * towards the beginning.
-     * 
-     * @param subString the string to find
-     * @param start the starting offset
-     * @return the index in this StringBuffer of the specified character, -1 if
-     *         the character isn't found
-     * 
-     * @see #indexOf(String,int)
-     * 
-     * @since 1.4
+     * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
     @Override
-    public synchronized int lastIndexOf(String subString, int start) {
-        return super.lastIndexOf(subString, start);
+    public synchronized StringBuffer insert(int offset, Object obj) {
+        //toStringCache = null;
+        return (StringBuffer) super.insert(offset, "" + obj);
+        
     }
 
     /**
-     * <p>
-     * Returns the index within this object that is offset from
-     * <code>index</code> by <code>codePointOffset</code> code points.
-     * </p>
-     * 
-     * @param index The index within this object to calculate the offset from.
-     * @param codePointOffset The number of code points to count.
-     * @return The index within this object that is the offset.
-     * @throws IndexOutOfBoundsException if <code>index</code> is negative or
-     *         greater than {@link #length()} or if there aren't enough code
-     *         points before or after <code>index</code> to match
-     *         <code>codePointOffset</code>.
-     * @since 1.5
+     * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
     @Override
-    public synchronized int offsetByCodePoints(int index, int codePointOffset) {
-        return super.offsetByCodePoints(index, codePointOffset);
+    public synchronized StringBuffer insert(int offset, String str) {
+        //toStringCache = null;
+        return (StringBuffer) super.insert(offset, str);
+        
     }
 
     /**
-     * Replace a range of characters with the characters in the specified
-     * String.
-     * 
-     * @param start the offset of the first character
-     * @param end the offset one past the last character
-     * @param string a String
-     * @return this StringBuffer
-     * 
-     * @throws StringIndexOutOfBoundsException when <code>start < 0</code> or
-     *         <code>start > end</code>
+     * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
-    public synchronized StringBuffer replace(int start, int end, String string) {
-        replace0(start, end, string);
-        return this;
+    @Override
+    public synchronized StringBuffer insert(int offset, char[] str) {
+        //toStringCache = null;
+        return (StringBuffer) super.insert(offset, str);
+        
     }
 
     /**
-     * Reverses the order of characters in this StringBuffer.
-     * 
-     * @return this StringBuffer
+     * @throws IndexOutOfBoundsException {@inheritDoc}
+     * @since      1.5
      */
+    @Override
+    public StringBuffer insert(int index, CharSequence s) {
+        // Note, synchronization achieved via invocations of other StringBuffer methods
+        // after narrowing of s to specific type
+        // Ditto for toStringCache clearing
+        return (StringBuffer) super.insert(index, s == null ? "null" : "" + s);
+        
+    }
+
+    /**
+     * @throws IndexOutOfBoundsException {@inheritDoc}
+     * @since      1.5
+     */
+    @Override
+    public synchronized StringBuffer insert(int dstOffset, CharSequence s,
+            int start, int end)
+    {
+        //toStringCache = null;
+        return (StringBuffer) super.insert(dstOffset, s, start, end);
+        
+    }
+
+    /**
+     * @throws StringIndexOutOfBoundsException {@inheritDoc}
+     */
+    @Override
+    public  StringBuffer insert(int offset, boolean b) {
+        // Note, synchronization achieved via invocation of StringBuffer insert(int, String)
+        // after conversion of b to String by super class method
+        // Ditto for toStringCache clearing
+        return (StringBuffer) super.insert(offset, b);
+        
+    }
+
+    /**
+     * @throws IndexOutOfBoundsException {@inheritDoc}
+     */
+    @Override
+    public synchronized StringBuffer insert(int offset, char c) {
+        //toStringCache = null;
+        return (StringBuffer) super.insert(offset, c);
+        
+    }
+
+    /**
+     * @throws StringIndexOutOfBoundsException {@inheritDoc}
+     */
+    @Override
+    public StringBuffer insert(int offset, int i) {
+        // Note, synchronization achieved via invocation of StringBuffer insert(int, String)
+        // after conversion of i to String by super class method
+        // Ditto for toStringCache clearing
+        return (StringBuffer) super.insert(offset, i);
+        
+    }
+
+    /**
+     * @throws StringIndexOutOfBoundsException {@inheritDoc}
+     */
+    @Override
+    public StringBuffer insert(int offset, long l) {
+        // Note, synchronization achieved via invocation of StringBuffer insert(int, String)
+        // after conversion of l to String by super class method
+        // Ditto for toStringCache clearing
+        return (StringBuffer) super.insert(offset, l);
+        
+    }
+
+    /**
+     * @throws StringIndexOutOfBoundsException {@inheritDoc}
+     */
+    @Override
+    public StringBuffer insert(int offset, float f) {
+        // Note, synchronization achieved via invocation of StringBuffer insert(int, String)
+        // after conversion of f to String by super class method
+        // Ditto for toStringCache clearing
+        return (StringBuffer) super.insert(offset, f);
+        
+    }
+
+    /**
+     * @throws StringIndexOutOfBoundsException {@inheritDoc}
+     */
+    @Override
+    public StringBuffer insert(int offset, double d) {
+        // Note, synchronization achieved via invocation of StringBuffer insert(int, String)
+        // after conversion of d to String by super class method
+        // Ditto for toStringCache clearing
+        return (StringBuffer) super.insert(offset, d);
+        
+    }
+//
+//    /**
+//     * @since      1.4
+//     */
+//    @Override
+//    public int indexOf(String str) {
+//        // Note, synchronization achieved via invocations of other StringBuffer methods
+//        return super.indexOf(str);
+//    }
+//
+//    /**
+//     * @since      1.4
+//     */
+//    @Override
+//    public synchronized int indexOf(String str, int fromIndex) {
+//        return super.indexOf(str, fromIndex);
+//    }
+//
+//    /**
+//     * @since      1.4
+//     */
+//    @Override
+//    public int lastIndexOf(String str) {
+//        // Note, synchronization achieved via invocations of other StringBuffer methods
+//        return super.lastIndexOf(str);
+//    }
+//
+//    /**
+//     * @since      1.4
+//     */
+//    @Override
+//    public synchronized int lastIndexOf(String str, int fromIndex) {
+//        return super.lastIndexOf(str, fromIndex);
+//    }
+
+    /**
+     * @since   JDK1.0.2
+     */
+    @Override
     public synchronized StringBuffer reverse() {
-        reverse0();
-        return this;
+        //toStringCache = null;
+        return (StringBuffer) super.reverse();
+        
     }
 
-    /**
-     * Sets the character at the specified offset in this StringBuffer.
-     * 
-     * @param index the zero-based index in this StringBuffer
-     * @param ch the character
-     * 
-     * @throws IndexOutOfBoundsException when <code>index < 0</code> or
-     *         <code>index >= length()</code>
-     */
-    @Override
-    public synchronized void setCharAt(int index, char ch) {
-        super.setCharAt(index, ch);
-    }
-
-    /**
-     * Sets the length of this StringBuffer to the specified length. If there
-     * are more than length characters in this StringBuffer, the characters at
-     * end are lost. If there are less than length characters in the
-     * StringBuffer, the additional characters are set to <code>\\u0000</code>.
-     * 
-     * @param length the new length of this StringBuffer
-     * 
-     * @throws IndexOutOfBoundsException when <code>length < 0</code>
-     * 
-     * @see #length
-     */
-    @Override
-    public synchronized void setLength(int length) {
-        super.setLength(length);
-    }
-
-    /**
-     * Copies a range of characters into a new String.
-     * 
-     * @param start the offset of the first character
-     * @param end the offset one past the last character
-     * @return a new String containing the characters from start to end - 1
-     * 
-     * @throws IndexOutOfBoundsException when
-     *         <code>start < 0, start > end</code> or
-     *         <code>end > length()</code>
-     * 
-     * @since 1.4
-     */
-    @Override
-    public synchronized CharSequence subSequence(int start, int end) {
-        return super.substring(start, end);
-    }
-
-    /**
-     * Copies a range of characters into a new String.
-     * 
-     * @param start the offset of the first character
-     * @return a new String containing the characters from start to the end of
-     *         the string
-     * 
-     * @throws StringIndexOutOfBoundsException when <code>start < 0</code> or
-     *         <code>start > length()</code>
-     */
-    @Override
-    public synchronized String substring(int start) {
-        return super.substring(start);
-    }
-
-    /**
-     * Copies a range of characters into a new String.
-     * 
-     * @param start the offset of the first character
-     * @param end the offset one past the last character
-     * @return a new String containing the characters from start to end - 1
-     * 
-     * @throws StringIndexOutOfBoundsException when
-     *         <code>start < 0, start > end</code> or
-     *         <code>end > length()</code>
-     */
-    @Override
-    public synchronized String substring(int start, int end) {
-        return super.substring(start, end);
-    }
-
-    /**
-     * Answers the contents of this StringBuffer.
-     * 
-     * @return a String containing the characters in this StringBuffer
-     */
     @Override
     public synchronized String toString() {
-        return super.toString();
+    	return 秘s;
+//        if (toStringCache == null) {
+//            toStringCache = Arrays.copyOfRange(value, 0, count);
+//        }
+//        return new String(toStringCache, true);
     }
-
-    /**
-     * <p>
-     * Trims the storage capacity of this buffer down to the size of the current
-     * character sequence. Execution of this method may change the results
-     * returned by the {@link #capacity()} method, but this is not required.
-     * </p>
-     * 
-     * @since 1.5
-     */
-    @Override
-    public synchronized void trimToSize() {
-        super.trimToSize();
-    }
-
-    private synchronized void writeObject(ObjectOutputStream out)
-            throws IOException {
-        ObjectOutputStream.PutField fields = out.putFields();
-        fields.put("count", length());
-        fields.put("shared", false);
-        fields.put("value", getValue());
-        out.writeFields();
-    }
-
-    private void readObject(ObjectInputStream in) throws IOException,
-            ClassNotFoundException {
-        ObjectInputStream.GetField fields = in.readFields();
-        int count = fields.get("count", 0);
-        char[] value = (char[]) fields.get("value", null);
-        set(value, count);
-    }
+//
+//    /**
+//     * Serializable fields for StringBuffer.
+//     *
+//     * @serialField value  char[]
+//     *              The backing character array of this StringBuffer.
+//     * @serialField count int
+//     *              The number of characters in this StringBuffer.
+//     * @serialField shared  boolean
+//     *              A flag indicating whether the backing array is shared.
+//     *              The value is ignored upon deserialization.
+//     */
+//    private static final java.io.ObjectStreamField[] serialPersistentFields =
+//    {
+//        new java.io.ObjectStreamField("value", char[].class),
+//        new java.io.ObjectStreamField("count", Integer.TYPE),
+//        new java.io.ObjectStreamField("shared", Boolean.TYPE),
+//    };
+//
+//    /**
+//     * readObject is called to restore the state of the StringBuffer from
+//     * a stream.
+//     */
+//    private synchronized void writeObject(java.io.ObjectOutputStream s)
+//        throws java.io.IOException {
+//        java.io.ObjectOutputStream.PutField fields = s.putFields();
+//        fields.put("value", value);
+//        fields.put("count", count);
+//        fields.put("shared", false);
+//        s.writeFields();
+//    }
+//
+//    /**
+//     * readObject is called to restore the state of the StringBuffer from
+//     * a stream.
+//     */
+//    private void readObject(java.io.ObjectInputStream s)
+//        throws java.io.IOException, ClassNotFoundException {
+//        java.io.ObjectInputStream.GetField fields = s.readFields();
+//        value = (char[])fields.get("value", null);
+//        count = fields.get("count", 0);
+//    }
 }

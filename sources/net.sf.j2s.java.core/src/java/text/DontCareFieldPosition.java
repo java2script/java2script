@@ -28,6 +28,8 @@
 
 package java.text;
 
+import java.text.Format.Field;
+
 /**
  * DontCareFieldPosition defines no-op FieldDelegate. Its
  * singleton is used for the format methods that don't take a
@@ -46,6 +48,12 @@ class DontCareFieldPosition extends FieldPosition {
 				public void formatted(int fieldID, Format.Field attr, Object value,
                               int start, int end, StringBuffer buffer) {
         }
+		@Override
+		public void formatted(Field attr, Object value, int start, int end, String[] buffer) {
+		}
+		@Override
+		public void formatted(int fieldID, Field attr, Object value, int start, int end, String[] buffer) {
+		}
     };
 
     private DontCareFieldPosition() {

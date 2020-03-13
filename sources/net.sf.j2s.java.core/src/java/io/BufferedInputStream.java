@@ -17,8 +17,6 @@
 
 package java.io;
 
-import org.apache.harmony.luni.util.Msg;
-
 /**
  * <code>BufferedInputStream</code> is a class which takes an input stream and
  * <em>buffers</em> the input. In this way, costly interaction with the
@@ -55,7 +53,7 @@ public class BufferedInputStream extends FilterInputStream {
      */
     protected int pos;
 
-    private boolean closed = false;
+    private boolean 秘closed = false;
 
     /**
      * Constructs a new <code>BufferedInputStream</code> on the InputStream
@@ -83,8 +81,7 @@ public class BufferedInputStream extends FilterInputStream {
     public BufferedInputStream(InputStream in, int size) {
         super(in);
         if (size <= 0) {
-            // K0058=size must be > 0
-            throw new IllegalArgumentException(Msg.getString("K0058")); //$NON-NLS-1$
+            throw new IllegalArgumentException("Buffer size <= 0");
         }
         buf = (in == null) ? null : new byte[size];
     }
@@ -102,8 +99,8 @@ public class BufferedInputStream extends FilterInputStream {
     @Override
     public synchronized int available() throws IOException {
         if (buf == null) {
-            // K0059=Stream is closed
-            throw new IOException(Msg.getString("K0059")); //$NON-NLS-1$
+            // Stream closed=Stream is closed
+            throw new IOException(("Stream closed")); //$NON-NLS-1$
         }
         return count - pos + in.available();
     }
@@ -122,7 +119,7 @@ public class BufferedInputStream extends FilterInputStream {
             in = null;
         }
         buf = null;
-        closed = true;
+        秘closed = true;
     }
 
     private int fillbuf() throws IOException {
@@ -201,8 +198,8 @@ public class BufferedInputStream extends FilterInputStream {
     @Override
     public synchronized int read() throws IOException {
         if (buf == null) {
-            // K0059=Stream is closed
-            throw new IOException(Msg.getString("K0059")); //$NON-NLS-1$
+            // Stream closed=Stream is closed
+            throw new IOException(("Stream closed")); //$NON-NLS-1$
         }
 
         /* Are there buffered bytes available? */
@@ -242,9 +239,9 @@ public class BufferedInputStream extends FilterInputStream {
     @Override
     public synchronized int read(byte[] buffer, int offset, int length)
             throws IOException {
-        if (closed) {
-            // K0059=Stream is closed
-            throw new IOException(Msg.getString("K0059")); //$NON-NLS-1$
+        if (秘closed) {
+            // Stream closed=Stream is closed
+            throw new IOException(("Stream closed")); //$NON-NLS-1$
         }
         // avoid int overflow
         if (offset > buffer.length - length || offset < 0 || length < 0) {
@@ -254,7 +251,7 @@ public class BufferedInputStream extends FilterInputStream {
             return 0;
         }
         if (null == buf) {
-            throw new IOException(Msg.getString("K0059")); //$NON-NLS-1$
+            throw new IOException(("Stream closed")); //$NON-NLS-1$
         }
 
         int required;
@@ -315,14 +312,12 @@ public class BufferedInputStream extends FilterInputStream {
 
     @Override
     public synchronized void reset() throws IOException {
-        if (closed) {
-            // K0059=Stream is closed
-            throw new IOException(Msg.getString("K0059")); //$NON-NLS-1$	
+        if (秘closed) {
+            // Stream closed=Stream is closed
+            throw new IOException(("Stream closed")); //$NON-NLS-1$	
         }
-        if (-1 == markpos) {
-            // K005a=Mark has been invalidated.
-            throw new IOException(Msg.getString("K005a")); //$NON-NLS-1$
-        }
+        if (markpos < 0)
+            throw new IOException("Resetting to invalid mark");
         pos = markpos;
     }
 
@@ -342,8 +337,8 @@ public class BufferedInputStream extends FilterInputStream {
     @Override
     public synchronized long skip(long amount) throws IOException {
         if (null == in) {
-            // K0059=Stream is closed
-            throw new IOException(Msg.getString("K0059")); //$NON-NLS-1$
+            // Stream closed=Stream is closed
+            throw new IOException(("Stream closed")); //$NON-NLS-1$
         }
         if (amount < 1) {
             return 0;

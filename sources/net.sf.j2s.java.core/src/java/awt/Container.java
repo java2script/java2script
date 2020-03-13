@@ -88,6 +88,8 @@ public class Container extends JSComponent {
 //
     public static final Component[] EMPTY_ARRAY = new Component[0];
 
+	protected boolean 秘isCRP;
+
     /**
      * The components in this container.
      * 
@@ -2776,6 +2778,11 @@ public class Container extends JSComponent {
      */
     @Override
 		public void removeNotify() {
+    		if (ui != null && 秘getUI().domNode == null) {
+    			// A CellRenderer's ui domNode has already been nulled out. 
+    			// Don't discard its children.
+    			return;
+    		}
 //        synchronized (getTreeLock()) {
             // We shouldn't use iterator because of the Swing menu
             // implementation specifics:

@@ -13,6 +13,8 @@ public interface J2SInterface {
 
 	HTML5Applet findApplet(String htmlName);
 
+	boolean debugClip();
+	
 	/**
 	 * 
 	 * @param isAll true for check of navigator; otherwise just J2S._lang from j2sLang=xx_XX in URI

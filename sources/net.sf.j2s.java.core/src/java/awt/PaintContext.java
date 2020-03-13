@@ -28,6 +28,7 @@
 
 package java.awt;
 
+import java.awt.image.Raster;
 
 /**
  * The <code>PaintContext</code> interface defines the encapsulated
@@ -61,22 +62,22 @@ AffineTransform, RenderingHints) createContext} method of
      */
     Object getColorModel();
 
-//    /**
-//     * Returns a <code>Raster</code> containing the colors generated for
-//     * the graphics operation.
-//     * @param x the x coordinate of the area in device space
-//     * for which colors are generated.
-//     * @param y the y coordinate of the area in device space
-//     * for which colors are generated.
-//     * @param w the width of the area in device space
-//     * @param h the height of the area in device space
-//     * @return a <code>Raster</code> representing the specified
-//     * rectangular area and containing the colors generated for
-//     * the graphics operation.
-//     */
-//    Raster getRaster(int x,
-//                     int y,
-//                     int w,
-//                     int h);
+    /**
+     * Returns a <code>Raster</code> containing the colors generated for
+     * the graphics operation.
+     * @param x the x coordinate of the area in device space
+     * for which colors are generated.
+     * @param y the y coordinate of the area in device space
+     * for which colors are generated.
+     * @param w the width of the area in device space
+     * @param h the height of the area in device space
+     * @return a <code>Raster</code> representing the specified
+     * rectangular area and containing the colors generated for
+     * the graphics operation.
+     */
+    Raster getRaster(int x,
+                     int y,
+                     int w,
+                     int h);
 
 }

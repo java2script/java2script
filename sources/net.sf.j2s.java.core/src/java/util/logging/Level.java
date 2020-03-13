@@ -527,7 +527,7 @@ public class Level implements java.io.Serializable {
     // Future API change should take this into consideration.
     static final class KnownLevel {
         private static Map<String, List<KnownLevel>> nameToLevels = new HashMap<>();
-        private static Map<Integer, List<KnownLevel>> intToLevels = new HashMap<>();
+        private static Map<String, List<KnownLevel>> intToLevels = new HashMap<>();
         final Level levelObject;     // instance of Level class or Level subclass
         final Level mirroredLevel;   // mirror of the custom Level
         KnownLevel(Level l) {
@@ -551,10 +551,10 @@ public class Level implements java.io.Serializable {
             }
             list.add(o);
 
-            list = intToLevels.get(l.value);
+            list = intToLevels.get("" + l.value); // SwingJS simpler map
             if (list == null) {
                 list = new ArrayList<>();
-                intToLevels.put(l.value, list);
+                intToLevels.put("" + l.value, list);
             }
             list.add(o);
         }
@@ -570,7 +570,7 @@ public class Level implements java.io.Serializable {
 
         // Returns a KnownLevel with the given value.
         static synchronized KnownLevel findByValue(int value) {
-            List<KnownLevel> list = intToLevels.get(value);
+            List<KnownLevel> list = intToLevels.get("" + value);
             if (list != null) {
                 return list.get(0);
             }

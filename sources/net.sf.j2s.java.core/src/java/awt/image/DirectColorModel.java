@@ -238,28 +238,28 @@ public class DirectColorModel extends PackedColorModel {
                isAlphaPremultiplied,
                amask == 0 ? Transparency.OPAQUE : Transparency.TRANSLUCENT,
                transferType);
-// SwingJS          if (ColorModel.isLinearRGBspace(colorSpace)) {
-//            is_LinearRGB = true;
-//            if (maxBits <= 8) {
-//                lRGBprecision = 8;
-//                tosRGB8LUT = ColorModel.getLinearRGB8TosRGB8LUT();
-//                fromsRGB8LUT8 = ColorModel.getsRGB8ToLinearRGB8LUT();
-//            } else {
-//                lRGBprecision = 16;
-//                tosRGB8LUT = ColorModel.getLinearRGB16TosRGB8LUT();
-//                fromsRGB8LUT16 = ColorModel.getsRGB8ToLinearRGB16LUT();
-//            }
-//        } else if (!is_sRGB) {
-//            for (int i = 0; i < 3; i++) {
-//                // super constructor checks that space is TYPE_RGB
-//                // check here that min/max are all 0.0/1.0
-//                if ((space.getMinValue(i) != 0.0f) ||
-//                    (space.getMaxValue(i) != 1.0f)) {
-//                    throw new IllegalArgumentException(
-//                        "Illegal min/max RGB component value");
-//                }
-//            }
-//        }
+        if (ColorModel.isLinearRGBspace(colorSpace)) {
+            is_LinearRGB = true;
+            if (maxBits <= 8) {
+                lRGBprecision = 8;
+                tosRGB8LUT = ColorModel.getLinearRGB8TosRGB8LUT();
+                fromsRGB8LUT8 = ColorModel.getsRGB8ToLinearRGB8LUT();
+            } else {
+                lRGBprecision = 16;
+                tosRGB8LUT = ColorModel.getLinearRGB16TosRGB8LUT();
+                fromsRGB8LUT16 = ColorModel.getsRGB8ToLinearRGB16LUT();
+            }
+        } else if (!is_sRGB) {
+            for (int i = 0; i < 3; i++) {
+                // super constructor checks that space is TYPE_RGB
+                // check here that min/max are all 0.0/1.0
+                if ((space.getMinValue(i) != 0.0f) ||
+                    (space.getMaxValue(i) != 1.0f)) {
+                    throw new IllegalArgumentException(
+                        "Illegal min/max RGB component value");
+                }
+            }
+        }
 //		setFields();
     }
 

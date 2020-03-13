@@ -539,13 +539,14 @@ public class ZoneInfo extends java.util.TimeZone {
             "]";
     }
 
-//    /**
-//     * Gets all available IDs supported in the Java run-time.
-//     *
-//     * @return an array of time zone IDs.
-//     */
-//    public static String[] getAvailableIDs() {
-//        List<String> idList = ZoneInfoFile.getZoneIDs();
+    /**
+     * Gets all available IDs supported in the Java run-time.
+     *
+     * @return an array of time zone IDs.
+     */
+    public static String[] getAvailableIDs() {
+    	return new String[] { "GMT" };
+//        List<String> idList = new ArrZoneInfoFile.getZoneIDs();
 //        List<String> excluded = ZoneInfoFile.getExcludedZones();
 //        if (excluded != null) {
 //            // List all zones from the idList and excluded lists
@@ -556,18 +557,19 @@ public class ZoneInfo extends java.util.TimeZone {
 //        }
 //        String[] ids = new String[idList.size()];
 //        return idList.toArray(ids);
-//    }
+    }
 
-//    /**
-//     * Gets all available IDs that have the same value as the
-//     * specified raw GMT offset.
-//     *
-//     * @param rawOffset the GMT offset in milliseconds. This
-//     * value should not include any daylight saving time.
-//     *
-//     * @return an array of time zone IDs.
-//     */
-//    public static String[] getAvailableIDs(int rawOffset) {
+    /**
+     * Gets all available IDs that have the same value as the
+     * specified raw GMT offset.
+     *
+     * @param rawOffset the GMT offset in milliseconds. This
+     * value should not include any daylight saving time.
+     *
+     * @return an array of time zone IDs.
+     */
+    public static String[] getAvailableIDs(int rawOffset) {
+    	return (rawOffset == 0 ? getAvailableIDs() : new String[0]);
 //        String[] result;
 //        List<String> matched = new ArrayList<String>();
 //        List<String> IDs = ZoneInfoFile.getZoneIDs();
@@ -607,59 +609,62 @@ public class ZoneInfo extends java.util.TimeZone {
 //        result = new String[matched.size()];
 //        matched.toArray(result);
 //        return result;
-//    }
+    }
 
-//    /**
-//     * Gets the ZoneInfo for the given ID.
-//     *
-//     * @param ID the ID for a ZoneInfo. See TimeZone for detail.
-//     *
-//     * @return the specified ZoneInfo object, or null if there is no
-//     * time zone of the ID.
-//     */
-//    public static TimeZone getTimeZone(String ID) {
-////        String givenID = null;
+    /**
+     * Gets the ZoneInfo for the given ID.
+     *
+     * @param ID the ID for a ZoneInfo. See TimeZone for detail.
+     *
+     * @return the specified ZoneInfo object, or null if there is no
+     * time zone of the ID.
+     */
+    public static TimeZone getTimeZone(String ID) {
+    	if (!ID.equals("GMT"))
+    		return null;
+    	
+//        String givenID = null;
+
+//        /*
+//         * If old JDK compatibility is specified, get the old alias
+//         * name.
+//         */
+//        if (USE_OLDMAPPING) {
+//            String compatibleID = TzIDOldMapping.MAP.get(ID);
+//            if (compatibleID != null) {
+//                givenID = ID;
+//                ID = compatibleID;
+//            }
+//        }
+
+//        ZoneInfo zi = ZoneInfoFile.getZoneInfo(ID);
+//        if (zi == null) {
+//            // if we can't create an object for the ID, try aliases.
+//            try {
+//                Map<String, String> map = getAliasTable();
+//                String alias = ID;
+//                while ((alias = map.get(alias)) != null) {
+//                    zi = ZoneInfoFile.getZoneInfo(alias);
+//                    if (zi != null) {
+//                        zi.setID(ID);
+//                        zi = ZoneInfoFile.addToCache(ID, zi);
+//                        zi = (ZoneInfo) zi.clone();
+//                        break;
+//                    }
+//                }
+//            } catch (Exception e){
+//                // ignore exceptions
+//            }
+//        }
 //
-////        /*
-////         * If old JDK compatibility is specified, get the old alias
-////         * name.
-////         */
-////        if (USE_OLDMAPPING) {
-////            String compatibleID = TzIDOldMapping.MAP.get(ID);
-////            if (compatibleID != null) {
-////                givenID = ID;
-////                ID = compatibleID;
-////            }
-////        }
-//
-////        ZoneInfo zi = ZoneInfoFile.getZoneInfo(ID);
-////        if (zi == null) {
-////            // if we can't create an object for the ID, try aliases.
-////            try {
-////                Map<String, String> map = getAliasTable();
-////                String alias = ID;
-////                while ((alias = map.get(alias)) != null) {
-////                    zi = ZoneInfoFile.getZoneInfo(alias);
-////                    if (zi != null) {
-////                        zi.setID(ID);
-////                        zi = ZoneInfoFile.addToCache(ID, zi);
-////                        zi = (ZoneInfo) zi.clone();
-////                        break;
-////                    }
-////                }
-////            } catch (Exception e){
-////                // ignore exceptions
-////            }
-////        }
-////
-////        if (givenID != null && zi != null) {
-////            zi.setID(givenID);
-////        }
-//        ZoneInfo zi = new ZoneInfo();
-//        zi.setID(ID);
-//        zi.setRawOffset(TimeZone.toMillis(ID));
-//        return zi;
-//    }
+//        if (givenID != null && zi != null) {
+//            zi.setID(givenID);
+//        }
+        ZoneInfo zi = new ZoneInfo();
+        zi.setID(ID);
+        zi.setRawOffset(0);//TimeZone.toMillis(ID));
+        return zi;
+    }
 
     private transient SimpleTimeZone lastRule;
 

@@ -227,8 +227,19 @@ public class Test_Dialog extends JFrame implements PropertyChangeListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 
-				JDialog d = new ImportExportJDialog(null, "Export Dialog");
+				JDialog d = new ImportExportJDialog(null, "Export Dialog") {
+				    public void setFocusableWindowState(boolean focusableWindowState) {
+				    	super.setFocusableWindowState(focusableWindowState);
+				    }
+
+				};
+				
+				System.out.println(d.getFocusableWindowState());
+				
 				d.setVisible(true);
+				
+				System.out.println(d.getFocusableWindowState());
+
 //				Test_Dialog.this
 //						.onDialogReturn(JColorChooser.showDialog(Test_Dialog.this, "Testing JColorChooser", Color.RED));
 //

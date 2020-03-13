@@ -56,7 +56,7 @@ public class MenuSelectionManager {
 //    private static final boolean VERBOSE = false; // show reuse hits/misses
 //    private static final boolean DEBUG =   false;  // show bad params, misc.
 
-    private static final Object MENU_SELECTION_MANAGER_KEY = new Object(); // javax.swing.MenuSelectionManager
+    private static final Object MENU_SELECTION_MANAGER_KEY = "javax.swing.MenuSelectionManager";//new Object(); // 
 
     /**
      * Returns the default menu selection manager.

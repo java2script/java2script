@@ -188,11 +188,7 @@ public abstract class GraphicsConfiguration {
 
 	protected BufferedImage newBufferedImage(ColorModel cm, WritableRaster wr,
 			boolean alphaPremultiplied, Hashtable<?, ?> properties) {
-		return (BufferedImage) Interface.getInstanceWithParams(
-				"java.awt.image.BufferedImage", new Class<?>[] { ColorModel.class,
-						WritableRaster.class, Boolean.class, Hashtable.class },
-				new Object[] { cm, wr,
-						alphaPremultiplied ? Boolean.TRUE : Boolean.FALSE, properties });
+		return new BufferedImage(cm, wr, alphaPremultiplied, properties);
 	}
 
 		/**

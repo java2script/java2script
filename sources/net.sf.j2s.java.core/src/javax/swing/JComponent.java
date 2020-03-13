@@ -52,10 +52,12 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -4308,6 +4310,7 @@ public abstract class JComponent extends Container {
 	 * @return always returns true
 	 */
 	public boolean isOptimizedDrawingEnabled() {
+		// JLayer, JLayeredPane, JRootPane, JViewport, JTabContainer
 		return true;
 	}
 
@@ -4402,30 +4405,20 @@ public abstract class JComponent extends Container {
 		this.paintingChild = paintingChild;
 	}
 
-	void _paintImmediately(int x, int y, int w, int h) {
+	private void _paintImmediately(int x, int y, int w, int h) {
 
 		// this method is called on JPanel if the developer uses jpanel.秘repaint()
 		
-		Graphics g;
-		Container c;
 		// Rectangle b;
 
 		int tmpX, tmpY, tmpWidth, tmpHeight;
 		int offsetX = 0, offsetY = 0;
 
-		boolean hasBuffer = false;
+		//boolean hasBuffer = false;
 
 		JComponent bufferedComponent = null;
 		JComponent paintingComponent = this;
 
-		// RepaintManager repaintManager = RepaintManager.currentManager(this);
-		// parent Container's up to Window or Applet. First container is
-		// the direct parent. Note that in testing it was faster to
-		// alloc a new Vector vs keeping a stack of them around, and gc
-		// seemed to have a minimal effect on this.
-		java.util.List<Component> path = new java.util.ArrayList<Component>(7);
-		int pIndex = -1;
-		int pCount = 0;
 
 		tmpX = tmpY = tmpWidth = tmpHeight = 0;
 
@@ -4436,6 +4429,7 @@ public abstract class JComponent extends Container {
 		paintImmediatelyClip.height = h;
 
 		boolean ontop = alwaysOnTop() && isOpaque();
+		// JMenuItem, PopupMenu, and JToolTip, but those never actually paint to the canvas anyway.
 		if (ontop) {
 			SwingUtilities.computeIntersection(0, 0, getWidth(), getHeight(),
 					paintImmediatelyClip);
@@ -4444,26 +4438,36 @@ public abstract class JComponent extends Container {
 				return;
 			}
 		}
-		Component child;
-		for (c = this, child = null; c != null && !c.isWindowOrJSApplet(); child = c, c = c.getParent()) {
+		// going through parents of this component
+		// RepaintManager repaintManager = RepaintManager.currentManager(this);
+		// parent Container's up to Window or Applet. First container is
+		// the direct parent. Note that in testing it was faster to
+		// alloc a new Vector vs keeping a stack of them around, and gc
+		// seemed to have a minimal effect on this.
+		List<Component> path = null; // SwingJS - even better idea!
+		int pIndex = -1;
+		Graphics g;
+		Container c = this;
+		Component child = null;
+		for (int pCount = 0; c != null && !c.isWindowOrJSApplet(); child = c, c = c.getParent(), pCount++) {
 			JComponent jc = (c instanceof JComponent) ? (JComponent) c : null;
-			path.add(c);
-			if (!ontop && jc != null && !jc.isOptimizedDrawingEnabled()) {
-				boolean resetPC;
-
-				// Children of c may overlap, three possible cases for the
-				// painting region:
-				// . Completely obscured by an opaque sibling, in which
-				// case there is no need to paint.
-				// . Partially obscured by a sibling: need to start
-				// painting from c.
-				// . Otherwise we aren't obscured and thus don't need to
-				// start painting from parent.
-				if (c != this) {
+			if (path != null)
+				path.add(c);
+			if (!ontop) {
+				if (c != this && jc != null && !jc.isOptimizedDrawingEnabled()) {
+					// note that 
+					// Children of c may overlap, three possible cases for the
+					// painting region:
+					// . Completely obscured by an opaque sibling, in which
+					// case there is no need to paint.
+					// . Partially obscured by a sibling: need to start
+					// painting from c.
+					// . Otherwise we aren't obscured and thus don't need to
+					// start painting from parent.
+					boolean resetPC;
 					if (jc.isPaintingOrigin()) {
 						resetPC = true;
-					} else {
-						
+					} else {					
 						Component[] children = JSComponent.秘getChildArray(c);
 						int i = 0;
 						for (int n = c.getComponentCount(); i < n; i++) {
@@ -4484,31 +4488,36 @@ public abstract class JComponent extends Container {
 							break;
 						}
 					}
-				} else {
-					resetPC = false;
-				}
+					if (resetPC) {
+						if (path == null) {
+							// SwingJS much easier to set this on the fly
+							path = new ArrayList<Component>(pCount + 1);
+							for (Component p = this;;p = p.getParent()) {
+								path.add(p);
+								if (p == c)
+									break;
+							}
+						}
+						// Get rid of any buffer since we draw from here and
+						// we might draw something larger
+						paintingComponent = jc;
+						pIndex = pCount;
+						offsetX = offsetY = 0;
+	//					hasBuffer = false;
+					}
 
-				if (resetPC) {
-					// Get rid of any buffer since we draw from here and
-					// we might draw something larger
-					paintingComponent = jc;
-					pIndex = pCount;
-					offsetX = offsetY = 0;
-					hasBuffer = false;
 				}
-			}
-			pCount++;
-
-			// look to see if the parent (and therefor this component)
-			// is double buffered
-			// if(repaintManager.isDoubleBufferingEnabled() && jc != null &&
-			// jc.isDoubleBuffered()) {
-			// hasBuffer = true;
-			// bufferedComponent = jc;
-			// }
-			//
-			// if we aren't on top, include the parent's clip
-			if (!ontop) {
+//			}
+//			// look to see if the parent (and therefor this component)
+//			// is double buffered
+//			// if(repaintManager.isDoubleBufferingEnabled() && jc != null &&
+//			// jc.isDoubleBuffered()) {
+//			// hasBuffer = true;
+//			// bufferedComponent = jc;
+//			// }
+//			//
+//			// if we aren't on top, include the parent's clip
+//			if (!ontop) {
 				int bx = c.getX();
 				int by = c.getY();
 				tmpWidth = c.getWidth();
@@ -4558,17 +4567,17 @@ public abstract class JComponent extends Container {
 			// SwingJS added .create()
 			g = safelyGetGraphics(paintingComponent, c);
 			try {
-				if (hasBuffer) {
-					RepaintManager rm = RepaintManager.currentManager(bufferedComponent);
-					rm.beginPaint();
-					try {
-						rm.paint(paintingComponent, bufferedComponent, g,
-								paintImmediatelyClip.x, paintImmediatelyClip.y,
-								paintImmediatelyClip.width, paintImmediatelyClip.height);
-					} finally {
-						rm.endPaint();
-					}
-				} else {
+//				if (hasBuffer) {
+//					RepaintManager rm = RepaintManager.currentManager(bufferedComponent);
+//					rm.beginPaint();
+//					try {
+//						rm.paint(paintingComponent, bufferedComponent, g,
+//								paintImmediatelyClip.x, paintImmediatelyClip.y,
+//								paintImmediatelyClip.width, paintImmediatelyClip.height);
+//					} finally {
+//						rm.endPaint();
+//					}
+//				} else {
 					// For some reason painting of the root pane causes a persistent clip in AWT. 
 					
 					// SwingJS early on was not clipping for better performance
@@ -4582,7 +4591,7 @@ public abstract class JComponent extends Container {
 					// (so that the underlying JRootPane canvas can show).
 					 paintingComponent.秘paintWithBackgroundCheck(g);
 					 //paintingComponent.paint(g);
-				}
+//				}
 			} finally {
 				g.dispose();
 			}
