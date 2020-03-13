@@ -66,7 +66,6 @@ public class JSFrameUI extends JSWindowUI implements FramePeer, JSComponentUI.Em
 //	private String title;
 	private int state;
 	private DOMNode closerWrap;
-	protected boolean isModal;
 	protected int zModal;
 
 	protected boolean isInternalFrame;
@@ -138,13 +137,6 @@ public class JSFrameUI extends JSWindowUI implements FramePeer, JSComponentUI.Em
 				DOMNode.setStyles(closerNode, "background-color", "#DDD");// strColor);
 			}
 			bindWindowEvents();
-			if (isModal) {
-				modalNode = DOMNode.createElement("div", id + "_modaldiv");
-				Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-				DOMNode.setStyles(modalNode, "position", "sticky", "left","0px", "top", "0px", 
-						"background", toCSSString(new Color(100, 100, 100, 100)));
-				DOMNode.setSize(modalNode, screen.width, screen.height);
-			}
 			Insets s = getInsets();
 			DOMNode.setTopLeftAbsolute(frameNode, 0, 0);
 			DOMNode.setAttrs(frameNode, "width", "" + frame.getWidth() + s.left + s.right, "height",
@@ -426,7 +418,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer, JSComponentUI.Em
 		if (isDummyFrame)
 			b = false;
 		super.setVisible(b);
-		if (isModal) {
+		if (isModal()) {
 			modalBlocked = b;
 			if (b) {
 				$(body).after(modalNode);
@@ -441,4 +433,8 @@ public class JSFrameUI extends JSWindowUI implements FramePeer, JSComponentUI.Em
 		DOMNode.setVisible(domNode, b);
 	}
 
+	protected boolean isModal() {
+		// see JSDialogUI
+		return false;
+	}
 }

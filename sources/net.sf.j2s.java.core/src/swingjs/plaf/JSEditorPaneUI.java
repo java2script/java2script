@@ -242,8 +242,6 @@ public class JSEditorPaneUI extends JSTextUI {
 	private String currentHTML;
 	private boolean isStyled;
 	private String mytext;
-	private String[] styles;
-	private String css;
 	private DOMNode styleNode;
 	
 
@@ -343,13 +341,15 @@ public class JSEditorPaneUI extends JSTextUI {
 		if (editor.秘jsHTMLHelper != null) {
 			mytext = html = text;
 			isHTML = true;
-			html = editor.秘jsHTMLHelper.indexAnchors(getInner(text, "body"));
-			getStyles();
+			html = (String) editor.秘jsHTMLHelper.get("html", getInner(text, "body"));
 			DOMNode.setAttrs(domNode, "contentEditable", FALSE);
 			styleNode = DOMNode.createElement("div", id + "_style");
 			domNode.appendChild(styleNode);
+			String[] styles = (String[]) editor.秘jsHTMLHelper.get("styles", "body");
 			if (styles != null)
 				DOMNode.setStyles(styleNode, styles);
+			String css = (String) editor.秘jsHTMLHelper.get("css", id);
+	        setStyle(id + "_style", css);
 		} else {
 			styleNode = domNode;
 			mytext = text;
@@ -387,38 +387,13 @@ public class JSEditorPaneUI extends JSTextUI {
 		}
 	}
 
-	private void getStyles() {
-		styles = null;
-		css = "";
-		StyleSheet sheet = editor.秘jsHTMLHelper.doc.getStyleSheet();
-		if (sheet == null)
-			return;
-        Enumeration styles = sheet.getStyleNames();
-        while (styles.hasMoreElements()) {
-            String name = (String) styles.nextElement();
-            // Don't write out the default style.
-            if (!name.equals(StyleContext.DEFAULT_STYLE)
-            		&& !name.equals("body")) {
-            	Style s = sheet.getStyle(name);
-            	css += s + "\n";
-            }
-        }
-        css = PT.rep(css, "NamedStyle:", "#" + id + " ").replace('=',':');
-        setStyle(id + "_style", css);
-		Style bodyStyle = sheet.getStyle("body");
-		if (bodyStyle != null) 
-		{
-			this.styles = /** @j2sNative bodyStyle.attributes.attributes || */null;
-		}
-	}
-
 	private void setStyle(String id, String css) {
 		DOMNode d = DOMNode.getElement(id);
 		if (d == null) {
-			d = DOMNode.createElement("style", id);
-			$(body).append(d);
+			$(body).append("<style id=" + id +">" + css + "</style>");
+		} else {
+			DOMNode.setAttr(d, "innerText", css);
 		}
-		DOMNode.setAttr(d, "innerText", css);
 	}
 
 	private String getInner(String html, String body) {

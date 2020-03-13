@@ -1,5 +1,7 @@
 package test;
 
+import java.net.URL;
+
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.event.HyperlinkEvent;
@@ -19,17 +21,39 @@ public class Test_Html extends JFrame {
 		editor.setEditable(false);
 		editor.setEditorKit(new HTMLEditorKit());
 		editor.setText(
-				"<html><head><style type=\"text/css\">body { margin:10px 10px 10px 10px;font-size: 12 pt; font-family: Dialog }</style></head><body><b>PhET Interactive Simulations</b><br>Copyright &copy; 2004-2015 University of Colorado.<br><a href=http://phet.colorado.edu/about/licensing.php>Some rights reserved.</a><br>Visit <a href=http://phet.colorado.edu>http://phet.colorado.edu</a></body></html>");
+				"<html>"
+				+ "<head>"
+				+ "<style type=\"text/css\">"
+				+ "body { margin:10px 10px 10px 10px;font-size: 24pt; font-family: Dialog }"
+				+ "a { text-decoration:none;font-size:12pt;}"
+				+ "</style>"
+				+ "</head>"
+				+ "<body>"
+				+ "<b><font color=red>PhET Interactive Simulations</font></b>"
+				+ "<br>Copyright &copy; 2004-2015 University of Colorado."
+				+ "<br><a href=http://phet.colorado.edu/about/licensing.php>Some rights reserved.</a>"
+				+ "<br>Visit <a href=http://phet.colorado.edu>http://phet.colorado.edu</a>"
+				+ " <a href=proxy-href>proxy</a>"
+				+ "</body>"
+				+ "</html>");
 				add(editor);
 		editor.addHyperlinkListener(new HyperlinkListener() {
 
 			@Override
 			public void hyperlinkUpdate(HyperlinkEvent e) {
+				URL url = e.getURL();
 				System.out.println("source=" + e.getSource() 
 				+ "\nsourceElement=" + e.getSourceElement() 
 				+ "\neventType=" + e.getEventType() 
 				+ "\ndesc=" + e.getDescription() 
-				+ "\nurl=" + e.getURL() + "\n");
+				+ "\nurl=" + url + "\n");
+				if (url != null) {
+				/** @j2sNative 
+				 * 
+				 * open(url.toString());
+				 * 
+				 */
+				}
 			}
 			
 		});
