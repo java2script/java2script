@@ -1301,7 +1301,7 @@ public class JSlider extends JComponent implements SwingConstants {
 	// } // AccessibleJSlider
 
 	@SuppressWarnings("serial")
-	class JSliderSmartHashtable extends Hashtable implements
+	class JSliderSmartHashtable extends Hashtable<String, Object> implements
 			PropertyChangeListener {
 		int increment = 0;
 		int start = 0;
@@ -1325,15 +1325,15 @@ public class JSlider extends JComponent implements SwingConstants {
 					|| e.getPropertyName().equals("maximum")) {
 
 				Enumeration keys = getLabelTable().keys();
-				Object key = null;
-				Hashtable hashtable = new Hashtable();
+				String key = null;
+				Hashtable<String, Object> hashtable = new Hashtable<>();
 
 				// Save the labels that were added by the developer
 				while (keys.hasMoreElements()) {
-					key = keys.nextElement();
+					key = (String) keys.nextElement();
 					Object value = getLabelTable().get(key);
 					if (!(value instanceof JSliderLabelUIResource)) {
-						hashtable.put(key, value);
+						hashtable.put((String) key, value);
 					}
 				}
 
@@ -1343,7 +1343,7 @@ public class JSlider extends JComponent implements SwingConstants {
 				// Add the saved labels
 				keys = hashtable.keys();
 				while (keys.hasMoreElements()) {
-					key = keys.nextElement();
+					key = (String) keys.nextElement();
 					put(key, hashtable.get(key));
 				}
 
@@ -1353,7 +1353,7 @@ public class JSlider extends JComponent implements SwingConstants {
 
 		void createLabels() {
 			for (int labelIndex = start; labelIndex <= getMaximum(); labelIndex += increment) {
-				put(new Integer(labelIndex), new JSliderLabelUIResource(
+				put("" + (labelIndex), new JSliderLabelUIResource(
 						"" + labelIndex, JLabel.CENTER));
 			}
 		}

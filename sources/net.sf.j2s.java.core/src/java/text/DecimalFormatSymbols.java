@@ -517,7 +517,7 @@ public class DecimalFormatSymbols implements Cloneable {
 
 		// get resource bundle data - try the cache first
 		boolean needCacheUpdate = false;
-		Object[] data = (Object[]) cachedLocaleData.get(locale);
+		Object[] data = (Object[]) cachedLocaleData.get(locale.toString());
 		if (data == null) { /* cache miss */
 			data = new Object[3];
 			ResourceBundle rb = LocaleData.getNumberFormatData(locale);
@@ -576,7 +576,7 @@ public class DecimalFormatSymbols implements Cloneable {
 		monetarySeparator = decimalSeparator;
 
 		if (needCacheUpdate) {
-			cachedLocaleData.put(locale, data);
+			cachedLocaleData.put(locale.toString(), data);
 		}
 	}
 
@@ -803,7 +803,7 @@ public class DecimalFormatSymbols implements Cloneable {
 	 * cache to hold the NumberElements and the Currency of a Locale.
 	 */
 	@SuppressWarnings("rawtypes")
-	private static final Hashtable cachedLocaleData = new Hashtable(3);
+	private static final Hashtable<String, Object[]> cachedLocaleData = new Hashtable<>(3);
 
 //    /**
 //     * Obtains a DecimalFormatSymbols instance from a DecimalFormatSymbolsProvider

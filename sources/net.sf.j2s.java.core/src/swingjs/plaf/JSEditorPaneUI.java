@@ -5,7 +5,9 @@ import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
+import java.util.Enumeration;
 
 import javax.swing.InputMap;
 import javax.swing.JComponent;
@@ -21,9 +23,12 @@ import javax.swing.text.Document;
 import javax.swing.text.Element;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.Keymap;
+import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
+import javax.swing.text.StyleContext;
 import javax.swing.text.StyledEditorKit;
 import javax.swing.text.View;
+import javax.swing.text.html.StyleSheet;
 
 import javajs.util.PT;
 import javajs.util.SB;
@@ -237,6 +242,9 @@ public class JSEditorPaneUI extends JSTextUI {
 	private String currentHTML;
 	private boolean isStyled;
 	private String mytext;
+	private String[] styles;
+	private String css;
+	private DOMNode styleNode;
 	
 
 
@@ -326,42 +334,91 @@ public class JSEditorPaneUI extends JSTextUI {
 		
 //	@Override
 	public void setText(String text) {
-		SB sb = new SB();
 		Document d = editor.getDocument();
 		if (d == null)
 			return;
+		String html;
 		if (text == null)
 			text = editor.getText();
-		mytext = text;
-		isHTML = text.startsWith("<html");
-		String html;
-		if (isHTML) {
+		if (editor.秘jsHTMLHelper != null) {
+			mytext = html = text;
+			isHTML = true;
+			html = editor.秘jsHTMLHelper.indexAnchors(getInner(text, "body"));
+			getStyles();
 			DOMNode.setAttrs(domNode, "contentEditable", FALSE);
-			html = getInner(text, "body");
+			styleNode = DOMNode.createElement("div", id + "_style");
+			domNode.appendChild(styleNode);
+			if (styles != null)
+				DOMNode.setStyles(styleNode, styles);
 		} else {
-		isStyled = ((JEditorPane)editor).getEditorKit() instanceof StyledEditorKit;
-		fromJava(text, sb, d.getRootElements()[0], true, null);
-		//System.out.println("JSEPUI setText " + text.replace('\n', '.').replace('\t', '^'));
-		// This added 5 px is necessary for the last line when scrolled to appear in full. 
-		// Don't know why. Maybe the scrollbar just needs one last div?
-		 html = sb.toString() + "<div style='height:5px'><br></div>";
+			styleNode = domNode;
+			mytext = text;
+			isHTML = text.startsWith("<html");
+			if (isHTML) {
+				DOMNode.setAttrs(domNode, "contentEditable", FALSE);
+				html = getInner(text, "body");
+			} else {
+				SB sb = new SB();
+				isStyled = ((JEditorPane) editor).getEditorKit() instanceof StyledEditorKit;
+				fromJava(text, sb, d.getRootElements()[0], true, null);
+				// System.out.println("JSEPUI setText " + text.replace('\n', '.').replace('\t',
+				// '^'));
+				// This added 5 px is necessary for the last line when scrolled to appear in
+				// full.
+				// Don't know why. Maybe the scrollbar just needs one last div?
+				html = sb.toString() + "<div style='height:5px'><br></div>";
+			}
 		}
-		//System.out.println(html);
+		// System.out.println(html);
 		if (html == currentHTML)
 			return;
 		text = fixText(currentText = text);
-		DOMNode.setAttr(domNode, "innerHTML", currentHTML = html);
+		DOMNode.setAttr(styleNode, "innerHTML", currentHTML = html);
 		updateDataUI();
 		@SuppressWarnings("unused")
 		JSEditorPaneUI me = this;
 		/**
 		 * @j2sNative
-		 *   
-		 *   setTimeout(function(){me.updateJSCursor$S("editortext")},10);
+		 * 
+		 * 			setTimeout(function(){me.updateJSCursor$S("editortext")},10);
 		 */
 		{
 			updateJSCursor("editortext");
 		}
+	}
+
+	private void getStyles() {
+		styles = null;
+		css = "";
+		StyleSheet sheet = editor.秘jsHTMLHelper.doc.getStyleSheet();
+		if (sheet == null)
+			return;
+        Enumeration styles = sheet.getStyleNames();
+        while (styles.hasMoreElements()) {
+            String name = (String) styles.nextElement();
+            // Don't write out the default style.
+            if (!name.equals(StyleContext.DEFAULT_STYLE)
+            		&& !name.equals("body")) {
+            	Style s = sheet.getStyle(name);
+            	css += s + "\n";
+            }
+        }
+        css = PT.rep(css, "NamedStyle:", "#" + id + " ").replace('=',':');
+        setStyle(id + "_style", css);
+		Style bodyStyle = sheet.getStyle("body");
+		if (bodyStyle != null) 
+		{
+			this.styles = /** @j2sNative bodyStyle.attributes.attributes || */null;
+		}
+	}
+
+	private void setStyle(String id, String css) {
+		DOMNode d = DOMNode.getElement(id);
+		if (d == null) {
+			d = DOMNode.createElement("style", id);
+			$(body).append(d);
+		}
+		DOMNode.setAttr(d, "innerText", css);
 	}
 
 	private String getInner(String html, String body) {
@@ -1033,9 +1090,17 @@ public class JSEditorPaneUI extends JSTextUI {
 		Boolean b = checkAllowEvent(jQueryEvent);
 		if (b != null)
 			return b;
+		System.out.println("handling event type " + eventType);
 		switch (eventType) {
 		default:
 			return NOT_HANDLED;
+		case MouseEvent.MOUSE_ENTERED:
+		case MouseEvent.MOUSE_EXITED:
+		case MouseEvent.MOUSE_RELEASED:
+			if (editor.秘jsHTMLHelper != null) {
+				editor.秘jsHTMLHelper.handleJSEvent(target, eventType, jQueryEvent);
+				return HANDLED;
+			}
 		case SOME_KEY_EVENT:
 			//System.out.println("JSEPUI dispatching " + jQueryEvent);
 			JSKeyEvent.dispatchKeyEvent(jc, 0, jQueryEvent, System.currentTimeMillis());

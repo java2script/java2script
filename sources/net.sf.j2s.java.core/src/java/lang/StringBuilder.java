@@ -128,13 +128,13 @@ public final class StringBuilder
 
     @Override
     public StringBuilder append(Object obj) {
-        return append(String.valueOf(obj));
+        return (StringBuilder) super.append(obj);
     }
 
     @Override
     public StringBuilder append(String str) {
-        super.append(str);
-        return this;
+        return (StringBuilder) super.append(str);
+        
     }
 
     /**
@@ -158,14 +158,14 @@ public final class StringBuilder
      */
     @Override
 	public StringBuilder append(StringBuffer sb) {
-        super.append(sb);
-        return this;
+    	return (StringBuilder) super.append(sb);
+        
     }
 
     @Override
     public StringBuilder append(CharSequence s) {
-        super.append(s);
-        return this;
+    	return (StringBuilder) super.append(s);
+        
     }
 
     /**
@@ -173,14 +173,14 @@ public final class StringBuilder
      */
     @Override
     public StringBuilder append(CharSequence s, int start, int end) {
-        super.append(s, start, end);
-        return this;
+        return (StringBuilder) super.append(s, start, end);
+        
     }
 
     @Override
     public StringBuilder append(char[] str) {
-        super.append(str);
-        return this;
+        return (StringBuilder) super.append(str);
+        
     }
 
     /**
@@ -188,44 +188,44 @@ public final class StringBuilder
      */
     @Override
     public StringBuilder append(char[] str, int offset, int len) {
-        super.append(str, offset, len);
-        return this;
+        return (StringBuilder) super.append(str, offset, len);
+        
     }
 
     @Override
     public StringBuilder append(boolean b) {
-        super.append(b);
-        return this;
+        return (StringBuilder) super.append(b);
+        
     }
 
     @Override
     public StringBuilder append(char c) {
-        super.append(c);
-        return this;
+        return (StringBuilder) super.append(c);
+        
     }
 
     @Override
     public StringBuilder append(int i) {
-        super.append(i);
-        return this;
+        return (StringBuilder) super.append( i);
+        
     }
 
     @Override
     public StringBuilder append(long lng) {
-        super.append(lng);
-        return this;
+        return (StringBuilder) super.append( lng);
+        
     }
 
     @Override
     public StringBuilder append(float f) {
-        super.append(f);
-        return this;
+        return (StringBuilder) super.append( f);
+        
     }
 
     @Override
     public StringBuilder append(double d) {
-        super.append(d);
-        return this;
+        return (StringBuilder) super.append( d);
+        
     }
 
     /**
@@ -233,8 +233,8 @@ public final class StringBuilder
      */
     @Override
     public StringBuilder appendCodePoint(int codePoint) {
-        super.appendCodePoint(codePoint);
-        return this;
+        return (StringBuilder) super.appendCodePoint(codePoint);
+        
     }
 
     /**
@@ -242,8 +242,8 @@ public final class StringBuilder
      */
     @Override
     public StringBuilder delete(int start, int end) {
-        super.delete(start, end);
-        return this;
+        return (StringBuilder) super.delete(start, end);
+        
     }
 
     /**
@@ -251,8 +251,8 @@ public final class StringBuilder
      */
     @Override
     public StringBuilder deleteCharAt(int index) {
-        super.deleteCharAt(index);
-        return this;
+        return (StringBuilder) super.deleteCharAt(index);
+        
     }
 
     /**
@@ -260,8 +260,8 @@ public final class StringBuilder
      */
     @Override
     public StringBuilder replace(int start, int end, String str) {
-        super.replace(start, end, str);
-        return this;
+        return (StringBuilder) super.replace(start, end, str);
+        
     }
 
     /**
@@ -271,8 +271,8 @@ public final class StringBuilder
     public StringBuilder insert(int index, char[] str, int offset,
                                 int len)
     {
-        super.insert(index, str, offset, len);
-        return this;
+        return (StringBuilder) super.insert(index, str, offset, len);
+        
     }
 
     /**
@@ -280,8 +280,8 @@ public final class StringBuilder
      */
     @Override
     public StringBuilder insert(int offset, Object obj) {
-            super.insert(offset, obj);
-            return this;
+            return (StringBuilder) super.insert(offset, obj);
+            
     }
 
     /**
@@ -289,8 +289,8 @@ public final class StringBuilder
      */
     @Override
     public StringBuilder insert(int offset, String str) {
-        super.insert(offset, str);
-        return this;
+        return (StringBuilder) super.insert(offset, str);
+        
     }
 
     /**
@@ -298,8 +298,8 @@ public final class StringBuilder
      */
     @Override
     public StringBuilder insert(int offset, char[] str) {
-        super.insert(offset, str);
-        return this;
+        return (StringBuilder) super.insert(offset, str);
+        
     }
 
     /**
@@ -307,8 +307,8 @@ public final class StringBuilder
      */
     @Override
     public StringBuilder insert(int dstOffset, CharSequence s) {
-            super.insert(dstOffset, s);
-            return this;
+            return (StringBuilder) super.insert(dstOffset, s);
+            
     }
 
     /**
@@ -318,8 +318,8 @@ public final class StringBuilder
     public StringBuilder insert(int dstOffset, CharSequence s,
                                 int start, int end)
     {
-        super.insert(dstOffset, s, start, end);
-        return this;
+        return (StringBuilder) super.insert(dstOffset, s, start, end);
+        
     }
 
     /**
@@ -327,8 +327,8 @@ public final class StringBuilder
      */
     @Override
     public StringBuilder insert(int offset, boolean b) {
-        super.insert(offset, b);
-        return this;
+        return (StringBuilder) super.insert(offset, b);
+        
     }
 
     /**
@@ -336,8 +336,8 @@ public final class StringBuilder
      */
     @Override
     public StringBuilder insert(int offset, char c) {
-        super.insert(offset, c);
-        return this;
+        return (StringBuilder) super.insert(offset, c);
+        
     }
 
     /**
@@ -345,8 +345,8 @@ public final class StringBuilder
      */
     @Override
     public StringBuilder insert(int offset, int i) {
-        super.insert(offset, i);
-        return this;
+        return (StringBuilder) super.insert(offset, i);
+        
     }
 
     /**
@@ -354,8 +354,8 @@ public final class StringBuilder
      */
     @Override
     public StringBuilder insert(int offset, long l) {
-        super.insert(offset, l);
-        return this;
+        return (StringBuilder) super.insert(offset, l);
+        
     }
 
     /**
@@ -363,8 +363,8 @@ public final class StringBuilder
      */
     @Override
     public StringBuilder insert(int offset, float f) {
-        super.insert(offset, f);
-        return this;
+        return (StringBuilder) super.insert(offset, f);
+        
     }
 
     /**
@@ -372,8 +372,8 @@ public final class StringBuilder
      */
     @Override
     public StringBuilder insert(int offset, double d) {
-        super.insert(offset, d);
-        return this;
+        return (StringBuilder) super.insert(offset, d);
+        
     }
 
     @Override
@@ -398,43 +398,44 @@ public final class StringBuilder
 
     @Override
     public StringBuilder reverse() {
-        super.reverse();
-        return this;
+    	return (StringBuilder) super.reverse();
+        
     }
 
     @Override
     public String toString() {
-        // Create a copy, don't share the array
-        return new String(value, 0, count);
+    	return 秘s;
+//        // Create a copy, don't share the array
+//        return new String(value, 0, count);
     }
-
-    /**
-     * Save the state of the {@code StringBuilder} instance to a stream
-     * (that is, serialize it).
-     *
-     * @serialData the number of characters currently stored in the string
-     *             builder ({@code int}), followed by the characters in the
-     *             string builder ({@code char[]}).   The length of the
-     *             {@code char} array may be greater than the number of
-     *             characters currently stored in the string builder, in which
-     *             case extra characters are ignored.
-     */
-    private void writeObject(java.io.ObjectOutputStream s)
-        throws java.io.IOException {
-        s.defaultWriteObject();
-        s.writeInt(count);
-        s.writeObject(value);
-    }
-
-    /**
-     * readObject is called to restore the state of the StringBuffer from
-     * a stream.
-     */
-    private void readObject(java.io.ObjectInputStream s)
-        throws java.io.IOException, ClassNotFoundException {
-        s.defaultReadObject();
-        count = s.readInt();
-        value = (char[]) s.readObject();
-    }
+//
+//    /**
+//     * Save the state of the {@code StringBuilder} instance to a stream
+//     * (that is, serialize it).
+//     *
+//     * @serialData the number of characters currently stored in the string
+//     *             builder ({@code int}), followed by the characters in the
+//     *             string builder ({@code char[]}).   The length of the
+//     *             {@code char} array may be greater than the number of
+//     *             characters currently stored in the string builder, in which
+//     *             case extra characters are ignored.
+//     */
+//    private void writeObject(java.io.ObjectOutputStream s)
+//        throws java.io.IOException {
+//        s.defaultWriteObject();
+//        s.writeInt(count);
+//        s.writeObject(value);
+//    }
+//
+//    /**
+//     * readObject is called to restore the state of the StringBuffer from
+//     * a stream.
+//     */
+//    private void readObject(java.io.ObjectInputStream s)
+//        throws java.io.IOException, ClassNotFoundException {
+//        s.defaultReadObject();
+//        count = s.readInt();
+//        value = (char[]) s.readObject();
+//    }
 
 }

@@ -148,6 +148,7 @@ public class StandardTextSource extends TextSource {
   // TextSource API
 
   public char[] getChars() {
+	  // SwingJS allowing ExtendedTextSource to access chars directly, no cloning necessary
     return chars.clone();
   }
 

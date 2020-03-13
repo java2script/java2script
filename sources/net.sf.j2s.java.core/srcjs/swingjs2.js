@@ -10669,7 +10669,7 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
-// Note if this character 秘 does not look like a Chinese character, 
+// Note if this character 秘 does not look like a Chinese character, u79d8 
 // then DON'T SAVE THIS FILE. Open it again with a default UTF-8 editor.
 
 // J2S._version set to "3.2.4.09" 2019.10.31
@@ -10902,6 +10902,13 @@ window.J2S = J2S = (function() {
 		return j;
 	})();
 
+    J2S.cantLoadLocalFiles = function() {
+		alert("There was a problem loading local files. " +
+				"Check to see that your browser has been set up to read local files." +
+				" \n\n\n-- Developers: Override J2S.cantLoadLocalFiles to " +
+				"customize this message.");
+    }
+    
 	J2S.extend = function(map, map0, key0) {
 		for (key in map) {
 			var val = map[key]
@@ -11337,16 +11344,24 @@ window.J2S = J2S = (function() {
 		// the IMAGE option, which has been abandoned.
 
 console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
- 
-		var s = "?call=getRawDataFromDatabase&database="
+if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
+	  J2S.say("Info.serverURL has not been set. The url " + query + " is in a domain that requires Cross Origin Resource Sharing (CORS) access from this page, " +
+	  		"and that domain is not recognized by SwingJS as allowing CORS access. If the server does allow CORS, " +
+	  		"then the developer of this page must make sure that " +
+	  		"J2S.addDirectDatabaseCall(path)" +
+	  		" is called for that domain -- for example, J2S.addDirectDatabaseCall('stolaf.edu')." +
+	  		" And if that domain does not allow CORS, then the developer should set Info.serverURL appropriately or contact the administrator of that domain to see if CORS can be allowed.");
+	  return "";
+	}
+
+	var s = "?call=getRawDataFromDatabase&database="
 				+ database
 				+ (query.indexOf("?POST?") >= 0 ? "?POST?" : "")
 				+ "&query="
 				+ encodeURIComponent(query)
 				+ (asBase64 ? "&encoding=base64" : "")
 				+ (noScript ? "" : "&script="
-						+ encodeURIComponent(J2S
-								._getScriptForDatabase(database)));
+						+ encodeURIComponent(J2S._getScriptForDatabase(database)));
 		return J2S._contactServer(s, fSuccess, fError, infoRet);
 	}
 
@@ -13287,7 +13302,13 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			if (J2S._version.indexOf("$Date: ") == 0)
 				J2S._version = (J2S._version.substring(7) + " -").split(" -")[0]
 						+ " (J2S)";
-			Clazz.loadClass("java.lang.Class");
+			if (!Clazz._4Name("java.lang.Class", null, null, true, false, true)) {
+				if (J2S._isFile) {
+					J2S.cantLoadLocalFiles();
+					return;
+				}
+				alert("There was an unknown problem loading java.lang.Class.");
+			}
 			J2S._registerApplet(applet._id, applet);
 			if (!applet.__Info.args || applet.__Info.args == "?") {
 				if (J2S._appArgs)
@@ -13880,6 +13901,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2020.03.11 2.3.9-v1 fixes numerous subtle issues with boxed primatives Integer, Float, etc.
+// BH 2020.03.07 2.3.9-v1 fixes array.hashCode() to be System.identityHashCode(array). 
 // BH 2020.02.18 2.3.8-v2 upgrades String, Integer, ClassLoader, Package, various Exceptions
 // BH 2020.02.12 3.2.8-v1 new Throwable().getStackTrace() should not include j2sClazz methods
 // BH 2020.02.02 3.2.7-v5 fixes array.getClass().getName() and getArrayClass() for short -- should be [S, not [H, for Java
@@ -13964,11 +13987,14 @@ var getArrayClass = function(name){
 
 Clazz.array = function(baseClass, paramType, ndims, params, isClone) {
 	
+	if (arguments.length == 2 && paramType < 0)
+		return arrayClass(baseClass, -paramType);
+
 	var t0 = (_profileNew ? window.performance.now() : 0);
 
 	var ret = _array.apply(null, arguments);
 	
-	  _profileNew && addProfileNew(baseClass, t0 - window.performance.now() - 0.01);
+	  _profileNew && addProfileNew(baseClass == -1 ? paramType.__BASECLASS : baseClass, -1);
 
 	return ret;
 }
@@ -14460,11 +14486,15 @@ Clazz._newCount = 0;
 Clazz.new_ = function(c, args, cl) {
   if (!c)
     return new Clazz._O();
-	if (Array.isArray(c)) {
-		var a = args;args = c;c = a;
+
+  var a = arguments;
+  if (Array.isArray(c)) {
+		a = [args, c];
+		if (arguments.length == 3)
+			a.push(cl);
+		var _ = args;args = c;c = _;
 	}
   var generics;
-  var a = arguments;
   if (c === 1) { // new for 3.2.6 {K:"java.lang.String",...}
 	generics = arguments[1];
 	a = [];
@@ -14993,8 +15023,10 @@ Clazz.getProfile = function() {
 
 var addProfileNew = function(c, t) {
   var s = c.__CLASS_NAME__ || c.__PARAMCODE;
-  if (t < 0)
+  if (t < 0) {
 	  s += "[]";
+	  t = 0;
+  }
   var p = _profileNew[s]; 
   p || (p = _profileNew[s] = [0,0]);
   p[0]++;
@@ -15019,12 +15051,21 @@ var doDebugger = function() { debugger }
     return b;
  }
  
+ var aHCOffset = 500000000000
+ var lHCOffset = 400000000000
+ var iHCOffset = 300000000000
+ var sHCOffset = 200000000000
+ var bHCOffset = 100000000000
+
+
  var setArray = function(vals, baseClass, paramType, ndims) {
   ndims = Math.abs(ndims);
+  vals.__JSID__ = ++_jsid;
   vals.getClass$ = function () { return arrayClass(this.__BASECLASS, this.__NDIM) };
-  vals.hashCode$ = function() {return this.toString().hashCode$()}
+  vals.hashCode$ = function() {return System.identityHashCode$O(this, aHCOffset);}
+  vals.equals$O = function (a) {return this == a; } 
 
-  vals.equals$O = function (a) { 
+  vals.reallyEquals$O = function (a) { 
     if (!a || a.__ARRAYTYPE != this.__ARRAYTYPE || a.length != this.length)
       return false;
     if (a.length == 0)
@@ -16271,9 +16312,8 @@ _Loader.loadClass = _Loader.prototype.loadClass = function (name, onLoaded, forc
   //System.out.println("loadClass " + name)
   var path = _Loader.getClasspathFor(name);
   lastLoaded = name;
-  Clazz.ClassFilesLoaded.push(name.replace(/\./g,"/") + ".js");
-    Clazz.loadScript(path);//(n, n.path, n.requiredBy, false, onLoaded ? function(_loadClass){ isLoadingEntryClass = bSave; onLoaded()}: null);
-}
+   Clazz.loadScript(path, name);
+ }
 
 /* private */
 _Loader.loadPackage = function(pkg, fSuccess) {
@@ -16492,7 +16532,7 @@ Clazz._4Name = function(clazzName, applet, state, asClazz, initialize, isQuiet) 
 Clazz.currentPath= "";
 
 
-Clazz.loadScript = function(file) {
+Clazz.loadScript = function(file, nameForList) {
 
   Clazz.currentPath = file;
   //loadedScripts[file] = true;
@@ -16508,8 +16548,11 @@ Clazz.loadScript = function(file) {
     _Loader.onScriptLoading(file);
     data = J2S.getFileData(file);
     evaluate(file, data);
+    if (nameForList)
+    	Clazz.ClassFilesLoaded.push(nameForList.replace(/\./g,"/") + ".js");
     _Loader.onScriptLoaded(file, null, data);
   }catch(e) {
+	  Clazz.ClassFilesLoaded.pop();
     _Loader.onScriptLoaded(file, e, data);
     var s = ""+e;
     if (data.indexOf("Error") >= 0)
@@ -17046,8 +17089,8 @@ C$.arraycopy$O$I$O$I$I=function (src, srcPos, dest, destPos, length) {
 	if (src !== dest || srcPos > destPos) { for (var i = length; --i >= 0;) dest[destPos++] = src[srcPos++]; } else { destPos += length; srcPos += length; for (var i = length; --i >= 0;) src[--destPos] = src[--srcPos]; }
 }
 
-C$.identityHashCode$O=function (x) {
-	return x==null ? 0 : x._$hashcode || (x._$hashcode = ++hashCode);
+C$.identityHashCode$O=function (x, offset) {
+	return x==null ? 0 : x._$hashcode || (x._$hashcode = ++hashCode + (offset || 0));
 }
 
 C$.getProperties$=function () {
@@ -17215,8 +17258,7 @@ Math.signum||(Math.signum=function(d){return(d==0.0||isNaN(d))?d:d < 0 ? -1 : 1}
 
 Math.scalb||(Math.scalb=function(d,scaleFactor){return d*Math.pow(2,scaleFactor)});
 
-//var 
-a64 = null, a32 = null, i32 = null, i64 = null;
+var a64 = null, i64 = null;
 
 Math.nextAfter||
 (Math.nextAfter=function(start,direction){
@@ -17380,10 +17422,10 @@ m$(Number,["byteValue$"],function(){return this.valueOf().byteValue();});
 m$(Number,["shortValue$"],function(){return this.valueOf().shortValue();});
 m$(Number,["intValue$"],function(){return this.valueOf().intValue();});
 m$(Number,["longValue$"],function(){return this.valueOf().longValue();});
-m$(Number,["floatValue$", "doubleValue$", "hashCode$"],function(){return this.valueOf();});
+m$(Number,["floatValue$", "doubleValue$"],function(){return this.valueOf();});
 
 Clazz._setDeclared("java.lang.Integer", java.lang.Integer=Integer=function(){
-if (typeof arguments[0] != "object")this.c$(arguments[0]);
+if (arguments[0] === null || typeof arguments[0] != "object")this.c$(arguments[0]);
 });
 
 var primTypes = {};
@@ -17409,9 +17451,11 @@ var setJ2STypeclass = function(cl, type, paramCode) {
   cl.TYPE.getInterfaces$ = EMPTY_CLASSES;
 }
 
-var decorateAsNumber = function (clazz, qClazzName, type, PARAMCODE) {
+var decorateAsNumber = function (clazz, qClazzName, type, PARAMCODE, hcOffset) {
   clazz.prototype.valueOf=function(){return 0;};
   clazz.prototype.__VAL0__ = 1;
+  if (hcOffset)
+	  clazz.prototype.hashCode$ = function() {return this.valueOf() + hcOffset};
   finalizeClazz(clazz, qClazzName, null, 0, true);
   extendPrototype(clazz, true, true);
   setSuperclass(clazz, Number);
@@ -17420,7 +17464,7 @@ var decorateAsNumber = function (clazz, qClazzName, type, PARAMCODE) {
   return clazz;
 };
 
-decorateAsNumber(Integer, "Integer", "int", "I");
+decorateAsNumber(Integer, "Integer", "int", "I", iHCOffset);
 
 Integer.toString=Integer.toString$I=Integer.toString$I$I=Integer.prototype.toString=function(i,radix){
 	switch(arguments.length) {
@@ -17433,18 +17477,73 @@ Integer.toString=Integer.toString$I=Integer.toString$I$I=Integer.prototype.toStr
 	}
 };
 
-m$(Integer, ["c$", "c$$S", "c$$I"], function(v){
- v == null && (v = 0);
- if (typeof v != "number")
-  v = Integer.parseInt$S$I(v, 10);
- v = v.intValue();  
+var minInt = Integer.MIN_VALUE=Integer.prototype.MIN_VALUE=-0x80000000;
+var maxInt = Integer.MAX_VALUE=Integer.prototype.MAX_VALUE=0x7fffffff;
+Integer.SIZE=Integer.prototype.SIZE=32;
+
+
+
+var ints = [];
+var longs = [];
+var shorts = [];
+
+var minValueOf = -128;
+var maxValueOf = 127;
+
+var getCachedNumber = function(i, a, cl, c$) {
+  if (i >= minValueOf && i <= maxValueOf) {
+	  var v = a[i + minValueOf];
+	  return (v ? v : a[i + minValueOf] = Clazz.new_(cl[c$], [i])); 
+  }
+}
+
+m$(Integer,"c$", function(v){ // SwingJS only -- for new Integer(3)
+	v || v == null || (v = 0);
+	 if (typeof v != "number")
+		 v = Integer.parseInt$S$I(v, 10);
+	 v = v.intValue();  
+	 this.valueOf=function(){return v;};
+	}, 1);
+
+m$(Integer, "c$$S", function(v){
+	 v = Integer.parseInt$S$I(v, 10);
+	 this.valueOf=function(){return v;};
+	}, 1);
+
+m$(Integer, "c$$I", function(v){
  this.valueOf=function(){return v;};
 }, 1);
 
+m$(Integer,"valueOf$S",
+function(s){
+	return Integer.valueOf$S$I(s, 10);
+}, 1);
 
-Integer.MIN_VALUE=Integer.prototype.MIN_VALUE=-0x80000000;
-Integer.MAX_VALUE=Integer.prototype.MAX_VALUE=0x7fffffff;
-//Integer.TYPE=Integer.prototype.TYPE=Integer;
+m$(Integer,"valueOf$S$I",
+function(s, radix){
+  return Integer.valueOf$I(Integer.parseInt$S$I(s, radix));
+}, 1);
+
+m$(Integer,"valueOf$I",
+function(i){
+  var v = getCachedNumber(i, ints, Integer, "c$$I");
+  return (v ? v : Clazz.new_(Integer.c$$I, [i]));
+}, 1);
+
+
+m$(Integer,"parseInt$S$I",
+function(s,radix){
+ var v = parseInt(s, radix);
+ if (isNaN(v) || v < minInt || v > maxInt){
+	throw Clazz.new_(NumberFormatException.c$$S, ["parsing " + s + " radix " + radix]);
+ }
+return v;
+}, 1);
+
+m$(Integer,"parseInt$S",
+function(s){
+return Integer.parseInt$S$I(s, 10);
+}, 1);
 
 m$(Integer,"highestOneBit$I",
 	function(i) { 
@@ -17474,7 +17573,7 @@ m$(Integer,"reverse$I",
 	        ((i >>> 8) & 0xff00) | (i >>> 24);
     return i;}, 1);
 
-Integer.reverseBytes = m$(Integer,"reverseBytes$I",
+m$(Integer,"reverseBytes$I",
 	function(i) { 
 		return ((i >>> 24)           ) |
 	           ((i >>   8) &   0xFF00) |
@@ -17517,32 +17616,6 @@ m$(Integer,"numberOfTrailingZeros$I",
 	  return n - ((i << 1) >>> 31);
 	}, 1);
 
-var radixChar = "0123456789abcdefghijklmnopqrstuvwxyz";
-
-m$(Integer,"parseInt$S$I",
-function(s,radix){
- var v = parseInt(s, radix);
- if (isNaN(v)){
-	throw Clazz.new_(NumberFormatException.c$$S, ["parsing " + s + " radix " + radix]);
- }
-return v;
-}, 1);
-
-m$(Integer,["parseInt$S"],
-function(s,radix){
-return Integer.parseInt$S$I(s, radix || 10);
-}, 1);
-
-m$(Integer,["valueOf$S","valueOf$I"],
-function(s, radix){
-  return Clazz.new_(Integer.c$, [s]);
-}, 1);
-
-m$(Integer,["valueOf$S$I"],
-function(s, radix){
-  return Integer.parseInt$S$I(s, radix || 10);
-}, 1);
-
 m$(Integer,"equals$O",
 function(s){
 return (s instanceof Integer) && s.valueOf()==this.valueOf();
@@ -17580,22 +17653,18 @@ return (radix == 8 ? parseInt(n, 8) : n);
 m$(Integer,"decode$S", function(n){
   if (isNaN(n = Integer.decodeRaw$S(n)) || n < Integer.MIN_VALUE|| n > Integer.MAX_VALUE)
     throw Clazz.new_(NumberFormatException.c$$S,["Invalid Integer"]);
-  return Clazz.new_(Integer.c$, [n]);
+  return Clazz.new_(Integer.c$$I, [n]);
 }, 1);
 
-m$(Integer,"hashCode$",
-function(){
-return this.valueOf();
-});
 
 
 // Note that Long is problematic in JavaScript 
 
 Clazz._setDeclared("java.lang.Long", java.lang.Long=Long=function(){
-if (typeof arguments[0] != "object")this.c$(arguments[0]);
+if (arguments[0] === null || typeof arguments[0] != "object")this.c$(arguments[0]);
 });
 
-decorateAsNumber(Long, "Long", "long", "J");
+decorateAsNumber(Long, "Long", "long", "J", lHCOffset);
 Long.toString=Long.toString$J=Long.toString$J$I = Long.prototype.toString=function(i, radix){
 	switch(arguments.length) {
 	case 2:
@@ -17607,28 +17676,69 @@ Long.toString=Long.toString$J=Long.toString$J$I = Long.prototype.toString=functi
 	}
 };
 
-m$(Long, ["c$", "c$$S", "c$$J"], function(v){
-  v == null && (v = 0);
-  v = (typeof v == "number" ? Math.round(v) : Integer.parseInt$S$I(v, 10));
-  this.valueOf=function(){return v;};
-}, 1);
 
 //Long.MIN_VALUE=Long.prototype.MIN_VALUE=-0x8000000000000000;
 //Long.MAX_VALUE=Long.prototype.MAX_VALUE=0x7fffffffffffffff;
 //Long.TYPE=Long.prototype.TYPE=Long;
-// Note that the largest usable "Long" in JavaScript is 53 digits:
+//Note that the largest usable "Long" in JavaScript is 53 digits:
 
 var maxLong =  0x20000000000000; // 53 digits, plus 1
 var minLong = -0x20000000000000;
+Long.SIZE=Long.prototype.SIZE=64;
 
-m$(Long,["parseLong$S", "parseLong$S$I"],
-function(s,radix){
- return Integer.parseInt$S$I(s, radix || 10);
+Long.sum$J$J = Integer.sum$I$I;
+Long.toHexString$J=Integer.toHexString$I;
+Long.toOctalString$J=Integer.toOctalString$I;
+Long.toBinaryString$J=Integer.toBinaryString$I;
+
+m$(Long,"c$",
+function(v){
+v || v == null || (v = 0);
+ if (typeof v != "number")
+	 v = Long.parseLong$S$I(v, 10);
+ this.valueOf=function(){return v;};
 }, 1);
 
-m$(Long,["valueOf$S","valueOf$J","valueOf$S$I"],
+m$(Long, "c$$J", function(v){
+	 this.valueOf=function(){return v;};
+}, 1);
+
+m$(Long,"c$$S",
+function(v){
+ var v = Long.parseLong$S$I(v, 10);
+ this.valueOf=function(){return v;}; 
+}, 1);
+
+
+m$(Long,"valueOf$S",
+function(s){
+	return Long.valueOf$S$I(s, 10);
+}, 1);
+
+m$(Long,"valueOf$S$I",
 function(s, radix){
-return Clazz.new_(Long.c$, [s, radix||10]);
+  return Long.valueOf$J(Long.parseLong$S$I(s, radix));
+}, 1);
+
+m$(Long,"valueOf$J",
+function(i){
+  var v = getCachedNumber(i, longs, Long, "c$$J");
+  return (v ? v : Clazz.new_(Long.c$$J, [i]));
+}, 1);
+
+
+m$(Long,"parseLong$S",
+function(s){
+ return Long.parseLong$S$I(s, 10);
+}, 1);
+
+m$(Long,"parseLong$S$I",
+function(s,radix){
+ var v = parseInt(s, radix);
+ if (isNaN(v) || v < minLong || v > maxLong) {
+	throw Clazz.new_(NumberFormatException.c$$S, ["parsing " + s + " radix " + radix]);
+ }
+ return v;
 }, 1);
 
 m$(Long,"equals$O",
@@ -17641,15 +17751,10 @@ m$(Long,"decode$S",
 function(n){
   if (isNaN(n = Integer.decodeRaw$S(n)))
     throw Clazz.new_(NumberFormatException.c$$S, ["Invalid Long"]);
-  return Clazz.new_(Long.c$, [n]);
+  return Clazz.new_(Long.c$$J, [n]);
 }, 1);
 
 
-Long.sum$J$J = Integer.sum$I$I;
-
-Long.toHexString$J=Integer.toHexString$I;
-Long.toOctalString$J=Integer.toOctalString$I;
-Long.toBinaryString$J=Integer.toBinaryString$I;
 Long.toUnsignedString$J=Long.toUnsignedString$J$I = function(i,r) {
 	if (i <= minLong)
 		return "" + minLong;
@@ -17682,18 +17787,66 @@ Long.toUnsignedBigInteger$J = function(i) {
 m$(Long,"signum$J", function(i){ return i < 0 ? -1 : i > 0 ? 1 : 0; }, 1);
 
 Clazz._setDeclared("java.lang.Short", java.lang.Short = Short = function(){
-if (typeof arguments[0] != "object")this.c$(arguments[0]);
+if (arguments[0] === null || typeof arguments[0] != "object")this.c$(arguments[0]);
 });
-decorateAsNumber(Short, "Short", "short", "H");
+decorateAsNumber(Short, "Short", "short", "H", sHCOffset);
 
-m$(Short, ["c$", "c$$S", "c$$H"],
-function (v,radix) {
- v == null && (v = 0);
- if (typeof v != "number")
-  v = Integer.parseInt$S$I(v, radix||10);
- v = v.shortValue();
- this.valueOf = function () {return v;};
+
+var minShort = Short.MIN_VALUE = Short.prototype.MIN_VALUE = -32768;
+var maxShort = Short.MAX_VALUE = Short.prototype.MAX_VALUE = 32767;
+Short.SIZE=Short.prototype.SIZE=16;
+
+m$(Short,"c$", function(v){ // SwingJS only -- for new Integer(3)
+	v || v == null || (v = 0);
+	 if (typeof v != "number")
+		 v = Short.parseShort$S$I(v, 10);
+	 this.valueOf=function(){return v;};
+	}, 1);
+
+
+m$(Short, "c$$H", function(v){
+	 this.valueOf=function(){return v;};
 }, 1);
+
+
+m$(Short,"c$$S",
+function(v){
+ var v = Short.parseShort$S$I(v, 10);
+ this.valueOf=function(){return v;}; 
+}, 1);
+
+
+m$(Short,"valueOf$S",
+function(s){
+	return Short.valueOf$S$I(s, 10);
+}, 1);
+
+m$(Short,"valueOf$S$I",
+function(s, radix){
+  return Short.valueOf$H(Short.parseShort$S$I(s, radix));
+}, 1);
+
+m$(Short,"valueOf$H",
+function(i){
+  var v = getCachedNumber(i, shorts, Short, "c$$H");
+  return (v ? v : Clazz.new_(Short.c$$H, [i]));
+}, 1);
+
+
+m$(Short,"parseShort$S",
+function(s){
+ return Short.parseShort$S$I(s, 10);
+}, 1);
+
+m$(Short,"parseShort$S$I",
+function(s,radix){
+ var v = parseInt(s, radix);
+ if (isNaN(v) || v < minShort || v > maxShort) {
+	throw Clazz.new_(NumberFormatException.c$$S, ["parsing " + s + " radix " + radix]);
+ }
+ return v;
+}, 1);
+
 
 Short.toString = Short.toString$H = Short.toString$H$I = Short.prototype.toString = function (i,radix) {
 	switch(arguments.length) {
@@ -17706,24 +17859,6 @@ Short.toString = Short.toString$H = Short.toString$H$I = Short.prototype.toStrin
 	}
 };
 
-Short.MIN_VALUE = Short.prototype.MIN_VALUE = -32768;
-Short.MAX_VALUE = Short.prototype.MAX_VALUE = 32767;
-//Short.TYPE = Short.prototype.TYPE = Short;
-
-m$(Short, ["parseShort$S", "parseShort$S$I"],function (s, radix) {
-return Integer.parseInt$S$I(s, radix || 10).shortValue();
-}, 1);
-
-m$(Short, ["valueOf$S","valueOf$H","valueOf$S$I"],
-function (s,radix) {
-  return Clazz.new_(Short.c$, [s,radix||10]);
-}, 1);
-
-m$(Short, "equals$O",
-function (s) {
-return (s instanceof Short) && s.valueOf() == this.valueOf();
-});
-
 Short.toUnsignedInt$H = Short.toUnsignedLong$H = function (i) {
   return (i < 0 ? i + 0x10000 : i);
 };
@@ -17732,21 +17867,69 @@ m$(Short, "decode$S",
 function(n){
   if (isNaN(n = Integer.decodeRaw$S(n)) || n < -32768|| n > 32767)
     throw Clazz.new_(NumberFormatException.c$$S, ["Invalid Short"]);
-  return Clazz.new_(Short.c$, [n]);
+  return Clazz.new_(Short.c$$H, [n]);
 }, 1);
 
 Clazz._setDeclared("Byte", java.lang.Byte=Byte=function(){
-if (typeof arguments[0] != "object")this.c$(arguments[0]);
+if (arguments[0] === null || typeof arguments[0] != "object")this.c$(arguments[0]);
 });
-decorateAsNumber(Byte,"Byte", "byte", "B");
+decorateAsNumber(Byte,"Byte", "byte", "B", bHCOffset);
 
-m$(Byte, ["c$", "c$$S", "c$$B"], function(v,radix){
- if (typeof v != "number")
-   v = Integer.parseInt$S$I(v, radix||10);
- v = v.byteValue();
-this.valueOf=function(){return v;};
-this.byteValue = function(){return v};
+//Byte.serialVersionUID=Byte.prototype.serialVersionUID=-7183698231559129828;
+var minByte = Byte.MIN_VALUE=Byte.prototype.MIN_VALUE=-128;
+var maxByte = Byte.MAX_VALUE=Byte.prototype.MAX_VALUE=127;
+Byte.SIZE=Byte.prototype.SIZE=8;
+
+m$(Byte,"c$", function(v){ // SwingJS only -- for new Integer(3)
+	v || v == null || (v = 0);
+	 if (typeof v != "number")
+		 v = Byte.parseByte$S$I(v, 10);
+	 this.valueOf=function(){return v;};
+	}, 1);
+
+
+m$(Byte, "c$$B", function(v){
+	 this.valueOf=function(){return v;};
 }, 1);
+
+m$(Byte,"c$$S",
+function(v){
+ var v = Byte.parseByte$S$I(v, 10);
+ this.valueOf=function(){return v;}; 
+}, 1);
+
+
+m$(Byte,"valueOf$S",
+function(s){
+	return Byte.valueOf$S$I(s, 10);
+}, 1);
+
+m$(Byte,"valueOf$S$I",
+function(s, radix){
+  return Byte.valueOf$B(Byte.parseByte$S$I(s, radix));
+}, 1);
+
+m$(Byte,"valueOf$B",
+function(i){
+  var v = getCachedNumber(i, bytes, Byte, "c$$B");
+  return v;
+}, 1);
+
+
+m$(Byte,"parseByte$S",
+function(s){
+ return Byte.parseByte$S$I(s, 10);
+}, 1);
+
+m$(Byte,"parseByte$S$I",
+function(s,radix){
+ var v = parseInt(s, radix);
+ if (isNaN(v) || v < minByte || v > maxByte) {
+	throw Clazz.new_(NumberFormatException.c$$S, ["parsing " + s + " radix " + radix]);
+ }
+ return v;
+}, 1);
+
 
 Byte.toString=Byte.toString$B=Byte.toString$B$I=Byte.prototype.toString=function(i,radix){
 	switch(arguments.length) {
@@ -17758,12 +17941,6 @@ Byte.toString=Byte.toString$B=Byte.toString$B$I=Byte.prototype.toString=function
 		return (this===Byte ? "class java.lang.Byte" : ""+this.valueOf());
 	}
 };
-
-Byte.serialVersionUID=Byte.prototype.serialVersionUID=-7183698231559129828;
-Byte.MIN_VALUE=Byte.prototype.MIN_VALUE=-128;
-Byte.MAX_VALUE=Byte.prototype.MAX_VALUE=127;
-Byte.SIZE=Byte.prototype.SIZE=8;
-//Byte.TYPE=Byte.prototype.TYPE=Byte;
 
 m$(Byte,["parseByte$S", "parseByte$S$I"],
 function(s,radix){
@@ -17788,7 +17965,7 @@ m$(Byte,"decode$S",
 function(n){
   if (isNaN(n = Integer.decodeRaw$S(n)) || n < -128|| n > 127)
     throw Clazz.new_(NumberFormatException.c$$S, ["Invalid Byte"]);
-  return Clazz.new_(Byte.c$, [n]);
+  return Clazz.new_(Byte.c$$B, [n]);
 }, 1);
 
 Clazz._floatToString = function(f) {
@@ -17811,14 +17988,31 @@ Clazz._floatToString = function(f) {
 }
 
 Clazz._setDeclared("Float", java.lang.Float=Float=function(){
-if (typeof arguments[0] != "object")this.c$(arguments[0]);
+if (arguments[0] === null || typeof arguments[0] != "object")this.c$(arguments[0]);
 });
 decorateAsNumber(Float,"Float", "float", "F");
 
-m$(Float, ["c$", "c$$S", "c$$F", "c$$D"], function(v){
- v == null && (v = 0);
- if (typeof v != "number") 
-  v = Number(v);
+var maxFloat = 3.4028235E38;
+var minFloat = -3.4028235E38;
+
+m$(Float,"c$", function(v){
+	v || v == null || (v = 0);
+	 if (typeof v != "number") 
+	  v = Float.parseFloat$S(v);
+	 this.valueOf=function(){return v;}
+	}, 1);
+
+m$(Float, "c$$F", function(v){
+	 this.valueOf=function(){return v;};
+}, 1);
+
+m$(Float, "c$$S", function(v){
+  v = Float.parseFloat$S(v);
+ this.valueOf=function(){return v;}
+}, 1);
+
+m$(Float, "c$$D", function(v){
+  v = (v < minFloat ? -Infinity : v > maxFloat ? Infinity : v);
  this.valueOf=function(){return v;}
 }, 1);
 
@@ -17854,39 +18048,49 @@ Float.intBitsToFloat$I = function(i) {
 Float.serialVersionUID=Float.prototype.serialVersionUID=-2671257302660747028;
 Float.MIN_VALUE=Float.prototype.MIN_VALUE=1.4e-45;
 Float.MAX_VALUE=Float.prototype.MAX_VALUE=3.4028235e+38;
-Float.NEGATIVE_INFINITY=Number.NEGATIVE_INFINITY;
-Float.POSITIVE_INFINITY=Number.POSITIVE_INFINITY;
+Float.NEGATIVE_INFINITY=Float.prototype.NEGATIVE_INFINITY = Number.NEGATIVE_INFINITY;
+Float.POSITIVE_INFINITY=Float.prototype.POSITIVE_INFINITY = Number.POSITIVE_INFINITY;
 Float.NaN=Number.NaN;
-//Float.TYPE=Float.prototype.TYPE=Float;
 
 m$(Float,"parseFloat$S",
 function(s){
-if(s==null){
-throw Clazz.new_(NumberFormatException.c$$S, ["null"]);
-}
-if (typeof s == "number")return s;  // important -- typeof NaN is "number" and is OK here
-if (s == "NaN")
-	return NaN;
-var floatVal=Number(s);
-if(isNaN(floatVal)){
-throw Clazz.new_(NumberFormatException.c$$S, ["Not a Number : "+s]);
-}
-return floatVal;
+	var v = Double.parseDouble$S(s);
+	return (v < minFloat ? -Infinity : v > maxFloat ? Infinity : v);
 }, 1);
 
-m$(Float,["valueOf$S","valueOf$F"],
+m$(Float,"valueOf$S",
 function(s){
-return Clazz.new_(Float.c$, [s]);
+return Clazz.new_(Float.c$$S, [s]);
 }, 1);
 
-Float.isNaN$F = m$(Float,"isNaN$",
+m$(Float,"valueOf$D",
+function(i){
+return Clazz.new_(Float.c$$F, [i < minFloat ? -Infinity : i > maxFloat ? Infinity : i]);
+}, 1);
+
+m$(Float,"valueOf$F",
+function(i){
+return Clazz.new_(Float.c$$F, [i]);
+}, 1);
+
+m$(Float,"isNaN$F",
 function(num){
-return isNaN(arguments.length == 1 ? num : this.valueOf());
+return isNaN(num);
+}, 1);
+
+m$(Float,"isNaN$",
+function(){
+return isNaN(this.valueOf());
 });
 
-Float.isInfinite$F = m$(Float,"isInfinite$",
+m$(Float,"isInfinite$F",
 function(num){
-return !Number.isFinite(arguments.length == 1 ? num : this.valueOf());
+return !Number.isFinite(num);
+}, 1);
+
+m$(Float,"isInfinite$",
+function(){
+return !Number.isFinite(this.valueOf());
 });
 
 m$(Float,"equals$O",
@@ -17895,24 +18099,9 @@ return (s instanceof Float) && s.valueOf()==this.valueOf();
 });
 
 Clazz._setDeclared("Double", java.lang.Double=Double=function(){
-if (typeof arguments[0] != "object")this.c$(arguments[0]);
+if (arguments[0] === null || typeof arguments[0] != "object")this.c$(arguments[0]);
 });
 decorateAsNumber(Double,"Double", "double", "D");
-Double.toString=Double.toString$D=Double.prototype.toString=function(){
-if(arguments.length!=0){
-return Clazz._floatToString(arguments[0]);
-}else if(this===Double){
-return"class java.lang.Double";
-}
-return Clazz._floatToString(this.valueOf());
-};
-
-m$(Double, ["c$", "c$$S", "c$$D"], function(v){
- v == null && (v = 0);
- if (typeof v != "number") 
-  v = Double.parseDouble$S(v);
- this.valueOf=function(){return v;};
-}, 1);
 
 Double.serialVersionUID=Double.prototype.serialVersionUID=-9172774392245257468;
 Double.MIN_VALUE=Double.prototype.MIN_VALUE=4.9e-324;
@@ -17922,45 +18111,74 @@ Double.POSITIVE_INFINITY=Number.POSITIVE_INFINITY;
 Double.NaN=Number.NaN;
 //Double.TYPE=Double.prototype.TYPE=Double;
 
-Double.isNaN$D = m$(Double,"isNaN$",
-function(num){
-return isNaN(arguments.length == 1 ? num : this.valueOf());
-});
+Double.toString=Double.toString$D=Double.prototype.toString=function(){
+if(arguments.length!=0){
+return Clazz._floatToString(arguments[0]);
+}else if(this===Double){
+return"class java.lang.Double";
+}
+return Clazz._floatToString(this.valueOf());
+};
 
-Float.prototype.hashCode$ = Double.prototype.hashCode$ = function() {("" + this.valueOf()).hashCode$()}
-Double.isInfinite$D = m$(Double,"isInfinite$",
-function(num){
-return!Number.isFinite(arguments.length == 1 ? num : this.valueOf());
-});
+m$(Double, "c$$D", function(v){
+	 this.valueOf=function(){return v;};
+}, 1);
+
+m$(Double,"c$", function(v){
+v || v == null || (v = 0);
+ if (typeof v != "number") 
+  v = Double.parseDouble$S(v);
+ this.valueOf=function(){return v;}
+}, 1);
+
+m$(Double, ["c$$S"], function(v){
+v || v == null || (v = 0);
+if (typeof v != "number") 
+	v = Double.parseDouble$S(v);
+this.valueOf=function(){return v;};
+}, 1);
+
+Double.prototype.isNaN$ = Float.prototype.isNaN$;
+Double.isNaN$D = Double.prototype.isNaN$D = Float.isNaN$F;
+
+Float.prototype.hashCode$ = function() {this._hashcode || (this._hashcode = new String("F\u79d8" + this.valueOf()).hashCode$())}
+Double.prototype.hashCode$ = function() {this._hashcode || (this._hashcode = new String("D\u79d8" + this.valueOf()).hashCode$())}
+Double.isInfinite$D = Double.prototype.isInfinite$D = Float.isInfinite$F;
+Double.prototype.isInfinite$ = Float.prototype.isInfinite$;
 
 m$(Double,"parseDouble$S",
 function(s){
 if(s==null){
   throw Clazz.new_(NumberFormatException.c$$S, ["null"]);
 }
-if (typeof s == "number")return s;  // important -- typeof NaN is "number" and is OK here
 if (s == "NaN")
 	return NaN;
-var doubleVal=Number(s);
-if(isNaN(doubleVal)){
+var v=Number(s);
+if(isNaN(v)){
 throw Clazz.new_(NumberFormatException.c$$S, ["Not a Number : "+s]);
 }
-return doubleVal;
+return v;
 }, 1);
 
-m$(Double,["valueOf$S","valueOf$D"],
+m$(Double,"valueOf$S",
 function(v){
-return Clazz.new_(Double.c$, [v]);
+return Clazz.new_(Double.c$$S, [v]);
 }, 1);
 
-Double.prototype.equals = m$(Double,"equals$O",
+m$(Double,"valueOf$D",
+function(v){
+return Clazz.new_(Double.c$$D, [v]);
+}, 1);
+
+//Double.prototype.equals = 
+m$(Double,"equals$O",
 function(s){
 return (s instanceof Double) && s.valueOf()==this.valueOf();
 });
 
 Clazz._setDeclared("Boolean", 
 Boolean = java.lang.Boolean = Boolean || function(){
-if (typeof arguments[0] != "object")this.c$(arguments[0]);
+if (arguments[0] === null || typeof arguments[0] != "object")this.c$(arguments[0]);
 });
 
 extendObject(Boolean);
@@ -17971,11 +18189,56 @@ setJ2STypeclass(Boolean, "boolean", "Z");
 //extendPrototype(Boolean, true, false);
 Boolean.serialVersionUID=Boolean.prototype.serialVersionUID=-3665804199014368530;
 
-m$(Boolean, ["c$", "c$$S", "c$$Z"],
+m$(Boolean, ["c$", "c$$S"],
 function(s){
   var b = ((typeof s == "string" ? Boolean.toBoolean(s) : s) ? true : false);
   this.valueOf=function(){return b;};
 }, 1);
+
+m$(Boolean, "c$$Z", function(v){
+	 this.valueOf=function(){return v;};
+	}, 1);
+
+
+Boolean.TRUE=Boolean.prototype.TRUE=Clazz.new_(Boolean.c$$Z, [true]);
+Boolean.FALSE=Boolean.prototype.FALSE=Clazz.new_(Boolean.c$$Z, [false]);
+m$(Boolean,"valueOf$S",function(s){	return("true".equalsIgnoreCase$S(s)?Boolean.TRUE:Boolean.FALSE);}, 1);
+
+//the need is to have new Boolean(string), but that won't work with native Boolean
+//so instead we have to do a lexical switch from "new Boolean" to "Boolean.from"
+//note no $ here
+
+m$(Boolean,"valueOf$Z",function(b){ return(b?Boolean.TRUE:Boolean.FALSE);}, 1);
+
+
+// encoded by the transpiler for new Boolean(boolean); NOT equivalent to Boolean.TRUE or Boolean.FALSE
+m$(Boolean,"from",
+function(name){
+return Clazz.new_(Boolean.c$$Z, [Boolean.toBoolean(name)]);
+}, 1);
+
+m$(Boolean,"getBoolean$S",
+function(name){
+var result=false;
+try{
+result=Boolean.toBoolean(System.getProperty$S(name));
+}catch(e){
+if(Clazz.instanceOf(e,IllegalArgumentException)){
+}else if(Clazz.instanceOf(e,NullPointerException)){
+}else{
+throw e;
+}
+}
+return result;
+}, 1);
+
+m$(Boolean,"parseBoolean$S", function(s){return Boolean.toBoolean(s);}, 1);
+
+m$(Boolean,"toBoolean",
+function(name){
+return(typeof name == "string" ? name.equalsIgnoreCase$S("true") : !!name);
+}, 1);
+
 
 m$(Boolean,["booleanValue","booleanValue$"], function(){ return this.valueOf(); });
 
@@ -17986,25 +18249,11 @@ m$(Boolean,["compareTo$Boolean","compareTo$O"],
 		return(b.valueOf() == this.valueOf() ? 0 : this.valueOf() ? 1 : -1);
 		});
 
-Boolean.prototype.equals = m$(Boolean,"equals$O",
+//Boolean.prototype.equals = 
+	m$(Boolean,"equals$O",
 		function(obj){
 		return obj instanceof Boolean && this.booleanValue()==obj.booleanValue();
 		});
-
-m$(Boolean,"getBoolean$S",
-		function(name){
-		var result=false;
-		try{
-		result=Boolean.toBoolean(System.getProperty$S(name));
-		}catch(e){
-		if(Clazz.instanceOf(e,IllegalArgumentException)){
-		}else if(Clazz.instanceOf(e,NullPointerException)){
-		}else{
-		throw e;
-		}
-		}
-		return result;
-		}, 1);
 
 m$(Boolean,"hashCode$", function(){ return this.valueOf()?1231:1237;});
 m$(Boolean,"hashCode$Z", function(b){ return b?1231:1237;}, 1);
@@ -18013,30 +18262,9 @@ m$(Boolean,"logicalAnd$Z$Z", function(a,b){return(a && b);}, 1);
 m$(Boolean,"logicalOr$Z$Z", function(a,b){return(a || b);}, 1);
 m$(Boolean,"logicalXor$Z$Z", function(a,b){return !!(a ^ b);}, 1);
 
-m$(Boolean,"parseBoolean$S", function(s){return Boolean.toBoolean(s);}, 1);
 
 m$(Boolean,"toString",function(){return this.valueOf()?"true":"false";});
 m$(Boolean,"toString$Z",function(b){return "" + b;}, 1);
-
-m$(Boolean,"valueOf$S",function(s){	return("true".equalsIgnoreCase$S(s)?Boolean.TRUE:Boolean.FALSE);}, 1);
-m$(Boolean,"valueOf$Z",function(b){ return(b?Boolean.TRUE:Boolean.FALSE);}, 1);
-
-//the need is to have new Boolean(string), but that won't work with native Boolean
-//so instead we have to do a lexical switch from "new Boolean" to "Boolean.from"
-//note no $ here
-
-m$(Boolean,"toBoolean",
-function(name){
-return(typeof name == "string" ? name.equalsIgnoreCase$S("true") : !!name);
-}, 1);
-
-m$(Boolean,"from",
-function(name){
-return Boolean.toBoolean(name) ? Boolean.TRUE : Boolean.FALSE;
-}, 1);
-
-Boolean.TRUE=Boolean.prototype.TRUE=Clazz.new_(Boolean.c$, [true]);
-Boolean.FALSE=Boolean.prototype.FALSE=Clazz.new_(Boolean.c$, [false]);
 
 
 Clazz._Encoding={
@@ -18181,7 +18409,7 @@ String.format$S$OA = function(format, args) {
 
  
  String.CASE_INSENSITIVE_ORDER = {
-	 compare$: function(s1, s2){
+	 compare$O$O: function(s1, s2){
 		 if(s1==null || s2 == null)
 			 throw new NullPointerException();
 		 if(s1==s2) return 0;
@@ -18194,7 +18422,7 @@ String.format$S$OA = function(format, args) {
 	 }
  } 
  
-String.CASE_INSENSITIVE_ORDER.compare$S$S = String.CASE_INSENSITIVE_ORDER.compare$;
+String.CASE_INSENSITIVE_ORDER.compare$S$S = String.CASE_INSENSITIVE_ORDER.compare$O$O;
 
 CharSequence.$defaults$(String);
  
@@ -18202,7 +18430,7 @@ CharSequence.$defaults$(String);
 
 sp.compareToIgnoreCase$S = function(str) { return String.CASE_INSENSITIVE_ORDER.compare$S$S(this, str);}
 
-sp.replace$=function(c1,c2){
+sp.replace$ = function(c1,c2){
   if (c1 == c2 || this.indexOf (c1) < 0) return "" + this;
   if (c1.length == 1) {
     if ("\\$.*+|?^{}()[]".indexOf(c1) >= 0)   
@@ -18720,7 +18948,7 @@ String.join$CharSequence$Iterable = function(sep,iterable) {
 }
  
 var C$=Clazz.newClass(java.lang,"Character",function(){
-if (typeof arguments[0] != "object")this.c$(arguments[0]);
+if (arguments[0] === null || typeof arguments[0] != "object")this.c$(arguments[0]);
 },null,[java.io.Serializable,Comparable]);
 Clazz._setDeclared("Character", java.lang.Character); 
 setJ2STypeclass(Character, "char", "C");
@@ -18774,6 +19002,15 @@ return this.value.charCodeAt(0)==obj.value.charCodeAt(0);
 m$(C$,"charCodeAt$I",
 function(i){
 return(this.value).charCodeAt(i);
+});
+m$(C$,"isValidCodePoint$I",
+function(i){
+	try {
+	  String.fromCodePoint(i);
+	  return true;
+	} catch(e) {
+	  return false;
+	}
 });
 
 m$(C$,["compareTo$C","compareTo$","compareTo$O"],

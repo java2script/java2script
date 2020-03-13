@@ -5141,7 +5141,7 @@ public abstract class Component implements ImageObserver/*
 	 * Weak map of known coalesceEvent overriders. Value indicates whether
 	 * overriden. Bootstrap classes are not included.
 	 */
-	private static final Map<Class<?>, Boolean> coalesceMap = new HashMap<Class<?>, Boolean>(); // was
+	private static final Map<String, Boolean> coalesceMap = new HashMap<String, Boolean>(); // was
 																								// weakHashmap
 
 	/**
@@ -5154,8 +5154,9 @@ public abstract class Component implements ImageObserver/*
 		if (getClass().getClassLoader() == null) {
 			return false;
 		}
-		final Class<? extends Component> clazz = getClass();
-		synchronized (coalesceMap) {
+		final String clazz = getClass().getName();
+//		synchronized (coalesceMap) 
+		{
 			// Check cache.
 			Boolean value = coalesceMap.get(clazz);
 			if (value != null) {

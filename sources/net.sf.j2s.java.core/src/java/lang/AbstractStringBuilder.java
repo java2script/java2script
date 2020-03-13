@@ -25,9 +25,6 @@
 
 package java.lang;
 
-//import sun.misc.FloatingDecimal;
-import java.util.Arrays;
-
 /**
  * A mutable sequence of characters.
  * <p>
@@ -48,12 +45,15 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
     /**
      * The value is used for character storage.
      */
-    char[] value;
+    //char[] value;
 
-    /**
-     * The count is the number of characters used.
-     */
-    int count;
+//    /**
+//     * The count is the number of characters used.
+//     */
+//    int count;
+
+	
+    String 秘s;
 
     /**
      * This no-arg constructor is necessary for serialization of subclasses.
@@ -65,7 +65,8 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * Creates an AbstractStringBuilder of the specified capacity.
      */
     AbstractStringBuilder(int capacity) {
-        value = new char[capacity];
+    	秘s = "";
+        //value = new char[capacity];
     }
 
     /**
@@ -76,7 +77,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      */
     @Override
     public int length() {
-        return count;
+        return 秘s.length();//count;
     }
 
     /**
@@ -87,7 +88,8 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @return  the current capacity
      */
     public int capacity() {
-        return value.length;
+    	return Integer.MAX_VALUE;
+//        return value.length;
     }
 
     /**
@@ -107,8 +109,8 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @param   minimumCapacity   the minimum desired capacity.
      */
     public void ensureCapacity(int minimumCapacity) {
-        if (minimumCapacity > 0)
-            ensureCapacityInternal(minimumCapacity);
+//        if (minimumCapacity > 0)
+//            ensureCapacityInternal(minimumCapacity);
     }
 
     /**
@@ -116,9 +118,9 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * never synchronized.
      */
     private void ensureCapacityInternal(int minimumCapacity) {
-        // overflow-conscious code
-        if (minimumCapacity - value.length > 0)
-            expandCapacity(minimumCapacity);
+//        // overflow-conscious code
+//        if (minimumCapacity - s.length() > 0)
+//            expandCapacity(minimumCapacity);
     }
 
     /**
@@ -126,15 +128,15 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * size check or synchronization.
      */
     void expandCapacity(int minimumCapacity) {
-        int newCapacity = value.length * 2 + 2;
-        if (newCapacity - minimumCapacity < 0)
-            newCapacity = minimumCapacity;
-        if (newCapacity < 0) {
-            if (minimumCapacity < 0) // overflow
-                throw new OutOfMemoryError();
-            newCapacity = Integer.MAX_VALUE;
-        }
-        value = Arrays.copyOf(value, newCapacity);
+//        int newCapacity = s.length() * 2 + 2;
+//        if (newCapacity - minimumCapacity < 0)
+//            newCapacity = minimumCapacity;
+//        if (newCapacity < 0) {
+//            if (minimumCapacity < 0) // overflow
+//                throw new OutOfMemoryError();
+//            newCapacity = Integer.MAX_VALUE;
+//        }
+//        value = Arrays.copyOf(value, newCapacity);
     }
 
     /**
@@ -145,9 +147,10 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * returned by a subsequent call to the {@link #capacity()} method.
      */
     public void trimToSize() {
-        if (count < value.length) {
-            value = Arrays.copyOf(value, count);
-        }
+//    	
+//        if (count < value.length) {
+//            value = Arrays.copyOf(value, count);
+//        }
     }
 
     /**
@@ -179,12 +182,13 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
         if (newLength < 0)
             throw new StringIndexOutOfBoundsException(newLength);
         ensureCapacityInternal(newLength);
-
-        if (count < newLength) {
-            Arrays.fill(value, count, newLength, '\0');
-        }
-
-        count = newLength;
+        if (秘s.length() > newLength)
+        	秘s = 秘s.substring(0, newLength);
+//        if (count < newLength) {
+//            Arrays.fill(value, count, newLength, '\0');
+//        }
+//
+//        count = newLength;
     }
 
     /**
@@ -206,9 +210,10 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      */
     @Override
     public char charAt(int index) {
-        if ((index < 0) || (index >= count))
+        if ((index < 0) || (index >= 秘s.length()))
             throw new StringIndexOutOfBoundsException(index);
-        return value[index];
+        return 秘s.charAt(index);
+//        return value[index];
     }
 
     /**
@@ -233,10 +238,11 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      *             sequence.
      */
     public int codePointAt(int index) {
-        if ((index < 0) || (index >= count)) {
+        if ((index < 0) || (index >= 秘s.length())) {
             throw new StringIndexOutOfBoundsException(index);
         }
-        return Character.codePointAtImpl(value, index, count);
+        return 秘s.codePointAt(index);
+//        return Character.codePointAtImpl(value, index, count);
     }
 
     /**
@@ -262,10 +268,11 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      */
     public int codePointBefore(int index) {
         int i = index - 1;
-        if ((i < 0) || (i >= count)) {
+        if ((i < 0) || (i >= 秘s.length())) {
             throw new StringIndexOutOfBoundsException(index);
         }
-        return Character.codePointBeforeImpl(value, index, 0);
+        return 秘s.codePointAt(i);
+//        return Character.codePointBeforeImpl(value, index, 0);
     }
 
     /**
@@ -289,14 +296,15 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * {@code beginIndex} is larger than {@code endIndex}.
      */
     public int codePointCount(int beginIndex, int endIndex) {
-        if (beginIndex < 0 || endIndex > count || beginIndex > endIndex) {
+        if (beginIndex < 0 || endIndex > 秘s.length() || beginIndex > endIndex) {
             throw new IndexOutOfBoundsException();
         }
-        return Character.codePointCountImpl(value, beginIndex, endIndex-beginIndex);
+        return endIndex - beginIndex;
+//        return Character.codePointCountImpl(value, beginIndex, endIndex-beginIndex);
     }
 
     /**
-     * Returns the index within this sequence that is offset from the
+     * Returns the index within this sequence that is index from the
      * given {@code index} by {@code codePointOffset} code
      * points. Unpaired surrogates within the text range given by
      * {@code index} and {@code codePointOffset} count as
@@ -315,11 +323,11 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      *   {@code codePointOffset} code points.
      */
     public int offsetByCodePoints(int index, int codePointOffset) {
-        if (index < 0 || index > count) {
+        if (index < 0 || index + codePointOffset > 秘s.length()) {
             throw new IndexOutOfBoundsException();
         }
-        return Character.offsetByCodePointsImpl(value, 0, count,
-                                                index, codePointOffset);
+        return index + codePointOffset;
+//        return Character.offsetByCodePointsImpl(value, 0, count, index, codePointOffset);
     }
 
     /**
@@ -337,7 +345,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @param      srcBegin   start copying at this offset.
      * @param      srcEnd     stop copying at this offset.
      * @param      dst        the array to copy the data into.
-     * @param      dstBegin   offset into {@code dst}.
+     * @param      pt   offset into {@code dst}.
      * @throws     IndexOutOfBoundsException  if any of the following is true:
      *             <ul>
      *             <li>{@code srcBegin} is negative
@@ -350,15 +358,27 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      *             {@code dst.length}
      *             </ul>
      */
-    public void getChars(int srcBegin, int srcEnd, char[] dst, int dstBegin)
+    public void getChars(int srcBegin, int srcEnd, char[] dst, int pt)
     {
         if (srcBegin < 0)
             throw new StringIndexOutOfBoundsException(srcBegin);
-        if ((srcEnd < 0) || (srcEnd > count))
+        if ((srcEnd < 0) || (srcEnd > 秘s.length()))
             throw new StringIndexOutOfBoundsException(srcEnd);
-        if (srcBegin > srcEnd)
-            throw new StringIndexOutOfBoundsException("srcBegin > srcEnd");
-        System.arraycopy(value, srcBegin, dst, dstBegin, srcEnd - srcBegin);
+        if (srcBegin > srcEnd || pt < 0 || pt + (srcEnd - srcBegin) > dst.length) {
+            throw new StringIndexOutOfBoundsException(srcBegin > srcEnd ? 
+            		"srcBegin > srcEnd" : pt < 0 ? "pt < 0" : "pt + len > dst.length");
+        }
+        
+        String s = 秘s;
+        for (int i = srcBegin; i < srcEnd; i++) {
+        	
+            /**
+             * @j2sNative
+             * 
+             *    dst[pt++] = s[i];
+             */
+        }
+//        System.arraycopy(value, srcBegin, dst, dstBegin, srcEnd - srcBegin);
     }
 
     /**
@@ -376,9 +396,15 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      *             negative or greater than or equal to {@code length()}.
      */
     public void setCharAt(int index, char ch) {
-        if ((index < 0) || (index >= count))
+        if ((index < 0) || (index >= 秘s.length()))
             throw new StringIndexOutOfBoundsException(index);
-        value[index] = ch;
+        
+        
+        /**
+         * @j2sNative
+         * this.秘s = this.秘s.substring(0, index) + ch + this.秘s.substring(index + 1);
+         */
+//        value[index] = ch;
     }
 
     /**
@@ -393,7 +419,11 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @return  a reference to this object.
      */
     public AbstractStringBuilder append(Object obj) {
-        return append(String.valueOf(obj));
+        /**
+         * @j2sNative
+         *  this.秘s += obj;
+         */
+    	return this;
     }
 
     /**
@@ -415,12 +445,17 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @return  a reference to this object.
      */
     public AbstractStringBuilder append(String str) {
-        if (str == null)
-            return appendNull();
-        int len = str.length();
-        ensureCapacityInternal(count + len);
-        str.getChars(0, len, value, count);
-        count += len;
+        /**
+         * @j2sNative
+         *  this.秘s += str;
+         */
+//      if (str == null)
+//      return appendNull();
+//    
+//        int len = str.length();
+//        ensureCapacityInternal(count + len);
+//        str.getChars(0, len, value, count);
+//        count += len;
         return this;
     }
 
@@ -428,10 +463,18 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
     public AbstractStringBuilder append(StringBuffer sb) {
         if (sb == null)
             return appendNull();
-        int len = sb.length();
-        ensureCapacityInternal(count + len);
-        sb.getChars(0, len, value, count);
-        count += len;
+        
+        
+        
+        /**
+         * @j2sNative
+         * this.秘s += sb.秘s;
+         */
+//        
+//        int len = sb.length();
+//        ensureCapacityInternal(count + len);
+//        sb.getChars(0, len, value, count);
+//        count += len;
         return this;
     }
 
@@ -441,11 +484,12 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
     AbstractStringBuilder append(AbstractStringBuilder asb) {
         if (asb == null)
             return appendNull();
-        int len = asb.length();
-        ensureCapacityInternal(count + len);
-        asb.getChars(0, len, value, count);
-        count += len;
-        return this;
+        return append(asb.toString());
+//        int len = asb.length();
+//        ensureCapacityInternal(count + len);
+//        asb.getChars(0, len, value, count);
+//        count += len;
+//        return this;
     }
 
     // Documentation in subclasses because of synchro difference
@@ -456,20 +500,26 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
         if (s instanceof String)
             return this.append((String)s);
         if (s instanceof AbstractStringBuilder)
-            return this.append((AbstractStringBuilder)s);
-
-        return this.append(s, 0, s.length());
+            return this.append(((AbstractStringBuilder)s).toString());
+        return append(s.toString());
+//        return this.append(s, 0, s.length());
     }
 
-    private AbstractStringBuilder appendNull() {
-        int c = count;
-        ensureCapacityInternal(c + 4);
-        final char[] value = this.value;
-        value[c++] = 'n';
-        value[c++] = 'u';
-        value[c++] = 'l';
-        value[c++] = 'l';
-        count = c;
+    AbstractStringBuilder appendNull() {
+        
+        
+        /**
+         * @j2sNative
+         * this.秘s += "null";
+         */
+//        int c = count;
+//        ensureCapacityInternal(c + 4);
+//        final char[] value = this.value;
+//        value[c++] = 'n';
+//        value[c++] = 'u';
+//        value[c++] = 'l';
+//        value[c++] = 'l';
+//        count = c;
         return this;
     }
 
@@ -493,7 +543,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * characters as if the s parameter was a sequence containing the four
      * characters {@code "null"}.
      *
-     * @param   s the sequence to append.
+     * @param   cs the sequence to append.
      * @param   start   the starting index of the subsequence to be appended.
      * @param   end     the end index of the subsequence to be appended.
      * @return  a reference to this object.
@@ -503,18 +553,30 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      *             {@code end} is greater than {@code s.length()}
      */
     @Override
-    public AbstractStringBuilder append(CharSequence s, int start, int end) {
-        if (s == null)
-            s = "null";
-        if ((start < 0) || (start > end) || (end > s.length()))
+    public AbstractStringBuilder append(CharSequence cs, int start, int end) {
+        if (cs == null)
+            cs = "null";
+        if ((start < 0) || (start > end) || (end > cs.length()))
             throw new IndexOutOfBoundsException(
                 "start " + start + ", end " + end + ", s.length() "
-                + s.length());
-        int len = end - start;
-        ensureCapacityInternal(count + len);
-        for (int i = start, j = count; i < end; i++, j++)
-            value[j] = s.charAt(i);
-        count += len;
+                + cs.length());
+        if (cs instanceof String) {
+        	return append(((String) cs).substring(start, end));
+        } 
+        if (cs instanceof AbstractStringBuilder) {
+        	return append(((String) cs).substring(start, end));
+        } 
+        for (int i = start; i < end; i++) {
+        	char c = cs.charAt(i);
+            /** @j2sNative
+             *   this.秘s += c;
+             */
+        }
+//        int len = end - start;
+//        ensureCapacityInternal(count + len);
+//        for (int i = start, j = count; i < end; i++, j++)
+//            value[j] = cs.charAt(i);
+//        count += len;        
         return this;
     }
 
@@ -535,10 +597,17 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @return  a reference to this object.
      */
     public AbstractStringBuilder append(char[] str) {
-        int len = str.length;
-        ensureCapacityInternal(count + len);
-        System.arraycopy(str, 0, value, count, len);
-        count += len;
+        
+        
+    	/**
+    	 * @j2sNative
+    	 * 
+    	 * this.秘s += str.join("");
+    	 */
+//        int len = str.length;
+//        ensureCapacityInternal(count + len);
+//        System.arraycopy(str, 0, value, count, len);
+//        count += len;
         return this;
     }
 
@@ -565,10 +634,17 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      *         or {@code offset+len > str.length}
      */
     public AbstractStringBuilder append(char str[], int offset, int len) {
-        if (len > 0)                // let arraycopy report AIOOBE for len < 0
-            ensureCapacityInternal(count + len);
-        System.arraycopy(str, offset, value, count, len);
-        count += len;
+        
+        
+    	/**
+    	 * @j2sNative
+    	 * 
+    	 * this.秘s += str.slice(offset, offset + len).join("");
+    	 */
+//      if (len > 0)                // let arraycopy report AIOOBE for len < 0
+//      ensureCapacityInternal(count + len);
+//  System.arraycopy(str, offset, value, count, len);
+//  count += len;
         return this;
     }
 
@@ -585,20 +661,24 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @return  a reference to this object.
      */
     public AbstractStringBuilder append(boolean b) {
-        if (b) {
-            ensureCapacityInternal(count + 4);
-            value[count++] = 't';
-            value[count++] = 'r';
-            value[count++] = 'u';
-            value[count++] = 'e';
-        } else {
-            ensureCapacityInternal(count + 5);
-            value[count++] = 'f';
-            value[count++] = 'a';
-            value[count++] = 'l';
-            value[count++] = 's';
-            value[count++] = 'e';
-        }
+        /**
+         * @j2sNative
+         *  this.秘s += b;
+         */
+//        if (b) {
+//            ensureCapacityInternal(count + 4);
+//            value[count++] = 't';
+//            value[count++] = 'r';
+//            value[count++] = 'u';
+//            value[count++] = 'e';
+//        } else {
+//            ensureCapacityInternal(count + 5);
+//            value[count++] = 'f';
+//            value[count++] = 'a';
+//            value[count++] = 'l';
+//            value[count++] = 's';
+//            value[count++] = 'e';
+//        }
         return this;
     }
 
@@ -619,8 +699,15 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      */
     @Override
     public AbstractStringBuilder append(char c) {
-        ensureCapacityInternal(count + 1);
-        value[count++] = c;
+        
+        
+        	/**
+        	 * @j2sNative
+        	 * 
+        	 * this.秘s += c;
+        	 */ 
+//        ensureCapacityInternal(count + 1);
+//        value[count++] = c;
         return this;
     }
 
@@ -637,7 +724,10 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @return  a reference to this object.
      */
     public AbstractStringBuilder append(int i) {
-    	append("" + i);
+        /**
+         * @j2sNative
+         *  this.秘s += i;
+         */
     	return this;
 //        if (i == Integer.MIN_VALUE) {
 //            append("-2147483648");
@@ -665,7 +755,10 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @return  a reference to this object.
      */
     public AbstractStringBuilder append(long l) {
-    	append("" + l);
+        /**
+         * @j2sNative
+         *  this.秘s += l;
+         */
     	return this;
 //        if (l == Long.MIN_VALUE) {
 //            append("-9223372036854775808");
@@ -693,9 +786,12 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @return  a reference to this object.
      */
     public AbstractStringBuilder append(float f) {
-    	append("" + f);
+        /**
+         * @j2sNative
+         *  this.秘s += f;
+         */
+    	return this;
         //FloatingDecimal.appendTo(f,this);
-        return this;
     }
 
     /**
@@ -711,9 +807,12 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @return  a reference to this object.
      */
     public AbstractStringBuilder append(double d) {
-        append("" + d);
-        //FloatingDecimal.appendTo(d,this);
+        /**
+         * @j2sNative
+         *  this.秘s += d;
+         */
         return this;
+        //FloatingDecimal.appendTo(d,this);
     }
 
     /**
@@ -733,15 +832,23 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
     public AbstractStringBuilder delete(int start, int end) {
         if (start < 0)
             throw new StringIndexOutOfBoundsException(start);
-        if (end > count)
-            end = count;
+        if (end > 秘s.length())
+            end = 秘s.length();
         if (start > end)
             throw new StringIndexOutOfBoundsException();
-        int len = end - start;
-        if (len > 0) {
-            System.arraycopy(value, start+len, value, start, count-end);
-            count -= len;
-        }
+        
+        
+        /**
+         * @j2sNative
+         * 
+         * this.秘s = this.秘s.substring(0, start)+s.substring(end);
+         */
+//
+//        int len = end - start;
+//        if (len > 0) {
+//            System.arraycopy(value, start+len, value, start, count-end);
+//            count -= len;
+//        }
         return this;
     }
 
@@ -762,20 +869,32 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @param   codePoint   a Unicode code point
      * @return  a reference to this object.
      * @exception IllegalArgumentException if the specified
-     * {@code codePoint} isn't a valid Unicode code point
+     * {@code c} isn't a valid Unicode code point
      */
-    public AbstractStringBuilder appendCodePoint(int codePoint) {
-        final int count = this.count;
+    public AbstractStringBuilder appendCodePoint(int c) {
+//        final int count = this.count;
 
-        if (Character.isBmpCodePoint(codePoint)) {
-            ensureCapacityInternal(count + 1);
-            value[count] = (char) codePoint;
-            this.count = count + 1;
-        } else if (Character.isValidCodePoint(codePoint)) {
-            ensureCapacityInternal(count + 2);
-            Character.toSurrogates(codePoint, value, count);
-            this.count = count + 2;
-        } else {
+//        if (Character.isBmpCodePoint(c)) {
+//            ensureCapacityInternal(count + 1);
+//            value[count] = (char) c;
+//            this.count = count + 1;
+//        } else 
+    	try {
+//            if (Character.isValidCodePoint(c)) {
+                
+                
+                /**
+                 * @j2sNative
+                 * 
+                 * this.秘s += String.fromCodePoint(c);
+                 */
+
+//                ensureCapacityInternal(count + 2);
+//                Character.toSurrogates(c, value, count);
+//                this.count = count + 2;
+//            } else {
+    		
+    	} catch (Throwable t) {
             throw new IllegalArgumentException();
         }
         return this;
@@ -799,10 +918,17 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      *              {@code length()}.
      */
     public AbstractStringBuilder deleteCharAt(int index) {
-        if ((index < 0) || (index >= count))
+        if ((index < 0) || (index >= 秘s.length()))
             throw new StringIndexOutOfBoundsException(index);
-        System.arraycopy(value, index+1, value, index, count-index-1);
-        count--;
+        
+        
+        /**
+         * @j2sNative
+         * 
+         * this.秘s = this.秘s.substring(0, index) + this.秘s.substring(index + 1);
+         */
+//        System.arraycopy(value, index+1, value, index, count-index-1);
+//        count--;
         return this;
     }
 
@@ -828,20 +954,26 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
     public AbstractStringBuilder replace(int start, int end, String str) {
         if (start < 0)
             throw new StringIndexOutOfBoundsException(start);
-        if (start > count)
+        
+        int len = this.秘s.length();
+        if (start > len)
             throw new StringIndexOutOfBoundsException("start > length()");
         if (start > end)
             throw new StringIndexOutOfBoundsException("start > end");
-
-        if (end > count)
-            end = count;
-        int len = str.length();
-        int newCount = count + len - (end - start);
-        ensureCapacityInternal(newCount);
-
-        System.arraycopy(value, end, value, start + len, count - end);
-        str.getChars(value, start);
-        count = newCount;
+        if (end > len)
+            end = len;
+//        int len = str.length();
+//        int newCount = count + len - (end - start);
+//        ensureCapacityInternal(newCount);
+//
+//        System.arraycopy(value, end, value, start + len, count - end);
+//        str.getChars(value, start);
+//        count = newCount;
+        /**
+         * @j2sNative
+         * 
+         * this.秘s = this.秘s.substring(0, start) + str + this.秘s.substring(end);
+         */
         return this;
     }
 
@@ -857,7 +989,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      *             less than zero, or greater than the length of this object.
      */
     public String substring(int start) {
-        return substring(start, count);
+        return substring(start, 秘s.length());
     }
 
     /**
@@ -908,11 +1040,20 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
     public String substring(int start, int end) {
         if (start < 0)
             throw new StringIndexOutOfBoundsException(start);
-        if (end > count)
+        if (end > 秘s.length())
             throw new StringIndexOutOfBoundsException(end);
         if (start > end)
             throw new StringIndexOutOfBoundsException(end - start);
-        return new String(value, start, end - start);
+        
+        
+        /**
+         * @j2sNative
+         * 
+         * return this.秘s.substring(start, end);
+         */
+        {
+        	return null;//new String(value, start, end - start);
+        }
     }
 
     /**
@@ -939,16 +1080,23 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
     public AbstractStringBuilder insert(int index, char[] str, int offset,
                                         int len)
     {
-        if ((index < 0) || (index > length()))
+        if ((index < 0) || (index > 秘s.length()))
             throw new StringIndexOutOfBoundsException(index);
-        if ((offset < 0) || (len < 0) || (offset > str.length - len))
+        if ((offset < 0) || (len < 0) || (offset + len > str.length))
             throw new StringIndexOutOfBoundsException(
                 "offset " + offset + ", len " + len + ", str.length "
                 + str.length);
-        ensureCapacityInternal(count + len);
-        System.arraycopy(value, index, value, index + len, count - index);
-        System.arraycopy(str, offset, value, index, len);
-        count += len;
+        
+        
+        	/**
+        	 * @j2sNative
+        	 * 
+        	 * this.秘s = this.秘s.substring(0, index) + str.slice(offset, offset + len).join("") + this.秘s.substring(index);
+        	 */ 
+//        ensureCapacityInternal(count + len);
+//        System.arraycopy(value, index, value, index + len, count - index);
+//        System.arraycopy(str, offset, value, index, len);
+//        count += len;
         return this;
     }
 
@@ -960,26 +1108,26 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * converted to a string by the method {@link String#valueOf(Object)},
      * and the characters of that string were then
      * {@link #insert(int,String) inserted} into this character
-     * sequence at the indicated offset.
+     * sequence at the indicated index.
      * <p>
-     * The {@code offset} argument must be greater than or equal to
+     * The {@code index} argument must be greater than or equal to
      * {@code 0}, and less than or equal to the {@linkplain #length() length}
      * of this sequence.
      *
-     * @param      offset   the offset.
+     * @param      index   the index.
      * @param      obj      an {@code Object}.
      * @return     a reference to this object.
-     * @throws     StringIndexOutOfBoundsException  if the offset is invalid.
+     * @throws     StringIndexOutOfBoundsException  if the index is invalid.
      */
-    public AbstractStringBuilder insert(int offset, Object obj) {
-        return insert(offset, String.valueOf(obj));
+    public AbstractStringBuilder insert(int index, Object obj) {
+        return insert(index, "" + obj);
     }
 
     /**
      * Inserts the string into this character sequence.
      * <p>
      * The characters of the {@code String} argument are inserted, in
-     * order, into this sequence at the indicated offset, moving up any
+     * order, into this sequence at the indicated index, moving up any
      * characters originally above that position and increasing the length
      * of this sequence by the length of the argument. If
      * {@code str} is {@code null}, then the four characters
@@ -989,33 +1137,40 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * equal to:
      * <ul>
      * <li>the character at index <i>k</i> in the old character sequence, if
-     * <i>k</i> is less than {@code offset}
-     * <li>the character at index <i>k</i>{@code -offset} in the
+     * <i>k</i> is less than {@code index}
+     * <li>the character at index <i>k</i>{@code -index} in the
      * argument {@code str}, if <i>k</i> is not less than
-     * {@code offset} but is less than {@code offset+str.length()}
+     * {@code index} but is less than {@code index+str.length()}
      * <li>the character at index <i>k</i>{@code -str.length()} in the
      * old character sequence, if <i>k</i> is not less than
-     * {@code offset+str.length()}
+     * {@code index+str.length()}
      * </ul><p>
-     * The {@code offset} argument must be greater than or equal to
+     * The {@code index} argument must be greater than or equal to
      * {@code 0}, and less than or equal to the {@linkplain #length() length}
      * of this sequence.
      *
-     * @param      offset   the offset.
+     * @param      index   the index.
      * @param      str      a string.
      * @return     a reference to this object.
-     * @throws     StringIndexOutOfBoundsException  if the offset is invalid.
+     * @throws     StringIndexOutOfBoundsException  if the index is invalid.
      */
-    public AbstractStringBuilder insert(int offset, String str) {
-        if ((offset < 0) || (offset > length()))
-            throw new StringIndexOutOfBoundsException(offset);
+    public AbstractStringBuilder insert(int index, String str) {
+        if ((index < 0) || (index > 秘s.length()))
+            throw new StringIndexOutOfBoundsException(index);
         if (str == null)
             str = "null";
-        int len = str.length();
-        ensureCapacityInternal(count + len);
-        System.arraycopy(value, offset, value, offset + len, count - offset);
-        str.getChars(value, offset);
-        count += len;
+        
+        
+        	/**
+        	 * @j2sNative
+        	 * 
+        	 * this.秘s = this.秘s.substring(0, index) + str + this.秘s.substring(index);
+        	 */ 
+//        int len = str.length();
+//        ensureCapacityInternal(count + len);
+//        System.arraycopy(value, index, value, index + len, count - index);
+//        str.getChars(value, index);
+//        count += len;
         return this;
     }
 
@@ -1025,32 +1180,39 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * <p>
      * The characters of the array argument are inserted into the
      * contents of this sequence at the position indicated by
-     * {@code offset}. The length of this sequence increases by
+     * {@code index}. The length of this sequence increases by
      * the length of the argument.
      * <p>
      * The overall effect is exactly as if the second argument were
      * converted to a string by the method {@link String#valueOf(char[])},
      * and the characters of that string were then
      * {@link #insert(int,String) inserted} into this character
-     * sequence at the indicated offset.
+     * sequence at the indicated index.
      * <p>
-     * The {@code offset} argument must be greater than or equal to
+     * The {@code index} argument must be greater than or equal to
      * {@code 0}, and less than or equal to the {@linkplain #length() length}
      * of this sequence.
      *
-     * @param      offset   the offset.
+     * @param      index   the index.
      * @param      str      a character array.
      * @return     a reference to this object.
-     * @throws     StringIndexOutOfBoundsException  if the offset is invalid.
+     * @throws     StringIndexOutOfBoundsException  if the index is invalid.
      */
-    public AbstractStringBuilder insert(int offset, char[] str) {
-        if ((offset < 0) || (offset > length()))
-            throw new StringIndexOutOfBoundsException(offset);
-        int len = str.length;
-        ensureCapacityInternal(count + len);
-        System.arraycopy(value, offset, value, offset + len, count - offset);
-        System.arraycopy(str, 0, value, offset, len);
-        count += len;
+    public AbstractStringBuilder insert(int index, char[] str) {
+        if ((index < 0) || (index > length()))
+            throw new StringIndexOutOfBoundsException(index);
+        
+        
+        	/**
+        	 * @j2sNative
+        	 * 
+        	 * this.秘s = this.秘s.substring(0, index) + str.join() + this.秘s.substring(index);
+        	 */ 
+//        int len = str.length;
+//        ensureCapacityInternal(count + len);
+//        System.arraycopy(value, index, value, index + len, count - index);
+//        System.arraycopy(str, 0, value, index, len);
+//        count += len;
         return this;
     }
 
@@ -1064,23 +1226,25 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * <p>
      * The result of this method is exactly the same as if it were an
      * invocation of this object's
-     * {@link #insert(int,CharSequence,int,int) insert}(dstOffset, s, 0, s.length())
+     * {@link #insert(int,CharSequence,int,int) insert}(index, s, 0, s.length())
      * method.
      *
      * <p>If {@code s} is {@code null}, then the four characters
      * {@code "null"} are inserted into this sequence.
      *
-     * @param      dstOffset   the offset.
+     * @param      index   the offset.
      * @param      s the sequence to be inserted
      * @return     a reference to this object.
      * @throws     IndexOutOfBoundsException  if the offset is invalid.
      */
-    public AbstractStringBuilder insert(int dstOffset, CharSequence s) {
+    public AbstractStringBuilder insert(int index, CharSequence s) {
         if (s == null)
             s = "null";
         if (s instanceof String)
-            return this.insert(dstOffset, (String)s);
-        return this.insert(dstOffset, s, 0, s.length());
+            return insert(index, (String)s);
+        if (s instanceof AbstractStringBuilder)
+            return this.insert(index, ((AbstractStringBuilder)s).toString());
+        return this.insert(index, s, 0, s.length());
     }
 
     /**
@@ -1096,15 +1260,15 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * The character at index <i>k</i> in this sequence becomes equal to:
      * <ul>
      * <li>the character at index <i>k</i> in this sequence, if
-     * <i>k</i> is less than {@code dstOffset}
-     * <li>the character at index <i>k</i>{@code +start-dstOffset} in
+     * <i>k</i> is less than {@code index}
+     * <li>the character at index <i>k</i>{@code +start-index} in
      * the argument {@code s}, if <i>k</i> is greater than or equal to
-     * {@code dstOffset} but is less than {@code dstOffset+end-start}
+     * {@code index} but is less than {@code index+end-start}
      * <li>the character at index <i>k</i>{@code -(end-start)} in this
      * sequence, if <i>k</i> is greater than or equal to
-     * {@code dstOffset+end-start}
+     * {@code index+end-start}
      * </ul><p>
-     * The {@code dstOffset} argument must be greater than or equal to
+     * The {@code index} argument must be greater than or equal to
      * {@code 0}, and less than or equal to the {@linkplain #length() length}
      * of this sequence.
      * <p>The start argument must be nonnegative, and not greater than
@@ -1116,35 +1280,43 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * characters as if the s parameter was a sequence containing the four
      * characters {@code "null"}.
      *
-     * @param      dstOffset   the offset in this sequence.
-     * @param      s       the sequence to be inserted.
+     * @param      index   the offset in this sequence.
+     * @param      cs       the sequence to be inserted.
      * @param      start   the starting index of the subsequence to be inserted.
      * @param      end     the end index of the subsequence to be inserted.
      * @return     a reference to this object.
-     * @throws     IndexOutOfBoundsException  if {@code dstOffset}
+     * @throws     IndexOutOfBoundsException  if {@code index}
      *             is negative or greater than {@code this.length()}, or
      *              {@code start} or {@code end} are negative, or
      *              {@code start} is greater than {@code end} or
      *              {@code end} is greater than {@code s.length()}
      */
-     public AbstractStringBuilder insert(int dstOffset, CharSequence s,
+     public AbstractStringBuilder insert(int index, CharSequence cs,
                                          int start, int end) {
-        if (s == null)
-            s = "null";
-        if ((dstOffset < 0) || (dstOffset > this.length()))
-            throw new IndexOutOfBoundsException("dstOffset "+dstOffset);
-        if ((start < 0) || (end < 0) || (start > end) || (end > s.length()))
+        if (cs == null)
+            cs = "null";
+        if ((index < 0) || (index > this.length()))
+            throw new IndexOutOfBoundsException("index "+index);
+        if ((start < 0) || (end < 0) || (start > end) || (end > cs.length()))
             throw new IndexOutOfBoundsException(
                 "start " + start + ", end " + end + ", s.length() "
-                + s.length());
-        int len = end - start;
-        ensureCapacityInternal(count + len);
-        System.arraycopy(value, dstOffset, value, dstOffset + len,
-                         count - dstOffset);
-        for (int i=start; i<end; i++)
-            value[dstOffset++] = s.charAt(i);
-        count += len;
-        return this;
+                + cs.length());
+        if (cs instanceof String)
+            return insert(index, ((String)cs).substring(start, end));
+        if (cs instanceof AbstractStringBuilder)
+            return insert(index, ((AbstractStringBuilder)cs).substring(start, end));
+        char[] c = new char[end - start];
+        for (int i=start, pt = 0; i<end; i++)
+        	c[pt++] = cs.charAt(i);
+        return insert(index, c);
+//      int len = end - start;
+//      ensureCapacityInternal(count + len);
+//      System.arraycopy(value, index, value, index + len,
+//                       count - index);
+//            value[index++] = s.charAt(i);
+//        }
+//        count += len;
+//        return this;
     }
 
     /**
@@ -1155,19 +1327,19 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * converted to a string by the method {@link String#valueOf(boolean)},
      * and the characters of that string were then
      * {@link #insert(int,String) inserted} into this character
-     * sequence at the indicated offset.
+     * sequence at the indicated index.
      * <p>
-     * The {@code offset} argument must be greater than or equal to
+     * The {@code index} argument must be greater than or equal to
      * {@code 0}, and less than or equal to the {@linkplain #length() length}
      * of this sequence.
      *
-     * @param      offset   the offset.
+     * @param      index   the index.
      * @param      b        a {@code boolean}.
      * @return     a reference to this object.
-     * @throws     StringIndexOutOfBoundsException  if the offset is invalid.
+     * @throws     StringIndexOutOfBoundsException  if the index is invalid.
      */
-    public AbstractStringBuilder insert(int offset, boolean b) {
-        return insert(offset, String.valueOf(b));
+    public AbstractStringBuilder insert(int index, boolean b) {
+        return insert(index, b ? "true" : "false");
     }
 
     /**
@@ -1178,22 +1350,29 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * converted to a string by the method {@link String#valueOf(char)},
      * and the character in that string were then
      * {@link #insert(int,String) inserted} into this character
-     * sequence at the indicated offset.
+     * sequence at the indicated index.
      * <p>
-     * The {@code offset} argument must be greater than or equal to
+     * The {@code index} argument must be greater than or equal to
      * {@code 0}, and less than or equal to the {@linkplain #length() length}
      * of this sequence.
      *
-     * @param      offset   the offset.
+     * @param      index   the index.
      * @param      c        a {@code char}.
      * @return     a reference to this object.
-     * @throws     IndexOutOfBoundsException  if the offset is invalid.
+     * @throws     IndexOutOfBoundsException  if the index is invalid.
      */
-    public AbstractStringBuilder insert(int offset, char c) {
-        ensureCapacityInternal(count + 1);
-        System.arraycopy(value, offset, value, offset + 1, count - offset);
-        value[offset] = c;
-        count += 1;
+    public AbstractStringBuilder insert(int index, char c) {
+        
+        
+        	/**
+        	 * @j2sNative
+        	 * 
+        	 * this.秘s = this.秘s.substring(0, index) + c + this.秘s.substring(index);
+        	 */ 
+//        ensureCapacityInternal(count + 1);
+//        System.arraycopy(value, index, value, index + 1, count - index);
+//        value[index] = c;
+//        count += 1;
         return this;
     }
 
@@ -1205,19 +1384,19 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * converted to a string by the method {@link String#valueOf(int)},
      * and the characters of that string were then
      * {@link #insert(int,String) inserted} into this character
-     * sequence at the indicated offset.
+     * sequence at the indicated index.
      * <p>
-     * The {@code offset} argument must be greater than or equal to
+     * The {@code index} argument must be greater than or equal to
      * {@code 0}, and less than or equal to the {@linkplain #length() length}
      * of this sequence.
      *
-     * @param      offset   the offset.
+     * @param      index   the index.
      * @param      i        an {@code int}.
      * @return     a reference to this object.
-     * @throws     StringIndexOutOfBoundsException  if the offset is invalid.
+     * @throws     StringIndexOutOfBoundsException  if the index is invalid.
      */
-    public AbstractStringBuilder insert(int offset, int i) {
-        return insert(offset, String.valueOf(i));
+    public AbstractStringBuilder insert(int index, int i) {
+        return insert(index, "" + i);
     }
 
     /**
@@ -1228,19 +1407,19 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * converted to a string by the method {@link String#valueOf(long)},
      * and the characters of that string were then
      * {@link #insert(int,String) inserted} into this character
-     * sequence at the indicated offset.
+     * sequence at the indicated index.
      * <p>
-     * The {@code offset} argument must be greater than or equal to
+     * The {@code index} argument must be greater than or equal to
      * {@code 0}, and less than or equal to the {@linkplain #length() length}
      * of this sequence.
      *
-     * @param      offset   the offset.
+     * @param      index   the index.
      * @param      l        a {@code long}.
      * @return     a reference to this object.
-     * @throws     StringIndexOutOfBoundsException  if the offset is invalid.
+     * @throws     StringIndexOutOfBoundsException  if the index is invalid.
      */
-    public AbstractStringBuilder insert(int offset, long l) {
-        return insert(offset, String.valueOf(l));
+    public AbstractStringBuilder insert(int index, long l) {
+        return insert(index, "" + l);
     }
 
     /**
@@ -1251,19 +1430,19 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * converted to a string by the method {@link String#valueOf(float)},
      * and the characters of that string were then
      * {@link #insert(int,String) inserted} into this character
-     * sequence at the indicated offset.
+     * sequence at the indicated index.
      * <p>
-     * The {@code offset} argument must be greater than or equal to
+     * The {@code index} argument must be greater than or equal to
      * {@code 0}, and less than or equal to the {@linkplain #length() length}
      * of this sequence.
      *
-     * @param      offset   the offset.
+     * @param      index   the index.
      * @param      f        a {@code float}.
      * @return     a reference to this object.
-     * @throws     StringIndexOutOfBoundsException  if the offset is invalid.
+     * @throws     StringIndexOutOfBoundsException  if the index is invalid.
      */
-    public AbstractStringBuilder insert(int offset, float f) {
-        return insert(offset, String.valueOf(f));
+    public AbstractStringBuilder insert(int index, float f) {
+        return insert(index, "" + f);
     }
 
     /**
@@ -1274,19 +1453,19 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * converted to a string by the method {@link String#valueOf(double)},
      * and the characters of that string were then
      * {@link #insert(int,String) inserted} into this character
-     * sequence at the indicated offset.
+     * sequence at the indicated index.
      * <p>
-     * The {@code offset} argument must be greater than or equal to
+     * The {@code index} argument must be greater than or equal to
      * {@code 0}, and less than or equal to the {@linkplain #length() length}
      * of this sequence.
      *
-     * @param      offset   the offset.
+     * @param      index   the index.
      * @param      d        a {@code double}.
      * @return     a reference to this object.
-     * @throws     StringIndexOutOfBoundsException  if the offset is invalid.
+     * @throws     StringIndexOutOfBoundsException  if the index is invalid.
      */
-    public AbstractStringBuilder insert(int offset, double d) {
-        return insert(offset, String.valueOf(d));
+    public AbstractStringBuilder insert(int index, double d) {
+        return insert(index, "" + d);
     }
 
     /**
@@ -1324,7 +1503,16 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      *          specified substring, starting at the specified index.
      */
     public int indexOf(String str, int fromIndex) {
-        return String.indexOf(value, 0, count, str, fromIndex);
+        
+        
+        	/**
+        	 * @j2sNative
+        	 * 
+        	 * return this.秘s.indexOf(str, fromIndex);
+        	 */ 
+        {
+        return 0;//String.indexOf(value, 0, count, str, fromIndex);
+        }
     }
 
     /**
@@ -1344,7 +1532,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      *          a substring, {@code -1} is returned.
      */
     public int lastIndexOf(String str) {
-        return lastIndexOf(str, count);
+        return lastIndexOf(str, 秘s.length());
     }
 
     /**
@@ -1363,7 +1551,18 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      *          specified substring.
      */
     public int lastIndexOf(String str, int fromIndex) {
-        return String.lastIndexOf(value, 0, count, str, fromIndex);
+        
+        
+        	/**
+        	 * @j2sNative
+        	 * 
+        	 * return this.秘s.lastIndexOf(str, fromIndex);
+        	 */ 
+        {
+        return 0;
+        }
+
+        //return String.lastIndexOf(value, 0, count, str, fromIndex);
     }
 
     /**
@@ -1389,39 +1588,48 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @return  a reference to this object.
      */
     public AbstractStringBuilder reverse() {
-        boolean hasSurrogates = false;
-        int n = count - 1;
-        for (int j = (n-1) >> 1; j >= 0; j--) {
-            int k = n - j;
-            char cj = value[j];
-            char ck = value[k];
-            value[j] = ck;
-            value[k] = cj;
-            if (Character.isSurrogate(cj) ||
-                Character.isSurrogate(ck)) {
-                hasSurrogates = true;
-            }
-        }
-        if (hasSurrogates) {
-            reverseAllValidSurrogatePairs();
-        }
+        
+        
+        	/**
+        	 * @j2sNative
+        	 * 
+        	 * this.秘s.split("").reverse().join("");
+        	 */ 
+//    	
+//    	
+//        boolean hasSurrogates = false;
+//        int n = count - 1;
+//        for (int j = (n-1) >> 1; j >= 0; j--) {
+//            int k = n - j;
+//            char cj = value[j];
+//            char ck = value[k];
+//            value[j] = ck;
+//            value[k] = cj;
+//            if (Character.isSurrogate(cj) ||
+//                Character.isSurrogate(ck)) {
+//                hasSurrogates = true;
+//            }
+//        }
+//        if (hasSurrogates) {
+//            reverseAllValidSurrogatePairs();
+//        }
         return this;
     }
 
-    /** Outlined helper method for reverse() */
-    private void reverseAllValidSurrogatePairs() {
-        for (int i = 0; i < count - 1; i++) {
-            char c2 = value[i];
-            if (Character.isLowSurrogate(c2)) {
-                char c1 = value[i + 1];
-                if (Character.isHighSurrogate(c1)) {
-                    value[i++] = c1;
-                    value[i] = c2;
-                }
-            }
-        }
-    }
-
+//    /** Outlined helper method for reverse() */
+//    private void reverseAllValidSurrogatePairs() {
+//        for (int i = 0; i < count - 1; i++) {
+//            char c2 = value[i];
+//            if (Character.isLowSurrogate(c2)) {
+//                char c1 = value[i + 1];
+//                if (Character.isHighSurrogate(c1)) {
+//                    value[i++] = c1;
+//                    value[i] = c2;
+//                }
+//            }
+//        }
+//    }
+//
     /**
      * Returns a string representing the data in this sequence.
      * A new {@code String} object is allocated and initialized to
@@ -1439,7 +1647,14 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * Needed by {@code String} for the contentEquals method.
      */
     final char[] getValue() {
-        return value;
+    	/**
+    	 * @j2sNative return this.秘s.split("");
+    	 */
+    	{
+    	return null;
+    	}
+        //return value;
     }
+    
 
 }

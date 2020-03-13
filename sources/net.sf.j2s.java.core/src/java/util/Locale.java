@@ -750,14 +750,14 @@ public final class Locale implements Cloneable, Serializable {
     private static class Cache 
     //extends LocaleObjectCache<LocaleKey, Locale> 
     {
-    	private HashMap<LocaleKey, Locale> cache = new HashMap<>();
+    	private HashMap<String, Locale> cache = new HashMap<>();
         private Cache() {
         }
 
         Locale get(LocaleKey key) {
-        	Locale loc = cache.get(key);
+        	Locale loc = cache.get(key.toString());
         	if (loc == null)
-        		cache.put(key,  loc = createObject(key));
+        		cache.put(key.toString(),  loc = createObject(key));
         	return loc;
         }
         
@@ -771,11 +771,16 @@ public final class Locale implements Cloneable, Serializable {
         private final BaseLocale base;
         private final LocaleExtensions exts;
         private final int hash;
+        private final String strRep;
 
+        public String toString() {
+        	return strRep;
+        }
         private LocaleKey(BaseLocale baseLocale, LocaleExtensions extensions) {
             base = baseLocale;
             exts = extensions;
 
+            strRep = base.toString() + (exts == null ? "" : exts.toString());
             // Calculate the hash value here because it's always used.
             int h = base.hashCode();
             if (exts != null) {
@@ -1254,81 +1259,87 @@ public final class Locale implements Cloneable, Serializable {
          return localeExtensions;
      }
 
-    /**
-     * Returns a string representation of this <code>Locale</code>
-     * object, consisting of language, country, variant, script,
-     * and extensions as below:
-     * <blockquote>
-     * language + "_" + country + "_" + (variant + "_#" | "#") + script + "-" + extensions
-     * </blockquote>
-     *
-     * Language is always lower case, country is always upper case, script is always title
-     * case, and extensions are always lower case.  Extensions and private use subtags
-     * will be in canonical order as explained in {@link #toLanguageTag}.
-     *
-     * <p>When the locale has neither script nor extensions, the result is the same as in
-     * Java 6 and prior.
-     *
-     * <p>If both the language and country fields are missing, this function will return
-     * the empty string, even if the variant, script, or extensions field is present (you
-     * can't have a locale with just a variant, the variant must accompany a well-formed
-     * language or country code).
-     *
-     * <p>If script or extensions are present and variant is missing, no underscore is
-     * added before the "#".
-     *
-     * <p>This behavior is designed to support debugging and to be compatible with
-     * previous uses of <code>toString</code> that expected language, country, and variant
-     * fields only.  To represent a Locale as a String for interchange purposes, use
-     * {@link #toLanguageTag}.
-     *
-     * <p>Examples: <ul>
-     * <li><tt>en</tt></li>
-     * <li><tt>de_DE</tt></li>
-     * <li><tt>_GB</tt></li>
-     * <li><tt>en_US_WIN</tt></li>
-     * <li><tt>de__POSIX</tt></li>
-     * <li><tt>zh_CN_#Hans</tt></li>
-     * <li><tt>zh_TW_#Hant-x-java</tt></li>
-     * <li><tt>th_TH_TH_#u-nu-thai</tt></li></ul>
-     *
-     * @return A string representation of the Locale, for debugging.
-     * @see #getDisplayName
-     * @see #toLanguageTag
-     */
-    @Override
-    public final String toString() {
-        boolean l = (baseLocale.getLanguage().length() != 0);
-        boolean s = (baseLocale.getScript().length() != 0);
-        boolean r = (baseLocale.getRegion().length() != 0);
-        boolean v = (baseLocale.getVariant().length() != 0);
-        boolean e = (localeExtensions != null && localeExtensions.getID().length() != 0);
+     private String str;
+     
+	/**
+	 * Returns a string representation of this <code>Locale</code> object,
+	 * consisting of language, country, variant, script, and extensions as below:
+	 * <blockquote> language + "_" + country + "_" + (variant + "_#" | "#") + script
+	 * + "-" + extensions </blockquote>
+	 *
+	 * Language is always lower case, country is always upper case, script is always
+	 * title case, and extensions are always lower case. Extensions and private use
+	 * subtags will be in canonical order as explained in {@link #toLanguageTag}.
+	 *
+	 * <p>
+	 * When the locale has neither script nor extensions, the result is the same as
+	 * in Java 6 and prior.
+	 *
+	 * <p>
+	 * If both the language and country fields are missing, this function will
+	 * return the empty string, even if the variant, script, or extensions field is
+	 * present (you can't have a locale with just a variant, the variant must
+	 * accompany a well-formed language or country code).
+	 *
+	 * <p>
+	 * If script or extensions are present and variant is missing, no underscore is
+	 * added before the "#".
+	 *
+	 * <p>
+	 * This behavior is designed to support debugging and to be compatible with
+	 * previous uses of <code>toString</code> that expected language, country, and
+	 * variant fields only. To represent a Locale as a String for interchange
+	 * purposes, use {@link #toLanguageTag}.
+	 *
+	 * <p>
+	 * Examples:
+	 * <ul>
+	 * <li><tt>en</tt></li>
+	 * <li><tt>de_DE</tt></li>
+	 * <li><tt>_GB</tt></li>
+	 * <li><tt>en_US_WIN</tt></li>
+	 * <li><tt>de__POSIX</tt></li>
+	 * <li><tt>zh_CN_#Hans</tt></li>
+	 * <li><tt>zh_TW_#Hant-x-java</tt></li>
+	 * <li><tt>th_TH_TH_#u-nu-thai</tt></li>
+	 * </ul>
+	 *
+	 * @return A string representation of the Locale, for debugging.
+	 * @see #getDisplayName
+	 * @see #toLanguageTag
+	 */
+	@Override
+	public final String toString() {
+		if (str == null) {
+			boolean l = (baseLocale.getLanguage().length() != 0);
+			boolean s = (baseLocale.getScript().length() != 0);
+			boolean r = (baseLocale.getRegion().length() != 0);
+			boolean v = (baseLocale.getVariant().length() != 0);
+			boolean e = (localeExtensions != null && localeExtensions.getID().length() != 0);
 
-        StringBuilder result = new StringBuilder(baseLocale.getLanguage());
-        if (r || (l && (v || s || e))) {
-            result.append('_')
-                .append(baseLocale.getRegion()); // This may just append '_'
-        }
-        if (v && (l || r)) {
-            result.append('_')
-                .append(baseLocale.getVariant());
-        }
+			StringBuilder result = new StringBuilder(baseLocale.getLanguage());
+			if (r || (l && (v || s || e))) {
+				result.append('_').append(baseLocale.getRegion()); // This may just append '_'
+			}
+			if (v && (l || r)) {
+				result.append('_').append(baseLocale.getVariant());
+			}
 
-        if (s && (l || r)) {
-            result.append("_#")
-                .append(baseLocale.getScript());
-        }
+			if (s && (l || r)) {
+				result.append("_#").append(baseLocale.getScript());
+			}
 
-        if (e && (l || r)) {
-            result.append('_');
-            if (!s) {
-                result.append('#');
-            }
-            result.append(localeExtensions.getID());
-        }
-
-        return result.toString();
-    }
+			if (e && (l || r)) {
+				result.append('_');
+				if (!s) {
+					result.append('#');
+				}
+				result.append(localeExtensions.getID());
+			}
+			str = result.toString();
+		}
+		return str;
+	}
 
     /**
      * Returns a well-formed IETF BCP 47 language tag representing
@@ -2128,80 +2139,80 @@ public final class Locale implements Cloneable, Serializable {
         return (s.length() == 2) && LocaleUtils.isAlphaNumericString(s);
     }
 
-    /**
-     * @serialField language    String
-     *      language subtag in lower case. (See <a href="java/util/Locale.html#getLanguage()">getLanguage()</a>)
-     * @serialField country     String
-     *      country subtag in upper case. (See <a href="java/util/Locale.html#getCountry()">getCountry()</a>)
-     * @serialField variant     String
-     *      variant subtags separated by LOWLINE characters. (See <a href="java/util/Locale.html#getVariant()">getVariant()</a>)
-     * @serialField hashcode    int
-     *      deprecated, for forward compatibility only
-     * @serialField script      String
-     *      script subtag in title case (See <a href="java/util/Locale.html#getScript()">getScript()</a>)
-     * @serialField extensions  String
-     *      canonical representation of extensions, that is,
-     *      BCP47 extensions in alphabetical order followed by
-     *      BCP47 private use subtags, all in lower case letters
-     *      separated by HYPHEN-MINUS characters.
-     *      (See <a href="java/util/Locale.html#getExtensionKeys()">getExtensionKeys()</a>,
-     *      <a href="java/util/Locale.html#getExtension(char)">getExtension(char)</a>)
-     */
-    private static final ObjectStreamField[] serialPersistentFields = {
-        new ObjectStreamField("language", String.class),
-        new ObjectStreamField("country", String.class),
-        new ObjectStreamField("variant", String.class),
-        new ObjectStreamField("hashcode", int.class),
-        new ObjectStreamField("script", String.class),
-        new ObjectStreamField("extensions", String.class),
-    };
-
-    /**
-     * Serializes this <code>Locale</code> to the specified <code>ObjectOutputStream</code>.
-     * @param out the <code>ObjectOutputStream</code> to write
-     * @throws IOException
-     * @since 1.7
-     */
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        ObjectOutputStream.PutField fields = out.putFields();
-        fields.put("language", baseLocale.getLanguage());
-        fields.put("script", baseLocale.getScript());
-        fields.put("country", baseLocale.getRegion());
-        fields.put("variant", baseLocale.getVariant());
-        fields.put("extensions", localeExtensions == null ? "" : localeExtensions.getID());
-        fields.put("hashcode", -1); // place holder just for backward support
-        out.writeFields();
-    }
-
-    /**
-     * Deserializes this <code>Locale</code>.
-     * @param in the <code>ObjectInputStream</code> to read
-     * @throws IOException
-     * @throws ClassNotFoundException
-     * @throws IllformedLocaleException
-     * @since 1.7
-     */
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        ObjectInputStream.GetField fields = in.readFields();
-        String language = (String)fields.get("language", "");
-        String script = (String)fields.get("script", "");
-        String country = (String)fields.get("country", "");
-        String variant = (String)fields.get("variant", "");
-        String extStr = (String)fields.get("extensions", "");
-        baseLocale = BaseLocale.getInstance(convertOldISOCodes(language), script, country, variant);
-        if (extStr.length() > 0) {
-            try {
-                InternalLocaleBuilder bldr = new InternalLocaleBuilder();
-                bldr.setExtensions(extStr);
-                localeExtensions = bldr.getLocaleExtensions();
-            } catch (LocaleSyntaxException e) {
-                throw new IllformedLocaleException(e.getMessage());
-            }
-        } else {
-            localeExtensions = null;
-        }
-    }
-
+//    /**
+//     * @serialField language    String
+//     *      language subtag in lower case. (See <a href="java/util/Locale.html#getLanguage()">getLanguage()</a>)
+//     * @serialField country     String
+//     *      country subtag in upper case. (See <a href="java/util/Locale.html#getCountry()">getCountry()</a>)
+//     * @serialField variant     String
+//     *      variant subtags separated by LOWLINE characters. (See <a href="java/util/Locale.html#getVariant()">getVariant()</a>)
+//     * @serialField hashcode    int
+//     *      deprecated, for forward compatibility only
+//     * @serialField script      String
+//     *      script subtag in title case (See <a href="java/util/Locale.html#getScript()">getScript()</a>)
+//     * @serialField extensions  String
+//     *      canonical representation of extensions, that is,
+//     *      BCP47 extensions in alphabetical order followed by
+//     *      BCP47 private use subtags, all in lower case letters
+//     *      separated by HYPHEN-MINUS characters.
+//     *      (See <a href="java/util/Locale.html#getExtensionKeys()">getExtensionKeys()</a>,
+//     *      <a href="java/util/Locale.html#getExtension(char)">getExtension(char)</a>)
+//     */
+//    private static final ObjectStreamField[] serialPersistentFields = {
+//        new ObjectStreamField("language", String.class),
+//        new ObjectStreamField("country", String.class),
+//        new ObjectStreamField("variant", String.class),
+//        new ObjectStreamField("hashcode", int.class),
+//        new ObjectStreamField("script", String.class),
+//        new ObjectStreamField("extensions", String.class),
+//    };
+//
+//    /**
+//     * Serializes this <code>Locale</code> to the specified <code>ObjectOutputStream</code>.
+//     * @param out the <code>ObjectOutputStream</code> to write
+//     * @throws IOException
+//     * @since 1.7
+//     */
+//    private void writeObject(ObjectOutputStream out) throws IOException {
+//        ObjectOutputStream.PutField fields = out.putFields();
+//        fields.put("language", baseLocale.getLanguage());
+//        fields.put("script", baseLocale.getScript());
+//        fields.put("country", baseLocale.getRegion());
+//        fields.put("variant", baseLocale.getVariant());
+//        fields.put("extensions", localeExtensions == null ? "" : localeExtensions.getID());
+//        fields.put("hashcode", -1); // place holder just for backward support
+//        out.writeFields();
+//    }
+//
+//    /**
+//     * Deserializes this <code>Locale</code>.
+//     * @param in the <code>ObjectInputStream</code> to read
+//     * @throws IOException
+//     * @throws ClassNotFoundException
+//     * @throws IllformedLocaleException
+//     * @since 1.7
+//     */
+//    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+//        ObjectInputStream.GetField fields = in.readFields();
+//        String language = (String)fields.get("language", "");
+//        String script = (String)fields.get("script", "");
+//        String country = (String)fields.get("country", "");
+//        String variant = (String)fields.get("variant", "");
+//        String extStr = (String)fields.get("extensions", "");
+//        baseLocale = BaseLocale.getInstance(convertOldISOCodes(language), script, country, variant);
+//        if (extStr.length() > 0) {
+//            try {
+//                InternalLocaleBuilder bldr = new InternalLocaleBuilder();
+//                bldr.setExtensions(extStr);
+//                localeExtensions = bldr.getLocaleExtensions();
+//            } catch (LocaleSyntaxException e) {
+//                throw new IllformedLocaleException(e.getMessage());
+//            }
+//        } else {
+//            localeExtensions = null;
+//        }
+//    }
+//
     /**
      * Returns a cached <code>Locale</code> instance equivalent to
      * the deserialized <code>Locale</code>. When serialized

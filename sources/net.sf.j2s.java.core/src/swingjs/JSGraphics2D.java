@@ -829,28 +829,28 @@ public class JSGraphics2D implements
 	}
 
 	public void setRenderingHint(Key hintKey, Object hintValue) {
-		hints.put(hintKey, hintValue);
+		//hints.put(hintKey, hintValue);
 	}
 
 	public Object getRenderingHint(Key hintKey) {
-		return (hints == null ? null : hints.get(hintKey));
+		return null;//
+//		return (hints == null ? null : hints.get(hintKey));
 	}
 
 	public void setRenderingHints(Map<?, ?> hints) {
-		this.hints = new RenderingHints((Map<Key, ?>) hints);
+		//this.hints = new RenderingHints(null);//(Map<Key, ?>) hints);
 	}
 
 	public void addRenderingHints(Map<?, ?> hints) {
-		if (hints == null)
-			hints = new RenderingHints(new Hashtable());
-		for (Entry<?, ?> e : hints.entrySet())
-			this.hints.put(e.getKey(), e.getValue());
+//		if (hints == null)
+//			hints = new RenderingHints(new Hashtable());
+//		for (Entry<?, ?> e : hints.entrySet())
+//			this.hints.put(e.getKey(), e.getValue());
 	}
 
+	private static RenderingHints nohints = new RenderingHints(new Hashtable());
 	public RenderingHints getRenderingHints() {
-		if (hints == null)
-			hints = new RenderingHints(new Hashtable());
-		return hints;
+		return (hints == null ? nohints : hints);
 	}
 
 	public void setBackground(Color c) {

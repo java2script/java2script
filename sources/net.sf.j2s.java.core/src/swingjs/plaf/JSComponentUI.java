@@ -2366,7 +2366,7 @@ public class JSComponentUI extends ComponentUI
 	protected String fixText(String t) {
 		if (t != null) {
 			if (isHTML) {
-				//
+				// 
 			} else if (valueNode == null) {
 				t = (t.indexOf("\u0000") >= 0 ? PT.rep(t, "\u0000", "") : t).replace(' ', '\u00A0');
 			}
@@ -2680,7 +2680,9 @@ public class JSComponentUI extends ComponentUI
 				"height", hCtr + "px");
 		addJSKeyVal(cssIcon, "position", "absolute", "top", null, "left", null, "transform", null);
 		addJSKeyVal(cssTxt, "position", "absolute", "top", null, "left", null, "transform", null);
-		isFullyCentered = (alignHCenter && alignVCenter && wIcon == 0 || wText == 0 && margins.left == margins.right
+		// checkboxes and radiobuttons should not be fully centered 
+		isFullyCentered = (alignHCenter && alignVCenter && wIcon == 0 
+				|| wText == 0 && (actionNode == null || isSimpleButton) && margins.left == margins.right
 				&& margins.top == margins.bottom && myInsets.left == myInsets.right && myInsets.top == myInsets.bottom);
 		if (isFullyCentered) {
 			// simple totally centered label or button

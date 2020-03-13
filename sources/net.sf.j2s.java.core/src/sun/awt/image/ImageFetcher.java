@@ -334,7 +334,8 @@ class FetcherInfo {
 
     /* The key to put()/get() the FetcherInfo into/from the AppContext. */
     private static final Object FETCHER_INFO_KEY =
-                                        new StringBuffer("FetcherInfo");
+                                        //new StringBuffer
+                                        ("ImageFetcher_FetcherInfo");
 
     static FetcherInfo getFetcherInfo() {
         AppContext appContext = AppContext.getAppContext();

@@ -1,6 +1,6 @@
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
-// Note if this character 秘 does not look like a Chinese character, 
+// Note if this character 秘 does not look like a Chinese character, u79d8 
 // then DON'T SAVE THIS FILE. Open it again with a default UTF-8 editor.
 
 // J2S._version set to "3.2.4.09" 2019.10.31
@@ -233,6 +233,13 @@ window.J2S = J2S = (function() {
 		return j;
 	})();
 
+    J2S.cantLoadLocalFiles = function() {
+		alert("There was a problem loading local files. " +
+				"Check to see that your browser has been set up to read local files." +
+				" \n\n\n-- Developers: Override J2S.cantLoadLocalFiles to " +
+				"customize this message.");
+    }
+    
 	J2S.extend = function(map, map0, key0) {
 		for (key in map) {
 			var val = map[key]
@@ -2626,7 +2633,13 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			if (J2S._version.indexOf("$Date: ") == 0)
 				J2S._version = (J2S._version.substring(7) + " -").split(" -")[0]
 						+ " (J2S)";
-			Clazz.loadClass("java.lang.Class");
+			if (!Clazz._4Name("java.lang.Class", null, null, true, false, true)) {
+				if (J2S._isFile) {
+					J2S.cantLoadLocalFiles();
+					return;
+				}
+				alert("There was an unknown problem loading java.lang.Class.");
+			}
 			J2S._registerApplet(applet._id, applet);
 			if (!applet.__Info.args || applet.__Info.args == "?") {
 				if (J2S._appArgs)

@@ -109,7 +109,7 @@ class ExtendedTextSourceLabel extends ExtendedTextLabel implements Decoration.La
       }
       font = font.deriveFont(charTX);
 
-      LineMetrics lm = font.getLineMetrics(source.getChars(), source.getStart(),
+      LineMetrics lm = font.getLineMetrics(sourceGetChars(), source.getStart(),
           source.getStart() + source.getLength(), source.getFRC());
       cm = CoreMetrics.get(lm);
     }
@@ -205,10 +205,19 @@ public Shape getOutline(float x, float y) {
 
   @Override
 public void handleDraw(Graphics2D g, float x, float y) {
-	((JSGraphics2D) (Object) g).drawText(source.getChars(), font, x, y);
+	((JSGraphics2D) (Object) g).drawText(sourceGetChars(), font, x, y);
   }
 
-  @Override
+  private char[] sourceGetChars() {
+	  char[] chars = null;
+	  /**
+	   * @j2sNative  if (this.source.__CLASS_NAME__.indexOf("sun.font") == 0)
+	   *    chars = this.source.chars; 
+	   */
+	return (chars == null ? source.getChars() : chars);
+}
+
+@Override
 public void draw(Graphics2D g, float x, float y) {
     decorator.drawTextAndDecorations(this, g, x, y);
   }
@@ -338,7 +347,7 @@ public Rectangle2D handleGetVisualBounds() {
   protected StandardGlyphVector createGV() {
     FontRenderContext frc = source.getFRC();
     int flags = source.getLayoutFlags();
-    char[] context = source.getChars();
+    char[] context = sourceGetChars();
     int start = source.getStart();
     int length = source.getLength();
 
@@ -549,7 +558,7 @@ public boolean caretAtOffsetIsValid(int offset) {
       if (offset == 0 || offset == source.getLength()) {
           return true;
       }
-      char c = source.getChars()[source.getStart() + offset];
+      char c = sourceGetChars()[source.getStart() + offset];
       if (c == '\t' || c == '\n' || c == '\r') { // hack
           return true;
       }
@@ -879,7 +888,7 @@ public boolean caretAtOffsetIsValid(int offset) {
     }
 
     if (DEBUG) {
-      char[] chars = source.getChars();
+      char[] chars = sourceGetChars();
       int start = source.getStart();
       int length = source.getLength();
       System.out.println("char info for " + length + " characters");
@@ -992,7 +1001,7 @@ public void getJustificationInfos(GlyphJustificationInfo[] infos, int infoStart,
                                  true, GlyphJustificationInfo.PRIORITY_INTERCHAR, size, size,
                                  false, GlyphJustificationInfo.PRIORITY_NONE, 0, 0);
 
-    char[] chars = source.getChars();
+    char[] chars = sourceGetChars();
     int offset = source.getStart();
 
     // assume data is 1-1 and either all rtl or all ltr, for now
@@ -1066,7 +1075,7 @@ public TextLineComponent applyJustificationDeltas(float[] deltas, int deltaStart
     }
     */
 
-    char[] chars = source.getChars();
+    char[] chars = sourceGetChars();
     int offset = source.getStart();
 
     // accumulate the deltas to adjust positions and advances.

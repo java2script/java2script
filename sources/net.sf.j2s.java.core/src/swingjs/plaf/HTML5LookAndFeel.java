@@ -29,8 +29,10 @@
 package swingjs.plaf;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.JSComponent;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.LookAndFeel;
@@ -2598,4 +2600,10 @@ public class HTML5LookAndFeel extends LookAndFeel {
 	public boolean isSupportedLookAndFeel() {
 		return true;
 	}
+	
+    @Override
+	public void provideErrorFeedback(Component c) {
+    	System.out.println("HTML5LookAndFeel says BEEP from " + c.getClass().getName());
+    }
+
 }

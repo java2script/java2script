@@ -355,15 +355,15 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		cb5.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 		cb5.setHorizontalTextPosition(SwingConstants.TRAILING);
 
-		JRadioButton rb1 = new JRadioButton("trailing,right-to-left");
+		JRadioButton rb1 = new JRadioButton();
 		rb1.setFont(font);
-		rb1.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-		rb1.setHorizontalTextPosition(SwingConstants.TRAILING);
+//		rb1.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+//		rb1.setHorizontalTextPosition(SwingConstants.TRAILING);
 
-		JRadioButton rb2 = new JRadioButton("right,left-to-right");
+		JRadioButton rb2 = new JRadioButton();
 		rb2.setFont(font);
-		rb2.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
-		rb2.setHorizontalTextPosition(SwingConstants.RIGHT);
+//		rb2.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+//		rb2.setHorizontalTextPosition(SwingConstants.RIGHT);
 
 		JRadioButton rb3 = new JRadioButton("right,r2l");
 		rb3.setFont(font);

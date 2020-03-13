@@ -232,7 +232,7 @@ public class JInternalFrame extends JFrame implements
 	 */
 	public final static String IS_ICON_PROPERTY = "icon";
 
-	private static final Object PROPERTY_CHANGE_LISTENER_KEY = new Object(); // InternalFramePropertyChangeListener
+	private static final String PROPERTY_CHANGE_LISTENER_KEY =  "JInternalFramePropertyChangeListener";//new Object(); //
 
 	private static void addPropertyChangeListenerIfNecessary() {
 		if (AppContext.getAppContext().get(PROPERTY_CHANGE_LISTENER_KEY) == null) {

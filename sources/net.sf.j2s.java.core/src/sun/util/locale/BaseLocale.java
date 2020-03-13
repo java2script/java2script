@@ -119,8 +119,12 @@ public final class BaseLocale {
                && variant == other.variant;
     }
 
+    private String strRep;
+  
     @Override
     public String toString() {
+    	if (strRep != null)
+    		return strRep;
         StringBuilder buf = new StringBuilder();
         if (language.length() > 0) {
             buf.append("language=");
@@ -147,7 +151,7 @@ public final class BaseLocale {
             buf.append("variant=");
             buf.append(variant);
         }
-        return buf.toString();
+        return strRep = buf.toString();
     }
 
     @Override
@@ -289,11 +293,19 @@ public final class BaseLocale {
 
             return new Key(lang, scrt, regn, vart, true);
         }
+        
+        private String str;
+        
+        public String toString() {
+        	return (str == null ? (str = "[BaseLocaleKey " + lang+regn+vart+scrt + ";" + normalized +"]"): str);
+        }
     }
 
-    private static class Cache extends HashMap<Key, BaseLocale> {
+    private static class Cache  {
 
-        public Cache() {
+    	private  HashMap<String, BaseLocale> map = new HashMap<>();
+
+    	public Cache() {
         }
 
         protected Key normalizeKey(Key key) {
@@ -305,9 +317,13 @@ public final class BaseLocale {
             return Key.normalize(key);
         }
         
+        public BaseLocale put(Key key, BaseLocale locale) {
+        	return map.put(key.toString(), locale);
+        	
+        }
         public BaseLocale get(Key key) {
         	key = normalizeKey(key);
-        	BaseLocale locale = super.get(key);
+        	BaseLocale locale = map.get(key.toString());
         	if (locale == null)
         		put(key, locale = createObject(key));
         	return locale;
