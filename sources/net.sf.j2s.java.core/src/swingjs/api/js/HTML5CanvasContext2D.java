@@ -1,6 +1,10 @@
 package swingjs.api.js;
 
+import java.awt.Color;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D.Float;
+
+import swingjs.JSToolkit;
 
 public abstract class HTML5CanvasContext2D {
 
@@ -18,8 +22,8 @@ public abstract class HTML5CanvasContext2D {
 
 	public float globalAlpha;
 
-	public abstract void drawImage(DOMNode img, int sx,
-			int sy, int swidth, int sheight, int dx, int dy, int dwidth, int dheight);
+	public abstract void drawImage(DOMNode img, double sx,
+			double sy, double swidth, double sheight, double dx, double dy, double width, double height);
 
 	public abstract ImageData getImageData(int x, int y, int width, int height);
 
@@ -47,13 +51,16 @@ public abstract class HTML5CanvasContext2D {
 
 	public abstract void fill();
 
+
+	public abstract void fill(String winding);
+
 	public abstract void rect(double x, double y, double width, double height);
 
 	public abstract void fillText(String s, double x, double y);
 
 	public abstract void fillRect(double x, double y, double width, double height);
 
-	public abstract void clearRect(int i, int j, int windowWidth, int windowHeight);
+	public abstract void clearRect(double i, double j, double windowWidth, double windowHeight);
 
 	public abstract void setLineDash(int[] dash);
 
@@ -63,9 +70,12 @@ public abstract class HTML5CanvasContext2D {
 
 	public abstract void bezierCurveTo(double d, double e, double f, double g, double h, double i);
 
-	public abstract void drawImage(DOMNode img, int x, int y, int width, int height);
+	public abstract void drawImage(DOMNode img, double x, double y, double width, double height);
 
-	public abstract void putImageData(Object imageData, int x, int y);
+	public abstract void putImageData(Object imageData, double x, double y);
+
+	public abstract void transform(double d, double shx, double e, double shy, double f, double g);
+
 
 	/**
 	 * pull one save structure onto the stack array ctx._aSaved
@@ -112,23 +122,44 @@ public abstract class HTML5CanvasContext2D {
 			return 0;
 		}
 	}
+	
+	public static Object[][] getSavedStack(HTML5CanvasContext2D ctx) {
+	   /**
+	    * @j2sNative
+	    * 
+	    * return (ctx._aSaved || []);
+	    */
+		{
+			return null;
+		}
+		
+	}
 
-	public static double[] getMatrix(HTML5CanvasContext2D ctx, AffineTransform transform) {
+	public static double[] setMatrix(HTML5CanvasContext2D ctx, AffineTransform transform) {
 		double[] m = /**  @j2sNative ctx._m || */ null;
 		if (transform == null) {
 			/** @j2sNative ctx._m = null; */
 			return null;			
 		}
 		if (m == null) {
-			m = new double[6];
 			/**
 			 * @j2sNative
-			 * ctx._m = m;
+			 * ctx._m = m = new Array(6);
 			 */
 			transform.getMatrix(m);
 		}
 		return m;
 	}
 
+	public static void createLinearGradient(HTML5CanvasContext2D ctx, Float p1, Float p2, String css1, String css2) {
+		/**
+		 * @j2sNative
+		 * 
+		 *   var grd = ctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
+		 *   grd.addColorStop(0,css1);
+		 *   grd.addColorStop(1,css2);
+		 *   ctx.fillStyle = grd;
+		 */
+		}
 
 }

@@ -69,10 +69,15 @@ import java.util.Map;
 
 import java.awt.Font;
 import java.awt.Paint;
+import java.awt.Toolkit;
+import java.awt.font.GraphicAttribute;
+import java.awt.font.NumericShaper;
 import java.awt.font.TextAttribute;
+import java.awt.font.TransformAttribute;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
+import java.awt.im.InputMethodHighlight;
 
 @SuppressWarnings({"unchecked"})
 public final class AttributeValues implements Cloneable {
@@ -85,9 +90,9 @@ public final class AttributeValues implements Cloneable {
     private float posture; // 0f
     private float size = 12f;
     private float tracking; // 0f
-    //private NumericShaper numericShaping; // null
+    private NumericShaper numericShaping; // null
     private AffineTransform transform; // null == identity
-    //private GraphicAttribute charReplacement; // null
+    private GraphicAttribute charReplacement; // null
     private Paint foreground; // null
     private Paint background; // null
     private float justification = 1f;
@@ -133,13 +138,14 @@ public final class AttributeValues implements Cloneable {
         updateDerivedTransforms();
         update(ETRANSFORM);
     }
-//    public void setTransform(TransformAttribute f) {
-//        this.transform = (f == null || f.isIdentity())
-//            ? DEFAULT.transform
-//            : f.getTransform();
-//        updateDerivedTransforms();
-//        update(ETRANSFORM);
-//    }
+
+    public void setTransform(TransformAttribute f) {
+        this.transform = (f == null || f.isIdentity())
+            ? DEFAULT.transform
+            : f.getTransform();
+        updateDerivedTransforms();
+        update(ETRANSFORM);
+    }
 
     public int getSuperscript() { return superscript; }
     public void setSuperscript(int f) {
@@ -148,9 +154,9 @@ public final class AttributeValues implements Cloneable {
     public Font getFont() { return font; }
     public void setFont(Font f) { this.font = f; update(EFONT); }
 
-//    public GraphicAttribute getCharReplacement() { return charReplacement; }
-//    public void setCharReplacement(GraphicAttribute f) {
-//      this.charReplacement = f; update(ECHAR_REPLACEMENT); }
+    public GraphicAttribute getCharReplacement() { return charReplacement; }
+    public void setCharReplacement(GraphicAttribute f) {
+      this.charReplacement = f; update(EAttribute.ECHAR_REPLACEMENT); }
 
     public Paint getForeground() { return foreground; }
     public void setForeground(Paint f) {
@@ -183,8 +189,8 @@ public final class AttributeValues implements Cloneable {
     public Object getInputMethodHighlight() { return imHighlight; }
     public void setInputMethodHighlight(Annotation f) {
       this.imHighlight = f; update(EINPUT_METHOD_HIGHLIGHT); }
-//    public void setInputMethodHighlight(InputMethodHighlight f) {
-//      this.imHighlight = f; update(EINPUT_METHOD_HIGHLIGHT); }
+    public void setInputMethodHighlight(InputMethodHighlight f) {
+      this.imHighlight = f; update(EINPUT_METHOD_HIGHLIGHT); }
 
     public int getInputMethodUnderline() { return imUnderline; }
     public void setInputMethodUnderline(int f) {
@@ -194,9 +200,9 @@ public final class AttributeValues implements Cloneable {
     public void setSwapColors(boolean f) {
       this.swapColors = f; update(ESWAP_COLORS); }
 
-//    public NumericShaper getNumericShaping() { return numericShaping; }
-//    public void setNumericShaping(NumericShaper f) {
-//      this.numericShaping = f; update(ENUMERIC_SHAPING); }
+    public NumericShaper getNumericShaping() { return numericShaping; }
+    public void setNumericShaping(NumericShaper f) {
+      this.numericShaping = f; update(EAttribute.ENUMERIC_SHAPING); }
 
     public int getKerning() { return kerning; }
     public void setKerning(int f) {
@@ -482,11 +488,11 @@ public final class AttributeValues implements Cloneable {
             && bidiEmbedding == rhs.bidiEmbedding
             && swapColors == rhs.swapColors
             && equals(transform, rhs.transform)
-//            && equals(foreground, rhs.foreground)
-//            && equals(background, rhs.background)
-//            && equals(numericShaping, rhs.numericShaping)
+            && equals(foreground, rhs.foreground)
+            && equals(background, rhs.background)
+            && equals(numericShaping, rhs.numericShaping)
             && equals(justification, rhs.justification)
-//            && equals(charReplacement, rhs.charReplacement)
+            && equals(charReplacement, rhs.charReplacement)
             && size == rhs.size
             && weight == rhs.weight
             && posture == rhs.posture
@@ -536,20 +542,20 @@ public final class AttributeValues implements Cloneable {
                 case EPOSTURE: b.append(posture); break;
                 case ESIZE: b.append(size); break;
                 case ETRANSFORM: b.append(transform); break;
-                case ESUPERSCRIPT: b.append("" + superscript); break;
+                case ESUPERSCRIPT: b.append(superscript); break;
                 case EFONT: b.append(font); break;
-//                case ECHAR_REPLACEMENT: b.append(charReplacement); break;
-//                case EFOREGROUND: b.append(foreground); break;
-//                case EBACKGROUND: b.append(background); break;
-                case EUNDERLINE: b.append("" + underline); break;
+                case ECHAR_REPLACEMENT: b.append(charReplacement); break;
+                case EFOREGROUND: b.append(foreground); break;
+                case EBACKGROUND: b.append(background); break;
+                case EUNDERLINE: b.append(underline); break;
                 case ESTRIKETHROUGH: b.append(strikethrough); break;
-                case ERUN_DIRECTION: b.append("" + runDirection); break;
-                case EBIDI_EMBEDDING: b.append("" + bidiEmbedding); break;
+                case ERUN_DIRECTION: b.append(runDirection); break;
+                case EBIDI_EMBEDDING: b.append(bidiEmbedding); break;
                 case EJUSTIFICATION: b.append(justification); break;
                 case EINPUT_METHOD_HIGHLIGHT: b.append(imHighlight); break;
-                case EINPUT_METHOD_UNDERLINE: b.append("" + imUnderline); break;
+                case EINPUT_METHOD_UNDERLINE: b.append(imUnderline); break;
                 case ESWAP_COLORS: b.append(swapColors); break;
-//                case ENUMERIC_SHAPING: b.append(numericShaping); break;
+                case ENUMERIC_SHAPING: b.append(numericShaping); break;
                 case EKERNING: b.append(kerning); break;
                 case ELIGATURES: b.append(ligatures); break;
                 case ETRACKING: b.append(tracking); break;
@@ -596,9 +602,9 @@ public final class AttributeValues implements Cloneable {
         case ETRANSFORM: transform = src.transform; updateDerivedTransforms(); break;
         case ESUPERSCRIPT: superscript = src.superscript; break;
         case EFONT: font = src.font; break;
-  //      case ECHAR_REPLACEMENT: charReplacement = src.charReplacement; break;
-  //      case EFOREGROUND: foreground = src.foreground; break;
-  //      case EBACKGROUND: background = src.background; break;
+        case ECHAR_REPLACEMENT: charReplacement = src.charReplacement; break;
+        case EFOREGROUND: foreground = src.foreground; break;
+        case EBACKGROUND: background = src.background; break;
         case EUNDERLINE: underline = src.underline; break;
         case ESTRIKETHROUGH: strikethrough = src.strikethrough; break;
         case ERUN_DIRECTION: runDirection = src.runDirection; break;
@@ -607,7 +613,7 @@ public final class AttributeValues implements Cloneable {
         case EINPUT_METHOD_HIGHLIGHT: imHighlight = src.imHighlight; break;
         case EINPUT_METHOD_UNDERLINE: imUnderline = src.imUnderline; break;
         case ESWAP_COLORS: swapColors = src.swapColors; break;
-//        case ENUMERIC_SHAPING: numericShaping = src.numericShaping; break;
+        case ENUMERIC_SHAPING: numericShaping = src.numericShaping; break;
         case EKERNING: kerning = src.kerning; break;
         case ELIGATURES: ligatures = src.ligatures; break;
         case ETRACKING: tracking = src.tracking; break;
@@ -625,9 +631,9 @@ public final class AttributeValues implements Cloneable {
         case ETRANSFORM: return equals(transform, src.transform);
         case ESUPERSCRIPT: return superscript == src.superscript;
         case EFONT: return equals(font, src.font);
-//        case ECHAR_REPLACEMENT: return equals(charReplacement, src.charReplacement);
-//        case EFOREGROUND: return equals(foreground, src.foreground);
-//        case EBACKGROUND: return equals(background, src.background);
+        case ECHAR_REPLACEMENT: return equals(charReplacement, src.charReplacement);
+        case EFOREGROUND: return equals(foreground, src.foreground);
+        case EBACKGROUND: return equals(background, src.background);
         case EUNDERLINE: return underline == src.underline;
         case ESTRIKETHROUGH: return strikethrough == src.strikethrough;
         case ERUN_DIRECTION: return runDirection == src.runDirection;
@@ -636,7 +642,7 @@ public final class AttributeValues implements Cloneable {
         case EINPUT_METHOD_HIGHLIGHT: return equals(imHighlight, src.imHighlight);
         case EINPUT_METHOD_UNDERLINE: return imUnderline == src.imUnderline;
         case ESWAP_COLORS: return swapColors == src.swapColors;
-//        case ENUMERIC_SHAPING: return equals(numericShaping, src.numericShaping);
+        case ENUMERIC_SHAPING: return equals(numericShaping, src.numericShaping);
         case EKERNING: return kerning == src.kerning;
         case ELIGATURES: return ligatures == src.ligatures;
         case ETRACKING: return tracking == src.tracking;
@@ -651,24 +657,24 @@ public final class AttributeValues implements Cloneable {
         case EWIDTH: width = ((Number)o).floatValue(); break;
         case EPOSTURE: posture = ((Number)o).floatValue(); break;
         case ESIZE: size = ((Number)o).floatValue(); break;
-//        case ETRANSFORM: {
-//            if (o instanceof TransformAttribute) {
-//                TransformAttribute ta = (TransformAttribute)o;
-//                if (ta.isIdentity()) {
-//                    transform = null;
-//                } else {
-//                    transform = ta.getTransform();
-//                }
-//            } else {
-//                transform = new AffineTransform((AffineTransform)o);
-//            }
-//            updateDerivedTransforms();
-//        } break;
+        case ETRANSFORM: {
+            if (o instanceof TransformAttribute) {
+                TransformAttribute ta = (TransformAttribute)o;
+                if (ta.isIdentity()) {
+                    transform = null;
+                } else {
+                    transform = ta.getTransform();
+                }
+            } else {
+                transform = new AffineTransform((AffineTransform)o);
+            }
+            updateDerivedTransforms();
+        } break;
         case ESUPERSCRIPT: superscript = (byte)((Integer)o).intValue(); break;
         case EFONT: font = (Font)o; break;
-//        case ECHAR_REPLACEMENT: charReplacement = (GraphicAttribute)o; break;
-//        case EFOREGROUND: foreground = (Paint)o; break;
-//        case EBACKGROUND: background = (Paint)o; break;
+        case ECHAR_REPLACEMENT: charReplacement = (GraphicAttribute)o; break;
+        case EFOREGROUND: foreground = (Paint)o; break;
+        case EBACKGROUND: background = (Paint)o; break;
         case EUNDERLINE: underline = (byte)((Integer)o).intValue(); break;
         case ESTRIKETHROUGH: strikethrough = ((Boolean)o).booleanValue(); break;
         case ERUN_DIRECTION: {
@@ -680,18 +686,18 @@ public final class AttributeValues implements Cloneable {
         } break;
         case EBIDI_EMBEDDING: bidiEmbedding = (byte)((Integer)o).intValue(); break;
         case EJUSTIFICATION: justification = ((Number)o).floatValue(); break;
-//        case EINPUT_METHOD_HIGHLIGHT: {
-//            if (o instanceof Annotation) {
-//                Annotation at = (Annotation)o;
-//                imHighlight = (InputMethodHighlight)at.getValue();
-//            } else {
-//                imHighlight = (InputMethodHighlight)o;
-//            }
-//        } break;
+        case EINPUT_METHOD_HIGHLIGHT: {
+            if (o instanceof Annotation) {
+                Annotation at = (Annotation)o;
+                imHighlight = (InputMethodHighlight)at.getValue();
+            } else {
+                imHighlight = (InputMethodHighlight)o;
+            }
+        } break;
         case EINPUT_METHOD_UNDERLINE: imUnderline = (byte)((Integer)o).intValue();
           break;
         case ESWAP_COLORS: swapColors = ((Boolean)o).booleanValue(); break;
-//        case ENUMERIC_SHAPING: numericShaping = (NumericShaper)o; break;
+        case ENUMERIC_SHAPING: numericShaping = (NumericShaper)o; break;
         case EKERNING: kerning = (byte)((Integer)o).intValue(); break;
         case ELIGATURES: ligatures = (byte)((Integer)o).intValue(); break;
         case ETRACKING: tracking = ((Number)o).floatValue(); break;
@@ -706,15 +712,15 @@ public final class AttributeValues implements Cloneable {
         case EWIDTH: return Float.valueOf(width);
         case EPOSTURE: return Float.valueOf(posture);
         case ESIZE: return Float.valueOf(size);
-//        case ETRANSFORM:
-//            return transform == null
-//                ? TransformAttribute.IDENTITY
-//                : new TransformAttribute(transform);
+        case ETRANSFORM:
+            return transform == null
+                ? TransformAttribute.IDENTITY
+                : new TransformAttribute(transform);
         case ESUPERSCRIPT: return Integer.valueOf(superscript);
         case EFONT: return font;
-  //      case ECHAR_REPLACEMENT: return charReplacement;
-  //      case EFOREGROUND: return foreground;
-  //      case EBACKGROUND: return background;
+        case ECHAR_REPLACEMENT: return charReplacement;
+        case EFOREGROUND: return foreground;
+        case EBACKGROUND: return background;
         case EUNDERLINE: return Integer.valueOf(underline);
         case ESTRIKETHROUGH: return Boolean.valueOf(strikethrough);
         case ERUN_DIRECTION: {
@@ -731,7 +737,7 @@ public final class AttributeValues implements Cloneable {
         case EINPUT_METHOD_HIGHLIGHT: return imHighlight;
         case EINPUT_METHOD_UNDERLINE: return Integer.valueOf(imUnderline);
         case ESWAP_COLORS: return Boolean.valueOf(swapColors);
-//        case ENUMERIC_SHAPING: return numericShaping;
+        case ENUMERIC_SHAPING: return numericShaping;
         case EKERNING: return Integer.valueOf(kerning);
         case ELIGATURES: return Integer.valueOf(ligatures);
         case ETRACKING: return Float.valueOf(tracking);
@@ -789,44 +795,44 @@ public final class AttributeValues implements Cloneable {
         return DEFAULT.justification;
     }
 
-//    public static NumericShaper getNumericShaping(Map<?, ?> map) {
-//        if (map != null) {
-//            if (map instanceof AttributeMap &&
-//                ((AttributeMap) map).getValues() != null) {
-//                return ((AttributeMap)map).getValues().numericShaping;
-//            }
-//            Object obj = map.get(TextAttribute.NUMERIC_SHAPING);
-//            if (obj != null && obj instanceof NumericShaper) {
-//                return (NumericShaper)obj;
-//            }
-//        }
-//        return DEFAULT.numericShaping;
-//    }
+    public static NumericShaper getNumericShaping(Map<?, ?> map) {
+        if (map != null) {
+            if (map instanceof AttributeMap &&
+                ((AttributeMap) map).getValues() != null) {
+                return ((AttributeMap)map).getValues().numericShaping;
+            }
+            Object obj = map.get(TextAttribute.NUMERIC_SHAPING);
+            if (obj != null && obj instanceof NumericShaper) {
+                return (NumericShaper)obj;
+            }
+        }
+        return DEFAULT.numericShaping;
+    }
 
     /**
      * If this has an imHighlight, create copy of this with those attributes
      * applied to it.  Otherwise return this unchanged.
      */
     public AttributeValues applyIMHighlight() {
-//        if (imHighlight != null) {
-//            InputMethodHighlight hl = null;
-//            if (imHighlight instanceof InputMethodHighlight) {
-//                hl = (InputMethodHighlight)imHighlight;
-//            } else {
-//                hl = (InputMethodHighlight)((Annotation)imHighlight).getValue();
-//            }
-//
-//            Map imStyles = hl.getStyle();
-//            if (imStyles == null) {
-//                Toolkit tk = Toolkit.getDefaultToolkit();
-//                imStyles = tk.mapInputMethodHighlight(hl);
-//            }
-//
-//            if (imStyles != null) {
-//                return clone().merge(imStyles);
-//            }
-//        }
-//
+        if (imHighlight != null) {
+            InputMethodHighlight hl = null;
+            if (imHighlight instanceof InputMethodHighlight) {
+                hl = (InputMethodHighlight)imHighlight;
+            } else {
+                hl = (InputMethodHighlight)((Annotation)imHighlight).getValue();
+            }
+
+            Map imStyles = hl.getStyle();
+            if (imStyles == null) {
+                Toolkit tk = Toolkit.getDefaultToolkit();
+                imStyles = tk.mapInputMethodHighlight(hl);
+            }
+
+            if (imStyles != null) {
+                return clone().merge(imStyles);
+            }
+        }
+
         return this;
     }
 

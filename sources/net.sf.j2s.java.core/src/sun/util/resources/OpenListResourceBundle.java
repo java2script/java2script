@@ -1,8 +1,5 @@
 /*
- * Some portions of this file have been modified by Robert Hanson hansonr.at.stolaf.edu 2012-2017
- * for use in SwingJS via transpilation into JavaScript using Java2Script.
- *
- * Copyright (c) 2005, 2007, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -45,6 +42,7 @@ package sun.util.resources;
 
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -60,7 +58,6 @@ import sun.util.ResourceBundleEnumeration;
  * adds a method createMap which allows subclasses to
  * use specialized Map implementations.
  */
-@SuppressWarnings({ "rawtypes", "unchecked" })
 public abstract class OpenListResourceBundle extends ResourceBundle {
     /**
      * Sole constructor.  (For invocation by subclass constructors, typically
@@ -71,7 +68,7 @@ public abstract class OpenListResourceBundle extends ResourceBundle {
 
     // Implements java.util.ResourceBundle.handleGetObject; inherits javadoc specification.
     @Override
-		public Object handleGetObject(String key) {
+    protected Object handleGetObject(String key) {
         if (key == null) {
             throw new NullPointerException();
         }
@@ -84,26 +81,38 @@ public abstract class OpenListResourceBundle extends ResourceBundle {
      * Implementation of ResourceBundle.getKeys.
      */
     @Override
-		public Enumeration<String> getKeys() {
-        ResourceBundle parent = this.parent;
-        return new ResourceBundleEnumeration(handleGetKeys(),
-                (parent != null) ? parent.getKeys() : null);
-    }
+    public Enumeration<String> getKeys() {
+        ResourceBundle parentBundle = this.parent;
+        return new ResourceBundleEnumeration(handleKeySet(),
+                (parentBundle != null) ? parentBundle.getKeys() : null);
+     }
 
     /**
-     * Returns a set of keys provided in this resource bundle
+     * Returns a set of keys provided in this resource bundle,
+     * including no parents.
      */
-	public Set<String> handleGetKeys() {
+    @Override
+    protected Set<String> handleKeySet() {
         loadLookupTablesIfNecessary();
-
         return lookup.keySet();
     }
 
-    /**
-     * Returns the parent bundle
-     */
-    public OpenListResourceBundle getParent() {
-        return (OpenListResourceBundle)parent;
+    @Override
+    public Set<String> keySet() {
+        if (keyset != null) {
+            return keyset;
+        }
+        Set<String> ks = createSet();
+        ks.addAll(handleKeySet());
+        if (parent != null) {
+            ks.addAll(parent.keySet());
+        }
+        synchronized (this) {
+            if (keyset == null) {
+                keyset = ks;
+            }
+        }
+        return keyset;
     }
 
     /**
@@ -124,12 +133,9 @@ public abstract class OpenListResourceBundle extends ResourceBundle {
      * We lazily load the lookup hashtable.  This function does the
      * loading.
      */
-	private synchronized void loadLookup() {
-        if (lookup != null)
-            return;
-
+    private void loadLookup() {
         Object[][] contents = getContents();
-        Map temp = createMap(contents.length);
+        Map<String, Object> temp = createMap(contents.length);
         for (int i = 0; i < contents.length; ++i) {
             // key must be non-null String, value must be non-null
             String key = (String) contents[i][0];
@@ -139,16 +145,25 @@ public abstract class OpenListResourceBundle extends ResourceBundle {
             }
             temp.put(key, value);
         }
-        lookup = temp;
+        synchronized (this) {
+            if (lookup == null) {
+                lookup = temp;
+            }
+        }
     }
 
     /**
      * Lets subclasses provide specialized Map implementations.
      * Default uses HashMap.
      */
-	protected Map createMap(int size) {
-        return new HashMap(size);
+    protected <K, V> Map<K, V> createMap(int size) {
+        return new HashMap<>(size);
     }
 
-    private Map lookup = null;
+    protected <E> Set<E> createSet() {
+        return new HashSet<>();
+    }
+
+    private volatile Map<String, Object> lookup = null;
+    private volatile Set<String> keyset;
 }

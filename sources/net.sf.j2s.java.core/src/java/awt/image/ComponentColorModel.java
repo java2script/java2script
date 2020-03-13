@@ -29,8 +29,6 @@
 package java.awt.image;
 
 import java.awt.color.ColorSpace;
-//import java.awt.color.ICC_ColorSpace;
-import java.awt.color.ICC_ColorSpace;
 
 /**
  * A <CODE>ColorModel</CODE> class that works with pixel values that
@@ -195,7 +193,7 @@ public class ComponentColorModel extends ColorModel {
     private byte[] tosRGB8LUT;
     private byte[] fromsRGB8LUT8;
     private short[] fromsRGB8LUT16;
-    private byte[] fromLinearGray16ToOtherGray8LUT;
+//    private byte[] fromLinearGray16ToOtherGray8LUT;
     private short[] fromLinearGray16ToOtherGray16LUT;
     private boolean needScaleInit;
     private boolean noUnnorm;
@@ -300,7 +298,7 @@ public class ComponentColorModel extends ColorModel {
                 throw new IllegalArgumentException("This constructor is not "+
                          "compatible with transferType " + transferType);
         }
-        setupLUTs();
+        //setupLUTs();
     }
 
     /**
@@ -394,92 +392,92 @@ public class ComponentColorModel extends ColorModel {
         return bits;
     }
 
-    private void setupLUTs() {
-        // REMIND: there is potential to accelerate sRGB, LinearRGB,
-        // LinearGray, ICCGray, and non-ICC Gray spaces with non-standard
-        // scaling, if that becomes important
-        //
-        // NOTE: The is_xxx_stdScale and nonStdScale booleans are provisionally
-        // set here when this method is called at construction time.  These
-        // variables may be set again when initScale is called later.
-        // When setupLUTs returns, nonStdScale is true if (the transferType
-        // is not float or double) AND (some minimum ColorSpace component
-        // value is not 0.0 OR some maximum ColorSpace component value
-        // is not 1.0).  This is correct for the calls to
-        // getNormalizedComponents(Object, float[], int) from initScale().
-        // initScale() may change the value nonStdScale based on the
-        // return value of getNormalizedComponents() - this will only
-        // happen if getNormalizedComponents() has been overridden by a
-        // subclass to make the mapping of min/max pixel sample values
-        // something different from min/max color component values.
-        if (is_sRGB) {
-            is_sRGB_stdScale = true;
-            nonStdScale = false;
-        } else if (ColorModel.isLinearRGBspace(colorSpace)) {
-            // Note that the built-in Linear RGB space has a normalized
-            // range of 0.0 - 1.0 for each coordinate.  Usage of these
-            // LUTs makes that assumption.
-            is_LinearRGB_stdScale = true;
-            nonStdScale = false;
-            if (transferType == DataBuffer.TYPE_BYTE) {
-                tosRGB8LUT = ColorModel.getLinearRGB8TosRGB8LUT();
-                fromsRGB8LUT8 = ColorModel.getsRGB8ToLinearRGB8LUT();
-            } else {
-                tosRGB8LUT = ColorModel.getLinearRGB16TosRGB8LUT();
-                fromsRGB8LUT16 = ColorModel.getsRGB8ToLinearRGB16LUT();
-            }
-        } else if ((colorSpaceType == ColorSpace.TYPE_GRAY) &&
-                   (colorSpace instanceof ICC_ColorSpace) &&
-                   (colorSpace.getMinValue(0) == 0.0f) &&
-                   (colorSpace.getMaxValue(0) == 1.0f)) {
-            // Note that a normalized range of 0.0 - 1.0 for the gray
-            // component is required, because usage of these LUTs makes
-            // that assumption.
-            ICC_ColorSpace ics = (ICC_ColorSpace) colorSpace;
-            is_ICCGray_stdScale = true;
-            nonStdScale = false;
-            fromsRGB8LUT16 = ColorModel.getsRGB8ToLinearRGB16LUT();
-            if (ColorModel.isLinearGRAYspace(ics)) {
-                is_LinearGray_stdScale = true;
-                if (transferType == DataBuffer.TYPE_BYTE) {
-                    tosRGB8LUT = ColorModel.getGray8TosRGB8LUT(ics);
-                } else {
-                    tosRGB8LUT = ColorModel.getGray16TosRGB8LUT(ics);
-                }
-            } else {
-                if (transferType == DataBuffer.TYPE_BYTE) {
-                    tosRGB8LUT = ColorModel.getGray8TosRGB8LUT(ics);
-                    fromLinearGray16ToOtherGray8LUT =
-                        ColorModel.getLinearGray16ToOtherGray8LUT(ics);
-                } else {
-                    tosRGB8LUT = ColorModel.getGray16TosRGB8LUT(ics);
-                    fromLinearGray16ToOtherGray16LUT =
-                        ColorModel.getLinearGray16ToOtherGray16LUT(ics);
-                }
-            }
-        } else if (needScaleInit) {
-            // if transferType is byte, ushort, int, or short and we
-            // don't already know the ColorSpace has minVlaue == 0.0f and
-            // maxValue == 1.0f for all components, we need to check that
-            // now and setup the min[] and diffMinMax[] arrays if necessary.
-            nonStdScale = false;
-            for (int i = 0; i < numColorComponents; i++) {
-                if ((colorSpace.getMinValue(i) != 0.0f) ||
-                    (colorSpace.getMaxValue(i) != 1.0f)) {
-                    nonStdScale = true;
-                    break;
-                }
-            }
-            if (nonStdScale) {
-                min = new float[numColorComponents];
-                diffMinMax = new float[numColorComponents];
-                for (int i = 0; i < numColorComponents; i++) {
-                    min[i] = colorSpace.getMinValue(i);
-                    diffMinMax[i] = colorSpace.getMaxValue(i) - min[i];
-                }
-            }
-        }
-    }
+//    private void setupLUTs() {
+//        // REMIND: there is potential to accelerate sRGB, LinearRGB,
+//        // LinearGray, ICCGray, and non-ICC Gray spaces with non-standard
+//        // scaling, if that becomes important
+//        //
+//        // NOTE: The is_xxx_stdScale and nonStdScale booleans are provisionally
+//        // set here when this method is called at construction time.  These
+//        // variables may be set again when initScale is called later.
+//        // When setupLUTs returns, nonStdScale is true if (the transferType
+//        // is not float or double) AND (some minimum ColorSpace component
+//        // value is not 0.0 OR some maximum ColorSpace component value
+//        // is not 1.0).  This is correct for the calls to
+//        // getNormalizedComponents(Object, float[], int) from initScale().
+//        // initScale() may change the value nonStdScale based on the
+//        // return value of getNormalizedComponents() - this will only
+//        // happen if getNormalizedComponents() has been overridden by a
+//        // subclass to make the mapping of min/max pixel sample values
+//        // something different from min/max color component values.
+//        if (is_sRGB) {
+//            is_sRGB_stdScale = true;
+//            nonStdScale = false;
+//        } else if (ColorModel.isLinearRGBspace(colorSpace)) {
+//            // Note that the built-in Linear RGB space has a normalized
+//            // range of 0.0 - 1.0 for each coordinate.  Usage of these
+//            // LUTs makes that assumption.
+//            is_LinearRGB_stdScale = true;
+//            nonStdScale = false;
+//            if (transferType == DataBuffer.TYPE_BYTE) {
+//                tosRGB8LUT = ColorModel.getLinearRGB8TosRGB8LUT();
+//                fromsRGB8LUT8 = ColorModel.getsRGB8ToLinearRGB8LUT();
+//            } else {
+//                tosRGB8LUT = ColorModel.getLinearRGB16TosRGB8LUT();
+//                fromsRGB8LUT16 = ColorModel.getsRGB8ToLinearRGB16LUT();
+//            }
+//        } else if ((colorSpaceType == ColorSpace.TYPE_GRAY) &&
+// //                  (colorSpace instanceof ICC_ColorSpace) &&
+//                   (colorSpace.getMinValue(0) == 0.0f) &&
+//                   (colorSpace.getMaxValue(0) == 1.0f)) {
+//            // Note that a normalized range of 0.0 - 1.0 for the gray
+//            // component is required, because usage of these LUTs makes
+//            // that assumption.
+//            ICC_ColorSpace ics = (ICC_ColorSpace) colorSpace;
+//            is_ICCGray_stdScale = true;
+//            nonStdScale = false;
+//            fromsRGB8LUT16 = ColorModel.getsRGB8ToLinearRGB16LUT();
+//            if (ColorModel.isLinearGRAYspace(ics)) {
+//                is_LinearGray_stdScale = true;
+//                if (transferType == DataBuffer.TYPE_BYTE) {
+//                    tosRGB8LUT = ColorModel.getGray8TosRGB8LUT(ics);
+//                } else {
+//                    tosRGB8LUT = ColorModel.getGray16TosRGB8LUT(ics);
+//                }
+//            } else {
+//                if (transferType == DataBuffer.TYPE_BYTE) {
+//                    tosRGB8LUT = ColorModel.getGray8TosRGB8LUT(ics);
+//                    fromLinearGray16ToOtherGray8LUT =
+//                        ColorModel.getLinearGray16ToOtherGray8LUT(ics);
+//                } else {
+//                    tosRGB8LUT = ColorModel.getGray16TosRGB8LUT(ics);
+//                    fromLinearGray16ToOtherGray16LUT =
+//                        ColorModel.getLinearGray16ToOtherGray16LUT(ics);
+//                }
+//            }
+//        } else if (needScaleInit) {
+//            // if transferType is byte, ushort, int, or short and we
+//            // don't already know the ColorSpace has minVlaue == 0.0f and
+//            // maxValue == 1.0f for all components, we need to check that
+//            // now and setup the min[] and diffMinMax[] arrays if necessary.
+//            nonStdScale = false;
+//            for (int i = 0; i < numColorComponents; i++) {
+//                if ((colorSpace.getMinValue(i) != 0.0f) ||
+//                    (colorSpace.getMaxValue(i) != 1.0f)) {
+//                    nonStdScale = true;
+//                    break;
+//                }
+//            }
+//            if (nonStdScale) {
+//                min = new float[numColorComponents];
+//                diffMinMax = new float[numColorComponents];
+//                for (int i = 0; i < numColorComponents; i++) {
+//                    min[i] = colorSpace.getMinValue(i);
+//                    diffMinMax[i] = colorSpace.getMaxValue(i) - min[i];
+//                }
+//            }
+//        }
+//    }
 
     private void initScale() {
         // This method is called the first time any method which uses
@@ -2849,9 +2847,9 @@ public class ComponentColorModel extends ColorModel {
         switch (transferType) {
         case DataBuffer.TYPE_BYTE:
         case DataBuffer.TYPE_USHORT:
-//            raster = Raster.createInterleavedRaster(transferType,
-//                                                    w, h,
-//                                                    numComponents, null);
+            raster = Raster.createInterleavedRaster(transferType,
+                                                    w, h,
+                                                    numComponents, null);
             break;
         default:
             SampleModel sm = createCompatibleSampleModel(w, h);

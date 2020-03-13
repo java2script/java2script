@@ -1127,7 +1127,7 @@ public class ImageUtil {
     public static final boolean imageIsContiguous(RenderedImage image) {
         SampleModel sm;
         if(image instanceof BufferedImage) {
-            WritableRaster ras = ((BufferedImage)image).getRaster();
+            WritableRaster ras = ((BufferedImage)image).秘getRaster();
             sm = ras.getSampleModel();
         } else {
             sm = image.getSampleModel();

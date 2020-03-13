@@ -557,12 +557,13 @@ public abstract class GlyphVector implements Cloneable {
      * @since 1.4
      */
     public Rectangle getGlyphPixelBounds(int index, FontRenderContext renderFRC, float x, float y) {
-                Rectangle2D rect = getGlyphVisualBounds(index).getBounds2D();
-                int l = (int)Math.floor(rect.getX() + x);
-                int t = (int)Math.floor(rect.getY() + y);
-                int r = (int)Math.ceil(rect.getMaxX() + x);
-                int b = (int)Math.ceil(rect.getMaxY() + y);
-                return new Rectangle(l, t, r - l, b - t);
+    	return null;
+//                Rectangle2D rect = getGlyphVisualBounds(index).getBounds2D();
+//                int l = (int)Math.floor(rect.getX() + x);
+//                int t = (int)Math.floor(rect.getY() + y);
+//                int r = (int)Math.ceil(rect.getMaxX() + x);
+//                int b = (int)Math.ceil(rect.getMaxY() + y);
+//                return new Rectangle(l, t, r - l, b - t);
         }
 
     /**

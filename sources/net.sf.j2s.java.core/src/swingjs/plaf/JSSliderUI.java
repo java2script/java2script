@@ -5,12 +5,17 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Insets;
+import java.awt.Rectangle;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.BoundedRangeModel;
+import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JScrollBar;
@@ -18,6 +23,7 @@ import javax.swing.JSlider;
 import javax.swing.LookAndFeel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.plaf.InsetsUIResource;
 import javax.swing.plaf.UIResource;
 
 import sun.swing.DefaultLookup;
@@ -107,7 +113,9 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 			this.isInverted = isInverted;
 			isChanged = true;
 		}
-		boolean isNew = (domNode == null);
+        if (!isScrollBar && recalculateIfInsetsChanged(recalculateIfOrientationChanged(false)))
+        	isChanged = true;
+        boolean isNew = (domNode == null);
 		if (isNew) {
 			domNode = wrap("div", id + "_wrap", jqSlider = DOMNode.createElement("div", id));
 			setJQuerySliderAndEvents();
@@ -128,6 +136,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	
 	private String foreColor = null;
 	private boolean sliderDisposed;
+	private int lastValue;
 	@Override
 	public void setForeground(Color c) {
 		if (!paintTicks && !paintLabels)
@@ -177,12 +186,13 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 
 		}
 		if (!isScrollBar)
-			setBackgroundDOM(outerNode, getBackground());
+			setBackgroundDOM(outerNode, jc.isOpaque() && !slider.秘paintsSelf() ? getBackground() : null);
 	}	
 	
 	@Override
 	public void paintBackground(JSGraphics2D g) {
-		// n/a
+		if (!isScrollBar)
+			super.paintBackground(g);
 	}
 
 	@Override
@@ -210,6 +220,19 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		setSliderFields();
 	    LookAndFeel.installColorsAndFont(jc, "Slider.background", "Slider.foreground",
 	            "Slider.font");
+	    
+
+        insetCache = slider.getInsets();
+        leftToRightCache = JSGraphicsUtils.isLeftToRight(slider);
+        focusRect = new Rectangle();
+        contentRect = new Rectangle();
+        labelRect = new Rectangle();
+        tickRect = new Rectangle();
+        trackRect = new Rectangle();
+        thumbRect = new Rectangle();
+        lastValue = slider.getValue();
+        focusInsets = new InsetsUIResource(2,2,2,2);
+
 	}
 	
 	private void setSliderFields() {
@@ -435,7 +458,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 					left = (int) (px - label.getWidth() / 2);
 				} else {
 					top = (int) (px - label.getHeight() / 2);
-					left = 28;
+					left = 20;
 				}
 				DOMNode.setTopLeftAbsolute(labelNode, top, left);
 				addClass(labelNode, "jslider-label");
@@ -481,6 +504,39 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		return new Dimension((isHoriz ? actualWidth : d), (isHoriz ? d : actualHeight));
 	} 
 
+	public void propertyChange(PropertyChangeEvent e) {
+		String propertyName = e.getPropertyName();
+		switch (propertyName) {
+		case "orientation":
+		case "inverted":
+		case "labelTable":
+		case "majorTickSpacing":
+		case "minorTickSpacing":
+		case "paintTicks":
+		case "paintTrack":
+		case "font":
+		case "paintLabels":
+		case "Slider.paintThumbArrowShape":
+			// checkedLabelBaselines = false;
+			calculateGeometry();
+			setTainted(true);// slider.repaint();
+			break;
+		case "componentOrientation":
+			calculateGeometry();
+			setTainted(true);// slider.repaint();
+//            InputMap km = getInputMap(JComponent.WHEN_FOCUSED, slider);
+//            SwingUtilities.replaceUIInputMap(slider,
+//                JComponent.WHEN_FOCUSED, km);
+			break;
+		case "model":
+			((BoundedRangeModel) e.getOldValue()).removeChangeListener(this);
+			((BoundedRangeModel) e.getNewValue()).addChangeListener(this);
+//            calculateThumbLocation();
+			setTainted(true);// slider.repaint();
+			break;
+		}
+		super.propertyChange(e);
+	}
 //	@Override
 //	public void propertyChange(PropertyChangeEvent e) {
 //		switch (e.getPropertyName()) {
@@ -516,12 +572,11 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		// overridden in JSScrollBarUI
 	}
 
-	
-	@Override
-	public Dimension getMinimumSize(JComponent jc) {
-		return (isScrollBar ? super.getMinimumSize(jc) 
-				: isHoriz ? getMinimumHorizontalSize() : getMinimumVerticalSize());
-	}
+//	@Override
+//	public Dimension getMinimumSize(JComponent jc) {
+//		return (isScrollBar ? super.getMinimumSize(jc) 
+//				: isHoriz ? getMinimumHorizontalSize() : getMinimumVerticalSize());
+//	}
 
 	private Dimension getMinimumHorizontalSize() {
 		Dimension horizDim = (Dimension) DefaultLookup.get(slider, this,
@@ -531,6 +586,396 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		}
 		return horizDim;
 	}
+
+	
+	
+    protected Insets focusInsets = null;
+    protected Insets insetCache = null;
+    protected boolean leftToRightCache = true;
+    protected Rectangle focusRect = null;
+    protected Rectangle contentRect = null;
+    protected Rectangle labelRect = null;
+    protected Rectangle tickRect = null;
+    protected Rectangle trackRect = null;
+    protected Rectangle thumbRect = null;
+
+    @Override
+	public Dimension getMinimumSize(JComponent c)  {
+    	
+		if (isScrollBar)
+			return super.getMinimumSize(c); 
+
+        recalculateIfInsetsChanged(false);
+        Dimension d;
+
+        if ( slider.getOrientation() == JSlider.VERTICAL ) {
+            d = new Dimension(getMinimumVerticalSize());
+            d.width = insetCache.left + insetCache.right;
+            d.width += focusInsets.left + focusInsets.right;
+            d.width += trackRect.width + tickRect.width + labelRect.width;
+        }
+        else {
+            d = new Dimension(getMinimumHorizontalSize());
+            d.height = insetCache.top + insetCache.bottom;
+            d.height += focusInsets.top + focusInsets.bottom;
+            d.height += trackRect.height + tickRect.height + labelRect.height;
+        }
+
+        return d;
+    }
+
+    protected boolean recalculateIfInsetsChanged(boolean doForce) {
+        Insets newInsets = slider.getInsets();
+        if (doForce || !newInsets.equals( insetCache ) ) {
+            insetCache = newInsets;
+            calculateGeometry();
+            return true;
+        }
+        return false;
+    }
+    
+
+	protected boolean recalculateIfOrientationChanged(boolean doit) {
+		boolean ltr = JSGraphicsUtils.isLeftToRight(slider);
+		if (ltr == leftToRightCache)
+			return false;
+		leftToRightCache = ltr;
+		if (doit)
+			calculateGeometry();
+		return true;
+	}
+
+
+
+    protected void calculateGeometry() {
+    	if (isScrollBar)
+    		return;
+        calculateFocusRect();
+        calculateContentRect();
+        calculateThumbSize();
+        calculateTrackBuffer();
+        calculateTrackRect();
+        calculateTickRect();
+        calculateLabelRect();
+//        calculateThumbLocation();
+    }
+
+
+    protected void calculateTickRect() {
+        if ( slider.getOrientation() == JSlider.HORIZONTAL ) {
+            tickRect.x = trackRect.x;
+            tickRect.y = trackRect.y + trackRect.height;
+            tickRect.width = trackRect.width;
+            tickRect.height = (slider.getPaintTicks()) ? getTickLength() : 0;
+        }
+        else {
+            tickRect.width = (slider.getPaintTicks()) ? getTickLength() : 0;
+            if(JSGraphicsUtils.isLeftToRight(slider)) {
+                tickRect.x = trackRect.x + trackRect.width;
+            }
+            else {
+                tickRect.x = trackRect.x - tickRect.width;
+            }
+            tickRect.y = trackRect.y;
+            tickRect.height = trackRect.height;
+        }
+    }
+
+
+    protected int trackBuffer = 0;  // The distance that the track is from the side of the control
+
+
+    protected void calculateTrackBuffer() {
+        if ( slider.getPaintLabels() && slider.getLabelTable()  != null ) {
+            Component highLabel = getHighestValueLabel();
+            Component lowLabel = getLowestValueLabel();
+
+            if ( slider.getOrientation() == JSlider.HORIZONTAL ) {
+                trackBuffer = Math.max( highLabel.getBounds().width, lowLabel.getBounds().width ) / 2;
+                trackBuffer = Math.max( trackBuffer, thumbRect.width / 2 );
+            }
+            else {
+                trackBuffer = Math.max( highLabel.getBounds().height, lowLabel.getBounds().height ) / 2;
+                trackBuffer = Math.max( trackBuffer, thumbRect.height / 2 );
+            }
+        }
+        else {
+            if ( slider.getOrientation() == JSlider.HORIZONTAL ) {
+                trackBuffer = thumbRect.width / 2;
+            }
+            else {
+                trackBuffer = thumbRect.height / 2;
+            }
+        }
+    }
+
+
+    protected void calculateTrackRect() {
+        int centerSpacing; // used to center sliders added using BorderLayout.CENTER (bug 4275631)
+        if ( slider.getOrientation() == JSlider.HORIZONTAL ) {
+            centerSpacing = thumbRect.height;
+            if ( slider.getPaintTicks() ) centerSpacing += getTickLength();
+            if ( slider.getPaintLabels() ) centerSpacing += getHeightOfTallestLabel();
+            trackRect.x = contentRect.x + trackBuffer;
+            trackRect.y = contentRect.y + (contentRect.height - centerSpacing - 1)/2;
+            trackRect.width = contentRect.width - (trackBuffer * 2);
+            trackRect.height = thumbRect.height;
+        }
+        else {
+            centerSpacing = thumbRect.width;
+            if (JSGraphicsUtils.isLeftToRight(slider)) {
+                if ( slider.getPaintTicks() ) centerSpacing += getTickLength();
+                if ( slider.getPaintLabels() ) centerSpacing += getWidthOfWidestLabel();
+            } else {
+                if ( slider.getPaintTicks() ) centerSpacing -= getTickLength();
+                if ( slider.getPaintLabels() ) centerSpacing -= getWidthOfWidestLabel();
+            }
+            trackRect.x = contentRect.x + (contentRect.width - centerSpacing - 1)/2;
+            trackRect.y = contentRect.y + trackBuffer;
+            trackRect.width = thumbRect.width;
+            trackRect.height = contentRect.height - (trackBuffer * 2);
+        }
+
+    }
+
+    /**
+     * Gets the height of the tick area for horizontal sliders and the width of the
+     * tick area for vertical sliders.  BasicSliderUI uses the returned value to
+     * determine the tick area rectangle.  If you want to give your ticks some room,
+     * make this larger than you need and paint your ticks away from the sides in paintTicks().
+     */
+    protected int getTickLength() {
+        return 8;
+    }
+
+    protected void calculateLabelRect() {
+        if ( slider.getPaintLabels() ) {
+            if ( slider.getOrientation() == JSlider.HORIZONTAL ) {
+                labelRect.x = tickRect.x - trackBuffer;
+                labelRect.y = tickRect.y + tickRect.height;
+                labelRect.width = tickRect.width + (trackBuffer * 2);
+                labelRect.height = getHeightOfTallestLabel();
+            }
+            else {
+                if(JSGraphicsUtils.isLeftToRight(slider)) {
+                    labelRect.x = tickRect.x + tickRect.width;
+                    labelRect.width = getWidthOfWidestLabel();
+                }
+                else {
+                    labelRect.width = getWidthOfWidestLabel();
+                    labelRect.x = tickRect.x - labelRect.width;
+                }
+                labelRect.y = tickRect.y - trackBuffer;
+                labelRect.height = tickRect.height + (trackBuffer * 2);
+            }
+        }
+        else {
+            if ( slider.getOrientation() == JSlider.HORIZONTAL ) {
+                labelRect.x = tickRect.x;
+                labelRect.y = tickRect.y + tickRect.height;
+                labelRect.width = tickRect.width;
+                labelRect.height = 0;
+            }
+            else {
+                if(JSGraphicsUtils.isLeftToRight(slider)) {
+                    labelRect.x = tickRect.x + tickRect.width;
+                }
+                else {
+                    labelRect.x = tickRect.x;
+                }
+                labelRect.y = tickRect.y;
+                labelRect.width = 0;
+                labelRect.height = tickRect.height;
+            }
+        }
+    }
+
+    protected int getWidthOfWidestLabel() {
+        Dictionary dictionary = slider.getLabelTable();
+        int widest = 0;
+        if ( dictionary != null ) {
+            Enumeration keys = dictionary.keys();
+            while ( keys.hasMoreElements() ) {
+                JComponent label = (JComponent) dictionary.get(keys.nextElement());
+                widest = Math.max( label.getPreferredSize().width, widest );
+            }
+        }
+        return widest;
+    }
+
+    protected int getHeightOfTallestLabel() {
+        Dictionary dictionary = slider.getLabelTable();
+        int tallest = 0;
+        if ( dictionary != null ) {
+            Enumeration keys = dictionary.keys();
+            while ( keys.hasMoreElements() ) {
+                JComponent label = (JComponent) dictionary.get(keys.nextElement());
+                tallest = Math.max( label.getPreferredSize().height, tallest );
+            }
+        }
+        return tallest;
+    }
+
+    /**
+     * Returns the biggest value that has an entry in the label table.
+     *
+     * @return biggest value that has an entry in the label table, or
+     *         null.
+     * @since 1.6
+     */
+    protected Integer getHighestValue() {
+        Dictionary dictionary = slider.getLabelTable();
+
+        if (dictionary == null) {
+            return null;
+        }
+
+        Enumeration keys = dictionary.keys();
+
+        Integer max = null;
+
+        while (keys.hasMoreElements()) {
+            Integer i = (Integer) keys.nextElement();
+
+            if (max == null || i > max) {
+                max = i;
+            }
+        }
+
+        return max;
+    }
+
+    /**
+     * Returns the smallest value that has an entry in the label table.
+     *
+     * @return smallest value that has an entry in the label table, or
+     *         null.
+     * @since 1.6
+     */
+    protected Integer getLowestValue() {
+        Dictionary dictionary = slider.getLabelTable();
+
+        if (dictionary == null) {
+            return null;
+        }
+
+        Enumeration keys = dictionary.keys();
+
+        Integer min = null;
+
+        while (keys.hasMoreElements()) {
+            Integer i = (Integer) keys.nextElement();
+
+            if (min == null || i < min) {
+                min = i;
+            }
+        }
+
+        return min;
+    }
+
+
+    protected int getWidthOfHighValueLabel() {
+        Component label = getHighestValueLabel();
+        int width = 0;
+
+        if ( label != null ) {
+            width = label.getPreferredSize().width;
+        }
+
+        return width;
+    }
+
+    protected int getWidthOfLowValueLabel() {
+        Component label = getLowestValueLabel();
+        int width = 0;
+
+        if ( label != null ) {
+            width = label.getPreferredSize().width;
+        }
+
+        return width;
+    }
+
+    protected int getHeightOfHighValueLabel() {
+        Component label = getHighestValueLabel();
+        int height = 0;
+
+        if ( label != null ) {
+            height = label.getPreferredSize().height;
+        }
+
+        return height;
+    }
+
+    protected int getHeightOfLowValueLabel() {
+        Component label = getLowestValueLabel();
+        int height = 0;
+
+        if ( label != null ) {
+            height = label.getPreferredSize().height;
+        }
+
+        return height;
+    }
+
+    /**
+     * Returns the label that corresponds to the highest slider value in the label table.
+     * @see JSlider#setLabelTable
+     */
+    protected Component getLowestValueLabel() {
+        Integer min = getLowestValue();
+        if (min != null) {
+            return (Component)slider.getLabelTable().get(min);
+        }
+        return null;
+    }
+
+    /**
+     * Returns the label that corresponds to the lowest slider value in the label table.
+     * @see JSlider#setLabelTable
+     */
+    protected Component getHighestValueLabel() {
+        Integer max = getHighestValue();
+        if (max != null) {
+            return (Component)slider.getLabelTable().get(max);
+        }
+        return null;
+    }
+
+    protected Dimension getThumbSize() {
+        Dimension size = new Dimension();
+
+        if ( slider.getOrientation() == JSlider.VERTICAL ) {
+            size.width = 20;
+            size.height = 11;
+        }
+        else {
+            size.width = 11;
+            size.height = 20;
+        }
+
+        return size;
+    }
+
+    protected void calculateFocusRect() {
+        focusRect.x = insetCache.left;
+        focusRect.y = insetCache.top;
+        focusRect.width = slider.getWidth() - (insetCache.left + insetCache.right);
+        focusRect.height = slider.getHeight() - (insetCache.top + insetCache.bottom);
+    }
+
+    protected void calculateThumbSize() {
+        Dimension size = getThumbSize();
+        thumbRect.setSize( size.width, size.height );
+    }
+
+    protected void calculateContentRect() {
+        contentRect.x = focusRect.x + focusInsets.left;
+        contentRect.y = focusRect.y + focusInsets.top;
+        contentRect.width = focusRect.width - (focusInsets.left + focusInsets.right);
+        contentRect.height = focusRect.height - (focusInsets.top + focusInsets.bottom);
+    }
 
 	private Dimension getMinimumVerticalSize() {
 		Dimension vertDim = (Dimension) DefaultLookup.get(slider, this,
@@ -543,7 +988,23 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 
 	@Override
 	public Dimension getPreferredSize(JComponent jc) {
-		return (isScrollBar ? super.getPreferredSize(jc) : isHoriz ? getPreferredHorizontalSize() : getPreferredVerticalSize());
+		if (isScrollBar)
+			return super.getPreferredSize(jc);
+        recalculateIfInsetsChanged(false);
+        Dimension d;
+        if ( slider.getOrientation() == JSlider.VERTICAL ) {
+            d = new Dimension(getPreferredVerticalSize());
+            d.width = insetCache.left + insetCache.right;
+            d.width += focusInsets.left + focusInsets.right;
+            d.width += trackRect.width + tickRect.width + labelRect.width;
+        }
+        else {
+            d = new Dimension(getPreferredHorizontalSize());
+            d.height = insetCache.top + insetCache.bottom;
+            d.height += focusInsets.top + focusInsets.bottom;
+            d.height += trackRect.height + tickRect.height + labelRect.height;
+        }
+        return d;
 	}
 
 	public Dimension getPreferredHorizontalSize() {
@@ -664,9 +1125,10 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		super.setJSDimensions(width, height);
 		DOMNode.setPositionAbsolute(domNode);
 		if (isHoriz) {
-			DOMNode.setStyles(domNode, "top", ((height - myHeight) / 2) + "px", "height", myHeight + "px");
+			int off = (height - myHeight + (insetCache.top - insetCache.bottom)) / 2;
+			DOMNode.setStyles(domNode, "top", off + "px", "height", myHeight + "px");
 		} else {
-			DOMNode.setStyles(domNode, "left", ((width - myHeight) / 2) + "px", "width", myHeight + "px");
+			DOMNode.setStyles(domNode, "left", (isScrollBar || true ? (width - myHeight) / 2 : insetCache.left) + "px", "width", myHeight + "px");
 		}
 		if (!isScrollBar)
 			setSlider();
@@ -681,9 +1143,14 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 
 	@Override
 	public Dimension getMaximumSize(JComponent jc) {
-		Dimension d = super.getMaximumSize(jc);
+		Dimension d = (isScrollBar ? super.getMaximumSize(jc) : null);
 		return (d != null ? d : isHoriz ? new Dimension(Short.MAX_VALUE, 40) : new Dimension(40, Short.MAX_VALUE));
 	}
 
+	public void clearPaintPath() {
+		if (!isScrollBar)
+			setBackgroundDOM(outerNode, null);
+		super.clearPaintPath();
+	}
 
 }

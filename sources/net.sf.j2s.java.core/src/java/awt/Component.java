@@ -1114,6 +1114,7 @@ public abstract class Component implements ImageObserver/*
 	public boolean isDisplayable() { 
 		// that is, if this component is connected to a top-level ancestor
 		// see JSComponent
+//        return comp.peer != null;
 		return true;
 	}
 
@@ -2057,6 +2058,12 @@ public abstract class Component implements ImageObserver/*
 	 */
 	@Deprecated
 	public void reshape(int x, int y, int width, int height) {
+		秘reshape(x, y, width, height, true);
+	}
+	
+	public void 秘reshape(int x, int y, int width, int height, boolean needNotify) {
+
+		needNotify &= (parent == null || !parent.秘isCRP);
 		try {
 			setBoundsOp(ComponentPeer.SET_BOUNDS);
 			// width or height can be < 0 if layout involved borders larger than
@@ -2083,7 +2090,6 @@ public abstract class Component implements ImageObserver/*
 				// resized to " + getBounds());
 			}
 
-			boolean needNotify = true;
 			mixOnReshaping();
 			if (getOrCreatePeer() != null) {
 				// LightwightPeer is an empty stub so can skip peer.reshape
@@ -2129,16 +2135,25 @@ public abstract class Component implements ImageObserver/*
 		}
 	}
 
+	/**
+	 * SwingJS note: x and y are ignored
+	 * @param x ignored
+	 * @param y ignored
+	 * @param width
+	 * @param height
+	 * @param op
+	 */
 	private void reshapeNativePeer(int x, int y, int width, int height, int op) {
 		// native peer might be offset by more than direct
 		// parent since parent might be lightweight.
-		int nativeX = x;
-		int nativeY = y;
-		for (Component c = parent; (c != null) && (c.peer instanceof LightweightPeer); c = c.parent) {
-			nativeX += c.x;
-			nativeY += c.y;
-		}
-		peer.setBounds(nativeX, nativeY, width, height, op);
+//		int nativeX = x;
+//		int nativeY = y;
+//		for (Component c = parent; (c != null) && (c.peer instanceof LightweightPeer); c = c.parent) {
+//			nativeX += c.x;
+//			nativeY += c.y;
+//		}
+//		peer.setBounds(nativeX, nativeY, width, height, op);
+		peer.setBounds(0, 0, width, height, op);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -2632,9 +2647,13 @@ public abstract class Component implements ImageObserver/*
 	}
 
 	/**
+     * SwingJS note: All this does in SwingJS is set valid = true. However, it is
+     * overridden in JSComponent, JRootPane, and the cell renderers.
+     * 
+     * 
 	 * Ensures that this component has a valid layout. This method is primarily
 	 * intended to operate on instances of <code>Container</code>.
-	 * 
+	 *
 	 * @see #invalidate
 	 * @see #doLayout()
 	 * @see LayoutManager
@@ -2642,24 +2661,24 @@ public abstract class Component implements ImageObserver/*
 	 * @since JDK1.0
 	 */
 	public void validate() {
-		synchronized (getTreeLock()) {
-			ComponentPeer peer = this.peer;
-			boolean wasValid = isValid();
-			if (!wasValid && peer != null) {
-				Font newfont = getFont();
-				Font oldfont = peerFont;
-				if (newfont != oldfont && (oldfont == null || !oldfont.equals(newfont))) {
-					peer.setFont(newfont);
-					peerFont = newfont;
-				}
-				peer.layout();
-			}
+//		
+//		synchronized (getTreeLock()) {
+//			ComponentPeer peer = this.peer;
+//			boolean wasValid = isValid();
+//			if (!wasValid && peer != null) {
+//				Font newfont = getFont();
+//				Font oldfont = peerFont;
+//				if (newfont != oldfont && (oldfont == null || !oldfont.equals(newfont))) {
+//					peer.setFont(newfont);
+//					peerFont = newfont;
+//				}
+//				peer.layout();
+//			}
 			valid = true;
-			// System.out.println("C is valid: " + this);
-			if (!wasValid) {
-				mixOnValidating();
-			}
-		}
+//			if (!wasValid) {
+//				mixOnValidating();
+//			}
+//		}
 	}
 
 	/**
@@ -4341,6 +4360,26 @@ public abstract class Component implements ImageObserver/*
 	 * @since 1.3
 	 */
 	public void addHierarchyListener(HierarchyListener l) {
+	
+        if (l == null) {
+            return;
+        }
+        boolean notifyAncestors;
+        synchronized (this) {
+            notifyAncestors =
+                (hierarchyListener == null &&
+                 (eventMask & AWTEvent.HIERARCHY_EVENT_MASK) == 0);
+            hierarchyListener = AWTEventMulticaster.add(hierarchyListener, l);
+            notifyAncestors = (notifyAncestors && hierarchyListener != null);
+            newEventsOnly = true;
+        }
+        if (notifyAncestors) {
+            synchronized (getTreeLock()) {
+                adjustListeningChildrenOnParent(AWTEvent.HIERARCHY_EVENT_MASK,
+                                                1);
+            }
+        }
+
 	}
 
 	/**
@@ -4362,6 +4401,26 @@ public abstract class Component implements ImageObserver/*
 	 * @since 1.3
 	 */
 	public void removeHierarchyListener(HierarchyListener l) {
+		
+        if (l == null) {
+            return;
+        }
+        boolean notifyAncestors;
+        synchronized (this) {
+            notifyAncestors =
+                (hierarchyListener != null &&
+                 (eventMask & AWTEvent.HIERARCHY_EVENT_MASK) == 0);
+            hierarchyListener =
+                AWTEventMulticaster.remove(hierarchyListener, l);
+            notifyAncestors = (notifyAncestors && hierarchyListener == null);
+        }
+        if (notifyAncestors) {
+            synchronized (getTreeLock()) {
+                adjustListeningChildrenOnParent(AWTEvent.HIERARCHY_EVENT_MASK,
+                                                -1);
+            }
+        }
+
 	}
 
 	/**
@@ -5082,7 +5141,7 @@ public abstract class Component implements ImageObserver/*
 	 * Weak map of known coalesceEvent overriders. Value indicates whether
 	 * overriden. Bootstrap classes are not included.
 	 */
-	private static final Map<Class<?>, Boolean> coalesceMap = new HashMap<Class<?>, Boolean>(); // was
+	private static final Map<String, Boolean> coalesceMap = new HashMap<String, Boolean>(); // was
 																								// weakHashmap
 
 	/**
@@ -5095,8 +5154,9 @@ public abstract class Component implements ImageObserver/*
 		if (getClass().getClassLoader() == null) {
 			return false;
 		}
-		final Class<? extends Component> clazz = getClass();
-		synchronized (coalesceMap) {
+		final String clazz = getClass().getName();
+//		synchronized (coalesceMap) 
+		{
 			// Check cache.
 			Boolean value = coalesceMap.get(clazz);
 			if (value != null) {
@@ -8264,7 +8324,7 @@ public abstract class Component implements ImageObserver/*
 	}
 
 	void mixOnValidating() {
-		// This method gets overriden in the Container. Obviously, a plain
+		// This method gets overridden in the Container. Obviously, a plain
 		// non-container components don't need to handle validation.
 	}
 

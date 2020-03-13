@@ -28,6 +28,8 @@ package java.lang;
 import java.util.Hashtable;
 import java.util.Map;
 
+import swingjs.JSUtil;
+
 /**
  * Package-private utility class containing data structures and logic
  * governing the virtual-machine shutdown sequence.
@@ -54,7 +56,7 @@ class Shutdown {
     // (2) DeleteOnExit hook
     private static final int MAX_SYSTEM_HOOKS = 10;
     
-    private static Map<ThreadGroup, Runnable[]> groupHooks;
+    private static Map<String, Runnable[]> groupHooks;
 //SwingJS fix for Java - this would only allow one running application or applet to do this
     // private static final Runnable[] hooks = new Runnable[MAX_SYSTEM_HOOKS];
 
@@ -122,11 +124,11 @@ class Shutdown {
     		groupHooks = new Hashtable<>();
     	}
     	ThreadGroup g = Thread.currentThread().getThreadGroup();
-    	Runnable[] hooks = groupHooks.get(g);
+    	Runnable[] hooks = groupHooks.get(JSUtil.getJSID(g));
 		if (hooks == null) {
     		if (!andCreate)
     			return null;
-			groupHooks.put(g, hooks = new Runnable[MAX_SYSTEM_HOOKS]);
+			groupHooks.put(JSUtil.getJSID(g), hooks = new Runnable[MAX_SYSTEM_HOOKS]);
 		}
 		return hooks;
 	}

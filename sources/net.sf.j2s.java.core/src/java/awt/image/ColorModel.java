@@ -1675,6 +1675,8 @@ public abstract class ColorModel implements Transparency{
     static Map g16Tos8Map = null;    // 16-bit gray values to 8-bit sRGB values
     static Map lg16Toog16Map = null; // 16-bit linear to 16-bit "other" gray
 
+    public static ColorSpace GRAYspace; // SwingJS should be in CSMananger
+
     static boolean isLinearRGBspace(ColorSpace cs) {
     	return false;
 //        // Note: CMM.LINEAR_RGBspace will be null if the linear
@@ -1685,7 +1687,7 @@ public abstract class ColorModel implements Transparency{
     static boolean isLinearGRAYspace(ColorSpace cs) {
         // Note: CMM.GRAYspace will be null if the linear
         // gray space has not been created yet.
-        return (cs == CMSManager.GRAYspace);
+        return false;//(cs == CMSManager.GRAYspace);
     }
 
 

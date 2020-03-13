@@ -5,6 +5,7 @@ import java.awt.BasicStroke;
 import java.awt.Button;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -22,6 +23,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.Line2D;
 
+import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JApplet;
 import javax.swing.JButton;
@@ -33,6 +35,7 @@ import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 public class TApp2_Swing extends JApplet {
 
@@ -89,9 +92,11 @@ public class TApp2_Swing extends JApplet {
 
 	@Override
 	public void init() {
-		
+		this.setLayout(null);
+		getContentPane().setBackground(Color.red);
 		setSize(800, 600);
 		addButtonTest();
+
 		setFont(new Font(Font.MONOSPACED, Font.PLAIN, 14));
 		setBackground(Color.yellow);
 		setLayout(null);

@@ -1,8 +1,5 @@
 /*
- * Some portions of this file have been modified by Robert Hanson hansonr.at.stolaf.edu 2012-2017
- * for use in SwingJS via transpilation into JavaScript using Java2Script.
- *
- * Copyright (c) 1996, 2005, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1996, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -43,46 +40,35 @@
 
 package sun.util.resources;
 
-//import java.security.AccessController;
-//import java.security.PrivilegedAction;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListResourceBundle;
 import java.util.Locale;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.ResourceBundle.Control;
 
-//import sun.util.LocaleDataMetaInfo;
+import sun.util.locale.provider.LocaleDataMetaInfo;
+import sun.util.locale.provider.LocaleProviderAdapter;
+import static sun.util.locale.provider.LocaleProviderAdapter.Type.JRE;
 
 /**
  * Provides information about and access to resource bundles in the
- * sun.text.resources and sun.util.resources package.
+ * sun.text.resources and sun.util.resources packages or in their corresponding
+ * packages for CLDR.
  *
  * @author Asmus Freytag
  * @author Mark Davis
  */
 
 public class LocaleData {
+//    private final LocaleProviderAdapter.Type type;
 
-//    private static final String localeDataJarName = "localedata.jar";
-
-    /**
-     * Lazy load available locales.
-     */
-    private static class AvailableLocales {
-         static final Locale[] localeList = createLocaleList();
-    }
-
-//    // SwingJS  for now, just en files are present in sun.text.resources
-//		private static String SwingJSSupportedLocales = "en|"; 
-//
-    /**
-     * Returns a list of the installed locales. Currently, this simply returns
-     * the list of locales for which a sun.text.resources.FormatData bundle
-     * exists. This bundle family happens to be the one with the broadest
-     * locale coverage in the JRE.
-     */
-    public static Locale[] getAvailableLocales() {
-        return AvailableLocales.localeList.clone();
+    public LocaleData(LocaleProviderAdapter.Type type) {
+//        this.type = type;
     }
 
     /**
@@ -93,37 +79,45 @@ public class LocaleData {
         return getBundle("sun.util.resources.CalendarData", locale);
     }
 
-//    /**
-//     * Gets a currency names resource bundle, using privileges
-//     * to allow accessing a sun.* package.
-//     */
-//    public static OpenListResourceBundle getCurrencyNames(Locale locale) {
-//        return (OpenListResourceBundle)getBundle("sun.util.resources.CurrencyNames", locale);
-//    }
+    /**
+     * Gets a currency names resource bundle, using privileges
+     * to allow accessing a sun.* package.
+     */
+    public static OpenListResourceBundle getCurrencyNames(Locale locale) {
+        return (OpenListResourceBundle) getBundle("sun.util.resources.CurrencyNames", locale);
+    }
 
-//    /**
-//     * Gets a locale names resource bundle, using privileges
-//     * to allow accessing a sun.* package.
-//     */
-//    public static OpenListResourceBundle getLocaleNames(Locale locale) {
-//        return (OpenListResourceBundle)getBundle("sun.util.resources.LocaleNames", locale);
-//    }
+    /**
+     * Gets a locale names resource bundle, using privileges
+     * to allow accessing a sun.* package.
+     */
+    public static OpenListResourceBundle getLocaleNames(Locale locale) {
+        return (OpenListResourceBundle) getBundle("sun.util.resources.LocaleNames", locale);
+    }
 
-//    /**
-//     * Gets a time zone names resource bundle, using privileges
-//     * to allow accessing a sun.* package.
-//     */
-//    public static OpenListResourceBundle getTimeZoneNames(Locale locale) {
-//        return (OpenListResourceBundle)getBundle("sun.util.resources.TimeZoneNames", locale);
-//    }
+    /**
+     * Gets a time zone names resource bundle, using privileges
+     * to allow accessing a sun.* package.
+     */
+    public static TimeZoneNamesBundle getTimeZoneNames(Locale locale) {
+        return (TimeZoneNamesBundle) getBundle("sun.util.resources.TimeZoneNames", locale);
+    }
 
-//    /**
-//     * Gets a collation data resource bundle, using privileges
-//     * to allow accessing a sun.* package.
-//     */
-//    public static ResourceBundle getCollationData(Locale locale) {
-//        return getBundle("sun.text.resources.CollationData", locale);
-//    }
+    /**
+     * Gets a break iterator info resource bundle, using privileges
+     * to allow accessing a sun.* package.
+     */
+    public static ResourceBundle getBreakIteratorInfo(Locale locale) {
+        return getBundle("sun.text.resources.BreakIteratorInfo", locale);
+    }
+
+    /**
+     * Gets a collation data resource bundle, using privileges
+     * to allow accessing a sun.* package.
+     */
+    public static ResourceBundle getCollationData(Locale locale) {
+        return getBundle("sun.text.resources.CollationData", locale);
+    }
 
     /**
      * Gets a date format data resource bundle, using privileges
@@ -131,6 +125,30 @@ public class LocaleData {
      */
     public static ResourceBundle getDateFormatData(Locale locale) {
         return getBundle("sun.text.resources.FormatData", locale);
+    }
+
+    public void setSupplementary(ParallelListResourceBundle formatData) {
+        if (!formatData.areParallelContentsComplete()) {
+            String suppName = "sun.text.resources.JavaTimeSupplementary";
+            setSupplementary(suppName, formatData);
+        }
+    }
+
+    private boolean setSupplementary(String suppName, ParallelListResourceBundle formatData) {
+        ParallelListResourceBundle parent = (ParallelListResourceBundle) formatData.getParent();
+        boolean resetKeySet = false;
+        if (parent != null) {
+            resetKeySet = setSupplementary(suppName, parent);
+        }
+        OpenListResourceBundle supp = getSupplementary(suppName, formatData.getLocale());
+        formatData.setParallelContents(supp);
+        resetKeySet |= supp != null;
+        // If any parents or this bundle has parallel data, reset keyset to create
+        // a new keyset with the data.
+        if (resetKeySet) {
+            formatData.resetKeySet();
+        }
+        return resetKeySet;
     }
 
     /**
@@ -141,33 +159,47 @@ public class LocaleData {
         return getBundle("sun.text.resources.FormatData", locale);
     }
 
-    private static ResourceBundle getBundle(final String baseName, final Locale locale) {
-        //return (ResourceBundle) AccessController.doPrivileged(new PrivilegedAction() {
-          //      public Object run() {
-                    return ResourceBundle.
-                        getBundle(baseName, locale,
-                                  LocaleDataResourceBundleControl.getRBControlInstance());
-         //       }
-           // });
+    public static ResourceBundle getBundle(final String baseName, final Locale locale) {
+//        return AccessController.doPrivileged(new PrivilegedAction<ResourceBundle>() {
+//            @Override
+//            public ResourceBundle run() {
+                return ResourceBundle
+                        .getBundle(baseName, locale, LocaleDataResourceBundleControl.INSTANCE);
+//            }
+//        });
     }
 
-    static class LocaleDataResourceBundleControl extends ResourceBundle.Control {
-        /* Singleton instance of ResourceBundle.Control. */
-        private static LocaleDataResourceBundleControl rbControlInstance =
+    private static OpenListResourceBundle getSupplementary(final String baseName, final Locale locale) {
+        return AccessController.doPrivileged(new PrivilegedAction<OpenListResourceBundle>() {
+           @Override
+           public OpenListResourceBundle run() {
+               OpenListResourceBundle rb = null;
+               try {
+                   rb = (OpenListResourceBundle) ResourceBundle.getBundle(baseName,
+                           locale, SupplementaryResourceBundleControl.INSTANCE);
+
+               } catch (MissingResourceException e) {
+                   // return null if no supplementary is available
+               }
+               return rb;
+           }
+        });
+    }
+
+    private static class LocaleDataResourceBundleControl extends ResourceBundle.Control {
+        /* Singlton instance of ResourceBundle.Control. */
+        private static final LocaleDataResourceBundleControl INSTANCE =
             new LocaleDataResourceBundleControl();
 
-        public static LocaleDataResourceBundleControl getRBControlInstance() {
-            return rbControlInstance;
+        private LocaleDataResourceBundleControl() {
         }
 
-    @Override
-		public List<String> getFormats(String baseName) {
-			if (baseName == null) {
-				throw new NullPointerException();
-			}
-			return (baseName.indexOf("sun.util.resources.Calendar") >= 0 ? ResourceBundle.Control.FORMAT_PROPERTIES
-					: ResourceBundle.Control.FORMAT_CLASS);
-		}
+        @Override
+		public List getFormats(String name) {
+        	return name.indexOf(".text.") >= 0 || name.indexOf("Time") >= 0 ? 
+        			 Control.FORMAT_CLASS : Control.FORMAT_PROPERTIES ;
+        }
+
         /*
          * This method overrides the default implementation to search
          * from a prebaked locale string list to determin the candidate
@@ -181,23 +213,38 @@ public class LocaleData {
         @Override
          public List<Locale> getCandidateLocales(String baseName, Locale locale) {
             List<Locale> candidates = super.getCandidateLocales(baseName, locale);
-            /* Get the locale string list from LocaleDataMetaInfo class. */
-            String localeString = " en ";//LocaleDataMetaInfo.getSupportedLocaleString(baseName);
-
-            if (localeString.length() == 0) {
-                return candidates;
-            }
-
-            for (Iterator<Locale> l = candidates.iterator(); l.hasNext(); ) {
-                String lstr = l.next().toString();
-                /* Every locale string in the locale string list returned from
-                   the above getSupportedLocaleString is enclosed
-                   within two white spaces so that we could check some locale
-                   such as "en".
-                */
-                if (lstr.length() != 0 && localeString.indexOf(" " + lstr + " ") == -1) {
-                    l.remove();
+            List<Locale> list = new ArrayList<>();
+//            list.add(Locale.ENGLISH);
+//            return list;
+//            /* Get the locale string list from LocaleDataMetaInfo class. */
+            String localeString = LocaleDataMetaInfo.getSupportedLocaleString(baseName);
+            if (localeString != null && localeString.length() != 0) {
+                for (Iterator<Locale> l = candidates.iterator(); l.hasNext();) {
+                    Locale loc = l.next();
+                    String lstr;
+                    if (loc.getScript().length() > 0) {
+                        lstr = loc.toLanguageTag().replace('-', '_');
+                    } else {
+                        lstr = loc.toString();
+                        int idx = lstr.indexOf("_#");
+                        if (idx >= 0) {
+                            lstr = lstr.substring(0, idx);
+                        }
+                    }
+                    /* Every locale string in the locale string list returned from
+                     the above getSupportedLocaleString is enclosed
+                     within two white spaces so that we could check some locale
+                     such as "en".
+                     */
+                    if (lstr.length() != 0 && localeString.indexOf(" " + lstr + " ") == -1) {
+                        l.remove();
+                    }
                 }
+            }
+            // Force fallback to Locale.ENGLISH for CLDR time zone names support
+            if (locale.getLanguage() != "en"
+                    && baseName.contains(CLDR) && baseName.endsWith("TimeZoneNames")) {
+                candidates.add(candidates.size() - 1, Locale.ENGLISH);
             }
             return candidates;
         }
@@ -217,91 +264,56 @@ public class LocaleData {
             }
             return null;
         }
+
+        private static final String CLDR      = ".cldr";
+
+        /**
+         * Changes baseName to its per-language package name and
+         * calls the super class implementation. For example,
+         * if the baseName is "sun.text.resources.FormatData" and locale is ja_JP,
+         * the baseName is changed to "sun.text.resources.ja.FormatData". If
+         * baseName contains "cldr", such as "sun.text.resources.cldr.FormatData",
+         * the name is changed to "sun.text.resources.cldr.jp.FormatData".
+         */
+        @Override
+        public String toBundleName(String baseName, Locale locale) {
+            String newBaseName = baseName;
+            String lang = locale.getLanguage();
+            if (lang.length() > 0) {
+                if (baseName.startsWith(JRE.getUtilResourcesPackage())
+                        || baseName.startsWith(JRE.getTextResourcesPackage())) {
+                    // Assume the lengths are the same.
+                    assert JRE.getUtilResourcesPackage().length()
+                        == JRE.getTextResourcesPackage().length();
+                    int index = JRE.getUtilResourcesPackage().length();
+                    if (baseName.indexOf(CLDR, index) > 0) {
+                        index += CLDR.length();
+                    }
+                    newBaseName = baseName.substring(0, index + 1) + lang
+                                      + baseName.substring(index);
+                }
+            }
+            return super.toBundleName(newBaseName, locale);
+        }
     }
 
-//    /*
-//     * Returns true if the non European resources jar file exists in jre
-//     * extension directory.
-//     * @returns true if the jar file is there. Otherwise, returns false.
-//     */
-//    private static boolean isNonEuroLangSupported() {
-//        final String sep = File.separator;
-//        String localeDataJar =
-//            java.security.AccessController.doPrivileged(
-//             new sun.security.action.GetPropertyAction("java.home")) +
-//            sep + "lib" + sep + "ext" + sep + localeDataJarName;
-//
-//        /* Peek at the installed extension directory to see if
-//           localedata.jar is installed or not.
-//        */
-//        final File f = new File(localeDataJar);
-//        boolean isNonEuroResJarExist =
-//            AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
-//                    public Boolean run() {
-//                        return Boolean.valueOf(f.exists());
-//                    }
-//                }).booleanValue();
-//
-//        return isNonEuroResJarExist;
-//    }
+    private static class SupplementaryResourceBundleControl extends LocaleDataResourceBundleControl {
+        private static final SupplementaryResourceBundleControl INSTANCE =
+                new SupplementaryResourceBundleControl();
 
-    /*
-     * This method gets the locale string list from LocaleDataMetaInfo class and
-     * then contructs the Locale array based on the locale string returned above.
-     * @returns the Locale array for the supported locale of JRE.
-     *
-     */
-    private static Locale[] createLocaleList() {
-    	
-    	return new Locale[] { new Locale("en", "", "") };
-    	
-//    	
-//        String supportedLocaleString = "en|";// SwingJS SupportedLocales ;
-////        LocaleDataMetaInfo.
-////            getSupportedLocaleString("sun.text.resources.FormatData");
-//
-//        if (supportedLocaleString.length() == 0) {
-//            return null;
-//        }
-//
-////        /* Look for "|" and construct a new locale string list. */
-//        int barIndex = supportedLocaleString.indexOf("|");
-//        StringTokenizer localeStringTokenizer = null;
-////        if (isNonEuroLangSupported()) {
-////            localeStringTokenizer = new
-////                StringTokenizer(supportedLocaleString.substring(0, barIndex) +
-////                                supportedLocaleString.substring(barIndex + 1));
-////        } else {
-//            localeStringTokenizer = new
-//                StringTokenizer(supportedLocaleString.substring(0, barIndex));
-////        }
-//
-//        Locale[] locales = new Locale[localeStringTokenizer.countTokens()];
-//        for (int i = 0; i < locales.length; i++) {
-//            String currentToken = localeStringTokenizer.nextToken();
-//            int p2 = 0;
-//            int p1 = currentToken.indexOf('_');
-//            String language = "";
-//            String country = "";
-//            String variant = "";
-//
-//            if (p1 == -1) {
-//                language = currentToken;
-//            } else {
-//                language = currentToken.substring(0, p1);
-//                p2 = currentToken.indexOf('_', p1 + 1);
-//                if (p2 == -1) {
-//                    country = currentToken.substring(p1 + 1);
-//                } else {
-//                    country = currentToken.substring(p1 + 1, p2);
-//                    if (p2 < currentToken.length()) {
-//                        variant = currentToken.substring(p2 + 1);
-//                    }
-//                }
-//            }
-//            locales[i] = new Locale(language, country, variant);
-//        }
-//        return locales;
+        private SupplementaryResourceBundleControl() {
+        }
+
+        @Override
+        public List<Locale> getCandidateLocales(String baseName, Locale locale) {
+            // Specifiy only the given locale
+            return Arrays.asList(locale);
+        }
+
+        @Override
+        public long getTimeToLive(String baseName, Locale locale) {
+            assert baseName.contains("JavaTimeSupplementary");
+            return TTL_DONT_CACHE;
+        }
     }
-
 }

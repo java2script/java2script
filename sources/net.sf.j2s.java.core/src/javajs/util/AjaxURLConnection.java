@@ -53,6 +53,12 @@ public class AjaxURLConnection extends HttpURLConnection {
 	ByteArrayOutputStream streamOut;
 
 	private Object ajax;
+    Object info;
+
+	@Override
+	public String getHeaderField(String name) {
+		return /** @j2sNative this.info && this.info.xhr && this.info.xhr.getResponseHeader(name) || */null;
+	}
 
 	/**
    * 
@@ -86,7 +92,7 @@ public class AjaxURLConnection extends HttpURLConnection {
      *    info.isBinary = !!isBinary;
      *  }
      */
-
+    this.info = info;
     Map<String, List<String>> map = getRequestProperties();
     boolean isnocache = false;
     String type = null;
@@ -181,8 +187,10 @@ public class AjaxURLConnection extends HttpURLConnection {
 
 	@Override
 	public InputStream getInputStream() throws FileNotFoundException {
+		if (is != null)
+			return is;
 		responseCode = -1;
-		InputStream is = getInputStreamAndResponse(false);
+		is = getInputStreamAndResponse(false);
 		if (is == null)
 			throw new FileNotFoundException("opening " + url);
 		return is;

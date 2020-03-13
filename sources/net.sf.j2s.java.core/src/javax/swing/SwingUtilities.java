@@ -1236,7 +1236,7 @@ public class SwingUtilities implements SwingConstants
                 p.add(shell);
             }
         } else {
-            shell = (Container) Interface.getInstance("javax.swing.CellRendererPane", false);
+            shell = new CellRendererPane();//(Container) Interface.getInstance("javax.swing.CellRendererPane", false);
             shell.add(c);
             p.add(shell);
         }

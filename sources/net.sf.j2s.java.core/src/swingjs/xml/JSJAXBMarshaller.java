@@ -192,7 +192,8 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 	/////////// output methods //////////////
 	
 	private void writeXML(JSJAXBClass jaxbClass, boolean isRoot, boolean addXsiType) throws JAXBException {
-		QName qname = (jaxbClass.tagField == null ? jaxbClass.getQName() : jaxbClass.tagField.qualifiedName);
+		QName qname = (isRoot && jaxbClass.qualifiedRootName != null ? jaxbClass.qualifiedRootName 
+				: jaxbClass.tagField == null ? jaxbClass.getQName() : jaxbClass.tagField.qualifiedName);
 		if (isRoot) {
 			outputHeader();
 		}
@@ -631,7 +632,8 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 //			/** @j2sNative console.log(s) */
 			if (writer != null) {
 			
-//	System.out.println((s.startsWith("<") ? "\n" : "") + s);
+				
+				System.out.println((s.startsWith("<") ? "\n" : "") + s);
 				
 				writer.write(s);
 			} else if (outputStream != null) {

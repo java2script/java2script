@@ -396,6 +396,9 @@ public abstract class Format implements Serializable, Cloneable {
         public void formatted(Format.Field attr, Object value, int start,
                               int end, StringBuffer buffer);
 
+        public void formatted(Format.Field attr, Object value, int start,
+                int end, String[] buffer);
+
         /**
          * Notified when a particular region of the String is formatted.
          *
@@ -409,5 +412,11 @@ public abstract class Format implements Serializable, Cloneable {
          */
         public void formatted(int fieldID, Format.Field attr, Object value,
                               int start, int end, StringBuffer buffer);
+
+
+        public void formatted(int fieldID, Format.Field attr, Object value,
+                int start, int end, String[] buffer);
+
+
     }
 }

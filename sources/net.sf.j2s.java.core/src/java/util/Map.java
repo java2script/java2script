@@ -127,6 +127,7 @@ import java.io.Serializable;
  * @since 1.2
  */
 public interface Map<K,V> {
+	
     // Query Operations
 
     /**
@@ -1181,4 +1182,70 @@ public interface Map<K,V> {
         }
         return newValue;
     }
+    
+	/**
+	 * We've had our fun, now we have to go back to Java...
+	 * 
+	 */
+	static void 秘ensureJavaMap(Map map) {
+			/**
+			 * @j2sNative
+			 * 
+			 * 		if (map.秘m) {
+			 * 			var m = map.秘m; 
+			 *          map.秘m = null;
+			 *          m.forEach(function(value, key){map.put$O$O(key, value);}); 
+			 *          m.clear();
+			 * 		}
+			 */
+	}
+
+	/**
+	 * flag developers can use to switch off all use of simple JavaScript Map objects 
+	 */
+	static boolean USE_SIMPLE = true;
+	
+	final static int NOT_SIMPLE = 0;
+	final static int INVALID_KEY = 1;
+	final static int NO_SUCH_KEY = 2;
+	final static int HAS_KEY = 3;
+	
+	static boolean 秘isSimple(Map map) {
+		/**
+		 * @j2sNative
+		 * 
+		 * 	return !!map.秘m;
+		 */
+		{
+			return false;
+		}
+		
+	}
+	
+	/**
+	 * Determine the type of key within this map.
+	 *  
+	 * We allow null keys for HashMap, but other than that only String keys,
+	 * because although JavaScript Map allows for non-string values, it cannot
+	 * detect the equivalence of Integer.valueOf(n) for a given n.
+	 * 
+	 * @param map
+	 * @param key
+	 * @return 0 (NOT_SIMPLE), 1 (INVALID_KEY), 2 (NO_SUCH_KEY), or 3 (HAS_KEY)
+	 */
+	static int 秘hasKey(Map map, Object key) {
+		
+		/**
+		 * @j2sNative
+		 * 
+		 * 			return (!map.秘m ? 0 : key != null && typeof key != "string" 
+		 *                ? 1 : map.秘m.has(key) ? 3 : 2); 
+		 *
+		 */
+		{
+			return NOT_SIMPLE;
+		}
+	}
+
+
 }

@@ -29,8 +29,10 @@
 package swingjs.plaf;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.JSComponent;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.LookAndFeel;
@@ -1549,7 +1551,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				new Dimension(36, 21),
 				"Slider.minimumVerticalSize",
 				new Dimension(21, 36),
-				// "Slider.focusInsets", sliderFocusInsets,
+				"Slider.focusInsets", twoInsets,//sliderFocusInsets,
 				 "Slider.focusInputMap",
 				 new UIDefaults.LazyInputMap(new Object[] {
 				 "RIGHT", "positiveUnitIncrement",
@@ -2598,4 +2600,10 @@ public class HTML5LookAndFeel extends LookAndFeel {
 	public boolean isSupportedLookAndFeel() {
 		return true;
 	}
+	
+    @Override
+	public void provideErrorFeedback(Component c) {
+    	System.out.println("HTML5LookAndFeel says BEEP from " + c.getClass().getName());
+    }
+
 }

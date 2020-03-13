@@ -47,13 +47,14 @@ public abstract class CellHolder {
 			width = DOMNode.getWidth(td);
 			height = DOMNode.getHeight(td);
 		}
-		c.setSize(width, height);
+		c.秘reshape(c.getX(), c.getY(), width, height, false);
 		ui.setRenderer(c, width, height, null);
 		ui.saveCellNodes(td, isHeader);
 	}
 
 	public static void setJ2SRendererComponent(JComponent comp) {
-		comp.秘getUI().setRenderer(comp, 0, 0, null);
+		if (comp != null)
+			comp.秘getUI().setRenderer(comp, 0, 0, null);
 	}
 
 

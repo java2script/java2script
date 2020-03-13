@@ -126,7 +126,7 @@ public abstract class DOMNode {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			attr && (node[attr] = (val == "TRUE" ? true : val == "FALSE" ? false : val));
+		 * 			attr && (node[attr] = (val == "秘TRUE" ? true : val == "秘FALSE" ? false : val));
 		 * 
 		 */
 		return node;
@@ -201,14 +201,6 @@ public abstract class DOMNode {
 		 * if (node == null) {document.body.style.cursor = c} else {  node.style.cursor = c }
 		 * 
 		 */
-	}
-
-	public static DOMNode getImageNode(Image img) {
-		// note that canvas takes precedence over imgNode, because
-		// imgNode is a placeholder for the original image, but canvas
-		// will be an op-filtered image
-		return (/** @j2sNative img.秘canvas || img.秘imgNode || */
-		(DOMNode) (Object) ((JSGraphics2D) (Object) img.getGraphics()).getCanvas());
 	}
 
 	public static void addHorizontalGap(DOMNode domNode, int gap) {

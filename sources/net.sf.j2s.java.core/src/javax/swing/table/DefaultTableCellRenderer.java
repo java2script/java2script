@@ -262,7 +262,11 @@ public class DefaultTableCellRenderer extends JLabel
         return this;
     }
 
-	public Component getComponent() {
+	/**
+	 * Used by JSTableUI to recognize this as a renderer that needs no preparation
+	 * @return this
+	 */
+	public Component 秘getComponent() {
 		return this;
 	}
 

@@ -12,7 +12,7 @@ public class JpgImageWriteParam extends ImageWriteParam {
 		super(l);
 		canWriteCompressed = true;
 		compressionTypes = new String[] { "JPEG" };
-		compressionMode = MODE_COPY_FROM_METADATA;
+		compressionMode = MODE_EXPLICIT;
 		compressionType = "JPEG";
 		compressionQuality = 0.75f;
 	}

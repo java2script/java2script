@@ -1,8 +1,5 @@
 /*
- * Some portions of this file have been modified by Robert Hanson hansonr.at.stolaf.edu 2012-2017
- * for use in SwingJS via transpilation into JavaScript using Java2Script.
- *
- * Copyright (c) 1997, 2007, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -31,7 +28,7 @@ import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.awt.image.RasterFormatException;
 import java.awt.image.SampleModel;
-//import java.awt.image.ComponentSampleModel;
+import java.awt.image.ComponentSampleModel;
 import java.awt.image.SinglePixelPackedSampleModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
@@ -86,10 +83,6 @@ public class ByteComponentRaster extends SunWritableRaster {
 //        initIDs();
 //    }
 
-    protected ByteComponentRaster() {
-    	// for reflection
-    }
-
     /**
      * Constructs a ByteComponentRaster with the given SampleModel.
      * The Raster's upper left corner is origin and it is the same
@@ -100,7 +93,7 @@ public class ByteComponentRaster extends SunWritableRaster {
      * @param origin          The Point that specified the origin.
      */
     public ByteComponentRaster(SampleModel sampleModel, Point origin) {
-        setByteCompRaster(sampleModel,
+        this(sampleModel,
              sampleModel.createDataBuffer(),
              new Rectangle(origin.x,
                            origin.y,
@@ -124,7 +117,7 @@ public class ByteComponentRaster extends SunWritableRaster {
     public ByteComponentRaster(SampleModel sampleModel,
                                   DataBuffer dataBuffer,
                                   Point origin) {
-        setByteCompRaster(sampleModel,
+        this(sampleModel,
              dataBuffer,
              new Rectangle(origin.x,
                            origin.y,
@@ -158,65 +151,57 @@ public class ByteComponentRaster extends SunWritableRaster {
                                   Rectangle aRegion,
                                   Point origin,
                                   ByteComponentRaster parent) {
-    	setByteCompRaster(sampleModel, dataBuffer, aRegion, origin, parent);
+        super(sampleModel, dataBuffer, aRegion, origin, parent);
+        this.maxX = minX + width;
+        this.maxY = minY + height;
+
+        if (!(dataBuffer instanceof DataBufferByte)) {
+            throw new RasterFormatException("ByteComponentRasters must have " +
+                                            "byte DataBuffers");
+        }
+
+        DataBufferByte dbb = (DataBufferByte)dataBuffer;
+        this.data = stealData(dbb, 0);
+        if (dbb.getNumBanks() != 1) {
+            throw new
+                RasterFormatException("DataBuffer for ByteComponentRasters"+
+                                      " must only have 1 bank.");
+        }
+        int dbOffset = dbb.getOffset();
+
+        if (sampleModel instanceof ComponentSampleModel) {
+            ComponentSampleModel ism = (ComponentSampleModel)sampleModel;
+            this.type = IntegerComponentRaster.TYPE_BYTE_SAMPLES;
+            this.scanlineStride = ism.getScanlineStride();
+            this.pixelStride = ism.getPixelStride();
+            this.dataOffsets = ism.getBandOffsets();
+            int xOffset = aRegion.x - origin.x;
+            int yOffset = aRegion.y - origin.y;
+            for (int i = 0; i < getNumDataElements(); i++) {
+                dataOffsets[i] += dbOffset +
+                    xOffset*pixelStride+yOffset*scanlineStride;
+            }
+        } else if (sampleModel instanceof SinglePixelPackedSampleModel) {
+            SinglePixelPackedSampleModel sppsm =
+                    (SinglePixelPackedSampleModel)sampleModel;
+            this.type = IntegerComponentRaster.TYPE_BYTE_PACKED_SAMPLES;
+            this.scanlineStride = sppsm.getScanlineStride();
+            this.pixelStride    = 1;
+            this.dataOffsets = new int[1];
+            this.dataOffsets[0] = dbOffset;
+            int xOffset = aRegion.x - origin.x;
+            int yOffset = aRegion.y - origin.y;
+            dataOffsets[0] += xOffset*pixelStride+yOffset*scanlineStride;
+        } else {
+            throw new RasterFormatException("IntegerComponentRasters must " +
+                "have ComponentSampleModel or SinglePixelPackedSampleModel");
+        }
+        this.bandOffset = this.dataOffsets[0];
+
+        verify();
     }
 
-    protected void setByteCompRaster(SampleModel sampleModel,
-				DataBuffer dataBuffer, Rectangle aRegion, Point origin,
-				ByteComponentRaster parent) {
-      setSunRaster(sampleModel, dataBuffer, aRegion, origin, parent);
-      this.maxX = minX + width;
-      this.maxY = minY + height;
-
-      if (!(dataBuffer instanceof DataBufferByte)) {
-          throw new RasterFormatException("ByteComponentRasters must have " +
-                                          "byte DataBuffers");
-      }
-
-      DataBufferByte dbb = (DataBufferByte)dataBuffer;
-      this.data = stealData(dbb, 0);
-      if (dbb.getNumBanks() != 1) {
-          throw new
-              RasterFormatException("DataBuffer for ByteComponentRasters"+
-                                    " must only have 1 bank.");
-      }
-      int dbOffset = dbb.getOffset();
-
-//      if (sampleModel instanceof ComponentSampleModel) {
-//          ComponentSampleModel ism = (ComponentSampleModel)sampleModel;
-//          this.type = IntegerComponentRaster.TYPE_BYTE_SAMPLES;
-//          this.scanlineStride = ism.getScanlineStride();
-//          this.pixelStride = ism.getPixelStride();
-//          this.dataOffsets = ism.getBandOffsets();
-//          int xOffset = aRegion.x - origin.x;
-//          int yOffset = aRegion.y - origin.y;
-//          for (int i = 0; i < getNumDataElements(); i++) {
-//              dataOffsets[i] += dbOffset +
-//                  xOffset*pixelStride+yOffset*scanlineStride;
-//          }
-//      } else 
-//      	
-      	if (sampleModel instanceof SinglePixelPackedSampleModel) {
-          SinglePixelPackedSampleModel sppsm =
-                  (SinglePixelPackedSampleModel)sampleModel;
-//          this.type = IntegerComponentRaster.TYPE_BYTE_PACKED_SAMPLES;
-          this.scanlineStride = sppsm.getScanlineStride();
-          this.pixelStride    = 1;
-          this.dataOffsets = new int[1];
-          this.dataOffsets[0] = dbOffset;
-          int xOffset = aRegion.x - origin.x;
-          int yOffset = aRegion.y - origin.y;
-          dataOffsets[0] += xOffset*pixelStride+yOffset*scanlineStride;
-      } else {
-          throw new RasterFormatException("IntegerComponentRasters must " +
-              "have ComponentSampleModel or SinglePixelPackedSampleModel");
-      }
-      this.bandOffset = this.dataOffsets[0];
-
-      verify();
-		}
-
-		/**
+    /**
      * Returns a copy of the data offsets array. For each band the data offset
      * is the index into the band's data array, of the first sample of the
      * band.
@@ -276,7 +261,7 @@ public class ByteComponentRaster extends SunWritableRaster {
      *                 getTransferType() with the request pixel data.
      */
     @Override
-		public Object getDataElements(int x, int y, Object obj) {
+	public Object getDataElements(int x, int y, Object obj) {
         if ((x < this.minX) || (y < this.minY) ||
             (x >= this.maxX) || (y >= this.maxY)) {
             throw new ArrayIndexOutOfBoundsException
@@ -325,7 +310,7 @@ public class ByteComponentRaster extends SunWritableRaster {
      *                 getTransferType() with the request pixel data.
      */
     @Override
-		public Object getDataElements(int x, int y, int w, int h, Object obj) {
+	public Object getDataElements(int x, int y, int w, int h, Object obj) {
         if ((x < this.minX) || (y < this.minY) ||
             (x + w > this.maxX) || (y + h > this.maxY)) {
             throw new ArrayIndexOutOfBoundsException
@@ -480,7 +465,7 @@ public class ByteComponentRaster extends SunWritableRaster {
      *                 containing the pixel data to place at x,y.
      */
     @Override
-		public void setDataElements(int x, int y, Object obj) {
+	public void setDataElements(int x, int y, Object obj) {
         if ((x < this.minX) || (y < this.minY) ||
             (x >= this.maxX) || (y >= this.maxY)) {
             throw new ArrayIndexOutOfBoundsException
@@ -505,7 +490,8 @@ public class ByteComponentRaster extends SunWritableRaster {
      * @param y          The Y coordinate of the pixel location.
      * @param inRaster   Raster of data to place at x,y location.
      */
-    public void setDataElements(int x, int y, Raster inRaster) {
+    @Override
+	public void setDataElements(int x, int y, Raster inRaster) {
         int dstOffX = inRaster.getMinX() + x;
         int dstOffY = inRaster.getMinY() + y;
         int width  = inRaster.getWidth();
@@ -601,7 +587,7 @@ public class ByteComponentRaster extends SunWritableRaster {
      *                 x+h, y+h.
      */
     @Override
-		public void setDataElements(int x, int y, int w, int h, Object obj) {
+	public void setDataElements(int x, int y, int w, int h, Object obj) {
         if ((x < this.minX) || (y < this.minY) ||
             (x + w > this.maxX) || (y + h > this.maxY)) {
             throw new ArrayIndexOutOfBoundsException
@@ -786,7 +772,7 @@ public class ByteComponentRaster extends SunWritableRaster {
      *            if the specified bounding box is outside of the parent raster.
      */
     @Override
-		public Raster createChild(int x, int y,
+	public Raster createChild(int x, int y,
                               int width, int height,
                               int x0, int y0, int[] bandList) {
         WritableRaster newRaster = createWritableChild(x, y,
@@ -816,7 +802,7 @@ public class ByteComponentRaster extends SunWritableRaster {
      *            if the specified bounding box is outside of the parent Raster.
      */
     @Override
-		public WritableRaster createWritableChild(int x, int y,
+	public WritableRaster createWritableChild(int x, int y,
                                               int width, int height,
                                               int x0, int y0,
                                               int[] bandList) {
@@ -856,7 +842,7 @@ public class ByteComponentRaster extends SunWritableRaster {
      * width and height, and with new zeroed data arrays.
      */
     @Override
-		public WritableRaster createCompatibleWritableRaster(int w, int h) {
+	public WritableRaster createCompatibleWritableRaster(int w, int h) {
         if (w <= 0 || h <=0) {
             throw new RasterFormatException("negative "+
                                           ((w <= 0) ? "width" : "height"));
@@ -875,7 +861,7 @@ public class ByteComponentRaster extends SunWritableRaster {
      * createCompatibleRaster(width, height).
      */
     @Override
-		public WritableRaster createCompatibleWritableRaster() {
+	public WritableRaster createCompatibleWritableRaster() {
         return createCompatibleWritableRaster(width,height);
     }
 
@@ -973,7 +959,7 @@ public class ByteComponentRaster extends SunWritableRaster {
     }
 
     @Override
-		public String toString() {
+	public String toString() {
         return new String ("ByteComponentRaster: width = "+width+" height = "
                            + height
                            +" #numDataElements "+numDataElements

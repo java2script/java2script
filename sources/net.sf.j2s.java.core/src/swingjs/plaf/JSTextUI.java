@@ -673,14 +673,16 @@ public abstract class JSTextUI extends JSLightweightUI {
 	public Dimension getMinimumSize(JComponent jc) {
 		Dimension d = getPreferredSize(jc);// new Dimension();
 		// Document doc = editor.getDocument();
-		Insets i = jc.getInsets();
+		// Insets i = jc.getInsets();
 		// if (doc instanceof AbstractDocument) {
 		// ((AbstractDocument)doc).readLock();
 		// }
 		// try {
 
-		d.width += i.left + i.right;
-		d.height += i.top + i.bottom;
+		// TODO: check that we really do not want these insets here.
+		
+		//d.width += i.left + i.right;
+		//d.height = jc.getFont().getSize() + i.top + i.bottom;
 
 		// d.width = (int) rootView.getMinimumSpan(View.X_AXIS) + i.left + i.right;
 		// d.height = (int) rootView.getMinimumSpan(View.Y_AXIS) + i.top + i.bottom;

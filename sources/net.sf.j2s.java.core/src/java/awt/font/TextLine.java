@@ -770,13 +770,13 @@ final class TextLine {
     }
 
     public void draw(Graphics2D g2, float x, float y) {
+
         if (lp == null) {
             for (int i = 0, n = 0; i < fComponents.length; i++, n += 2) {
                 TextLineComponent tlc = fComponents[getComponentLogicalIndex(i)];
                 tlc.draw(g2, locs[n] + x, locs[n+1] + y);
             }
         } else {
-            AffineTransform oldTx = g2.getTransform();
             Point2D.Float pt = new Point2D.Float();
             for (int i = 0, n = 0; i < fComponents.length; i++, n += 2) {
                 TextLineComponent tlc = fComponents[getComponentLogicalIndex(i)];
@@ -786,10 +786,11 @@ final class TextLine {
                 AffineTransform at = tlc.getBaselineTransform();
 
                 if (at != null) {
+                	g2 = (Graphics2D) g2.create();
                     g2.translate(pt.x - at.getTranslateX(), pt.y - at.getTranslateY());
                     g2.transform(at);
                     tlc.draw(g2, 0, 0);
-                    g2.setTransform(oldTx);
+                	g2.dispose();
                 } else {
                     tlc.draw(g2, pt.x, pt.y);
                 }

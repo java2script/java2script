@@ -109,7 +109,12 @@ public class OutputStreamWriter extends Writer {
 	public OutputStreamWriter(OutputStream out, String charsetName) throws UnsupportedEncodingException {
 		super(out);
 		this.stream = out;
-		setCharset(charsetName);
+		try {
+			setCharset(charsetName);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			System.err.println("OutputStreamWriter: " + charsetName + " not supported (only UTF-8 in SwingJS)");
+		}
 
 		// se = StreamEncoder.forOutputStreamWriter(out, this, charsetName);
 	}

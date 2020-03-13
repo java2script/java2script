@@ -1,15 +1,21 @@
 package test;
 
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.Label;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.JApplet;
 import javax.swing.JComboBox;
-import javax.swing.JLabel;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 
 public class Test_Applet_Split extends JApplet {
 
@@ -24,8 +30,15 @@ public class Test_Applet_Split extends JApplet {
 		 */
 	}
 
+	private JScrollPane sp;
+
 	@Override
 	public void init() {
+		add(newSplitPane());
+		resize(500,400);		
+	}
+
+	private JPanel newSplitPane() {
 		JPanel top = new JPanel();
 		top.setBackground(Color.green);
 		top.add(new Label("testing"));
@@ -37,18 +50,23 @@ public class Test_Applet_Split extends JApplet {
 		JSplitPane pleft = new JSplitPane(JSplitPane.VERTICAL_SPLIT, top, bottom);
 		pleft.setDividerSize(3);
 
-		JPanel right = new JPanel();
-		right.add(new Label("here"));
-		right.setBackground(Color.red);
-		JSplitPane p = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, pleft, right);
-		p.setSize(500, 400);
-		p.setDividerLocation(0.24);
-		p.setDividerSize(3);
 		JComboBox cb = new JComboBox();
 		cb.addItem("test1");
 		cb.addItem("test2");
 		cb.addItem("test3");
-		right.add(cb);
+		sp = new JScrollPane();
+		sp.setBorder(new LineBorder(Color.GREEN,5));
+		sp.setViewportBorder(new EmptyBorder(5,5,5,5));
+		JPanel jp = new JPanel();
+		jp.add(cb);
+		jp.add(new Label("here"));
+		sp.getViewport().add(jp);
+		sp.getViewport().setBackground(Color.yellow);
+		sp.setBackground(Color.red);
+		JSplitPane p = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, pleft, sp);
+		p.setSize(500, 400);
+		//p.setDividerLocation(0.24);
+		p.setDividerSize(3);
 		p.addPropertyChangeListener(new PropertyChangeListener() {
 
 			@Override
@@ -69,7 +87,42 @@ public class Test_Applet_Split extends JApplet {
 			}
 			
 		});
-		add(p);
-		resize(500,400);		
+		JPanel pp = new JPanel();
+		pp.add(p);
+		return pp;
+	}
+	
+	public static void main(String[] args) {
+		JPanel p = new Test_Applet_Split().newSplitPane();
+		JFrame f = new JFrame();
+		JDialog jd;
+		int mode = 3;
+		switch (mode) {
+		case 0:
+			f.add(p);
+			f.pack();
+			f.setVisible(true);
+			break;
+		case 1:
+			jd = new JDialog((Frame) f, "test", true);
+			jd.add(p);
+			jd.setSize(new Dimension(600, 300));
+			jd.setVisible(true);
+			break;
+		case 2:
+			jd = new JDialog((Frame) null, true);
+			jd.add(p);
+			jd.setSize(new Dimension(600, 300));
+			jd.setVisible(true);
+			break;
+		case 3:
+			jd = new JDialog((Frame) null, true);
+			jd.setContentPane(p);
+			jd.setSize(new Dimension(600, 300));
+			jd.pack();
+			jd.setVisible(true);
+		}
+		
+		
 	}
 }

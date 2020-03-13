@@ -116,7 +116,9 @@ public class Test_Label extends JPanel implements MenuListener, ItemListener {
 //			}
 //		};
 //		
-		Icon icon = getImage("test2.png");
+		
+
+		Icon icon = getImage("zoom.gif");
 		JLabel l3 = new JLabel(icon); 
 		l3.setOpaque(true);
 		l3.setBackground(Color.red);
@@ -190,8 +192,22 @@ public class Test_Label extends JPanel implements MenuListener, ItemListener {
 //		rb3.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 //		rb3.setHorizontalTextPosition(SwingConstants.RIGHT);
 
-//		firstColumn.add(l1);
-//		firstColumn.add(l2);
+		ImageIcon icon1 = new ImageIcon("test/zoom.gif");
+		JLabel l = new JLabel("TEST?", icon1, SwingConstants.LEADING);
+		l.setBounds(300,300,20,20);
+		add(l);
+
+		ImageIcon icon2 = new ImageIcon("test/zoom.gif");
+		JButton ib = new JButton(icon2);
+		ib.setPreferredSize(new Dimension(50,20));
+		ib.setBounds(300,360,20,20);
+		add(ib);
+		ib.setBackground(null);
+		ib.setOpaque(false);
+
+		firstColumn.add(l);
+		firstColumn.add(ib);
+
 		firstColumn.add(l3);
 		firstColumn.add(l4);
 		firstColumn.add(b1);
@@ -249,6 +265,7 @@ public class Test_Label extends JPanel implements MenuListener, ItemListener {
 				Thread.sleep(10);
 			} catch (InterruptedException e) {
 			}
+		System.out.println("getImage " + name + " status=" + icon.getImageLoadStatus());
 		return icon;
 	}
 

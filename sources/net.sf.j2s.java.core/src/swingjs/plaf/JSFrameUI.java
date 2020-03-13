@@ -309,15 +309,17 @@ public class JSFrameUI extends JSWindowUI implements FramePeer, JSComponentUI.Em
 	}
 
 	protected void closeFrame() {
-		DOMNode tbar = titleBarNode;
-		/**
-		 * @j2sNative
-		 * 
-		 * J2S.setDraggable(tbar, false);
-		 */
-		{
-			// but "false" here will become Boolean.FALSE
-			J2S.setDraggable(tbar, false);
+		if (!frame.isUndecorated()) {
+			DOMNode tbar = titleBarNode;
+			/**
+			 * @j2sNative
+			 * 
+			 * 			J2S.setDraggable(tbar, false);
+			 */
+			{
+				// but "false" here will become Boolean.FALSE
+				J2S.setDraggable(tbar, false);
+			}
 		}
 		J2S.unsetMouse(frameNode);
 		$(frameNode).remove();

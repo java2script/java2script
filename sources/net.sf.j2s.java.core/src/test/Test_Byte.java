@@ -1,7 +1,7 @@
 package test;
 
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.Arrays;
 
 class Test_Byte extends Test_ {
@@ -13,11 +13,25 @@ class Test_Byte extends Test_ {
 	  }
 	  
 	public static void main(String[] args) {
-
 		byte[] ab = new byte[] { 0, 10, 0, 11, 0, 12, 1, 0, 2, 0, 3, 0 };
 
 		final ByteBuffer bb = ByteBuffer.wrap(ab);
 		short[] ash = new short[10];
+		short ash2 = -2;
+		System.out.println(Integer.toHexString(Short.toUnsignedInt(ash2)));
+		assert((ash2 & 0xFFFF) == 0xfffe);
+		ash2 = Short.MIN_VALUE;
+		System.out.println(Integer.toHexString(Short.toUnsignedInt(ash2)));
+		assert((ash2 & 0xFFFF) == 0x8000);
+		ash2 = Short.MAX_VALUE;
+		System.out.println(Integer.toHexString(Short.toUnsignedInt(ash2)));
+		assert((ash2 & 0xFFFF) == 0x7FFF);
+		ash2 = (short)(Short.MAX_VALUE + 1);
+		System.out.println(Integer.toHexString(Short.toUnsignedInt(ash2)));
+		assert((ash2 & 0xFFFF) == 0x8000);
+		ash2 = (short)(2*Short.MAX_VALUE + 1);
+		System.out.println(Integer.toHexString(Short.toUnsignedInt(ash2)));
+		assert((ash2 & 0xFFFF) == 0xFFFF);
 		
 		bb.asShortBuffer().get(ash, 0, 5);
 		String st = Arrays.toString(ash);

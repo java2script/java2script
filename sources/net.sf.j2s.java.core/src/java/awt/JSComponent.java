@@ -341,7 +341,7 @@ public abstract class JSComponent extends Component {
 
 	@Override
 	public boolean isDisplayable() { 
-		return 秘getTopInvokableAncestor(this, false) != null;
+		return ui != null && 秘getUI().isDisplayable();
 	}
 
 	@Override

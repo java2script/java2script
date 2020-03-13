@@ -45,7 +45,8 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoableEdit;
 import javax.swing.SwingUtilities;
-//import static sun.swing.SwingUtilities2.IMPLIED_CR;
+
+import static sun.swing.SwingUtilities2.IMPLIED_CR;
 
 /**
  * A document that can be marked up with character and paragraph
@@ -798,9 +799,9 @@ public class DefaultStyledDocument extends AbstractDocument implements StyledDoc
                 // and doesn't have the CR attribute defined.
                 mattr.addAttribute(StyleConstants.NameAttribute,
                         AbstractDocument.ContentElementName);
-// SWINGJS TODO                if (mattr.isDefined(IMPLIED_CR)) {
-//                    mattr.removeAttribute(IMPLIED_CR);
-//                }
+                if (mattr.isDefined(IMPLIED_CR)) {
+                    mattr.removeAttribute(IMPLIED_CR);
+                }
             }
 
             ElementSpec[] spec = new ElementSpec[parseBuffer.size()];

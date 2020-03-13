@@ -30,7 +30,17 @@ import java.util.HashMap.Node;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class JSHashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Cloneable, Serializable {
+/**
+ * A super simple very limited capability HashMap - Strings Only; extends AbstractMap, not HashMap.
+ * 
+ * Used in BinaryCIF-SwingJS
+ * 
+ * @author hansonr
+ *
+ * @param <K>
+ * @param <V>
+ */
+final public class JSHashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Cloneable, Serializable {
 
 	/**
 	 * Holds cached entrySet(). Note that AbstractMap fields are used for keySet()
@@ -445,7 +455,7 @@ public class JSHashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clo
 		/**
 		 * @j2sNative
 		 * 
-		 * 			var val = jsmap[key]; if (val !== undefined) return val;
+		 * 			var val = jsmap[key]; if (val !== null && val !== undefined) return val;
 		 */
 
 		return putVal(key, value, true, true);

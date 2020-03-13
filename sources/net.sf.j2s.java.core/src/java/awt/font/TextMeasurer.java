@@ -100,20 +100,20 @@ public final class TextMeasurer implements Cloneable {
     // Number of lines to format to.
     private static float EST_LINES = (float) 2.1;
 
-    /*
-    static {
-        String s = System.getProperty("estLines");
-        if (s != null) {
-            try {
-                Float f = new Float(s);
-                EST_LINES = f.floatValue();
-            }
-            catch(NumberFormatException e) {
-            }
-        }
-        //System.out.println("EST_LINES="+EST_LINES);
-    }
-    */
+    
+//    static {
+//        String s = System.getProperty("estLines");
+//        if (s != null) {
+//            try {
+//                Float f = new Float(s);
+//                EST_LINES = f.floatValue();
+//            }
+//            catch(NumberFormatException e) {
+//            }
+//        }
+//        //System.out.println("EST_LINES="+EST_LINES);
+//    }
+    
 
     private FontRenderContext fFrc;
 

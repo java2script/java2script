@@ -152,6 +152,8 @@ public class DefaultTreeCellRenderer extends JLabel implements TreeCellRenderer
      */
     public DefaultTreeCellRenderer() {
 
+    	秘paintClass = /**@j2sNative C$ || */null;
+
         setLeafIcon(DefaultLookup.getIcon(this, ui, "Tree.leafIcon"));
         setClosedIcon(DefaultLookup.getIcon(this, ui, "Tree.closedIcon"));
         setOpenIcon(DefaultLookup.getIcon(this, ui, "Tree.openIcon"));

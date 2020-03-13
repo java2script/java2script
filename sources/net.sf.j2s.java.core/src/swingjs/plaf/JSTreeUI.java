@@ -30,6 +30,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Insets;
+import java.awt.JSComponent;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -366,6 +367,7 @@ public class JSTreeUI extends JSPanelUI {
 		if (domNode == null) {
 			
 			domNode = focusNode = enableNode = newDOMObject("div", id);
+			DOMNode.setStyles(domNode, "outline","none"); // removes blue focus line
 			// maybe DOMNode.setAttrInt(domNode, "tabIndex", 1);
 			//innerNode = newDOMObject("div", id + "_inner");
 			addFocusHandler();
@@ -1582,7 +1584,7 @@ public class JSTreeUI extends JSPanelUI {
 
 	private void updateItem(Graphics g, TreePath path, int row, boolean isExpanded, boolean isLeaf, boolean isLead,
 			Rectangle bounds, boolean isVisible) {
-		Component component = currentCellRenderer.getTreeCellRendererComponent(tree, path.getLastPathComponent(),
+		JSComponent component = (JSComponent) currentCellRenderer.getTreeCellRendererComponent(tree, path.getLastPathComponent(),
 				tree.isRowSelected(row), isExpanded, isLeaf, row, isLead);
 		int cx = bounds.x;
 		int cy = bounds.y;
@@ -1590,10 +1592,10 @@ public class JSTreeUI extends JSPanelUI {
 		int ch = bounds.height;
 		if (isVisible)
 			rendererPane.paintComponent(g, component, tree, cx, cy, cw, ch, true);
-		updateItemHTML((JComponent) component, path, cx, cy, cw, tree.getRowHeight());
+		updateItemHTML(component, path, cx, cy, cw, tree.getRowHeight());
 	}
 
-	private void updateItemHTML(JComponent c, TreePath path, int left, int top, int width, int height) {
+	private void updateItemHTML(JSComponent c, TreePath path, int left, int top, int width, int height) {
 		c.setSize(width, height);
 		c.setVisible(true);
 		JSComponentUI ui = c.秘getUI();
@@ -1616,7 +1618,7 @@ public class JSTreeUI extends JSPanelUI {
 		DOMNode.setSize(node, width, height);
 		DOMNode.setTopLeftAbsolute(node, top, left);
 		DOMNode.setStyles(node, "display", null);
-		$("#" + DOMNode.getAttrInt(node,"id") + "_txt").css("background", path.equals(tree.getSelectionPath()) ? selectionBackground : null);		
+		$("#" + DOMNode.getAttrInt(node,"id") + "_txt").css("background", tree.isPathSelected(path) ? selectionBackground : null);		
 	}
 
 	/**

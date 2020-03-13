@@ -41,18 +41,17 @@
 
 package java.text;
 
-//import java.io.InvalidObjectException;
-//import java.math.BigDecimal;
-//import java.math.BigInteger;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.ArrayList;
-//import java.util.Currency;
+import java.util.Currency;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
-//import java.util.concurrent.atomic.AtomicInteger;
-//import java.util.concurrent.atomic.AtomicLong;
 import sun.util.resources.LocaleData;
 
 /**
@@ -492,17 +491,17 @@ public class DecimalFormat extends NumberFormat {
                                      StringBuffer toAppendTo,
                                      FieldPosition pos) {
         if (number instanceof Long || number instanceof Integer ||
-                   number instanceof Short || number instanceof Byte //||
-//                   number instanceof AtomicInteger ||
-//                   number instanceof AtomicLong ||
-//                   (number instanceof BigInteger &&
-//                    ((BigInteger)number).bitLength () < 64)
+                   number instanceof Short || number instanceof Byte ||
+                   number instanceof AtomicInteger ||
+                   number instanceof AtomicLong ||
+                   (number instanceof BigInteger &&
+                    ((BigInteger)number).bitLength () < 64)
                     ) {
             return format(((Number)number).longValue(), toAppendTo, pos);
-//        } else if (number instanceof BigDecimal) {
-//            return format((BigDecimal)number, toAppendTo, pos);
-//        } else if (number instanceof BigInteger) {
-//            return format((BigInteger)number, toAppendTo, pos);
+        } else if (number instanceof BigDecimal) {
+            return format((BigDecimal)number, toAppendTo, pos);
+        } else if (number instanceof BigInteger) {
+            return format((BigInteger)number, toAppendTo, pos);
         } else if (number instanceof Number) {
             return format(((Number)number).doubleValue(), toAppendTo, pos);
         } else {
@@ -527,14 +526,21 @@ public class DecimalFormat extends NumberFormat {
         fieldPosition.setBeginIndex(0);
         fieldPosition.setEndIndex(0);
         // SwingJS  setting difference here by whether it is an integer or not
-        boolean isInt = (number == (int) number && Math.abs(number) < Integer.MAX_VALUE);
+        boolean isInt = false;
+        /** @j2sNative 
+         * var a = ("" + number);
+         * isInt = (a.indexOf(".") < 0 && a.indexOf("e") < 0);
+         */
+        String[] ret = this.秘toArray(result);
         if (isInt)
-          return formatLong((int)number, result, fieldPosition.getFieldDelegate());
+          ret = formatLong((long)number, ret, fieldPosition.getFieldDelegate());
         else
-          return formatDouble(number, result, fieldPosition.getFieldDelegate());
+          ret = formatDouble(number, ret, fieldPosition.getFieldDelegate());
+        return this.秘toSB(ret, result);
     }
 
-    /**
+
+	/**
      * Formats a double to produce a string.
      * @param number    The double to format
      * @param result    where the text is to be appended
@@ -543,15 +549,15 @@ public class DecimalFormat extends NumberFormat {
      *                  mode being set to RoundingMode.UNNECESSARY
      * @return The formatted number string
      */
-    private StringBuffer formatDouble(double number, StringBuffer result,
-                                FieldDelegate delegate) {
+    private String[] formatDouble(double number, String[] result,
+    		FieldDelegate delegate) {
         if (Double.isNaN(number) ||
            (Double.isInfinite(number) && multiplier == 0)) {
-            int iFieldStart = result.length();
-            result.append(symbols.getNaN());
+            int iFieldStart = result[0].length();
+            result[0] += (symbols.getNaN());
             delegate.formatted(INTEGER_FIELD, Field.INTEGER, Field.INTEGER,
-                               iFieldStart, result.length(), result);
-            return result;
+                               iFieldStart, result[0].length(), result);
+            return (String[]) (Object) result;
         }
 
         /* Detecting whether a double is negative is easy with the exception of
@@ -579,10 +585,10 @@ public class DecimalFormat extends NumberFormat {
                        getPositivePrefixFieldPositions(), Field.SIGN);
             }
 
-            int iFieldStart = result.length();
-            result.append(symbols.getInfinity());
+            int iFieldStart = result[0].length();
+            result[0] += (symbols.getInfinity());
             delegate.formatted(INTEGER_FIELD, Field.INTEGER, Field.INTEGER,
-                               iFieldStart, result.length(), result);
+                               iFieldStart, result[0].length(), result);
 
             if (isNegative) {
                 append(result, negativeSuffix, delegate,
@@ -617,7 +623,8 @@ public class DecimalFormat extends NumberFormat {
     }
 
     
-    /**
+
+	/**
      * Format a long to produce a string.
      * @param number    The long to format
      * @param result    where the text is to be appended
@@ -636,8 +643,9 @@ public class DecimalFormat extends NumberFormat {
                                FieldPosition fieldPosition) {
         fieldPosition.setBeginIndex(0);
         fieldPosition.setEndIndex(0);
-
-        return formatLong(number, result, fieldPosition.getFieldDelegate());
+        String[] ret = this.秘toArray(result);
+        ret = formatLong(number, ret, fieldPosition.getFieldDelegate());
+        return 秘toSB(ret, result);
     }
 
     /**
@@ -650,8 +658,8 @@ public class DecimalFormat extends NumberFormat {
      *                   mode being set to RoundingMode.UNNECESSARY
      * @see java.text.FieldPosition
      */
-    private StringBuffer formatLong(long number, StringBuffer result,
-                               FieldDelegate delegate) {
+    private String[] formatLong(long number, String[] result,
+    		FieldDelegate delegate) {
         boolean isNegative = (number < 0);
         if (isNegative) {
             number = -number;
@@ -663,27 +671,27 @@ public class DecimalFormat extends NumberFormat {
         // a number near MIN_VALUE or MAX_VALUE outside the legal range.  We
         // check for this before multiplying, and if it happens we use
         // BigInteger instead.
-//        boolean useBigInteger = false;
+        boolean useBigInteger = false;
         if (number < 0) { // This can only happen if number == Long.MIN_VALUE.
-//            if (multiplier != 0) {
-//                useBigInteger = true;
-//            }
+            if (multiplier != 0) {
+                useBigInteger = true;
+            }
         } else if (multiplier != 1 && multiplier != 0) {
             long cutoff = Long.MAX_VALUE / multiplier;
             if (cutoff < 0) {
                 cutoff = -cutoff;
             }
-            //useBigInteger = (number > cutoff);
+            useBigInteger = (number > cutoff);
         }
 
-//        if (useBigInteger) {
-//            if (isNegative) {
-//                number = -number;
-//            }
-//            BigInteger bigIntegerValue = BigInteger.valueOf(number);
-//            return format(bigIntegerValue, result, delegate, true);
-//        }
-//
+        if (useBigInteger) {
+            if (isNegative) {
+                number = -number;
+            }
+            BigInteger bigIntegerValue = BigInteger.valueOf(number);
+            return format(bigIntegerValue, result, delegate, true);
+        }
+
         number *= multiplier;
         if (number == 0) {
             isNegative = false;
@@ -708,124 +716,127 @@ public class DecimalFormat extends NumberFormat {
         }
     }
 
-//    /**
-//     * Formats a BigDecimal to produce a string.
-//     * @param number    The BigDecimal to format
-//     * @param result    where the text is to be appended
-//     * @param fieldPosition    On input: an alignment field, if desired.
-//     * On output: the offsets of the alignment field.
-//     * @return The formatted number string
-//     * @exception        ArithmeticException if rounding is needed with rounding
-//     *                   mode being set to RoundingMode.UNNECESSARY
-//     * @see java.text.FieldPosition
-//     */
-//    private StringBuffer format(BigDecimal number, StringBuffer result,
-//                                FieldPosition fieldPosition) {
-//        fieldPosition.setBeginIndex(0);
-//        fieldPosition.setEndIndex(0);
-//        return format(number, result, fieldPosition.getFieldDelegate());
-//    }
-//
-//    /**
-//     * Formats a BigDecimal to produce a string.
-//     * @param number    The BigDecimal to format
-//     * @param result    where the text is to be appended
-//     * @param delegate notified of locations of sub fields
-//     * @exception        ArithmeticException if rounding is needed with rounding
-//     *                   mode being set to RoundingMode.UNNECESSARY
-//     * @return The formatted number string
-//     */
-//    private StringBuffer format(BigDecimal number, StringBuffer result,
-//                                FieldDelegate delegate) {
-//        if (multiplier != 1) {
-//            number = number.multiply(getBigDecimalMultiplier());
-//        }
-//        boolean isNegative = number.signum() == -1;
-//        if (isNegative) {
-//            number = number.negate();
-//        }
-//
-//        synchronized(digitList) {
-//            int maxIntDigits = getMaximumIntegerDigits();
-//            int minIntDigits = getMinimumIntegerDigits();
-//            int maxFraDigits = getMaximumFractionDigits();
-//            int minFraDigits = getMinimumFractionDigits();
-//            int maximumDigits = maxIntDigits + maxFraDigits;
-//
-//            digitList.set(isNegative, number, useExponentialNotation ?
-//                ((maximumDigits < 0) ? Integer.MAX_VALUE : maximumDigits) :
-//                maxFraDigits, !useExponentialNotation);
-//
-//            return subformat(result, delegate, isNegative, false,
-//                maxIntDigits, minIntDigits, maxFraDigits, minFraDigits);
-//        }
-//    }
-//
-//    /**
-//     * Format a BigInteger to produce a string.
-//     * @param number    The BigInteger to format
-//     * @param result    where the text is to be appended
-//     * @param fieldPosition    On input: an alignment field, if desired.
-//     * On output: the offsets of the alignment field.
-//     * @return The formatted number string
-//     * @exception        ArithmeticException if rounding is needed with rounding
-//     *                   mode being set to RoundingMode.UNNECESSARY
-//     * @see java.text.FieldPosition
-//     */
-//    private StringBuffer format(BigInteger number, StringBuffer result,
-//                               FieldPosition fieldPosition) {
-//        fieldPosition.setBeginIndex(0);
-//        fieldPosition.setEndIndex(0);
-//
-//        return format(number, result, fieldPosition.getFieldDelegate(), false);
-//    }
-//
-//    /**
-//     * Format a BigInteger to produce a string.
-//     * @param number    The BigInteger to format
-//     * @param result    where the text is to be appended
-//     * @param delegate notified of locations of sub fields
-//     * @return The formatted number string
-//     * @exception        ArithmeticException if rounding is needed with rounding
-//     *                   mode being set to RoundingMode.UNNECESSARY
-//     * @see java.text.FieldPosition
-//     */
-//    private StringBuffer format(BigInteger number, StringBuffer result,
-//                               FieldDelegate delegate, boolean formatLong) {
-//        if (multiplier != 1) {
-//            number = number.multiply(getBigIntegerMultiplier());
-//        }
-//        boolean isNegative = number.signum() == -1;
-//        if (isNegative) {
-//            number = number.negate();
-//        }
-//
-//        synchronized(digitList) {
-//            int maxIntDigits, minIntDigits, maxFraDigits, minFraDigits, maximumDigits;
-//            if (formatLong) {
-//                maxIntDigits = super.getMaximumIntegerDigits();
-//                minIntDigits = super.getMinimumIntegerDigits();
-//                maxFraDigits = super.getMaximumFractionDigits();
-//                minFraDigits = super.getMinimumFractionDigits();
-//                maximumDigits = maxIntDigits + maxFraDigits;
-//            } else {
-//                maxIntDigits = getMaximumIntegerDigits();
-//                minIntDigits = getMinimumIntegerDigits();
-//                maxFraDigits = getMaximumFractionDigits();
-//                minFraDigits = getMinimumFractionDigits();
-//                maximumDigits = maxIntDigits + maxFraDigits;
-//                if (maximumDigits < 0) {
-//                    maximumDigits = Integer.MAX_VALUE;
-//                }
-//            }
-//
-//            digitList.set(isNegative, number,
-//                          useExponentialNotation ? maximumDigits : 0);
-//
-//            return subformat(result, delegate, isNegative, true,
-//                maxIntDigits, minIntDigits, maxFraDigits, minFraDigits);
-//        }
-//    }
+    /**
+     * Formats a BigDecimal to produce a string.
+     * @param number    The BigDecimal to format
+     * @param result    where the text is to be appended
+     * @param fieldPosition    On input: an alignment field, if desired.
+     * On output: the offsets of the alignment field.
+     * @return The formatted number string
+     * @exception        ArithmeticException if rounding is needed with rounding
+     *                   mode being set to RoundingMode.UNNECESSARY
+     * @see java.text.FieldPosition
+     */
+    private StringBuffer format(BigDecimal number, StringBuffer result,
+                                FieldPosition fieldPosition) {
+        fieldPosition.setBeginIndex(0);
+        fieldPosition.setEndIndex(0);
+        String[] ret = 秘toArray(result);
+        ret = format(number, ret, fieldPosition.getFieldDelegate());
+        return 秘toSB(ret, result);
+    }
+
+    /**
+     * Formats a BigDecimal to produce a string.
+     * @param number    The BigDecimal to format
+     * @param result    where the text is to be appended
+     * @param delegate notified of locations of sub fields
+     * @exception        ArithmeticException if rounding is needed with rounding
+     *                   mode being set to RoundingMode.UNNECESSARY
+     * @return The formatted number string
+     */
+    private String[] format(BigDecimal number, String[] result,
+    		FieldDelegate delegate) {
+        if (multiplier != 1) {
+            number = number.multiply(getBigDecimalMultiplier());
+        }
+        boolean isNegative = number.signum() == -1;
+        if (isNegative) {
+            number = number.negate();
+        }
+
+        synchronized(digitList) {
+            int maxIntDigits = getMaximumIntegerDigits();
+            int minIntDigits = getMinimumIntegerDigits();
+            int maxFraDigits = getMaximumFractionDigits();
+            int minFraDigits = getMinimumFractionDigits();
+            int maximumDigits = maxIntDigits + maxFraDigits;
+
+            digitList.set(isNegative, number, useExponentialNotation ?
+                ((maximumDigits < 0) ? Integer.MAX_VALUE : maximumDigits) :
+                maxFraDigits, !useExponentialNotation);
+
+            return subformat(result, delegate, isNegative, false,
+                maxIntDigits, minIntDigits, maxFraDigits, minFraDigits);
+        }
+    }
+
+    /**
+     * Format a BigInteger to produce a string.
+     * @param number    The BigInteger to format
+     * @param result    where the text is to be appended
+     * @param fieldPosition    On input: an alignment field, if desired.
+     * On output: the offsets of the alignment field.
+     * @return The formatted number string
+     * @exception        ArithmeticException if rounding is needed with rounding
+     *                   mode being set to RoundingMode.UNNECESSARY
+     * @see java.text.FieldPosition
+     */
+    private StringBuffer format(BigInteger number, StringBuffer result,
+                               FieldPosition fieldPosition) {
+        fieldPosition.setBeginIndex(0);
+        fieldPosition.setEndIndex(0);
+        String[] ret = 秘toArray(result);
+        ret = format(number, ret, fieldPosition.getFieldDelegate(), false);
+        return 秘toSB(ret, result);
+    }
+
+    /**
+     * Format a BigInteger to produce a string.
+     * @param number    The BigInteger to format
+     * @param result    where the text is to be appended
+     * @param delegate notified of locations of sub fields
+     * @return The formatted number string
+     * @exception        ArithmeticException if rounding is needed with rounding
+     *                   mode being set to RoundingMode.UNNECESSARY
+     * @see java.text.FieldPosition
+     */
+    private String[] format(BigInteger number, String[] result,
+    		FieldDelegate delegate, boolean formatLong) {
+        if (multiplier != 1) {
+            number = number.multiply(getBigIntegerMultiplier());
+        }
+        boolean isNegative = number.signum() == -1;
+        if (isNegative) {
+            number = number.negate();
+        }
+
+        synchronized(digitList) {
+            int maxIntDigits, minIntDigits, maxFraDigits, minFraDigits, maximumDigits;
+            if (formatLong) {
+                maxIntDigits = super.getMaximumIntegerDigits();
+                minIntDigits = super.getMinimumIntegerDigits();
+                maxFraDigits = super.getMaximumFractionDigits();
+                minFraDigits = super.getMinimumFractionDigits();
+                maximumDigits = maxIntDigits + maxFraDigits;
+            } else {
+                maxIntDigits = getMaximumIntegerDigits();
+                minIntDigits = getMinimumIntegerDigits();
+                maxFraDigits = getMaximumFractionDigits();
+                minFraDigits = getMinimumFractionDigits();
+                maximumDigits = maxIntDigits + maxFraDigits;
+                if (maximumDigits < 0) {
+                    maximumDigits = Integer.MAX_VALUE;
+                }
+            }
+
+            digitList.set(isNegative, number,
+                          useExponentialNotation ? maximumDigits : 0);
+
+            return subformat(result, delegate, isNegative, true,
+                maxIntDigits, minIntDigits, maxFraDigits, minFraDigits);
+        }
+    }
 
     /**
      * Formats an Object producing an <code>AttributedCharacterIterator</code>.
@@ -850,21 +861,21 @@ public class DecimalFormat extends NumberFormat {
 		public AttributedCharacterIterator formatToCharacterIterator(Object obj) {
         CharacterIteratorFieldDelegate delegate =
                          new CharacterIteratorFieldDelegate();
-        StringBuffer sb = new StringBuffer();
+        String[] sb = 秘newSA();
 
         if (obj instanceof Double || obj instanceof Float) {
             formatDouble(((Number)obj).doubleValue(), sb, delegate);
         } else if (obj instanceof Long || obj instanceof Integer ||
                    obj instanceof Short || obj instanceof Byte 
-//                   ||
-//                   obj instanceof AtomicInteger || obj instanceof AtomicLong
-//                   
+                   ||
+                   obj instanceof AtomicInteger || obj instanceof AtomicLong
+                   
         		) {
             formatLong(((Number)obj).longValue(), sb, delegate);
-//        } else if (obj instanceof BigDecimal) {
-//            format((BigDecimal)obj, sb, delegate);
-//        } else if (obj instanceof BigInteger) {
-//            format((BigInteger)obj, sb, delegate, false);
+        } else if (obj instanceof BigDecimal) {
+            format((BigDecimal)obj, sb, delegate);
+        } else if (obj instanceof BigInteger) {
+            format((BigInteger)obj, sb, delegate, false);
         } else if (obj == null) {
             throw new NullPointerException(
                 "formatToCharacterIterator must be passed non-null object");
@@ -872,14 +883,14 @@ public class DecimalFormat extends NumberFormat {
             throw new IllegalArgumentException(
                 "Cannot format given Object as a Number");
         }
-        return delegate.getIterator(sb.toString());
+        return delegate.getIterator(sb[0]);
     }
 
     /**
      * Complete the formatting of a finite number.  On entry, the digitList must
      * be filled in with the correct digits.
      */
-    private StringBuffer subformat(StringBuffer result, FieldDelegate delegate,
+    private String[] subformat(String[] result, FieldDelegate delegate,
                                    boolean isNegative, boolean isInteger,
                                    int maxIntDigits, int minIntDigits,
                                    int maxFraDigits, int minFraDigits) {
@@ -923,7 +934,7 @@ public class DecimalFormat extends NumberFormat {
         }
 
         if (useExponentialNotation) {
-            int iFieldStart = result.length();
+            int iFieldStart = result[0].length();
             int iFieldEnd = -1;
             int fFieldStart = -1;
 
@@ -984,33 +995,33 @@ public class DecimalFormat extends NumberFormat {
             for (int i=0; i<totalDigits; ++i) {
                 if (i == integerDigits) {
                     // Record field information for caller.
-                    iFieldEnd = result.length();
+                    iFieldEnd = result[0].length();
 
-                    result.append(decimal);
+                    result[0] += (decimal);
                     addedDecimalSeparator = true;
 
                     // Record field information for caller.
-                    fFieldStart = result.length();
+                    fFieldStart = result[0].length();
                 }
-                result.append((i < digitList.count) ?
+                result[0] += ((i < digitList.count) ?
                               (char)(digitList.digits[i] + zeroDelta) :
                               zero);
             }
 
             if (decimalSeparatorAlwaysShown && totalDigits == integerDigits) {
                 // Record field information for caller.
-                iFieldEnd = result.length();
+                iFieldEnd = result[0].length();
 
-                result.append(decimal);
+                result[0] += (decimal);
                 addedDecimalSeparator = true;
 
                 // Record field information for caller.
-                fFieldStart = result.length();
+                fFieldStart = result[0].length();
             }
 
             // Record field information
             if (iFieldEnd == -1) {
-                iFieldEnd = result.length();
+                iFieldEnd = result[0].length();
             }
             delegate.formatted(INTEGER_FIELD, Field.INTEGER, Field.INTEGER,
                                iFieldStart, iFieldEnd, result);
@@ -1020,21 +1031,21 @@ public class DecimalFormat extends NumberFormat {
                                    iFieldEnd, fFieldStart, result);
             }
             if (fFieldStart == -1) {
-                fFieldStart = result.length();
+                fFieldStart = result[0].length();
             }
             delegate.formatted(FRACTION_FIELD, Field.FRACTION, Field.FRACTION,
-                               fFieldStart, result.length(), result);
+                               fFieldStart, result[0].length(), result);
 
             // The exponent is output using the pattern-specified minimum
             // exponent digits.  There is no maximum limit to the exponent
             // digits, since truncating the exponent would result in an
             // unacceptable inaccuracy.
-            int fieldStart = result.length();
+            int fieldStart = result[0].length();
 
-            result.append(symbols.getExponentSeparator());
+            result[0] += (symbols.getExponentSeparator());
 
             delegate.formatted(Field.EXPONENT_SYMBOL, Field.EXPONENT_SYMBOL,
-                               fieldStart, result.length(), result);
+                               fieldStart, result[0].length(), result);
 
             // For zero values, we force the exponent to zero.  We
             // must do this here, and not earlier, because the value
@@ -1046,26 +1057,26 @@ public class DecimalFormat extends NumberFormat {
             boolean negativeExponent = exponent < 0;
             if (negativeExponent) {
                 exponent = -exponent;
-                fieldStart = result.length();
-                result.append(symbols.getMinusSign());
+                fieldStart = result[0].length();
+                result[0] += (symbols.getMinusSign());
                 delegate.formatted(Field.EXPONENT_SIGN, Field.EXPONENT_SIGN,
-                                   fieldStart, result.length(), result);
+                                   fieldStart, result[0].length(), result);
             }
             digitList.setExp(negativeExponent, exponent);
 
-            int eFieldStart = result.length();
+            int eFieldStart = result[0].length();
 
             for (int i=digitList.decimalAt; i<minExponentDigits; ++i) {
-                result.append(zero);
+                result[0] += (zero);
             }
             for (int i=0; i<digitList.decimalAt; ++i) {
-                result.append((i < digitList.count) ?
+                result[0] += ((i < digitList.count) ?
                           (char)(digitList.digits[i] + zeroDelta) : zero);
             }
             delegate.formatted(Field.EXPONENT, Field.EXPONENT, eFieldStart,
-                               result.length(), result);
+                               result[0].length(), result);
         } else {
-            int iFieldStart = result.length();
+            int iFieldStart = result[0].length();
 
             // Output the integer portion.  Here 'count' is the total
             // number of integer digits we will display, including both
@@ -1086,14 +1097,14 @@ public class DecimalFormat extends NumberFormat {
                 digitIndex = digitList.decimalAt - count;
             }
 
-            int sizeBeforeIntegerPart = result.length();
+            int sizeBeforeIntegerPart = result[0].length();
             for (int i=count-1; i>=0; --i) {
                 if (i < digitList.decimalAt && digitIndex < digitList.count) {
                     // Output a real digit
-                    result.append((char)(digitList.digits[digitIndex++] + zeroDelta));
+                    result[0] += ((char)(digitList.digits[digitIndex++] + zeroDelta));
                 } else {
                     // Output a leading zero
-                    result.append(zero);
+                    result[0] += (zero);
                 }
 
                 // Output grouping separator if necessary.  Don't output a
@@ -1101,11 +1112,11 @@ public class DecimalFormat extends NumberFormat {
                 // the integer part.
                 if (isGroupingUsed() && i>0 && (groupingSize != 0) &&
                     (i % groupingSize == 0)) {
-                    int gStart = result.length();
-                    result.append(grouping);
+                    int gStart = result[0].length();
+                    result[0] += (grouping);
                     delegate.formatted(Field.GROUPING_SEPARATOR,
                                        Field.GROUPING_SEPARATOR, gStart,
-                                       result.length(), result);
+                                       result[0].length(), result);
                 }
             }
 
@@ -1117,25 +1128,25 @@ public class DecimalFormat extends NumberFormat {
             // If there is no fraction present, and we haven't printed any
             // integer digits, then print a zero.  Otherwise we won't print
             // _any_ digits, and we won't be able to parse this string.
-            if (!fractionPresent && result.length() == sizeBeforeIntegerPart) {
-                result.append(zero);
+            if (!fractionPresent && result[0].length() == sizeBeforeIntegerPart) {
+                result[0] += (zero);
             }
 
             delegate.formatted(INTEGER_FIELD, Field.INTEGER, Field.INTEGER,
-                               iFieldStart, result.length(), result);
+                               iFieldStart, result[0].length(), result);
 
             // Output the decimal separator if we always do so.
-            int sStart = result.length();
+            int sStart = result[0].length();
             if (decimalSeparatorAlwaysShown || fractionPresent) {
-                result.append(decimal);
+                result[0] += (decimal);
             }
 
-            if (sStart != result.length()) {
+            if (sStart != result[0].length()) {
                 delegate.formatted(Field.DECIMAL_SEPARATOR,
                                    Field.DECIMAL_SEPARATOR,
-                                   sStart, result.length(), result);
+                                   sStart, result[0].length(), result);
             }
-            int fFieldStart = result.length();
+            int fFieldStart = result[0].length();
 
             for (int i=0; i < maxFraDigits; ++i) {
                 // Here is where we escape from the loop.  We escape if we've
@@ -1153,22 +1164,22 @@ public class DecimalFormat extends NumberFormat {
                 // after the decimal but before any significant digits. These
                 // are only output if abs(number being formatted) < 1.0.
                 if (-1-i > (digitList.decimalAt-1)) {
-                    result.append(zero);
+                    result[0] += (zero);
                     continue;
                 }
 
                 // Output a digit, if we have any precision left, or a
                 // zero if we don't.  We don't want to output noise digits.
                 if (!isInteger && digitIndex < digitList.count) {
-                    result.append((char)(digitList.digits[digitIndex++] + zeroDelta));
+                    result[0] += ((char)(digitList.digits[digitIndex++] + zeroDelta));
                 } else {
-                    result.append(zero);
+                    result[0] += (zero);
                 }
             }
 
             // Record field information for caller.
             delegate.formatted(FRACTION_FIELD, Field.FRACTION, Field.FRACTION,
-                               fFieldStart, result.length(), result);
+                               fFieldStart, result[0].length(), result);
         }
 
         if (isNegative) {
@@ -1196,14 +1207,14 @@ public class DecimalFormat extends NumberFormat {
      * <p>
      * This is used by <code>subformat</code> to add the prefix/suffix.
      */
-    private void append(StringBuffer result, String string,
-                        FieldDelegate delegate,
+    private void append(String[] result, String string,
+    		FieldDelegate delegate,
                         FieldPosition[] positions,
                         Format.Field signAttribute) {
-        int start = result.length();
+        int start = result[0].length();
 
         if (string.length() > 0) {
-            result.append(string);
+            result[0] += (string);
             for (int counter = 0, max = positions.length; counter < max;
                  counter++) {
                 FieldPosition fp = positions[counter];
@@ -1307,23 +1318,23 @@ public class DecimalFormat extends NumberFormat {
             }
         }
 
-//        if (isParseBigDecimal()) {
-//            BigDecimal bigDecimalResult = digitList.getBigDecimal();
-//
-//            if (multiplier != 1) {
-//                try {
-//                    bigDecimalResult = bigDecimalResult.divide(getBigDecimalMultiplier());
-//                }
-//                catch (ArithmeticException e) {  // non-terminating decimal expansion
-//                    bigDecimalResult = bigDecimalResult.divide(getBigDecimalMultiplier(), roundingMode);
-//                }
-//            }
-//
-//            if (!status[STATUS_POSITIVE]) {
-//                bigDecimalResult = bigDecimalResult.negate();
-//            }
-//            return bigDecimalResult;
-//        } else {
+        if (isParseBigDecimal()) {
+            BigDecimal bigDecimalResult = digitList.getBigDecimal();
+
+            if (multiplier != 1) {
+                try {
+                    bigDecimalResult = bigDecimalResult.divide(getBigDecimalMultiplier());
+                }
+                catch (ArithmeticException e) {  // non-terminating decimal expansion
+                    bigDecimalResult = bigDecimalResult.divide(getBigDecimalMultiplier(), roundingMode);
+                }
+            }
+
+            if (!status[STATUS_POSITIVE]) {
+                bigDecimalResult = bigDecimalResult.negate();
+            }
+            return bigDecimalResult;
+        } else {
             boolean gotDouble = true;
             boolean gotLongMinimum = false;
             double  doubleResult = 0.0;
@@ -1381,30 +1392,30 @@ public class DecimalFormat extends NumberFormat {
             return gotDouble ?
                 (Number)new Double(doubleResult) : (Number)new Long(longResult);
         }
-//    }
+    }
 
-//    /**
-//     * Return a BigInteger multiplier.
-//     */
-//    private BigInteger getBigIntegerMultiplier() {
-//        if (bigIntegerMultiplier == null) {
-//            bigIntegerMultiplier = BigInteger.valueOf(multiplier);
-//        }
-//        return bigIntegerMultiplier;
-//    }
-//    private transient BigInteger bigIntegerMultiplier;
-//
-//    /**
-//     * Return a BigDecimal multiplier.
-//     */
-//    private BigDecimal getBigDecimalMultiplier() {
-//        if (bigDecimalMultiplier == null) {
-//            bigDecimalMultiplier = new BigDecimal(multiplier);
-//        }
-//        return bigDecimalMultiplier;
-//    }
-//    private transient BigDecimal bigDecimalMultiplier;
-//
+    /**
+     * Return a BigInteger multiplier.
+     */
+    private BigInteger getBigIntegerMultiplier() {
+        if (bigIntegerMultiplier == null) {
+            bigIntegerMultiplier = BigInteger.valueOf(multiplier);
+        }
+        return bigIntegerMultiplier;
+    }
+    private transient BigInteger bigIntegerMultiplier;
+
+    /**
+     * Return a BigDecimal multiplier.
+     */
+    private BigDecimal getBigDecimalMultiplier() {
+        if (bigDecimalMultiplier == null) {
+            bigDecimalMultiplier = new BigDecimal(multiplier);
+        }
+        return bigDecimalMultiplier;
+    }
+    private transient BigDecimal bigDecimalMultiplier;
+
     private static final int STATUS_INFINITE = 0;
     private static final int STATUS_POSITIVE = 1;
     private static final int STATUS_LENGTH   = 2;
@@ -1839,8 +1850,8 @@ public class DecimalFormat extends NumberFormat {
      */
     public void setMultiplier (int newValue) {
         multiplier = newValue;
-//        bigDecimalMultiplier = null;
-//        bigIntegerMultiplier = null;
+        bigDecimalMultiplier = null;
+        bigIntegerMultiplier = null;
     }
 
     /**
@@ -1997,7 +2008,7 @@ public class DecimalFormat extends NumberFormat {
      */
     private void expandAffixes() {
         // Reuse one StringBuffer for better performance
-        StringBuffer buffer = new StringBuffer();
+        String[] buffer = 秘newSA();
         if (posPrefixPattern != null) {
             positivePrefix = expandAffix(posPrefixPattern, buffer);
             positivePrefixFieldPositions = null;
@@ -2016,7 +2027,8 @@ public class DecimalFormat extends NumberFormat {
         }
     }
 
-    /**
+
+	/**
      * Expand an affix pattern into an affix string.  All characters in the
      * pattern are literal unless prefixed by QUOTE.  The following characters
      * after QUOTE are recognized: PATTERN_PERCENT, PATTERN_PER_MILLE,
@@ -2030,8 +2042,8 @@ public class DecimalFormat extends NumberFormat {
      * @param buffer a scratch StringBuffer; its contents will be lost
      * @return the expanded equivalent of pattern
      */
-    private String expandAffix(String pattern, StringBuffer buffer) {
-        buffer.setLength(0);
+    private String expandAffix(String pattern, String[] buffer) {
+        buffer[0] = "";
         for (int i=0; i<pattern.length(); ) {
             char c = pattern.charAt(i++);
             if (c == QUOTE) {
@@ -2041,9 +2053,9 @@ public class DecimalFormat extends NumberFormat {
                     if (i<pattern.length() &&
                         pattern.charAt(i) == CURRENCY_SIGN) {
                         ++i;
-                        buffer.append(symbols.getInternationalCurrencySymbol());
+                        buffer[0] += (symbols.getInternationalCurrencySymbol());
                     } else {
-                        buffer.append(symbols.getCurrencySymbol());
+                        buffer[0] += (symbols.getCurrencySymbol());
                     }
                     continue;
                 case PATTERN_PERCENT:
@@ -2057,9 +2069,9 @@ public class DecimalFormat extends NumberFormat {
                     break;
                 }
             }
-            buffer.append(c);
+            buffer[0] += (c);
         }
-        return buffer.toString();
+        return buffer[0];
     }
 
     /**
@@ -2157,7 +2169,7 @@ public class DecimalFormat extends NumberFormat {
      * @param localized true if the appended pattern should contain localized
      * pattern characters; otherwise, non-localized pattern chars are appended
      */
-    private void appendAffix(StringBuffer buffer, String affixPattern,
+    private void appendAffix(String[] buffer, String affixPattern,
                              String expAffix, boolean localized) {
         if (affixPattern == null) {
             appendAffix(buffer, expAffix, localized);
@@ -2175,13 +2187,13 @@ public class DecimalFormat extends NumberFormat {
                 char c = affixPattern.charAt(++i);
                 ++i;
                 if (c == QUOTE) {
-                    buffer.append(c);
+                    buffer[0] += (c);
                     // Fall through and append another QUOTE below
                 } else if (c == CURRENCY_SIGN &&
                            i<affixPattern.length() &&
                            affixPattern.charAt(i) == CURRENCY_SIGN) {
                     ++i;
-                    buffer.append(c);
+                    buffer[0] += (c);
                     // Fall through and append another CURRENCY_SIGN below
                 } else if (localized) {
                     switch (c) {
@@ -2196,7 +2208,7 @@ public class DecimalFormat extends NumberFormat {
                         break;
                     }
                 }
-                buffer.append(c);
+                buffer[0] += (c);
             }
         }
     }
@@ -2206,7 +2218,7 @@ public class DecimalFormat extends NumberFormat {
      * there are special characters.  Single quotes themselves must be
      * escaped in either case.
      */
-    private void appendAffix(StringBuffer buffer, String affix, boolean localized) {
+    private void appendAffix(String[] buffer, String affix, boolean localized) {
         boolean needQuote;
         if (localized) {
             needQuote = affix.indexOf(symbols.getZeroDigit()) >= 0
@@ -2230,22 +2242,22 @@ public class DecimalFormat extends NumberFormat {
                 || affix.indexOf(PATTERN_MINUS) >= 0
                 || affix.indexOf(CURRENCY_SIGN) >= 0;
         }
-        if (needQuote) buffer.append('\'');
-        if (affix.indexOf('\'') < 0) buffer.append(affix);
+        if (needQuote) buffer[0] += ('\'');
+        if (affix.indexOf('\'') < 0) buffer[0] += (affix);
         else {
             for (int j=0; j<affix.length(); ++j) {
                 char c = affix.charAt(j);
-                buffer.append(c);
-                if (c == '\'') buffer.append(c);
+                buffer[0] += (c);
+                if (c == '\'') buffer[0] += (c);
             }
         }
-        if (needQuote) buffer.append('\'');
+        if (needQuote) buffer[0] += ('\'');
     }
 
     /**
      * Does the real work of generating a pattern.  */
     private String toPattern(boolean localized) {
-        StringBuffer result = new StringBuffer();
+        String[] result = new String[] {""};
         for (int j = 1; j >= 0; --j) {
             if (j == 1)
                 appendAffix(result, posPrefixPattern, positivePrefix, localized);
@@ -2257,31 +2269,31 @@ public class DecimalFormat extends NumberFormat {
             for (i = digitCount; i > 0; --i) {
                 if (i != digitCount && isGroupingUsed() && groupingSize != 0 &&
                     i % groupingSize == 0) {
-                    result.append(localized ? symbols.getGroupingSeparator() :
+                    result[0] += (localized ? symbols.getGroupingSeparator() :
                                   PATTERN_GROUPING_SEPARATOR);
                 }
-                result.append(i <= getMinimumIntegerDigits()
+                result[0] += (i <= getMinimumIntegerDigits()
                     ? (localized ? symbols.getZeroDigit() : PATTERN_ZERO_DIGIT)
                     : (localized ? symbols.getDigit() : PATTERN_DIGIT));
             }
             if (getMaximumFractionDigits() > 0 || decimalSeparatorAlwaysShown)
-                result.append(localized ? symbols.getDecimalSeparator() :
+                result[0] += (localized ? symbols.getDecimalSeparator() :
                               PATTERN_DECIMAL_SEPARATOR);
             for (i = 0; i < getMaximumFractionDigits(); ++i) {
                 if (i < getMinimumFractionDigits()) {
-                    result.append(localized ? symbols.getZeroDigit() :
+                    result[0] += (localized ? symbols.getZeroDigit() :
                                   PATTERN_ZERO_DIGIT);
                 } else {
-                    result.append(localized ? symbols.getDigit() :
+                    result[0] += (localized ? symbols.getDigit() :
                                   PATTERN_DIGIT);
                 }
             }
         if (useExponentialNotation)
         {
-            result.append(localized ? symbols.getExponentSeparator() :
+            result[0] += (localized ? symbols.getExponentSeparator() :
                   PATTERN_EXPONENT);
         for (i=0; i<minExponentDigits; ++i)
-                    result.append(localized ? symbols.getZeroDigit() :
+                    result[0] += (localized ? symbols.getZeroDigit() :
                                   PATTERN_ZERO_DIGIT);
         }
             if (j == 1) {
@@ -2296,11 +2308,11 @@ public class DecimalFormat extends NumberFormat {
                          negativePrefix.equals(symbols.getMinusSign() + positivePrefix)))
                         break;
                 }
-                result.append(localized ? symbols.getPatternSeparator() :
+                result[0] += (localized ? symbols.getPatternSeparator() :
                               PATTERN_SEPARATOR);
             } else appendAffix(result, negSuffixPattern, negativeSuffix, localized);
         }
-        return result.toString();
+        return result[0];
     }
 
     /**
@@ -2393,8 +2405,8 @@ public class DecimalFormat extends NumberFormat {
         int start = 0;
         for (int j = 1; j >= 0 && start < pattern.length(); --j) {
             boolean inQuote = false;
-            StringBuffer prefix = new StringBuffer();
-            StringBuffer suffix = new StringBuffer();
+            String[] prefix = 秘newSA();
+            String[] suffix = 秘newSA();
             int decimalPos = -1;
             int multiplier = 1;
             int digitLeftCount = 0, zeroDigitCount = 0, digitRightCount = 0;
@@ -2410,7 +2422,7 @@ public class DecimalFormat extends NumberFormat {
             int phase = 0;
 
             // The affix is either the prefix or the suffix.
-            StringBuffer affix = prefix;
+            String[] affix = prefix;
 
             for (int pos = start; pos < pattern.length(); ++pos) {
                 char ch = pattern.charAt(pos);
@@ -2426,7 +2438,7 @@ public class DecimalFormat extends NumberFormat {
                             if ((pos+1) < pattern.length() &&
                                 pattern.charAt(pos+1) == QUOTE) {
                                 ++pos;
-                                affix.append("''"); // 'don''t'
+                                affix[0] += ("''"); // 'don''t'
                             } else {
                                 inQuote = false; // 'do'
                             }
@@ -2454,7 +2466,7 @@ public class DecimalFormat extends NumberFormat {
                              ++pos;
                             }
                             isCurrencyFormat = true;
-                            affix.append(doubled ? "'\u00A4\u00A4" : "'\u00A4");
+                            affix[0] += (doubled ? "'\u00A4\u00A4" : "'\u00A4");
                             continue;
                         } else if (ch == QUOTE) {
                             // A quote outside quotes indicates either the
@@ -2465,7 +2477,7 @@ public class DecimalFormat extends NumberFormat {
                                 if ((pos+1) < pattern.length() &&
                                     pattern.charAt(pos+1) == QUOTE) {
                                     ++pos;
-                                    affix.append("''"); // o''clock
+                                    affix[0] += ("''"); // o''clock
                                 } else {
                                     inQuote = true; // 'do'
                                 }
@@ -2491,7 +2503,7 @@ public class DecimalFormat extends NumberFormat {
                                     pattern + '"');
                             }
                             multiplier = 100;
-                            affix.append("'%");
+                            affix[0] += ("'%");
                             continue;
                         } else if (ch == perMill) {
                             if (multiplier != 1) {
@@ -2499,17 +2511,17 @@ public class DecimalFormat extends NumberFormat {
                                     pattern + '"');
                             }
                             multiplier = 1000;
-                            affix.append("'\u2030");
+                            affix[0] += ("'\u2030");
                             continue;
                         } else if (ch == minus) {
-                            affix.append("'-");
+                            affix[0] += ("'-");
                             continue;
                         }
                     }
                     // Note that if we are within quotes, or if this is an
                     // unquoted, non-special character, then we usually fall
                     // through to here.
-                    affix.append(ch);
+                    affix[0] += (ch);
                     break;
 
                 case 1:
@@ -2636,8 +2648,8 @@ public class DecimalFormat extends NumberFormat {
             }
 
             if (j == 1) {
-                posPrefixPattern = prefix.toString();
-                posSuffixPattern = suffix.toString();
+                posPrefixPattern = prefix[0];
+                posSuffixPattern = suffix[0];
                 negPrefixPattern = posPrefixPattern;   // assume these for now
                 negSuffixPattern = posSuffixPattern;
                 int digitTotalCount = digitLeftCount + zeroDigitCount + digitRightCount;
@@ -2661,8 +2673,8 @@ public class DecimalFormat extends NumberFormat {
                 setDecimalSeparatorAlwaysShown(decimalPos == 0 ||
                     decimalPos == digitTotalCount);
             } else {
-                negPrefixPattern = prefix.toString();
-                negSuffixPattern = suffix.toString();
+                negPrefixPattern = prefix[0];
+                negSuffixPattern = suffix[0];
                 gotNegative = true;
             }
         }
@@ -2820,40 +2832,40 @@ public class DecimalFormat extends NumberFormat {
         return minimumFractionDigits;
     }
 
-//    /**
-//     * Gets the currency used by this decimal format when formatting
-//     * currency values.
-//     * The currency is obtained by calling
-//     * {@link DecimalFormatSymbols#getCurrency DecimalFormatSymbols.getCurrency}
-//     * on this number format's symbols.
-//     *
-//     * @return the currency used by this decimal format, or <code>null</code>
-//     * @since 1.4
-//     */
-//    public Currency getCurrency() {
-//        return symbols.getCurrency();
-//    }
-//
-//    /**
-//     * Sets the currency used by this number format when formatting
-//     * currency values. This does not update the minimum or maximum
-//     * number of fraction digits used by the number format.
-//     * The currency is set by calling
-//     * {@link DecimalFormatSymbols#setCurrency DecimalFormatSymbols.setCurrency}
-//     * on this number format's symbols.
-//     *
-//     * @param currency the new currency to be used by this decimal format
-//     * @exception NullPointerException if <code>currency</code> is null
-//     * @since 1.4
-//     */
-//    public void setCurrency(Currency currency) {
-//        if (currency != symbols.getCurrency()) {
-//            symbols.setCurrency(currency);
-//            if (isCurrencyFormat) {
-//                expandAffixes();
-//            }
-//        }
-//    }
+    /**
+     * Gets the currency used by this decimal format when formatting
+     * currency values.
+     * The currency is obtained by calling
+     * {@link DecimalFormatSymbols#getCurrency DecimalFormatSymbols.getCurrency}
+     * on this number format's symbols.
+     *
+     * @return the currency used by this decimal format, or <code>null</code>
+     * @since 1.4
+     */
+    public Currency getCurrency() {
+        return symbols.getCurrency();
+    }
+
+    /**
+     * Sets the currency used by this number format when formatting
+     * currency values. This does not update the minimum or maximum
+     * number of fraction digits used by the number format.
+     * The currency is set by calling
+     * {@link DecimalFormatSymbols#setCurrency DecimalFormatSymbols.setCurrency}
+     * on this number format's symbols.
+     *
+     * @param currency the new currency to be used by this decimal format
+     * @exception NullPointerException if <code>currency</code> is null
+     * @since 1.4
+     */
+    public void setCurrency(Currency currency) {
+        if (currency != symbols.getCurrency()) {
+            symbols.setCurrency(currency);
+            if (isCurrencyFormat) {
+                expandAffixes();
+            }
+        }
+    }
 
     /**
      * Gets the {@link java.math.RoundingMode} used in this DecimalFormat.

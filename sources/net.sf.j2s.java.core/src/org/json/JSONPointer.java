@@ -1,7 +1,5 @@
 package org.json;
 
-import static java.lang.String.format;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -213,7 +211,7 @@ public class JSONPointer {
             } else if (current instanceof JSONArray) {
                 current = readByIndexToken(current, token);
             } else {
-                throw new JSONPointerException(format(
+                throw new JSONPointerException(String.format(
                         "value [%s] is not an array or object therefore its key %s cannot be resolved", current,
                         token));
             }
@@ -233,7 +231,7 @@ public class JSONPointer {
             int index = Integer.parseInt(indexToken);
             JSONArray currentArr = (JSONArray) current;
             if (index >= currentArr.length()) {
-                throw new JSONPointerException(format("index %d is out of bounds - the array has %d elements", index,
+                throw new JSONPointerException(String.format("index %d is out of bounds - the array has %d elements", index,
                         currentArr.length()));
             }
             try {
@@ -242,7 +240,7 @@ public class JSONPointer {
 				throw new JSONPointerException("Error reading value at index position " + index, e);
 			}
         } catch (NumberFormatException e) {
-            throw new JSONPointerException(format("%s is not an array index", indexToken), e);
+            throw new JSONPointerException(String.format("%s is not an array index", indexToken), e);
         }
     }
 

@@ -30,7 +30,7 @@ public class MessageFormat {
     	this.pattern = pattern;
     }
 
-    public static String format(String pattern, Object[] args) {
+    public static String format(String pattern, Object... args) {
         /**
          * @j2sNative
          * return pattern.replace (/\{(\d+)\}/g, function ($0, $1) {

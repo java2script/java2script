@@ -1,8 +1,5 @@
 /*
- * Some portions of this file have been modified by Robert Hanson hansonr.at.stolaf.edu 2012-2017
- * for use in SwingJS via transpilation into JavaScript using Java2Script.
- *
- * Copyright (c) 1997, 2001, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -27,6 +24,7 @@
  */
 package javax.swing.event;
 
+import java.awt.event.InputEvent;
 import java.util.EventObject;
 import java.net.URL;
 import javax.swing.text.Element;
@@ -41,13 +39,12 @@ import javax.swing.text.Element;
  * future Swing releases. The current serialization support is
  * appropriate for short term storage or RMI between applications running
  * the same version of Swing.  As of 1.4, support for long term storage
- * of all JavaBeans<sup><font size="-2">TM</font></sup>
+ * of all JavaBeans&trade;
  * has been added to the <code>java.beans</code> package.
  * Please see {@link java.beans.XMLEncoder}.
  *
  * @author  Timothy Prinzing
  */
-@SuppressWarnings("serial")
 public class HyperlinkEvent extends EventObject {
 
     /**
@@ -105,6 +102,32 @@ public class HyperlinkEvent extends EventObject {
     }
 
     /**
+     * Creates a new object representing a hypertext link event.
+     *
+     * @param source the object responsible for the event
+     * @param type the event type
+     * @param u the affected URL.  This may be null if a valid URL
+     *   could not be created.
+     * @param desc the description of the link.  This may be useful
+     *   when attempting to form a URL resulted in a MalformedURLException.
+     *   The description provides the text used when attempting to form the
+     *   URL.
+     * @param sourceElement Element in the Document representing the
+     *   anchor
+     * @param inputEvent  InputEvent that triggered the hyperlink event
+     * @since 1.7
+     */
+    public HyperlinkEvent(Object source, EventType type, URL u, String desc,
+                          Element sourceElement, InputEvent inputEvent) {
+        super(source);
+        this.type = type;
+        this.u = u;
+        this.desc = desc;
+        this.sourceElement = sourceElement;
+        this.inputEvent = inputEvent;
+    }
+
+    /**
      * Gets the type of event.
      *
      * @return the type
@@ -135,7 +158,7 @@ public class HyperlinkEvent extends EventObject {
     /**
      * Returns the <code>Element</code> that corresponds to the source of the
      * event. This will typically be an <code>Element</code> representing
-     * an anchor. If a constructur that is used that does not specify a source
+     * an anchor. If a constructor that is used that does not specify a source
      * <code>Element</code>, or null was specified as the source
      * <code>Element</code>, this will return null.
      *
@@ -146,10 +169,24 @@ public class HyperlinkEvent extends EventObject {
         return sourceElement;
     }
 
+    /**
+     * Returns the {@code InputEvent} that triggered the hyperlink event.
+     * This will typically be a {@code MouseEvent}.  If a constructor is used
+     * that does not specify an {@code InputEvent}, or @{code null}
+     * was specified as the {@code InputEvent}, this returns {@code null}.
+     *
+     * @return  InputEvent that triggered the hyperlink event, or null
+     * @since 1.7
+     */
+    public InputEvent getInputEvent() {
+        return inputEvent;
+    }
+
     private EventType type;
     private URL u;
     private String desc;
     private Element sourceElement;
+    private InputEvent inputEvent;
 
 
     /**
@@ -182,8 +219,7 @@ public class HyperlinkEvent extends EventObject {
          *
          * @return the string
          */
-        @Override
-				public String toString() {
+        public String toString() {
             return typeString;
         }
 

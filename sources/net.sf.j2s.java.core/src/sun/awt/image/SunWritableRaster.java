@@ -1,5 +1,5 @@
 /*
- * Copyrig	ht (c) 2001, 2008, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2001, 2008, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -29,15 +29,14 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
-import java.awt.image.DataBufferInt;
 import java.awt.image.DataBufferUShort;
-import java.awt.image.Raster;
+import java.awt.image.DataBufferInt;
 import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
-import sun.java2d.StateTrackable.State;
-import sun.java2d.StateTrackableDelegate;
 
-//import java.awt.image.DataBufferUShort;
+import sun.java2d.StateTrackable.State;
+import sun.java2d.SurfaceData;
+import sun.java2d.StateTrackableDelegate;
 
 /**
  * This class exists as a middle layer between WritableRaster and its
@@ -46,11 +45,10 @@ import sun.java2d.StateTrackableDelegate;
  * DataBuffer types and also steals the StateTrackableDelegate from the
  * associated DataBuffer so that it can be updated when the data is changed.
  */
-
 public class SunWritableRaster extends WritableRaster {
 
 	// temporary only, until we figure out how to do this.
-	
+
 	public int[] 秘pix;
 
 	private static DataStealer stealer;
@@ -63,11 +61,10 @@ public class SunWritableRaster extends WritableRaster {
 			}
 
 			@Override
-			public short[] getData(DataBufferUShort dbus,
-			 int bank) {
-			 return dbus.bankdata[bank];
+			public short[] getData(DataBufferUShort dbus, int bank) {
+				return dbus.bankdata[bank];
 			}
-			
+
 			@Override
 			public int[] getData(DataBufferInt dbi, int bank) {
 				return dbi.bankdata[bank];
@@ -82,8 +79,7 @@ public class SunWritableRaster extends WritableRaster {
 			public void setTrackable(DataBuffer db, StateTrackableDelegate trackable) {
 				db.theTrackable = trackable;
 			}
-		}
-				: stealer);
+		} : stealer);
 	}
 
 //	// SwingJS had to extract DataStealer interface to top level
@@ -100,10 +96,10 @@ public class SunWritableRaster extends WritableRaster {
 		return getStealer().getData(dbb, bank);
 	}
 
-	 public static short[] stealData(DataBufferUShort dbus, int bank) {
-	 return getStealer().getData(dbus, bank);
-	 }
-	 
+	public static short[] stealData(DataBufferUShort dbus, int bank) {
+		return getStealer().getData(dbus, bank);
+	}
+
 	public static int[] stealData(DataBufferInt dbi, int bank) {
 		return getStealer().getData(dbi, bank);
 	}
@@ -112,14 +108,12 @@ public class SunWritableRaster extends WritableRaster {
 		return getStealer().getTrackable(db);
 	}
 
-	public static void setTrackable(DataBuffer db,
-			StateTrackableDelegate trackable) {
+	public static void setTrackable(DataBuffer db, StateTrackableDelegate trackable) {
 		getStealer().setTrackable(db, trackable);
 	}
 
 	public static void makeTrackable(DataBuffer db) {
-		getStealer().setTrackable(db,
-				StateTrackableDelegate.createInstance(State.STABLE));
+		getStealer().setTrackable(db, StateTrackableDelegate.createInstance(State.STABLE));
 	}
 
 	public static void markDirty(DataBuffer db) {
@@ -145,24 +139,14 @@ public class SunWritableRaster extends WritableRaster {
 		theTrackable = stealTrackable(dataBuffer);
 	}
 
-	public SunWritableRaster(SampleModel sampleModel, DataBuffer dataBuffer,
-			Point origin) {
+	public SunWritableRaster(SampleModel sampleModel, DataBuffer dataBuffer, Point origin) {
 		super(sampleModel, dataBuffer, origin);
 		theTrackable = stealTrackable(dataBuffer);
 	}
-	
-	public SunWritableRaster(){
-		// for reflection
-	}
 
-	public SunWritableRaster(SampleModel sampleModel, DataBuffer dataBuffer,
-			Rectangle aRegion, Point sampleModelTranslate, Raster parent) {
-		setSunRaster(sampleModel, dataBuffer, aRegion, sampleModelTranslate, parent);
-	}
-
-	protected void setSunRaster(SampleModel sampleModel, DataBuffer dataBuffer,
-			Rectangle aRegion, Point sampleModelTranslate, Raster parent) {
-		setRaster(sampleModel, dataBuffer, aRegion, sampleModelTranslate, parent);
+	public SunWritableRaster(SampleModel sampleModel, DataBuffer dataBuffer, Rectangle aRegion,
+			Point sampleModelTranslate, WritableRaster parent) {
+		super(sampleModel, dataBuffer, aRegion, sampleModelTranslate, parent);
 		theTrackable = stealTrackable(dataBuffer);
 	}
 

@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.HashSet;
 
 import swingjs.JSToolkit;
+import swingjs.JSUtil;
 
 import java.beans.PropertyChangeSupport;
 import java.beans.PropertyChangeListener;
@@ -133,12 +134,15 @@ public final class AppContext {
 
     /* The key to put()/get() the Java EventQueue into/from the AppContext.
      */
-    public static final Object EVENT_QUEUE_KEY = new StringBuffer("EventQueue");
+    public static final String EVENT_QUEUE_KEY = "AppContext_EVENT_QUEUE_KEY";//new StringBuffer("EventQueue");
 
     /* A map of AppContexts, referenced by ThreadGroup.
      */
-    private static final Map<ThreadGroup, AppContext> threadGroup2appContext =
-            Collections.synchronizedMap(new IdentityHashMap<ThreadGroup, AppContext>());
+    private static final Map<//ThreadGroup
+    String, AppContext> threadGroup2appContext =  // ThreadGroup
+            //Collections.synchronizedMap(new Identity
+            		new HashMap<String//ThreadGroup
+            		, AppContext>();//);
 
     /**
      * Returns a set containing all <code>AppContext</code>s.
@@ -214,7 +218,7 @@ public final class AppContext {
         numAppContexts++;
 
         this.threadGroup = threadGroup;
-        threadGroup2appContext.put(threadGroup, this);
+        threadGroup2appContext.put(JSUtil.getJSID(threadGroup), this);
 
         contextClassLoader = /** @j2sNative this || */ null;
 //        this.contextClassLoader =
@@ -298,7 +302,7 @@ public final class AppContext {
 //                            initMainAppContext();
 //                        }
 //                    }
-            appContext = threadGroup2appContext.get(threadGroup);
+            appContext = threadGroup2appContext.get(JSUtil.getJSID(threadGroup));
             while (appContext == null) {
                 threadGroup = threadGroup.getParent();
                 if (threadGroup == null) {
@@ -323,13 +327,13 @@ public final class AppContext {
 //                    }
 //                    return null;
                 }
-                appContext = threadGroup2appContext.get(threadGroup);
+                appContext = threadGroup2appContext.get(JSUtil.getJSID(threadGroup));
             }
             // In case we did anything in the above while loop, we add
             // all the intermediate ThreadGroups to threadGroup2appContext
             // so we won't spin again.
             for (ThreadGroup tg = currentThreadGroup; tg != threadGroup; tg = tg.getParent()) {
-                threadGroup2appContext.put(tg, appContext);
+                threadGroup2appContext.put(JSUtil.getJSID(tg), appContext);
             }
 
             // Now we're done, so we cache the latest key/value pair.
@@ -593,6 +597,7 @@ public final class AppContext {
      * @since   1.2
      */
     public Object get(Object key) {
+    	key = 秘fixKey(key);
         /*
          * The most recent reference should be updated inside a synchronized
          * block to avoid a race when put() and get() are executed in
@@ -624,7 +629,11 @@ public final class AppContext {
         }
     }
 
-    /**
+    private String 秘fixKey(Object key) {
+    	return JSUtil.getJSID(key);
+	}
+
+	/**
      * Maps the specified <code>key</code> to the specified
      * <code>value</code> in this AppContext.  Neither the key nor the
      * value can be <code>null</code>.
@@ -642,6 +651,7 @@ public final class AppContext {
      * @since   1.2
      */
     public Object put(Object key, Object value) {
+    	key = 秘fixKey(key);
         synchronized (table) {
             MostRecentKeyValue recent = mostRecentKeyValue;
             if ((recent != null) && (recent.key == key))
@@ -661,6 +671,7 @@ public final class AppContext {
      * @since   1.2
      */
     public Object remove(Object key) {
+    	key = 秘fixKey(key);
         synchronized (table) {
             MostRecentKeyValue recent = mostRecentKeyValue;
             if ((recent != null) && (recent.key == key))

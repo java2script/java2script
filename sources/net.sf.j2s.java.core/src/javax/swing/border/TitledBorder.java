@@ -230,13 +230,13 @@ public class TitledBorder extends AbstractBorder
      * @param height the height of the painted border
      */
     @Override
-		public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+		public void paintBorder(Component c, Graphics g0, int x, int y, int width, int height) {
 
-        Border border = getBorder();
+    	Border border = getBorder();
 
         if (getTitle() == null || getTitle().equals("")) {
             if (border != null) {
-                border.paintBorder(c, g, x, y, width, height);
+                border.paintBorder(c, g0, x, y, width, height);
             }
             return;
         }
@@ -244,10 +244,10 @@ public class TitledBorder extends AbstractBorder
         Rectangle grooveRect = new Rectangle(x + EDGE_SPACING, y + EDGE_SPACING,
                                              width - (EDGE_SPACING * 2),
                                              height - (EDGE_SPACING * 2));
-        Font font = g.getFont();
-        Color color = g.getColor();
+        Font font = g0.getFont();
+        Color color = g0.getColor();
 
-        g.setFont(getFont(c));
+        g0.setFont(getFont(c));
 
         //JComponent jc = (JComponent)c;
         FontMetrics fm = getFont(c).getFontMetrics();
@@ -340,6 +340,8 @@ public class TitledBorder extends AbstractBorder
         // to show through the title.
         //
         if (border != null) {
+        	Rectangle clip0 = g0.getClipBounds();
+
             if (((titlePos == TOP || titlePos == DEFAULT_POSITION) &&
                   (grooveRect.y > textLoc.y - ascent)) ||
                  (titlePos == BOTTOM &&
@@ -348,72 +350,71 @@ public class TitledBorder extends AbstractBorder
                 Rectangle clipRect = new Rectangle();
 
                 // save original clip
-                Rectangle saveClip = g.getClipBounds();
+                //Rectangle saveClip = g.getClipBounds();
                 
-                JSGraphics2D cg = (JSGraphics2D) (Object) g;
-                int pt = cg.mark();
+                //JSGraphics2D cg = (JSGraphics2D) (Object) g;
+                //int pt = cg.mark();
+                
                 // paint strip left of text
-                clipRect.setBounds(saveClip);
+                clipRect.setBounds(clip0);
                 if (computeIntersection(clipRect, x, y, textLoc.x-1-x, height)) {
+                	Graphics g = g0.create();
                     g.setClip(clipRect);
                     border.paintBorder(c, g, grooveRect.x, grooveRect.y,
                                   grooveRect.width, grooveRect.height);
-                    cg.reset(pt);
-                    cg.mark();
+                    g.dispose();
                 }
 
                 // paint strip right of text
-                clipRect.setBounds(saveClip);
+                clipRect.setBounds(clip0);
                 if (computeIntersection(clipRect, textLoc.x+stringWidth+1, y,
                                x+width-(textLoc.x+stringWidth+1), height)) {
+                    Graphics g = g0.create();
                     g.setClip(clipRect);
                     border.paintBorder(c, g, grooveRect.x, grooveRect.y,
                                   grooveRect.width, grooveRect.height);
-                    cg.reset(pt);
-                    cg.mark();
+                    g.dispose();
                 }
 
                 if (titlePos == TOP || titlePos == DEFAULT_POSITION) {
                     // paint strip below text
-                    clipRect.setBounds(saveClip);
+                    clipRect.setBounds(clip0);
                     if (computeIntersection(clipRect, textLoc.x-1, textLoc.y+descent,
                                         stringWidth+2, y+height-textLoc.y-descent)) {
+                        Graphics g = g0.create();
                         g.setClip(clipRect);
                         border.paintBorder(c, g, grooveRect.x, grooveRect.y,
                                   grooveRect.width, grooveRect.height);
-                        cg.reset(pt);
-                        cg.mark();
+                    	g.dispose();
                     }
 
                 } else { // titlePos == BOTTOM
                   // paint strip above text
-                    clipRect.setBounds(saveClip);
+                    clipRect.setBounds(clip0);
                     if (computeIntersection(clipRect, textLoc.x-1, y,
                           stringWidth+2, textLoc.y - ascent - y)) {
+                        Graphics g = g0.create();
                         g.setClip(clipRect);
                         border.paintBorder(c, g, grooveRect.x, grooveRect.y,
                                   grooveRect.width, grooveRect.height);
-                        cg.reset(pt);
-                        cg.mark();
+                    	g.dispose();
                     }
                 }
 
                 // restore clip
-                g.setClip(saveClip);
-                cg.reset(pt);
+              //  g.setClip(saveClip);
 
             } else {
-                border.paintBorder(c, g, grooveRect.x, grooveRect.y,
+                border.paintBorder(c, g0, grooveRect.x, grooveRect.y,
                                   grooveRect.width, grooveRect.height);
             }
         }
 
-        g.setColor(getTitleColor());
+        g0.setColor(getTitleColor());
         //SwingUtilities2.drawString(jc, g, getTitle(), textLoc.x, textLoc.y);
-        g.drawString(getTitle(), textLoc.x, textLoc.y);
-
-        g.setFont(font);
-        g.setColor(color);
+        g0.drawString(getTitle(), textLoc.x, textLoc.y);
+        g0.setFont(font);
+        g0.setColor(color);
     }
 
     /**

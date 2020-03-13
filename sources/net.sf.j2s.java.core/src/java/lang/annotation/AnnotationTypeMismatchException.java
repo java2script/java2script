@@ -19,7 +19,7 @@ package java.lang.annotation;
 
 import java.lang.reflect.Method;
 
-import org.apache.harmony.luni.util.Msg;
+//import org.apache.harmony.luni.util.Msg;
 
 /**
  * <p>
@@ -46,7 +46,8 @@ public class AnnotationTypeMismatchException extends RuntimeException {
      * @param foundType The invalid type that was found.
      */
     public AnnotationTypeMismatchException(Method element, String foundType) {
-        super(Msg.getString("annotation.1", element, foundType)); //$NON-NLS-1$
+        super("Incorrectly typed data found for annotation element " + element
+                + " (Found data of type " + foundType + ")");
         this.element = element;
         this.foundType = foundType;
     }

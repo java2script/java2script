@@ -311,7 +311,7 @@ public abstract class ResourceBundle {
 	 * This variable would be better named "cache", but we keep the old name for
 	 * compatibility with some workarounds for bug 4212439.
 	 */
-	private static final HashMap<CacheKey, ResourceBundle> cacheList = new HashMap<CacheKey, ResourceBundle>(
+	private static final HashMap<String, ResourceBundle> cacheList = new HashMap<String, ResourceBundle>(
 			INITIAL_CACHE_SIZE);
 	// SwingJS was ConcurrentMap
 
@@ -1609,7 +1609,7 @@ public abstract class ResourceBundle {
 	 *         return if the bundle in the cache has expired.
 	 */
 	private static final ResourceBundle findBundleInCache(CacheKey cacheKey, Control control) {
-		ResourceBundle bundleRef = cacheList.get(cacheKey);
+		ResourceBundle bundleRef = cacheList.get(cacheKey.toString());
 		if (bundleRef == null) {
 			return null;
 		}
@@ -1720,7 +1720,7 @@ public abstract class ResourceBundle {
 		CacheKey key = (CacheKey) cacheKey.clone();
 //            BundleReference bundleRef = new BundleReference(bundle, referenceQueue, key);
 //            bundle.cacheKey = key;
-		cacheList.put(key, bundle);
+		cacheList.put(key.toString(), bundle);
 //
 //            // Put the bundle in the cache if it's not been in the cache.
 //            BundleReference result = cacheList.putIfAbsent(key, bundleRef);
@@ -2197,7 +2197,7 @@ public abstract class ResourceBundle {
 			if (baseName == null) {
 				throw new NullPointerException();
 			}
-			return FORMAT_PROPERTIES;// SwingJS was FORMAT_DEFAULT;
+			return FORMAT_DEFAULT;
 		}
 
 		/**
