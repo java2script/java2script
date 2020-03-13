@@ -3120,6 +3120,10 @@ var getURIField = function(name, def) {
 	}
 }
 
+var fixAgent = function(agent) {return "" + ((agent = agent.split(";")[0]),
+	  (agent + (agent.indexOf("(") >= 0 && agent.indexOf(")") < 0 ? ")" : ""))) }
+
+var agent = navigator.userA;
 var sysprops = {
 		"file.separator" : "/",
 		"line.separator" : "\n",
@@ -3131,8 +3135,8 @@ var sysprops = {
 		"java.vendor.url" : "https://github.com/BobHanson/java2script",
 		"java.version" : "1.8",
 		"os.arch" : navigator.userAgent,
-		"os.name" : navigator.userAgent,
-		"os.version": navigator.userAgent,
+		"os.name" : fixAgent(navigator.userAgent).split("(")[0],
+		"os.version": fixAgent(navigator.appVersion).replace(fixAgent(navigator.userAgent), ""),
 		"path.separator" : ":",
 		"user.dir" : "https://.",
 		"user.home" : "https://.",

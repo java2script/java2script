@@ -2465,7 +2465,7 @@ public final class Class<T> {
 	    var javapath = fname;
 	    try {
 	      if (fname.indexOf(":/") < 0) {
-	        var d = document.location.href.split("?")[0].split("/");
+	        var d = document.location.href.split("#")[0].split("?")[0].split("/");
         	d[d.length - 1] = fname;
         	fname = d.join("/");
 	      }
