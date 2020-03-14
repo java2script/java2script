@@ -104,8 +104,7 @@ public class JSHTMLHelper {
 			String left = href.substring(0, pt);
 			elem = getElementFromHref(left);
 			href = trimHRef(href.substring(pt + 9));
-
-			url = new URL(href);
+			url =  new URL(doc.getBase(), href);
 		} catch (MalformedURLException e) {
 			// ignore -- could be anything the developer wants.
 		}
