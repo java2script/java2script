@@ -282,6 +282,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer, JSComponentUI.Em
 				return HANDLED;
 			}
 		}
+		// note that for a key event this will cause stopPropagation and preventDefault from JQuery
 		return NOT_HANDLED;
 	}
 
