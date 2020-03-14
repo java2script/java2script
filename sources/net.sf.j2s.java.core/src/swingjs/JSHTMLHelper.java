@@ -20,6 +20,7 @@ import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 
 import javajs.util.PT;
+import swingjs.plaf.JSComponentUI;
 
 /**
  * A class to help with HTMLEditorKit-derived JEditorPane.
@@ -77,7 +78,7 @@ public class JSHTMLHelper {
 		String href = /** @j2sNative jQueryEvent.target.href || */
 				null;
 		if (href == null)
-			return false;
+			return JSComponentUI.HANDLED;
 		switch (eventType) {
 // these don't get registered, apparently. TODO
 //		case MouseEvent.MOUSE_ENTERED:
@@ -90,7 +91,7 @@ public class JSHTMLHelper {
 			type = EventType.ACTIVATED;
 			break;
 		default:
-			return false;
+			return JSComponentUI.HANDLED;
 		}
 		URL url = null;
 		Element elem = null;

@@ -7,7 +7,6 @@ import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
-import java.util.Enumeration;
 
 import javax.swing.InputMap;
 import javax.swing.JComponent;
@@ -15,7 +14,6 @@ import javax.swing.JEditorPane;
 import javax.swing.event.CaretEvent;
 import javax.swing.plaf.InputMapUIResource;
 import javax.swing.text.AbstractDocument.BranchElement;
-import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Caret;
@@ -23,12 +21,10 @@ import javax.swing.text.Document;
 import javax.swing.text.Element;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.Keymap;
-import javax.swing.text.Style;
+import javax.swing.text.Position;
 import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
 import javax.swing.text.StyledEditorKit;
 import javax.swing.text.View;
-import javax.swing.text.html.StyleSheet;
 
 import javajs.util.PT;
 import javajs.util.SB;
@@ -71,6 +67,8 @@ public class JSEditorPaneUI extends JSTextUI {
 	private static final int SPACES_PER_TAB = 4;
 	
 	protected boolean isTextPane = false;
+	
+	protected boolean isHtmlKit = false;
 
 	public JSEditorPaneUI() {
 		isEditorPane = isTextView = true;
@@ -213,7 +211,7 @@ public class JSEditorPaneUI extends JSTextUI {
 		}
 		textListener.checkDocument();
 		setCssFont(domNode, c.getFont());
-		DOMNode.setAttrs(domNode, "contentEditable", editor.isEditable() ? TRUE : FALSE, "spellcheck", FALSE);
+		DOMNode.setAttrs(domNode, "contentEditable", isHtmlKit || editor.isEditable() ? TRUE : FALSE, "spellcheck", FALSE);
 		if (jc.getTopLevelAncestor() != null) {
 			if (editor.getText() != mytext) {
 				setText(null);
@@ -231,6 +229,9 @@ public class JSEditorPaneUI extends JSTextUI {
 		String prop = e.getPropertyName();
 		//System.out.println("JSEPUI prop " + prop);
 		switch(prop) {
+		case "editorKit":
+			isHtmlKit = (editor.秘jsHTMLHelper != null);
+			return;
 		case "text":
 			setCurrentText();
 			return;
@@ -338,11 +339,11 @@ public class JSEditorPaneUI extends JSTextUI {
 		String html;
 		if (text == null)
 			text = editor.getText();
-		if (editor.秘jsHTMLHelper != null) {
+		if (isHtmlKit) {
 			mytext = html = text;
 			isHTML = true;
 			html = (String) editor.秘jsHTMLHelper.get("html", getInner(text, "body"));
-			DOMNode.setAttrs(domNode, "contentEditable", FALSE);
+			DOMNode.setAttrs(domNode, "contentEditable", TRUE);
 			styleNode = DOMNode.createElement("div", id + "_style");
 			domNode.appendChild(styleNode);
 			String[] styles = (String[]) editor.秘jsHTMLHelper.get("styles", "body");
@@ -726,6 +727,8 @@ public class JSEditorPaneUI extends JSTextUI {
 	 */
 	@Override
 	protected void setJSSelection(int mark, int dot, boolean andScroll) {
+		if (isHtmlKit)
+			return;
 		super.setJSSelection(Math.min(mark,  dot), Math.max(mark,  dot), andScroll);
 	}
 
@@ -841,6 +844,8 @@ public class JSEditorPaneUI extends JSTextUI {
 	@SuppressWarnings("unused")
 	@Override
 	boolean getJSMarkAndDot(Point pt, int keycode) {
+		if (isHtmlKit)
+			return false;
 		int dot = 0, mark = 0, apt = 0, fpt = 0;
 		DOMNode anode = null, fnode = null, apar = null, fpar = null;
 		String atag = null, ftag = null;
@@ -891,6 +896,8 @@ public class JSEditorPaneUI extends JSTextUI {
 
 	@Override
 	void setJSMarkAndDot(int mark, int dot, boolean andScroll) {
+		if (isHtmlKit)
+			return;
 		//System.out.println("setJSMarkAndDot " + mark + " " + dot + " " + andScroll);
 		// key up with text change -- need to refresh data-ui attributes
 		// for all childNodes and also set the java caret, which will then
@@ -907,6 +914,8 @@ public class JSEditorPaneUI extends JSTextUI {
 	
 	@Override
 	public void action(String what, int data) {
+		if (isHtmlKit)
+			return;
 		int p = -1;
 		switch (what) {
 		case "paste":
@@ -985,6 +994,12 @@ public class JSEditorPaneUI extends JSTextUI {
 	private String stemp;
 	private int[] xyTemp;
 	
+    @Override
+	public int viewToModel(JTextComponent t, Point pt,
+            Position.Bias[] biasReturn) {
+		return (isHtmlKit ? 0 : super.viewToModel(t,  pt,  biasReturn));
+    }
+
 	/**
 	 * CTRL-V insertion requires knowledge of the text length at the time of keypress and 
 	 * then comparing that to the value at the time of keyup. Hopefully no repeating!
@@ -993,7 +1008,9 @@ public class JSEditorPaneUI extends JSTextUI {
 	@Override
 	protected boolean handleCtrlV(int mode) {
 		//System.out.println(getJavaMarkAndDot());
-		
+		if (isHtmlKit)
+			return false;
+
 		getJSMarkAndDot(markDot, 0);
 		//System.out.println(markDot);
 		String s = (String) DOMNode.getAttr(domNode, "innerText");
@@ -1060,33 +1077,43 @@ public class JSEditorPaneUI extends JSTextUI {
 	
 	boolean isPressConsumed;
 	
+	protected final static boolean DO_KEY_DEFAULT = true;
+	protected final static boolean STOP_KEY_DEFAULT_AND_PREVENT_PROPAGATION = false;
+
+
+	/**
+	 * This method is entered from the j2sApplet mouse listeners, 
+	 * 
+	 */
 	@Override
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
 		Boolean b = checkAllowEvent(jQueryEvent);
 		if (b != null)
 			return b;
-		System.out.println("handling event type " + eventType);
 		switch (eventType) {
 		default:
 			return NOT_HANDLED;
 		case MouseEvent.MOUSE_ENTERED:
+		case MouseEvent.MOUSE_DRAGGED:
 		case MouseEvent.MOUSE_EXITED:
+		case MouseEvent.MOUSE_PRESSED:
 		case MouseEvent.MOUSE_RELEASED:
-			if (editor.秘jsHTMLHelper != null) {
+			if (isHtmlKit) {
+				// The idea here is to disallow mouse-driven editing
+				DOMNode.setAttrs(domNode, "contentEditable", FALSE);				
 				editor.秘jsHTMLHelper.handleJSEvent(target, eventType, jQueryEvent);
 				return HANDLED;
 			}
-		case SOME_KEY_EVENT:
-			//System.out.println("JSEPUI dispatching " + jQueryEvent);
-			JSKeyEvent.dispatchKeyEvent(jc, 0, jQueryEvent, System.currentTimeMillis());
-			/**
-			 * @j2sNative
-			 * 
-			 * 			jQueryEvent.preventDefault(); 
-			 * 			jQueryEvent.stopPropagation();
-			 */
-			setIgnoreEvent(jQueryEvent);
 			return HANDLED;
+		case SOME_KEY_EVENT:
+			setIgnoreEvent(jQueryEvent);
+			if (isHtmlKit) {
+				// Allow CTRL-A to select just the JEditorPane, not the whole page
+				DOMNode.setAttrs(domNode, "contentEditable", TRUE);				
+				return DO_KEY_DEFAULT;
+			}
+			JSKeyEvent.dispatchKeyEvent(jc, 0, jQueryEvent, System.currentTimeMillis());
+			return STOP_KEY_DEFAULT_AND_PREVENT_PROPAGATION;
 		}
 	}
 
