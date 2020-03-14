@@ -1038,7 +1038,7 @@ public class JSComponentUI extends ComponentUI
 		 * @j2sNative
 		 * 
 		 * 			node.focus(function(e) {
-		 * 				//System.out.println("JSSCUI node.focus() callback " + me.id + "  " + document.activeElement.id);
+		 * 				//System.out.println("JSSCUI node.focus() callback " + me.id + "  " + document.activeElement.id + " " + me.ignoreFocus);
 		 *              if (!me.ignoreFocus)
 		 * 				me.handleJSFocus$O$O$Z(me.jc, e.relatedTarget, true);
 		 * 				me.ignoreFocus = false;
@@ -1108,9 +1108,9 @@ public class JSComponentUI extends ComponentUI
 	/**
 	 * for SetMouse check
 	 */
-	protected final static boolean HANDLED = true;
-	protected final static boolean NOT_HANDLED = false;
-
+	public final static boolean HANDLED = true;
+	public final static boolean NOT_HANDLED = false;
+	
     protected static final int SOME_MOUSE_EVENT = -1;
     protected static final int SOME_KEY_EVENT = -2;
 
@@ -2647,8 +2647,8 @@ public class JSComponentUI extends ComponentUI
 				}
 			}
 			if (!isMenu || isMenuItem)
-				DOMNode.setStyles(menuAnchorNode, "width", "95%", "min-width",
-					Math.max(75, (wCtr + wAccel + margins.left + margins.right) * 1.1) + "px");
+				DOMNode.setStyles(menuAnchorNode, "width", "90%", "min-width",
+					Math.max(75, (wCtr + wAccel + margins.left + margins.right) * 1.1) + "px"); // was 95%, but then the blue background extends past right end of menu item
 		}
 
 		if (alignHCenter) {
@@ -3522,17 +3522,9 @@ public class JSComponentUI extends ComponentUI
 	 */
 	public boolean isTextView;
 
-
-
 	public boolean isModalBlocked() {
 		return JSComponent.秘getTopInvokableAncestor(jc, false).秘getUI().modalBlocked;
 	}
-
-
-	public boolean processKeyEvent(KeyEvent e) {
-		return NOT_HANDLED;
-	}
-
 
 	public boolean isDisplayable() {
 		return domNode != null;
