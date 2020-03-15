@@ -1437,7 +1437,8 @@ public class JEditorPane extends JTextComponent {
 	@Override
 	public void setText(String t) {
 		try {
-			this.秘jsHTMLHelper.setText(t);
+			if (秘jsHTMLHelper != null)
+				秘jsHTMLHelper.setText(t);
 			Document doc = getDocument();
 			doc.remove(0, doc.getLength());
 			if (t == null || t.equals("")) {

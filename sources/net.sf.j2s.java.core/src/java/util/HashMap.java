@@ -500,7 +500,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 		if (Map.秘isSimple(this) && Map.秘isSimple(mOriginal)) {
 			HashMap me = this;
 			/**
-			 * @j2sNative m.秘m.forEach(function(value, key) {
+			 * @j2sNative mOriginal.秘m.forEach(function(value, key) {
 			 * 
 			 */
 			me.putVal(NO_RETURN, key, value, false, evict, Map.秘hasKey(me, key));
@@ -519,7 +519,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 		if (Map.秘isSimple(mOriginal)) {
 			HashMap me = this;
 			/**
-			 * @j2sNative m.秘m.forEach(function(value, key) {
+			 * @j2sNative mOriginal.秘m.forEach(function(value, key) {
 			 * 
 			 */
 			me.putVal(hash(key), key, value, false, evict, NOT_SIMPLE);
