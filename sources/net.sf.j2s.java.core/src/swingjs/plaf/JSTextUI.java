@@ -233,19 +233,22 @@ public abstract class JSTextUI extends JSLightweightUI {
 
 
 	/**
+	 * mouse events only -- called by j2sApplet.js
+	 * 
 	 * Handle stopPropagation and preventDefault here.
 	 * 
+	 * By existing at all, this method prevents j2sApplet.checkStopPropagation
+	 * from acting, and by returning false, it indicates
+	 * that other components (such as the JRootPane) should
+	 * handle this mouse action. 
 	 * 
-	 * mouse events only -- called by j2sApplet.js
 	 * 
 	 * @param ev
 	 * @param handled
 	 * @return true only if no further processing is desired
 	 */
 	public boolean checkStopPropagation(Object ev, boolean handled) {
-		// ev.stopPropagation();
-		// ev.preventDefault();
-		return false;
+		return NOT_HANDLED;
 	}
 
 	@Override
@@ -1303,6 +1306,12 @@ public abstract class JSTextUI extends JSLightweightUI {
 				else if (type == "keyup")
 					handleCtrlV(KeyEvent.KEY_RELEASED);
 				return NOT_CONSUMED;
+			case KeyEvent.VK_A: // a
+				if (!isCTRL)
+					return null;
+				return null;
+//				allowKeyEvent(jQueryEvent);
+//				return NOT_CONSUMED; // allow standard browser CTRL-C, with no Java-Event processing
 			case KeyEvent.VK_C: // copy
 				if (!isCTRL)
 					return null;
@@ -1380,7 +1389,6 @@ public abstract class JSTextUI extends JSLightweightUI {
 	 */
     public int viewToModel(JTextComponent t, Point pt,
             Position.Bias[] biasReturn) {
-    	
     	// from DefaultCursor mouse event
     	pt.x = Integer.MAX_VALUE;
     	getJSMarkAndDot(pt, 0);
@@ -1425,9 +1433,6 @@ public abstract class JSTextUI extends JSLightweightUI {
 		pt.x = (dot == oldDot && mark == oldMark ? Integer.MIN_VALUE : mark);
 		pt.y = dot;
 		return pt;
-	}
-
-	public void updateJSCursorFromCaret() {
 	}
 
 	public void caretUpdatedByProgram(CaretEvent e) {

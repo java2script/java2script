@@ -13802,7 +13802,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		if (!node.ui.jc.modal && modalZ < 1e10 && z > modalZ) {
 			z = modalZ - 500;
 		}
-		node.ui.outerNode.style.zIndex = z;
+		node.ui.outerNode && (node.ui.outerNode.style.zIndex = z);
 		return z;
 	}
 

@@ -2667,8 +2667,7 @@ public abstract class JComponent extends Container {
 		shouldProcessKey = KeyboardState.shouldProcess(e);
 
 		if (!e.isConsumed() && (shouldProcessKey
-				&& processKeyBindings(e, e.getID() == KeyEvent.KEY_PRESSED)
-				|| 秘getUI().processKeyEvent(e))) {
+				&& processKeyBindings(e, e.getID() == KeyEvent.KEY_PRESSED))) {
 			e.consume();
 		}
 	}

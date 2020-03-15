@@ -335,13 +335,13 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Test_Editor action " + getID(e.getSource()));
 				editor.setText("");
-				JFrame frame1 = new JFrame();
-				frame1.setLocationRelativeTo(finalB);
-				JPanel jp = new JPanel();
-				jp.setPreferredSize(new Dimension(150,150));
-				frame1.add(jp);
-				frame1.pack();
-				frame1.setVisible(true);
+//				JFrame frame1 = new JFrame();
+//				frame1.setLocationRelativeTo(finalB);
+//				JPanel jp = new JPanel();
+//				jp.setPreferredSize(new Dimension(150,150));
+//				frame1.add(jp);
+//				frame1.pack();
+//				frame1.setVisible(true);
 
 //				btop.setEnabled(!btop.isEnabled());
 			}
@@ -419,7 +419,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Test_Editor action " + getID(e.getSource()));
-				area.setCaretPosition(area1.getText().length());
+				area.setCaretPosition(area.getText().length());
 				area.requestFocus();
 			}
 

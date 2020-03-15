@@ -22,7 +22,7 @@ public class Test_Html extends JFrame {
 		editor.setEditorKit(new HTMLEditorKit());
 		editor.setText(
 				"<html>"
-				+ "<head>"
+				+ "<head><base href=http://phet.colorado.edu>"
 				+ "<style type=\"text/css\">"
 				+ "body { margin:10px 10px 10px 10px;font-size: 24pt; font-family: Dialog }"
 				+ "a { text-decoration:none;font-size:12pt;}"
@@ -31,8 +31,8 @@ public class Test_Html extends JFrame {
 				+ "<body>"
 				+ "<b><font color=red>PhET Interactive Simulations</font></b>"
 				+ "<br>Copyright &copy; 2004-2015 University of Colorado."
-				+ "<br><a href=http://phet.colorado.edu/about/licensing.php>Some rights reserved.</a>"
-				+ "<br>Visit <a href=http://phet.colorado.edu>http://phet.colorado.edu</a>"
+				+ "<br><a href=\"about/licensing.php\">Some rights reserved.</a>"
+				+ "<br>Visit <a href=\".\">http://phet.colorado.edu</a>"
 				+ " <a href=proxy-href>proxy</a>"
 				+ "</body>"
 				+ "</html>");
@@ -58,9 +58,11 @@ public class Test_Html extends JFrame {
 			
 		});
 		HTMLDocument doc = (HTMLDocument)editor.getDocument();
+		URL base = doc.getBase();
+		System.out.println("Test_Html base=" + base);
 		Iterator iter = doc.getIterator(HTML.Tag.A);
 		while(iter.isValid()) {
-			System.out.println(iter.getAttributes());
+			System.out.println("Test_Html a=" + iter.getAttributes());
 					iter.next();
 		}
 
