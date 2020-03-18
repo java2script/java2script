@@ -607,6 +607,21 @@ public class JSGraphics2D implements
 		return drawImage(img, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, observer);
 	}
 
+	/**
+	 * Draw an image, possibly only part of it, and possibly scaled.
+	 * 
+	 * @param img
+	 * @param dx1 destination x1
+	 * @param dy1 destination y1
+	 * @param dx2 destination x2
+	 * @param dy2 destination y2
+	 * @param sx1 source x1
+	 * @param sy1 source y1
+	 * @param sx2 source x2
+	 * @param sy2 source y2
+	 * @param observer
+	 * @return true
+	 */
 	@SuppressWarnings("unused")
 	public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2, int sx1, int sy1, int sx2, int sy2,
 			ImageObserver observer) {
@@ -658,9 +673,17 @@ public class JSGraphics2D implements
 
 	private boolean thinLine;
 
+	public boolean drawImagePriv(Image img, int x, int y, ImageObserver observer) {
+		if (img == null)
+			return true;
+		return drawImagePriv(img, x, y, img.getWidth(observer), img.getHeight(observer), observer);
+	}
+
 	/**
-	 * This method first checks to see if we have pixels. For example, from a
-	 * user-derived raster.
+	 * This method first checks to see if we have pixels, for example from a
+	 * user-derived raster. If we do, and the current transform is a translation only, we can use
+	 * them directly. If we don't or this a scaled or skewed transform, we must draw the canvas
+	 * object corresponding to this image instead. 
 	 * 
 	 * @param img
 	 * @param x
@@ -668,13 +691,6 @@ public class JSGraphics2D implements
 	 * @param observer
 	 * @return
 	 */
-	@SuppressWarnings("unused")
-	public boolean drawImagePriv(Image img, int x, int y, ImageObserver observer) {
-		if (img == null)
-			return true;
-		return drawImagePriv(img, x, y, img.getWidth(observer), img.getHeight(observer), observer);
-	}
-
 	private boolean drawImagePriv(Image img, int x, int y, int width, int height, ImageObserver observer) {
 		double[] m = HTML5CanvasContext2D.setMatrix(ctx, transform);
 		boolean isToSelf = (this == ((BufferedImage) img).秘g);
@@ -713,10 +729,6 @@ public class JSGraphics2D implements
 					buf8[i] = pixels[i++] & 0xFF;
 					buf8[i] = 0xFF;
 				}
-//			} else if (isOpaque) {
-//				for (int i = 0, n = Math.min(buf8.length, pixels.length); i < n; i++) {
-//					buf8[i] = pixels[i] & 0xFF;
-//				}
 			} else if (isToSelf) {
 				for (int i = 0, n = Math.min(buf8.length, pixels.length); i < n; i++) {
 					buf8[i] = pixels[i] & 0xFF;
