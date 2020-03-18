@@ -2726,6 +2726,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			VariableDeclarationFragment fragment = (VariableDeclarationFragment) iter.next();
 			Expression initializer = fragment.getInitializer();
 			IVariableBinding fbinding = fragment.resolveBinding();
+			if (fbinding == null) {
+				System.out.println(">>> null binding for fragment in " + field);
+			}
 			String name = getFinalFieldName(fbinding);
 			if (initializer != null) {
 				if (checkFinalConstant && getConstantValue(initializer, false))
@@ -5958,6 +5961,13 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		return true;
 	}
 
+	/**
+	 * 
+	 * @param annotation
+	 * @param node
+	 * @param mode one of {CHECK_ANNOTATIONS_ONLY}
+	 * @return true if successful
+	 */
 	private boolean addAnnotation(Annotation annotation, ASTNode node, int mode) {
 		String name = annotation.getTypeName().getFullyQualifiedName();
 		int idx = name.indexOf("J2S");
@@ -5967,7 +5977,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if (global_ignoredAnnotations == null || global_ignoredAnnotations.indexOf(";" + name + ";") >= 0) {
 			return true;
 		}
-		String qname = getFinalJ2SClassName(annotation.resolveTypeBinding().getQualifiedName(), FINAL_RAW);
+		String qname = name;
+		try {
+			qname = getFinalJ2SClassName(annotation.resolveTypeBinding().getQualifiedName(), FINAL_RAW);
+		} catch (NullPointerException e) {
+			System.out.println("J2S could not resolve annotation " + annotation);
+		}
 		if (class_annotations == null)
 			class_annotations = new ArrayList<ClassAnnotation>();
 		class_annotations.add(new ClassAnnotation(qname, annotation, node));
