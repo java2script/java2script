@@ -132,6 +132,7 @@ public class JSTableUI extends JSPanelUI {
 		if (domNode == null) {
 			domNode = newDOMObject("div", id);
 			enableJSKeys(true);
+			DOMNode.setStyles(domNode,  "outline", "none");
 			// bindJSKeyEvents(domNode, true);
 		}
 		if (rebuild) {
@@ -2051,6 +2052,7 @@ public class JSTableUI extends JSPanelUI {
 	@Override
 	public void paint(Graphics g, JComponent c) {
 		super.paint(g, c);
+
 		// BH 2019.07.04
 		// This method is entered from JViewport.blitDoubleBuffered (from scrolling)
 		// or from JComponent.paintComponent (initially, or from resize, for instance)
@@ -2074,6 +2076,10 @@ public class JSTableUI extends JSPanelUI {
 
 		int rMin = table.rowAtPoint(upperLeft);
 		int rMax = table.rowAtPoint(lowerRight);
+
+		System.out.println(" new clip " + clip 
+				+ "\n" + upperLeft + " " + lowerRight + " " + rMin + " " + rMax);
+
 
 		// This should never happen (as long as our bounds intersect the clip,
 		// which is why we bail above if that is the case).
