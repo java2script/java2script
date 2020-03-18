@@ -1626,7 +1626,6 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
      * @param g the <code>Graphics</code> context within which to paint
      */
     private void paintView(Graphics g) {
-        Rectangle clip = g.getClipBounds();
         JComponent view = (JComponent)getView();
 
         if (view.getWidth() >= getWidth()) {
@@ -1634,11 +1633,14 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
             // coordinates space.
             int x = view.getX();
             int y = view.getY();
+            Rectangle clip = g.getClipBounds();
             g.translate(x, y);
-            g.setClip(clip.x - x, clip.y - y, clip.width, clip.height);
-            view.paintForceDoubleBuffered(g);
+            Graphics g1 = g.create();
+            g1.setClip(clip.x - x, clip.y - y, clip.width, clip.height);
+            view.paintForceDoubleBuffered(g1);
+            g1.dispose();
             g.translate(-x, -y);
-            g.setClip(clip.x, clip.y, clip.width, clip.height);
+            //g.setClip(clip.x, clip.y, clip.width, clip.height);
         }
         else {
             // To avoid any problems that may result from the viewport being
