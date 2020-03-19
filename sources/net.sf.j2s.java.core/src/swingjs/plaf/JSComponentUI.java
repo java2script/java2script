@@ -1876,7 +1876,7 @@ public class JSComponentUI extends ComponentUI
 						if (jc.getFrameViewer().isApplet) {
 							// If the applet's root pane, we insert it into the applet's
 							// content
-							DOMNode cdiv = swingjs.JSToolkit.getHTML5Applet(jc)._getContentLayer();
+							DOMNode cdiv = (DOMNode) swingjs.JSToolkit.getHTML5Applet(jc)._getContentLayer();
 							DOMNode.appendChildSafely(cdiv, outerNode);
 						}
 					}

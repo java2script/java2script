@@ -105,7 +105,7 @@ public class JSUtil implements JSUtilI {
 	@SuppressWarnings("unused")
 	private static Object getFileContents(Object uriOrJSFile, boolean asBytes) {
 		if (uriOrJSFile instanceof File) {
-			byte[] bytes = /** @j2sNative uriOrJSFile.ç§˜bytes || */
+			byte[] bytes = /** @j2sNative uriOrJSFile.秘bytes || */
 					null;
 			if (bytes != null)
 				return bytes;
@@ -731,12 +731,12 @@ public class JSUtil implements JSUtilI {
 	}
 
 	public static byte[] getFileBytes(File f) {
-		return f.ç§˜bytes;
+		return f.秘bytes;
 	}
 	
 	@Override
 	public byte[] getBytes(File f) {
-		return f.ç§˜bytes;
+		return f.秘bytes;
 	}
 	
 	@Override
@@ -768,19 +768,19 @@ public class JSUtil implements JSUtilI {
 	public static boolean setFileBytesStatic(File f, Object isOrBytes) {
 		// Used in JalviewJS
 		if (isOrBytes instanceof InputStream) {
-			f.ç§˜bytes = /**
+			f.秘bytes = /**
 						 * @j2sNative (isOrBytes.$in.$in || isOrBytes.$in).buf ||
 						 */
 					null;
 		} else if (isOrBytes instanceof byte[]) {
-			f.ç§˜bytes = /**
+			f.秘bytes = /**
 						 * @j2sNative isOrBytes ||
 						 */
 				null;
 		} else {
-			f.ç§˜bytes = null;
+			f.秘bytes = null;
 		}
-		return (f.ç§˜bytes != null);
+		return (f.秘bytes != null);
 	} 
 
 	@Override
