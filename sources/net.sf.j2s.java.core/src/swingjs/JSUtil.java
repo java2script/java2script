@@ -1,6 +1,8 @@
 package swingjs;
 
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.JSComponent;
 import java.awt.Toolkit;
 import java.io.BufferedInputStream;
@@ -9,10 +11,16 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
+
+import javax.swing.JComponent;
+import javax.swing.plaf.ComponentUI;
 
 import javajs.util.AU;
 import javajs.util.AjaxURLConnection;
@@ -20,14 +28,20 @@ import javajs.util.PT;
 import javajs.util.Rdr;
 import javajs.util.SB;
 import javajs.util.ZipTools;
+import sun.awt.AppContext;
 import swingjs.api.Interface;
+import swingjs.api.JSUtilI;
+import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Applet;
 import swingjs.api.js.J2SInterface;
 import swingjs.api.js.JQuery;
 import swingjs.json.JSON;
+import swingjs.plaf.JSFrameUI;
 
-public class JSUtil {
+public class JSUtil implements JSUtilI {
 
+	public JSUtil() {}
+	
 	static {
 		boolean j2sdebug = false;
 		J2SInterface j2sself = null;
@@ -91,7 +105,7 @@ public class JSUtil {
 	@SuppressWarnings("unused")
 	private static Object getFileContents(Object uriOrJSFile, boolean asBytes) {
 		if (uriOrJSFile instanceof File) {
-			byte[] bytes = /** @j2sNative uriOrJSFile.秘bytes || */
+			byte[] bytes = /** @j2sNative uriOrJSFile.ç§˜bytes || */
 					null;
 			if (bytes != null)
 				return bytes;
@@ -717,11 +731,21 @@ public class JSUtil {
 	}
 
 	public static byte[] getFileBytes(File f) {
-		return f.秘bytes;
+		return f.ç§˜bytes;
 	}
 	
+	@Override
+	public byte[] getBytes(File f) {
+		return f.ç§˜bytes;
+	}
+	
+	@Override
+	public HTML5Applet getAppletForComponent(Component c) {
+		return getHTML5Applet(c);
+	}
+
 	public static HTML5Applet getApplet() {
-		return Thread.currentThread().getThreadGroup().秘html5Applet;
+		return getHTML5Applet(null);
 	}
 
 	public static String getJSID(Object o) {
@@ -734,7 +758,168 @@ public class JSUtil {
 		 {
 			 return null;
 		 }
+	}
+
+	public static HTML5Applet getHTML5Applet(Component c) {
+		ThreadGroup g = (c == null ? Thread.currentThread().getThreadGroup() : c.getAppContext().getThreadGroup());
+		return ((JSThreadGroup) g).getHtmlApplet();
+	}
+
+	public static boolean setFileBytesStatic(File f, Object isOrBytes) {
+		// Used in JalviewJS
+		if (isOrBytes instanceof InputStream) {
+			f.ç§˜bytes = /**
+						 * @j2sNative (isOrBytes.$in.$in || isOrBytes.$in).buf ||
+						 */
+					null;
+		} else if (isOrBytes instanceof byte[]) {
+			f.ç§˜bytes = /**
+						 * @j2sNative isOrBytes ||
+						 */
+				null;
+		} else {
+			f.ç§˜bytes = null;
+		}
+		return (f.ç§˜bytes != null);
 	} 
+
+	@Override
+	public HashMap<?,?> getJSContext(Object key) {
+	    HashMap<?,?> map = (HashMap<?, ?>) AppContext.getAppContext().get(key);
+	    if (map == null)
+	    	AppContext.getAppContext().put(key, map = new HashMap<Object, Object>());
+	    return map;
+	}
+
+	@Override
+	public void addBinaryFileType(String ext) {
+		J2S.addBinaryFileType(ext);
+	}
+	
+	@Override
+	public void readInfoProperties(String prefix, Properties p) {
+		Object info = DOMNode.getAttr(getApplet(), "__Info");
+		if (info == null)
+			return;
+		String key = "";
+		String value = "";
+		/**
+		 * @j2sNative for (var key in info) { if (prefix == null || key.indexOf(prefix) == 0) { value = ""
+		 *            + info[key];
+		 */
+		System.out.println("Platform reading Info." + key + " = " + value);
+		p.put(key, value);
+
+		/**
+		 * @j2sNative } }
+		 */
+
+	}
+
+	@Override
+	public void loadResourceIfClassUnknown(String resource, String className) {
+		if (!isClassLoaded(className))
+			loadStaticResource(resource);		
+	}
+	
+	@Override
+	public void setAppletAttribute(String key, Object val) {
+	    @SuppressWarnings("unused")
+	    HTML5Applet applet = getApplet();
+	    /**
+	     * 
+	     * @j2sNative
+	     *   applet[key] = val;
+	     */
+
+	}
+
+	@Override
+	public Object getAppletAttribute(String key) {
+	    @SuppressWarnings("unused")
+	    HTML5Applet applet = getApplet();
+	    /**
+	     * 
+	     * @j2sNative
+	     *   return applet[key];
+	     */ 
+	    {
+	    	return null;
+	    }
+	}
+
+	@Override
+	public Object getEmbeddedAttribute(Component frame, String type) {
+		ComponentUI ui = ((JComponent)frame).getUI();
+		return (ui instanceof JSFrameUI ? (Dimension) ((JSFrameUI) ui).getEmbedded(type) : null);
+	}
+
+	@Override
+	public boolean streamToFile(InputStream is, File outFile) {
+		return (outFile instanceof JSTempFile ? ((JSTempFile) outFile).setBytes(is) : setFileBytes(outFile, is));
+	}
+
+	@Override
+	public boolean setFileBytes(File f, Object isOrBytes) {
+		return setFileBytesStatic(f, isOrBytes);
+	}
+	
+	/**
+	 * Add a known domain that implements access-control-allow-origin:*
+	 * 
+	 * These should be reviewed periodically.
+	 * 
+	 * @param domain for a service that is not allowing ajax
+	 * 
+	 * @author hansonr@stolaf.edu
+	 * 
+	 */
+	@Override
+	public void addDirectDatabaseCall(String domain) {
+
+		System.out.println("JSUtil adding known access-control-allow-origin * for domain " + domain);
+		J2S.addDirectDatabaseCall(domain);
+
+	}
+
+	@Override
+	public void cachePathData(String path, Object data) {
+		cacheFileData(path, data);
+	}
+
+	@Override
+	public Object getFile(String path, boolean asString) {
+		return (asString ? getFileAsString(path) : getFileAsBytes(path));
+	}
+
+	@Override
+	public void setAppletInfo(String infoKey, Object val) {
+		HTML5Applet applet = getApplet();
+		/** @j2sNative
+		 * 
+		 * applet.__Info[infoKey] = val;
+		 */
+	}
+
+	@Override
+	public URL getDocumentBase() {
+		JSFrameViewer ap = (JSFrameViewer) this.getAppletAttribute("_appletPanel");
+		try {
+			return new URL(ap.appletDocumentBase);
+		} catch (MalformedURLException e) {
+			return null;
+		}
+	}
+
+	@Override
+	public URL getCodeBase() {
+		JSFrameViewer ap = (JSFrameViewer) this.getAppletAttribute("_appletPanel");
+		try {
+			return new URL(ap.appletCodeBase);
+		} catch (MalformedURLException e) {
+			return null;
+		}
+	}
 
 }
 

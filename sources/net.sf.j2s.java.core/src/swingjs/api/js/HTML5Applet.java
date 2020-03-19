@@ -7,7 +7,7 @@ public interface HTML5Applet {
 	 * 
 	 * @return
 	 */
-	HTML5Canvas _getHtml5Canvas();
+	Object _getHtml5Canvas();
 
 	int _getHeight();
 
@@ -18,7 +18,7 @@ public interface HTML5Applet {
 	 * 
 	 * @return
 	 */
-	DOMNode _getContentLayer();
+	Object _getContentLayer();
 
 	/**
 	 * Simple resizing for an inline applet
@@ -28,6 +28,8 @@ public interface HTML5Applet {
 	void _resizeApplet(int[] widthHeight);
 
 	void _show(boolean b);
+
+	String _getID();
 
 
 }
