@@ -110,8 +110,15 @@ class Test_Map extends Test_ {
 	}
 
 	private static void testIdentity() {
-		System.out.println("IdentityHashMap should have 13 members:");
+		System.out.println("IdentityHashMap should have 15 members:");
 		IdentityHashMap<Object, Object> hmi = new IdentityHashMap<>();
+		
+		hmi.put(new String("testing"), "testing1");   // different
+		
+		hmi.put("testing", "testing2");               // different from above
+		hmi.put("testing", "testing3");               // same as above
+
+
 		try {
 			hmi.put(new Integer(null), "126new"); // unique
 			assert (false);
@@ -144,17 +151,23 @@ class Test_Map extends Test_ {
 		
 		hmi.put(Boolean.FALSE, "false1"); // same
 		hmi.put(Boolean.valueOf("adfadf"), "False"); // same
-
+		
+		Entry<Object, Object> e0 = null;
 		for (Entry<Object, Object> e : hmi.entrySet()) {
-			System.out.println(e);
-
+			System.out.println(e.toString() + ":" + e.equals(e0));
+			e0 = e;
 		}
 		System.out.println(hmi.size());
-		assert (hmi.size() == 13);
+		assert (hmi.size() == 15);
 
 		
-		System.out.println("HashMap should have 8 members:");
+		System.out.println("HashMap should have 9 members:");
 		HashMap<Object, Object> hm = new HashMap<>();
+		
+		hm.put("testing", "testing2");               // identical
+		hm.put("testing", "testing3");               // identical
+		hm.put(new String("testing"), "testing1");   // identical
+
 		try {
 			hm.put(new Integer(null), "126new"); // unique
 			assert (false);
@@ -187,13 +200,15 @@ class Test_Map extends Test_ {
 		hm.put(Boolean.FALSE, "false1"); // same
 		hm.put(Boolean.valueOf("adfadf"), "False"); // same
 
-
+		hm.put(new String("testing"), "testing1");
+		hm.put("testing", "testing2");
+		e0 = null;
 		for (Entry<Object, Object> e : hm.entrySet()) {
-			System.out.println(e);
-
+			System.out.println(e.toString() + ":" + e.equals(e0));
+			e0 = e;
 		}
 		System.out.println(hm.size());
-		assert (hm.size() == 8);
+		assert (hm.size() == 9);
 
 		System.out.println("testIdentity OK");
 	}

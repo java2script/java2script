@@ -135,6 +135,7 @@ import org.eclipse.jdt.core.dom.WildcardType;
 
 // TODO: superclass inheritance for JAXB XmlAccessorType
 
+//BH 2020.03.20 -- 3.2.9-v1c more efficient static call from 3.2.9-v1a 
 //BH 2020.02.26 -- 3.2.9-v1b allows (byte) = (byte) to not use |0 
 //BH 2020.02.20 -- 3.2.9-v1a order of 1st two parameters in new_ should be reversed
 //BH 2020.02.18 -- 3.2.8-v2 fixes no-argument call to varargs constructor
@@ -344,7 +345,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 //	private static Map<String, Map<String, List<String[]>>> syntheticClassMethodNameMap = new HashMap<String, Map<String, List<String[]>>>();
 //	private static Map<String, Map<String, Object>> genericClassTypes = new HashMap<String, Map<String, Object>>();
 
-	private static Map<String, String> htStrLitCache = new Hashtable<>();
+	private static Map<String, String> htStringLiteralCache = new Hashtable<>();
 
 	/**
 	 * includes @j2sDebug blocks; from j2s.compiler.mode=debug in .j2s
@@ -368,7 +369,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	static void startCleanBuild() {
-		htStrLitCache = new Hashtable<>();
+		htStringLiteralCache = new Hashtable<>();
 	}
 
 	/**
@@ -466,6 +467,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		package_htIncludeNames = parent.package_htIncludeNames;
 		package_includeCount = parent.package_includeCount;
 		package_includes = parent.package_includes;
+		package_haveStaticArgsReversal = parent.package_haveStaticArgsReversal;
 		package_mapBlockJavadoc = parent.package_mapBlockJavadoc;
 
 		// final and effectively final references
@@ -633,6 +635,15 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	private ArrayList<String> applets, apps;
 
+	private boolean isUserApplet;
+
+	private int class_localType = NOT_LOCAL;
+
+	/**
+	 * flag to indicate that we need the $I$(i,n,m) definition.
+	 */
+	private boolean[] package_haveStaticArgsReversal = new boolean[] {false};
+
 	private void addApplication() {
 		if (apps == null)
 			apps = new ArrayList<String>();
@@ -662,10 +673,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	public ArrayList<String> getAppList(boolean isApplets) {
 		return (isApplets ? applets : apps);
 	}
-
-	private boolean isUserApplet;
-
-	private int class_localType = NOT_LOCAL;
 
 	public boolean visit(CompilationUnit node) {
 		resetPrivateVars();
@@ -846,22 +853,22 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			IMethodBinding constructorMethodDeclaration = (constructorMethodBinding == null ? null
 					: constructorMethodBinding.getMethodDeclaration());
 			addMethodParameterList(arguments, constructorMethodDeclaration, prefix, postfix, METHOD_CONSTRUCTOR);			
-			checkStaticParams(pt, pt1, true);
+			checkStaticParams2(pt, pt1, true);
 		}
 		buffer.append(")");
 	}
 
 	/**
-	 * 3.2.9.v1 
+	 * 3.2.9.v1a 
 	 * 
 	 * Static method invocations must process parameters before initializing the method's class
 	 * if any parameter either calls a method or defines a static variable. We do this by changing
 	 *  
-	 *  $I(3).xxxx(x,y,z)
+	 *  $I$(3).xxxx(x,y,z)
 	 *  
 	 *    to 
 	 *    
-	 *  (function(a,b){b.apply(null,a)})([x,y,z],$I(3).xxxx)
+	 *  (function(a,b){b.apply(null,a)})([x,y,z],$I$(3).xxxx)
 	 * 
 	 * In addition, for constructors, Clazz.new_ needs to have the parameters as the first
 	 * parameter and the constructor method as the second parameter:
@@ -875,10 +882,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 */
 	private void checkStaticParams(int pt, int pt1, boolean isConstructor) {
 		String args;
-		// must switch from Clazz.new_($I(3).xxxx,[x,y,z] to Clazz.new([x,y,z],$I(3).xxxx
-	    // ............................^pt.......^pt1           
-		// must switch from $I(3).xxxx(x,y,z  to (function(a,f){return f.apply(null,a)})([x,y,z],$I(3).xxxx
-		// .................^pt.......^pt1
+		// must switch from Clazz.new_($I$(3).xxxx,[x,y,z] to Clazz.new([x,y,z],$I$(3).xxxx
+	    // ............................^pt........^pt1           
+		// must switch from $I$(3).xxxx(x,y,z  to (function(a,f){return f.apply(null,a)})([x,y,z],$I$(3).xxxx
+		// .................^pt........^pt1
 		if (pt1 == pt 
 				|| buffer.charAt(pt) != '$' 
 				|| (args = buffer.substring(pt1 + 1)).indexOf("(") < 0 && args.indexOf("=") < 0)
@@ -889,6 +896,53 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			args = "(function(a,f){return f.apply(null,a)})([" + args + "]";			
 		}
 		buffer.append(args).append(",").append(f);
+	}
+
+	
+	/**
+	 * 3.2.9.v1c
+	 * 
+	 * Static method invocations must process parameters before initializing the method's class
+	 * if any parameter either calls a method or defines a static variable. We do this by changing
+	 *  
+	 *  $I$(3).xxxx(x,y,z)
+	 *  
+	 *    to 
+	 *    
+	 *  $I$(3,"xxxx",[x,y,z])
+	 * 
+	 * In addition, for constructors, Clazz.new_ needs to have the parameters as the first
+	 * parameter and the constructor method as the second parameter:
+	 * 
+	 *   Clazz.new_([args],constr)
+	 * 
+	 * The method invocation has not been closed at this point.
+	 * 
+	 * @param pt   start of method name
+	 * @param pt1  end of method name
+	 */
+	private void checkStaticParams2(int pt, int pt1, boolean isConstructor) {
+		String args;
+		// must switch from Clazz.new_($I$(3).xxxx,[x,y,z] to Clazz.new([x,y,z],$I$(3).xxxx
+	    // ............................^pt........^pt1           
+		// must switch from $I$(3).xxxx(x,y,z  to $I$(3,"xxxx",[x,y,z])
+		// .................fffffffffff
+		// .................^pt..^fpt..^pt1
+		if (pt1 == pt 
+				|| buffer.charAt(pt) != '$' 
+				|| (args = buffer.substring(pt1 + 1)).indexOf("(") < 0 && args.indexOf("=") < 0)
+			return;
+		String f = buffer.substring(pt, pt1);
+		buffer.setLength(pt);
+		if (isConstructor) {
+			buffer.append(args).append(",").append(f);			
+		} else {
+			package_haveStaticArgsReversal[0] = true;
+			int fpt = f.indexOf(")");
+			buffer.append(f.substring(0, fpt))
+				.append(",\"").append(f.substring(fpt+2)).append("\",[")
+				.append(args).append("]");
+		}
 	}
 
 	/**
@@ -1592,7 +1646,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			buffer.append("(");
 		addMethodParameterList(arguments, mBinding, null, null, isIndexOf ? METHOD_INDEXOF : METHOD_NOTSPECIAL);
 		if (isStatic && lambdaArity < 0 && term == ")") {
-			checkStaticParams(pt, pt1, false);
+			checkStaticParams2(pt, pt1, false);
 		}
 		buffer.append(term);
 		return true;
@@ -2789,7 +2843,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					METHOD_CONSTRUCTOR);
 		}
 		buffer.append("]");
-		checkStaticParams(pt, pt1, true);
+		checkStaticParams2(pt, pt1, true);
 
 		// an anonymous class will be calling a constructor in another
 		// class, so we need to indicate its actual call explicitly with a third parameter
@@ -3848,9 +3902,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			buffer.append(s);
 		} else {
 			// \1 doesn't work for JavaScript strict mode
-			String v = htStrLitCache.get(s);
+			String v = htStringLiteralCache.get(s);
 			if (v == null) {
-				htStrLitCache.put(s, v = !po0.matcher(s).find() ? s : replaceOctal(s));
+				htStringLiteralCache.put(s, v = !po0.matcher(s).find() ? s : replaceOctal(s));
 			}
 			buffer.append(v);
 		}
@@ -5055,7 +5109,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * 
 	 * For Clazz.newClass we want an array if the superclass is an inner class so
 	 * that the outer class is guaranteed to be loaded first. The same goes for
-	 * $I$[] dynamic class loading and interfaces, (but interfaces are handled
+	 * I$[] dynamic class loading and interfaces, (but interfaces are handled
 	 * differently).
 	 * 
 	 * @param packageName   Java package name or "_"
@@ -6104,9 +6158,20 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		header = header
 				.replace(",I$=[]",
 						privateVarString + (package_includes.length() == 0 ? ""
-								: package_includes.append("]]," + "$I$=function(i,n){return"
-										+ "(i=(I$[i]||(I$[i]=Clazz.load(I$[0][i])))),"
-										+ "!n&&i.$load$&&Clazz.load(i,2)," + "i}")));
+								: package_includes.append("]]," + "$I$=function(i,n,m){return("
+										+ (package_haveStaticArgsReversal[0] ? "m?(i=function(f,a){return f.apply(null,a)}($I$(i)[n],m)):" : "")
+										+ "((i=(I$[i]||(I$[i]=Clazz.load(I$[0][i]))))"
+										+ ",!n&&i.$load$&&Clazz.load(i,2)))"
+										+ ",i};"
+//						
+//										
+//										
+//										"$I$=function(i,n){return"
+//										+ "(i=(I$[i]||(I$[i]=Clazz.load(I$[0][i])))),"
+//										+ "!n&&i.$load$&&Clazz.load(i,2)," + "i}"
+//										
+//										
+										)));
 		for (int i = 1; i < parts.length; i++) {
 			js = parts[i];
 			int pt = js.indexOf("\n");
