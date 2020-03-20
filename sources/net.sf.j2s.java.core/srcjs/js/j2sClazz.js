@@ -7,9 +7,10 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
-// BH 2020.03.11 2.3.9-v1 fixes numerous subtle issues with boxed primatives Integer, Float, etc.
-// BH 2020.03.07 2.3.9-v1 fixes array.hashCode() to be System.identityHashCode(array). 
-// BH 2020.02.18 2.3.8-v2 upgrades String, Integer, ClassLoader, Package, various Exceptions
+// BH 2020.03.19 3.2.9-v1c fixes new String("xxx") !== "xxx"
+// BH 2020.03.11 3.2.9-v1b fixes numerous subtle issues with boxed primatives Integer, Float, etc.
+// BH 2020.03.07 3.2.9-v1a fixes array.hashCode() to be System.identityHashCode(array). 
+// BH 2020.02.18 3.2.8-v2 upgrades String, Integer, ClassLoader, Package, various Exceptions
 // BH 2020.02.12 3.2.8-v1 new Throwable().getStackTrace() should not include j2sClazz methods
 // BH 2020.02.02 3.2.7-v5 fixes array.getClass().getName() and getArrayClass() for short -- should be [S, not [H, for Java
 // BH 2019.12.29 3.2.6 fixes Float.parseFloat$S("NaN") [and Double]
@@ -3200,7 +3201,7 @@ C$.arraycopy$O$I$O$I$I=function (src, srcPos, dest, destPos, length) {
 }
 
 C$.identityHashCode$O=function (x, offset) {
-	return x==null ? 0 : x._$hashcode || (x._$hashcode = ++hashCode + (offset || 0));
+	return x==null ? 0 : x._$hashcode || (typeof x == "string" ? x.hashCode$() : (x._$hashcode = ++hashCode + (offset || 0)));
 }
 
 C$.getProperties$=function () {
@@ -4933,9 +4934,9 @@ case 1:
   // String(StringBuilder builder)
   // String(String original)
   if (x.__BYTESIZE || x instanceof Array){
-    return (x.length == 0 ? "" : typeof x[0]=="number" ? Encoding.readUTF8Array(x) : x.join(''));
+    return new String(x.length == 0 ? "" : typeof x[0]=="number" ? Encoding.readUTF8Array(x) : x.join(''));
   }
-  return x.toString();
+  return new String(x.toString());
 case 2:  
   // String(char[] value, boolean share)
   // String(byte[] ascii, int hibyte)
