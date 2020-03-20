@@ -918,7 +918,7 @@ public class JSGraphics2D implements
 
 	
 	public void setClip(int x, int y, int width, int height) {
-		if (currentClip != null && !currentClip.contains(x, y, width, height))
+		if (currentClip != null)// && !currentClip.contains(x, y, width, height))
 			unclip(Integer.MIN_VALUE);
 		clipPriv(x,y, width, height);
 	}

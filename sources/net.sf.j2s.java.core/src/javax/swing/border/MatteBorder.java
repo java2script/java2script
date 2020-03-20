@@ -144,7 +144,7 @@ public class MatteBorder extends EmptyBorder
 
             // Paint top matte edge
             cg = g.create();
-            cg.setClip(0, 0, width, insets.top);
+            cg.clipRect(0, 0, width, insets.top);
             for (ypos = 0; insets.top - ypos > 0; ypos += tileH) {
                 for (xpos = 0; width - xpos > 0; xpos += tileW) {
                     tileIcon.paintIcon(c, cg, xpos, ypos);
@@ -154,7 +154,7 @@ public class MatteBorder extends EmptyBorder
 
             // Paint left matte edge
             cg = g.create();
-            cg.setClip(0, insets.top, insets.left, height - insets.top);
+            cg.clipRect(0, insets.top, insets.left, height - insets.top);
             starty = insets.top - (insets.top%tileH);
             startx = 0;
             for (ypos = starty; height - ypos > 0; ypos += tileH) {
@@ -166,7 +166,7 @@ public class MatteBorder extends EmptyBorder
 
             // Paint bottom matte edge
             cg = g.create();
-            cg.setClip(insets.left, height - insets.bottom, width - insets.left, insets.bottom);
+            cg.clipRect(insets.left, height - insets.bottom, width - insets.left, insets.bottom);
             starty = (height - insets.bottom) - ((height - insets.bottom)%tileH);
             startx = insets.left - (insets.left%tileW);
             for (ypos = starty; height - ypos > 0; ypos += tileH) {
@@ -178,7 +178,7 @@ public class MatteBorder extends EmptyBorder
 
             // Paint right matte edge
             cg = g.create();
-            cg.setClip(width - insets.right, insets.top, insets.right, height - insets.top - insets.bottom);
+            cg.clipRect(width - insets.right, insets.top, insets.right, height - insets.top - insets.bottom);
             starty = insets.top - (insets.top%tileH);
             startx = width - insets.right - ((width - insets.right)%tileW);
             for (ypos = starty; height - ypos > 0; ypos += tileH) {

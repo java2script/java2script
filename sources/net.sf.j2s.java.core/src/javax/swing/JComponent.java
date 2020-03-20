@@ -305,7 +305,7 @@ public abstract class JComponent extends Container {
 	// bit 10 is free
 	private static final int IS_PRINTING = 11;
 	private static final int IS_PRINTING_ALL = 12;
-	private static final int ISREPAINTING = 13;
+	protected static final int 秘ISREPAINTING = 13;
 	/** Bits 14-21 are used to handle nested writeObject calls. **/
 	// private static final int WRITE_OBJ_COUNTER_FIRST = 14;
 	// private static final int RESERVED_1 = 15;
@@ -464,7 +464,7 @@ public abstract class JComponent extends Container {
 	 */
 	public void setInheritsPopupMenu(boolean value) {
 		boolean oldValue = getFlag(INHERITS_POPUP_MENU);
-		setFlag(INHERITS_POPUP_MENU, value);
+		秘setFlag(INHERITS_POPUP_MENU, value);
 		firePropertyChange("inheritsPopupMenu", oldValue, value);
 	}
 
@@ -733,8 +733,8 @@ public abstract class JComponent extends Container {
 					} finally {
 						jsg.dispose();
 						if (shouldSetFlagBack) {
-							((JComponent) jc).setFlag(ANCESTOR_USING_BUFFER, false);
-							((JComponent) jc).setFlag(IS_PAINTING_TILE, false);
+							((JComponent) jc).秘setFlag(ANCESTOR_USING_BUFFER, false);
+							((JComponent) jc).秘setFlag(IS_PAINTING_TILE, false);
 						}
 					}
 				}
@@ -895,10 +895,10 @@ public abstract class JComponent extends Container {
 		} finally {
 			cg.dispose();
 			if (shouldClearPaintFlags) {
-				setFlag(ANCESTOR_USING_BUFFER, false);
-				setFlag(IS_PAINTING_TILE, false);
-				setFlag(IS_PRINTING, false);
-				setFlag(IS_PRINTING_ALL, false);
+				秘setFlag(ANCESTOR_USING_BUFFER, false);
+				秘setFlag(IS_PAINTING_TILE, false);
+				秘setFlag(IS_PRINTING, false);
+				秘setFlag(IS_PRINTING_ALL, false);
 			}
 		}
 	}
@@ -911,12 +911,12 @@ public abstract class JComponent extends Container {
 		RepaintManager rm = RepaintManager.currentManager(this);
 		Rectangle clip = g.getClipBounds();
 		rm.beginPaint();
-		setFlag(ISREPAINTING, true);
+		秘setFlag(秘ISREPAINTING, true);
 		try {
 			rm.paint(this, this, g, clip.x, clip.y, clip.width, clip.height);
 		} finally {
 			rm.endPaint();
-			setFlag(ISREPAINTING, false);
+			秘setFlag(秘ISREPAINTING, false);
 		}
 	}
 
@@ -944,13 +944,13 @@ public abstract class JComponent extends Container {
 			if (parent instanceof JComponent) {
 				jparent = (JComponent) parent;
 				if (jparent.getFlag(ANCESTOR_USING_BUFFER))
-					setFlag(ANCESTOR_USING_BUFFER, true);
+					秘setFlag(ANCESTOR_USING_BUFFER, true);
 				if (jparent.getFlag(IS_PAINTING_TILE))
-					setFlag(IS_PAINTING_TILE, true);
+					秘setFlag(IS_PAINTING_TILE, true);
 				if (jparent.getFlag(IS_PRINTING))
-					setFlag(IS_PRINTING, true);
+					秘setFlag(IS_PRINTING, true);
 				if (jparent.getFlag(IS_PRINTING_ALL))
-					setFlag(IS_PRINTING_ALL, true);
+					秘setFlag(IS_PRINTING_ALL, true);
 				break;
 			}
 		}
@@ -969,11 +969,11 @@ public abstract class JComponent extends Container {
 	 */
 	@Override
 	public void printAll(Graphics g) {
-		setFlag(IS_PRINTING_ALL, true);
+		秘setFlag(IS_PRINTING_ALL, true);
 		try {
 			print(g);
 		} finally {
-			setFlag(IS_PRINTING_ALL, false);
+			秘setFlag(IS_PRINTING_ALL, false);
 		}
 	}
 
@@ -1023,12 +1023,12 @@ public abstract class JComponent extends Container {
 	 */
 	@Override
 	public void print(Graphics g) {
-		setFlag(IS_PRINTING, true);
+		秘setFlag(IS_PRINTING, true);
 		firePropertyChange("paintingForPrint", false, true);
 		try {
 			paint(g);
 		} finally {
-			setFlag(IS_PRINTING, false);
+			秘setFlag(IS_PRINTING, false);
 			firePropertyChange("paintingForPrint", true, false);
 		}
 	}
@@ -1256,7 +1256,7 @@ public abstract class JComponent extends Container {
 	 * @see java.awt.Component#setFocusable
 	 */
 	public void setRequestFocusEnabled(boolean requestFocusEnabled) {
-		setFlag(REQUEST_FOCUS_DISABLED, !requestFocusEnabled);
+		秘setFlag(REQUEST_FOCUS_DISABLED, !requestFocusEnabled);
 	}
 
 	/**
@@ -2212,16 +2212,16 @@ public abstract class JComponent extends Container {
 						"WHEN_IN_FOCUSED_WINDOW InputMaps must be of type ComponentInputMap");
 			}
 			windowInputMap = (ComponentInputMap) map;
-			setFlag(WIF_INPUTMAP_CREATED, true);
+			秘setFlag(WIF_INPUTMAP_CREATED, true);
 			registerWithKeyboardManager(false);
 			break;
 		case WHEN_ANCESTOR_OF_FOCUSED_COMPONENT:
 			ancestorInputMap = map;
-			setFlag(ANCESTOR_INPUTMAP_CREATED, true);
+			秘setFlag(ANCESTOR_INPUTMAP_CREATED, true);
 			break;
 		case WHEN_FOCUSED:
 			focusInputMap = map;
-			setFlag(FOCUS_INPUTMAP_CREATED, true);
+			秘setFlag(FOCUS_INPUTMAP_CREATED, true);
 			break;
 		default:
 			throw new IllegalArgumentException(
@@ -2266,7 +2266,7 @@ public abstract class JComponent extends Container {
 	 */
 	public final void setActionMap(ActionMap am) {
 		actionMap = am;
-		setFlag(ACTIONMAP_CREATED, true);
+		秘setFlag(ACTIONMAP_CREATED, true);
 	}
 
 	/**
@@ -2967,7 +2967,7 @@ public abstract class JComponent extends Container {
 	 *           automatically scrolls its contents when dragged.
 	 */
 	public void setAutoscrolls(boolean autoscrolls) {
-		setFlag(AUTOSCROLLS_SET, true);
+		秘setFlag(AUTOSCROLLS_SET, true);
 		if (this.autoscrolls != autoscrolls) {
 			this.autoscrolls = autoscrolls;
 			if (autoscrolls) {
@@ -3043,7 +3043,7 @@ public abstract class JComponent extends Container {
 	 *          true if the double buffer image was created from this component
 	 */
 	void setCreatedDoubleBuffer(boolean newValue) {
-		setFlag(CREATED_DOUBLE_BUFFER, newValue);
+		秘setFlag(CREATED_DOUBLE_BUFFER, newValue);
 	}
 
 	boolean getCreatedDoubleBuffer() {
@@ -3512,12 +3512,12 @@ public abstract class JComponent extends Container {
 		if (propertyName == "opaque") {
 			if (!getFlag(OPAQUE_SET)) {
 				setOpaque(((Boolean) value).booleanValue());
-				setFlag(OPAQUE_SET, false);
+				秘setFlag(OPAQUE_SET, false);
 			}
 		} else if (propertyName == "autoscrolls") {
 			if (!getFlag(AUTOSCROLLS_SET)) {
 				setAutoscrolls(((Boolean) value).booleanValue());
-				setFlag(AUTOSCROLLS_SET, false);
+				秘setFlag(AUTOSCROLLS_SET, false);
 			}
 		} else if (propertyName == "focusTraversalKeysForward") {
 			 if (!getFlag(FOCUS_TRAVERSAL_KEYS_FORWARD_SET)) {
@@ -3568,9 +3568,9 @@ public abstract class JComponent extends Container {
 	public void setFocusTraversalKeys(int id,
 			Set<? extends AWTKeyStroke> keystrokes) {
 		 if (id == KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS) {
-		 setFlag(FOCUS_TRAVERSAL_KEYS_FORWARD_SET,true);
+		 秘setFlag(FOCUS_TRAVERSAL_KEYS_FORWARD_SET,true);
 		 } else if (id == KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS) {
-		 setFlag(FOCUS_TRAVERSAL_KEYS_BACKWARD_SET,true);
+		 秘setFlag(FOCUS_TRAVERSAL_KEYS_BACKWARD_SET,true);
 		 }
 		super.setFocusTraversalKeys(id, keystrokes);
 	}
@@ -3770,8 +3770,8 @@ public abstract class JComponent extends Container {
 	 */
 	public void setOpaque(boolean isOpaque) {
 		boolean oldValue = getFlag(IS_OPAQUE);
-		setFlag(IS_OPAQUE, isOpaque);
-		setFlag(OPAQUE_SET, true);
+		秘setFlag(IS_OPAQUE, isOpaque);
+		秘setFlag(OPAQUE_SET, true);
 		firePropertyChange("opaque", oldValue, isOpaque);
 	}
 
@@ -4268,14 +4268,14 @@ public abstract class JComponent extends Container {
 				if (getFlag(REVALIDATE_RUNNABLE_SCHEDULED)) {
 					return;
 				}
-				setFlag(REVALIDATE_RUNNABLE_SCHEDULED, true);
+				秘setFlag(REVALIDATE_RUNNABLE_SCHEDULED, true);
 			//}
 			// final Object me = this;
 			Runnable callRevalidate = new Runnable() {
 				@Override
 				public void run() {
 //					synchronized (JComponent.this) {
-						setFlag(REVALIDATE_RUNNABLE_SCHEDULED, false);
+						秘setFlag(REVALIDATE_RUNNABLE_SCHEDULED, false);
 //					}
 					revalidate();
 				}
@@ -4544,7 +4544,7 @@ public abstract class JComponent extends Container {
 			// SwingJS hiding of panel that is drawn through needs to clear
 			paintingComponent = paintingComponent.getRootPane();
 		}
-		paintingComponent.setFlag(ISREPAINTING, true);
+		paintingComponent.秘setFlag(秘ISREPAINTING, true);
 
 		paintImmediatelyClip.x -= offsetX;
 		paintImmediatelyClip.y -= offsetY;
@@ -4581,7 +4581,7 @@ public abstract class JComponent extends Container {
 					
 					// SwingJS early on was not clipping for better performance
 					 if (!秘isRootPane)
-						 g.setClip(paintImmediatelyClip.x, paintImmediatelyClip.y,
+						 g.clipRect(paintImmediatelyClip.x, paintImmediatelyClip.y,
                             paintImmediatelyClip.width, paintImmediatelyClip.height);
 
 					// this sequence assures that if the developer called 
@@ -4606,7 +4606,7 @@ public abstract class JComponent extends Container {
 					}
 				}
 			}
-			paintingComponent.setFlag(ISREPAINTING, false);
+			paintingComponent.秘setFlag(秘ISREPAINTING, false);
 		}
 		recycleRectangle(paintImmediatelyClip);
 	}
@@ -4620,11 +4620,11 @@ public abstract class JComponent extends Container {
 	void paintToOffscreen(Graphics g, int x, int y, int w, int h, int maxX,
 			int maxY) {
 		try {
-			setFlag(ANCESTOR_USING_BUFFER, true);
+			秘setFlag(ANCESTOR_USING_BUFFER, true);
 			if ((y + h) < maxY || (x + w) < maxX) {
-				setFlag(IS_PAINTING_TILE, true);
+				秘setFlag(IS_PAINTING_TILE, true);
 			}
-			if (getFlag(ISREPAINTING)) {
+			if (getFlag(秘ISREPAINTING)) {
 				// Called from paintImmediately (RepaintManager) to fill
 				// repaint request
 				paint(g);
@@ -4637,8 +4637,8 @@ public abstract class JComponent extends Container {
 				paintChildren(g);
 			}
 		} finally {
-			setFlag(ANCESTOR_USING_BUFFER, false);
-			setFlag(IS_PAINTING_TILE, false);
+			秘setFlag(ANCESTOR_USING_BUFFER, false);
+			秘setFlag(IS_PAINTING_TILE, false);
 		}
 	}
 
@@ -4703,7 +4703,7 @@ public abstract class JComponent extends Container {
 		return true;
 	}
 
-	private void setFlag(int aFlag, boolean aValue) {
+	protected void 秘setFlag(int aFlag, boolean aValue) {
 		if (aValue) {
 			flags |= (1 << aFlag);
 		} else {

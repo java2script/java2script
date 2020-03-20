@@ -28,6 +28,7 @@
 
 package javax.swing;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -48,6 +49,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 
 import swingjs.JSGraphics2D;
+import swingjs.plaf.JSViewportUI;
 
 
 
@@ -616,16 +618,16 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
         }
     }
 
-    private void paintViaBackingStore(Graphics g, Rectangle oClip) {
-        Graphics bsg = getBackingStoreGraphics(g);
-        try {
-            super.paint(bsg);
-            g.setClip(oClip);
-            ((JSGraphics2D)(Object)g).drawImagePriv(backingStoreImage, 0, 0, this);
-        } finally {
-            bsg.dispose();
-        }
-    }
+//    private void paintViaBackingStore(Graphics g, Rectangle oClip) {
+//        Graphics bsg = getBackingStoreGraphics(g);
+//        try {
+//            super.paint(bsg);
+//            g.setClip(oClip);
+//            ((JSGraphics2D)(Object)g).drawImagePriv(backingStoreImage, 0, 0, this);
+//        } finally {
+//            bsg.dispose();
+//        }
+//    }
 
     /**
      * The <code>JViewport</code> overrides the default implementation of
@@ -696,6 +698,9 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
             return;
         }
 
+        myClip.width = width;
+        myClip.height = height;
+    	((JSViewportUI) ui).setClip(myClip);
         if (inBlitPaint) {
             // We invoked paint as part of copyArea cleanup, let it through.
             super.paint(g);
@@ -758,19 +763,19 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
             // and result in empty areas.
             backingStoreImage = createImage(width, height);
             Rectangle clip = g.getClipBounds();
-            if (clip.width != width || clip.height != height) {
-                if (!isOpaque()) {
-                    g.setClip(0, 0, Math.min(viewBounds.width, width),
-                              Math.min(viewBounds.height, height));
-                }
-                else {
-                    g.setClip(0, 0, width, height);
-                }
-                paintViaBackingStore(g, clip);
-            }
-            else {
+//            if (clip.width != width || clip.height != height) {
+//                if (!isOpaque()) {
+//                    g.clipRect(0, 0, Math.min(viewBounds.width, width),
+//                              Math.min(viewBounds.height, height));
+//                }
+//                else {
+//                    g.setClip(0, 0, width, height);
+//                }
+//                paintViaBackingStore(g, clip);
+//            }
+//            else {
                 paintViaBackingStore(g);
-            }
+//            }
         }
         else {
             if (!scrollUnderway || lastPaintPosition.equals(getViewLocation())) {
@@ -778,46 +783,46 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
                 paintViaBackingStore(g);
             } else {
                 // The image was scrolled. Manipulate the backing store and flush it to g.
-                Point blitFrom = new Point();
-                Point blitTo = new Point();
-                Dimension blitSize = new Dimension();
-                Rectangle blitPaint = new Rectangle();
-
-                Point newLocation = getViewLocation();
-                int dx = newLocation.x - lastPaintPosition.x;
-                int dy = newLocation.y - lastPaintPosition.y;
-                boolean canBlit = computeBlit(dx, dy, blitFrom, blitTo, blitSize, blitPaint);
-                if (!canBlit) {
+//                Point blitFrom = new Point();
+//                Point blitTo = new Point();
+//                Dimension blitSize = new Dimension();
+//                Rectangle blitPaint = new Rectangle();
+//
+//                Point newLocation = getViewLocation();
+//                int dx = newLocation.x - lastPaintPosition.x;
+//                int dy = newLocation.y - lastPaintPosition.y;
+//                boolean canBlit = computeBlit(dx, dy, blitFrom, blitTo, blitSize, blitPaint);
+//                if (!canBlit) {
                     // The image was either moved diagonally or
                     // moved by more than the image size: paint normally.
                     paintViaBackingStore(g);
-                } else {
-                    int bdx = blitTo.x - blitFrom.x;
-                    int bdy = blitTo.y - blitFrom.y;
-
-                    // Move the relevant part of the backing store.
-                    Rectangle clip = g.getClipBounds();
-                    // We don't want to inherit the clip region when copying
-                    // bits, if it is inherited it will result in not moving
-                    // all of the image resulting in garbage appearing on
-                    // the screen.
-                    g.setClip(0, 0, width, height);
-                    Graphics bsg = getBackingStoreGraphics(g);
-                    try {
-                        bsg.copyArea(blitFrom.x, blitFrom.y, blitSize.width, blitSize.height, bdx, bdy);
-
-                        g.setClip(clip.x, clip.y, clip.width, clip.height);
-                        // Paint the rest of the view; the part that has just been exposed.
-                        Rectangle r = viewBounds.intersection(blitPaint);
-                        bsg.setClip(r);
-                        super.paint(bsg);
-
-                        // Copy whole of the backing store to g.
-                        ((JSGraphics2D)(Object)g).drawImagePriv(backingStoreImage, 0, 0, this);
-                    } finally {
-                        bsg.dispose();
-                    }
-                }
+//                } else {
+//                    int bdx = blitTo.x - blitFrom.x;
+//                    int bdy = blitTo.y - blitFrom.y;
+//
+//                    // Move the relevant part of the backing store.
+//                    Rectangle clip = g.getClipBounds();
+//                    // We don't want to inherit the clip region when copying
+//                    // bits, if it is inherited it will result in not moving
+//                    // all of the image resulting in garbage appearing on
+//                    // the screen.
+//                    g.setClip(0, 0, width, height);
+//                    Graphics bsg = getBackingStoreGraphics(g);
+//                    try {
+//                        bsg.copyArea(blitFrom.x, blitFrom.y, blitSize.width, blitSize.height, bdx, bdy);
+//
+//                        g.setClip(clip.x, clip.y, clip.width, clip.height);
+//                        // Paint the rest of the view; the part that has just been exposed.
+//                        Rectangle r = viewBounds.intersection(blitPaint);
+//                        bsg.setClip(r);
+//                        super.paint(bsg);
+//
+//                        // Copy whole of the backing store to g.
+//                        ((JSGraphics2D)(Object)g).drawImagePriv(backingStoreImage, 0, 0, this);
+//                    } finally {
+//                        bsg.dispose();
+//                    }
+//                }
             }
         }
         lastPaintPosition = getViewLocation();
@@ -877,11 +882,11 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
       */
     public void setScrollMode(int mode) {
         scrollMode = mode;
-        if (mode == BACKINGSTORE_SCROLL_MODE) {
-            backingStore = true;
-        } else {
-            backingStore = false;
-        }
+//        if (mode == BACKINGSTORE_SCROLL_MODE) {
+//            backingStore = true;
+//        } else {
+//            backingStore = false;
+//        }
     }
 
     /**
@@ -925,11 +930,11 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
      */
     @Deprecated
     public void setBackingStoreEnabled(boolean enabled) {
-        if (enabled) {
-            setScrollMode(BACKINGSTORE_SCROLL_MODE);
-        } else {
-            setScrollMode(BLIT_SCROLL_MODE);
-        }
+//        if (enabled) {
+//            setScrollMode(BACKINGSTORE_SCROLL_MODE);
+//        } else {
+//            setScrollMode(BLIT_SCROLL_MODE);
+//        }
     }
 
     private final boolean isBlitting() {
@@ -1103,7 +1108,7 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
                     try {
                         flushViewDirtyRegion(g, dirty);
                         view.setLocation(newX, newY);
-                        g.setClip(0,0,getWidth(), Math.min(getHeight(),
+                        g.clipRect(0,0,getWidth(), Math.min(getHeight(),
                                                            jview.getHeight()));
                         // Repaint the complete component if the blit succeeded
                         // and needsRepaintAfterBlit returns true.
@@ -1451,13 +1456,13 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
 		public void firePropertyChange(String propertyName, Object oldValue,
                                       Object newValue) {
         super.firePropertyChange(propertyName, oldValue, newValue);
-        if (propertyName.equals(EnableWindowBlit)) {
-            if (newValue != null) {
-                setScrollMode(BLIT_SCROLL_MODE);
-            } else {
-                setScrollMode(SIMPLE_SCROLL_MODE);
-            }
-        }
+//        if (propertyName.equals(EnableWindowBlit)) {
+//            if (newValue != null) {
+//                setScrollMode(BLIT_SCROLL_MODE);
+//            } else {
+//                setScrollMode(SIMPLE_SCROLL_MODE);
+//            }
+//        }
     }
 
     /**
@@ -1520,7 +1525,7 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
             Rectangle clip = g.getClipBounds();
             if (clip == null) {
                 // Only happens in 1.2
-                g.setClip(0, 0, getWidth(), getHeight());
+                g.clipRect(0, 0, getWidth(), getHeight());
             }
             g.clipRect(dirty.x, dirty.y, dirty.width, dirty.height);
             clip = g.getClipBounds();
@@ -1547,7 +1552,7 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
 
         boolean retValue;
 //        RepaintManager rm = RepaintManager.currentManager(this);
-        JComponent view = (JComponent) getView();
+//        JComponent view = (JComponent) getView();
 
         if (lastPaintPosition == null ||
             lastPaintPosition.equals(getViewLocation())) {
@@ -1556,31 +1561,31 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
         } else {
             // The image was scrolled. Manipulate the backing store and flush
             // it to g.
-            Point blitFrom = new Point();
-            Point blitTo = new Point();
-            Dimension blitSize = new Dimension();
-            Rectangle blitPaint = new Rectangle();
-
-            Point newLocation = getViewLocation();
-            int dx = newLocation.x - lastPaintPosition.x;
-            int dy = newLocation.y - lastPaintPosition.y;
-            boolean canBlit = computeBlit(dx, dy, blitFrom, blitTo, blitSize,
-                                          blitPaint);
-            if (!canBlit) {
+//            Point blitFrom = new Point();
+//            Point blitTo = new Point();
+//            Dimension blitSize = new Dimension();
+//            Rectangle blitPaint = new Rectangle();
+//
+//            Point newLocation = getViewLocation();
+//            int dx = newLocation.x - lastPaintPosition.x;
+//            int dy = newLocation.y - lastPaintPosition.y;
+//            boolean canBlit = computeBlit(dx, dy, blitFrom, blitTo, blitSize,
+//                                          blitPaint);
+//            if (!canBlit) {
                 paintView(g);
                 retValue = false;
-            } else {
-                // Prepare the rest of the view; the part that has just been
-                // exposed.
-                Rectangle r = view.getBounds().intersection(blitPaint);
-                r.x -= view.getX();
-                r.y -= view.getY();
-
-                blitDoubleBuffered(view, g, r.x, r.y, r.width, r.height,
-                                   blitFrom.x, blitFrom.y, blitTo.x, blitTo.y,
-                                   blitSize.width, blitSize.height);
-                retValue = true;
-            }
+//            } else {
+//                // Prepare the rest of the view; the part that has just been
+//                // exposed.
+//                Rectangle r = view.getBounds().intersection(blitPaint);
+//                r.x -= view.getX();
+//                r.y -= view.getY();
+//
+//                blitDoubleBuffered(view, g, r.x, r.y, r.width, r.height,
+//                                   blitFrom.x, blitFrom.y, blitTo.x, blitTo.y,
+//                                   blitSize.width, blitSize.height);
+//                retValue = true;
+//            }
         }
         lastPaintPosition = getViewLocation();
         return retValue;
@@ -1594,30 +1599,33 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
     // not setDoubleBuffered(true) was invoked on the view.
     //
 
-    private void blitDoubleBuffered(JComponent view, Graphics g,
-                                    int clipX, int clipY, int clipW, int clipH,
-                                    int blitFromX, int blitFromY, int blitToX, int blitToY,
-                                    int blitW, int blitH) {
-        // NOTE:
-        //   blitFrom/blitTo are in JViewport coordinates system
-        //     not the views coordinate space.
-        //   clip* are in the views coordinate space.
-//        RepaintManager rm = RepaintManager.currentManager(this);
-//        int bdx = blitToX - blitFromX;
-//        int bdy = blitToY - blitFromY;
-
-// SwingJS        // Shift the scrolled region
-//        rm.copyArea(this, g, blitFromX, blitFromY, blitW, blitH, bdx, bdy,
-//                    false);
+//    private void blitDoubleBuffered(JComponent view, Graphics g,
+//                                    int clipX, int clipY, int clipW, int clipH,
+//                                    int blitFromX, int blitFromY, int blitToX, int blitToY,
+//                                    int blitW, int blitH) {
+//        // NOTE:
+//        //   blitFrom/blitTo are in JViewport coordinates system
+//        //     not the views coordinate space.
+//        //   clip* are in the views coordinate space.
+////        RepaintManager rm = RepaintManager.currentManager(this);
+////        int bdx = blitToX - blitFromX;
+////        int bdy = blitToY - blitFromY;
 //
-        // Paint the newly exposed region.
-        int x = view.getX();
-        int y = view.getY();
-        g.translate(x, y);
-        g.setClip(clipX, clipY, clipW, clipH);
-        view.paintForceDoubleBuffered(g);
-        g.translate(-x, -y);
-    }
+//// SwingJS        // Shift the scrolled region
+////        rm.copyArea(this, g, blitFromX, blitFromY, blitW, blitH, bdx, bdy,
+////                    false);
+////
+//        // Paint the newly exposed region.
+//        int x = view.getX();
+//        int y = view.getY();
+//        g.translate(x, y);
+//        g.setClip(clipX, clipY, clipW, clipH);
+//        view.paintForceDoubleBuffered(g);
+//        g.translate(-x, -y);
+//    }
+    
+    
+    Rectangle myClip = new Rectangle();
 
     /**
      * Called to paint the view, usually when <code>blitPaint</code>
@@ -1628,33 +1636,55 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
     private void paintView(Graphics g) {
         JComponent view = (JComponent)getView();
 
+        Rectangle clip = g.getClipBounds();
         if (view.getWidth() >= getWidth()) {
             // Graphics is relative to JViewport, need to map to view's
             // coordinates space.
             int x = view.getX();
-            int y = view.getY();
-            Rectangle clip = g.getClipBounds();
+            int y = view.getY();// will be negative
+        	//System.out.println(">>>>painting JView" + x + " " + y + "  " +clip);
+            //Graphics g1 = g.create();
             g.translate(x, y);
-            Graphics g1 = g.create();
-            g1.setClip(clip.x - x, clip.y - y, clip.width, clip.height);
-            view.paintForceDoubleBuffered(g1);
-            g1.dispose();
-            g.translate(-x, -y);
+            myClip.width = clip.width;
+            myClip.height = clip.height;
+            myClip.x = clip.x - x;
+            myClip.y = clip.y - y;
+            paintForceDoubleBuffered(g, view);
+            //g.setColor(Math.random() > 0.5 ? Color.GREEN : Color.MAGENTA);
+            //g.fillRect(-x, 50-y, clip.width, clip.height);
+            //g1.dispose();
+            //g.translate(-x, -y);
             //g.setClip(clip.x, clip.y, clip.width, clip.height);
         }
         else {
+            myClip.x = clip.x;
+            myClip.y = clip.y;
             // To avoid any problems that may result from the viewport being
             // bigger than the view we start painting from the viewport.
             try {
                 inBlitPaint = true;
-                paintForceDoubleBuffered(g);
+                paintForceDoubleBuffered(g, this);
             } finally {
                 inBlitPaint = false;
             }
         }
     }
 
-    /**
+    private void paintForceDoubleBuffered(Graphics g, JComponent c) {
+    	
+        g.clipRect(myClip.x, myClip.y, myClip.width, myClip.height);
+		RepaintManager rm = RepaintManager.currentManager(c);
+		rm.beginPaint();
+		秘setFlag(JComponent.秘ISREPAINTING, true);
+		try {
+			rm.paint(c, c, g, myClip.x, myClip.y, myClip.width, myClip.height);
+		} finally {
+			rm.endPaint();
+			秘setFlag(JComponent.秘ISREPAINTING, false);
+		}
+	}
+
+	/**
      * Returns true if the viewport is not obscured by one of its ancestors,
      * or its ancestors children and if the viewport is showing. Blitting
      * when the view isn't showing will work,
