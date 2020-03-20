@@ -83,7 +83,7 @@ class BufferedOutputStream extends FilterOutputStream {
             count = 0;
         }
     }
-
+    
     /**
      * Writes the specified byte to this buffered output stream.
      *

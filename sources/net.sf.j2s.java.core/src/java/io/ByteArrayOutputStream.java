@@ -54,6 +54,12 @@ public class ByteArrayOutputStream extends OutputStream {
      */
     protected int count;
 
+	public boolean 秘setBytes(byte[] b) {
+		buf = b;
+		count = b.length;
+		return true;
+	}
+
     /**
      * Creates a new byte array output stream. The buffer capacity is
      * initially 32 bytes, though its size increases if necessary.
