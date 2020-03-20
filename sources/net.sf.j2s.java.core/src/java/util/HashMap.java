@@ -300,14 +300,9 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 
 		@Override
 		public final boolean equals(Object o) {
-			if (o == this)
-				return true;
-			if (o instanceof Map.Entry) {
-				Map.Entry<?, ?> e = (Map.Entry<?, ?>) o;
-				if (Objects.equals(key, e.getKey()) && Objects.equals(value, e.getValue()))
-					return true;
-			}
-			return false;
+			return (o == this || o instanceof Map.Entry
+					&& Objects.equals(key, ((Map.Entry<?, ?>) o).getKey()) 
+					&& Objects.equals(value, ((Map.Entry<?, ?>) o).getValue()));
 		}
 	}
 
