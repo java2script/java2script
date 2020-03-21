@@ -52,8 +52,49 @@ import java.util.function.Function;
 class Test_Map extends Test_ {
 
 	public static void main(String[] args) {
-	
-		testSets();
+
+		System.out.println("Equivalence tests asserted");
+		assert(new Integer(3) == 3);
+		assert(new Integer(3) != new Integer(3));
+
+		String a = "x";
+		assert("xxx" == "xx" + "x"); 
+		assert("xxx" == ("xx" + a).intern()); 
+		
+		try {
+			assert("xxx" != "xx" + a);
+		} catch (AssertionError e) {
+			System.out.println("Known assertion error for  a=\"x\";\"xxx\" != \"xx\" + a ");
+		}
+		try {
+			assert(new String("xxx").toString() != ("xx" + a).intern());
+		} catch (AssertionError e) {
+			System.out.println("Known assertion error for a=\"x\"; new String(\"xxx\").toString() != (\"xx\" + a).intern()");
+		}
+		assert(new String("xxx").intern() == "xxx"); 
+		assert(!(new String("xxx") == "xxx")); 
+		assert(new String("xxx") != "xxx"); 
+		assert(new String("xxx") != new String("xxx")); 
+		assert(new String("xxx") != new String("xxx").intern()); 
+
+
+		
+		System.out.println("The identityHashCode for these three are all different in Java, but not in Java:");
+		System.out.println(System.identityHashCode("test"));
+		String s = "";
+		System.out.println(System.identityHashCode("test" + s));
+		s = "st";
+		System.out.println(System.identityHashCode("te" + s));
+		System.out.println(System.identityHashCode("te" + s));
+		
+		System.out.println("The identityHashCode for an interned string is the same as its literal");
+		System.out.println(System.identityHashCode(("te" + s).intern()));
+
+		System.out.println("The identityHashCode for these three are all different in Java and JavaScript:");
+		System.out.println(System.identityHashCode(new String("test")));
+		System.out.println(System.identityHashCode(new String("test")));
+		System.out.println(System.identityHashCode(new String("test")));
+		testSets(); 
 		
 		testIdentity();
 		
@@ -75,6 +116,7 @@ class Test_Map extends Test_ {
 	
 	private static void testSets() {
 		Set<Object> hs = new HashSet<>();
+		System.out.println("HashSet should have 6 members:");
 		hs.add(null);
 		hs.add(new int[] {1,2,3});
 		hs.add(new int[] {1,2,3});
@@ -82,11 +124,17 @@ class Test_Map extends Test_ {
 		hs.add(Integer.valueOf(3)); // identical
 		hs.add(Integer.valueOf(3)); // identical
 		hs.add(Integer.valueOf(3)); // identical
+		
+		hs.add(new String("testing"));   // different
+		String ing = "ing";
+		hs.add("test" + ing);               // different from above
+		hs.add("testing");               // different from above
+
 		for (Object o : hs) {
 			System.out.println(o);
 		}
 		System.out.println(hs.size());
-		assert(hs.size() == 5);
+		assert(hs.size() == 6);
 	
 		Iterator<Object> it;
 		it = hs.iterator();
@@ -114,9 +162,13 @@ class Test_Map extends Test_ {
 		IdentityHashMap<Object, Object> hmi = new IdentityHashMap<>();
 		
 		hmi.put(new String("testing"), "testing1");   // different
+
 		
-		hmi.put("testing", "testing2");               // different from above
-		hmi.put("testing", "testing3");               // same as above
+//		String ing = "ing";
+//		hmi.put("test" + ing, "testing2");               // different from above
+		
+		hmi.put("testing", "testing3");               // different from above
+		hmi.put("testing", "testing4");               // same as above
 
 
 		try {
@@ -164,9 +216,12 @@ class Test_Map extends Test_ {
 		System.out.println("HashMap should have 9 members:");
 		HashMap<Object, Object> hm = new HashMap<>();
 		
-		hm.put("testing", "testing2");               // identical
-		hm.put("testing", "testing3");               // identical
-		hm.put(new String("testing"), "testing1");   // identical
+		hm.put(new String("testing"), "testing1");   // same
+		hm.put("testing", "testing2");               // same
+		String ing = "ing";
+		hmi.put("test" + ing, "testing3");               // same
+		hm.put("testing", "testing4");               // same
+		
 
 		try {
 			hm.put(new Integer(null), "126new"); // unique
