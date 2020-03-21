@@ -114,6 +114,11 @@ class Test_Map extends Test_ {
 		}
 	}
 	
+	static final int hash(Object key) {
+		int h;
+		return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
+	}
+	
 	private static void testSets() {
 		Set<Object> hs = new HashSet<>();
 		System.out.println("HashSet should have 6 members:");
@@ -154,6 +159,35 @@ class Test_Map extends Test_ {
 		}
 		System.out.println(hs.size());
 		
+		String test;
+		
+		System.out.println("Testing order for new HashSet() -- this will be different than Java for JavaScript in this particular case");
+		hs = new HashSet<Object>();
+		hs.add("testing");
+		hs.add("two");
+		hs.add("one");
+		hs.add("three");
+		test = "";
+		it = hs.iterator();
+		while (it.hasNext()) {
+			test += it.next();
+		}
+		System.out.println(test);
+		assert(test.equals(/** @j2sNative 1 ? "testingtwoonethree":*/"testingonetwothree"));
+		System.out.println("Testing order for new HashSet(16, 0.75f) -- this will be the same");
+		hs = new HashSet<Object>(16, 0.75f);
+		hs.add("testing");
+		hs.add("two");
+		hs.add("one");
+		hs.add("three");
+		test = "";
+		it = hs.iterator();
+		while (it.hasNext()) {
+			test += it.next();
+		}
+		System.out.println(test);
+		assert(test.equals("testingonetwothree"));
+
 		System.out.println("testSets OK");
 	}
 

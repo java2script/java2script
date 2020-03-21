@@ -98,15 +98,18 @@ public class HashSet<E>
     private static final Object PRESENT = new Object();
 
     /**
+     * SwingJS note: This constructor allow JavaScript Map object for HashSet<String>.
+     * 
      * Constructs a new, empty set; the backing <tt>HashMap</tt> instance has
      * default initial capacity (16) and load factor (0.75).
      */
     public HashSet() {
         map = new HashMap<>();
-        map.秘m = null;
     }
 
 	/**
+     * SwingJS note: This constructor allow JavaScript Map object for HashSet<String>.
+     * 
 	 * Constructs a new set containing the elements in the specified collection. The
 	 * <tt>HashMap</tt> is created with default load factor (0.75) and an initial
 	 * capacity sufficient to contain the elements in the specified collection.
@@ -116,11 +119,12 @@ public class HashSet<E>
 	 */
 	public HashSet(Collection<? extends E> c) {
 		map = new HashMap<>(Math.max((int) (c.size() / .75f) + 1, 16));
-		map.秘m = null;
 		addAll(c);
 	}
 
     /**
+     * SwingJS note: This constructor DOES NOT allow JavaScript Map object for HashSet<String>.
+     * 
      * Constructs a new, empty set; the backing <tt>HashMap</tt> instance has
      * the specified initial capacity and the specified load factor.
      *
@@ -131,10 +135,11 @@ public class HashSet<E>
      */
     public HashSet(int initialCapacity, float loadFactor) {
         map = new HashMap<>(initialCapacity, loadFactor);
-        map.秘m = null;    
     }
 
     /**
+     * SwingJS note: This constructor allows JavaScript Map object for HashSet<String>.
+     * 
      * Constructs a new, empty set; the backing <tt>HashMap</tt> instance has
      * the specified initial capacity and default load factor (0.75).
      *
@@ -147,6 +152,8 @@ public class HashSet<E>
     }
 
     /**
+     * SwingJS note: This constructor DOES NOT allow JavaScript Map object for HashSet<String>.
+     * 
      * Constructs a new, empty linked hash set.  (This package private
      * constructor is only used by LinkedHashSet.) The backing
      * HashMap instance is a LinkedHashMap with the specified initial

@@ -358,12 +358,14 @@ Clazz.getClass = function(cl, methodList) {
  */
 /* public */
 Clazz.instanceOf = function (obj, clazz) {
+	  if (obj == null)
+		    return false;
   // allows obj to be a class already, from arrayX.getClass().isInstance(y)
   // unwrap java.lang.Class to JavaScript clazz using $clazz$
   if (typeof clazz == "string") {
     clazz = Clazz._getDeclared(clazz);
   } 
-  if (obj == null || !clazz)
+  if (!clazz)
     return false;
   if (obj == clazz)
 	return true;
@@ -4922,6 +4924,9 @@ String(byte[] ascii, int hibyte, int offset, int count)
 
 var textDecoder = null;
 
+// Note that of all these constructors, only new String("xxx") and new String(new String())
+// return actual JavaScript String objects (as of 3.2.9.v1)
+
 String.instantialize=function(){
 var x=arguments[0];
 switch (arguments.length) {
@@ -4934,9 +4939,10 @@ case 1:
   // String(StringBuilder builder)
   // String(String original)
   if (x.__BYTESIZE || x instanceof Array){
-    return new String(x.length == 0 ? "" : typeof x[0]=="number" ? Encoding.readUTF8Array(x) : x.join(''));
+    return x.length == 0 ? "" : typeof x[0]=="number" ? Encoding.readUTF8Array(x).toString() : x.join('');
   }
-  return new String(x.toString());
+  // raw JavaScript string unless new String(string)
+  return (typeof x == "string" ||  x instanceof String ? new String(x) : x.toString());
 case 2:  
   // String(char[] value, boolean share)
   // String(byte[] ascii, int hibyte)
@@ -4946,7 +4952,7 @@ case 2:
   var hibyte=arguments[1];
   return (typeof hibyte=="number" ? String.instantialize(x,hibyte,0,x.length) 
 	: typeof hibyte == "boolean" ? x.join('') : self.TextDecoder && (textDecoder || (textDecoder = new TextDecoder())) && arguments[1].toString().toUpperCase() == "UTF-8" ? textDecoder.decode(arguments[0])
-	: String.instantialize(x,0,x.length,hibyte));
+	: String.instantialize(x,0,x.length,hibyte)).toString();
 case 3:
   // String(byte[] bytes, int offset, int length)
   // String(char[] value, int offset, int count)
@@ -4990,7 +4996,7 @@ case 4:
     var length=arguments[2];
     if (typeof cs == "string") {
     	if (",utf8,utf-8,utf_8,".indexOf("," + cs + ",") >= 0)
-    		return Encoding.readUTF8Array(bytes,offset,length);
+    		return Encoding.readUTF8Array(bytes,offset,length).toString();
     	cs = Clazz.loadClass("java.nio.charset.Charset").forName$S(cs);
     	if (!cs)
     		throw new java.io.UnsupportedEncodingException();

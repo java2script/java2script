@@ -25,7 +25,6 @@
 
 package java.util;
 
-import java.util.HashMap.Node;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -170,6 +169,8 @@ public class Hashtable<K,V>
     private static final long serialVersionUID = 1421746759512286392L;
 
     /**
+     * SwingJS note: This constructor DOES NOT allow JavaScript Map object for Hashtable<String,?>.
+     * 
      * Constructs a new, empty hashtable with the specified initial
      * capacity and the specified load factor.
      *
@@ -184,8 +185,6 @@ public class Hashtable<K,V>
                                                initialCapacity);
         if (loadFactor <= 0 || Float.isNaN(loadFactor))
             throw new IllegalArgumentException("Illegal Load: "+loadFactor);
-		秘setJS();
-		
         if (initialCapacity==0)
             initialCapacity = 1;
         this.loadFactor = loadFactor;
@@ -194,6 +193,8 @@ public class Hashtable<K,V>
     }
     
     /**
+     * SwingJS note: This constructor allows JavaScript Map object for Hashtable<String,?>.
+     * 
      * Constructs a new, empty hashtable with the specified initial capacity
      * and default load factor (0.75).
      *
@@ -203,14 +204,18 @@ public class Hashtable<K,V>
      */
     public Hashtable(int initialCapacity) {
         this(initialCapacity, 0.75f);
+		秘setJS();		
     }
 
     /**
+     * SwingJS note: This constructor allows JavaScript Map object for Hashtable<String,?>.
+     * 
      * Constructs a new, empty hashtable with a default initial capacity (11)
      * and load factor (0.75).
      */
     public Hashtable() {
         this(11, 0.75f);
+		秘setJS();		
     }
 
     /**
