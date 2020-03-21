@@ -59,6 +59,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JViewport;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.LookAndFeel;
@@ -132,6 +133,7 @@ public class JSTableUI extends JSPanelUI {
 		if (domNode == null) {
 			domNode = newDOMObject("div", id);
 			enableJSKeys(true);
+			DOMNode.setStyles(domNode,  "outline", "none");
 			// bindJSKeyEvents(domNode, true);
 		}
 		if (rebuild) {
@@ -2055,7 +2057,8 @@ public class JSTableUI extends JSPanelUI {
 		// This method is entered from JViewport.blitDoubleBuffered (from scrolling)
 		// or from JComponent.paintComponent (initially, or from resize, for instance)
 
-		Rectangle clip = g.getClipBounds();
+		//table.getFillsViewportHeight();
+		Rectangle clip = getClip();
 
 		table.computeVisibleRect(tmpRect);
 
@@ -2161,6 +2164,16 @@ public class JSTableUI extends JSPanelUI {
 		dragging = false;
 		repaintAll = false;
 		setHidden(false);
+	}
+
+	private Rectangle myClip = new Rectangle();
+	private Rectangle getClip() {
+		if (table.parent instanceof JViewport) {
+			return ((JSViewportUI)table.parent.getUI()).myClip; 
+		}
+		myClip.width = table.getWidth();
+		myClip.height = table.getHeight();
+		return myClip;
 	}
 
 	private void paintCells(Graphics g, int rMin0, int rMax0, int rMin, int rMax, int cMin, int cMax) {

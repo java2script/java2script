@@ -477,8 +477,7 @@ public class JSToolkit extends SunToolkit
 	 * @return
 	 */
 	public static HTML5Applet getHTML5Applet(Component c) {
-		ThreadGroup g = (c == null ? Thread.currentThread().getThreadGroup() : c.getAppContext().getThreadGroup());
-		return ((JSThreadGroup) g).getHtmlApplet();
+		return JSUtil.getHTML5Applet(c);
 	}
 
 	public static void taintUI(Component c) {

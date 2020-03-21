@@ -126,13 +126,13 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	protected int width, height;
 
 	/**
-	 * the JSGrpahics2D object associated with this image
+	 * the JSGrpahics2D object associated with this image, if it has been requested
 	 */
 	public JSGraphics2D 秘g; // a JSGraphics2D instance
 
 	/**
-	 * if an image is used just for graphics that the HTML5 canvas can use, we back
-	 * the BufferedImage with an HTML5 canvas and just draw to it, never using the
+	 * if an image is used just for graphics that the HTML5 canvas can draw, we back
+	 * the BufferedImage with an HTML5 canvas and draw to it, never using the
 	 * raster associated with this image.
 	 */
 	public Object 秘imgNode; // used by JSGraphics2D directly
@@ -150,7 +150,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * set to true if pixels have been generated from an HTML5 canvas
 	 * 
 	 */
-	private boolean 秘havePixels;
+	private boolean 秘haveFilePixels;
 	
 	/**
 	 * the HTML5 canvas that originated 秘pix or that was created from them.
@@ -453,7 +453,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 					DataBuffer.TYPE_BYTE);
 			raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE, width, height, width * 4, 4, bOffs, null);
 			秘pix = ((DataBufferInt) raster.getDataBuffer()).data;
-			秘havePixels = 秘hasRasterData = true;	
+			秘haveFilePixels = 秘hasRasterData = true;	
 		}
 			break;
 
@@ -909,7 +909,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @return true if pixels had to be set
 	 */
 	public boolean 秘ensureHavePixels(boolean andSetImageNode) {
-		if (!秘havePixels && (秘imgNode != null || 秘g != null)) {
+		if (!秘haveFilePixels && (秘imgNode != null || 秘g != null)) {
 			秘setPixelsFromHTML5Canavas(andSetImageNode);
 			return true;
 		}
@@ -1019,7 +1019,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		// 秘pix is used by getGraphics()
 		// 秘pixSaved is kept in case we need to do this again
 		秘g = null; // forces new this.秘canvas to be created in getGraphics()
-		getImageGraphic(); // sets 秘pix = null and creates 秘canvas
+		秘getImageGraphic(); // sets 秘pix = null and creates 秘canvas
 
 	}
 
@@ -1152,7 +1152,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @return a <code>Graphics2D</code>, used for drawing into this image.
 	 */
 	public Graphics2D createGraphics() {
-		return (Graphics2D) getImageGraphic().create();
+		return (Graphics2D) 秘getImageGraphic().create();
 //		GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
 //		return (Graphics2D) env.createGraphics(this);
 	}
@@ -1214,7 +1214,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 */
 	@Override
 	public String toString() {
-		return new String("BufferedImage@" + Integer.toHexString(hashCode()) + ": type = " + imageType + " "
+		return ("BufferedImage@" + Integer.toHexString(hashCode()) + ": type = " + imageType + " "
 				+ colorModel.toString() + " " + raster.toString());
 	}
 
@@ -1715,7 +1715,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		if (秘pix == null)
 			toIntARGB(data, 秘pix = new int[data.length >> 2]);
 		秘imgNode = (andSetImgNode ? canvas : null);
-		秘havePixels = true;
+		秘haveFilePixels = true;
 	}
 
 	/**
@@ -1794,7 +1794,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		// call this method after drawing to ensure that
 		// pixels are recreated from the HTML5 canvas
 		秘pix = null;
-		秘havePixels = false;
+		秘haveFilePixels = false;
 	}
 
 	/**
@@ -1807,7 +1807,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @return a JSGraphics2D object
 	 */
 	@SuppressWarnings("unused")
-	public Graphics2D getImageGraphic() {
+	public Graphics2D 秘getImageGraphic() {
 		if (秘g == null) {
 			HTML5Canvas canvas = (HTML5Canvas) DOMNode.createElement("canvas", "img" + System.currentTimeMillis());
 			int w = getWidth();
@@ -1914,10 +1914,13 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		boolean isPacked = cm instanceof PackedColorModel;
 		int[] p = 秘pix;
 		if (isPacked) {
+			int alpha = (cm.getNumColorComponents() == 3 ? 0xFF : -1);
 			int[] a = new int[n];
 			raster.getDataElements(0, 0, width, height, a);
 			for (int i = 0, pt = 0; i < n; i++, pt += 4) {
 				cm.getComponents(a[i], p, pt);
+				if (alpha != 0)
+					p[pt + 3] = alpha;
 			}
 		} else {
 			int nc = cm.getNumComponents();
@@ -1966,20 +1969,26 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * canvas associated with this image, particularly if this is from a
 	 * user-provided raster.
 	 * 
-	 * @param imgNode
+	 * @param force  initially false just to get the pre-constructed canvas if it exists
 	 * @return
 	 */
 
 	public DOMNode 秘getImageNode(boolean force) {
-		if (!秘hasRasterData)
-			return (DOMNode) (秘canvas != null ? 秘canvas
+		// If we have raster data and are not forcing, return the canvas if it exists.
+		// If we we have no raster data and are not forcing, force the issue anyway 
+		// and return the canvas or image node.
+		// If we are forcing, or force the creation of a canvas
+		if (!force)
+			return (DOMNode) (秘hasRasterData || 秘canvas != null ? 秘canvas
 					: 秘imgNode != null ? 秘imgNode : JSGraphicsCompositor.createImageNode(this));
-		if (!force)// || imageType == TYPE_4BYTE_HTML5)
-			return null;
+		// we are forcing 
 		秘getPixelsFromRaster();
 		秘g = null;
-		getImageGraphic();
-		return 秘g.getCanvas();
+		秘getImageGraphic();
+		DOMNode canvas = 秘g.getCanvas();
+		秘g = null;
+		秘canvas = null;
+		return canvas;
 	}
 
 	/**
@@ -1989,11 +1998,11 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 */
 	protected void 秘setPixels(int[] argb) {
 		秘pix = argb;
-		秘havePixels = true;
+		秘haveFilePixels = true;
 	}
 
 	/**
-	 * This private method does not trigger actual conversion to a rastered image.
+	 * This method, called from ImageUtil does not trigger actual conversion to a rastered image.
 	 * 
 	 * @return
 	 */

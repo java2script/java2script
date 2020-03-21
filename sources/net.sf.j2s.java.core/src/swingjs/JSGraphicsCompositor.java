@@ -248,7 +248,7 @@ public class JSGraphicsCompositor {
 			retBI = op.filter(src, dst);
 			break;
 		case 'A':
-			Graphics2D g = dst.getImageGraphic();
+			Graphics2D g = dst.秘getImageGraphic();
 			g.drawImage(src,
 					((AffineTransformOp) op).getTransform(), null);
 			retBI = dst;

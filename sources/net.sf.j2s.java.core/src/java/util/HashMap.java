@@ -300,14 +300,9 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 
 		@Override
 		public final boolean equals(Object o) {
-			if (o == this)
-				return true;
-			if (o instanceof Map.Entry) {
-				Map.Entry<?, ?> e = (Map.Entry<?, ?>) o;
-				if (Objects.equals(key, e.getKey()) && Objects.equals(value, e.getValue()))
-					return true;
-			}
-			return false;
+			return (o != null && (o == this || o instanceof Map.Entry
+					&& Objects.equals(key, ((Map.Entry<?, ?>) o).getKey()) 
+					&& Objects.equals(value, ((Map.Entry<?, ?>) o).getValue())));
 		}
 	}
 
@@ -429,6 +424,8 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 	/* ---------------- Public operations -------------- */
 
 	/**
+     * SwingJS note: This constructor DOES NOT allow JavaScript Map object for HashMap<String,?>.
+     * 
 	 * Constructs an empty <tt>HashMap</tt> with the specified initial capacity and
 	 * load factor.
 	 *
@@ -438,7 +435,6 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 	 *                                  load factor is nonpositive
 	 */
 	public HashMap(int initialCapacity, float loadFactor) {
-		秘setJS();
 		if (initialCapacity < 0)
 			throw new IllegalArgumentException("Illegal initial capacity: " + initialCapacity);
 		if (initialCapacity > MAXIMUM_CAPACITY)
@@ -450,6 +446,8 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 	}
 
 	/**
+     * SwingJS note: This constructor allows JavaScript Map object for HashMap<String,?>.
+     * 
 	 * Constructs an empty <tt>HashMap</tt> with the specified initial capacity and
 	 * the default load factor (0.75).
 	 *
@@ -458,9 +456,12 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 	 */
 	public HashMap(int initialCapacity) {
 		this(initialCapacity, DEFAULT_LOAD_FACTOR);
+		秘setJS();
 	}
 
 	/**
+     * SwingJS note: This constructor allows JavaScript Map object for HashMap<String,?>.
+     * 
 	 * Constructs an empty <tt>HashMap</tt> with the default initial capacity (16)
 	 * and the default load factor (0.75).
 	 */

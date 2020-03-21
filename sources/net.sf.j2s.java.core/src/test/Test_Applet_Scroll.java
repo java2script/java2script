@@ -10,6 +10,7 @@ package test;
 //web_Features= graphics, AWT-to-Swing
 
 import java.awt.Adjustable;
+import java.awt.BorderLayout;
 import java.awt.Choice;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -231,7 +232,7 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener, Mouse
 		p.add(panel2);
 
 		sp.getViewport().add(p);
-		getContentPane().add(sp);
+		add(sp);
 		sp.getViewport().addChangeListener(this);
 //		hsb = sp.getHorizontalScrollBar();
 

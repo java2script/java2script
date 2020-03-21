@@ -209,7 +209,7 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 	private HTML5Canvas newCanvas(int width, int height, RootPaneContainer window) {
 		if (isApplet) {
 			// applets create their own canvas
-			HTML5Canvas c = html5Applet._getHtml5Canvas();
+			HTML5Canvas c = (HTML5Canvas) html5Applet._getHtml5Canvas();
 			if (c != null) {
 				return canvas = c;
 			}

@@ -1529,7 +1529,7 @@ public class IndexColorModel extends ColorModel {
      * <code>ColorModel</code> object.
      */
     public String toString() {
-       return new String("IndexColorModel: #pixelBits = "+pixel_bits
+       return ("IndexColorModel: #pixelBits = "+pixel_bits
                          + " numComponents = "+numComponents
                          + " color space = "+colorSpace
                          + " transparency = "+transparency

@@ -39,6 +39,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSlider;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.event.TableModelListener;
@@ -58,24 +59,49 @@ public class SimpleTableDemo extends JPanel {
     private boolean DEBUG = false;
 
     public SimpleTableDemo() {
-        super(new GridLayout(1,0));
+        super(new GridLayout(2,0));
 
         String[] columnNames = {"First Name",
                                 "Last Name",
                                 "Sport",
                                 "# of Years",
-                                "Vegetarian"};
+                                //"Vegetarian"
+                                };
 
         Object[][] data = {
-	    {"Kathy", "Smith",
-	     "Snowboarding", new Integer(5), new Boolean(false)},
-	    {"John", "Doe",
-	     "Rowing", new Integer(3), new Boolean(true)},
-	    {"Sue", "Black",
-	     "Knitting", new Integer(2), new Boolean(false)},
-	    {"Jane", "White",
-	     "Speed reading", new Integer(20), new Boolean(true)},
-	    {"Joe", "Brown",
+        	    {"Kathy", "Smith",
+       		     "Snowboarding", new Integer(5), new Boolean(false)},
+       		    {"John", "Doe",
+       		     "Rowing", new Integer(3), new Boolean(true)},
+       		    {"Sue", "Black",
+       		     "Knitting", new Integer(2), new Boolean(false)},
+       		    {"Jane", "White",
+       		     "Speed reading", new Integer(20), new Boolean(true)},
+        	    {"Kathy", "Smith",
+        		     "Snowboarding", new Integer(5), new Boolean(false)},
+        		    {"John", "Doe",
+        		     "Rowing", new Integer(3), new Boolean(true)},
+        		    {"Sue", "Black",
+        		     "Knitting", new Integer(2), new Boolean(false)},
+        		    {"Jane", "White",
+        		     "Speed reading", new Integer(20), new Boolean(true)},
+            	    {"Kathy", "Smith",
+            		     "Snowboarding", new Integer(5), new Boolean(false)},
+            		    {"John", "Doe",
+            		     "Rowing", new Integer(3), new Boolean(true)},
+            		    {"Sue", "Black",
+            		     "Knitting", new Integer(2), new Boolean(false)},
+            		    {"Jane", "White",
+            		     "Speed reading", new Integer(20), new Boolean(true)},
+                	    {"Kathy", "Smith",
+                		     "Snowboarding", new Integer(5), new Boolean(false)},
+                		    {"John", "Doe",
+                		     "Rowing", new Integer(3), new Boolean(true)},
+                		    {"Sue", "Black",
+                		     "Knitting", new Integer(2), new Boolean(false)},
+                		    {"Jane", "White",
+                		     "Speed reading", new Integer(20), new Boolean(true)},
+        		    {"Joe", "Brown",
 	     "Pool", new Integer(10), new Boolean(false)}
         };
 
@@ -125,6 +151,7 @@ public class SimpleTableDemo extends JPanel {
 
         //Add the scroll pane to this panel.
         add(scrollPane);
+//        add(new JSlider(0,100,10));
     }
 
     private void printDebugData(JTable table) {

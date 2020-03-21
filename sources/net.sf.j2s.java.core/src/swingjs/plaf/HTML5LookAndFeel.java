@@ -773,7 +773,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 		// "javax.swing.plaf.basic.BasicIconFactory",
 		// "getRadioButtonMenuItemIcon");
 		//
-		// Object menuItemAcceleratorDelimiter = new String("+");
+		// Object menuItemAcceleratorDelimiter = ("+");
 		//
 		// // *** OptionPane value objects
 		//

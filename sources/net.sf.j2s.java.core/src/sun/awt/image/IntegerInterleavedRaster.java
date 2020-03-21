@@ -500,7 +500,7 @@ public class IntegerInterleavedRaster extends IntegerComponentRaster {
 
 	@Override
 	public String toString() {
-		return new String("IntegerInterleavedRaster: width = " + width + " height = " + height + " #Bands = " + numBands
+		return ("IntegerInterleavedRaster: width = " + width + " height = " + height + " #Bands = " + numBands
 				+ " xOff = " + sampleModelTranslateX + " yOff = " + sampleModelTranslateY + " dataOffset[0] "
 				+ dataOffsets[0]);
 	}

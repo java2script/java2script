@@ -394,9 +394,9 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 	  if (isTainted)
 	    updateDOMNode();
 		super.paint(g, c);
-		Shape clip = g.getClip();
+		//Shape clip = g.getClip();
 		paintImpl(g, c);
-		g.setClip(clip);
+		//g.setClip(clip);
 //		paintDropLine(g);
 	}
 

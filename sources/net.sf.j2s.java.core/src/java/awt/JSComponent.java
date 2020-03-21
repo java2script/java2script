@@ -158,6 +158,8 @@ public abstract class JSComponent extends Component {
 	
 	@Override
 	public void repaint() {
+		if (width <= 0 || height <= 0)
+			return;
 		if (秘isAWT()) {
 			秘repaintCmp(0, 0, 0, width, height);
 		} else {
@@ -701,6 +703,8 @@ public abstract class JSComponent extends Component {
 	 * javax.swing, primarily)
 	 */
 	public void 秘repaint() {
+		if (width <= 0 || height <= 0)
+			return;
 		if (秘isAWT()) {
 			// this is an internal Swing repaint call - do not use update(Graphics)
 			秘repaintAsUpdate = false;

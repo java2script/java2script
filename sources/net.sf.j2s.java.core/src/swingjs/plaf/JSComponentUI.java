@@ -1876,7 +1876,7 @@ public class JSComponentUI extends ComponentUI
 						if (jc.getFrameViewer().isApplet) {
 							// If the applet's root pane, we insert it into the applet's
 							// content
-							DOMNode cdiv = swingjs.JSToolkit.getHTML5Applet(jc)._getContentLayer();
+							DOMNode cdiv = (DOMNode) swingjs.JSToolkit.getHTML5Applet(jc)._getContentLayer();
 							DOMNode.appendChildSafely(cdiv, outerNode);
 						}
 					}
@@ -2680,9 +2680,9 @@ public class JSComponentUI extends ComponentUI
 				"height", hCtr + "px");
 		addJSKeyVal(cssIcon, "position", "absolute", "top", null, "left", null, "transform", null);
 		addJSKeyVal(cssTxt, "position", "absolute", "top", null, "left", null, "transform", null);
-		// checkboxes and radiobuttons should not be fully centered 
+		// checkboxes and radiobuttons (i.e. with actionNodes) should not be fully centered unless in a table
 		isFullyCentered = (alignHCenter && alignVCenter && wIcon == 0 
-				|| wText == 0 && (actionNode == null || isSimpleButton) && margins.left == margins.right
+				|| wText == 0 && (actionNode == null || this.cellComponent != null || isSimpleButton) && margins.left == margins.right
 				&& margins.top == margins.bottom && myInsets.left == myInsets.right && myInsets.top == myInsets.bottom);
 		if (isFullyCentered) {
 			// simple totally centered label or button

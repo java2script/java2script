@@ -354,6 +354,7 @@ public class ImageView extends View {
         paintHighlights(g, a);
         paintBorder(g, rect);
         if (clip != null) {
+            g = g.create();
             g.clipRect(rect.x + leftInset, rect.y + topInset,
                        rect.width - leftInset - rightInset,
                        rect.height - topInset - bottomInset);
@@ -396,8 +397,9 @@ public class ImageView extends View {
             }
         }
         if (clip != null) {
+        	g.dispose();
             // Reset clip.
-            g.setClip(clip.x, clip.y, clip.width, clip.height);
+//            g.setClip(clip.x, clip.y, clip.width, clip.height);
         }
     }
 

@@ -254,7 +254,7 @@ public final class SystemFlavorMap implements FlavorMap, FlavorTable {
                     while (continueLine(line)) {
                         String nextLine = in.readLine();
                         if (nextLine == null) {
-                            nextLine = new String("");
+                            nextLine = ("");
                         }
                         String loppedLine =
                             line.substring(0, line.length() - 1);

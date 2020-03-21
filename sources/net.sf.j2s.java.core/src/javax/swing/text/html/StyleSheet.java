@@ -2514,6 +2514,7 @@ public class StyleSheet extends StyleContext {
         void paint(Graphics g, float x, float y, float w, float h, View v) {
             Rectangle clip = g.getClipRect();
             if (clip != null) {
+            	g = g.create();
                 // Constrain the clip so that images don't draw outside the
                 // legal bounds.
                 g.clipRect((int)x, (int)y, (int)w, (int)h);
@@ -2566,8 +2567,9 @@ public class StyleSheet extends StyleContext {
                 }
             }
             if (clip != null) {
+            	g.dispose();
                 // Reset clip.
-                g.setClip(clip.x, clip.y, clip.width, clip.height);
+//                g.setClip(clip.x, clip.y, clip.width, clip.height);
             }
         }
 

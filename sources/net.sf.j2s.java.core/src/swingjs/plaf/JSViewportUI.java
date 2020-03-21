@@ -29,6 +29,7 @@
 package swingjs.plaf;
 
 import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.JComponent;
@@ -74,6 +75,12 @@ ChangeListener {
 	protected DOMNode setHTMLElement() {
 		return DOMNode.setStyles(setHTMLElementCUI(), "overflow", "hidden", "margin", "1px"
 		,"width", (width - 2) + "px", "height", (height-2) + "px");
+	}
+
+	Rectangle myClip;
+	
+	public void setClip(Rectangle clip) {
+		myClip = clip;
 	}
 
 }
