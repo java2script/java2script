@@ -1214,7 +1214,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 */
 	@Override
 	public String toString() {
-		return new String("BufferedImage@" + Integer.toHexString(hashCode()) + ": type = " + imageType + " "
+		return ("BufferedImage@" + Integer.toHexString(hashCode()) + ": type = " + imageType + " "
 				+ colorModel.toString() + " " + raster.toString());
 	}
 

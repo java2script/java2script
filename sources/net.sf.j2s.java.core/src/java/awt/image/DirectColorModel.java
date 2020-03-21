@@ -1427,7 +1427,7 @@ public class DirectColorModel extends PackedColorModel {
      */
     @Override
 		public String toString() {
-        return new String("DirectColorModel: rmask="
+        return ("DirectColorModel: rmask="
                           +Integer.toHexString(red_mask)+" gmask="
                           +Integer.toHexString(green_mask)+" bmask="
                           +Integer.toHexString(blue_mask)+" amask="

@@ -3535,7 +3535,7 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
 
         @Override
 		public String toString() {
-            return new String("viewport.viewSize="+viewport.getViewSize()+"\n"+
+            return ("viewport.viewSize="+viewport.getViewSize()+"\n"+
                               "viewport.viewRectangle="+viewport.getViewRect()+"\n"+
                               "leadingTabIndex="+leadingTabIndex+"\n"+
                               "tabViewPosition="+tabViewPosition);

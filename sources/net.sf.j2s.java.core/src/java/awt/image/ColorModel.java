@@ -1643,7 +1643,7 @@ public abstract class ColorModel implements Transparency{
      */
     @Override
 		public String toString() {
-       return new String("ColorModel: #pixelBits = "+pixel_bits
+       return ("ColorModel: #pixelBits = "+pixel_bits
                          + " numComponents = "+numComponents
                          + " color space = "+colorSpace
                          + " transparency = "+transparency
