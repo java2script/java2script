@@ -151,4 +151,18 @@ public abstract class OutputStream implements Closeable, Flushable {
     public void close() throws IOException {
     }
 
+    /**
+     * ByteArrayOutputStream and FileOutputStream will set bytes directly; others will append.
+     * @param b
+     * @return
+     */
+	public boolean 秘setBytes(byte[] b) {
+		try {
+			write(b, 0, b.length);
+			return true;
+		} catch (IOException e) {
+			return false;
+		}
+	}
+
 }

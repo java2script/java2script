@@ -17,8 +17,8 @@ import swingjs.api.js.DOMNode;
  * initialized to the raster data, but 秘imgNode will be null.
  * 
  * When an image is used, then 秘pix will be there, but it will not be populated
- * unless a call to setRGB is made. Until then, JSGraphics2D.drawImage will
- * simply use the image itself.
+ * unless a call to getRaster() or one of the setRGB() methods is made. 
+ * Until then, JSGraphics2D.drawImage will simply use the image itself.
  * 
  * useful states: (needs checking)
  * 

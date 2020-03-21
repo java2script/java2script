@@ -27,7 +27,7 @@ public class JSGraphicsEnvironment extends GraphicsEnvironment {
 
 	@Override
 	public Graphics2D createGraphics(BufferedImage img) {
-		return (Graphics2D) img.getImageGraphic().create();
+		return (Graphics2D) img.秘getImageGraphic().create();
 	}
 
 	private static Font[] availableFonts;

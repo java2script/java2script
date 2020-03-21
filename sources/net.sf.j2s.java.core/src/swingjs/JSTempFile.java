@@ -28,20 +28,12 @@ public class JSTempFile extends File {
 	}
 
 	public boolean setBytes(Object isOrBytes) {
-		if (isOrBytes instanceof InputStream) {
-			秘bytes = /**
-						 * @j2sNative (isOrBytes.$in.$in || isOrBytes.$in).buf ||
-						 */
-					null;
-		} else if (isOrBytes instanceof byte[]) {
-			秘bytes = /**
-						 * @j2sNative isOrBytes ||
-						 */
-				null;
-		} else {
-			秘bytes = null;
+		boolean ok = JSUtil.setFileBytesStatic((File) this, isOrBytes);
+		if (ok) {
+			String path = getAbsolutePath();
+			JSUtil.cacheFileData(path, 秘bytes);
 		}
-		return 秘bytes != null;
+		return ok;
 	}
 
 

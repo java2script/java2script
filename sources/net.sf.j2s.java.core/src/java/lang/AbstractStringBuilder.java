@@ -841,7 +841,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
         /**
          * @j2sNative
          * 
-         * this.秘s = this.秘s.substring(0, start)+s.substring(end);
+         * this.秘s = this.秘s.substring(0, start)+this.秘s.substring(end);
          */
 //
 //        int len = end - start;

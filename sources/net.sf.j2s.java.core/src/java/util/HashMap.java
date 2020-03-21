@@ -253,6 +253,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 	static final int MIN_TREEIFY_CAPACITY = 64;
 
 	Map<String, Object> 秘m;
+	boolean 秘allowJS = false;
 
 	/**
 	 * Basic hash bin node, used for most entries. (See below for TreeNode subclass,
@@ -300,14 +301,9 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 
 		@Override
 		public final boolean equals(Object o) {
-			if (o == this)
-				return true;
-			if (o instanceof Map.Entry) {
-				Map.Entry<?, ?> e = (Map.Entry<?, ?>) o;
-				if (Objects.equals(key, e.getKey()) && Objects.equals(value, e.getValue()))
-					return true;
-			}
-			return false;
+			return (o != null && (o == this || o instanceof Map.Entry
+					&& Objects.equals(key, ((Map.Entry<?, ?>) o).getKey()) 
+					&& Objects.equals(value, ((Map.Entry<?, ?>) o).getValue())));
 		}
 	}
 
@@ -426,9 +422,18 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 	 */
 	final float loadFactor;
 
+	/**
+	 * flag developers can use to switch off all use of simple JavaScript Map objects
+	 * 
+	 * not final, so that it can be managed on the fly in SwingJS
+	 */
+	public static boolean USE_SIMPLE = true;
+
 	/* ---------------- Public operations -------------- */
 
 	/**
+     * SwingJS note: This constructor DOES NOT allow JavaScript Map object for HashMap<String,?>.
+     * 
 	 * Constructs an empty <tt>HashMap</tt> with the specified initial capacity and
 	 * load factor.
 	 *
@@ -438,7 +443,6 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 	 *                                  load factor is nonpositive
 	 */
 	public HashMap(int initialCapacity, float loadFactor) {
-		秘setJS();
 		if (initialCapacity < 0)
 			throw new IllegalArgumentException("Illegal initial capacity: " + initialCapacity);
 		if (initialCapacity > MAXIMUM_CAPACITY)
@@ -450,6 +454,8 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 	}
 
 	/**
+     * SwingJS note: This constructor allows JavaScript Map object for HashMap<String,?>.
+     * 
 	 * Constructs an empty <tt>HashMap</tt> with the specified initial capacity and
 	 * the default load factor (0.75).
 	 *
@@ -458,13 +464,18 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 	 */
 	public HashMap(int initialCapacity) {
 		this(initialCapacity, DEFAULT_LOAD_FACTOR);
+		秘allowJS = true;
+		秘setJS();
 	}
 
 	/**
+     * SwingJS note: This constructor allows JavaScript Map object for HashMap<String,?>.
+     * 
 	 * Constructs an empty <tt>HashMap</tt> with the default initial capacity (16)
 	 * and the default load factor (0.75).
 	 */
 	public HashMap() {
+		秘allowJS = true;
 		秘setJS();
 		this.loadFactor = DEFAULT_LOAD_FACTOR; // all other fields defaulted
 	}
@@ -479,6 +490,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 	 * @throws NullPointerException if the specified map is null
 	 */
 	public HashMap(Map<? extends K, ? extends V> m) {
+        秘allowJS = (/** @j2sNative m.allowJS ||*/false);
 		秘setJS();
 		this.loadFactor = DEFAULT_LOAD_FACTOR;
 		putMapEntries(m, false);
@@ -3066,7 +3078,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 
 	protected void 秘setJS() {
 
-		秘m = (Map.USE_SIMPLE ? /** @j2sNative new Map() || */
+		秘m = (秘allowJS && HashMap.USE_SIMPLE ? /** @j2sNative new Map() || */
 				null : null);
 	}
 

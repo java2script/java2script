@@ -27,6 +27,7 @@
  */
 package javax.swing;
 
+import java.applet.Applet;
 import java.applet.JSApplet;
 import java.awt.Component;
 import java.awt.Container;
@@ -568,6 +569,10 @@ public class RepaintManager {
 	 * @since 1.6
 	 */
 	public void addDirtyRegion(JSApplet applet, int x, int y, int w, int h) {
+		addDirtyRegion0(applet, x, y, w, h);
+	}
+
+	public void addDirtyRegion(Applet applet, int x, int y, int w, int h) {
 		addDirtyRegion0(applet, x, y, w, h);
 	}
 
