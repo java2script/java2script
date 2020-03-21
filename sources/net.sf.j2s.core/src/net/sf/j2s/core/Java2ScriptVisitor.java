@@ -135,6 +135,8 @@ import org.eclipse.jdt.core.dom.WildcardType;
 
 // TODO: superclass inheritance for JAXB XmlAccessorType
 
+//BH 2020.03.21 -- 3.2.9-v1e better v1c 
+//BH 2020.03.20 -- 3.2.9-v1d proper check for new String("x") == "x" (should be false), but new integer(3) == 3 (true) 
 //BH 2020.03.20 -- 3.2.9-v1c more efficient static call from 3.2.9-v1a 
 //BH 2020.02.26 -- 3.2.9-v1b allows (byte) = (byte) to not use |0 
 //BH 2020.02.20 -- 3.2.9-v1a order of 1st two parameters in new_ should be reversed
@@ -3259,7 +3261,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					}
 				} else {
 					// just add the right operand
-					addOperandWithDoc(right, leftIsString);
+					addOperandWithJ2SDoc(right, leftIsString);
 				}
 				if (needNewStaticParenthesis) {
 					buffer.append(")");
@@ -3564,6 +3566,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		boolean isToString = (expTypeName.indexOf("String") >= 0);
 
 		String operator = node.getOperator().toString();
+		
 		boolean isBitwise = isBitwiseBinaryOperator(node);
 		boolean isComparison = (!isBitwise && "!==<=>=".indexOf(operator) >= 0);
 		ITypeBinding leftTypeBinding = left.resolveTypeBinding();
@@ -3591,9 +3594,14 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			post = ')';
 			buffer.append("!!(");
 		}
-
+		
 		boolean isDirect = isBitwise && !toBoolean && leftIsInt && rightIsInt;
-		if (isDirect || isComparison) {
+		// string literal comparison check in 3.2.9.v1d
+		boolean isStringComparison = (isComparison 
+				&& !(left instanceof NullLiteral) && !(right instanceof NullLiteral)
+				&& isInternOrLiteral(left) != isInternOrLiteral(right)
+			);
+		if (isDirect || isComparison && !isStringComparison) {
 
 			// we do not have to do a full conversion
 			// possibilities include
@@ -3641,7 +3649,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 		// left
 
-		addOperandWithDoc(left, isToString && !isBitwise);
+		addOperandWithJ2SDoc(left, isToString && !isBitwise);
 		buffer.append(' ');
 		// op
 		buffer.append(operator);
@@ -3651,7 +3659,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 		buffer.append(' ');
 		// right
-		if (right instanceof ParenthesizedExpression || getJ2sJavadoc(right, DOC_CHECK_ONLY) != null) {
+		boolean parenthesize = (
+				//isStringComparison || 
+				right instanceof ParenthesizedExpression || getJ2sJavadoc(right, DOC_CHECK_ONLY) != null);
+//		if (isStringComparison)
+//			buffer.append("new String");
+		if (parenthesize) {
 			buffer.append("(");
 			addJ2SDoc(right);
 			if (right instanceof ParenthesizedExpression)
@@ -3677,7 +3690,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		return false;
 	}
 
-	private void addOperandWithDoc(Expression exp, boolean toString) {
+	private boolean isInternOrLiteral(Expression e) {
+		return e instanceof StringLiteral || (e instanceof MethodInvocation) &&(((MethodInvocation) e).resolveMethodBinding().getName().equals("intern"));
+	}
+
+	private void addOperandWithJ2SDoc(Expression exp, boolean toString) {
 		if (exp instanceof ParenthesizedExpression) {
 			buffer.append("(");
 			addJ2SDoc(exp);
@@ -6158,20 +6175,20 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		header = header
 				.replace(",I$=[]",
 						privateVarString + (package_includes.length() == 0 ? ""
-								: package_includes.append("]]," + "$I$=function(i,n,m){return("
-										+ (package_haveStaticArgsReversal[0] ? "m?(i=function(f,a){return f.apply(null,a)}($I$(i)[n],m)):" : "")
+								: package_includes.append("]]," 
+										+ "$I$=function"
+									//3.2.9-v1e:
+										+ (package_haveStaticArgsReversal[0] ? 
+											"(i,n,m){return m?$I$(i)[n].apply(null,m):"
+											: "(i,n){return"
+										  )	
+									//3.2.9-v1a:
+										//+ "(i,n){return"
 										+ "((i=(I$[i]||(I$[i]=Clazz.load(I$[0][i]))))"
-										+ ",!n&&i.$load$&&Clazz.load(i,2)))"
-										+ ",i};"
-//						
-//										
-//										
-//										"$I$=function(i,n){return"
-//										+ "(i=(I$[i]||(I$[i]=Clazz.load(I$[0][i])))),"
-//										+ "!n&&i.$load$&&Clazz.load(i,2)," + "i}"
-//										
-//										
-										)));
+										+ ",!n&&i.$load$&&Clazz.load(i,2)" 
+										+ ",i)"
+                                      + "}"
+						)));
 		for (int i = 1; i < parts.length; i++) {
 			js = parts[i];
 			int pt = js.indexOf("\n");
