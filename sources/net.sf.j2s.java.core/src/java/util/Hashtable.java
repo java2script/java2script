@@ -130,6 +130,7 @@ public class Hashtable<K,V>
     implements Map<K,V>, Cloneable, java.io.Serializable {
 
 	Map<String, Object> 秘m;
+	boolean 秘allowJS = false;
 
     /**
      * The hash table data.
@@ -204,6 +205,7 @@ public class Hashtable<K,V>
      */
     public Hashtable(int initialCapacity) {
         this(initialCapacity, 0.75f);
+        秘allowJS = true;
 		秘setJS();		
     }
 
@@ -215,6 +217,7 @@ public class Hashtable<K,V>
      */
     public Hashtable() {
         this(11, 0.75f);
+        秘allowJS = true;
 		秘setJS();		
     }
 
@@ -229,6 +232,7 @@ public class Hashtable<K,V>
      */
     public Hashtable(Map<? extends K, ? extends V> t) {
         this(Math.max(2*t.size(), 11), 0.75f);
+        秘allowJS = (/** @j2sNative t.allowJS ||*/false);
         putAll(t);
     }
 
@@ -1946,7 +1950,7 @@ public class Hashtable<K,V>
     }
     
 	protected void 秘setJS() {		
-		秘m = (Map.USE_SIMPLE ? /** @j2sNative new Map() || */
+		秘m = (秘allowJS && HashMap.USE_SIMPLE ? /** @j2sNative new Map() || */
 				null : null);
 	}
 

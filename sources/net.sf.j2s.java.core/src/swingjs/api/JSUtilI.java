@@ -164,4 +164,11 @@ public interface JSUtilI {
 	 */
 	boolean streamToFile(InputStream is, File outFile);
 
+	  /**
+	   * Switch the flag in SwingJS to use or not use the JavaScript Map object in
+	   * Hashtable, HashMap, and HashSet. Default is enabled.
+	   * 	   * 
+	   */
+	void setJavaScriptMapObjectEnabled(boolean enabled);
+
 }

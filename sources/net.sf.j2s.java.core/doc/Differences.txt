@@ -556,9 +556,9 @@ new HashSet()
 
 all use the JavaScript Map. But
 
-new Hashtable(11, 0.75)
-new HashMap(16, 0.75)
-new HashSet(16, 0.75)
+new Hashtable(11, 0.75f)
+new HashMap(16, 0.75f)
+new HashSet(16, 0.75f)
 
 do not. 
 

@@ -253,6 +253,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 	static final int MIN_TREEIFY_CAPACITY = 64;
 
 	Map<String, Object> 秘m;
+	boolean 秘allowJS = false;
 
 	/**
 	 * Basic hash bin node, used for most entries. (See below for TreeNode subclass,
@@ -421,6 +422,13 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 	 */
 	final float loadFactor;
 
+	/**
+	 * flag developers can use to switch off all use of simple JavaScript Map objects
+	 * 
+	 * not final, so that it can be managed on the fly in SwingJS
+	 */
+	public static boolean USE_SIMPLE = true;
+
 	/* ---------------- Public operations -------------- */
 
 	/**
@@ -456,6 +464,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 	 */
 	public HashMap(int initialCapacity) {
 		this(initialCapacity, DEFAULT_LOAD_FACTOR);
+		秘allowJS = true;
 		秘setJS();
 	}
 
@@ -466,6 +475,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 	 * and the default load factor (0.75).
 	 */
 	public HashMap() {
+		秘allowJS = true;
 		秘setJS();
 		this.loadFactor = DEFAULT_LOAD_FACTOR; // all other fields defaulted
 	}
@@ -480,6 +490,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 	 * @throws NullPointerException if the specified map is null
 	 */
 	public HashMap(Map<? extends K, ? extends V> m) {
+        秘allowJS = (/** @j2sNative m.allowJS ||*/false);
 		秘setJS();
 		this.loadFactor = DEFAULT_LOAD_FACTOR;
 		putMapEntries(m, false);
@@ -3067,7 +3078,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 
 	protected void 秘setJS() {
 
-		秘m = (Map.USE_SIMPLE ? /** @j2sNative new Map() || */
+		秘m = (秘allowJS && HashMap.USE_SIMPLE ? /** @j2sNative new Map() || */
 				null : null);
 	}
 

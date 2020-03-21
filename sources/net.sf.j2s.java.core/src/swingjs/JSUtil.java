@@ -921,5 +921,18 @@ public class JSUtil implements JSUtilI {
 		}
 	}
 
+	  /**
+	   * Switch the flag in SwingJS to use or not use the JavaScript Map object in
+	   * Hashtable, HashMap, and HashSet. Default is enabled.
+	   * 	   * 
+	   */
+	@Override
+	  public void setJavaScriptMapObjectEnabled(boolean enabled)
+	  {
+	    /**
+	     * @j2sNative Clazz.loadClass("java.util.HashMap").USE_SIMPLE = enabled;
+	     */
+	  }
+
 }
 

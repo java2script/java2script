@@ -1200,11 +1200,6 @@ public interface Map<K,V> {
 			 */
 	}
 
-	/**
-	 * flag developers can use to switch off all use of simple JavaScript Map objects 
-	 */
-	static boolean USE_SIMPLE = true;
-	
 	final static int NOT_SIMPLE = 0;
 	final static int INVALID_KEY = 1;
 	final static int NO_SUCH_KEY = 2;
