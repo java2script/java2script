@@ -227,7 +227,9 @@ public class JSTableUI extends JSPanelUI {
 			if (sp != null) {
 				sp.getVerticalScrollBar().setValue(0);
 			}
-
+			if (table.getRowCount() == 0) {
+				setHidden(true);
+			}
 			return;
 		case "autoCreateRowSorter":
 		case "rowSorter":
