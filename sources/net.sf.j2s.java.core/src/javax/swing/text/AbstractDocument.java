@@ -2756,9 +2756,8 @@ public abstract class AbstractDocument implements Document {
 			// a hashtable for to locate the change for a given element.
 			if ((changeLookup == null) && (edits.size() > 10)) {
 				changeLookup = new Hashtable();
-				int n = edits.size();
-				for (int i = 0; i < n; i++) {
-					Object o = edits.elementAt(i);
+				for (int i = 0, n = edits.size(); i < n; i++) {
+					Object o = edits.get(i);
 					if (o instanceof DocumentEvent.ElementChange) {
 						DocumentEvent.ElementChange ec = (DocumentEvent.ElementChange) o;
 						changeLookup.put(ec.getElement(), ec);
@@ -2934,9 +2933,8 @@ public abstract class AbstractDocument implements Document {
 			if (changeLookup != null) {
 				return (DocumentEvent.ElementChange) changeLookup.get(elem);
 			}
-			int n = edits.size();
-			for (int i = 0; i < n; i++) {
-				Object o = edits.elementAt(i);
+			for (int i = 0, n = edits.size(); i < n; i++) {
+				Object o = edits.get(i);
 				if (o instanceof DocumentEvent.ElementChange) {
 					DocumentEvent.ElementChange c = (DocumentEvent.ElementChange) o;
 					if (elem.equals(c.getElement())) {
