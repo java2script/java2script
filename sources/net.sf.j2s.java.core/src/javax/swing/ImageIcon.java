@@ -408,7 +408,7 @@ public class ImageIcon implements Icon {
     @Override
 		public synchronized void paintIcon(Component c, Graphics g, int x, int y) {
         if(imageObserver == null) {
-        	((JSGraphics2D)(Object)g).drawImagePriv(image, x, y, c);
+        	((JSGraphics2D)(Object)g).drawImage(image, x, y, c);
         } else {
            g.drawImage(image, x, y, imageObserver);
         }

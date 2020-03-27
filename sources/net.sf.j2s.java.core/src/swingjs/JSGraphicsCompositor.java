@@ -141,7 +141,7 @@ public class JSGraphicsCompositor {
 					}
 			if (canDo) {
 				g.setAlpha(scaleFactors[3]);
-				g.drawImagePriv(img, x, y, null);
+				g.drawImageFromRaster(img, x, y, null);
 				g.setAlpha(1);
 				return true;
 			}
