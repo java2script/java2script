@@ -48,7 +48,9 @@ import java.util.Vector;
 import javax.swing.JComponent;
 import javax.swing.JLayeredPane;
 import javax.swing.JRootPane;
+import javax.swing.RepaintManager;
 import javax.swing.RootPaneContainer;
+import javax.swing.SwingUtilities;
 
 import sun.awt.AppContext;
 import swingjs.JSToolkit;
@@ -61,6 +63,8 @@ import swingjs.plaf.JSWindowUI;
  * subclass JComponent. It is fair to say that there will be issues
  * with this, but the reason was to allow JInternalFrame to subclass JFrame
  * instead of duplicating in code all of its functionality.
+ * 
+ * In addition, it allows all sorts of windows to be JComponents and have UIs.
  * 
  * 
  * A <code>Window</code> object is a top-level window with no borders and no
@@ -3631,6 +3635,33 @@ public class Window extends JComponent {
 //                x + w * securityWarningAlignmentX + securityWarningPointX,
 //                y + h * securityWarningAlignmentY + securityWarningPointY);
 //    }
+
+    
+    /**
+     * Indicates if this container is a validate root.
+     * <p>
+     * {@code Window} objects are the validate roots, and, therefore, they
+     * override this method to return {@code true}.
+     *
+     * @return {@code true}
+     * @since 1.7
+     * @see java.awt.Container#isValidateRoot
+     */
+    @Override
+    public boolean isValidateRoot() {
+        return true;
+    }
+
+	@Override
+	public void revalidate() {
+		// added to see if JFrame can be revalidated this way after a change in contentPane.
+		// SwingJS - set this UI to rebuild itself due to some 
+		// internal structural change.
+		if (ui != null)
+			((JSComponentUI)ui).setTainted();
+		invalidate();
+		validate();
+	}
 
 } // class Window
 
