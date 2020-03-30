@@ -4245,7 +4245,7 @@ public abstract class JComponent extends Container {
 		// internal structural change.
 		if (ui != null)
 			((JSComponentUI)ui).setTainted();
-		if (getParent() == null) {
+		if (getParent() == null && !isValidateRoot()) {
 			// Note: We don't bother invalidating here as once added
 			// to a valid parent invalidate will be invoked (addImpl
 			// invokes addNotify which will invoke invalidate on the

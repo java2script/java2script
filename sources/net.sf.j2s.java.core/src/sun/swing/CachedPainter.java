@@ -198,7 +198,7 @@ public abstract class CachedPainter {
     protected void paintImage(Component c, Graphics g,
                               int x, int y, int w, int h, Image image,
                               Object[] args) {
-    	((JSGraphics2D)(Object)g).drawImagePriv(image, x, y, null);
+    	((JSGraphics2D)(Object)g).drawImageFromRaster(image, x, y, null);
     }
 
     /**

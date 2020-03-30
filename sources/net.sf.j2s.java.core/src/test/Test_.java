@@ -97,6 +97,7 @@ public class Test_ {
 
 	public static void main(String[] args) {
 
+        
 		int val = new Test_().test3();
 		assert (val == 13 || val == 4);
 

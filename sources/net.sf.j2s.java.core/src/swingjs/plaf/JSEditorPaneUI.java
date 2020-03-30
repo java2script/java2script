@@ -477,7 +477,7 @@ public class JSEditorPaneUI extends JSTextUI {
 				t = PT.rep(t,  "\t", JSTAB);
 			}
 			if (t.indexOf('<') >= 0) {
-				t = PT.rep(t,  "<", "&lt;");
+				t = PT.rep(PT.rep(t,  "<", "&lt;"), ">", "&gt;");
 			}
 			sb.append(t);
 		}

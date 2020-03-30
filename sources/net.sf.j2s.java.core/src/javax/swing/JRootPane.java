@@ -578,7 +578,7 @@ public class JRootPane extends JComponent {
 	 * by the root pane.
 	 * <p>
 	 * Swing's painting architecture requires an opaque <code>JComponent</code> in
-	 * the containment hiearchy. This is typically provided by the content pane.
+	 * the containment hierarchy. This is typically provided by the content pane.
 	 * If you replace the content pane it is recommended you replace it with an
 	 * opaque <code>JComponent</code>.
 	 * 
@@ -592,12 +592,17 @@ public class JRootPane extends JComponent {
 		if (content == null)
 			throw new IllegalComponentStateException(
 					"contentPane cannot be set to null.");
+		if (contentPane == content)
+			return;
 		if (contentPane != null && contentPane.getParent() == layeredPane)
 			layeredPane.remove(contentPane);
 		content = 秘transferFrameTo((JComponent)content);
 		content.秘isContentPane = true;
+		Container old = contentPane;
 		contentPane = content;
 		layeredPane.add(contentPane, JLayeredPane.FRAME_CONTENT_LAYER);
+		if (old != null)
+			validate();
 	}
 
 	/**

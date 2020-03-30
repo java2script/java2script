@@ -2727,6 +2727,53 @@ public abstract class Component implements ImageObserver/*
 		}
 	}
 
+// SwingJS see JComponent
+//    /**
+//     * Revalidates the component hierarchy up to the nearest validate root.
+//     * <p>
+//     * This method first invalidates the component hierarchy starting from this
+//     * component up to the nearest validate root. Afterwards, the component
+//     * hierarchy is validated starting from the nearest validate root.
+//     * <p>
+//     * This is a convenience method supposed to help application developers
+//     * avoid looking for validate roots manually. Basically, it's equivalent to
+//     * first calling the {@link #invalidate()} method on this component, and
+//     * then calling the {@link #validate()} method on the nearest validate
+//     * root.
+//     *
+//     * @see Container#isValidateRoot
+//     * @since 1.7
+//     */
+//    public void revalidate() {
+//        revalidateSynchronously();
+//    }
+//
+//    /**
+//     * Revalidates the component synchronously.
+//     */
+//    final void revalidateSynchronously() {
+//        synchronized (getTreeLock()) {
+//            invalidate();
+//
+//            Container root = getContainer();
+//            if (root == null) {
+//                // There's no parents. Just validate itself.
+//                validate();
+//            } else {
+//                while (!root.isValidateRoot()) {
+//                    if (root.getContainer() == null) {
+//                        // If there's no validate roots, we'll validate the
+//                        // topmost container
+//                        break;
+//                    }
+//
+//                    root = root.getContainer();
+//                }
+//
+//                root.validate();
+//            }
+//        }
+//    }
 	/**
 	 * 
 	 * Unused in SwingJS. For SwingJS, we have the graphics without needing to get it from a peer.
