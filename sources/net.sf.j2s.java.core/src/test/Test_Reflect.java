@@ -16,6 +16,11 @@ class Test_Reflect extends Test_ {
 	public int[] testing;
 	public Test_ test;
 	
+	@Reflect
+	public int[] testIntArray() {
+		return new int[3];
+	}
+	
 	public void test(char i, String s) {
 		System.out.println("testchar " + i);assert(s.equals("char"));
 	}
@@ -96,8 +101,16 @@ class Test_Reflect extends Test_ {
 
 	public static void main(String[] args) {
 
+		Method[] m = Test_Reflect.class.getDeclaredMethods();
+		int iii = m.length - 1;
+		System.out.println(
+				m[iii].getName() + "\t" + m[iii].getReturnType().getName() 
+				+ "\t" + m[iii].getReturnType().isArray());
+
+		System.out.println("????");
+
 		List<String> list = new ArrayList<>();
-		Map.Entry<String, Integer>entry = new Map.Entry<String, Integer>(){
+		Map.Entry<String, Integer> entry = new Map.Entry<String, Integer>() {
 
 			@Override
 			public String getKey() {
@@ -116,15 +129,12 @@ class Test_Reflect extends Test_ {
 				// TODO Auto-generated method stub
 				return null;
 			}
-			
+
 		};
-		Method[] m = Map.Entry.class.getDeclaredMethods();
-		for (int i = 0; i < m.length; i++)
-			System.out.println(m[i].getName() + "\t" + m[i].getReturnType().getName());
-				
-		
-		
-		
+//		Method[] m = Map.Entry.class.getDeclaredMethods();
+//		for (int i = 0; i < m.length; i++)
+//			System.out.println(m[i].getName() + "\t" + m[i].getReturnType().getName() + "\t" + m[i].getReturnType().isArray());
+
 		new Test_Reflect().test("int[]", new int[] { 1, 2, 3 });
 		String name = "";
 		try {
@@ -205,7 +215,8 @@ class Test_Reflect extends Test_ {
 		try {
 			Field[] fields = f.getDeclaredFields();
 			for (int i = 0; i < fields.length; i++)
-				System.out.println("declaredField " + i + ": " + fields[i].getName() + " " + fields[i].get(t) + " as " + fields[i].getType().getName());
+				System.out.println("declaredField " + i + ": " + fields[i].getName() + " " + fields[i].get(t) + " as "
+						+ fields[i].getType().getName());
 			f.getField("s").set(t, "news");
 			System.out.println("t.s=" + t.s);
 			assert (t.s.equals("news"));

@@ -2391,7 +2391,7 @@ public class JSComponentUI extends ComponentUI
 			icon = currentIcon = getIcon(jc, icon);
 			$(iconNode).empty();
 			if (currentIcon != null) {
-				imageNode = ((BufferedImage)currentIcon.getImage()).秘getImageNode(true);
+				imageNode = ((BufferedImage)currentIcon.getImage()).秘getImageNode(BufferedImage.GET_IMAGE_FOR_ICON);
 				iconNode.appendChild(imageNode);
 				iconHeight = icon.getIconHeight();
 				DOMNode.setStyles(imageNode, "visibility", (isLabel ? "hidden" : null));

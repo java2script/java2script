@@ -86,7 +86,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 	    }
 
 	    SplitPaneDivider(JSSplitPaneUI ui) {
-			super();
+			super(" ");
 	    	paneui = ui;
 			setOpaque(true);
 		}
@@ -672,7 +672,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 	 * Canvas that fills the background in dark gray.
 	 */
 	protected Component createDefaultNonContinuousLayoutDivider() {
-		return new JLabel() {
+		return new JLabel(" ") {
 			{
 				setOpaque(true);
 				setBackground(Color.BLACK);
@@ -1144,7 +1144,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 				setDividerLocation(spDividerLocation - dOffset, availableSize);
 				dividerLocationIsSet = false;
 			} else if (availableSize != lastSplitPaneSize) {
-				distributeSpace(availableSize - lastSplitPaneSize, getKeepHidden());
+				distributeSpace(availableSize - lastSplitPaneSize, getKeepHidden(), null);
 			}
 			doReset = false;
 			dividerLocationIsSet = false;
@@ -1675,7 +1675,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 				}
 			}
 			setSizes(testSizes);
-			distributeSpace(availableSize - totalSize, false);
+			distributeSpace(availableSize - totalSize, false, testSizes);
 		}
 
 		/**
@@ -1687,7 +1687,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 		 *          if true and one of the components is 0x0 it gets none of the
 		 *          extra space
 		 */
-		void distributeSpace(int space, boolean keepHidden) {
+		void distributeSpace(int space, boolean keepHidden, int[] prefSizes) {
 			boolean lValid = (components[0] != null && components[0].isVisible());
 			boolean rValid = (components[1] != null && components[1].isVisible());
 
@@ -1703,19 +1703,28 @@ public class JSSplitPaneUI extends JSPanelUI {
 					rValid = false;
 				}
 			}
+			int lMin = getMinimumSizeOfComponent(components[0]);
+			int rMin = getMinimumSizeOfComponent(components[1]);
 			if (lValid && rValid) {
 				double weight = splitPane.getResizeWeight();
-				int lExtra = (int) (weight * (double) space);
+//				if (prefSizes != null && weight == 0 && (rMin + lMin + prefSizes[2]) <= space) {
+//					// SwingJS better!
+//					weight = 1.0 * prefSizes[0] / (prefSizes[0] + prefSizes[1]);
+//				}
+				int lExtra = (int) (weight * space);
 				int rExtra = (space - lExtra);
 
 				sizes[0] += lExtra;
 				sizes[1] += rExtra;
 
-				int lMin = getMinimumSizeOfComponent(components[0]);
-				int rMin = getMinimumSizeOfComponent(components[1]);
 				boolean lMinValid = (sizes[0] >= lMin);
 				boolean rMinValid = (sizes[1] >= rMin);
-
+				if (prefSizes != null && (!lMinValid || !rMinValid)) {
+					distributeSpace(space, keepHidden, null);
+					return;
+				}
+					
+				
 				if (!lMinValid && !rMinValid) {
 					if (sizes[0] < 0) {
 						sizes[1] += sizes[0];

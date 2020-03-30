@@ -589,7 +589,7 @@ public class JSGraphics2D implements
 			return true;
 //		backgroundPainted = true;
 		if (img != null) {
-			DOMNode imgNode = ((BufferedImage) img).秘getImageNode(false);
+			DOMNode imgNode = ((BufferedImage) img).秘getImageNode(BufferedImage.GET_IMAGE_ALLOW_NULL);
 			if (imgNode == null) {
 				drawImagePriv(img, x, y, width, height, observer);
 			} else {
@@ -628,17 +628,17 @@ public class JSGraphics2D implements
 //		backgroundPainted = true;
 		if (img != null) {
 			byte[] bytes = null;
-			DOMNode imgNode = ((BufferedImage) img).秘getImageNode(true);
+			DOMNode imgNode = ((BufferedImage) img).秘getImageNode(BufferedImage.GET_IMAGE_ALLOW_NULL);
 			if (imgNode == null) {
+				// raster image -- check to see if we can draw it; if not, then create its canvas
 				if (sx2 - sx1 != dx2 - dx1 || sy2 - sy1 != dy2 - dy1 || sx1 != 0 || sx2 != img.getWidth(null)
 						|| sy1 != 0 || sy2 != img.getHeight(null)) {
-					this.drawImage(img, dx1, dy1, sx2 - sx1, sy2 - sy1, observer);
-				} else {
-					JSUtil.notImplemented("JSGraphics2D.drawImage cannot could not create an image node");
+					imgNode = ((BufferedImage) img).秘getImageNode(BufferedImage.GET_IMAGE_FOR_ICON);
 				}
-			} else {
+			}
+			if (imgNode != null) {
 				// we would need an image to do this
-				ctx.drawImage(imgNode, sx1, sy1, sx2 - sx1, sy2 - sy1, 0, 0, dx2 - dx1, dy2 - dy1);
+				ctx.drawImage(imgNode, sx1, sy1, sx2 - sx1, sy2 - sy1, dx1, dy1, dx2 - dx1, dy2 - dy1);
 			}
 			if (observer != null)
 				observe(img, observer, imgNode != null);
@@ -661,7 +661,7 @@ public class JSGraphics2D implements
 	private boolean drawImageXT(Image img, AffineTransform xform, ImageObserver obs) {
 		ctx.save();
 		transformCTX(xform);
-		boolean ret = drawImagePriv(img, 0, 0, obs);
+		boolean ret = drawImageFromRaster(img, 0, 0, obs);
 		ctx.restore();
 		return ret;
 	}
@@ -673,7 +673,7 @@ public class JSGraphics2D implements
 
 	private boolean thinLine;
 
-	public boolean drawImagePriv(Image img, int x, int y, ImageObserver observer) {
+	public boolean drawImageFromRaster(Image img, int x, int y, ImageObserver observer) {
 		if (img == null)
 			return true;
 		return drawImagePriv(img, x, y, img.getWidth(observer), img.getHeight(observer), observer);
@@ -699,7 +699,7 @@ public class JSGraphics2D implements
 		int[] pixels = (isTranslationOnly(m) && !isClipped(x,y,width,height) ? ((BufferedImage) img).get秘pix() : null);
 		DOMNode imgNode = null;
 		if (pixels == null) {
-			imgNode = ((BufferedImage) img).秘getImageNode(true);
+			imgNode = ((BufferedImage) img).秘getImageNode(BufferedImage.GET_IMAGE_FOR_RASTER);
 			if (imgNode != null)
 				ctx.drawImage(imgNode, x, y, width, height);
 		} else {

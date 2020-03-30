@@ -1826,7 +1826,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 			// allow creating a Graphics from MemoryImageSource
 			// so pixels would never be there.
 			if (pix != null)
-				秘g.drawImagePriv(this, 0, 0, null);
+				秘g.drawImageFromRaster(this, 0, 0, null);
 			/**
 			 * @j2sNative if (pix) pix.img = this;
 			 * 
@@ -1972,23 +1972,49 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @param force  initially false just to get the pre-constructed canvas if it exists
 	 * @return
 	 */
+	
+	public final static int GET_IMAGE_ALLOW_NULL = 0;
+	public final static int GET_IMAGE_FOR_RASTER = 1;
+	public final static int GET_IMAGE_FOR_ICON = 2;
+	
 
-	public DOMNode 秘getImageNode(boolean force) {
+	/**
+	 * 
+	 * Return or create a DOMNode canvas or image tag or null
+	 * 
+	 * @param mode GET_IMAGE_ALLOW_NULL(0) || GET_IMAGE_FOR_RASTER(1) ||
+	 *             GET_IMAGE_FOR_ICON(2)
+	 * @return if allowing null, return the canvas if we have raster data (always
+	 *         null?) or the canvas or imgNode if not; if getting an image for a
+	 *         raster, we already know this is a raster image, so create its image;
+	 *         if getting an image for an icon, return the canvas or imgNode if this
+	 *         is not a raster image, or create its image
+	 */
+	public DOMNode 秘getImageNode(int mode) {
 		// If we have raster data and are not forcing, return the canvas if it exists.
-		// If we we have no raster data and are not forcing, force the issue anyway 
+		// If we we have no raster data and are not forcing, force the issue anyway
 		// and return the canvas or image node.
 		// If we are forcing, or force the creation of a canvas
-		if (!force)
+		switch (mode) {
+		default:
+		case GET_IMAGE_ALLOW_NULL:
 			return (DOMNode) (秘hasRasterData || 秘canvas != null ? 秘canvas
 					: 秘imgNode != null ? 秘imgNode : JSGraphicsCompositor.createImageNode(this));
-		// we are forcing 
-		秘getPixelsFromRaster();
-		秘g = null;
-		秘getImageGraphic();
-		DOMNode canvas = 秘g.getCanvas();
-		秘g = null;
-		秘canvas = null;
-		return canvas;
+		case GET_IMAGE_FOR_ICON:
+			if  (!秘hasRasterData)
+				return (DOMNode) (秘canvas != null ? 秘canvas
+					: 秘imgNode != null ? 秘imgNode : JSGraphicsCompositor.createImageNode(this));
+			//$fall-through$
+		case GET_IMAGE_FOR_RASTER:
+			// we are forcing
+			秘getPixelsFromRaster();
+			秘g = null;
+			秘getImageGraphic();
+			DOMNode canvas = 秘g.getCanvas();
+			秘g = null;
+			秘canvas = null;
+			return canvas;
+		}
 	}
 
 	/**
