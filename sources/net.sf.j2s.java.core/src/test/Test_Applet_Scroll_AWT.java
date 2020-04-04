@@ -82,7 +82,7 @@ public class Test_Applet_Scroll_AWT extends Applet {
 		final TextField tf = new TextField("12.5", 8);
 //		tf.setBackground(Color.red);
 		tf.setForeground(Color.orange);
-		tf.setEditable(false);
+		tf.setEditable(true);
 		//tf.setOpaque(true);
 		setSize(tf, 80, 40);
 		tf.addActionListener(new java.awt.event.ActionListener() {

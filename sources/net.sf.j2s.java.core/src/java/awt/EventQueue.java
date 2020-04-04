@@ -735,15 +735,12 @@ public class EventQueue {
 	 * @since 1.4
 	 */
 	public static long getMostRecentEventTime() {
-		return 0;
-		// return Toolkit.getEventQueue().getMostRecentEventTimeImpl();
+		return Toolkit.getEventQueue().getMostRecentEventTimeImpl();
 	}
 
-	// private synchronized long getMostRecentEventTimeImpl() {
-	// return (Thread.currentThread() == dispatchThread)
-	// ? mostRecentEventTime
-	// : System.currentTimeMillis();
-	// }
+	private synchronized long getMostRecentEventTimeImpl() {
+		return (Thread.currentThread() == dispatchThread) ? mostRecentEventTime : System.currentTimeMillis();
+	}
 
 	/**
 	 * @return most recent event time on all threads.

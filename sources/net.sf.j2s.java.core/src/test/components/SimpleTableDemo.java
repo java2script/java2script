@@ -59,7 +59,7 @@ public class SimpleTableDemo extends JPanel {
     private boolean DEBUG = false;
 
     public SimpleTableDemo() {
-        super(new GridLayout(2,0));
+        super(new GridLayout(2,2));
 
         String[] columnNames = {"First Name",
                                 "Last Name",

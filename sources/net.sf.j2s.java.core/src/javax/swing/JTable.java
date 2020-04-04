@@ -83,8 +83,6 @@ import sun.swing.SwingUtilities2;
 import swingjs.plaf.CellHolder;
 // SwingJS  TODO import java.text.DateFormat;
 //import sun.swing.SwingLazyValue;
-import swingjs.plaf.JSComponentUI;
-import swingjs.plaf.JSTableUI;
 
 /**
  * SwingJS TODO: print/printable all not implemented
@@ -4655,7 +4653,11 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		int rh = getRowHeight();
 		Rectangle drawRect = new Rectangle(0, start * rh, getColumnModel().getTotalColumnWidth(),
 				(getRowCount() - start) * rh);
+  	    firePropertyChange("tableAppending", null, e); //$NON-NLS-1$
 
+  	    Rectangle r = getVisibleRect();
+  	    if (drawRect.y > r.y + r.height)
+  	    	return;
 		revalidate();
 		// PENDING(milne) revalidate calls 秘repaint() if parent is a ScrollPane
 		// repaint still required in the unusual case where there is no
@@ -6065,5 +6067,15 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		}
 	}
 
+	/**
+	 * SwingJS method to optionally return null.
+	 * @param row
+	 * @param col
+	 * @param isScrolling 
+	 * @return the cell renderer or null.
+	 */
+	public TableCellRenderer getCellRendererOrNull(int row, int col, boolean isScrolling) {
+		return getCellRenderer(row, col);
+	}
 	
 } // End of Class JTable

@@ -33,6 +33,7 @@ import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import swingjs.JSGraphics2D;
 
@@ -126,6 +127,12 @@ public class ImageIcon implements Icon {
      * Id used in loading images from MediaTracker.
      */
     private static int mediaTrackerID;
+	/**
+	 *  See JSImageKit
+	 * 
+	 */
+	public ImageIcon 秘tempIcon;
+
 
     private final static Object TRACKER_KEY = new StringBuilder("TRACKER_KEY");
 

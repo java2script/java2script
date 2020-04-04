@@ -1374,7 +1374,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 		 */
 		@Override
 		public Dimension maximumLayoutSize(Container target) {
-			return new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE);
+			return ANY_SIZE;
 		}
 
 		//
