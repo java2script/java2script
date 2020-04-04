@@ -207,7 +207,7 @@ public class BasicArrowButton extends JButton implements SwingConstants
          */
     	@Override
         public Dimension getMaximumSize() {
-            return new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE);
+            return JSComponentUI.ANY_SIZE;
         }
 
         /**

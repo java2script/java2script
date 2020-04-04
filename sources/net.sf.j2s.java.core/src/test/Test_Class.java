@@ -311,6 +311,8 @@ class Test_Class extends Test_Class2<Integer> {
 	
 	public static void main(String[] args) {
 		
+		System.out.println(System.getProperty("screen"));
+		
 		// tricky situation where a parameter changes a value that is also changed by the static initializer of a class:
 		boolean test1 = false;
 		if (test1) {

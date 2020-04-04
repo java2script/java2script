@@ -1299,7 +1299,9 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
         }
         if (lastBias == Position.Bias.Backward && offset > 0) {
             try {
-                Segment s = new Segment();
+            	s.count = 0;
+            	s.offset = 0;
+            	s.array = null;
                 component.getDocument().getText(offset - 1, 1, s);
                 if (s.count > 0 && s.array[s.offset] == '\n') {
                     lastBias = Position.Bias.Forward;
@@ -1309,6 +1311,8 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
         }
         return lastBias;
     }
+    
+    private static Segment s = new Segment();
 
     // ---- local methods --------------------------------------------
 
@@ -1778,7 +1782,8 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
                     Document doc = component.getDocument();
                     boolean isNewline;
                     try {
-                        Segment s = new Segment();
+                    	s.count = s.offset = 0;
+                    	s.array = null;
                         doc.getText(newDot - 1, 1, s);
                         isNewline = (s.count > 0 &&
                                 s.array[s.offset] == '\n');

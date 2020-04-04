@@ -10,11 +10,8 @@ package test;
 //web_Features= graphics, AWT-to-Swing
 
 import java.awt.Adjustable;
-import java.awt.BorderLayout;
-import java.awt.Choice;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
@@ -27,7 +24,9 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.font.TextAttribute;
 import java.text.DecimalFormat;
+import java.util.EventListener;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JApplet;
@@ -48,9 +47,290 @@ import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.EventListenerList;
+import javax.swing.event.UndoableEditListener;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.Element;
+import javax.swing.text.PlainDocument;
+import javax.swing.text.Position;
+import javax.swing.text.Segment;
 
 public class Test_Applet_Scroll extends JApplet implements ChangeListener, MouseListener, MouseMotionListener {
 
+
+//	class SimpleDocument implements Document {
+//
+//		public class DocEvent implements DocumentEvent {
+//
+//			private EventType type;
+//			private int offset;
+//			private int length;
+//
+//			public DocEvent(int offset, int length, EventType type) {
+//				this.type = type;
+//				this.offset = offset;
+//				this.length = length;
+//			}
+//
+//			@Override
+//			public int getOffset() {return offset;}
+//
+//			@Override
+//			public int getLength() {return length;}
+//
+//			@Override
+//			public Document getDocument() {
+//				return SimpleDocument.this;
+//			}
+//
+//			@Override
+//			public EventType getType() {
+//				return type;
+//			}
+//
+//			@Override
+//			public ElementChange getChange(Element elem) {
+//				return null;
+//			}
+//
+//		}
+//
+//		private StringBuffer myText = new StringBuffer();
+//
+////		Element root = new Element() {
+////
+////		
+////			@Override
+////			public Document getDocument() {
+////				return SimpleDocument.this;
+////			}
+////
+////			@Override
+////			public Element getParentElement() {
+////				return null;
+////			}
+////
+////			@Override
+////			public String getName() {
+////				return "root";					}
+////
+////			@Override
+////			public AttributeSet getAttributes() {
+////				return null;
+////			}
+////
+////			@Override
+////			public int getStartOffset() {
+////				return 0;
+////			}
+////
+////			@Override
+////			public int getEndOffset() {
+////				return myText.length();
+////			}
+////
+////			@Override
+////			public int getElementIndex(int offset) {
+////				return 0;
+////			}
+////
+////			@Override
+////			public int getElementCount() {
+////				return 0;
+////			}
+////
+////			@Override
+////			public Element getElement(int index) {
+////				return null;
+////			}
+////
+////			@Override
+////			public boolean isLeaf() {
+////				return true;
+////			}
+////			
+////		};
+//
+//		@Override
+//		public int getLength() {
+//			return myText.length();
+//		}
+//
+//		@Override
+//		public void addDocumentListener(DocumentListener listener) {
+//			listenerList.add(DocumentListener.class, listener);
+//		}
+//
+//		@Override
+//		public void removeDocumentListener(DocumentListener listener) {
+//			listenerList.remove(DocumentListener.class, listener);
+//		}
+//
+//		@Override
+//		public void addUndoableEditListener(UndoableEditListener listener) {
+//			System.out.println(listener);
+//		}
+//
+//		@Override
+//		public void removeUndoableEditListener(UndoableEditListener listener) {
+//			System.out.println(listener);
+//		}
+//
+//		@Override
+//		public Object getProperty(Object key) {
+////			if (key == TextAttribute.RUN_DIRECTION)
+////				return TextAttribute.RUN_DIRECTION_LTR;
+////			if (key.toString().equals("tabSize"))
+////				return  new Integer(8);
+//			return null;
+//		}
+//
+//		@Override
+//		public void putProperty(Object key, Object value) {
+////			System.out.println("putprop " + key + " " + value);
+//		}
+//
+//		@Override
+//		public void remove(int offs, int len) throws BadLocationException {
+//			if (len <= 0)
+//				return;
+//			if (offs < 0 || (offs + len) > getLength()) {
+//				throw new BadLocationException("Invalid remove", getLength() + 1);
+//			}
+//			myText.replace(offs,  len,  "");
+//			
+//				DocEvent chng = new DocEvent(offs, len, DocumentEvent.EventType.REMOVE);
+//
+//				//postRemoveUpdate(chng);
+//				fireRemoveUpdate(chng);
+//		}
+//
+//		@Override
+//		public void insertString(int offset, String str, AttributeSet a) throws BadLocationException {
+//			if ((str == null) || (str.length() == 0)) {
+//				return;
+//			}
+//			myText.insert(offset, str);
+//			DocEvent e = new DocEvent(offset, str.length(), DocumentEvent.EventType.INSERT);
+//			fireInsertUpdate(e);
+//		}
+//
+//		@Override
+//		public String getText(int offset, int length) throws BadLocationException {
+//			return myText.substring(offset, offset + length);
+//		}
+//
+//		char[] achar = new char[0];
+//		@Override
+//		public void getText(int offset, int length, Segment txt) throws BadLocationException {
+//			System.out.println("getText");
+//			if (length > 0) {
+//				if (achar.length < offset + length) 
+//					achar = new char[offset + length * 2];
+//				if (txt.array != achar)
+//					txt.array = achar;
+//				myText.getChars(offset, offset + length, achar, offset);
+//			}
+//			txt.offset = offset;
+//			txt.count = length;
+//		}
+//
+//		@Override
+//		public Position getStartPosition() {
+//			return null;
+////			System.out.println("getstartpos");
+////			return new Position() {
+////
+////				@Override
+////				public int getOffset() {
+////					return 0;
+////				}
+////				
+////			};
+//		}
+//
+//		@Override
+//		public Position getEndPosition() {
+//			System.out.println("getendpos");
+//			return null;
+////			return new Position() {
+////
+////				@Override
+////				public int getOffset() {
+////					return myText.length();
+////				}
+////				
+////			};
+//		}
+//
+//		@Override
+//		public Position createPosition(int offs) throws BadLocationException {
+//			return null;
+////			return new Position() {
+////
+////				@Override
+////				public int getOffset() {
+////					return offs;
+////				}
+////				
+////			};
+//		}
+//
+//		@Override
+//		public Element[] getRootElements() {
+//			return null;
+////			return new Element[] {root};
+//		}
+//
+//		@Override
+//		public Element getDefaultRootElement() {
+//			return null;
+////			return root;
+//		}
+//
+//
+//
+//		@Override
+//		public void render(Runnable r) {
+//		}
+//
+//		protected void fireInsertUpdate(DocumentEvent e) {
+//			try {
+//				Object[] listeners = listenerList.getListenerList();
+//				for (int i = listeners.length - 2; i >= 0; i -= 2) {
+//					if (listeners[i] == DocumentListener.class) {
+//						((DocumentListener) listeners[i + 1]).insertUpdate(e);
+//					}
+//				}
+//			} finally {
+////	            notifyingListeners = false;
+//			}
+//		}
+//		protected void fireRemoveUpdate(DocumentEvent e) {
+//			try {
+//				Object[] listeners = listenerList.getListenerList();
+//				for (int i = listeners.length - 2; i >= 0; i -= 2) {
+//					if (listeners[i] == DocumentListener.class) {
+//						((DocumentListener) listeners[i + 1]).removeUpdate(e);
+//					}
+//				}
+//			} finally {
+////	            notifyingListeners = false;
+//			}
+//		}
+//		protected EventListenerList listenerList = new EventListenerList();
+//		public <T extends EventListener> T[] getListeners(Class<T> listenerType) {
+//			return listenerList.getListeners(listenerType);
+//		}
+//
+//
+//}
+
+	
 	static {
 		/**
 		 * @j2sNative
@@ -99,16 +379,17 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener, Mouse
 	@Override
 	public void init() {
 		final JLabel label = new JLabel("hello") {
+			@Override
 			public void paintComponent(Graphics g) {
-				//super.paintComponent(g);
-				/**@j2sNative g.unclip$I(-4);*/
-				Graphics2D g2 = (Graphics2D) g.create();
-				g2.setColor(Color.red);
-				g2.setClip(-60,-60, 70,70);
-				g2.fillRect(-60,-60,70,70);
-				//g2.dispose();
-				/**@j2sNative g.unclip$I(4);*/
-				
+				super.paintComponent(g);
+//				/**@j2sNative g.unclip$I(-4);*/
+//				Graphics2D g2 = (Graphics2D) g.create();
+//				g2.setColor(Color.red);
+//				g2.setClip(-60,-60, 70,70);
+//				g2.fillRect(-60,-60,70,70);
+//				//g2.dispose();
+//				/**@j2sNative g.unclip$I(4);*/
+//				
 				
 			}
 		};
@@ -120,10 +401,21 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener, Mouse
 		label.setHorizontalAlignment(SwingConstants.RIGHT);
 		label.setVerticalAlignment(SwingConstants.CENTER);
 
-		final JTextField tf = new JTextField("12.5", 8);
-		tf.setBackground(Color.black);
-		tf.setForeground(Color.yellow);
-		tf.setOpaque(true);
+		final JTextField tf = new JTextField(/** @j2sNative "JS" ||*/null, "12.5", 8);
+//		final JTextField tf = new JTextField(new PlainDocument() {
+//			@Override
+//			public void getText(int offset, int length, Segment txt) throws BadLocationException {
+//				System.out.println("getText");
+//				super.getText(offset, length, txt);
+//				System.out.println(txt);
+//			}
+//			
+//		}, "12.5", 8);
+		
+//
+//		tf.setBackground(Color.orange);
+//		tf.setForeground(Color.yellow);
+//		tf.setOpaque(true);
 		setSize(tf, 80, 40);
 		tf.addActionListener(new java.awt.event.ActionListener() {
 			@Override
@@ -179,17 +471,17 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener, Mouse
 			@Override
 			public void actionPerformed(ActionEvent event) {
 				label.setBackground(button2.isSelected() ? Color.green : Color.yellow);
-				tf.setBackground(Color.green);
-				label.setText("btn2");
-				vp.remove(vslider);
-				vp.add(vslider);
-				JFrame frame1 = new JFrame();
-				frame1.setLocationRelativeTo(button2);
-				JPanel jp = new JPanel();
-				jp.setPreferredSize(new Dimension(150,150));
-				frame1.add(jp);
-				frame1.pack();
-				frame1.setVisible(true);
+//				tf.setBackground(Color.green);
+//				label.setText("btn2");
+//				vp.remove(vslider);
+//				vp.add(vslider);
+//				JFrame frame1 = new JFrame();
+//				frame1.setLocationRelativeTo(button2);
+//				JPanel jp = new JPanel();
+//				jp.setPreferredSize(new Dimension(150,150));
+//				frame1.add(jp);
+//				frame1.pack();
+//				frame1.setVisible(true);
 			}
 		});
 

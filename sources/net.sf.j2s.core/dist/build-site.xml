@@ -8,6 +8,7 @@
  - unzip libjs/*.zip into site/swingjs/j2s
  - unzips swingjs/SwingJS-site.zip into site/
  - copies non-java resources from resources/ into site/swingjs/j2s
+ - copies site resources from site-resources/ to site/
  
 -->
 

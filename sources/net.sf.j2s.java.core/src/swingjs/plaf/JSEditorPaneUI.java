@@ -11,8 +11,11 @@ import java.beans.PropertyChangeEvent;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
+import javax.swing.UIManager;
+import javax.swing.border.Border;
 import javax.swing.event.CaretEvent;
 import javax.swing.plaf.InputMapUIResource;
+import javax.swing.plaf.UIResource;
 import javax.swing.text.AbstractDocument.BranchElement;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
@@ -224,6 +227,14 @@ public class JSEditorPaneUI extends JSTextUI {
 		return updateDOMNodeCUI();
 	} 
 
+	@Override
+	protected void setBorder(String prefix) {
+		 Border b = editor.getBorder();
+		 if ((b == null) || (b instanceof UIResource)) {
+		 editor.setBorder(UIManager.getBorder(prefix + ".border"));
+		 }		
+	}
+	
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		String prop = e.getPropertyName();

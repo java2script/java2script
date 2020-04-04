@@ -29,7 +29,7 @@ public class TextField extends JTextField {
 	}
 
     public TextField(String text, int width) {
-		super(text, width);
+		super((Document) (Object) "null", text, width);
 	}
 
 	private static Insets awtInsets = new Insets(0, 1, 0, 1);

@@ -4,8 +4,12 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.beans.PropertyChangeEvent;
 
+import javax.swing.JComponent;
 import javax.swing.JTextArea;
+import javax.swing.UIManager;
+import javax.swing.border.Border;
 import javax.swing.event.CaretEvent;
+import javax.swing.plaf.UIResource;
 import javax.swing.text.Element;
 import javax.swing.text.PlainView;
 import javax.swing.text.View;
@@ -33,7 +37,7 @@ public class JSTextAreaUI extends JSTextUI {
 			valueNode = domNode = newDOMObject("textarea", id, "spellcheck", FALSE, "autocomplete", "off");
 			allowPaintedBackground = false;
 			focusNode = enableNode = textNode = domNode;
-			DOMNode.setStyles(domNode, "resize", "none", "margin", "0px", "padding", "0px","scrollbar-width", "thin"); // otherwise it overflows
+			DOMNode.setStyles(domNode, "resize", "none", "border", "none", "margin", "0px", "padding", "0px","scrollbar-width", "thin"); // otherwise it overflows
 			DOMNode.setStyles(domNode, "box-sizing", "border-box");
 			bindJSKeyEvents(focusNode, true);
 		}
@@ -53,6 +57,15 @@ public class JSTextAreaUI extends JSTextUI {
 		return super.updateDOMNode();
 	}
 
+
+//	@Override
+//	protected void setBorder(String prefix) {
+//		 Border b = editor.getBorder();
+//		 if ((b == null) || (b instanceof UIResource)) {
+//		 editor.setBorder(UIManager.getBorder(prefix + ".border"));
+//		 }		
+//	}
+	
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		String prop = e.getPropertyName();
@@ -156,6 +169,12 @@ public class JSTextAreaUI extends JSTextUI {
 		return false;
 	}
 
+
+	@Override
+	public Dimension getMaximumSize(JComponent jc) {
+		return ANY_SIZE;
+	}
+	
 	@Override
 	protected boolean handleTab(Object jqEvent) {
 		String val = getJSTextValue();

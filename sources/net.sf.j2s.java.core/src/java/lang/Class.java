@@ -2490,7 +2490,7 @@ public final class Class<T> {
 	    Clazz.load("java.io.ByteArrayInputStream");
 	    var is = Clazz.new_(java.io.BufferedInputStream.c$$java_io_InputStream, [Clazz.new_(java.io.ByteArrayInputStream.c$$BA, [bytes])]); 
 	    is.url = url;
-	    url._streamData = is;
+	    url._streamData = bytes;
 	    return is;
 		 */
 		{

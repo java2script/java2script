@@ -31,13 +31,22 @@ import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.ComponentOrientation;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.HeadlessException;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.TextComponent;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.dnd.DnDConstants;
+import java.awt.event.ActionEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.InputEvent;
 import java.awt.event.InputMethodListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
@@ -47,6 +56,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.Enumeration;
+import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
@@ -70,6 +80,9 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.EventListenerList;
+import javax.swing.event.UndoableEditListener;
+import javax.swing.event.DocumentEvent.ElementChange;
+import javax.swing.event.DocumentEvent.EventType;
 import javax.swing.plaf.TextUI;
 import javax.swing.plaf.UIResource;
 
@@ -422,7 +435,12 @@ public abstract class JTextComponent extends JComponent implements TextComponent
      *       expert: true
      */
     public void setDocument(Document doc) {
+    	
         Document old = model;
+
+        if ((Object) doc == "null") {
+        	doc = new JSPlainDocument();
+        }
 
         /*
          * aquire a read lock on the old model to prevent notification of
@@ -1445,9 +1463,9 @@ public abstract class JTextComponent extends JComponent implements TextComponent
      */
     public void cut() {
     	((JSTextUI)this.ui).action("delete", 0);
-//        if (isEditable() && isEnabled()) {
-//            invokeAction("cut", TransferHandler.getCutAction());
-//        }
+        if (isEditable() && isEnabled()) {
+            invokeAction("cut", TransferHandler.getCutAction());
+        }
     }
 
     /**
@@ -1460,7 +1478,7 @@ public abstract class JTextComponent extends JComponent implements TextComponent
      * @see java.awt.datatransfer.Clipboard
      */
     public void copy() {
-//        invokeAction("copy", TransferHandler.getCopyAction());
+        invokeAction("copy", TransferHandler.getCopyAction());
     }
 
     /**
@@ -1477,48 +1495,48 @@ public abstract class JTextComponent extends JComponent implements TextComponent
      */
     public void paste() {
     	((JSTextUI)this.ui).action("paste", 0);
-//        if (isEditable() && isEnabled()) {
-//            invokeAction("paste", TransferHandler.getPasteAction());
-//        }
+        if (isEditable() && isEnabled()) {
+            invokeAction("paste", TransferHandler.getPasteAction());
+        }
     }
 
-//    /**
-//     * This is a conveniance method that is only useful for
-//     * <code>cut</code>, <code>copy</code> and <code>paste</code>.  If
-//     * an <code>Action</code> with the name <code>name</code> does not
-//     * exist in the <code>ActionMap</code>, this will attemp to install a
-//     * <code>TransferHandler</code> and then use <code>altAction</code>.
-//     */
-//    private void invokeAction(String name, Action altAction) {
-//        ActionMap map = getActionMap();
-//        Action action = null;
-//
-//        if (map != null) {
-//            action = map.get(name);
-//        }
-//        if (action == null) {
-//            installDefaultTransferHandlerIfNecessary();
-//            action = altAction;
-//        }
-//        action.actionPerformed(new ActionEvent(this,
-//                               ActionEvent.ACTION_PERFORMED, (String)action.
-//                               getValue(Action.NAME),
-//                               EventQueue.getMostRecentEventTime(),
-//                               getCurrentEventModifiers()));
-//    }
+    /**
+     * This is a conveniance method that is only useful for
+     * <code>cut</code>, <code>copy</code> and <code>paste</code>.  If
+     * an <code>Action</code> with the name <code>name</code> does not
+     * exist in the <code>ActionMap</code>, this will attemp to install a
+     * <code>TransferHandler</code> and then use <code>altAction</code>.
+     */
+    private void invokeAction(String name, Action altAction) {
+        ActionMap map = getActionMap();
+        Action action = null;
 
-//    /**
-//     * If the current <code>TransferHandler</code> is null, this will
-//     * install a new one.
-//     */
-//    private void installDefaultTransferHandlerIfNecessary() {
-//        if (getTransferHandler() == null) {
-//            if (defaultTransferHandler == null) {
-//                defaultTransferHandler = new DefaultTransferHandler();
-//            }
-//            setTransferHandler(defaultTransferHandler);
-//        }
-//    }
+        if (map != null) {
+            action = map.get(name);
+        }
+        installDefaultTransferHandlerIfNecessary();
+        if (action == null) {
+            action = altAction;
+        }
+        action.actionPerformed(new ActionEvent(this,
+                               ActionEvent.ACTION_PERFORMED, (String)action.
+                               getValue(Action.NAME),
+                               EventQueue.getMostRecentEventTime(),
+                               getCurrentEventModifiers()));
+    }
+
+    /**
+     * If the current <code>TransferHandler</code> is null, this will
+     * install a new one.
+     */
+    private void installDefaultTransferHandlerIfNecessary() {
+        if (getTransferHandler() == null) {
+            if (defaultTransferHandler == null) {
+                defaultTransferHandler = new DefaultTransferHandler();
+            }
+            setTransferHandler(defaultTransferHandler);
+        }
+    }
 
     /**
      * Moves the caret to a new position, leaving behind a mark
@@ -3900,7 +3918,8 @@ public abstract class JTextComponent extends JComponent implements TextComponent
          *
          * @return a string representation of this drop location
          */
-        public String toString() {
+        @Override
+		public String toString() {
             return getClass().getName()
                    + "[dropPoint=" + getDropPoint() + ","
                    + "index=" + index + ","
@@ -3912,10 +3931,10 @@ public abstract class JTextComponent extends JComponent implements TextComponent
 //				}
     }
 
-//    /**
-//     * TransferHandler used if one hasn't been supplied by the UI.
-//     */
-//    private static DefaultTransferHandler defaultTransferHandler;
+    /**
+     * TransferHandler used if one hasn't been supplied by the UI.
+     */
+    private static DefaultTransferHandler defaultTransferHandler;
 
     /**
      * Maps from class name to Boolean indicating if
@@ -3960,81 +3979,83 @@ public abstract class JTextComponent extends JComponent implements TextComponent
     }
 
 
-//    /**
-//     * A Simple TransferHandler that exports the data as a String, and
-//     * imports the data from the String clipboard.  This is only used
-//     * if the UI hasn't supplied one, which would only happen if someone
-//     * hasn't subclassed Basic.
-//     */
-//    static class DefaultTransferHandler extends TransferHandler implements
-//                                        UIResource {
-////        public void exportToClipboard(JComponent comp, Clipboard clipboard,
-////                                      int action) throws IllegalStateException {
-////            if (comp instanceof JTextComponent) {
-////                JTextComponent text = (JTextComponent)comp;
-////                int p0 = text.getSelectionStart();
-////                int p1 = text.getSelectionEnd();
-////                if (p0 != p1) {
-////                    try {
-////                        Document doc = text.getDocument();
-////                        String srcData = doc.getText(p0, p1 - p0);
-////                        StringSelection contents =new StringSelection(srcData);
-////
-////                        // this may throw an IllegalStateException,
-////                        // but it will be caught and handled in the
-////                        // action that invoked this method
-////                        clipboard.setContents(contents, null);
-////
-////                        if (action == TransferHandler.MOVE) {
-////                            doc.remove(p0, p1 - p0);
-////                        }
-////                    } catch (BadLocationException ble) {}
-////                }
-////            }
-////        }
-////        public boolean importData(JComponent comp, Transferable t) {
-////            if (comp instanceof JTextComponent) {
-////                DataFlavor flavor = getFlavor(t.getTransferDataFlavors());
-////
-////                if (flavor != null) {
-//////                    InputContext ic = comp.getInputContext();
-//////                    if (ic != null) {
-//////                        ic.endComposition();
-//////                    }
-////                    try {
-////                        String data = (String)t.getTransferData(flavor);
-////
-////                        ((JTextComponent)comp).replaceSelection(data);
-////                        return true;
-////                    } catch (UnsupportedFlavorException ufe) {
-////                    } catch (IOException ioe) {
-////                    }
-////                }
-////            }
-////            return false;
-////        }
-////        public boolean canImport(JComponent comp,
-////                                 DataFlavor[] transferFlavors) {
-////            JTextComponent c = (JTextComponent)comp;
-////            if (!(c.isEditable() && c.isEnabled())) {
-////                return false;
-////            }
-////            return (getFlavor(transferFlavors) != null);
-////        }
-////        public int getSourceActions(JComponent c) {
-////            return DnDConstants.ACTION_NONE;
-////        }
-////        private DataFlavor getFlavor(DataFlavor[] flavors) {
-////            if (flavors != null) {
-////                for (int counter = 0; counter < flavors.length; counter++) {
-////                    if (flavors[counter].equals(DataFlavor.stringFlavor)) {
-////                        return flavors[counter];
-////                    }
-////                }
-////            }
-////            return null;
-////        }
-//    }
+    /**
+     * A Simple TransferHandler that exports the data as a String, and
+     * imports the data from the String clipboard.  This is only used
+     * if the UI hasn't supplied one, which would only happen if someone
+     * hasn't subclassed Basic.
+     */
+    static class DefaultTransferHandler extends TransferHandler implements
+                                        UIResource {
+        @Override
+		public void exportToClipboard(JComponent comp, Clipboard clipboard,
+                                      int action) throws IllegalStateException {
+            if (comp instanceof JTextComponent) {
+                JTextComponent text = (JTextComponent)comp;
+                int p0 = text.getSelectionStart();
+                int p1 = text.getSelectionEnd();
+                if (p0 != p1) {
+                    try {
+                        Document doc = text.getDocument();
+                        String srcData = doc.getText(p0, p1 - p0);
+                        StringSelection contents =new StringSelection(srcData);
+
+                        // this may throw an IllegalStateException,
+                        // but it will be caught and handled in the
+                        // action that invoked this method
+                        clipboard.setContents(contents, null);
+
+                        if (action == TransferHandler.MOVE) {
+                            doc.remove(p0, p1 - p0);
+                        }
+                    } catch (BadLocationException ble) {}
+                }
+            }
+        }
+        public boolean importData(JComponent comp, Transferable t) {
+            if (comp instanceof JTextComponent) {
+                DataFlavor flavor = getFlavor(t.getTransferDataFlavors());
+
+                if (flavor != null) {
+//                    InputContext ic = comp.getInputContext();
+//                    if (ic != null) {
+//                        ic.endComposition();
+//                    }
+                    try {
+                        String data = (String)t.getTransferData(flavor);
+                        ((JTextComponent)comp).replaceSelection(data);
+                        return true;
+                    } catch (UnsupportedFlavorException ufe) {
+                    } catch (IOException ioe) {
+                    }
+                }
+            }
+            return false;
+        }
+        @Override
+		public boolean canImport(JComponent comp,
+                                 DataFlavor[] transferFlavors) {
+            JTextComponent c = (JTextComponent)comp;
+            if (!(c.isEditable() && c.isEnabled())) {
+                return false;
+            }
+            return (getFlavor(transferFlavors) != null);
+        }
+        @Override
+		public int getSourceActions(JComponent c) {
+            return DnDConstants.ACTION_NONE;
+        }
+        private DataFlavor getFlavor(DataFlavor[] flavors) {
+            if (flavors != null) {
+                for (int counter = 0; counter < flavors.length; counter++) {
+                    if (flavors[counter].equals(DataFlavor.stringFlavor)) {
+                        return flavors[counter];
+                    }
+                }
+            }
+            return null;
+        }
+    }
 
     /**
      * Returns the JTextComponent that most recently had focus. The returned
@@ -4045,17 +4066,17 @@ public abstract class JTextComponent extends JComponent implements TextComponent
             get(FOCUSED_COMPONENT);
     }
 
-//    private int getCurrentEventModifiers() {
-//        int modifiers = 0;
-//        AWTEvent currentEvent = EventQueue.getCurrentEvent();
-//        if (currentEvent instanceof InputEvent) {
-//            modifiers = ((InputEvent)currentEvent).getModifiers();
-//        } else if (currentEvent instanceof ActionEvent) {
-//            modifiers = ((ActionEvent)currentEvent).getModifiers();
-//        }
-//        return modifiers;
-//    }
-//
+    private int getCurrentEventModifiers() {
+        int modifiers = 0;
+        AWTEvent currentEvent = EventQueue.getCurrentEvent();
+        if (currentEvent instanceof InputEvent) {
+            modifiers = ((InputEvent)currentEvent).getModifiers();
+        } else if (currentEvent instanceof ActionEvent) {
+            modifiers = ((ActionEvent)currentEvent).getModifiers();
+        }
+        return modifiers;
+    }
+
     private static final String KEYMAP_TABLE = "JTextComponent_KeymapTable";//new Object(); //  new StringBuilder("JTextComponent_KeymapTable"
     //
     // member variables used for on-the-spot input method
@@ -5093,4 +5114,184 @@ public abstract class JTextComponent extends JComponent implements TextComponent
 //            host.setCaretPosition(newPos.getOffset());
 //        }
 //    }
+
+	/**
+	 * A simple class that implements only the essential aspects of PlainDocument.
+	 * No undo/redo, no positioning. Just insert, replace, getLength, getText, and
+	 * basic DocumentListener support. 
+	 * 
+	 * Nonpublic instantiation.
+	 * 
+	 * @author hansonr
+	 *
+	 */
+	public class JSPlainDocument implements Document {
+
+		public JSPlainDocument() { }
+		
+		class DocEvent implements DocumentEvent {
+
+			private EventType type;
+			private int offset;
+			private int length;
+
+			DocEvent(int offset, int length, EventType type) {
+				this.type = type;
+				this.offset = offset;
+				this.length = length;
+			}
+
+			@Override
+			public int getOffset() {
+				return offset;
+			}
+
+			@Override
+			public int getLength() {
+				return length;
+			}
+
+			@Override
+			public Document getDocument() {
+				return JSPlainDocument.this;
+			}
+
+			@Override
+			public EventType getType() {
+				return type;
+			}
+
+			@Override
+			public ElementChange getChange(Element elem) {
+				return null;
+			}
+
+		}
+
+		private StringBuffer myText = new StringBuffer();
+
+		@Override
+		public int getLength() {
+			return myText.length();
+		}
+
+		@Override
+		public String getText(int offset, int length) throws BadLocationException {
+			return myText.substring(offset, offset + length);
+		}
+
+		@Override
+		public void insertString(int offset, String str, AttributeSet a) throws BadLocationException {
+			if ((str == null) || (str.length() == 0)) {
+				return;
+			}
+			myText.insert(offset, str);
+			DocEvent e = new DocEvent(offset, str.length(), DocumentEvent.EventType.INSERT);
+			fireInsertUpdate(e);
+		}
+
+		@Override
+		public void remove(int offs, int len) throws BadLocationException {
+			if (len <= 0)
+				return;
+			if (offs < 0 || (offs + len) > getLength()) {
+				throw new BadLocationException("Invalid remove", getLength() + 1);
+			}
+			myText.replace(offs, len, "");
+			DocEvent chng = new DocEvent(offs, len, DocumentEvent.EventType.REMOVE);
+			fireRemoveUpdate(chng);
+		}
+
+		private EventListenerList listenerList = new EventListenerList();
+
+		private void fireInsertUpdate(DocumentEvent e) {
+			Object[] listeners = listenerList.getListenerList();
+			for (int i = listeners.length - 2; i >= 0; i -= 2) {
+				if (listeners[i] == DocumentListener.class) {
+					((DocumentListener) listeners[i + 1]).insertUpdate(e);
+				}
+			}
+		}
+
+		private void fireRemoveUpdate(DocumentEvent e) {
+			Object[] listeners = listenerList.getListenerList();
+			for (int i = listeners.length - 2; i >= 0; i -= 2) {
+				if (listeners[i] == DocumentListener.class) {
+					((DocumentListener) listeners[i + 1]).removeUpdate(e);
+				}
+			}
+		}
+
+		public <T extends EventListener> T[] getListeners(Class<T> listenerType) {
+			return listenerList.getListeners(listenerType);
+		}
+
+		@Override
+		public void addDocumentListener(DocumentListener listener) {
+			listenerList.add(DocumentListener.class, listener);
+		}
+
+		@Override
+		public void removeDocumentListener(DocumentListener listener) {
+			listenerList.remove(DocumentListener.class, listener);
+		}
+
+		// unimplemented by design:
+		
+		char[] achar = new char[0];
+
+		@Override
+		public void getText(int offset, int length, Segment txt) throws BadLocationException {
+			return;
+		}
+
+		@Override
+		public Position getStartPosition() {
+			return null;
+		}
+
+		@Override
+		public Position getEndPosition() {
+			return null;
+		}
+
+		@Override
+		public Position createPosition(int offs) throws BadLocationException {
+			return null;
+		}
+
+		@Override
+		public Element[] getRootElements() {
+			return null;
+		}
+
+		@Override
+		public Element getDefaultRootElement() {
+			return null;
+		}
+
+		@Override
+		public Object getProperty(Object key) {
+			return null;
+		}
+
+		@Override
+		public void putProperty(Object key, Object value) {
+		}
+
+		@Override
+		public void render(Runnable r) {
+		}
+
+		@Override
+		public void addUndoableEditListener(UndoableEditListener listener) {
+		}
+
+		@Override
+		public void removeUndoableEditListener(UndoableEditListener listener) {
+		}
+
+
+	}
+
 }

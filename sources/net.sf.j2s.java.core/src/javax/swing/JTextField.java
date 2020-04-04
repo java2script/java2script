@@ -27,7 +27,6 @@
  */
 package javax.swing;
 
-import swingjs.JSToolkit;
 import java.awt.AWTEvent;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -252,7 +251,11 @@ public class JTextField extends JTextComponent implements SwingConstants {
 		this.columns = columns;
 		if (doc == null) {
 			doc = createDefaultModel();
-		}
+		} else if ((Object) doc == "null") {
+			// SwingJS only
+        	doc = new JSPlainDocument();
+        }
+
 		setDocument(doc);
 		if (text != null) {
 			setText(text);

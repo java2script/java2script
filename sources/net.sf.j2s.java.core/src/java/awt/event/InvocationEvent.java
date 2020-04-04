@@ -232,6 +232,10 @@ public class InvocationEvent extends AWTEvent implements ActiveEvent {
                     exception = (Exception) t;
                 }
                 throwable = t;
+                System.err.println("InvocationException: " + t);
+                try {
+                t.printStackTrace();
+                } catch(Throwable e) {}
             }
         }
         else {

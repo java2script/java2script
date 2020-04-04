@@ -32,7 +32,9 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import java.awt.peer.ComponentPeer;
 
+import swingjs.api.js.DOMNode;
 import swingjs.plaf.JSComponentUI;
 
 /**
@@ -164,9 +166,16 @@ public class CellRendererPane extends JPanel
 //          c.validate();
 //      } 
 	  JSComponentUI ui = ((JComponent) c).秘getUI();
-      c.秘reshape(x, y, w, h, false);
+      c.秘reshape(0, 0, w, h, false);
+      // x and y are not used in Component.reshape in SwingJS
+      //c.setLocation(x, y);
+      //ui.setBounds(x,  y, 0, 0, ComponentPeer.SET_LOCATION);
       ((JComponent) c).validateTree();
       ui.updateDOMNode();
+      if (p instanceof JTable)
+    	  DOMNode.setTopLeftAbsolute(ui.domNode, ((JTable) p).getRowMargin() / 2, ((JTable) p).getColumnModel().getColumnMargin() / 2);
+      if (c instanceof JLabel)
+    	  DOMNode.setStyles(ui.domNode, "overflow", "hidden");
 //          if (!ui.doPaintBackground())
 //        	  return;
 //	  ui.setTainted(false);

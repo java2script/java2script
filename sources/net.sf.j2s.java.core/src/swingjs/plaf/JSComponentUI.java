@@ -1802,6 +1802,8 @@ public class JSComponentUI extends ComponentUI
 		return new Dimension(0, 0);
 	}
 
+	protected static Dimension ANY_SIZE = new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE);
+	
 	/**
 	 * Creates the DOM node and inserts it into the tree at the correct place,
 	 * iterating through all children if this is a container.
@@ -1845,21 +1847,9 @@ public class JSComponentUI extends ComponentUI
 			if (n == 0)
 				return outerNode;
 		}
-
 		if (outerNode == null)
-			outerNode = wrap("div", id, domNode);
-
-		/**
-		 * @j2sNative
-		 * 
-		 * 			this.outerNode.setAttribute("name", this.jc.__CLASS_NAME__);
-		 */
-		{
-		}
-		// set position
-
+			createOuterNode();
 		setOuterLocationFromComponent();
-
 		if (n > 0 && containerNode == null)
 			containerNode = outerNode;
 		if (isContainer || n > 0) {
@@ -1909,6 +1899,15 @@ public class JSComponentUI extends ComponentUI
 		return outerNode;
 	}
 
+	private void createOuterNode() {
+		outerNode = wrap("div", id, domNode);
+		@SuppressWarnings("unused")
+		JComponent c = jc;
+		String s = (/** @j2sNative c.__CLASS_NAME__|| */"");
+		outerNode.setAttribute("name", s);
+	}
+
+
 	protected boolean isFrameIndependent() {
 		return true;
 	}
@@ -1947,7 +1946,8 @@ public class JSComponentUI extends ComponentUI
 			}
 			ui.parent = this;
 			if (ui.getOuterNode() == null) {
-				System.out.println("JSCUI addChildren no outer node for " + ui.id);
+				if (ui.domNode != null)
+					System.out.println("JSCUI addChildren no outer node for " + ui.id);
 			} else {
 				if (ui.domNode != ui.outerNode && DOMNode.getParent(ui.domNode) == null)				
 					ui.outerNode.appendChild(ui.domNode);
@@ -2265,10 +2265,12 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	@Override
-	final public void setBounds(int x, int y, int width, int height, int op) {
-		// note that x and y are completely ignored.
+	public void setBounds(int x, int y, int width, int height, int op) {
+			// note that x and y are completely ignored.
 		if (isUIDisabled)
 			return;
+		
+		
 		boolean isBounded = (width > 0 && height > 0);
 		if (isBounded && !boundsSet) {
 			// now we can set it to be visible, because its bounds have
@@ -2317,7 +2319,7 @@ public class JSComponentUI extends ComponentUI
 					&& parent.outerNode != null)
 				DOMNode.appendChildSafely(parent.outerNode, outerNode);
 			DOMNode.setPositionAbsolute(outerNode);
-			DOMNode.setStyles(outerNode, "left", (x = c.getX()) + "px", "top", (y = c.getY()) + "px");
+			DOMNode.setStyles(outerNode, "left", (x = c.getX()) + "px", "top", (y = c.getY()) + "px");	
 		}
 	}
 

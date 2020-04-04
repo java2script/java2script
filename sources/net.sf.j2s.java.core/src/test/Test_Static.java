@@ -75,6 +75,14 @@ class Test_Static extends Test_ implements Test_int3, Test_int2, Test_int1 {
 	@SuppressWarnings("static-access")
 	public static void main(String[] args) {
 
+		try {
+			new Test_Static1("Static.main");
+			//Class.forName("test.Test_Static1");
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		new Test_Static().callStatic();
 		// each of these pairs will be the same:
 		test.testStatic();

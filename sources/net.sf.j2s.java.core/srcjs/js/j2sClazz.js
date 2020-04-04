@@ -7,8 +7,9 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2020.04.01 2.2.0-v1e fixes missing C$.superclazz when class loaded from core
 // BH 2020.03.19 3.2.9-v1c fixes new String("xxx") !== "xxx"
-// BH 2020.03.11 3.2.9-v1b fixes numerous subtle issues with boxed primatives Integer, Float, etc.
+// BH 2020.03.11 3.2.9-v1b fixes numerous subtle issues with boxed primitives Integer, Float, etc.
 // BH 2020.03.07 3.2.9-v1a fixes array.hashCode() to be System.identityHashCode(array). 
 // BH 2020.02.18 3.2.8-v2 upgrades String, Integer, ClassLoader, Package, various Exceptions
 // BH 2020.02.12 3.2.8-v1 new Throwable().getStackTrace() should not include j2sClazz methods
@@ -296,6 +297,7 @@ Clazz.exceptionOf = function(e, clazz) {
 Clazz.forName = function(name, initialize, loader, isQuiet) {
   // we need to consider loading a class from the path of the calling class. 
  var cl = null;
+ (typeof initialize == "undefined") && (initialize = true);
  if (loader) {
 	try {
 		isQuiet = true;
@@ -402,9 +404,10 @@ var initStatic = function(cl, impls) {
 Clazz.load = function(cName, from$clinit$) {
   if (!cName)
     return null;
-  if (from$clinit$ == 1) {
+  var cl = cName;  
+  switch (from$clinit$ || 0) {
+  case 1:
     // C$.$clinit$ call to finalize all dependencies
-	var cl = cName;
 	cl.$clinit$ = 0-cl.$clinit$;
 	// -2 means v 3.2.6
 	// -1 means v 3.2.5
@@ -421,12 +424,15 @@ Clazz.load = function(cName, from$clinit$) {
     	break;    
     }
     return;
-  } 
-  if (from$clinit$ == 2) {
+  case 2:
 	// C$.$static$ to do static initialization
- 	  if (cName.$load$) {
- 		cName.$load$ = 0;
-	    initStatic(cName, cName.$isInterface ? cName.implementz : 0);
+ 	  if (cl.$load$) {
+        if (cl.$load$[0] && !cl.superclazz) {
+        	// can happen with Clazz.new_($I(n,1)....)
+          setSuperclass(cl, Clazz.load(cl.$load$[0]));
+        }
+ 		cl.$load$ = 0;
+	    initStatic(cl, cl.$isInterface ? cl.implementz : 0);
   	  }
 	  return;
   }
@@ -441,8 +447,8 @@ Clazz.load = function(cName, from$clinit$) {
     return cl1;
   }
   // allow for a clazz itself
-  if (cName.__CLASS_NAME__)
-    return Clazz._initClass(cName,1,1,0);
+  if (cl.__CLASS_NAME__)
+    return Clazz._initClass(cl,1,1,0);
   // standard load of class by name
   if (cName.indexOf("Thread.") == 0)
     Clazz._4Name("java.lang.Thread", null, null, true)
@@ -2397,7 +2403,8 @@ Clazz.loadClass = function (name, onLoaded, async) {
   if (!name)
     return null;
   if (!async)
-    return Clazz._4Name(name, null, null, true, true); 
+	return Clazz._4Name(name, null, null, true, true); 
+  
   _Loader.loadClass(name, function() {
     var cl = Clazz._getDeclared(name);
     onLoaded(cl && Clazz._initClass(cl, 1, 1));
@@ -2574,10 +2581,10 @@ var evaluate = function(file, js) {
   }
 }
 
-Clazz._initClass = function(c,clinit,status,objThis) {
+Clazz._initClass = function(c,clinit,statics,objThis) {
 	var f;
 	return clinit && (f=c.$clinit$) && (f === 1 || f === 2 ? Clazz.load(c,1) : f && typeof f == "function"? f() : 0),
-	status && c.$load$ && Clazz.load(c, 2),
+	statics && c.$load$ && Clazz.load(c, 2),
 	objThis  && (f=c.$init0$) && f.apply(objThis),
 	c;
 }
@@ -3224,7 +3231,8 @@ C$.setProperties$java_util_Properties=function (props) {
 
 C$.getProperty$S=function (key) {
 	C$.checkKey$S(key);
-	return (C$.props == null ? sysprops[key] : C$.props.getProperty$S(key));
+	var p = (C$.props == null ? sysprops[key] : C$.props.getProperty$S(key))
+	return (p == null ? null : p);
 }
 
 C$.getProperty$S$S=function (key, def) {
@@ -4109,7 +4117,7 @@ var maxFloat = 3.4028235E38;
 var minFloat = -3.4028235E38;
 
 m$(Float,"c$", function(v){
-	v || v == null || (v = 0);
+	v || v == null || v != v || (v = 0);
 	 if (typeof v != "number") 
 	  v = Float.parseFloat$S(v);
 	 this.valueOf=function(){return v;}
@@ -4238,7 +4246,7 @@ m$(Double, "c$$D", function(v){
 }, 1);
 
 m$(Double,"c$", function(v){
-v || v == null || (v = 0);
+v || v == null ||  v != v || (v = 0);
  if (typeof v != "number") 
   v = Double.parseDouble$S(v);
  this.valueOf=function(){return v;}
