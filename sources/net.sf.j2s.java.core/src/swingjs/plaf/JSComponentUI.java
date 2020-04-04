@@ -2882,11 +2882,12 @@ public class JSComponentUI extends ComponentUI
 				break;
 			case SwingConstants.LEFT:
 			case SwingConstants.LEADING:
-				DOMNode.setStyles(actionNode, "left", "0px", "transform", "scale(0.75,0.75) translate(-5px,-20px)");
+				DOMNode.setStyles(actionNode, "left", "0px", 
+						"top", "50%", "transform", "scale(0.75,0.75) translateX(-50%) translateY(-50%) translate(-10px,-10px)");
 				break;
 			case SwingConstants.CENTER:
-				DOMNode.setStyles(actionNode, "left", (width / 2) + "px", "transform",
-						"scale(0.75,0.75) translate(-15px,-15px)"); // admittedly, a hack
+				DOMNode.setStyles(actionNode, "left", "50%", "top", "50%", "transform",
+						"scale(0.75,0.75) translateX(-50%) translateY(-50%) translate(-10px,-10px)");// translate(-20px,-20px)"); // admittedly, a hack translate(-50%,-50%) does not work- still need the -10,-10
 				break;
 			}
 
