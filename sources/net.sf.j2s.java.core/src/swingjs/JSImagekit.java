@@ -262,13 +262,27 @@ public class JSImagekit implements ImageConsumer {
 	public static ImageIcon createImageIcon(Component c, Icon icon, String id) {
 		int width = icon.getIconWidth();
 		int height = icon.getIconHeight();
-		JSGraphics2D g = createCanvasGraphics(width, height, id);
-		// A JSGraphics2D is not a real Graphics object - must coerce 
+		DOMNode canvas = DOMNode.getElement(id);
+		ImageIcon imgIcon;
+		BufferedImage img;
+		JSGraphics2D g;
+		if (canvas != null && (imgIcon = ((ImageIcon) icon).秘tempIcon) != null && DOMNode.getAttrInt(canvas, "width") == width
+				&& DOMNode.getAttrInt(canvas, "height") == height) {
+			// reuse this canvas
+			img = (BufferedImage) imgIcon.getImage();
+			g = img.秘g;
+		} else {
+			g = createCanvasGraphics(width, height, id);
+			// A JSGraphics2D is not a real Graphics object - must coerce 
+			ColorModel cm = ColorModel.getRGBdefault();
+			img = new BufferedImage(cm, cm.createCompatibleWritableRaster(width, height), false, null);
+			imgIcon = new ImageIcon(img, "paintedIcon");
+		}
 		icon.paintIcon(c, (Graphics)(Object) g, 0, 0);
-		ColorModel cm = ColorModel.getRGBdefault();
-		BufferedImage img = new BufferedImage(cm, cm.createCompatibleWritableRaster(width, height), false, null);
 		img.setImageFromHTML5Canvas(g);
-		return new ImageIcon(img, "paintedIcon");
+		g.dispose();
+		((ImageIcon) icon).秘tempIcon = imgIcon;
+		return imgIcon;
 	}
 
 	public static JSGraphics2D createCanvasGraphics(int width, int height, String id) {

@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.JSComponent;
 import java.awt.Toolkit;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -748,6 +749,10 @@ public class JSUtil implements JSUtilI {
 		return getHTML5Applet(null);
 	}
 
+	public static String getJSClassName(Object o) {
+		return /** @j2sNative o && o.__CLASS_NAME__ ||*/"";
+	}
+	
 	public static String getJSID(Object o) {
 		
 		/** @j2sNative 
@@ -933,6 +938,19 @@ public class JSUtil implements JSUtilI {
 	     * @j2sNative Clazz.loadClass("java.util.HashMap").USE_SIMPLE = enabled;
 	     */
 	  }
+
+	public static void setClipboardContents(String data) {
+		try {
+			/**
+			 * @j2sNative
+			 * 
+			 * navigator.clipboard.writeText(data);
+			 * 
+			 */
+		} catch (Throwable t) {
+			alert(data);
+		}
+	}
 
 }
 

@@ -33,11 +33,13 @@ import java.awt.Component;
 import java.awt.ComponentOrientation;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.JSComponent;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -83,7 +85,6 @@ import sun.swing.DefaultLookup;
 import sun.swing.SwingUtilities2;
 import sun.swing.UIAction;
 import swingjs.JSMouse;
-import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 
 /**
@@ -163,14 +164,17 @@ public class JSTableUI extends JSPanelUI {
 	}
 
 	@Override
+	public void setBounds(int x, int y, int w, int h, int op) {
+		//if (getScrollPane() == null)
+			enableTable(true);
+		super.setBounds(x, y, w, h, op);
+	}
+	@Override
 	public void endLayout() {
 		super.endLayout();
 		currentRowMin = currentRowMax = -1;
 		justLaidOut = true;
-		JSTableHeaderUI hui = getHeaderUI();
-		if (hui != null)
-			hui.setUIDisabled(false);
-		setUIDisabled(false);
+		enableTable(true);
 	}
 
 	@Override
@@ -211,18 +215,12 @@ public class JSTableUI extends JSPanelUI {
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		String prop = e.getPropertyName();
-		// System.out.println("JSTableUI prop=" + prop);
-		JSTableHeaderUI hui;
 		switch (prop) {
 		case "model":
 			currentRowMin = currentRowMax = -1;
 			isLaidOut = false;
 			setHTMLElement();
-			// System.out.println(e.getNewValue());
-			hui = this.getHeaderUI();
-			if (hui != null)
-				hui.setUIDisabled(true);
-			setUIDisabled(true);
+		    enableTable(false);
 			JScrollPane sp = getScrollPane();
 			if (sp != null) {
 				sp.getVerticalScrollBar().setValue(0);
@@ -245,9 +243,22 @@ public class JSTableUI extends JSPanelUI {
 			// TODO ?
 			return;
 		}
-		System.out.println("JTableUI property not handled: " + prop);
+		//System.out.println("JTableUI property not handled: " + prop);
 		super.propertyChange(e);
 	}
+
+	private void enableTable(boolean b) {
+		JSTableHeaderUI hui = this.getHeaderUI();
+		if (hui != null)
+			hui.setUIDisabled(!b);
+		setUIDisabled(!b);
+	}
+
+	private JSTableHeaderUI getHeaderUI() {
+		JTableHeader th = table.getTableHeader();
+		return (th == null ? null : (JSTableHeaderUI) th.getUI());
+	}
+
 
 	/**
 	 * Each cell is controlled by a single renderer, but each renderer may control
@@ -306,21 +317,30 @@ public class JSTableUI extends JSPanelUI {
 		if (currentRowMin == -1) {
 			setHidden(true);
 			havePainted = false;
-			int nrows = table.getRowCount();
 			int ncols = table.getColumnCount();
-			int h = table.getRowHeight();
+			int rowCount = table.getRowCount();
 			int[] cw = getColumnWidths();
 			int rminy, rmaxy, rminx, rmaxx;
 			table.computeVisibleRect(tmpRect);
 			rminx = tmpRect.x;
 			rmaxx = tmpRect.x + tmpRect.width;
-			// DOMNode.setStyles(outerNode, "overflow", "hidden", "height", th + "px");
+			int h = table.getRowHeight();
+
+			if (getScrollPane() == null) {
+				int height = 0;
+				if (rowCount > 0 && ncols > 0) {
+					Rectangle r = table.getCellRect(rowCount - 1, 0, true);
+					height = r.y + r.height;
+					DOMNode.setStyles(outerNode, "overflow", "hidden", "height", height + "px");
+				}
+			}
+
 			$(domNode).empty();
 			rminy = tmpRect.y;
 			rmaxy = tmpRect.y + tmpRect.height;
 			if (tmpRect.height != 0) {
 				currentRowMin = 0;
-				addElements(rminx, rminy, rmaxx, rmaxy, cw, h, 0, nrows, 0, ncols);
+				addElements(rminx, rminy, rmaxx, rmaxy, cw, h, 0, rowCount, 0, ncols);
 			}
 		}
 	}
@@ -483,6 +503,8 @@ public class JSTableUI extends JSPanelUI {
 	 */
 	private boolean isFileList = false;
 	public boolean dragging;
+
+	private boolean isNewModel;
 
 	//
 	// Helper class for keyboard actions
@@ -786,7 +808,7 @@ public class JSTableUI extends JSPanelUI {
 						this.dy = 0;
 					}
 				} else {
-					if (!(table.getParent().getParent() instanceof JScrollPane)) {
+					if (((JSTableUI) table.秘getUI()).getScrollPane() == null) {
 						return;
 					}
 
@@ -1174,12 +1196,15 @@ public class JSTableUI extends JSPanelUI {
 		}
 
 		// KeyListener
+		@Override
 		public void keyPressed(KeyEvent e) {
 		}
 
+		@Override
 		public void keyReleased(KeyEvent e) {
 		}
 
+		@Override
 		public void keyTyped(KeyEvent e) {
 			KeyStroke keyStroke = KeyStroke.getKeyStroke(e.getKeyChar(), e.getModifiers());
 
@@ -1301,8 +1326,8 @@ public class JSTableUI extends JSPanelUI {
 		// delivered if DnD is cancelled (via ESCAPE for example)
 		private boolean dragStarted;
 
-		// Whether or not we should start the editing timer on release
-		private boolean shouldStartTimer;
+//		// Whether or not we should start the editing timer on release
+//		private boolean shouldStartTimer;
 
 		// To cache the return value of pointOutsidePrefSize since we use
 		// it multiple times.
@@ -1351,10 +1376,10 @@ public class JSTableUI extends JSPanelUI {
 			pressedCol = table.columnAtPoint(p);
 			outsidePrefSize = pointOutsidePrefSize(pressedRow, pressedCol, p);
 
-			if (isFileList) {
-				shouldStartTimer = table.isCellSelected(pressedRow, pressedCol) && !e.isShiftDown()
-						&& !e.isControlDown() && !outsidePrefSize;
-			}
+//			if (isFileList) {
+//				shouldStartTimer = table.isCellSelected(pressedRow, pressedCol) && !e.isShiftDown()
+//						&& !e.isControlDown() && !outsidePrefSize;
+//			}
 
 			if (table.getDragEnabled()) {
 				mousePressedDND(e);
@@ -1582,29 +1607,28 @@ public class JSTableUI extends JSPanelUI {
 		// PropertyChangeListener
 		@Override
 		public void propertyChange(PropertyChangeEvent event) {
-			String changeName = event.getPropertyName();
-			if ("tableCellEditor" == changeName) {
-
-//			  System.err.println("JSTABLEUI TABLECELLEDITOR " + event.getNewValue());
-
+			switch (event.getPropertyName()) {
+			case "tableCellEditor":
 				prepareDOMEditor(event.getNewValue() != null, pressedRow, pressedCol);
-			} else if ("componentOrientation" == changeName) {
+				break;
+			case "componentOrientation":
 				InputMap inputMap = getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-
 				SwingUtilities.replaceUIInputMap(table, JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, inputMap);
-
 				JTableHeader header = table.getTableHeader();
 				if (header != null) {
 					header.setComponentOrientation((ComponentOrientation) event.getNewValue());
 				}
-			} else if ("model" == changeName) {
-
-			} else if ("dropLocation" == changeName) {
+				break;
+			case "model":
+				newModel();
+				break;
+			case "dropLocation":
 				rebuildTable();
 //	                JTable.DropLocation oldValue = (JTable.DropLocation)event.getOldValue();
 //	                repaintDropLocation(oldValue);
 //	                repaintDropLocation(table.getDropLocation());
-			} else if ("Table.isFileList" == changeName) {
+				break;
+			case "Table.isFileList":
 				isFileList = Boolean.TRUE.equals(table.getClientProperty("Table.isFileList"));
 				table.revalidate();
 				table.秘repaint();
@@ -1614,12 +1638,14 @@ public class JSTableUI extends JSPanelUI {
 					table.getSelectionModel().removeListSelectionListener(getHandler());
 					timer = null;
 				}
-			} else if ("selectionModel" == changeName) {
+				break;
+			case "selectionModel":
 				if (isFileList) {
 					ListSelectionModel old = (ListSelectionModel) event.getOldValue();
 					old.removeListSelectionListener(getHandler());
 					table.getSelectionModel().addListSelectionListener(getHandler());
 				}
+				break;
 			}
 		}
 
@@ -1652,6 +1678,22 @@ public class JSTableUI extends JSPanelUI {
 //	        }
 	}
 
+	public void rebuildTable() {
+		setTainted();
+		currentRowMin = -1;
+		setHTMLElement();
+		rebuildHeader();
+	}
+
+	private void rebuildHeader() {
+		JSComponentUI ui = getHeaderUI();
+		if (ui != null) {
+			ui.setTainted();
+			ui.setHTMLElement();
+			table.getTableHeader().秘repaint();
+		}
+	}
+
 	/*
 	 * Returns true if the given point is outside the preferredSize of the item at
 	 * the given row of the table. (Column must be 0). Returns false if the
@@ -1663,6 +1705,14 @@ public class JSTableUI extends JSPanelUI {
 		}
 
 		return SwingUtilities2.pointOutsidePrefSize(table, row, column, p);
+	}
+
+	public void newModel() {
+		isNewModel = true;
+	}
+
+	public boolean haveSrollPane() {
+		return (table.getParent().getParent() instanceof JScrollPane);
 	}
 
 	public void repaintCell(int lr, int lc) {
@@ -1767,22 +1817,26 @@ public class JSTableUI extends JSPanelUI {
 		isFileList = Boolean.TRUE.equals(table.getClientProperty("Table.isFileList"));
 	}
 
-	private JScrollPane getScrollPane() {
+    JScrollPane getScrollPane() {
 		Container parent;
 		parent = ((parent = table.getParent()) == null ? null : parent.getParent());
 		return (parent instanceof JScrollPane ? (JScrollPane) parent : null);
 	}
 
 	private void installDefaults2() {
-//	        TransferHandler th = table.getTransferHandler();
-//	        if (th == null || th instanceof UIResource) {
-//	            table.setTransferHandler(defaultTransferHandler);
-//	            // default TransferHandler doesn't support drop
-//	            // so we don't want drop handling
-//	            if (table.getDropTarget() instanceof UIResource) {
-//	                table.setDropTarget(null);
-//	            }
-//	        }
+		//installTransferHandlerIfNeeded();
+	}
+	
+	public void installDefaultTransferHandlerIfNecessary() {
+	        TransferHandler th = table.getTransferHandler();
+	        if (th == null || th instanceof UIResource) {
+	            table.setTransferHandler(defaultTransferHandler);
+	            // default TransferHandler doesn't support drop
+	            // so we don't want drop handling
+	            if (table.getDropTarget() instanceof UIResource) {
+	                table.setDropTarget(null);
+	            }
+	        }
 	}
 
 	/**
@@ -2061,10 +2115,14 @@ public class JSTableUI extends JSPanelUI {
 
 		//table.getFillsViewportHeight();
 		Rectangle clip = getClip();
-
+		int rc = table.getRowCount();
+		int rh = table.getRowHeight();
+		if (getScrollPane() != null) {
+			DOMNode.setStyles(outerNode, "overflow", "hidden", "height", (rc * rh) + "px");
+		}
 		table.computeVisibleRect(tmpRect);
 
-		if (table.getRowCount() <= 0 || table.getColumnCount() <= 0 ||
+		if (rc <= 0 || table.getColumnCount() <= 0 ||
 		// this check prevents us from painting the entire table
 		// when the clip doesn't intersect our bounds at all
 				!tmpRect.intersects(clip)) {
@@ -2080,6 +2138,8 @@ public class JSTableUI extends JSPanelUI {
 		int rMin = table.rowAtPoint(upperLeft);
 		int rMax = table.rowAtPoint(lowerRight);
 
+		// happens after new model when scrollbar is not at 0
+		
 		// This should never happen (as long as our bounds intersect the clip,
 		// which is why we bail above if that is the case).
 		if (rMin == -1) {
@@ -2090,16 +2150,15 @@ public class JSTableUI extends JSPanelUI {
 		// which is why we bail above if that is the case).
 		// Replace this with the index of the last row.
 		if (rMax == -1) {
-			rMax = table.getRowCount() - 1;
+			rMax = rc - 1;
 		}
-
 		resized = (tmpRect.width != lastWidth);
 		if (resized) {
 			// table has been resized
 			if (rMax - rMin > 1) {
 				JScrollPane sp = getScrollPane();
 				if (sp != null) {
-					int val = Math.max(1, (rMax - rMin - 1) * table.getRowHeight());
+					int val = Math.max(1, (rMax - rMin - 1) * rh);
 					sp.getVerticalScrollBar().setBlockIncrement(val);
 					sp.getVerticalScrollBar().setUnitIncrement((val + 1) / 2);
 
@@ -2114,11 +2173,10 @@ public class JSTableUI extends JSPanelUI {
 				JSTableHeaderUI hui = getHeaderUI();
 				if (hui != null)
 					hui.paint(g, c);
-				table.repaint(tmpRect);
+				table.repaint();//tmpRect);
 				return;
 			}
 		}
-
 		working = true;
 
 		boolean ltr = table.getComponentOrientation().isLeftToRight();
@@ -2171,7 +2229,12 @@ public class JSTableUI extends JSPanelUI {
 	private Rectangle myClip = new Rectangle();
 	private Rectangle getClip() {
 		if (table.parent instanceof JViewport) {
-			return ((JSViewportUI)table.parent.getUI()).myClip; 
+			JSViewportUI ui = ((JSViewportUI)table.parent.getUI());
+			if (isNewModel) {
+				ui.myClip.x = ui.myClip.y = 0;
+				isNewModel = false;
+			}
+			return ui.myClip; 
 		}
 		myClip.width = table.getWidth();
 		myClip.height = table.getHeight();
@@ -2179,7 +2242,6 @@ public class JSTableUI extends JSPanelUI {
 	}
 
 	private void paintCells(Graphics g, int rMin0, int rMax0, int rMin, int rMax, int cMin, int cMax) {
-
 		TableColumnModel cm = table.getColumnModel();
 		int columnMargin = cm.getColumnMargin();
 
@@ -2261,11 +2323,12 @@ public class JSTableUI extends JSPanelUI {
 						row + 1, col, col + 1);
 			}
 			boolean fullPaint = (newtd || !havePainted || !isScrolling || table.getSelectedRowCount() > 0);
-			TableCellRenderer renderer = table.getCellRenderer(row, col);
+			TableCellRenderer renderer = (fullPaint ? table.getCellRenderer(row, col)
+					: table.getCellRendererOrNull(row, col, isScrolling));
 			if (!fullPaint) {
 				// no need to paint the default renderers with nothing selected
 				/**
-				 * @j2sNative if (renderer.__CLASS_NAME__.indexOf("javax.swing.") == 0) return;
+				 * @j2sNative if (!renderer || renderer.__CLASS_NAME__.indexOf("javax.swing.") == 0) return;
 				 */
 			}
 			JComponent comp = (JComponent) getCellComponent(renderer, row, col, cw[col], h, td, fullPaint);
@@ -2471,110 +2534,107 @@ public class JSTableUI extends JSPanelUI {
 				: getAdjustedLead(table, row, table.getColumnModel().getSelectionModel());
 	}
 
-//
-//	    private static final TransferHandler defaultTransferHandler = new TableTransferHandler();
-//
-//	    static class TableTransferHandler extends TransferHandler implements UIResource {
-//
-//	        /**
-//	         * Create a Transferable to use as the source for a data transfer.
-//	         *
-//	         * @param c  The component holding the data to be transfered.  This
-//	         *  argument is provided to enable sharing of TransferHandlers by
-//	         *  multiple components.
-//	         * @return  The representation of the data to be transfered.
-//	         *
-//	         */
-//	        protected Transferable createTransferable(JComponent c) {
-//	            if (c instanceof JTable) {
-//	                JTable table = (JTable) c;
-//	                int[] rows;
-//	                int[] cols;
-//
-//	                if (!table.getRowSelectionAllowed() && !table.getColumnSelectionAllowed()) {
-//	                    return null;
-//	                }
-//
-//	                if (!table.getRowSelectionAllowed()) {
-//	                    int rowCount = table.getRowCount();
-//
-//	                    rows = new int[rowCount];
-//	                    for (int counter = 0; counter < rowCount; counter++) {
-//	                        rows[counter] = counter;
-//	                    }
-//	                } else {
-//	                    rows = table.getSelectedRows();
-//	                }
-//
-//	                if (!table.getColumnSelectionAllowed()) {
-//	                    int colCount = table.getColumnCount();
-//
-//	                    cols = new int[colCount];
-//	                    for (int counter = 0; counter < colCount; counter++) {
-//	                        cols[counter] = counter;
-//	                    }
-//	                } else {
-//	                    cols = table.getSelectedColumns();
-//	                }
-//
-//	                if (rows == null || cols == null || rows.length == 0 || cols.length == 0) {
-//	                    return null;
-//	                }
-//
-//	                StringBuffer plainBuf = new StringBuffer();
-//	                StringBuffer htmlBuf = new StringBuffer();
-//
-//	                htmlBuf.append("<html>\n<body>\n<table>\n");
-//
-//	                for (int row = 0; row < rows.length; row++) {
-//	                    htmlBuf.append("<tr>\n");
-//	                    for (int col = 0; col < cols.length; col++) {
-//	                        Object obj = table.getValueAt(rows[row], cols[col]);
-//	                        String val = ((obj == null) ? "" : obj.toString());
-//	                        plainBuf.append(val + "\t");
-//	                        htmlBuf.append("  <td>" + val + "</td>\n");
-//	                    }
-//	                    // we want a newline at the end of each line and not a tab
-//	                    plainBuf.deleteCharAt(plainBuf.length() - 1).append("\n");
-//	                    htmlBuf.append("</tr>\n");
-//	                }
-//
-//	                // remove the last newline
-//	                plainBuf.deleteCharAt(plainBuf.length() - 1);
-//	                htmlBuf.append("</table>\n</body>\n</html>");
-//
-//	                return new BasicTransferable(plainBuf.toString(), htmlBuf.toString());
-//	            }
-//
-//	            return null;
-//	        }
-//
-//	        public int getSourceActions(JComponent c) {
-//	            return COPY;
-//	        }
-//
-//	    }
-//
 
-	public void rebuildTable() {
-		setTainted();
-		currentRowMin = -1;
-		setHTMLElement();
-		rebuildHeader();
-	}
+	    private static final TransferHandler defaultTransferHandler = new TableTransferHandler();
 
-	private void rebuildHeader() {
-		JSComponentUI ui = getHeaderUI();
-		if (ui != null) {
-			ui.setTainted();
-			ui.setHTMLElement();
-			table.getTableHeader().秘repaint();
+	static class TableTransferHandler extends TransferHandler implements UIResource {
+
+		/**
+		 * Create a Transferable to use as the source for a data transfer.
+		 *
+		 * @param c The component holding the data to be transfered. This argument is
+		 *          provided to enable sharing of TransferHandlers by multiple
+		 *          components.
+		 * @return The representation of the data to be transfered.
+		 *
+		 */
+		@Override
+		protected Transferable createTransferable(JComponent c) {
+			if (c instanceof JTable) {
+				JTable table = (JTable) c;
+				int[] rows;
+				int[] cols;
+
+				if (!table.getRowSelectionAllowed() && !table.getColumnSelectionAllowed()) {
+					return null;
+				}
+
+				if (!table.getRowSelectionAllowed()) {
+					int rowCount = table.getRowCount();
+
+					rows = new int[rowCount];
+					for (int counter = 0; counter < rowCount; counter++) {
+						rows[counter] = counter;
+					}
+				} else {
+					rows = table.getSelectedRows();
+				}
+
+				if (!table.getColumnSelectionAllowed()) {
+					int colCount = table.getColumnCount();
+
+					cols = new int[colCount];
+					for (int counter = 0; counter < colCount; counter++) {
+						cols[counter] = counter;
+					}
+				} else {
+					cols = table.getSelectedColumns();
+				}
+
+				if (rows == null || cols == null || rows.length == 0 || cols.length == 0) {
+					return null;
+				}
+
+				StringBuffer plainBuf = new StringBuffer();
+				StringBuffer htmlBuf = new StringBuffer();
+
+				htmlBuf.append("<html>\n<body>\n<table>\n");
+
+				for (int row = 0; row < rows.length; row++) {
+					htmlBuf.append("<tr>\n");
+					for (int col = 0; col < cols.length; col++) {
+						Object obj = table.getValueAt(rows[row], cols[col]);
+						String val = ((obj == null) ? "" : obj.toString());
+						plainBuf.append(val + "\t");
+						htmlBuf.append("  <td>" + val + "</td>\n");
+					}
+					// we want a newline at the end of each line and not a tab
+					plainBuf.deleteCharAt(plainBuf.length() - 1).append("\n");
+					htmlBuf.append("</tr>\n");
+				}
+
+				// remove the last newline
+				plainBuf.deleteCharAt(plainBuf.length() - 1);
+				htmlBuf.append("</table>\n</body>\n</html>");
+
+				return new BasicTransferable(plainBuf.toString(), htmlBuf.toString());
+			}
+
+			return null;
 		}
+
+		@Override
+		public int getSourceActions(JComponent c) {
+			return COPY;
+		}
+
 	}
 
-	private JSTableHeaderUI getHeaderUI() {
-		JTableHeader th = table.getTableHeader();
-		return (th == null ? null : (JSTableHeaderUI) th.getUI());
-	}
+    public void invokeAction(String name, Action altAction) {
+        ActionMap map = table.getActionMap();
+        Action action = null;
+
+        if (map != null) {
+            action = map.get(name);
+        }
+        installDefaultTransferHandlerIfNecessary();
+        if (action == null) {
+            action = altAction;
+        }
+        action.actionPerformed(new ActionEvent(this,
+                               ActionEvent.ACTION_PERFORMED, (String)action.
+                               getValue(Action.NAME),
+                               EventQueue.getMostRecentEventTime(), 0));
+    }
 
 }

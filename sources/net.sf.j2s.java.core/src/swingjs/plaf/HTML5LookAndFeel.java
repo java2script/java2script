@@ -32,7 +32,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.JSComponent;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.LookAndFeel;
@@ -1952,7 +1951,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				// "TextArea.selectionForeground", textHighlightText,
 				// "TextArea.caretForeground", textText,
 				// "TextArea.caretBlinkRate", caretBlinkRate,
-				// "TextArea.border", marginBorder,
+			    //"TextArea.border", marginBorder,
 				"TextArea.margin",
 				zeroInsets,
 
@@ -1967,7 +1966,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				// "TextPane.caretForeground", textText,
 				// "TextPane.caretBlinkRate", caretBlinkRate,
 				"TextPane.inactiveForeground", disabledTextColor,
-				// "TextPane.border", marginBorder,
+			    "TextPane.border", marginBorder,
 				"TextPane.margin",
 				editorMargin,
 	            "TextPane.focusInputMap", multilineInputMap,
@@ -1983,7 +1982,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				// "EditorPane.caretForeground", textText,
 				// "EditorPane.caretBlinkRate", caretBlinkRate,
 				"EditorPane.inactiveForeground", disabledTextColor,
-				// "EditorPane.border", marginBorder,
+				"EditorPane.border", marginBorder,
 				"EditorPane.margin",
 				editorMargin,
 	            "EditorPane.focusInputMap", multilineInputMap,

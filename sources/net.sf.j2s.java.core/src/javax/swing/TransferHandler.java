@@ -1699,7 +1699,7 @@ public class TransferHandler {
 //
         @Override
 				public void actionPerformed(final ActionEvent e) {
-            final Object src = e.getSource();
+//           final Object src = e.getSource();
 //
 //            final PrivilegedAction<Void> action = new PrivilegedAction<Void>() {
 //                public Void run() {

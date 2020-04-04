@@ -50,6 +50,7 @@ import javax.swing.JTextArea;
 import javax.swing.JViewport;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.TransferHandler;
 import javax.swing.UIManager;
 import javax.swing.event.CaretEvent;
 import javax.swing.plaf.ActionMapUIResource;
@@ -269,24 +270,23 @@ public abstract class JSTextUI extends JSLightweightUI {
 	 */
 	protected void installDefaults() {
 		String prefix = getPropertyPrefix();
+		
 		Font f = editor.getFont();
 		if ((f == null && !isAWT) || (f instanceof UIResource)) {
 			editor.setFont(UIManager.getFont(prefix + ".font"));
 		}
-
 		setColors(prefix);
-		//
-		// Border b = editor.getBorder();
-		// if ((b == null) || (b instanceof UIResource)) {
-		// editor.setBorder(UIManager.getBorder(prefix + ".border"));
-		// }
-		//
+		//setBorder(prefix);
 		Insets margin = editor.getMargin();
 		if (margin == null || margin instanceof UIResource) {
 			editor.setMargin(UIManager.getInsets(prefix + ".margin"));
 		}
 		//
 		// updateCursor();
+	}
+
+	protected void setBorder(String prefix) {
+		// set JSEditorPaneUI
 	}
 
 	protected void setColors(String prefix) {
@@ -515,12 +515,12 @@ public abstract class JSTextUI extends JSLightweightUI {
 			map.put(a.getValue(Action.NAME), a);
 			//System.out.println("JSTextUI " + jc.getUIClassID() + ".createAction: " + a.getValue(Action.NAME));
 		}
-		// map.put(TransferHandler.getCutAction().getValue(Action.NAME),
-		// TransferHandler.getCutAction());
-		// map.put(TransferHandler.getCopyAction().getValue(Action.NAME),
-		// TransferHandler.getCopyAction());
-		// map.put(TransferHandler.getPasteAction().getValue(Action.NAME),
-		// TransferHandler.getPasteAction());
+		 map.put(TransferHandler.getCutAction().getValue(Action.NAME),
+		 TransferHandler.getCutAction());
+		 map.put(TransferHandler.getCopyAction().getValue(Action.NAME),
+		 TransferHandler.getCopyAction());
+		 map.put(TransferHandler.getPasteAction().getValue(Action.NAME),
+		 TransferHandler.getPasteAction());
 		return map;
 	}
 

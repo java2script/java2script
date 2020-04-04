@@ -736,7 +736,7 @@ public class JSToolkit extends SunToolkit
 	@Override
 	public Clipboard getSystemClipboard() {
 		if (systemClipboard == null)
-			systemClipboard = (Clipboard) JSUtil.getInstance("java.awt.datatransfer.Clipboard");
+			systemClipboard = new Clipboard("System");
 		return systemClipboard;
 	}
 

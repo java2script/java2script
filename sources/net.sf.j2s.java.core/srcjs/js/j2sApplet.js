@@ -168,6 +168,7 @@ window.J2S = J2S = (function() {
 					// these sites are known to implement
 					// access-control-allow-origin *
 					// null here means no conversion necessary
+					"INTERNET.TEST" : "https://pubchem.ncbi.nlm.nih.gov",
 					"chemapps.stolaf.edu" : null,
 					"cactus.nci.nih.gov" : null,
 					".x3dna.org" : null,
@@ -858,7 +859,9 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 		var isHttps2Http = (J2S._httpProto == "https://" && fileName.indexOf("http://") == 0);
 		var cantDoSynchronousLoad = (!isMyHost && J2S.$supportsIECrossDomainScripting());
 		var mustCallHome = !isFile && (isHttps2Http || asBase64 || !fSuccess && cantDoSynchronousLoad);
-		var isNotDirectCall = !mustCallHome && !isFile && !isMyHost && !J2S._isDirectCall(fileName);
+		var url;
+		var isNotDirectCall = !mustCallHome && !isFile && !isMyHost && !(url = J2S._isDirectCall(fileName));
+		fileName = url || fileName;
 		var data = null;
 		if (mustCallHome || isNotDirectCall) {
 			data = J2S._getRawDataFromServer("_", fileName, fSuccess, fSuccess,
@@ -913,7 +916,7 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 		for ( var key in J2S.db._DirectDatabaseCalls) {
 			if (key.indexOf(".") >= 0 && url.indexOf(key) >= 0) {
 				// hack because ebi is not returning ajax calls
-				return true;//url.indexOf(".ebi.ac.") < 0 || url.indexOf("dbfetch/dbfetch") < 0;
+				return J2S.db._DirectDatabaseCalls[key] || url;//url.indexOf(".ebi.ac.") < 0 || url.indexOf("dbfetch/dbfetch") < 0;
 								
 			}
 		}
@@ -2657,7 +2660,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 							applet.__Info.code = clazz;
 					}
 					
-					var cl = Clazz.loadClass(clazz);cl.$static$ && cl.$static$();
+					var cl = Clazz.loadClass(clazz);
+					//cl.$static$ && cl.$static$();
 					if (clazz.indexOf("_.") == 0)
 						J2S.setWindowVar(clazz.substring(2), cl);
 					if (isApp && cl.j2sHeadless)

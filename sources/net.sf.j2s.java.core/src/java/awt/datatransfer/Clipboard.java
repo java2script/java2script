@@ -37,6 +37,7 @@ import java.util.Arrays;
 import java.io.IOException;
 
 import sun.awt.EventListenerAggregate;
+import swingjs.JSUtil;
 
 
 /**
@@ -127,14 +128,21 @@ public class Clipboard {
 
         this.owner = owner;
         this.contents = contents;
-
-        if (oldOwner != null && oldOwner != owner) {
-            EventQueue.invokeLater(new Runnable() {
-                public void run() {
-                    oldOwner.lostOwnership(Clipboard.this, oldContents);
-                }
-            });
+        if ("System".equals(name) && contents.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+			try {
+				String s = (String) contents.getTransferData(DataFlavor.stringFlavor);
+				JSUtil.setClipboardContents(s);
+			} catch (UnsupportedFlavorException | IOException e) {
+			}        	
         }
+
+//        if (oldOwner != null && oldOwner != owner) {
+//            EventQueue.invokeLater(new Runnable() {
+//                public void run() {
+//                    oldOwner.lostOwnership(Clipboard.this, oldContents);
+//                }
+//            });
+//        }
         fireFlavorsChanged();
     }
 

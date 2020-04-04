@@ -4847,7 +4847,7 @@ public abstract class JComponent extends Container {
     }
 
     public TransferHandler getTransferHandler() {
-		return null;
+        return (TransferHandler)getClientProperty(JComponent_TRANSFER_HANDLER);
 	}
 
 	Object setDropLocation(DropLocation dropLocation, Object state,

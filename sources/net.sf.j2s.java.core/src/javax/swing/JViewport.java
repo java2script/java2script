@@ -698,9 +698,9 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
             return;
         }
 
-        myClip.width = width;
-        myClip.height = height;
-    	((JSViewportUI) ui).setClip(myClip);
+        秘myClip.width = width;
+        秘myClip.height = height;
+    	((JSViewportUI) ui).setClip(秘myClip);
         if (inBlitPaint) {
             // We invoked paint as part of copyArea cleanup, let it through.
             super.paint(g);
@@ -1625,8 +1625,8 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
 //    }
     
     
-    Rectangle myClip = new Rectangle();
-
+    private Rectangle 秘myClip = new Rectangle();
+    
     /**
      * Called to paint the view, usually when <code>blitPaint</code>
      * can not blit.
@@ -1635,20 +1635,18 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
      */
     private void paintView(Graphics g) {
         JComponent view = (JComponent)getView();
-
         Rectangle clip = g.getClipBounds();
         if (view.getWidth() >= getWidth()) {
             // Graphics is relative to JViewport, need to map to view's
             // coordinates space.
             int x = view.getX();
             int y = view.getY();// will be negative
-        	//System.out.println(">>>>painting JView" + x + " " + y + "  " +clip);
             //Graphics g1 = g.create();
             g.translate(x, y);
-            myClip.width = clip.width;
-            myClip.height = clip.height;
-            myClip.x = clip.x - x;
-            myClip.y = clip.y - y;
+            秘myClip.width = clip.width;
+            秘myClip.height = clip.height;
+            秘myClip.x = clip.x - x;
+            秘myClip.y = clip.y - y;
             paintForceDoubleBuffered(g, view);
             //g.setColor(Math.random() > 0.5 ? Color.GREEN : Color.MAGENTA);
             //g.fillRect(-x, 50-y, clip.width, clip.height);
@@ -1657,8 +1655,8 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
             //g.setClip(clip.x, clip.y, clip.width, clip.height);
         }
         else {
-            myClip.x = clip.x;
-            myClip.y = clip.y;
+            秘myClip.x = clip.x;
+            秘myClip.y = clip.y;
             // To avoid any problems that may result from the viewport being
             // bigger than the view we start painting from the viewport.
             try {
@@ -1668,16 +1666,17 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
                 inBlitPaint = false;
             }
         }
+
     }
 
     private void paintForceDoubleBuffered(Graphics g, JComponent c) {
     	
-        g.clipRect(myClip.x, myClip.y, myClip.width, myClip.height);
+        g.clipRect(秘myClip.x, 秘myClip.y, 秘myClip.width, 秘myClip.height);
 		RepaintManager rm = RepaintManager.currentManager(c);
 		rm.beginPaint();
 		秘setFlag(JComponent.秘ISREPAINTING, true);
 		try {
-			rm.paint(c, c, g, myClip.x, myClip.y, myClip.width, myClip.height);
+			rm.paint(c, c, g, 秘myClip.x, 秘myClip.y, 秘myClip.width, 秘myClip.height);
 		} finally {
 			rm.endPaint();
 			秘setFlag(JComponent.秘ISREPAINTING, false);
