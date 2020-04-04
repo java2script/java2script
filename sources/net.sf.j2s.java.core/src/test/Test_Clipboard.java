@@ -3,6 +3,7 @@ package test;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -11,17 +12,17 @@ import java.util.Date;
 import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumnModel;
 
 import swingjs.plaf.JSTableUI;
 
@@ -55,6 +56,8 @@ public class Test_Clipboard extends JFrame {
 		}
 
 	}
+
+	private DefaultListModel listModel;
 
 	public Test_Clipboard() {
 		super();
@@ -97,12 +100,28 @@ public class Test_Clipboard extends JFrame {
 		table.setFillsViewportHeight(true);
 		table.setBackground(Color.yellow);
 		//table.setRowHeight(10); // very tight! exact match
-		table.setRowMargin(10);
+		//table.setRowMargin(10);
 		table.getColumnModel().setColumnMargin(10);
 		//JScrollPane scrollPane = new JScrollPane(table);
 
 		//p.add(scrollPane);
 		p.add(table);
+		
+		listModel = new DefaultListModel();
+		listModel.addElement("Jane Doe");
+		listModel.addElement("John Smith");
+		listModel.addElement("Kathy Green");
+		listModel.addElement("Rose Red");
+		listModel.addElement("Nearly Black");
+		listModel.addElement("Pearly White");
+		// Create the list and put it in a scroll pane.
+		JList list = new JList(listModel);
+		list.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 24));
+		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		list.setSelectedIndex(0);
+		//list.addListSelectionListener(this);
+		list.setVisibleRowCount(5);
+		p.add(list);
 		
 		JPanel m = new JPanel(new GridLayout());
 
