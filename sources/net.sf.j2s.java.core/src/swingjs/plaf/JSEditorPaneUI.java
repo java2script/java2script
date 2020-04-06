@@ -213,7 +213,7 @@ public class JSEditorPaneUI extends JSTextUI {
 			bindJSKeyEvents(focusNode, true);
 		}
 		textListener.checkDocument();
-		setCssFont(domNode, c.getFont());
+		setCssFont(domNode, c.getFont());// will check enabled and also set background
 		DOMNode.setAttrs(domNode, "contentEditable", isHtmlKit || editor.isEditable() ? TRUE : FALSE, "spellcheck", FALSE);
 		if (jc.getTopLevelAncestor() != null) {
 			if (editor.getText() != mytext) {
@@ -1128,6 +1128,12 @@ public class JSEditorPaneUI extends JSTextUI {
 		}
 	}
 
+
+	@Override
+	public Dimension getMaximumSize(JComponent jc) {
+		return ANY_SIZE;
+	}
+	
 	@Override
 	public Dimension getMinimumSize(JComponent jc) {
 		getPreferredSize(jc);

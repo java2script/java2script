@@ -5340,10 +5340,14 @@ Integer.sum$I$I = Long.sum$J$J = Float.sum$F$F = Double.sum$D$D = 		function(a,b
 
 // NOTE THAT java.util.Date, like java.lang.Math, is unqualified by the transpiler -- this is NOT necessary
 
+;(function() {
+
 Clazz._setDeclared("java.util.Date", java.util.Date=Date);
 //Date.TYPE="java.util.Date";
 Date.__CLASS_NAME__="Date";
 addInterface(Date,[java.io.Serializable,java.lang.Comparable]);
+
+Date.parse$S = Date.parse;
 
 m$(java.util.Date, ["c$", "c$$S", "c$$J"], function(t) {
   this.setTime$J(typeof t == "string" ? Date.parse(t) : t ? t : System.currentTimeMillis$())
@@ -5380,6 +5384,13 @@ function(){
 var ht=this.getTime();
 return parseInt(ht)^parseInt((ht>>32));
 });
+
+Date.prototype.toString$ = Date.prototype.toString;
+m$(java.util.Date,"toString",
+function(){
+return this.toString$().split("(")[0].trim();
+});
+})();
 
 var notImplemented = function(why) {return function() {System.err.println(why + " has not been implemented.")}};
 

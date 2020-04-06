@@ -1,13 +1,22 @@
 package test;
 
+import java.util.Date;
+
 class Test_Boolean extends Test_ {
 	
   public static int i_;
   
   public static void main(String[] args) {
 	  
+	  System.out.println(new Date() + " " + Date.parse("3/4/2020"));
+	  Boolean b = Boolean.FALSE;
+	  Boolean b1 = new Boolean(false);
+	  System.out.println(Integer.valueOf(3));
 	  assert(new Boolean(false).equals(Boolean.FALSE));
 
+	  assert(b ? false : true);
+	  assert(b1 ? false : true);
+	  assert(Boolean.FALSE ? false : true);
 	  System.out.println("" + (new Boolean("true")) + (!new Boolean("false")));
 	  assert(new Boolean("true"));
 	  assert(!new Boolean("false"));

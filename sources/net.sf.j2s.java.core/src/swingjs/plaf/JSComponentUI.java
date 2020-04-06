@@ -1520,11 +1520,6 @@ public class JSComponentUI extends ComponentUI
 		allowDivOverflow = (root != null && "false".equals(root.getClientProperty("swingjs.overflow.hidden")));
 	}
 
-	public void setAllowPaintedBackground(boolean TF) {
-		// listCellRenderer does not allow this.
-		allowPaintedBackground = TF;
-	}
-
 	public DOMNode getDOMNode() {
 		return (isUIDisabled ? null : updateDOMNode());
 	}

@@ -30,6 +30,8 @@ public class CorePlugin extends Plugin {
 	// if you change the x.x.x number, be sure to also indicate that in 
 	// j2sApplet.js and also (Bob only) update.bat, update-clean.bat
 
+
+	// BH 2020.04.05 -- 3.2.9-v1f (Boolean ? ...) not unboxed
 	// BH 2020.03.21 -- 3.2.9-v1e better v1c 
 	// BH 2020.03.20 -- 3.2.9-v1d proper check for new String("x") == "x" (should be false), but new integer(3) == 3 (true) 
 	// BH 2020.03.20 -- 3.2.9-v1c more efficient static call from 3.2.9-v1a 
