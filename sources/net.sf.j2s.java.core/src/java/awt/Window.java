@@ -758,7 +758,8 @@ public class Window extends JComponent {
 	}
 
 	@Override
-	protected ComponentPeer getOrCreatePeer() {
+	public ComponentPeer getOrCreatePeer() {
+		// SwingJS this should have 秘
 		return (ui == null ? null : peer == null ? (peer = getToolkit().createWindow(this)) : peer);
 	}
 
@@ -3521,9 +3522,8 @@ public class Window extends JComponent {
 //            }
             setLayersOpaque(this, opaque);
             this.opaque = opaque;
-            WindowPeer peer = (WindowPeer)getPeer();
             if (peer != null) {
-                peer.setOpaque(opaque);
+                ((WindowPeer) peer).setOpaque(opaque);
             }
         }
     }

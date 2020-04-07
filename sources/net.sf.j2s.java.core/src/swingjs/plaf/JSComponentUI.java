@@ -3103,7 +3103,6 @@ public class JSComponentUI extends ComponentUI
 	@Override
 	public void reparent(ContainerPeer newContainer) {
 		JSUtil.notImplemented("");
-
 	}
 
 	@Override

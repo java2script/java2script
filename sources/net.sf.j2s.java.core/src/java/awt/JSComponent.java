@@ -359,7 +359,7 @@ public abstract class JSComponent extends Component {
 	 * A peer in SwingJS can only be created after the ui is created.
 	 */
 	@Override
-	protected ComponentPeer getOrCreatePeer() {
+	public ComponentPeer getOrCreatePeer() {
 		return (ui == null ? null : peer == null ? (peer = getToolkit().createComponent(this)) : peer);
 	}
 
@@ -798,6 +798,5 @@ public abstract class JSComponent extends Component {
 	     */
 	    TOOLKIT_EXCLUDE
 	}
-
 
 }
