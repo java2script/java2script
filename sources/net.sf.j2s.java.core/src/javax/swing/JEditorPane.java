@@ -1324,14 +1324,11 @@ public class JEditorPane extends JTextComponent {
 		if (SwingUtilities.appContextGet(kitTypeRegistryKey) == null) {
 			synchronized (defaultEditorKitMap) {
 				if (defaultEditorKitMap.size() == 0) {
-					// preliminary only - no support for rtf; html same as plain
 					defaultEditorKitMap.put("text/plain", "javax.swing.JEditorPane$PlainEditorKit");
-					defaultEditorKitMap.put("text/html", "javax.swing.JEditorPane$PlainEditorKit");
-
-//defaultEditorKitMap.put("text/plain", "javax.swing.JEditorPane$PlainEditorKit");
-//defaultEditorKitMap.put("text/html", "javax.swing.text.html.HTMLEditorKit");
-//defaultEditorKitMap.put("text/rtf", "javax.swing.text.rtf.RTFEditorKit");
-//defaultEditorKitMap.put("application/rtf", "javax.swing.text.rtf.RTFEditorKit");
+					defaultEditorKitMap.put("text/html", "javax.swing.text.html.HTMLEditorKit");
+// SwingJS 
+//			defaultEditorKitMap.put("text/rtf", "javax.swing.text.rtf.RTFEditorKit");
+//			defaultEditorKitMap.put("application/rtf", "javax.swing.text.rtf.RTFEditorKit");
 
 				}
 			}
@@ -1437,9 +1434,17 @@ public class JEditorPane extends JTextComponent {
 	@Override
 	public void setText(String t) {
 		try {
+			Document doc = getDocument();
+			if (doc instanceof HTMLDocument) {
+				if (t.indexOf("<body>")< 0)
+				t = "<body>" + t + "</body>";
+				if (t.indexOf("<head>")< 0)
+				t = "<head>" + t + "</head>";
+				if (t.indexOf("<html>")< 0)
+				t = "<html>" + t + "</html>";
+			}
 			if (秘jsHTMLHelper != null)
 				秘jsHTMLHelper.setText(t);
-			Document doc = getDocument();
 			doc.remove(0, doc.getLength());
 			if (t == null || t.equals("")) {
 				return;
