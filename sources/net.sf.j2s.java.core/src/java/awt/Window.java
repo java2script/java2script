@@ -3522,8 +3522,9 @@ public class Window extends JComponent {
 //            }
             setLayersOpaque(this, opaque);
             this.opaque = opaque;
+            WindowPeer peer = (WindowPeer)getPeer();
             if (peer != null) {
-                ((WindowPeer) peer).setOpaque(opaque);
+                peer.setOpaque(opaque);
             }
         }
     }
