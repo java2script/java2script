@@ -947,6 +947,10 @@ public class JSComponentUI extends ComponentUI
 		}
 	}
 
+	/**
+	 * Called by DefaultFocusTraversalPolicy only.
+	 * Overridden to return true in buttons, menu items, JEditorPane, JTextPane, JTextArea
+	 */
 	@Override
 	public boolean isFocusable() {
 		// meaning "can use TAB to set their focus" within a focus cycle
@@ -970,7 +974,7 @@ public class JSComponentUI extends ComponentUI
 //		return (jc.isFocusable() && setFocusable());
 	}
 
-	protected boolean setFocusable() {
+	public boolean setFocusable() {
 		if (focusNode == null) 
 		  addFocusHandler();
 		if (focusNode != null)
@@ -984,16 +988,14 @@ public class JSComponentUI extends ComponentUI
 				 */false;
 	}
 
-	@Override
-	public boolean requestFocus(Component lightweightChild, boolean temporary, boolean focusedWindowChangeAllowed,
-			long time, Cause cause) {
-		if (lightweightChild == null)
-			return focus();
-		if (!jc.isFocusable())
-			return false;
-		setFocusable();
-		return JSToolkit.requestFocus(lightweightChild);
-	}
+	private Runnable focusRunnable = new Runnable() {
+
+		@Override
+		public void run() {
+			focus();
+		}
+		
+	};
 
 	/**
 	 * Outgoing: Initiate a focus() event in the system directly
@@ -1017,6 +1019,29 @@ public class JSComponentUI extends ComponentUI
 			c.requestFocus();
 	}
 
+	/**
+	 * A Window ComponentPeer method called from Component.requestFocusHelper
+	 * in response to a requestFocus() call.
+	 * 
+	 * @param me  The lightweight component to receive the focus.
+	 * @param temporary ignored
+	 * @param focusedWindowChangeAllowed ignored
+	 * @param time ignored
+	 * @param cause ignored
+	 * @return true if successful
+	 */
+	@Override
+	public boolean requestFocus(Component me, boolean temporary, boolean focusedWindowChangeAllowed, long time,
+			Cause cause) {
+		if (me == null)
+			return focus();
+		if (!me.isFocusable())
+			return false;
+		JSComponentUI ui = ((JSComponent) me).秘getUI();
+		ui.setFocusable();
+		JSToolkit.dispatch(ui.focusRunnable, 50, 0);
+		return true;
+	}
 	/**
 	 * Add the $().focus() and $().blur() events to a DOM button.
 	 * 
@@ -3500,10 +3525,12 @@ public class JSComponentUI extends ComponentUI
 	public void clearPaintPath() {
 		JSComponent c = jc;
 		while (c != null) {
-			((JSComponentUI) c.ui).inPaintPath = true;
-
+			JSComponentUI ui = c.秘getUI();
+			if (ui == null)
+				return;
+			ui.inPaintPath = true;
 			c.秘setPaintsSelf(JSComponent.PAINTS_SELF_ALWAYS);
-			((JSComponentUI) c.ui).setTransparent();
+			ui.setTransparent();
 			c = c.getParent();
 		}
 	}

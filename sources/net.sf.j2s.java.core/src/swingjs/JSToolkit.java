@@ -651,22 +651,6 @@ public class JSToolkit extends SunToolkit
 		return (ui != null && !ui.isNull && ui.hasFocus());
 	}
 
-	public static boolean requestFocus(Component c) {
-		final JSComponentUI ui = getUI(c, false);
-		if (ui == null || ui.isNull || !ui.jc.isFocusable())
-			return false;
-		Runnable r = new Runnable() {
-
-			@Override
-			public void run() {
-				ui.requestFocus(null, false, false, 0, null);
-			}
-			
-		};
-		dispatch(r, 50, 0);
-		return true;
-	}
-
 	private static JSAudio audioPlayer;
 
 	private static JSAudio getAudioPlayer() {
