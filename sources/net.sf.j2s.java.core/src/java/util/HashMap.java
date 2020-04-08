@@ -593,6 +593,8 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 		case NOT_SIMPLE:
 			break;
 		case INVALID_KEY:
+			Map.秘ensureJavaMap(this);
+			break;
 		case NO_SUCH_KEY:
 			return null;
 		case HAS_KEY:
@@ -649,6 +651,8 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 		case NOT_SIMPLE:
 			break;
 		case INVALID_KEY:
+			Map.秘ensureJavaMap(this);
+			break;
 		case NO_SUCH_KEY:
 			return false;
 		case HAS_KEY:
@@ -895,6 +899,8 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 		case NOT_SIMPLE:
 			break;
 		case INVALID_KEY:
+			Map.秘ensureJavaMap(this);
+			break;
 		case NO_SUCH_KEY:
 			return null;
 		case HAS_KEY:
@@ -1094,6 +1100,8 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 			case NOT_SIMPLE:
 				break;
 			case INVALID_KEY:
+				Map.秘ensureJavaMap(HashMap.this);
+				break;
 			case NO_SUCH_KEY:
 				return false;
 			case HAS_KEY:
@@ -1287,6 +1295,8 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 			case NOT_SIMPLE:
 				return removeNode(hash(key), key, value, true, true, NOT_SIMPLE) != null;
 			case INVALID_KEY:
+				Map.秘ensureJavaMap(HashMap.this);
+				return removeNode(hash(key), key, value, true, true, NOT_SIMPLE) != null;
 			case NO_SUCH_KEY:
 				return false;
 			case HAS_KEY:
@@ -1327,6 +1337,8 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 		case NOT_SIMPLE:
 			break;
 		case INVALID_KEY:
+			Map.秘ensureJavaMap(this);
+			break;
 		case NO_SUCH_KEY:
 			return defaultValue;
 		case HAS_KEY:
@@ -1374,6 +1386,8 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 		case NOT_SIMPLE:
 			break;
 		case INVALID_KEY:
+			Map.秘ensureJavaMap(this);
+			break;
 		case NO_SUCH_KEY:
 			return false;
 		case HAS_KEY:
@@ -1393,6 +1407,8 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 		case NOT_SIMPLE:
 			break;
 		case INVALID_KEY:
+			Map.秘ensureJavaMap(this);
+			break;
 		case NO_SUCH_KEY:
 			return false;
 		case HAS_KEY:
@@ -1430,6 +1446,8 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 		case NOT_SIMPLE:
 			break;
 		case INVALID_KEY:
+			Map.秘ensureJavaMap(this);
+			break;
 		case NO_SUCH_KEY:
 			return null;
 		case HAS_KEY:
@@ -1569,6 +1587,8 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 		case NOT_SIMPLE:
 			break;
 		case INVALID_KEY:
+			Map.秘ensureJavaMap(this);
+			break;
 		case NO_SUCH_KEY:
 			return null;
 		case HAS_KEY:
