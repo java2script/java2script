@@ -499,7 +499,7 @@ public class DropTarget implements DropTargetListener, Serializable {
 
         for (Component c = component;
              c != null && peer instanceof LightweightPeer; c = c.getParent()) {
-            peer = ((JSComponent) c).getOrCreatePeer(); // SwingJS was getPeer(), but this is only if attached.
+            peer = /** @j2sNative c.peer || */null;//((JSComponent) c).peer;//getPeer(); // SwingJS was getPeer(), but this is only if attached.
         }
 
         //if (peer instanceof DropTargetPeer) {
