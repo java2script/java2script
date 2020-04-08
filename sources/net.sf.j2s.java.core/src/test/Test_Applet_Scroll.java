@@ -401,7 +401,7 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener, Mouse
 		label.setHorizontalAlignment(SwingConstants.RIGHT);
 		label.setVerticalAlignment(SwingConstants.CENTER);
 
-		final JTextField tf = new JTextField(/** @j2sNative "JS" ||*/null, "12.5", 8);
+		final JTextField tf = new JTextField(/** @j2sNative "null" ||*/null, "12.5", 8);
 //		final JTextField tf = new JTextField(new PlainDocument() {
 //			@Override
 //			public void getText(int offset, int length, Segment txt) throws BadLocationException {

@@ -53,11 +53,14 @@ class Test_Map extends Test_ {
 
 	public static void main(String[] args) {
 
+		
 		System.out.println("Equivalence tests asserted");
 		assert(new Integer(3) == 3);
 		assert(new Integer(3) != new Integer(3));
 
 		String a = "x";
+		String sa = new String("x");
+		
 		assert("xxx" == "xx" + "x"); 
 		assert("xxx" == ("xx" + a).intern()); 
 		
@@ -249,13 +252,17 @@ class Test_Map extends Test_ {
 		
 		System.out.println("HashMap should have 9 members:");
 		HashMap<Object, Object> hm = new HashMap<>();
+
+		hm.put("testing", "testing4");               // same
+		assert(hm.get(new String("testing")) == "testing4");
+
+		hm.clear(); 
 		
 		hm.put(new String("testing"), "testing1");   // same
 		hm.put("testing", "testing2");               // same
 		String ing = "ing";
-		hmi.put("test" + ing, "testing3");               // same
+		hm.put("test" + ing, "testing3");               // same
 		hm.put("testing", "testing4");               // same
-		
 
 		try {
 			hm.put(new Integer(null), "126new"); // unique

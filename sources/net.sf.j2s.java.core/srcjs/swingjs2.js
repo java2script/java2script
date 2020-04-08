@@ -11485,6 +11485,17 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 			".bin?", ".smol?", ".spartan?", ".mrc?", ".pse?", ".map?",
 			".omap?", ".dcd?", ".mp3?", ".ogg?", ".wav?", ".au?" ];
 
+	J2S.addBinaryFileType = function(ext) {
+		if (!ext.indexOf(".") == 0)
+			ext = "." + ext;
+		if (!ext.indexOf("?") == ext.length - 1)
+			ext += "?";
+		for (var i = J2S._binaryTypes.length; --i >= 0;)
+			if (J2S._binaryTypes[i] == ext)
+				return;
+		J2S._binaryTypes.push(ext);
+	}
+	
 	J2S.isBinaryUrl = function(url) {
 		url = url.toLowerCase() + "?";
 		for (var i = J2S._binaryTypes.length; --i >= 0;)
