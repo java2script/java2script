@@ -11384,7 +11384,7 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 		if (applet._cacheFiles && J2S._fileCache && !fileName.endsWith(".js")) {
 			var data = J2S._fileCache[fileName];
 			if (data) {
-				System.out.println("using " + data.length
+				System.out.println("using " + (data.length)
 						+ " bytes of cached data for " + fileName);
 				fSuccess(data);
 				return null;
@@ -11740,7 +11740,8 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 				var data = null;
 				if (evt.target.readyState == FileReader.DONE) {
 					var data = evt.target.result;
-					System.out.println("J2S.getFileFromDialog format=" + format + " file name=" + file.name  + " size=" + data.length)
+					System.out.println("J2S.getFileFromDialog format=" + format 
+								+ " file name=" + file.name  + " size=" + (data.length || data.byteLength));
 					switch (format) {
 					case "java.util.Map":
 						map.put$O$O(file.name, J2S._toBytes(data));
@@ -17053,6 +17054,8 @@ var sysprops = {
 		"java.vendor" : "java2script/SwingJS/OpenJDK",
 		"java.vendor.url" : "https://github.com/BobHanson/java2script",
 		"java.version" : "1.8",
+		"java.vm.version" : "1.8",
+		"java.specification.version" : "1.8",
 		"os.arch" : navigator.userAgent,
 		"os.name" : fixAgent(navigator.userAgent).split("(")[0],
 		"os.version": fixAgent(navigator.appVersion).replace(fixAgent(navigator.userAgent), ""),

@@ -424,7 +424,7 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 			try {
 				output((String) adapter.marshal(value));
 			} catch (Exception e) {
-				System.out.println("JSJAXBMarshaller " + e + " trying to marshal " + field.text);
+				//System.out.println("JSJAXBMarshaller " + e + " trying to marshal " + field.text);
 				outputSimple(field, value);				
 			}
 		}
@@ -446,7 +446,7 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 			default:
 				if (!JSJAXBField.isknownSchemaType(field.xmlSchemaType)
 						&& cantmarshall.indexOf(field.xmlSchemaType) < 0) {
-					System.out.println("JSJAXBMarshaller schema not supported " + field.xmlSchemaType);
+					//System.out.println("JSJAXBMarshaller schema not supported " + field.xmlSchemaType);
 					cantmarshall += ";" + field.xmlSchemaType;
 				}
 				// fall through //
@@ -633,7 +633,7 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 			if (writer != null) {
 			
 				
-				System.out.println((s.startsWith("<") ? "\n" : "") + s);
+				//System.out.println((s.startsWith("<") ? "\n" : "") + s);
 				
 				writer.write(s);
 			} else if (outputStream != null) {

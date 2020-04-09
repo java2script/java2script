@@ -3144,6 +3144,8 @@ var sysprops = {
 		"java.vendor" : "java2script/SwingJS/OpenJDK",
 		"java.vendor.url" : "https://github.com/BobHanson/java2script",
 		"java.version" : "1.8",
+		"java.vm.version" : "1.8",
+		"java.specification.version" : "1.8",
 		"os.arch" : navigator.userAgent,
 		"os.name" : fixAgent(navigator.userAgent).split("(")[0],
 		"os.version": fixAgent(navigator.appVersion).replace(fixAgent(navigator.userAgent), ""),
