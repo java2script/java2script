@@ -9,6 +9,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Date;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
@@ -18,12 +19,15 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JToolTip;
+import javax.swing.ToolTipManager;
 
 public class Test_Applet_Combo extends JApplet {
 
 	String[] optionsNew = new String[] { "optionnew1", "optionnew2verylong" };
 	String[] options = new String[] { "option1", "option2", "option3long" };
 	JLabel[] labels = new JLabel[] { new JLabel("option1"), new JLabel("option2"), new JLabel("option3") };
+	
 	
 	@Override
 	public void init() {
@@ -38,7 +42,20 @@ public class Test_Applet_Combo extends JApplet {
 //			labels[i].addMouseListener(ma);
 //			labels[i].addMouseMotionListener(ma);
 //		}
-		JPanel p = new JPanel();
+		JPanel p = new JPanel() {
+	    	@Override
+			public JToolTip createToolTip() {
+	    		return new JMultiLineToolTip(20, false);
+	    	}
+	    	
+	    	@Override
+			public String getToolTipText() {
+	    		return new Date().toString();
+	    	}
+		};
+	
+		ToolTipManager.sharedInstance().registerComponent(p);
+		
 		JComboBox c1 = new JComboBox(options) {
 			@Override
 			public void addNotify() {
