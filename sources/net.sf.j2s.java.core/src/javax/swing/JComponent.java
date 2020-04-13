@@ -631,7 +631,9 @@ public abstract class JComponent extends Container {
 				ui.update(scratchGraphics, this);
 				//JSGraphics2D jsg = 秘getJSGraphic2D(scratchGraphics);		
 				//秘isBackgroundPainted = (jsg != null && jsg.isBackgroundPainted());
-			} finally {
+			} catch (Throwable t) {
+				t.printStackTrace();
+			}	finally {
 				scratchGraphics.dispose();
 			}
 		}
