@@ -854,14 +854,28 @@ public class CSS implements Serializable {
             return 1;
         }
 
+        if (couldBeNumber(borderValue))
         try {
             return Integer.parseInt(borderValue);
         } catch (NumberFormatException e) {
-            return 0;
         }
+        return 0;
     }
 
-    private static final Hashtable<String, Attribute> attributeMap = new Hashtable<String, Attribute>();
+    /**
+     * BH SwingJS
+     * 
+     * Ends with . or a digit
+     * @param borderValue
+     * @return
+     */
+    private static boolean couldBeNumber(String borderValue) {
+    	int n = borderValue.length();
+    	return (n > 0 && ".0123456789".indexOf(borderValue.charAt(n - 1)) >= 0);
+
+	}
+
+	private static final Hashtable<String, Attribute> attributeMap = new Hashtable<String, Attribute>();
     private static final Hashtable<String, Value> valueMap = new Hashtable<String, Value>();
 
     /**
@@ -2284,42 +2298,44 @@ public class CSS implements Serializable {
             return percentage;
         }
 
-        Object parseCssValue(String value) {
-            LengthValue lv;
-            try {
-                // Assume pixels
-                float absolute = Float.valueOf(value).floatValue();
-                lv = new LengthValue();
-                lv.span = absolute;
-            } catch (NumberFormatException nfe) {
-                // Not pixels, use LengthUnit
-                LengthUnit lu = new LengthUnit(value,
-                                               LengthUnit.UNINITALIZED_LENGTH,
-                                               0);
+		Object parseCssValue(String value) {
+			LengthValue lv = null;
+			boolean ok = false;
+			if (couldBeNumber(value)) {
+				try {
+					// Assume pixels
+					float absolute = Float.valueOf(value).floatValue();
+					lv = new LengthValue();
+					lv.span = absolute;
+					ok = true;
+				} catch (NumberFormatException nfe) {
+				}
+			}
+			if (!ok) {
+				// Not pixels, use LengthUnit
+				LengthUnit lu = new LengthUnit(value, LengthUnit.UNINITALIZED_LENGTH, 0);
 
-                // PENDING: currently, we only support absolute values and
-                // percentages.
-                switch (lu.type) {
-                case 0:
-                    // Absolute
-                    lv = new LengthValue();
-                    lv.span =
-                        (mayBeNegative) ? lu.value : Math.max(0, lu.value);
-                    lv.units = lu.units;
-                    break;
-                case 1:
-                    // %
-                    lv = new LengthValue();
-                    lv.span = Math.max(0, Math.min(1, lu.value));
-                    lv.percentage = true;
-                    break;
-                default:
-                    return null;
-                }
-            }
-            lv.svalue = value;
-            return lv;
-        }
+				// PENDING: currently, we only support absolute values and
+				// percentages.
+				switch (lu.type) {
+				case 0:
+					// Absolute
+					lv = new LengthValue();
+					lv.span = (mayBeNegative) ? lu.value : Math.max(0, lu.value);
+					lv.units = lu.units;
+					break;
+				case 1:
+					// %
+					lv = new LengthValue();
+					lv.span = Math.max(0, Math.min(1, lu.value));
+					lv.percentage = true;
+					break;
+				}
+			}
+			if (lv != null)
+				lv.svalue = value;
+			return lv;
+		}
 
         Object parseHtmlValue(String value) {
             if (value.equals(HTML.NULL_ATTRIBUTE_VALUE)) {

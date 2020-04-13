@@ -177,7 +177,13 @@ public class JSComponentUI extends ComponentUI
 	protected static boolean debugging;
 
 	/**
-	 * a unique id
+	 * this initial unique id, such as testApplet_EditorPaneUI_1553
+	 */
+	protected String id0;
+
+	/**
+	 * a unique id for a given revision of an element, such as
+	 * testApplet_EditorPaneUI_1553_1611
 	 */
 	protected String id;
 
@@ -731,9 +737,12 @@ public class JSComponentUI extends ComponentUI
 	protected void newID(boolean forceNew) {
 		classID = c.getUIClassID();
 		notImplemented = (classID == "ComponentUI");
-		if (id == null || forceNew) {
+		boolean firstTime = (id == null);
+		if (firstTime || forceNew) {
 			num = ++incr;
 			id = c.getHTMLName(classID) + "_" + num;
+			if (firstTime) 
+				id0 = id;
 		}
 	}
 
@@ -2388,9 +2397,14 @@ public class JSComponentUI extends ComponentUI
 	protected String fixText(String t) {
 		if (t != null) {
 			if (isHTML) {
-				// 
+				// file:///./testing -> swingjs/j2s///./  which is OK
+				// file://./testing ->  swingjs/j2s//./  which is OK, but not Java
+				// file://testing ->    swingjs/j2s/testing
+				// file:/testing -->    swintjs/j2s/testing
+				String rp = J2S.getResourcePath("",  true);
+				t = PT.rep(t, "file:/", t.indexOf(rp) >= 0 ? "" : rp);
 			} else if (valueNode == null) {
-				t = (t.indexOf("\u0000") >= 0 ? PT.rep(t, "\u0000", "") : t).replace(' ', '\u00A0');
+				t = PT.rep(t, "\u0000", "").replace(' ', '\u00A0');
 			}
 		}
 		return t;

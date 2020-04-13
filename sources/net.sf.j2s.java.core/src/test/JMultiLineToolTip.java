@@ -1,142 +1,94 @@
 package test;
 
-import java.awt.Dimension;
-import java.awt.Graphics;
+import java.awt.Color;
 
-import javax.swing.BorderFactory;
-import javax.swing.JComponent;
-import javax.swing.JTextArea;
 import javax.swing.JToolTip;
-import javax.swing.ToolTipManager;
+import javax.swing.border.EmptyBorder;
 
 /**
- * A multiline tooltip based on open source code from http://code.ohloh.net.
+ * A multi-line tool tip using simple HTML/BR.
  * 
- * SwingJS abandons the UI idea in favor of simple HTML BR. Code borrowed from
- * Jalview-JS development.
+ * Text can be set with br tags to indicate that this task is already done but
+ * still needs wrapping within an html element.
+ * 
+ * Likewise, if text starts with &lt;html&gt;, then it is left unchanged.
+ * 
+ * Complex HTML text for JavaScript in particular should be wrapped with an html
+ * element so as to bypass the addition of br tags inappropriately.
+ * 
+ * @author hansonr
  *
  */
+@SuppressWarnings("serial")
 public class JMultiLineToolTip extends JToolTip {
 
-	private static final String HTML_DIV_PREFIX = "<html><div style=\"width:250px;white-space:pre-wrap;padding:2px;overflow-wrap:break-word;\">";
-	private static final String DIV_HTML_SUFFIX = "</div></html>";
-	private static final int MAX_LEN = 40;
+	private String lastText;
+	private String lastWrapped;
 
-	private boolean enclose = false;
-	private String lastText = null;
-	private String lastWrapped = null;
+	private int maxChar;
 
-	private JTextArea textArea;
-
-	private int maxChar = MAX_LEN;
-
-	private boolean asTextArea;
-
-	private static Dimension ZERO_DIM = new Dimension();
-
-	private static Dimension MAX_DIM = new Dimension(250, 1000);
+	private StringBuilder sb = new StringBuilder();
 
 	/**
-	 * Allow for two options - a JTextArea or HTML-formatted text
-	 * 
-	 * @param maxChar
-	 * @param asTextArea
+	 * default constructor for maxChar=40 and bgColor=YELLOW
 	 */
-	public JMultiLineToolTip(int maxChar, boolean asTextArea) {
-		super();
-		this.maxChar = maxChar;
-		this.asTextArea = asTextArea;
-
-		if (asTextArea) {
-			textArea = new JTextArea() {
-				@Override
-				public Dimension getMaximumSize() {
-					return MAX_DIM;
-				}
-			};
-			add(textArea);
-			textArea.setBorder(BorderFactory.createEmptyBorder(0, 2, 2, 2));
-			textArea.setWrapStyleWord(true);
-			textArea.setLineWrap(true);
-		} else {
-
-		}
-
+	public JMultiLineToolTip() {
+		this(40, Color.yellow);
 	}
 
-	@Override
-	public Dimension getPreferredSize() {
-		if (asTextArea) {
-			String tipText = getTipText();
-			if (tipText == null || tipText.length() == 0)
-				return ZERO_DIM;
-			return textArea.getPreferredSize();
-		}
-		return super.getPreferredSize();
+	/**
+	 * @param maxChar simple character count for width
+	 * @param bgColor just for convenience; background color
+	 */
+	public JMultiLineToolTip(int maxChar, Color bgColor) {
+		super();
+		this.maxChar = maxChar;
+		setBorder(new EmptyBorder(0, 5, 0, 5));
+		setBackground(bgColor);
 	}
 
 	@Override
 	public void setTipText(String tipText) {
-		if (asTextArea) {
-			textArea.setText(tipText);
-		} else {
-			tipText = wrapToolTip(tipText);
-		}
-		super.setTipText(tipText);
+		super.setTipText(wrapToolTip(tipText));
 	}
 
-	@Override
-	public void paintComponent(Graphics g) {
-		if (asTextArea) {
-			System.out.println(textArea.getText());
-			textArea.paintComponents(g);
-		} else {
-			System.out.println("text=" + this.getTipText());
-			super.paintComponent(g);
-		}
-	}
-
-	private StringBuilder sb = new StringBuilder();
-
-	private String wrapToolTip(String ttext) {
-		if (ttext.equals(lastText))
+	/**
+	 * Wrap the text using a simple maximum between-word character count.
+	 * 
+	 * Can be overridden.
+	 * 
+	 * @param text
+	 * @return wrapped text with br tags
+	 */
+	protected String wrapToolTip(String text) {
+		if (text.equals(lastText))
 			return lastWrapped;
-
-		ttext = ttext.trim();
-		boolean addDiv = false;
-
-		if (ttext.contains("<br>")) {
+		lastText = text;
+		text = text.trim();
+		boolean enclose;
+		if (text.startsWith("<html>")) {
+			enclose = false;
+		} else if (text.contains("<br") || text.contains("<BR")) {
+			// allowing for <br> or <br/> here
 			enclose = true;
-			asTextArea = false;
-//			String[] htmllines = ttext.split("<br>");
-//			for (String line : htmllines) {
-//				addDiv = line.length() > maxChar;
-//				if (addDiv) {
-//					break;
-//				}
-//			}
 		} else {
-			enclose = ttext.length() > maxChar;
+			enclose = (text.length() > maxChar);
 			if (enclose) {
-				String[] words = ttext.split(" ");
+				String[] words = text.split(" ");
 				sb.setLength(0);
 				for (int i = 0, len = 0; i < words.length; i++) {
-					if (len > 0)
-						sb.append(" ");
 					if ((len = len + words[i].length()) > maxChar) {
 						sb.append("<br>");
 						len = 0;
+					} else if (len > 0) {
+						sb.append(" ");
 					}
 					sb.append(words[i]);
 				}
-				ttext = sb.toString();
+				text = sb.toString();
 			}
 		}
-		lastText = ttext;
-		lastWrapped = (!enclose ? ttext
-				: addDiv ? HTML_DIV_PREFIX + ttext + DIV_HTML_SUFFIX : "<html>" + ttext + "</html>");
-		System.out.println(lastWrapped);
-		return lastWrapped;
+		return lastWrapped = (enclose ? "<html>" + text + "</html>" : text);
 	}
 
 }

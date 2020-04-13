@@ -256,9 +256,6 @@ public class JSEditorPaneUI extends JSTextUI {
 	private String mytext;
 	private DOMNode styleNode;
 	
-
-
-	
 //	private int epTimer;
 //	@Override
 //	protected void handleJSTextEvent(int eventType, Object jQueryEvent, int keyCode, boolean trigger) {
@@ -353,9 +350,11 @@ public class JSEditorPaneUI extends JSTextUI {
 		if (isHtmlKit) {
 			mytext = html = text;
 			isHTML = true;
+			domNode.setAttribute("innerHTML", "");
+			// we will have to figure out a way for images and base. 
 			html = (String) editor.秘jsHTMLHelper.get("html", getInner(text, "body"));
 			DOMNode.setAttrs(domNode, "contentEditable", TRUE);
-			styleNode = DOMNode.createElement("div", id + "_style");
+			styleNode = DOMNode.createElement("div", id0 + "_style");
 			domNode.appendChild(styleNode);
 			String[] styles = (String[]) editor.秘jsHTMLHelper.get("styles", "body");
 			if (styles != null)
@@ -381,23 +380,32 @@ public class JSEditorPaneUI extends JSTextUI {
 				html = sb.toString() + "<div style='height:5px'><br></div>";
 			}
 		}
+		if (isHTML) {
+			html = fixText(html);
+			setBackgroundDOM(domNode, jc.getBackground());
+		}
 		// System.out.println(html);
 		if (html == currentHTML)
 			return;
-		text = fixText(currentText = text);
+		// had text = fixText(currentText = text) here, but result was never used
+		currentText = text;
 		DOMNode.setAttr(styleNode, "innerHTML", currentHTML = html);
 		updateDataUI();
-		@SuppressWarnings("unused")
-		JSEditorPaneUI me = this;
-		/**
-		 * @j2sNative
-		 * 
-		 * 			setTimeout(function(){me.updateJSCursor$S("editortext")},10);
-		 */
-		{
+		JSToolkit.dispatch(updateRunnable, 10, 0);
+	}
+	
+	private Runnable updateRunnable = new Runnable() {
+
+		@Override
+		public void run() {
 			updateJSCursor("editortext");
 		}
-	}
+		
+	};
+	
+
+
+
 
 	private void setStyle(String id, String css) {
 		DOMNode d = DOMNode.getElement(id);
@@ -408,11 +416,11 @@ public class JSEditorPaneUI extends JSTextUI {
 		}
 	}
 
-	private String getInner(String html, String body) {
-		int pt = html.indexOf("<" + body);
+	private String getInner(String html, String tag) {
+		int pt = html.indexOf("<" + tag);
 		if (pt >= 0) {
 			html = html.substring(html.indexOf(">", pt) + 1);
-			pt = html.lastIndexOf("</" + body + ">");
+			pt = html.lastIndexOf("</" + tag + ">");
 			if (pt >= 0)
 				html = html.substring(0, pt);
 		}
