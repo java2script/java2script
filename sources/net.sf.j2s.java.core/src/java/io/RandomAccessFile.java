@@ -27,7 +27,6 @@ package java.io;
 
 import java.nio.channels.FileChannel;
 import swingjs.JSFileSystem.JSFileChannel;
-import swingjs.JSTempFile;
 
 
 
@@ -249,7 +248,7 @@ public class RandomAccessFile implements DataOutput, DataInput, Closeable {
         fd = new FileDescriptor();
         this._file = file;
         fd.attach(this);
-        fd._setTempFile(file instanceof JSTempFile);
+        fd._setTempFile(file.秘isTempFile);
         if (rw)
         	fd._setPosAndLen(0, 0);
         path = name;

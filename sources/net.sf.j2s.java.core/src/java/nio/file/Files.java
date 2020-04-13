@@ -724,50 +724,51 @@ public final class Files {
     public static Path createDirectories(Path dir, FileAttribute<?>... attrs)
         throws IOException
     {
-        // attempt to create the directory
-        try {
-            createAndCheckIsDirectory(dir, attrs);
-            return dir;
-        } catch (FileAlreadyExistsException x) {
-            // file exists and is not a directory
-            throw x;
-        } catch (IOException x) {
-            // parent may not exist or other reason
-        }
-        SecurityException se = null;
-        try {
-            dir = dir.toAbsolutePath();
-        } catch (SecurityException x) {
-            // don't have permission to get absolute path
-            se = x;
-        }
-        // find a decendent that exists
-        Path parent = dir.getParent();
-        while (parent != null) {
-            try {
-                provider(parent).checkAccess(parent);
-                break;
-            } catch (NoSuchFileException x) {
-                // does not exist
-            }
-            parent = parent.getParent();
-        }
-        if (parent == null) {
-            // unable to find existing parent
-            if (se == null) {
-                throw new FileSystemException(dir.toString(), null,
-                    "Unable to determine if root directory exists");
-            } else {
-                throw se;
-            }
-        }
-
-        // create directories
-        Path child = parent;
-        for (Path name: parent.relativize(dir)) {
-            child = child.resolve(name);
-            createAndCheckIsDirectory(child, attrs);
-        }
+// SwingJS -- this would only apply to temp files. We ignore this.
+//        // attempt to create the directory
+//        try {
+//            createAndCheckIsDirectory(dir, attrs);
+//            return dir;
+//        } catch (FileAlreadyExistsException x) {
+//            // file exists and is not a directory
+//            throw x;
+//        } catch (IOException x) {
+//            // parent may not exist or other reason
+//        }
+//        SecurityException se = null;
+//        try {
+//            dir = dir.toAbsolutePath();
+//        } catch (SecurityException x) {
+//            // don't have permission to get absolute path
+//            se = x;
+//        }
+//        // find a decendent that exists
+//        Path parent = dir.getParent();
+//        while (parent != null) {
+//            try {
+//                provider(parent).checkAccess(parent);
+//                break;
+//            } catch (NoSuchFileException x) {
+//                // does not exist
+//            }
+//            parent = parent.getParent();
+//        }
+//        if (parent == null) {
+//            // unable to find existing parent
+//            if (se == null) {
+//                throw new FileSystemException(dir.toString(), null,
+//                    "Unable to determine if root directory exists");
+//            } else {
+//                throw se;
+//            }
+//        }
+//
+//        // create directories
+//        Path child = parent;
+//        for (Path name: parent.relativize(dir)) {
+//            child = child.resolve(name);
+//            createAndCheckIsDirectory(child, attrs);
+//        }
         return dir;
     }
 

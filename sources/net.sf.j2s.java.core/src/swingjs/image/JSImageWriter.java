@@ -2,6 +2,7 @@ package swingjs.image;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Hashtable;
@@ -178,7 +179,7 @@ public abstract class JSImageWriter extends ImageWriter {
 		return (errMsg == null ? bytes : errMsg);
 	}
 
-	OC getOutputChannel(String fileName) 	throws IOException {
+	private OC getOutputChannel(String fileName) 	throws IOException {
 		@SuppressWarnings("resource")
 		OC outputChannel = new OC();
 		return outputChannel.setParams(null, fileName, false, null);

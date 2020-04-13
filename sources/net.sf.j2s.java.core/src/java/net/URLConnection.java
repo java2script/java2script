@@ -1402,7 +1402,8 @@ public abstract class URLConnection //
 	 * @see java.net.URLConnection#getHeaderField(java.lang.String)
 	 */
 	public String getContentType() {
-		return getHeaderField("content-type");
+		String type = getHeaderField("content-type");
+		return (type == null ? "application/octet-stream" : type);
 	}
 
 	/**

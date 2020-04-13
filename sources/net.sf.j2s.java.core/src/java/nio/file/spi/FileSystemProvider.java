@@ -34,6 +34,9 @@ import java.io.OutputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
+
+import swingjs.JSFileSystem;
+
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
@@ -85,10 +88,11 @@ public abstract class FileSystemProvider {
     private static boolean loadingProviders  = false;
 
     private static Void checkPermission() {
-        SecurityManager sm = System.getSecurityManager();
-        if (sm != null)
-            sm.checkPermission(new RuntimePermission("fileSystemProvider"));
-        return null;
+    	return null;
+//        SecurityManager sm = System.getSecurityManager();
+//        if (sm != null)
+//            sm.checkPermission(new RuntimePermission("fileSystemProvider"));
+//        return null;
     }
     private FileSystemProvider(Void ignore) { }
 
@@ -111,26 +115,27 @@ public abstract class FileSystemProvider {
     // loads all installed providers
     private static List<FileSystemProvider> loadInstalledProviders() {
         List<FileSystemProvider> list = new ArrayList<FileSystemProvider>();
+//
+//        ServiceLoader<FileSystemProvider> sl = ServiceLoader
+//            .load(FileSystemProvider.class, ClassLoader.getSystemClassLoader());
 
-        ServiceLoader<FileSystemProvider> sl = ServiceLoader
-            .load(FileSystemProvider.class, ClassLoader.getSystemClassLoader());
-
+        String[] sl = new String[] { "file" , "http", "https" };
         // ServiceConfigurationError may be throw here
-        for (FileSystemProvider provider: sl) {
-            String scheme = provider.getScheme();
+        for (String scheme : sl) {
+            //String scheme = provider.getScheme();
 
             // add to list if the provider is not "file" and isn't a duplicate
             if (!scheme.equalsIgnoreCase("file")) {
-                boolean found = false;
-                for (FileSystemProvider p: list) {
-                    if (p.getScheme().equalsIgnoreCase(scheme)) {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    list.add(provider);
-                }
+//                boolean found = false;
+//                for (FileSystemProvider p: list) {
+//                    if (p.getScheme().equalsIgnoreCase(scheme)) {
+//                        found = true;
+//                        break;
+//                    }
+//                }
+//                if (!found) {
+                    list.add(new JSFileSystem.JSFileSystemProvider(scheme));
+                //}
             }
         }
         return list;
@@ -155,26 +160,27 @@ public abstract class FileSystemProvider {
             // ensure default provider is initialized
             FileSystemProvider defaultProvider = FileSystems.getDefault().provider();
 
-            synchronized (lock) {
+            //synchronized (lock) {
                 if (installedProviders == null) {
                     if (loadingProviders) {
                         throw new Error("Circular loading of installed providers detected");
                     }
                     loadingProviders = true;
 
-                    List<FileSystemProvider> list = AccessController
-                        .doPrivileged(new PrivilegedAction<List<FileSystemProvider>>() {
-                            @Override
-                            public List<FileSystemProvider> run() {
-                                return loadInstalledProviders();
-                        }});
-
+                    List<FileSystemProvider> list = loadInstalledProviders();
+//                    AccessController
+//                        .doPrivileged(new PrivilegedAction<List<FileSystemProvider>>() {
+//                            @Override
+//                            public List<FileSystemProvider> run() {
+//                                return loadInstalledProviders();
+//                        }});
+//
                     // insert the default provider at the start of the list
                     list.add(0, defaultProvider);
 
                     installedProviders = Collections.unmodifiableList(list);
                 }
-            }
+           // }
         }
         return installedProviders;
     }
