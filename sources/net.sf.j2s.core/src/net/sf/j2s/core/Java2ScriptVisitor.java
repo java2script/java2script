@@ -134,6 +134,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
 // TODO: superclass inheritance for JAXB XmlAccessorType
+// TODO: inner classes of interface are duplicated
 
 //BH 2020.04.05 -- 3.2.9-v1f (Boolean ? ...) not unboxed
 //BH 2020.03.21 -- 3.2.9-v1e better v1c 
