@@ -16,12 +16,15 @@ import javajs.util.OC;
 
 public class Test_File extends Test_ {
 
+	@SuppressWarnings("unused")
 	public static void main(String[] args) {
 
 		System.out.println(System.getProperty("jnlp.codebase"));
 		String tmpdir = System.getProperty("java.io.tmpdir");
 		System.out.println(tmpdir);
 		File f = new File("./test");
+		URI u = f.toURI();
+		System.out.println(u);
 		System.out.println(f = new File(f.getAbsolutePath()));
 		if (/** @j2sNative true|| */
 		false) {
@@ -34,6 +37,15 @@ public class Test_File extends Test_ {
 
 		}
 
+// first is null
+//		URL fu = Test_File.class.getResource("./NOTICE");
+// 		System.out.println("fu=" + fu);
+// second is found if NOTICE is in the j2s directory.
+//		fu = Test_File.class.getResource("/NOTICE");
+//		System.out.println("fu=" + fu);
+//		
+//		
+		
 		f = new File("c:/temp/out.txt");
 		System.out.println(f.getName());
 		File p = f.getParentFile();

@@ -953,5 +953,28 @@ public class JSUtil implements JSUtilI {
 		}
 	}
 
+	@Override
+	public byte[] getCachedBytes(String path) {
+		return (byte[]) getCachedFileData(path, true);
+	}
+
+	/**
+	 * Attach cached bytes to a file-like object, including URL,
+	 * or anything having a 秘bytes field.
+	 * 
+	 * @return byte[] or null
+	 * 
+	 */
+	@Override
+	public byte[] addJSCachedBytes(Object URLorURIorFile) {
+		byte[] bytes = getCachedBytes(URLorURIorFile.toString());
+		if (URLorURIorFile instanceof URL) {
+			((URL) URLorURIorFile)._streamData = bytes;
+		} else {
+			((File) URLorURIorFile).秘bytes = bytes;
+		}
+		return bytes;
+	}
+
 }
 

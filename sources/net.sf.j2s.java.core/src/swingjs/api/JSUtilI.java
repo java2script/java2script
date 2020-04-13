@@ -171,4 +171,25 @@ public interface JSUtilI {
 	   */
 	void setJavaScriptMapObjectEnabled(boolean enabled);
 
+	/**
+	 * Retrieve cached bytes for a path (with unnormalized name)
+	 * from J2S._javaFileCache.
+	 * 
+	 * @param path
+	 * 
+	 * @return byte[] or null
+	 */
+	byte[] getCachedBytes(String path);
+	
+	/**
+	 * Attach cached bytes to a file-like object, including URL,
+	 * or anything having a 秘bytes field (File, URI, Path)
+	 * from J2S._javaFileCache.
+	 * 
+	 * 
+	 * @param URLorURIorFile
+	 * @return
+	 */
+	byte[] addJSCachedBytes(Object URLorURIorFile);
+
 }

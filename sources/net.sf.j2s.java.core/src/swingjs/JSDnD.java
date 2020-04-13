@@ -71,9 +71,9 @@ public class JSDnD {
 	public static void drop(JComponent jc, Object html5DataTransfer, Object[][] data, int x, int y) {
 		if (html5DataTransfer == null)
 			return;
-		JSTransferable t = new FileTransferable(data);
+		FileTransferable t = new FileTransferable(data);
 		DropTarget target = jc.getDropTarget();
-		System.out.println("JSDnD[] drop for " + jc.getUIClassID() + " target " + target);
+		System.out.println("JSDnD[] drop for " + jc.getUIClassID() + " target " + (target == null ? null : target.getClass().getName()));
 		if (target != null) {
 			target.drop(createDropEvent(target, t, data, x, y));
 			return;
@@ -83,6 +83,8 @@ public class JSDnD {
 		System.out.println("JSDnD drop for " + jc.getUIClassID() + " offset " + x + " " + y);
 
 		top.dispatchEvent(new JSDropMouseEvent(jc, MouseEvent.MOUSE_RELEASED, x, y, t, null, null));
+		
+		t.files = null;
 	}
 
 	@SuppressWarnings("serial")
@@ -94,7 +96,6 @@ public class JSDnD {
 
 	    public JSDropMouseEvent(Component source, int id, int x, int y, Transferable t, String name, byte[] data) {
 	        super(source, id, System.currentTimeMillis(), 0, x, y, 0, false, NOBUTTON);
-	        System.out.println("new JSDropMouseEvent for " + source);
 	        this.transferable = t;
 	        this.name = name;
 	        if (name != null)
@@ -356,7 +357,6 @@ public class JSDnD {
 		@Override
 		public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
 			Object o = files;
-			files = null;
 			return o;
 		}
 		

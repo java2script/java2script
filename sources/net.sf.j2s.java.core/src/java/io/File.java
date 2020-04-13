@@ -708,7 +708,7 @@ public class File
         try {
             String sp = slashify(getAbsoluteFile().getPath(), false);
             if (sp.startsWith("//"))
-                sp = "//" + sp;
+                sp = "file:" + sp;
             URI uri = new URI("file", null, sp, null);
             uri.秘bytes = 秘bytes;
             return uri;
