@@ -3130,33 +3130,6 @@ var getURIField = function(name, def) {
 	}
 }
 
-var fixAgent = function(agent) {return "" + ((agent = agent.split(";")[0]),
-	  (agent + (agent.indexOf("(") >= 0 && agent.indexOf(")") < 0 ? ")" : ""))) }
-
-var agent = navigator.userA;
-var sysprops = {
-		"file.separator" : "/",
-		"line.separator" : "\n",
-		"java.awt.printerjob" : "swingjs.JSPrinterJob",
-		"java.class.path" : "/",
-		"java.class.version" : "80",
-		"java.home" : "https://.",
-		"java.vendor" : "java2script/SwingJS/OpenJDK",
-		"java.vendor.url" : "https://github.com/BobHanson/java2script",
-		"java.version" : "1.8",
-		"java.vm.version" : "1.8",
-		"java.specification.version" : "1.8",
-		"os.arch" : navigator.userAgent,
-		"os.name" : fixAgent(navigator.userAgent).split("(")[0],
-		"os.version": fixAgent(navigator.appVersion).replace(fixAgent(navigator.userAgent), ""),
-		"path.separator" : ":",
-		"user.dir" : "https://.",
-		"user.home" : "https://.",
-		"user.name" : "user",
-		"javax.xml.datatype.DatatypeFactory" : "swingjs.xml.JSJAXBDatatypeFactory",
-		"javax.xml.bind.JAXBContextFactory" : "swingjs.xml.JSJAXBContextFactory"	
-}
-
 Clazz._setDeclared("java.lang.System", java.lang.System = System = {});
 ;(function(C$){
 
@@ -3281,12 +3254,43 @@ C$.getenv$=function () {
 	return env || (env = Clazz.load("java.util.Properties"));
 }
 
+
+
 C$.exit$I=function (status) {
 	Clazz.loadClass("java.lang.Runtime").getRuntime$().exit$I(status | 0);
 }
 
 C$.gc$=C$.runFinalization$=C$.runFinalizersOnExit$Z=C$.load$S=C$.loadLibrary$S=C$.mapLibraryName$S=
 	function (libname) {return null;}
+
+var fixAgent = function(agent) {return "" + ((agent = agent.split(";")[0]),
+		  (agent + (agent.indexOf("(") >= 0 && agent.indexOf(")") < 0 ? ")" : ""))) }
+
+	var agent = navigator.userA;
+	var sysprops = {
+			"file.separator" : "/",
+			"line.separator" : "\n",
+			"java.awt.printerjob" : "swingjs.JSPrinterJob",
+			"java.class.path" : "/",
+			"java.class.version" : "80",
+			"java.home" : "https://.",
+			"java.vendor" : "java2script/SwingJS/OpenJDK",
+			"java.vendor.url" : "https://github.com/BobHanson/java2script",
+			"java.version" : "1.8",
+			"java.vm.version" : "1.8",
+			"java.specification.version" : "1.8",
+			"java.io.tmpdir" : J2S.getGlobal("j2s.tmpdir"),
+			"os.arch" : navigator.userAgent,
+			"os.name" : fixAgent(navigator.userAgent).split("(")[0],
+			"os.version": fixAgent(navigator.appVersion).replace(fixAgent(navigator.userAgent), ""),
+			"path.separator" : ":",
+			"user.dir" : "https://.",
+			"user.home" : "https://.",
+			"user.name" : "user",
+			"javax.xml.datatype.DatatypeFactory" : "swingjs.xml.JSJAXBDatatypeFactory",
+			"javax.xml.bind.JAXBContextFactory" : "swingjs.xml.JSJAXBContextFactory"	
+	}
+
 
 })(System);
 

@@ -150,8 +150,9 @@ window.J2S = J2S = (function() {
 			 */
 			_appletCssClass : "",
 			_appletCssText : "",
-			_fileCache : null, // enabled by J2S.setFileCaching(applet,
-								// true/false)
+			_fileCache : {}, // a simple object used only in J2S._loadFileData and J2S.loadFileAsynchronously 
+			    // via J2S._checkCache and only for non-js files and only if Info.cacheFiles == true (which it is not in SwingJS)
+			_javaFileCache : null, // a Hashtable, for JSUtil and /TEMP/
 			_jarFile : null, // can be set in URL using _JAR=
 			_j2sPath : null, // can be set in URL using _J2S=
 			_use : null, // can be set in URL using _USE=
@@ -300,6 +301,8 @@ window.J2S = J2S = (function() {
 	}
 
 	var fixProtocol = function(url) {
+		if (url.indexOf("file://") >= 0)
+			url = "http" + url.substring(4);
 		// force https if page is https
 		if (J2S._httpProto == "https://" && url.indexOf("http://") == 0)
 			url = "https" + url.substring(4);
@@ -710,9 +713,30 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 		}
 		return fileName;
 	}
+	
+	J2S.fixCachePath = function(uri) {
+		if (uri.startsWith("./"))
+			uri = "/" + uri;
+		var n = (uri.startsWith("https:/") || uri.startsWith("file://") ? 7 
+				: uri.startsWith("http:/") || uri.startsWith("file:/") ? 6
+						: 0);
+		if (n > 0)
+			uri = uri.substring(n);
+		uri = uri.replace("//", "/");
+		var pt;
+		while ((pt = uri.indexOf("/././")) >= 0) {
+			// https://././xxx --> /./xxx
+			uri = uri.substring(0, pt) + uri.substring(pt + 2);
+		}
+		if (uri.startsWith("/"))
+			uri = uri.substring(1);
+		if (uri.startsWith("./"))
+			uri = uri.substring(2);
+		return uri;
+	}
 
 	J2S._checkCache = function(applet, fileName, fSuccess) {
-		if (applet._cacheFiles && J2S._fileCache && !fileName.endsWith(".js")) {
+		if (applet._cacheFiles && !fileName.endsWith(".js")) {
 			var data = J2S._fileCache[fileName];
 			if (data) {
 				System.out.println("using " + (data.length)
@@ -730,8 +754,9 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 
 	J2S.getSetJavaFileCache = function(map) {
 		// called by swingjs.JSUtil
-		return (map == null ? J2S._javaFileCache
-				: (J2S._javaFileCache = map));
+		if (map == null && !J2S._javaFileCache)
+			J2S._javaFileCache = Clazz.new_("java.util.Hashtable");
+		return (map == null ? J2S._javaFileCache : (J2S._javaFileCache = map));
 	}
 
 	J2S.getCachedJavaFile = function(key) {
@@ -845,10 +870,15 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 		var isBinary = info.isBinary;
 		// swingjs.api.J2SInterface
 		// use host-server PHP relay if not from this host
-		if (fileName.indexOf("https://./") == 0)
+
+		if (fileName.indexOf("/") == 0)
+			fileName = "." + fileName;
+		else if (fileName.indexOf("https://./") == 0)
 			fileName = fileName.substring(10);
 		else if (fileName.indexOf("http://./") == 0)
 			fileName = fileName.substring(9);
+		else if (fileName.indexOf("file:") >= 0)
+			fileName = "./" + fileName.substring(5);
 		isBinary = (isBinary || J2S.isBinaryUrl(fileName));
 		var isPDB = (fileName.indexOf("pdb.gz") >= 0 && fileName
 				.indexOf("//www.rcsb.org/pdb/files/") >= 0);
@@ -970,9 +1000,7 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 			var fileName0 = fileName;
 			fileName = J2S._checkFileName(applet, fileName);
 			var fSuccess = function(data) {
-				J2S
-						._setData(fileLoadThread, fileName, fileName0, data,
-								appData)
+				J2S._setData(fileLoadThread, fileName, fileName0, data,	appData)
 			};
 			fSuccess = J2S._checkCache(applet, fileName, fSuccess);
 			if (fileName.indexOf("|") >= 0)
@@ -1180,6 +1208,10 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 	// FileSave interface? return true if successful
 
 	J2S.saveFile = J2S._saveFile = function(filename, data, mimetype, encoding) {
+		var isString = (typeof data == "string");
+		if (filename.indexOf(J2S.getGlobal("j2s.tmpdir")) == 0) {
+			return J2S.getSetJavaFileCache().put$O$O(J2S.fixCachePath(filename), (isString ? data.getBytes$S("UTF-8") : data));
+		}
 		if (J2S._localFileSaveFunction
 				&& J2S._localFileSaveFunction(filename, data))
 			return "OK";
@@ -1193,7 +1225,6 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 														| filename
 																.indexOf(".jpeg") >= 0 ? "image/jpg"
 														: ""));
-		var isString = (typeof data == "string");
 		data = Clazz.loadClass("javajs.util.Base64").getBase64$BA(
 				isString ? data.getBytes$S("UTF-8") : data).toString();
 		encoding || (encoding = "base64");
@@ -1406,7 +1437,6 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 			J2S.View.__init(obj);
 			obj._currentView = null;
 		}
-		!J2S._fileCache && obj._cacheFiles && (J2S._fileCache = {});
 		if (!obj._console)
 			obj._console = obj._id + "_infodiv";
 		if (obj._console == "none" || obj._console == "NONE")
@@ -2628,6 +2658,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 				console : this._console,
 				monitorZIndex : J2S.getZ(this, "monitorZIndex")
 			});
+			J2S.setGlobal("j2s.tmpdir", "/TEMP/");
 			var isFirst = (__execStack.length == 0);
 			if (isFirst)
 				J2S._addExec([ this, __loadClazz, null, "loadClazz" ]);
@@ -2983,7 +3014,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 		var $tag = $(tag);
 		tag = $tag[0];
-		if (tag._isDragger)
+		if (!tag || tag._isDragger)
 			return;
 
 		var target, fDown, fDrag, fUp;
