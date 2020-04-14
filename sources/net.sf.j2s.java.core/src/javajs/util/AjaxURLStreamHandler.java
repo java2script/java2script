@@ -1,6 +1,7 @@
 package javajs.util;
 
 import java.io.IOException;
+import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
@@ -23,6 +24,8 @@ public class AjaxURLStreamHandler extends URLStreamHandler {
 
 	@Override
 	protected URLConnection openConnection(URL url) throws IOException {
+		if (protocol.equals("jar"))
+			return new JSJarURLConnection(url);
 		return AjaxURLConnection.newConnection(url);
 	}
 }

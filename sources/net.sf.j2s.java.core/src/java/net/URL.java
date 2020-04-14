@@ -36,6 +36,7 @@ import java.io.InputStream;
 import java.util.Hashtable;
 
 import javajs.util.AjaxURLConnection;
+import javajs.util.AjaxURLStreamHandlerFactory;
 
 /**
  * Class <code>URL</code> represents a Uniform Resource Locator, a pointer to a
@@ -1178,7 +1179,7 @@ public/* SwingJS final */class URL {// implements Serializable {
 			if (秘factory == null) {
 				// SwingJS -- we always use javajs.util.AjaxURLStreamHandlerFactory
 				try {
-					URL.setURLStreamHandlerFactory((URLStreamHandlerFactory) Class.forName("javajs.util.AjaxURLStreamHandlerFactory").newInstance());
+					URL.setURLStreamHandlerFactory(new AjaxURLStreamHandlerFactory());
 				} catch (Exception e) {
 					
 				}

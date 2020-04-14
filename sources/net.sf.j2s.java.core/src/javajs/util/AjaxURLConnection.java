@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javajs.api.js.J2SObjectInterface;
+import swingjs.JSUtil;
 
 /**
  * 
@@ -138,7 +139,9 @@ public class AjaxURLConnection extends HttpURLConnection {
     	 */
     }
     String myURL = url.toString();
-    
+    if (myURL.startsWith("file:")) {
+    	myURL = JSUtil.J2S.getResourcePath("", true) + myURL.substring(5);
+    }
     
     Object result = J2S.doAjax(myURL, postOut, bytesOut, info);
     boolean isEmpty = false;
