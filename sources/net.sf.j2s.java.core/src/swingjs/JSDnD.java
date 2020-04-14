@@ -328,8 +328,10 @@ public class JSDnD {
 			addFile(name, data);
 		}
 
+		private static String temp = System.getProperty("java.io.tmpdir");
+		
 		private void addFile(String name, byte[] data) {
-			File file = new File(name);
+			File file = new File(temp + name);
 			file.秘bytes = data;
 			files.add(file);
 		}
