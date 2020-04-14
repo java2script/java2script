@@ -192,4 +192,6 @@ public interface JSUtilI {
 	 */
 	byte[] addJSCachedBytes(Object URLorURIorFile);
 
+	void displayURL(String url, String target);
+
 }

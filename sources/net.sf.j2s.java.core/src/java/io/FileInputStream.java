@@ -426,10 +426,9 @@ class FileInputStream extends InputStream
 	 * @throws IOException
 	 */
 	@Override
-	public long transferTo​(OutputStream out)
-            throws IOException {
+	public long transferTo(OutputStream out)  throws IOException {
 		if (channel != null) { 
-			return super.transferTo​(out);
+			return super.transferTo(out);
 		}
 		byte[] b = (is.pos == 0 ? is.buf : is.readAllBytes());
 		out.write(b);

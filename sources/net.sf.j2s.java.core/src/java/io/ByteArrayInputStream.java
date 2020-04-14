@@ -232,7 +232,7 @@ public class ByteArrayInputStream extends InputStream {
 	 * @throws IOException
 	 */
 	@Override
-	public long transferTo​(OutputStream out)
+	public long transferTo(OutputStream out)
             throws IOException {
 		byte[] b = (pos == 0 ? buf : readAllBytes());
 		out.write(b);

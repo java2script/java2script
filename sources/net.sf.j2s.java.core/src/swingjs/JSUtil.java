@@ -119,7 +119,8 @@ public class JSUtil implements JSUtilI {
 	 */
 	@SuppressWarnings("unused")
 	private static Object getFileContents(Object uriOrJSFile, boolean asBytes) {
-		if (uriOrJSFile instanceof File) {
+		boolean isFile = (uriOrJSFile instanceof File);
+		if (isFile) {
 			byte[] bytes = /** @j2sNative uriOrJSFile.秘bytes || */
 					null;
 			if (bytes != null)
@@ -142,15 +143,18 @@ public class JSUtil implements JSUtilI {
 		}
 		if (data == null && !uri.startsWith("./")) {
 			// Java applications may use "./" here
-			try {
-				BufferedInputStream stream = (BufferedInputStream) new URL(uri).getContent();
-				data = (asBytes ? Rdr.getStreamAsBytes(stream, null) : Rdr.streamToUTF8String(stream));
-			} catch (Exception e) {
-				// bypasses AjaxURLConnection
-				data = J2S.getFileData(uri, null, false, asBytes);
-				if (data == null)
-					removeCachedFileData(uri);
+			if (!isFile) {
+				try {
+					BufferedInputStream stream = (BufferedInputStream) new URL(uri).getContent();
+					return (asBytes ? Rdr.getStreamAsBytes(stream, null) : Rdr.streamToUTF8String(stream));
+				} catch (Exception e) {
+				}
 			}
+			// bypasses AjaxURLConnection
+			data = J2S.getFileData(uri, null, false, asBytes);
+			if (data == null)
+				removeCachedFileData(uri);
+
 		}
 		return data;
 	}
@@ -596,6 +600,14 @@ public class JSUtil implements JSUtilI {
 		return null;
 	}
 
+	/**
+	 * Display the web page in the give target, such as "_blank"
+	 */
+	@Override
+	public void displayURL(String url, String target) {
+		showWebPage((URL)(Object)url, target);
+	}
+	
 	public static void showWebPage(URL url, Object target) {
 			/**
 			 * @j2sNative
@@ -604,6 +616,8 @@ public class JSUtil implements JSUtilI {
 			 *            window.open(url.toString());
 			 */
 	  }
+	
+	
 
 	/**
 	 * important warnings for TODO list

@@ -370,8 +370,7 @@ public class FileOutputStream extends OutputStream {
 				if (channel == null) {
 					bos.close();
 					fd._file.秘bytes = 秘bytes = bos.toByteArray();
-					if (!fd._isTempFile())
-						JSUtil.saveFile(path, 秘bytes, null, null);
+					JSUtil.saveFile(path, 秘bytes, null, null);
 				} else {
 					channel.close();
 				}

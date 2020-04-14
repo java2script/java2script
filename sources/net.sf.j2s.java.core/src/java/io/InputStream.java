@@ -218,8 +218,7 @@ public abstract class InputStream extends Object implements Closeable {
 	 * @return
 	 * @throws IOException
 	 */
-	public long transferTo​(OutputStream out)
-            throws IOException {
+	public long transferTo(OutputStream out) throws IOException {
 		long n = available();
 		out.write(readAllBytes());
 		return n;
