@@ -43,7 +43,6 @@ import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.lang.ref.SoftReference;
 import java.text.CharacterIterator;
 
 import sun.awt.SunHints;
@@ -155,7 +154,7 @@ public class StandardGlyphVector extends GlyphVector {
     private AffineTransform invdtx; // inverse of dtx or null if dtx is identity
     private AffineTransform frctx; // font render context transform, wish we could just share it
     private Font2D fontxx2D;         // basic strike-independent stuff
-    private SoftReference fsref;   // font strike reference for glyphs with no per-glyph transform
+    private GlyphStrike fsref;   // font strike reference for glyphs with no per-glyph transform
 
     /////////////////////////////
     // Constructors and Factory methods
@@ -409,21 +408,22 @@ public class StandardGlyphVector extends GlyphVector {
     // !!! not cached, assume TextLayout will cache if necessary
     @Override
 	public Rectangle2D getVisualBounds() {
-        Rectangle2D result = null;
-        for (int i = 0; i < glyphs.length; ++i) {
-            Rectangle2D glyphVB = getGlyphVisualBounds(i).getBounds2D();
-            if (!glyphVB.isEmpty()) {
-                if (result == null) {
-                    result = glyphVB;
-                } else {
-                    Rectangle2D.union(result, glyphVB, result);
-                }
-            }
-        }
-        if (result == null) {
-            result = new Rectangle2D.Float(0, 0, 0, 0);
-        }
-        return result;
+    	return (Rectangle2D) getOutline();
+//        Rectangle2D result = null;
+//        for (int i = 0; i < glyphs.length; ++i) {
+//            Rectangle2D glyphVB = getGlyphVisualBounds(i).getBounds2D();
+//            if (!glyphVB.isEmpty()) {
+//                if (result == null) {
+//                    result = glyphVB;
+//                } else {
+//                    Rectangle2D.union(result, glyphVB, result);
+//                }
+//            }
+//        }
+//        if (result == null) {
+//            result = new Rectangle2D.Float(0, 0, 0, 0);
+//        }
+//        return result;
     }
 
     // !!! not cached, assume TextLayout will cache if necessary
@@ -544,17 +544,16 @@ public class StandardGlyphVector extends GlyphVector {
         return internalGetGlyphPositions(start, count, 0, result);
     }
 
-    @Override
+	@Override
 	public Shape getGlyphLogicalBounds(int ix) {
-        if (ix < 0 || ix >= glyphs.length) {
-            throw new IndexOutOfBoundsException("ix = " + ix);
-        }
+		if (ix < 0 || ix >= glyphs.length) {
+			throw new IndexOutOfBoundsException("ix = " + ix);
+		}
 
-        Shape[] lbcache;
-        if (lbcacheRef == null || (lbcache = (Shape[])lbcacheRef.get()) == null) {
-            lbcache = new Shape[glyphs.length];
-            lbcacheRef = new SoftReference(lbcache);
-        }
+		Shape[] lbcache = lbcacheRef;
+		if (lbcacheRef == null)
+			lbcache = new Shape[glyphs.length];
+		lbcacheRef = (lbcache);
 
         Shape result = lbcache[ix];
         if (result == null) {
@@ -593,30 +592,35 @@ public class StandardGlyphVector extends GlyphVector {
 
         return result;
     }
-    private SoftReference lbcacheRef;
+    private Shape[] lbcacheRef;
 
     @Override
 	public Shape getGlyphVisualBounds(int ix) {
-    	return null;
-//        if (ix < 0 || ix >= glyphs.length) {
-//            throw new IndexOutOfBoundsException("ix = " + ix);
-//        }
-//
+        if (ix < 0 || ix >= glyphs.length) {
+            throw new IndexOutOfBoundsException("ix = " + ix);
+        }
+//original
 //        Shape[] vbcache;
 //        if (vbcacheRef == null || (vbcache = (Shape[])vbcacheRef.get()) == null) {
 //            vbcache = new Shape[glyphs.length];
 //            vbcacheRef = new SoftReference(vbcache);
 //        }
-//
-//        Shape result = vbcache[ix];
-//        if (result == null) {
-//            result = new DelegatingShape(getGlyphOutlineBounds(ix));
-//            vbcache[ix] = result;
-//        }
-//
-//        return result;
+//BH 2020.04.14
+        
+        Shape[] vbcache = vbcacheRef;
+        if (vbcache == null) 
+        	vbcache = vbcacheRef = new Shape[glyphs.length]
+        			;
+        
+        Shape result = vbcache[ix];
+        if (result == null) {
+            result = new DelegatingShape(getGlyphOutlineBounds(ix));
+            vbcache[ix] = result;
+        }
+
+        return result;
     }
-    private SoftReference vbcacheRef;
+    private Shape[] vbcacheRef;
 
     @Override
 	public Rectangle getGlyphPixelBounds(int index, FontRenderContext renderFRC, float x, float y) {
@@ -1057,9 +1061,7 @@ public class StandardGlyphVector extends GlyphVector {
                 // we needn't care for rendering
             }
         }
-        if (gti != null) {
-            gti.strikesRef = null;
-        }
+        gti = null;
     }
 
     /**
@@ -1210,25 +1212,31 @@ public class StandardGlyphVector extends GlyphVector {
     private Rectangle2D getGlyphOutlineBounds(int ix) {
         setFRCTX();
         initPositions();
-        return getGlyphStrike(ix).getGlyphOutlineBounds(glyphs[ix], positions[ix*2], positions[ix*2+1]);
+        return getGlyphStrike(ix).getGlyphOutlineBounds(glyphs[ix], positions[ix*2], positions[ix*2+1] + font.getFontMetrics().getHeight());
     }
 
     /**
      * Used by getOutline, getGlyphsOutline
      */
     private Shape getGlyphsOutline(int start, int count, float x, float y) {
+    	
         setFRCTX();
         initPositions();
+        
+        double h0 = -font.getFontMetrics().getDescent();
+        double h1 = font.getFontMetrics().getHeight() + h0;
 
-        GeneralPath result = new GeneralPath(GeneralPath.WIND_NON_ZERO);
-        for (int i = start, e = start + count, n = start * 2; i < e; ++i, n += 2) {
-            float px = x + positions[n];
-            float py = y + positions[n+1];
-
-            getGlyphStrike(i).appendGlyphOutline(glyphs[i], result, px, py);
-        }
-
-        return result;
+        return new Rectangle2D.Double(x + positions[start * 2], y + positions[start * 2 + 1] + h0, positions[count * 2], positions[count * 2 + 1] + h1);
+//        GeneralPath result = new GeneralPath(GeneralPath.WIND_NON_ZERO);
+//        for (int i = start, e = start + count, n = start * 2; i < e; ++i, n += 2) {
+//            float px = x + positions[n];
+//            float py = y + positions[n+1];
+//
+//            
+//            getGlyphStrike(i).appendGlyphOutline(glyphs[i], result, px, py);
+//        }
+//
+//        return result;
     }
 
     private Rectangle getGlyphsPixelBounds(FontRenderContext frc, float x, float y, int start, int count) {
@@ -1269,18 +1277,15 @@ public class StandardGlyphVector extends GlyphVector {
 
     private void clearCaches(int ix) {
         if (lbcacheRef != null) {
-            Shape[] lbcache = (Shape[])lbcacheRef.get();
+            Shape[] lbcache = lbcacheRef;
             if (lbcache != null) {
                 lbcache[ix] = null;
             }
         }
 
-        if (vbcacheRef != null) {
-            Shape[] vbcache = (Shape[])vbcacheRef.get();
-            if (vbcache != null) {
-                vbcache[ix] = null;
-            }
-        }
+        if (vbcacheRef != null)
+        	vbcacheRef[ix] = null;
+      
     }
 
     private void clearCaches() {
@@ -1396,11 +1401,11 @@ public class StandardGlyphVector extends GlyphVector {
     private GlyphStrike getDefaultStrike() {
         GlyphStrike gs = null;
         if (fsref != null) {
-            gs = (GlyphStrike)fsref.get();
+            gs = fsref;
         }
         if (gs == null) {
             gs = GlyphStrike.create(this, dtx, null);
-            fsref = new SoftReference(gs);
+            fsref = gs;
         }
         return gs;
     }
@@ -1418,7 +1423,7 @@ public class StandardGlyphVector extends GlyphVector {
         StandardGlyphVector sgv;  // reference back to glyph vector - yuck
         int[] indices;            // index into unique strikes
         double[] transforms;      // six doubles per unique transform, because AT is a pain to manipulate
-        SoftReference strikesRef; // ref to unique strikes, one per transform
+        GlyphStrike[] strikesRef; // ref to unique strikes, one per transform
         boolean haveAllStrikes;   // true if the strike array has been filled by getStrikes().
 
         // used when first setting a transform
@@ -1692,12 +1697,12 @@ public class StandardGlyphVector extends GlyphVector {
         private GlyphStrike[] getStrikeArray() {
             GlyphStrike[] strikes = null;
             if (strikesRef != null) {
-                strikes = (GlyphStrike[])strikesRef.get();
+                strikes = strikesRef;
             }
             if (strikes == null) {
                 haveAllStrikes = false;
                 strikes = new GlyphStrike[transformCount() + 1];
-                strikesRef = new SoftReference(strikes);
+                strikesRef = strikes;
             }
 
             return strikes;
@@ -1739,52 +1744,44 @@ public class StandardGlyphVector extends GlyphVector {
         static GlyphStrike create(StandardGlyphVector sgv, AffineTransform dtx, AffineTransform gtx) {
             float dx = 0;
             float dy = 0;
-
-            AffineTransform tx = sgv.ftx;
-            if (!dtx.isIdentity() || gtx != null) {
-                tx = new AffineTransform(sgv.ftx);
-                if (gtx != null) {
-                    tx.preConcatenate(gtx);
-                    dx = (float)tx.getTranslateX(); // uses ftx then gtx to get translation
-                    dy = (float)tx.getTranslateY();
-                }
-                if (!dtx.isIdentity()) {
-                    tx.preConcatenate(dtx);
-                }
-            }
-
-            int ptSize = 1; // only matters for 'gasp' case.
-            Object aaHint = sgv.frc.getAntiAliasingHint();
-            if (aaHint == VALUE_TEXT_ANTIALIAS_GASP) {
-                /* Must pass in the calculated point size for rendering.
-                 * If the glyph tx is anything other than identity or a
-                 *  simple translate, calculate the transformed point size.
-                 */
-                if (!tx.isIdentity() &&
-                    (tx.getType() & ~AffineTransform.TYPE_TRANSLATION) != 0) {
-                    double shearx = tx.getShearX();
-                    if (shearx != 0) {
-                        double scaley = tx.getScaleY();
-                        ptSize =
-                            (int)Math.sqrt(shearx * shearx + scaley * scaley);
-                    } else {
-                        ptSize = (int)(Math.abs(tx.getScaleY()));
-                    }
-                }
-            }
-//            int aa = FontStrikeDesc.getAAHintIntVal(aaHint,sgv.font2D, ptSize);
-//            int fm = FontStrikeDesc.getFMHintIntVal
-//                (sgv.frc.getFractionalMetricsHint());
-//            FontStrikeDesc desc = new FontStrikeDesc(dtx,
-//                                                     tx,
-//                                                     sgv.font.getStyle(),
-//                                                     aa, fm);
-//            // Get the strike via the handle. Shouldn't matter
-//            // if we've invalidated the font but its an extra precaution.
+            return null;
+//
+//            AffineTransform tx = sgv.ftx;
+//            if (!dtx.isIdentity() || gtx != null) {
+//                tx = new AffineTransform(sgv.ftx);
+//                if (gtx != null) {
+//                    tx.preConcatenate(gtx);
+//                    dx = (float)tx.getTranslateX(); // uses ftx then gtx to get translation
+//                    dy = (float)tx.getTranslateY();
+//                }
+//                if (!dtx.isIdentity()) {
+//                    tx.preConcatenate(dtx);
+//                }
+//            }
+//
+//            int ptSize = 1; // only matters for 'gasp' case.
+//            Object aaHint = sgv.frc.getAntiAliasingHint();
+//            if (aaHint == VALUE_TEXT_ANTIALIAS_GASP) {
+//                /* Must pass in the calculated point size for rendering.
+//                 * If the glyph tx is anything other than identity or a
+//                 *  simple translate, calculate the transformed point size.
+//                 */
+//                if (!tx.isIdentity() &&
+//                    (tx.getType() & ~AffineTransform.TYPE_TRANSLATION) != 0) {
+//                    double shearx = tx.getShearX();
+//                    if (shearx != 0) {
+//                        double scaley = tx.getScaleY();
+//                        ptSize =
+//                            (int)Math.sqrt(shearx * shearx + scaley * scaley);
+//                    } else {
+//                        ptSize = (int)(Math.abs(tx.getScaleY()));
+//                    }
+//                }
+//            }
 //            FontStrike strike = sgv.font2D.handle.font2D.getStrike(desc);  // !!! getStrike(desc, false)
 //
-            FontStrike strike = null;
-            return new GlyphStrike(sgv, strike, dx, dy);
+//            FontStrike strike = new FontStrike();
+//            return new GlyphStrike(sgv, null, dx, dy);
         }
 
         private GlyphStrike(StandardGlyphVector sgv, FontStrike strike, float dx, float dy) {
@@ -1792,8 +1789,6 @@ public class StandardGlyphVector extends GlyphVector {
             this.strike = strike;
             this.dx = dx;
             this.dy = dy;
-            JSUtil.notImplemented(null);
-
         }
 
         void getADL(ADL result) {

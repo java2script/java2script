@@ -120,13 +120,16 @@ public class JSUtil implements JSUtilI {
 	@SuppressWarnings("unused")
 	private static Object getFileContents(Object uriOrJSFile, boolean asBytes) {
 		boolean isFile = (uriOrJSFile instanceof File);
+		String uri = uriOrJSFile.toString();
 		if (isFile) {
 			byte[] bytes = /** @j2sNative uriOrJSFile.秘bytes || */
 					null;
 			if (bytes != null)
 				return bytes;
+			if (((File) uriOrJSFile).秘isTempFile)
+				return getCachedFileData(uri, true);
+			uri = J2S.getResourcePath(uri, true);
 		}
-		String uri = uriOrJSFile.toString();
 		Object data = null;
 		if (asBytes && uri.indexOf(":/") < 0) {
 			data = getCachedFileData(uri);
