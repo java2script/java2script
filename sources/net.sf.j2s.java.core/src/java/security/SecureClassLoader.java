@@ -54,9 +54,9 @@ public class SecureClassLoader extends ClassLoader {
 
     private static final Debug debug = Debug.getInstance("scl");
 
-    static {
-        ClassLoader.registerAsParallelCapable();
-    }
+//    static {
+//        ClassLoader.registerAsParallelCapable();
+//    }
 
     /**
      * Creates a new SecureClassLoader using the specified parent
@@ -74,11 +74,11 @@ public class SecureClassLoader extends ClassLoader {
      */
     protected SecureClassLoader(ClassLoader parent) {
         super(parent);
-        // this is to make the stack depth consistent with 1.1
-        SecurityManager security = System.getSecurityManager();
-        if (security != null) {
-            security.checkCreateClassLoader();
-        }
+//        // this is to make the stack depth consistent with 1.1
+//        SecurityManager security = System.getSecurityManager();
+//        if (security != null) {
+//            security.checkCreateClassLoader();
+//        }
         initialized = true;
     }
 
@@ -97,11 +97,11 @@ public class SecureClassLoader extends ClassLoader {
      */
     protected SecureClassLoader() {
         super();
-        // this is to make the stack depth consistent with 1.1
-        SecurityManager security = System.getSecurityManager();
-        if (security != null) {
-            security.checkCreateClassLoader();
-        }
+//        // this is to make the stack depth consistent with 1.1
+//        SecurityManager security = System.getSecurityManager();
+//        if (security != null) {
+//            security.checkCreateClassLoader();
+//        }
         initialized = true;
     }
 
@@ -196,32 +196,32 @@ public class SecureClassLoader extends ClassLoader {
      * Returned cached ProtectionDomain for the specified CodeSource.
      */
     private ProtectionDomain getProtectionDomain(CodeSource cs) {
-        if (cs == null)
+//        if (cs == null)
             return null;
-
-        ProtectionDomain pd = null;
-        synchronized (pdcache) {
-            pd = pdcache.get(cs);
-            if (pd == null) {
-                PermissionCollection perms = getPermissions(cs);
-                pd = new ProtectionDomain(cs, perms, this, null);
-                pdcache.put(cs, pd);
-                if (debug != null) {
-                    debug.println(" getPermissions "+ pd);
-                    debug.println("");
-                }
-            }
-        }
-        return pd;
+//
+//        ProtectionDomain pd = null;
+//        synchronized (pdcache) {
+//            pd = pdcache.get(cs);
+//            if (pd == null) {
+//                PermissionCollection perms = getPermissions(cs);
+//                pd = new ProtectionDomain(cs, perms, this, null);
+//                pdcache.put(cs, pd);
+//                if (debug != null) {
+//                    debug.println(" getPermissions "+ pd);
+//                    debug.println("");
+//                }
+//            }
+//        }
+//        return pd;
     }
 
     /*
      * Check to make sure the class loader has been initialized.
      */
     private void check() {
-        if (!initialized) {
-            throw new SecurityException("ClassLoader object not initialized");
-        }
+//        if (!initialized) {
+//            throw new SecurityException("ClassLoader object not initialized");
+//        }
     }
 
 }
