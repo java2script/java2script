@@ -798,6 +798,7 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
       b = appendMap({},b);
       isNew = true;
     }
+    b[getClassName(outerObj, true)] = outerObj;
     // add all superclass references for outer object
     addB$Keys(clazz1, isNew, b, outerObj, objThis);
   }
@@ -821,6 +822,11 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
   Clazz._initClass(clazz,1,0,objThis);
 };
 
+
+var fixBRefs = function(cl, obj, outerObj) {
+	// see Clazz.super_
+	obj.b$[cl.superclazz.$this$0] = outerObj;
+}
 
 var stripJavaLang = function(s) {
 	return (
@@ -1014,7 +1020,15 @@ Clazz.newPackage = function (pkgName) {
   return Clazz.lastPackage = pkg;
 };
 
-Clazz.super_ = function(cl, obj) {
+Clazz.super_ = function(cl, obj, outerObj) {
+  if (outerObj) {
+	  // inner class is subclassing an inner class in another class using OuterClass.super()
+	  fixBRefs(cl, obj, outerObj);
+	  return;
+  }
+
+  // implicit super() call 
+  
   if (cl.superclazz && cl.superclazz.c$) {
     // added [] here to account for the possibility of vararg default constructor
     cl.superclazz.c$.apply(obj, [[]]);

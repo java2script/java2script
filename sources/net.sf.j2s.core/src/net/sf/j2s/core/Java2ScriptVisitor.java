@@ -136,6 +136,7 @@ import org.eclipse.jdt.core.dom.WildcardType;
 // TODO: superclass inheritance for JAXB XmlAccessorType
 // TODO: inner classes of interface are duplicated
 
+//BH 2020.04.15 -- 3.2.9-v1g fix for qualified super() in inner classes using Class.super_ call (Tracker)
 //BH 2020.04.05 -- 3.2.9-v1f (Boolean ? ...) not unboxed
 //BH 2020.03.21 -- 3.2.9-v1e better v1c 
 //BH 2020.03.20 -- 3.2.9-v1d proper check for new String("x") == "x" (should be false), but new integer(3) == 3 (true) 
@@ -2904,6 +2905,13 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			buffer.append("Clazz.super_(C$, this);\n");
 			return;
 		}
+
+		if (node.getExpression() != null) {
+			buffer.append(";Clazz.super_(C$,this,");
+			node.getExpression().accept(this);
+			buffer.append(")");
+		}
+
 		buffer.append(getFinalMethodNameWith$Params(";C$.superclazz.c$", node.resolveConstructorBinding(), null, false,
 				METHOD_NOTSPECIAL));
 		buffer.append(".apply(this,[");
@@ -4789,7 +4797,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 */
 	private String getSyntheticReference(String className) {
 		return "this" + (className.equals("java.lang.Object") || className.equals("Object") ? ""
-				: className.equals(this$0Name) ? ".this$0"
+				//: className.equals(this$0Name) ? ".this$0"
 						: ".b$['" + getFinalJ2SClassName(className, FINAL_RAW) + "']");
 	}
 
