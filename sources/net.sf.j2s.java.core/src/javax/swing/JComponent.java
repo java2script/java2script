@@ -631,7 +631,9 @@ public abstract class JComponent extends Container {
 				ui.update(scratchGraphics, this);
 				//JSGraphics2D jsg = 秘getJSGraphic2D(scratchGraphics);		
 				//秘isBackgroundPainted = (jsg != null && jsg.isBackgroundPainted());
-			} finally {
+			} catch (Throwable t) {
+				t.printStackTrace();
+			}	finally {
 				scratchGraphics.dispose();
 			}
 		}
@@ -4245,7 +4247,7 @@ public abstract class JComponent extends Container {
 		// internal structural change.
 		if (ui != null)
 			((JSComponentUI)ui).setTainted();
-		if (getParent() == null && !isValidateRoot()) {
+		if (getParent() == null && !isValidateRoot() || !秘isTopLevelVisible()) {
 			// Note: We don't bother invalidating here as once added
 			// to a valid parent invalidate will be invoked (addImpl
 			// invokes addNotify which will invoke invalidate on the
@@ -4284,6 +4286,10 @@ public abstract class JComponent extends Container {
 		}
 	}
 
+	boolean 秘isTopLevelVisible() {
+	    Component c = 秘getTopInvokableAncestor(this, true);
+		return (c != null && c.isVisible());
+	}
 	/**
 	 * If this method returns true, <code>revalidate</code> calls by descendants
 	 * of this component will cause the entire tree beginning with this root to be

@@ -680,6 +680,11 @@ public class JPopupMenu extends JComponent implements MenuElement {
         }
     }
 
+    
+    public void hide() {
+    	System.out.println("JPopupMenu hide");
+    	super.hide();
+    }
 	/**
 	 * Sets the visibility of the popup menu.
 	 *
@@ -696,8 +701,14 @@ public class JPopupMenu extends JComponent implements MenuElement {
 			return;
 		}
 		getUI().setVisible(b);
-		if (!b)
+		if (!b) {
 			popup = null;
+			
+			System.out.println("JPopupMenu.setVis false to invoker " + invoker);
+			// SwingJS added
+			if (invoker != null && invoker.isFocusable())
+				invoker.requestFocus();
+		}
 //		/**
 //		 * @j2sNative
 //		 * 

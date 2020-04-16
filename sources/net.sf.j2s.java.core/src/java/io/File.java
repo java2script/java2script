@@ -37,7 +37,6 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import swingjs.JSFileSystem.JSPath;
-import swingjs.JSTempFile;
 
 
 
@@ -143,6 +142,8 @@ public class File
 	
 	
 	public byte[] 秘bytes; // filled in by SwingJS ajax call or drag-drop from JSDnD
+	
+	public boolean 秘isTempFile;
 //
 //    /**
 //     * The FileSystem object representing the platform's local file system.
@@ -232,34 +233,6 @@ public class File
 //        this.prefixLength = fs.prefixLength(this.path);
     }
 
-    /**
-     * Internal constructor for already-normalized pathname strings.
-     */
-    private File(String pathname, int prefixLength) {
-        this.path = pathname;
-        this.prefixLength = prefixLength;
-    }
-
-    /**
-     * Internal constructor for already-normalized pathname strings.
-     * The parameter order is used to disambiguate this method from the
-     * public(File, String) constructor.
-     */
-    private File(String child, File parent) {
-        assert parent.path != null;
-        assert (!parent.path.equals(""));
-        this.path = resolve(parent.path, child);
-        this.prefixLength = parent.prefixLength;
-    }
-
-    private String resolve(String path, String child) {
-    	if (path == "." && child.startsWith("./"))
-    		return child;
-    	if (child.length() > 0 && !child.startsWith("/") && !path.endsWith("/"))
-    			path += "/";
-    	return path + child; 
-		}
-
     /* Note: The two-argument File constructors do not interpret an empty
        parent abstract pathname as the current user directory.  An empty parent
        instead causes the child to be resolved against the system-dependent
@@ -298,14 +271,12 @@ public class File
 		}
 		if (parent != null) {
 			if (parent.equals("") && !child.startsWith("/")) {
-				this.path = resolve(".", child); // fs.resolve(fs.getDefaultParent(),
-				// fs.normalize(child));
+				this.path = resolve(".", fs.normalize(child));
 			} else {
-				this.path = resolve(parent, child);// fs.resolve(fs.normalize(parent),
-				// fs.normalize(child));
+				this.path = resolve(fs.normalize(parent), fs.normalize(child));
 			}
 		} else {
-			this.path = resolve(".", child);// normalize(child);
+			this.path = resolve(".", fs.normalize(child));
 		}
 		this.prefixLength = this.path.lastIndexOf("/") + 1; // 1efixLength(this.path);
     }
@@ -355,76 +326,108 @@ public class File
 //        this.prefixLength = fs.prefixLength(this.path);
     }
 
-	// /**
-	// * Creates a new <tt>File</tt> instance by converting the given
-	// * <tt>file:</tt> URI into an abstract pathname.
-	// *
-	// * <p> The exact form of a <tt>file:</tt> URI is system-dependent, hence
-	// * the transformation performed by this constructor is also
-	// * system-dependent.
-	// *
-	// * <p> For a given abstract pathname <i>f</i> it is guaranteed that
-	// *
-	// * <blockquote><tt>
-	// * new File(</tt><i>&nbsp;f</i><tt>.{@link #toURI()
-	// toURI}()).equals(</tt><i>&nbsp;f</i><tt>.{@link #getAbsoluteFile()
-	// getAbsoluteFile}())
-	// * </tt></blockquote>
-	// *
-	// * so long as the original abstract pathname, the URI, and the new abstract
-	// * pathname are all created in (possibly different invocations of) the same
-	// * Java virtual machine. This relationship typically does not hold,
-	// * however, when a <tt>file:</tt> URI that is created in a virtual machine
-	// * on one operating system is converted into an abstract pathname in a
-	// * virtual machine on a different operating system.
-	// *
-	// * @param uri
-	// * An absolute, hierarchical URI with a scheme equal to
-	// * <tt>"file"</tt>, a non-empty path component, and undefined
-	// * authority, query, and fragment components
-	// *
-	// * @throws NullPointerException
-	// * If <tt>uri</tt> is <tt>null</tt>
-	// *
-	// * @throws IllegalArgumentException
-	// * If the preconditions on the parameter do not hold
-	// *
-	// * @see #toURI()
-	// * @see java.net.URI
-	// * @since 1.4
-	// */
-	// public File(URI uri) {
-	//
-	// // Check our many preconditions
-	// if (!uri.isAbsolute())
-	// throw new IllegalArgumentException("URI is not absolute");
-	// if (uri.isOpaque())
-	// throw new IllegalArgumentException("URI is not hierarchical");
-	// String scheme = uri.getScheme();
-	// if ((scheme == null) || !scheme.equalsIgnoreCase("file"))
-	// throw new IllegalArgumentException("URI scheme is not \"file\"");
-	// if (uri.getAuthority() != null)
-	// throw new IllegalArgumentException("URI has an authority component");
-	// if (uri.getFragment() != null)
-	// throw new IllegalArgumentException("URI has a fragment component");
-	// if (uri.getQuery() != null)
-	// throw new IllegalArgumentException("URI has a query component");
-	// String p = uri.getPath();
-	// if (p.equals(""))
-	// throw new IllegalArgumentException("URI path component is empty");
-	//
-	// // Okay, now initialize
-	// p = fs.fromURIPath(p);
-	// if (File.separatorChar != '/')
-	// p = p.replace('/', File.separatorChar);
-	// this.path = fs.normalize(p);
-	// this.prefixLength = fs.prefixLength(this.path);
-	// }
-	//
+	/**
+	 * Creates a new <tt>File</tt> instance by converting the given <tt>file:</tt>
+	 * URI into an abstract pathname.
+	 *
+	 * <p>
+	 * The exact form of a <tt>file:</tt> URI is system-dependent, hence the
+	 * transformation performed by this constructor is also system-dependent.
+	 *
+	 * <p>
+	 * For a given abstract pathname <i>f</i> it is guaranteed that
+	 *
+	 * <blockquote><tt>
+	 * new File(</tt><i>&nbsp;f</i><tt>.{@link #toURI()
+	 toURI}()).equals(</tt><i>&nbsp;f</i><tt>.{@link #getAbsoluteFile()
+	 getAbsoluteFile}())
+	 * </tt></blockquote>
+	 *
+	 * so long as the original abstract pathname, the URI, and the new abstract
+	 * pathname are all created in (possibly different invocations of) the same Java
+	 * virtual machine. This relationship typically does not hold, however, when a
+	 * <tt>file:</tt> URI that is created in a virtual machine on one operating
+	 * system is converted into an abstract pathname in a virtual machine on a
+	 * different operating system.
+	 *
+	 * @param uri An absolute, hierarchical URI with a scheme equal to
+	 *            <tt>"file"</tt>, a non-empty path component, and undefined
+	 *            authority, query, and fragment components
+	 *
+	 * @throws NullPointerException     If <tt>uri</tt> is <tt>null</tt>
+	 *
+	 * @throws IllegalArgumentException If the preconditions on the parameter do not
+	 *                                  hold
+	 *
+	 * @see #toURI()
+	 * @see java.net.URI
+	 * @since 1.4
+	 */
+	public File(URI uri) {
+
+		String err = null, scheme, p;
+		// Check our many preconditions
+		if (!uri.isAbsolute())
+			err = ("URI is not absolute");
+		else if (uri.isOpaque())
+			err = ("URI is not hierarchical");
+		else if (((scheme = uri.getScheme()) == null) || !scheme.equalsIgnoreCase("file"))
+			err = ("URI scheme is not \"file\"");
+		else if (uri.getAuthority() != null)
+			err = ("URI has an authority component");
+		else if (uri.getFragment() != null)
+			err = ("URI has a fragment component");
+		else if (uri.getQuery() != null)
+			err = ("URI has a query component");
+		else if ((p = uri.getPath()).equals(""))
+			err = ("URI path component is empty");
+		else {
+			// Okay, now initialize
+			p = fs.fromURIPath(p);
+//			if (File.separatorChar != '/')
+//				p = p.replace('/', File.separatorChar);
+			this.path = //fs.normalize
+					(p);
+			this.prefixLength = fs.prefixLength(this.path);
+			return;
+		}
+		throw new IllegalArgumentException(err);
+	}
+	
 
 	/* -- Path-component accessors -- */
 
-		/**
+    /**
+     * Internal constructor for already-normalized pathname strings.
+     */
+    private File(String pathname, int prefixLength) {
+        this.path = pathname;
+        this.prefixLength = prefixLength;
+    }
+
+    /**
+     * Internal constructor for already-normalized pathname strings.
+     * The parameter order is used to disambiguate this method from the
+     * public(File, String) constructor.
+     */
+    private File(String child, File parent) {
+//        assert parent.path != null;
+//        assert (!parent.path.equals(""));
+        this.path = resolve(parent.path, child);
+        this.prefixLength = parent.prefixLength;
+    }
+
+    private String resolve(String path, String child) {
+    	if (path == "." && child.startsWith("./"))
+    		return child;
+    	if (child.length() > 0 && !child.startsWith("/") && !path.endsWith("/"))
+    			path += "/";
+    	path = path + child;
+    	this.秘isTempFile = path.startsWith(temporaryDirectory);
+    	return path;
+		}
+
+    /**
      * Returns the name of the file or directory denoted by this abstract
      * pathname.  This is just the last name in the pathname's name
      * sequence.  If the pathname's name sequence is empty, then the empty
@@ -705,7 +708,7 @@ public class File
         try {
             String sp = slashify(getAbsoluteFile().getPath(), false);
             if (sp.startsWith("//"))
-                sp = "//" + sp;
+                sp = "file:" + sp;
             URI uri = new URI("file", null, sp, null);
             uri.秘bytes = 秘bytes;
             return uri;
@@ -891,13 +894,7 @@ public class File
      *          method denies read access to the file
      */
     public long length() {
-//        SecurityManager security = System.getSecurityManager();
-//        if (security != null) {
-//            security.checkRead(path);
-//        }
-//        return fs.getLength(this);
-    	return (/** @j2sNative this.秘bytes ? this.秘bytes.length : */0);
-    	
+        return fs.getLength(this);    	
     }
 
 
@@ -1752,7 +1749,9 @@ public class File
         } else {
             n = Math.abs(n);
         }
-        return new JSTempFile(dir, prefix + Long.toString(n) + suffix);
+        File f = new File(dir, prefix + Long.toString(n) + suffix);
+        f.秘isTempFile = true;
+        return f;
     }
 //
 //    private static boolean checkAndCreate(String filename, SecurityManager sm,

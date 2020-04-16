@@ -10819,8 +10819,9 @@ window.J2S = J2S = (function() {
 			 */
 			_appletCssClass : "",
 			_appletCssText : "",
-			_fileCache : null, // enabled by J2S.setFileCaching(applet,
-								// true/false)
+			_fileCache : {}, // a simple object used only in J2S._loadFileData and J2S.loadFileAsynchronously 
+			    // via J2S._checkCache and only for non-js files and only if Info.cacheFiles == true (which it is not in SwingJS)
+			_javaFileCache : null, // a Hashtable, for JSUtil and /TEMP/
 			_jarFile : null, // can be set in URL using _JAR=
 			_j2sPath : null, // can be set in URL using _J2S=
 			_use : null, // can be set in URL using _USE=
@@ -10969,6 +10970,8 @@ window.J2S = J2S = (function() {
 	}
 
 	var fixProtocol = function(url) {
+		if (url.indexOf("file://") >= 0)
+			url = "http" + url.substring(4);
 		// force https if page is https
 		if (J2S._httpProto == "https://" && url.indexOf("http://") == 0)
 			url = "https" + url.substring(4);
@@ -11379,12 +11382,33 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 		}
 		return fileName;
 	}
+	
+	J2S.fixCachePath = function(uri) {
+		if (uri.startsWith("./"))
+			uri = "/" + uri;
+		var n = (uri.startsWith("https:/") || uri.startsWith("file://") ? 7 
+				: uri.startsWith("http:/") || uri.startsWith("file:/") ? 6
+						: 0);
+		if (n > 0)
+			uri = uri.substring(n);
+		uri = uri.replace("//", "/");
+		var pt;
+		while ((pt = uri.indexOf("/././")) >= 0) {
+			// https://././xxx --> /./xxx
+			uri = uri.substring(0, pt) + uri.substring(pt + 2);
+		}
+		if (uri.startsWith("/"))
+			uri = uri.substring(1);
+		if (uri.startsWith("./"))
+			uri = uri.substring(2);
+		return uri;
+	}
 
 	J2S._checkCache = function(applet, fileName, fSuccess) {
-		if (applet._cacheFiles && J2S._fileCache && !fileName.endsWith(".js")) {
+		if (applet._cacheFiles && !fileName.endsWith(".js")) {
 			var data = J2S._fileCache[fileName];
 			if (data) {
-				System.out.println("using " + data.length
+				System.out.println("using " + (data.length)
 						+ " bytes of cached data for " + fileName);
 				fSuccess(data);
 				return null;
@@ -11399,8 +11423,9 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 
 	J2S.getSetJavaFileCache = function(map) {
 		// called by swingjs.JSUtil
-		return (map == null ? J2S._javaFileCache
-				: (J2S._javaFileCache = map));
+		if (map == null && !J2S._javaFileCache)
+			J2S._javaFileCache = Clazz.new_("java.util.Hashtable");
+		return (map == null ? J2S._javaFileCache : (J2S._javaFileCache = map));
 	}
 
 	J2S.getCachedJavaFile = function(key) {
@@ -11485,6 +11510,17 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 			".bin?", ".smol?", ".spartan?", ".mrc?", ".pse?", ".map?",
 			".omap?", ".dcd?", ".mp3?", ".ogg?", ".wav?", ".au?" ];
 
+	J2S.addBinaryFileType = function(ext) {
+		if (!ext.indexOf(".") == 0)
+			ext = "." + ext;
+		if (!ext.indexOf("?") == ext.length - 1)
+			ext += "?";
+		for (var i = J2S._binaryTypes.length; --i >= 0;)
+			if (J2S._binaryTypes[i] == ext)
+				return;
+		J2S._binaryTypes.push(ext);
+	}
+	
 	J2S.isBinaryUrl = function(url) {
 		url = url.toLowerCase() + "?";
 		for (var i = J2S._binaryTypes.length; --i >= 0;)
@@ -11503,10 +11539,15 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 		var isBinary = info.isBinary;
 		// swingjs.api.J2SInterface
 		// use host-server PHP relay if not from this host
-		if (fileName.indexOf("https://./") == 0)
+
+		if (fileName.indexOf("/") == 0)
+			fileName = "." + fileName;
+		else if (fileName.indexOf("https://./") == 0)
 			fileName = fileName.substring(10);
 		else if (fileName.indexOf("http://./") == 0)
 			fileName = fileName.substring(9);
+		else if (fileName.indexOf("file:") >= 0)
+			fileName = "./" + fileName.substring(5);
 		isBinary = (isBinary || J2S.isBinaryUrl(fileName));
 		var isPDB = (fileName.indexOf("pdb.gz") >= 0 && fileName
 				.indexOf("//www.rcsb.org/pdb/files/") >= 0);
@@ -11628,9 +11669,7 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 			var fileName0 = fileName;
 			fileName = J2S._checkFileName(applet, fileName);
 			var fSuccess = function(data) {
-				J2S
-						._setData(fileLoadThread, fileName, fileName0, data,
-								appData)
+				J2S._setData(fileLoadThread, fileName, fileName0, data,	appData)
 			};
 			fSuccess = J2S._checkCache(applet, fileName, fSuccess);
 			if (fileName.indexOf("|") >= 0)
@@ -11729,7 +11768,8 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 				var data = null;
 				if (evt.target.readyState == FileReader.DONE) {
 					var data = evt.target.result;
-					System.out.println("J2S.getFileFromDialog format=" + format + " file name=" + file.name  + " size=" + data.length)
+					System.out.println("J2S.getFileFromDialog format=" + format 
+								+ " file name=" + file.name  + " size=" + (data.length || data.byteLength));
 					switch (format) {
 					case "java.util.Map":
 						map.put$O$O(file.name, J2S._toBytes(data));
@@ -11837,6 +11877,10 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 	// FileSave interface? return true if successful
 
 	J2S.saveFile = J2S._saveFile = function(filename, data, mimetype, encoding) {
+		var isString = (typeof data == "string");
+		if (filename.indexOf(J2S.getGlobal("j2s.tmpdir")) == 0) {
+			return J2S.getSetJavaFileCache().put$O$O(J2S.fixCachePath(filename), (isString ? data.getBytes$S("UTF-8") : data));
+		}
 		if (J2S._localFileSaveFunction
 				&& J2S._localFileSaveFunction(filename, data))
 			return "OK";
@@ -11850,7 +11894,6 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 														| filename
 																.indexOf(".jpeg") >= 0 ? "image/jpg"
 														: ""));
-		var isString = (typeof data == "string");
 		data = Clazz.loadClass("javajs.util.Base64").getBase64$BA(
 				isString ? data.getBytes$S("UTF-8") : data).toString();
 		encoding || (encoding = "base64");
@@ -12063,7 +12106,6 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 			J2S.View.__init(obj);
 			obj._currentView = null;
 		}
-		!J2S._fileCache && obj._cacheFiles && (J2S._fileCache = {});
 		if (!obj._console)
 			obj._console = obj._id + "_infodiv";
 		if (obj._console == "none" || obj._console == "NONE")
@@ -13285,6 +13327,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 				console : this._console,
 				monitorZIndex : J2S.getZ(this, "monitorZIndex")
 			});
+			J2S.setGlobal("j2s.tmpdir", "/TEMP/");
 			var isFirst = (__execStack.length == 0);
 			if (isFirst)
 				J2S._addExec([ this, __loadClazz, null, "loadClazz" ]);
@@ -13640,7 +13683,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 		var $tag = $(tag);
 		tag = $tag[0];
-		if (tag._isDragger)
+		if (!tag || tag._isDragger)
 			return;
 
 		var target, fDown, fDrag, fUp;
@@ -14696,6 +14739,7 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
       b = appendMap({},b);
       isNew = true;
     }
+    b[getClassName(outerObj, true)] = outerObj;
     // add all superclass references for outer object
     addB$Keys(clazz1, isNew, b, outerObj, objThis);
   }
@@ -14719,6 +14763,11 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
   Clazz._initClass(clazz,1,0,objThis);
 };
 
+
+var fixBRefs = function(cl, obj, outerObj) {
+	// see Clazz.super_
+	obj.b$[cl.superclazz.$this$0] = outerObj;
+}
 
 var stripJavaLang = function(s) {
 	return (
@@ -14912,7 +14961,15 @@ Clazz.newPackage = function (pkgName) {
   return Clazz.lastPackage = pkg;
 };
 
-Clazz.super_ = function(cl, obj) {
+Clazz.super_ = function(cl, obj, outerObj) {
+  if (outerObj) {
+	  // inner class is subclassing an inner class in another class using OuterClass.super()
+	  fixBRefs(cl, obj, outerObj);
+	  return;
+  }
+
+  // implicit super() call 
+  
   if (cl.superclazz && cl.superclazz.c$) {
     // added [] here to account for the possibility of vararg default constructor
     cl.superclazz.c$.apply(obj, [[]]);
@@ -17028,31 +17085,6 @@ var getURIField = function(name, def) {
 	}
 }
 
-var fixAgent = function(agent) {return "" + ((agent = agent.split(";")[0]),
-	  (agent + (agent.indexOf("(") >= 0 && agent.indexOf(")") < 0 ? ")" : ""))) }
-
-var agent = navigator.userA;
-var sysprops = {
-		"file.separator" : "/",
-		"line.separator" : "\n",
-		"java.awt.printerjob" : "swingjs.JSPrinterJob",
-		"java.class.path" : "/",
-		"java.class.version" : "80",
-		"java.home" : "https://.",
-		"java.vendor" : "java2script/SwingJS/OpenJDK",
-		"java.vendor.url" : "https://github.com/BobHanson/java2script",
-		"java.version" : "1.8",
-		"os.arch" : navigator.userAgent,
-		"os.name" : fixAgent(navigator.userAgent).split("(")[0],
-		"os.version": fixAgent(navigator.appVersion).replace(fixAgent(navigator.userAgent), ""),
-		"path.separator" : ":",
-		"user.dir" : "https://.",
-		"user.home" : "https://.",
-		"user.name" : "user",
-		"javax.xml.datatype.DatatypeFactory" : "swingjs.xml.JSJAXBDatatypeFactory",
-		"javax.xml.bind.JAXBContextFactory" : "swingjs.xml.JSJAXBContextFactory"	
-}
-
 Clazz._setDeclared("java.lang.System", java.lang.System = System = {});
 ;(function(C$){
 
@@ -17177,12 +17209,43 @@ C$.getenv$=function () {
 	return env || (env = Clazz.load("java.util.Properties"));
 }
 
+
+
 C$.exit$I=function (status) {
 	Clazz.loadClass("java.lang.Runtime").getRuntime$().exit$I(status | 0);
 }
 
 C$.gc$=C$.runFinalization$=C$.runFinalizersOnExit$Z=C$.load$S=C$.loadLibrary$S=C$.mapLibraryName$S=
 	function (libname) {return null;}
+
+var fixAgent = function(agent) {return "" + ((agent = agent.split(";")[0]),
+		  (agent + (agent.indexOf("(") >= 0 && agent.indexOf(")") < 0 ? ")" : ""))) }
+
+	var agent = navigator.userA;
+	var sysprops = {
+			"file.separator" : "/",
+			"line.separator" : "\n",
+			"java.awt.printerjob" : "swingjs.JSPrinterJob",
+			"java.class.path" : "/",
+			"java.class.version" : "80",
+			"java.home" : "https://.",
+			"java.vendor" : "java2script/SwingJS/OpenJDK",
+			"java.vendor.url" : "https://github.com/BobHanson/java2script",
+			"java.version" : "1.8",
+			"java.vm.version" : "1.8",
+			"java.specification.version" : "1.8",
+			"java.io.tmpdir" : J2S.getGlobal("j2s.tmpdir"),
+			"os.arch" : navigator.userAgent,
+			"os.name" : fixAgent(navigator.userAgent).split("(")[0],
+			"os.version": fixAgent(navigator.appVersion).replace(fixAgent(navigator.userAgent), ""),
+			"path.separator" : ":",
+			"user.dir" : "https://.",
+			"user.home" : "https://.",
+			"user.name" : "user",
+			"javax.xml.datatype.DatatypeFactory" : "swingjs.xml.JSJAXBDatatypeFactory",
+			"javax.xml.bind.JAXBContextFactory" : "swingjs.xml.JSJAXBContextFactory"	
+	}
+
 
 })(System);
 
@@ -19238,10 +19301,14 @@ Integer.sum$I$I = Long.sum$J$J = Float.sum$F$F = Double.sum$D$D = 		function(a,b
 
 // NOTE THAT java.util.Date, like java.lang.Math, is unqualified by the transpiler -- this is NOT necessary
 
+;(function() {
+
 Clazz._setDeclared("java.util.Date", java.util.Date=Date);
 //Date.TYPE="java.util.Date";
 Date.__CLASS_NAME__="Date";
 addInterface(Date,[java.io.Serializable,java.lang.Comparable]);
+
+Date.parse$S = Date.parse;
 
 m$(java.util.Date, ["c$", "c$$S", "c$$J"], function(t) {
   this.setTime$J(typeof t == "string" ? Date.parse(t) : t ? t : System.currentTimeMillis$())
@@ -19278,6 +19345,13 @@ function(){
 var ht=this.getTime();
 return parseInt(ht)^parseInt((ht>>32));
 });
+
+Date.prototype.toString$ = Date.prototype.toString;
+m$(java.util.Date,"toString",
+function(){
+return this.toString$().split("(")[0].trim();
+});
+})();
 
 var notImplemented = function(why) {return function() {System.err.println(why + " has not been implemented.")}};
 

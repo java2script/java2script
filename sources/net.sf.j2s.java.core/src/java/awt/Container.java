@@ -772,22 +772,24 @@ public class Container extends JSComponent {
      */
     @SuppressWarnings("deprecation")
 	private void reparentTraverse(ContainerPeer parentPeer, Container child) {
-        checkTreeLock();
-
-        for (int i = 0; i < child.getComponentCount(); i++) {
-            Component comp = child.getComponent(i);
-            if (comp.isLightweight()) {
-                // If components is lightweight check if it is container
-                // If it is container it might contain heavyweight children we need to reparent
-                if (comp instanceof Container) {
-                    reparentTraverse(parentPeer, (Container)comp);
-                }
-            } else {
-                // Q: Need to update NativeInLightFixer?
-                comp.getPeer().reparent(parentPeer);
-            }
-        }
+    	// JSComponentUI.reparent is not implemented. It just gets tainted.
     }
+//        checkTreeLock();
+//
+//        for (int i = 0; i < child.getComponentCount(); i++) {
+//            Component comp = child.getComponent(i);
+//            if (comp.isLightweight()) {
+//                // If components is lightweight check if it is container
+//                // If it is container it might contain heavyweight children we need to reparent
+//                if (comp instanceof Container) {
+//                    reparentTraverse(parentPeer, (Container)comp);
+//                }
+//            } else {
+//                // Q: Need to update NativeInLightFixer?
+//                comp.peer.reparent(parentPeer);
+//            }
+//        }
+//    }
 
     /**
      * Reparents child component peer to this container peer.
@@ -796,22 +798,24 @@ public class Container extends JSComponent {
      */
     @SuppressWarnings("deprecation")
 	private void reparentChild(Component comp) {
+// SwingJS does not need to worry about reparenting peers.
+//
 //        checkTreeLock();
-        if (comp == null) {
-            return;
-        }
-        if (comp.isLightweight()) {
-        	
-        	// never true in SwingJS
-        	
-            // If component is lightweight container we need to reparent all its explicit  heavyweight children
-            if (comp instanceof Container) {
-                // Traverse component's tree till depth-first until encountering heavyweight component
-                reparentTraverse((ContainerPeer)getPeer(), (Container)comp);
-            }
-        } else {
-            comp.getPeer().reparent((ContainerPeer)getPeer());
-        }
+//        if (comp == null) {
+//            return;
+//        }
+//        if (comp.isLightweight()) {
+//        	
+//        	// never true in SwingJS
+//        	
+//            // If component is lightweight container we need to reparent all its explicit  heavyweight children
+//            if (comp instanceof Container) {
+//                // Traverse component's tree till depth-first until encountering heavyweight component
+//                reparentTraverse((ContainerPeer)peer, (Container)comp); // BH was getPeer()
+//            }
+//        } else {
+//            comp.peer.reparent((ContainerPeer)peer);
+//        }
     }
 
     /**

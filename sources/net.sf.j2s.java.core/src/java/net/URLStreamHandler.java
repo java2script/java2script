@@ -31,6 +31,8 @@ package java.net;
 
 import java.io.IOException;
 
+import javajs.util.SB;
+
 /**
  * The abstract class <code>URLStreamHandler</code> is the common
  * superclass for all stream protocol handlers. A stream protocol
@@ -467,50 +469,36 @@ public abstract class URLStreamHandler {
         return u1.getHost() == null && u2.getHost() == null;
     }
 
-    /**
-     * Converts a <code>URL</code> of a specific protocol to a
-     * <code>String</code>.
-     *
-     * @param   u   the URL.
-     * @return  a string representation of the <code>URL</code> argument.
-     */
-    protected String toExternalForm(URL u) {
-      return "";
-//     
-//        // pre-compute length of StringBuffer
-//        int len = u.getProtocol().length() + 1;
-//        if (u.getAuthority() != null && u.getAuthority().length() > 0)
-//            len += 2 + u.getAuthority().length();
-//        if (u.getPath() != null) {
-//            len += u.getPath().length();
-//        }
-//        if (u.getQuery() != null) {
-//            len += 1 + u.getQuery().length();
-//        }
-//        if (u.getRef() != null)
-//            len += 1 + u.getRef().length();
-//
-//        StringBuffer result = new StringBuffer(len);
-//        result.append(u.getProtocol());
-//        result.append(":");
-//        if (u.getAuthority() != null && u.getAuthority().length() > 0) {
-//            result.append("//");
-//            result.append(u.getAuthority());
-//        }
-//        if (u.getPath() != null) {
-//            result.append(u.getPath());
-//        }
-//        if (u.getQuery() != null) {
-//            result.append('?');
-//            result.append(u.getQuery());
-//        }
-//        if (u.getRef() != null) {
-//            result.append("#");
-//            result.append(u.getRef());
-//        }
-//        return result.toString();
-//
-    }
+	/**
+	 * Converts a <code>URL</code> of a specific protocol to a <code>String</code>.
+	 *
+	 * @param u the URL.
+	 * @return a string representation of the <code>URL</code> argument.
+	 */
+	protected String toExternalForm(URL u) {
+		SB result = new SB();
+		String p = u.getProtocol();
+		result.append(p);
+		result.append(":");
+		if (u.getAuthority() != null && u.getAuthority().length() > 0) {
+			result.append("//");
+			result.append(u.getAuthority());
+		}
+		if (u.getPath() != null) {
+			result.append(u.getPath());
+		}
+		if (u.getQuery() != null) {
+			result.append("?");
+			result.append(u.getQuery());
+		}
+		if (u.getRef() != null) {
+			result.append("#");
+			result.append(u.getRef());
+		}
+		return result.toString();
+	}
+    
+    
 
     /**
      * Sets the fields of the <code>URL</code> argument to the indicated values.

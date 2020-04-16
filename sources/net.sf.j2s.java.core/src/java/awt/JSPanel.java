@@ -103,7 +103,7 @@ public class JSPanel extends Container {
 	}
     
   	@Override
-  	protected ComponentPeer getOrCreatePeer() {
+  	public ComponentPeer getOrCreatePeer() {
   		return (ui == null ? null : peer == null ? (peer = getToolkit().createPanel((Panel) (Object) this)) : peer);
   	}
 

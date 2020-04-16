@@ -23,8 +23,9 @@ public class AjaxURLStreamHandlerFactory implements URLStreamHandlerFactory {
 	@Override
   public URLStreamHandler createURLStreamHandler(String protocol) {
 		AjaxURLStreamHandler fac = htFactories.get(protocol);
-		if (fac == null)
+		if (fac == null) {
 			htFactories.put(protocol, fac = new AjaxURLStreamHandler(protocol));
+		}
 		return (fac.protocol == null ? null : fac);
 	}
 

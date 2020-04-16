@@ -30,6 +30,7 @@ package sun.misc;
 
 import java.io.EOFException;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.InputStream;
@@ -150,6 +151,19 @@ public abstract class Resource {
         }
         return b;
     }
+
+	public ByteBuffer getByteBuffer() {
+		byte[] bytes;
+		try {
+			bytes = getBytes();
+			ByteBuffer bb = ByteBuffer.allocate(bytes.length);
+			bb.put(bytes);
+			bb.reset();
+			return bb;
+		} catch (IOException e) {
+			return null;
+		}
+	}
 
 //    /**
 //     * Returns the Resource data as a ByteBuffer, but only if the input stream

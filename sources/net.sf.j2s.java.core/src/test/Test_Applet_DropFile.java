@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetDragEvent;
@@ -27,6 +28,7 @@ import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.TransferHandler;
 
 import javajs.util.Rdr;
 
@@ -64,7 +66,53 @@ public class Test_Applet_DropFile extends JApplet implements DropTargetListener 
 			
 		});
 		getContentPane().add(b, BorderLayout.SOUTH);
-		target = new DropTarget(fileData, this);
+		//target = new DropTarget(fileData, this);
+		fileData.setTransferHandler(new TransferHandler() {
+			
+			  @Override
+			  public boolean canImport(TransferHandler.TransferSupport support) {
+				  return true;
+			  }
+
+
+			@Override
+			public boolean importData(TransferHandler.TransferSupport support) {
+				System.out.println(support.getComponent());
+				Transferable tr = support.getTransferable();
+				JTextArea target = fileData;
+				target.setText("");
+				DataFlavor[] flavors = tr.getTransferDataFlavors();
+				try {
+					for (int i = 0; i < flavors.length; i++) {
+						if (flavors[i].isFlavorJavaFileListType()) {
+							List<File> list = null;
+							list = (List<File>) tr.getTransferData(flavors[i]);
+							for (int j = 0; j < list.size(); j++) {
+								File file = (File) list.get(j);
+								byte[] data = getDroppedFileBytes(file);
+								String s = ">>>>>>>>>" + file.getName() + " - " + data.length + " "
+										+ support.getDropLocation() + "\n";
+								fileName.setText(s);
+								target.append(s);
+								target.append(new String(data));
+								System.out.println("prefsize " + target.getPreferredSize());
+							}
+							return true;
+						} else if (flavors[i].isFlavorTextType()) {
+							String data = (String) tr.getTransferData(flavors[i]);
+							target.setText(data);
+							return true;
+						}
+					}
+				} catch (UnsupportedFlavorException | IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				return false;
+			}	
+			  
+		});
+
 	}
 
 	@Override

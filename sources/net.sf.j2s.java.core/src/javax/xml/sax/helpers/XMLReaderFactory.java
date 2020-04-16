@@ -6,11 +6,8 @@
 // $Id: XMLReaderFactory.java,v 1.10 2002/04/22 01:00:13 dbrownell Exp $
 
 package javax.xml.sax.helpers;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import javax.xml.sax.XMLReader;
 import javax.xml.sax.SAXException;
+import javax.xml.sax.XMLReader;
 
 
 /**
@@ -113,32 +110,28 @@ final public class XMLReaderFactory
 	catch (RuntimeException e) { /* normally fails for applets */ }
 
 	// 2. if that fails, try META-INF/services/
-	/**
-	 * @j2sIgnore
-	 * 
-	 */
-	{
-	if (className == null) {
-	    try {
-		String		service = "META-INF/services/" + property;
-		InputStream	in;
-		BufferedReader	reader;
-
-		if (loader == null)
-		    in = ClassLoader.getSystemResourceAsStream (service);
-		else
-		    in = loader.getResourceAsStream (service);
-
-		if (in != null) {
-		    reader = new BufferedReader (
-			    new InputStreamReader (in, "UTF8"));
-		    className = reader.readLine ();
-		    in.close ();
-		}
-	    } catch (Exception e) {
-	    }
-	}
-	}
+//	{
+//	if (className == null) {
+//	    try {
+//		String		service = "META-INF/services/" + property;
+//		InputStream	in;
+//		BufferedReader	reader;
+//
+//		if (loader == null)
+//		    in = ClassLoader.getSystemResourceAsStream (service);
+//		else
+//		    in = loader.getResourceAsStream (service);
+//
+//		if (in != null) {
+//		    reader = new BufferedReader (
+//			    new InputStreamReader (in, "UTF8"));
+//		    className = reader.readLine ();
+//		    in.close ();
+//		}
+//	    } catch (Exception e) {
+//	    }
+//	}
+//	}
 	// 3. Distro-specific fallback
 	if (className == null) {
 // BEGIN DISTRIBUTION-SPECIFIC

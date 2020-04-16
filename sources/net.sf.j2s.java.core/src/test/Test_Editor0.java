@@ -123,7 +123,7 @@ public class Test_Editor0 extends JApplet {
 
 		area.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 16));
 		area.setText(test);
-		area.setBackground(new Color(200, 200, 180));
+		//area.setBackground(new Color(200, 200, 180));
 //		// area.setEditable(false);
 //		area.addCaretListener(new CaretListener() {
 //
@@ -155,7 +155,7 @@ public class Test_Editor0 extends JApplet {
 		area.setEditorKit(new StyledEditorKit());
 		area.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 16));
 		area.setText(test);
-		area.setBackground(new Color(200, 200, 180));
+		//area.setBackground(new Color(200, 200, 180));
 	return area;
 	}
 

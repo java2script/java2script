@@ -1,1 +1,2 @@
-this is a testing RandomAccessFile
+this is a test
+it is a RandomAccessFile

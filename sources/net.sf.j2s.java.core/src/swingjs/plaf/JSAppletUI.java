@@ -41,9 +41,10 @@ public class JSAppletUI extends JSLightweightUI {
 	
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
-		Object value = e.getNewValue();
-		String prop = e.getPropertyName();
-		System.out.println("JSAPpletUI prop val " + prop + " " + value);
+		// Don't pass these on
+//		Object value = e.getNewValue();
+//		String prop = e.getPropertyName();
+		//System.out.println("JSAPpletUI prop val " + prop + " " + value);
 	}
 
 	/**

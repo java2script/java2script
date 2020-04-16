@@ -316,7 +316,7 @@ public class Window extends JComponent {
      *
      * @since 1.6
      */
-    Dialog.ModalExclusionType modalExclusionType;
+    ModalExclusionType modalExclusionType;
 
     transient WindowListener windowListener;
     transient WindowStateListener windowStateListener;
@@ -602,7 +602,7 @@ public class Window extends JComponent {
 		// // setLocationByPlatform(locationByPlatformProp);
 		// }
 
-		modalExclusionType = Dialog.ModalExclusionType.NO_EXCLUDE;
+		modalExclusionType = ModalExclusionType.NO_EXCLUDE;
 
 		// sun.java2d.Disposer.addRecord(anchor, new
 		// WindowDisposerRecord(appContext, this));
@@ -758,7 +758,8 @@ public class Window extends JComponent {
 	}
 
 	@Override
-	protected ComponentPeer getOrCreatePeer() {
+	public ComponentPeer getOrCreatePeer() {
+		// SwingJS this should have 秘
 		return (ui == null ? null : peer == null ? (peer = getToolkit().createWindow(this)) : peer);
 	}
 
@@ -1628,13 +1629,14 @@ public class Window extends JComponent {
      * @since 1.6
      */
     public void setModalExclusionType(Dialog.ModalExclusionType exclusionType) {
-        if (exclusionType == null) {
-            exclusionType = Dialog.ModalExclusionType.NO_EXCLUDE;
+    	ModalExclusionType type = (ModalExclusionType)(Object) exclusionType;
+        if (type == null) {
+           type = ModalExclusionType.NO_EXCLUDE;
+        } else if (!Toolkit.getDefaultToolkit().isModalExclusionTypeSupported(exclusionType)) {
+            type = ModalExclusionType.NO_EXCLUDE;
         }
-        if (!Toolkit.getDefaultToolkit().isModalExclusionTypeSupported(exclusionType)) {
-            exclusionType = Dialog.ModalExclusionType.NO_EXCLUDE;
-        }
-        if (modalExclusionType == exclusionType) {
+        int n = type.ordinal();
+        if (modalExclusionType.ordinal() == n) {
             return;
         }
 //        if (exclusionType == Dialog.ModalExclusionType.TOOLKIT_EXCLUDE) {
@@ -1643,7 +1645,17 @@ public class Window extends JComponent {
 //                sm.checkPermission(SecurityConstants.TOOLKIT_MODALITY_PERMISSION);
 //            }
 //        }
-        modalExclusionType = exclusionType;
+        switch (n) {
+        case 0:
+            modalExclusionType = ModalExclusionType.NO_EXCLUDE;
+        	break;        	
+        case 1:
+            modalExclusionType = ModalExclusionType.APPLICATION_EXCLUDE;
+        	break;
+        case 2:
+            modalExclusionType = ModalExclusionType.TOOLKIT_EXCLUDE;
+        	break;
+        }
 
         // if we want on-fly changes, we need to uncomment the lines below
         //   and override the method in Dialog to use modalShow() instead
@@ -1668,12 +1680,18 @@ public class Window extends JComponent {
      * @since 1.6
      */
     public Dialog.ModalExclusionType getModalExclusionType() {
-        return modalExclusionType;
+    	if (modalExclusionType == ModalExclusionType.APPLICATION_EXCLUDE)
+    		return Dialog.ModalExclusionType.APPLICATION_EXCLUDE;
+    	if (modalExclusionType == ModalExclusionType.NO_EXCLUDE)
+    		return Dialog.ModalExclusionType.NO_EXCLUDE;
+    	if (modalExclusionType == ModalExclusionType.TOOLKIT_EXCLUDE)
+    		return Dialog.ModalExclusionType.TOOLKIT_EXCLUDE;
+        return null;
     }
 
     boolean isModalExcluded(Dialog.ModalExclusionType exclusionType) {
         if ((modalExclusionType != null) &&
-            modalExclusionType.compareTo(exclusionType) >= 0)
+            modalExclusionType.ordinal() >= exclusionType.ordinal())
         {
             return true;
         }

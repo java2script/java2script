@@ -141,6 +141,8 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				hideTipWindow();
+				//System.out.println("ttm stop enter");
+
 				enterTimer.stop();
 				showImmediately = false;
 				insideComponent = null;
@@ -270,8 +272,14 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 	}
 
 	void showTipWindow() {
+		
+
+		//System.out.println("ttm showtipwindow1");
+		
 		if (insideComponent == null || !insideComponent.isShowing())
 			return;
+		
+		//System.out.println("ttm showtipwindow2");
 		Component win = insideComponent.getTopLevelAncestor();
 		// will be null for some menu items
 		if (win != null  && win.isWindowOrJSApplet()) {
@@ -359,13 +367,14 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 //        }
 //            }
 //            else 
-			{
-				popupFactory.setPopupType(PopupFactory.HEAVY_WEIGHT_POPUP);// PopupFactory.MEDIUM_WEIGHT_POPUP);
-			}
+//			{
+				popupFactory.setPopupType(PopupFactory.HEAVY_WEIGHT_POPUP);// PopupFactory.MEDIUM_WEIGHT_POPUP);/
+//			}
 			JToolTip t = tip;
 			hideTipWindow();
 			tip = t;
 			tipWindow = popupFactory.getPopup(insideComponent, tip, location.x, location.y);
+			// Yes, we do this again...
 			popupFactory.setPopupType(PopupFactory.LIGHT_WEIGHT_POPUP);
 			tipWindow.show();
 			hasFired = true;
@@ -378,6 +387,9 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 			} else {
 				window = null;
 			}
+			//System.out.println("ttm stop inside");
+			//System.out.println("ttm start inside");
+			
 			insideTimer.stop();
 			insideTimer.start();
 			tipShowing = true;
@@ -390,14 +402,24 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 				window.removeMouseListener(this);
 				window = null;
 			}
-			@SuppressWarnings("unused")
 			Popup win = this.tipWindow;
 			// give this a few milliseconds, for continuity
-			JSToolkit.dispatch(/** @j2sNative function() {win.hide$()} || */null, 10, 0);
-//			tipWindow.hide();
+			Runnable r = new Runnable() {
+
+				@Override
+				public void run() {
+					win.hide();
+				}
+				
+			};
+			JSToolkit.dispatch(r, 10, 0);
 			tipWindow = null;
 			tipShowing = false;
 			tip = null;
+			//System.out.println("ttm stop inside");
+			//System.out.println("ttm stop enter");
+			//System.out.println("ttm stop exit");
+			
 			insideTimer.stop();
 			enterTimer.stop();
 			exitTimer.stop();
@@ -480,6 +502,7 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 		}
 
 		if (insideComponent != null) {
+			//System.out.println("ttm stop enter");
 			enterTimer.stop();
 		}
 		// A component in an unactive internal frame is sent two
@@ -506,6 +529,8 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 				}
 			} else {
 //				useCurrentMenu = true;
+				//System.out.println("ttm start enter");
+
 				enterTimer.start();
 			}
 		}
@@ -569,7 +594,9 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 			}
 		}
 
-		if (shouldHide) {
+		if (shouldHide)
+		// System.out.println("ttm stop enter");
+		{
 			enterTimer.stop();
 			if (insideComponent != null) {
 				insideComponent.removeMouseMotionListener(this);
@@ -578,6 +605,8 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 			toolTipText = null;
 			mouseEvent = null;
 			hideTipWindow();
+			// System.out.println("ttm restart exit");
+
 			exitTimer.restart();
 		}
 	}
@@ -591,6 +620,10 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 	@Override
 	public void mousePressed(MouseEvent event) {
 		hideTipWindow();
+		//System.out.println("ttm stop inside");
+		//System.out.println("ttm stop enter");
+		//System.out.println("ttm stop exit");
+
 		insideTimer.stop();
 		exitTimer.stop();
 		enterTimer.stop();
@@ -618,6 +651,7 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 	 */
 	@Override
 	public void mouseMoved(MouseEvent event) {
+		
 		if (tipShowing) {
 			checkForTipChange(event);
 		} else if (showImmediately) {
@@ -627,17 +661,25 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 				preferredLocation = component.getToolTipLocation(event);
 				mouseEvent = event;
 				insideComponent = component;
+				//System.out.println("ttm stop exit");
+
 				exitTimer.stop();
 				showTipWindow();
 			}
 		} else {
+
+
 			hideTipWindow();
-			if (hasFired)
-				return;
+			
+			//System.out.println("ttm component mouse moved showing " + tipShowing + " " + showImmediately + " " + hasFired);
+
+//			if (hasFired)
+//				return;
 			// Lazily lookup the values from within insideTimerAction
 			insideComponent = (JComponent) event.getSource();
 			mouseEvent = event;
 			toolTipText = null;
+			//System.out.println("ttm restart enter");
 			enterTimer.restart();
 		}
 	}
@@ -661,6 +703,7 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 				
 				
 				if (newText != null) {
+					//System.out.println("ttm restart enter");
 					enterTimer.restart();
 					return;
 				}
@@ -672,8 +715,10 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 				if (showImmediately) {
 					hideTipWindow();
 					showTipWindow();
+					//System.out.println("ttm stop exit");
 					exitTimer.stop();
 				} else {
+					//System.out.println("ttm restart enter");
 					enterTimer.restart();
 				}
 				return;
@@ -683,6 +728,11 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 			mouseEvent = null;
 			insideComponent = null;
 			hideTipWindow();
+			
+			//System.out.println("ttm stop inside");
+			//System.out.println("ttm stop enter");
+			//System.out.println("ttm restart exit");
+
 			enterTimer.stop();
 			insideTimer.stop();
 			exitTimer.restart();
@@ -701,6 +751,7 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 	private class MoveBeforeEnterListener extends MouseMotionAdapter {
 		@Override
 		public void mouseMoved(MouseEvent e) {
+			//System.out.println("TTM mousemoved");
 			initiateToolTip(e);
 		}
 	}

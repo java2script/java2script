@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javajs.api.js.J2SObjectInterface;
+import swingjs.JSUtil;
 
 /**
  * 
@@ -61,101 +62,106 @@ public class AjaxURLConnection extends HttpURLConnection {
 	}
 
 	/**
-   * 
-   * doAjax() is where the synchronous call to AJAX is to happen. or at least
-   * where we wait for the asynchronous call to return. This method should fill
-   * the dataIn field with either a string or byte array, or null if you want to
-   * throw an error.
-   * 
-   * url, bytesOut, and postOut are all available for use
-   * 
-   * the method is "private", but in JavaScript that can still be overloaded.
-   * Just set something to org.jmol.awtjs.JmolURLConnection.prototype.doAjax
-   * 
-   * 
-   * @param isBinary 
-   * 
-   * @return file data as a javajs.util.SB or byte[] depending upon the file
-   *         type.
-   * 
-   * 
-   */
-  @SuppressWarnings("null")
-  private Object doAjax(boolean isBinary) {
-	getBytesOut();
-    J2SObjectInterface J2S = /** @j2sNative self.J2S || */ null;
-    Object info = null;
-    /** @j2sNative
-     * 
-     *  info = this.ajax || {};
-     *  if (!info.dataType) {
-     *    info.isBinary = !!isBinary;
-     *  }
-     */
-    this.info = info;
-    Map<String, List<String>> map = getRequestProperties();
-    boolean isnocache = false;
-    String type = null;
-    if (map != null) {
-    	// Unfortunately, AJAX now disallows just about all headers. 
-    	// Even cache-control can be blocked.
-    	// We could set this up to check if it is cross-domain CORS and
-    	// then not do this. But for now just not allowing headers.
-    	for (Entry<String, List<String>> e : map.entrySet()) {
-    		String key = e.getKey();
-    		switch (key.toLowerCase()) {
-    		case "content-type":
-    			type = e.getValue().get(0);
-    			break;
-    		case "cache-control":
-    			isnocache = e.getValue().get(0).equalsIgnoreCase("no-cache");
-    			break;
-    		}
-    		String s = "";
-    		List<String>values = e.getValue();
-    		for (int i = 0; i < values.size(); i++) {
-    			s += (i == 0 ? "" : ", ") + values.get(i);
-    		}
-    		if (s.length() > 0) {
-            	/**
-            	 * For now we are not enabling this. Causes too 
-            	 * much problem with CORS.
-            	 * 
-            	 * @j2sNative 
-            	 *  
-            	 * info.headers || (info.headers = {});
-            	 *  //info.headers[key] = s; 
-            	 */
-    		}	
-    	}
-    }
-    if ("application/json".equals(type)) {
-    	// Hack here we are turning off the content type for CORS for VBRC
-    	/**
-    	 * @j2sNative 
-    	 * 
-    	 * info.contentType = false;
-    	 */
-    }
-    String myURL = url.toString();
-    
-    
-    Object result = J2S.doAjax(myURL, postOut, bytesOut, info);
-    boolean isEmpty = false;
-    // the problem is that jsmol.php is still returning crlf even if output is 0 bytes
-    // and it is not passing through the not-found state, just 200
-    /**
-     * @j2sNative
-     * 
-     *    isEmpty = (!result || result.length == 2 && result[0] == 13 && result[1] == 10);
-     *    if (isEmpty)
-     *      result = new Int8Array;
-     *    
-     *     
-     */
-    responseCode = isEmpty ? HTTP_NOT_FOUND : /** @j2sNative info.xhr.status || */0;
-    return result;
-  }
+	 * 
+	 * doAjax() is where the synchronous call to AJAX is to happen. or at least
+	 * where we wait for the asynchronous call to return. This method should fill
+	 * the dataIn field with either a string or byte array, or null if you want to
+	 * throw an error.
+	 * 
+	 * url, bytesOut, and postOut are all available for use
+	 * 
+	 * the method is "private", but in JavaScript that can still be overloaded. Just
+	 * set something to org.jmol.awtjs.JmolURLConnection.prototype.doAjax
+	 * 
+	 * 
+	 * @param isBinary
+	 * 
+	 * @return file data as a javajs.util.SB or byte[] depending upon the file type.
+	 * 
+	 * 
+	 */
+	@SuppressWarnings("null")
+	private Object doAjax(boolean isBinary) {
+		getBytesOut();
+		J2SObjectInterface J2S = /** @j2sNative self.J2S || */
+				null;
+		Object info = null;
+		/**
+		 * @j2sNative
+		 * 
+		 * 			info = this.ajax || {}; if (!info.dataType) { info.isBinary =
+		 *            !!isBinary; }
+		 */
+		this.info = info;
+		Map<String, List<String>> map = getRequestProperties();
+		boolean isnocache = false;
+		String type = null;
+		if (map != null) {
+			// Unfortunately, AJAX now disallows just about all headers.
+			// Even cache-control can be blocked.
+			// We could set this up to check if it is cross-domain CORS and
+			// then not do this. But for now just not allowing headers.
+			for (Entry<String, List<String>> e : map.entrySet()) {
+				String key = e.getKey();
+				switch (key.toLowerCase()) {
+				case "content-type":
+					type = e.getValue().get(0);
+					break;
+				case "cache-control":
+					isnocache = e.getValue().get(0).equalsIgnoreCase("no-cache");
+					break;
+				}
+				String s = "";
+				List<String> values = e.getValue();
+				for (int i = 0; i < values.size(); i++) {
+					s += (i == 0 ? "" : ", ") + values.get(i);
+				}
+				if (s.length() > 0) {
+					/**
+					 * For now we are not enabling this. Causes too much problem with CORS.
+					 * 
+					 * @j2sNative
+					 * 
+					 * 			info.headers || (info.headers = {}); //info.headers[key] = s;
+					 */
+				}
+			}
+		}
+		if ("application/json".equals(type)) {
+			// Hack here we are turning off the content type for CORS for VBRC
+			/**
+			 * @j2sNative
+			 * 
+			 * 			info.contentType = false;
+			 */
+		}
+
+		Object result;
+		String myURL = url.toString();
+		boolean isEmpty = false;
+		if (myURL.startsWith("file:/TEMP/")) {
+			result = JSUtil.getCachedFileData(myURL, true);
+			isEmpty = (result == null);
+			responseCode = (isEmpty ? HTTP_NOT_FOUND : HTTP_ACCEPTED);
+		} else {
+			if (myURL.startsWith("file:")) {
+				myURL = JSUtil.J2S.getResourcePath("", true) + myURL.substring(5);
+			}
+			result = J2S.doAjax(myURL, postOut, bytesOut, info);
+		// the problem is that jsmol.php is still returning crlf even if output is 0
+		// bytes
+		// and it is not passing through the not-found state, just 200
+			/**
+			 * @j2sNative
+			 * 
+			 * 			isEmpty = (!result || result.length == 2 && result[0] == 13 &&
+			 *            result[1] == 10); if (isEmpty) result = new Int8Array;
+			 */
+			responseCode = isEmpty ? HTTP_NOT_FOUND : /** @j2sNative info.xhr.status || */
+				0;
+		}
+		return result;
+	}
 
 	@Override
 	public void connect() throws IOException {

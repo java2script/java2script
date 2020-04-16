@@ -52,10 +52,10 @@ public class JSHTMLHelper {
 		doc.秘jsHTMLHelper = this;
 	}
 
-	String html;
+	String html = "";
 
 	public void setText(String html) {
-		this.html = html;
+		this.html = (html == null ? "" : html);
 	}
 
 	public String getText() {

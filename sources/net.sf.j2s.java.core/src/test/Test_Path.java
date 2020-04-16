@@ -7,6 +7,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
+import swingjs.JSToolkit;
+import swingjs.JSUtil;
+
 
 class Test_Path extends Test_ {
 
@@ -23,7 +26,7 @@ class Test_Path extends Test_ {
 		System.out.println(p);
 
 		ThreadGroup g = Thread.currentThread().getThreadGroup();
-		String myDir = /**@j2sNative g.html5Applet._j2sPath + "/" ||*/"src/";
+		String myDir = ((/**@j2sNative true ||*/false) ? JSUtil.J2S.getResourcePath("", true) : "src/");
 		String cl = Test_Path.class.getName().replace('.','/');
 		myDir += cl.substring(0, cl.indexOf("/") + 1);
 		f = new File(myDir + "test.txt");

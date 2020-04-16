@@ -495,7 +495,7 @@ public class JSFrame extends Window {
 	}
 
   	@Override
-  	protected ComponentPeer getOrCreatePeer() {
+  	public ComponentPeer getOrCreatePeer() {
   		return (ui == null ? null : peer == null ? (peer = getToolkit().createFrame(this)) : peer);
   	}
 

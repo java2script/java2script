@@ -33,6 +33,7 @@ import java.awt.Dimension;
 import java.awt.HeadlessException;
 //import java.awt.HeadlessException;
 import java.awt.Insets;
+import java.awt.JSComponent;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -46,6 +47,7 @@ import java.awt.peer.LightweightPeer;
 import java.io.Serializable;
 import java.util.TooManyListenersException;
 
+import javax.swing.JComponent;
 import javax.swing.Timer;
 
 
@@ -497,7 +499,7 @@ public class DropTarget implements DropTargetListener, Serializable {
 
         for (Component c = component;
              c != null && peer instanceof LightweightPeer; c = c.getParent()) {
-            peer = c.getPeer();
+            peer = /** @j2sNative c.peer || */null;//((JSComponent) c).peer;//getPeer(); // SwingJS was getPeer(), but this is only if attached.
         }
 
         //if (peer instanceof DropTargetPeer) {

@@ -70,16 +70,30 @@ public class JSUtil implements JSUtilI {
 
 	
 	private static Map<String, Object> getFileCache() {
-		if (fileCache == null && (fileCache = J2S.getSetJavaFileCache(null)) == null) {
-			fileCache = new Hashtable<String, Object>();
-			J2S.getSetJavaFileCache(fileCache);
-		}
-		return fileCache;
+		return (fileCache == null ?
+			fileCache = J2S.getSetJavaFileCache(null) : fileCache);
 	}
 
+	/**
+	 * Get cached file data, possibly an indicator that the file is known to not exist.
+	 * 
+	 * @param path
+	 * @return byte[] or Boolean.FALSE or null
+	 */
 	public static Object getCachedFileData(String path) {
-		return (useCache && fileCache != null ?
-					fileCache.get(fixCachePath(path)) : null);
+		return getCachedFileData(path, false);
+	}
+
+	/**
+	 * Get cached file data, null, or Boolean.FALSE, optionally not allowing Boolean.FALSE.
+	 * 
+	 * @param path
+	 * @param asBytes  
+	 * @return  byte[] or null or (if !asBytes) Boolean.FALSE
+	 */
+	public static Object getCachedFileData(String path, boolean asBytes) {
+		Object o = (getFileCache() != null ? fileCache.get(fixCachePath(path)) : null);
+		return (o instanceof byte[] ? (byte[]) o : null);
 	}
 
 	/**
@@ -88,7 +102,7 @@ public class JSUtil implements JSUtilI {
 	 * @return
 	 */
 	public static Object removeCachedFileData(String path) {
-		return (useCache && fileCache != null ?
+		return (getFileCache() != null ?
 					fileCache.put(fixCachePath(path), Boolean.FALSE) : null);
 	}
 
@@ -105,18 +119,22 @@ public class JSUtil implements JSUtilI {
 	 */
 	@SuppressWarnings("unused")
 	private static Object getFileContents(Object uriOrJSFile, boolean asBytes) {
-		if (uriOrJSFile instanceof File) {
+		boolean isFile = (uriOrJSFile instanceof File);
+		String uri = uriOrJSFile.toString();
+		if (isFile) {
 			byte[] bytes = /** @j2sNative uriOrJSFile.秘bytes || */
 					null;
 			if (bytes != null)
 				return bytes;
+			if (((File) uriOrJSFile).秘isTempFile)
+				return getCachedFileData(uri, true);
+			uri = J2S.getResourcePath(uri, true);
 		}
-		String uri = uriOrJSFile.toString();
 		Object data = null;
 		if (asBytes && uri.indexOf(":/") < 0) {
 			data = getCachedFileData(uri);
 			if (data != null)
-				return data;
+				return data; // could be Boolean!
 			// looking for "examples/xxxx.xxx" --> "./examples/xxxx.xxx"
 			if (!uri.startsWith("/"))
 				uri = "/" + uri;
@@ -128,37 +146,24 @@ public class JSUtil implements JSUtilI {
 		}
 		if (data == null && !uri.startsWith("./")) {
 			// Java applications may use "./" here
-			try {
-				BufferedInputStream stream = (BufferedInputStream) new URL(uri).getContent();
-				data = (asBytes ? Rdr.getStreamAsBytes(stream, null) : Rdr.streamToUTF8String(stream));
-			} catch (Exception e) {
-				// bypasses AjaxURLConnection
-				data = J2S.getFileData(uri, null, false, asBytes);
-				if (data == null)
-					removeCachedFileData(uri);
+			if (!isFile) {
+				try {
+					BufferedInputStream stream = (BufferedInputStream) new URL(uri).getContent();
+					return (asBytes ? Rdr.getStreamAsBytes(stream, null) : Rdr.streamToUTF8String(stream));
+				} catch (Exception e) {
+				}
 			}
+			// bypasses AjaxURLConnection
+			data = J2S.getFileData(uri, null, false, asBytes);
+			if (data == null)
+				removeCachedFileData(uri);
+
 		}
 		return data;
 	}
 
 	private static String fixCachePath(String uri) {
-		int pt;
-		if (uri.startsWith("./"))
-			uri = "/" + uri;
-		if (uri.startsWith("https:/"))
-			uri = uri.substring(7);
-		if (uri.startsWith("http:/"))
-			uri = uri.substring(6);
-		uri = uri.replace("//", "/");
-		while ((pt = uri.indexOf("/././")) >= 0) {
-			// https://././xxx --> /./xxx
-			uri = uri.substring(0, pt) + uri.substring(pt + 2);
-		}
-		if (uri.startsWith("/"))
-			uri = uri.substring(1);
-		if (uri.startsWith("./"))
-			uri = uri.substring(2);
-		return uri;
+		return J2S.fixCachePath(uri);
 	}
 
 	/**
@@ -213,7 +218,6 @@ public class JSUtil implements JSUtilI {
 				if (new String(data).equals("NetworkError: A network error occurred."))
 						return null;
 			}
-			System.out.println(new String(data));
 		}
 		return data;
 	}
@@ -289,28 +293,28 @@ public class JSUtil implements JSUtilI {
 	}
 	
 	public static InputStream getCachedResourceAsStream(String name) {
-		
-		
-//		, isjavapath false, docachetrue, doprocefalse)
-		
 		System.out.println("JSUtil getting Java resource " + name);
 		String path = J2S.getResourcePath(name, false);
 		if (path == null)
 			return null;
 		InputStream stream;
 		Object data = getCachedFileData(path);
-		if (data == null) {
-			stream = getResourceAsStream(name);
-			data = /** @j2sNative stream && stream.$in.buf ||*/null;
-		} else {
-			stream = new BufferedInputStream(new ByteArrayInputStream((byte[]) data));
+		if (data instanceof byte[]) {
+			return new BufferedInputStream(new ByteArrayInputStream((byte[]) data));
 		}
+		if (data instanceof Boolean) {
+			return null;
+		}
+		stream = getResourceAsStream(name);
+		data = /** @j2sNative stream && stream.$in.buf || */
+				null;
 		if (stream != null && useCache)
 			cacheFileData(path, data);
 		return stream;
 	}
 
 	public static void cacheFileData(String path, Object data) {
+		path = fixCachePath(path);
 		if (data == null) {
 			System.out.println("JSUtil releasing cached bytes for " + path);
 			getFileCache().remove(path);
@@ -320,7 +324,6 @@ public class JSUtil implements JSUtilI {
 				count = ""+ ((byte[]) data).length;
 			else if (data instanceof String)
 				count = "" + ((String) data).length();
-			path = fixCachePath(path);
 			if (!getFileCache().containsKey(path))
 				System.out.println("JSUtil caching " + count + " bytes for " + path);
 			getFileCache().put(path, data);
@@ -600,6 +603,14 @@ public class JSUtil implements JSUtilI {
 		return null;
 	}
 
+	/**
+	 * Display the web page in the give target, such as "_blank"
+	 */
+	@Override
+	public void displayURL(String url, String target) {
+		showWebPage((URL)(Object)url, target);
+	}
+	
 	public static void showWebPage(URL url, Object target) {
 			/**
 			 * @j2sNative
@@ -608,6 +619,8 @@ public class JSUtil implements JSUtilI {
 			 *            window.open(url.toString());
 			 */
 	  }
+	
+	
 
 	/**
 	 * important warnings for TODO list
@@ -861,7 +874,12 @@ public class JSUtil implements JSUtilI {
 
 	@Override
 	public boolean streamToFile(InputStream is, File outFile) {
-		return (outFile instanceof JSTempFile ? ((JSTempFile) outFile).setBytes(is) : setFileBytes(outFile, is));
+		boolean ok = JSUtil.setFileBytesStatic(outFile, is);
+		if (ok && outFile.秘isTempFile) {
+			String path = outFile.getAbsolutePath();
+			cacheFileData(path, outFile.秘bytes);
+		}
+		return ok;
 	}
 
 	@Override
@@ -950,6 +968,29 @@ public class JSUtil implements JSUtilI {
 		} catch (Throwable t) {
 			alert(data);
 		}
+	}
+
+	@Override
+	public byte[] getCachedBytes(String path) {
+		return (byte[]) getCachedFileData(path, true);
+	}
+
+	/**
+	 * Attach cached bytes to a file-like object, including URL,
+	 * or anything having a 秘bytes field.
+	 * 
+	 * @return byte[] or null
+	 * 
+	 */
+	@Override
+	public byte[] addJSCachedBytes(Object URLorURIorFile) {
+		byte[] bytes = getCachedBytes(URLorURIorFile.toString());
+		if (URLorURIorFile instanceof URL) {
+			((URL) URLorURIorFile)._streamData = bytes;
+		} else {
+			((File) URLorURIorFile).秘bytes = bytes;
+		}
+		return bytes;
 	}
 
 }

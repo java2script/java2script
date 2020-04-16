@@ -211,23 +211,23 @@ class XPathFactoryFinder  {
         }
 
         // try META-INF/services files
-        Iterator sitr = createServiceFileIterator();
-        while(sitr.hasNext()) {
-            URL resource = (URL)sitr.next();
-            debugPrintln("looking into " + resource);
-            try {
-                xpathFactory = loadFromService(uri, resource.toExternalForm(),
-                                                ss.getURLInputStream(resource));
-                if (xpathFactory != null) {
-                    return xpathFactory;
-                }
-            } catch(IOException e) {
-                if( debug ) {
-                    debugPrintln("failed to read "+resource);
-                    e.printStackTrace();
-                }
-            }
-        }
+//        Iterator sitr = createServiceFileIterator();
+//        while(sitr.hasNext()) {
+//            URL resource = (URL)sitr.next();
+//            debugPrintln("looking into " + resource);
+//            try {
+//                xpathFactory = loadFromService(uri, resource.toExternalForm(),
+//                                                ss.getURLInputStream(resource));
+//                if (xpathFactory != null) {
+//                    return xpathFactory;
+//                }
+//            } catch(IOException e) {
+//                if( debug ) {
+//                    debugPrintln("failed to read "+resource);
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
 
         // platform default
         if(uri.equals(XPathFactory.DEFAULT_OBJECT_MODEL_URI)) {
@@ -471,51 +471,51 @@ class XPathFactoryFinder  {
         }
     }
 
-    /**
-     * Returns an {@link Iterator} that enumerates all
-     * the META-INF/services files that we care.
-     */
-    private Iterator createServiceFileIterator() {
-        if (classLoader == null) {
-            return new SingleIterator() {
-                protected Object value() {
-                    ClassLoader classLoader = XPathFactoryFinder.class.getClassLoader();
-                    return ss.getResourceAsURL(classLoader, SERVICE_ID);
-                    //return (ClassLoader.getSystemResource( SERVICE_ID ));
-                }
-            };
-        } else {
-            try {
-                //final Enumeration e = classLoader.getResources(SERVICE_ID);
-                final Enumeration e = ss.getResources(classLoader, SERVICE_ID);
-                if(!e.hasMoreElements()) {
-                    debugPrintln("no "+SERVICE_ID+" file was found");
-                }
-
-                // wrap it into an Iterator.
-                return new Iterator() {
-                    public void remove() {
-                        throw new UnsupportedOperationException();
-                    }
-
-                    public boolean hasNext() {
-                        return e.hasMoreElements();
-                    }
-
-                    public Object next() {
-                        return e.nextElement();
-                    }
-                };
-            } catch (IOException e) {
-                debugPrintln("failed to enumerate resources "+SERVICE_ID);
-                if(debug)   e.printStackTrace();
-                return new ArrayList().iterator();  // empty iterator
-            }
-        }
-    }
-
+//    /**
+//     * Returns an {@link Iterator} that enumerates all
+//     * the META-INF/services files that we care.
+//     */
+//    private Iterator createServiceFileIterator() {
+//        if (classLoader == null) {
+//            return new SingleIterator() {
+//                protected Object value() {
+//                    ClassLoader classLoader = XPathFactoryFinder.class.getClassLoader();
+//                    return ss.getResourceAsURL(classLoader, SERVICE_ID);
+//                    //return (ClassLoader.getSystemResource( SERVICE_ID ));
+//                }
+//            };
+//        } else {
+//            try {
+//                //final Enumeration e = classLoader.getResources(SERVICE_ID);
+//                final Enumeration e = ss.getResources(classLoader, SERVICE_ID);
+//                if(!e.hasMoreElements()) {
+//                    debugPrintln("no "+SERVICE_ID+" file was found");
+//                }
+//
+//                // wrap it into an Iterator.
+//                return new Iterator() {
+//                    public void remove() {
+//                        throw new UnsupportedOperationException();
+//                    }
+//
+//                    public boolean hasNext() {
+//                        return e.hasMoreElements();
+//                    }
+//
+//                    public Object next() {
+//                        return e.nextElement();
+//                    }
+//                };
+//            } catch (IOException e) {
+//                debugPrintln("failed to enumerate resources "+SERVICE_ID);
+//                if(debug)   e.printStackTrace();
+//                return new ArrayList().iterator();  // empty iterator
+//            }
+//        }
+//    }
+//
     private static final Class SERVICE_CLASS = XPathFactory.class;
-    private static final String SERVICE_ID = "META-INF/services/" + SERVICE_CLASS.getName();
+    //private static final String SERVICE_ID = "META-INF/services/" + SERVICE_CLASS.getName();
 
 
 

@@ -30,6 +30,8 @@
 package javax.swing;
 
 /**
+ * SwingJS note -- JToopTip extends JLabel; was JComponent
+ * 
  * Used to display a "Tip" for a Component. Typically components provide api
  * to automate the process of using <code>ToolTip</code>s.
  * For example, any Swing component can use the <code>JComponent</code>
@@ -62,10 +64,8 @@ package javax.swing;
  * @author Dave Moore
  * @author Rich Shiavi
  */
-public class JToolTip extends JComponent {
+public class JToolTip extends JLabel {
 
-
-    String tipText;
     JComponent component;
 
     /** Creates a tool tip. */
@@ -91,8 +91,8 @@ public class JToolTip extends JComponent {
      *  description: Sets the text of the tooltip
      */
     public void setTipText(String tipText) {
-        String oldValue = this.tipText;
-        this.tipText = tipText;
+    	String oldValue = getText();
+    	super.setText(tipText);
         firePropertyChange("tiptext", oldValue, tipText);
     }
 
@@ -103,7 +103,7 @@ public class JToolTip extends JComponent {
      * @return the <code>String</code> that is displayed
      */
     public String getTipText() {
-        return tipText;
+        return getText();
     }
 
     /**
@@ -148,24 +148,19 @@ public class JToolTip extends JComponent {
         return true;
     }
 
-    /**
-     * Returns a string representation of this <code>JToolTip</code>.
-     * This method
-     * is intended to be used only for debugging purposes, and the
-     * content and format of the returned string may vary between
-     * implementations. The returned string may be empty but may not
-     * be <code>null</code>.
-     *
-     * @return  a string representation of this <code>JToolTip</code>
-     */
-    @Override
-		protected String paramString() {
-        String tipTextString = (tipText != null ?
-                                tipText : "");
-
-        return super.paramString() +
-        ",tipText=" + tipTextString;
-    }
+	/**
+	 * Returns a string representation of this <code>JToolTip</code>. This method is
+	 * intended to be used only for debugging purposes, and the content and format
+	 * of the returned string may vary between implementations. The returned string
+	 * may be empty but may not be <code>null</code>.
+	 *
+	 * @return a string representation of this <code>JToolTip</code>
+	 */
+	@Override
+	protected String paramString() {
+		String tipText = getText();
+		return super.paramString() + ",tipText=" +(tipText != null ? tipText : "");
+	}
 
     
 }

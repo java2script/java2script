@@ -2424,14 +2424,14 @@ public final class Class<T> {
 		String clazzName = /** @j2sNative this.$clazz$ && (this.$clazz$.__CLASS_NAME$__ ||  this.$clazz$.__CLASS_NAME__)||*/ "";
 		if (clazzName == "" && !name.startsWith("/"))
 			name = "/" + name;
-	    Object data = null, fname = null;
+	    Object data = null;
+	    if (name == null || URL.class == null)
+	    	return null;
+	    name = name.replace('\\','/');
+	    String baseFolder = null;
+	    String fname= name;
 		/**
 		 * @j2sNative
-	    if (!name)
-	      return null;
-	    name = name.replace (/\\/g, '/');
-	    var baseFolder = null;
-	    fname = name;
 	    if (arguments.length == 2 && name.indexOf ('/') != 0) { // additional argument
 	      name = "/" + name;
 	    }
@@ -2464,13 +2464,13 @@ public final class Class<T> {
 	    var url = null;
 	    var javapath = fname;
 	    try {
-	      if (fname.indexOf(":/") < 0) {
-	        var d = document.location.href.split("#")[0].split("?")[0].split("/");
-        	d[d.length - 1] = fname;
-        	fname = d.join("/");
-	      }
+//	      if (fname.indexOf(":/") < 0) {
+//	        var d = document.location.href.split("#")[0].split("?")[0].split("/");
+//        	d[d.length - 1] = fname;
+//        	fname = d.join("/");
+//	      }
 	      Clazz.load("java.net.URL");
-	      url = Clazz.new_(java.net.URL.c$$S,[fname]);
+	      url = Clazz.new_(java.net.URL.c$$S,["file:/" + fname]);
 	    } catch (e) {
 	      return null;
 	    }

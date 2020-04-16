@@ -20,9 +20,10 @@ public class Test_Resource extends Test_ {
 		try {
 			// check for proper referencing of an interface
 			Class<?> c = Test_Resource.class;
+			System.out.println("Class.getResourceAsStream(\"test.properties\")");
 			p.load(c.getResourceAsStream("test.properties"));
 	        String test = p.getProperty("test");
-	        System.out.println(test);
+	        System.out.println("property test=" + test);
 	        assert("OK".equals(test));
 		} catch (Exception e) {
 			System.out.println(e);
@@ -31,6 +32,7 @@ public class Test_Resource extends Test_ {
 
 		try {
 			File f = File.createTempFile("test", ".txt");
+	        System.out.println("opening output stream for tempfile testnnnnn.txt");
 			try(OutputStream os = new FileOutputStream(f) {
 				public void close() {
 					try {

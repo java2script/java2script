@@ -3,6 +3,8 @@ package test;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -14,6 +16,10 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -23,7 +29,9 @@ import java.util.zip.ZipInputStream;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import javajs.util.PT;
 import javajs.util.Rdr;
+import sun.misc.IOUtils;
 
 public class Test_URL extends Test_ {
 
@@ -38,6 +46,132 @@ public class Test_URL extends Test_ {
 	protected static String getResponseMimeType() {
 		return "application/json";
 	}
+	public static void main(String[] args) {
+
+
+		try {
+			// jar:file:C:/temp/car.trz!/Car in a loop with friction.trk
+			File fi = new File("src/test/test.xlsx").getAbsoluteFile();
+			System.out.println(fi.getAbsolutePath());
+		//	FileInputStream fis = new FileInputStream(fi);
+			URL url;
+			URL jarURL;
+			
+			String jarpath = /** @j2sNative "./test/test.xlsx" || */"src/test/test.xlsx";
+			url = new URL("file", null, "C:/temp/car.trz");
+			jarURL = new URL("jar", null,  url + "!/Car in a loop with friction.trk");//"!/xl/worksheets/sheet1.xml");
+			url = new URL("file", null, jarpath);
+			jarURL = new URL("jar", null,  url + "!/xl/worksheets/sheet1.xml");
+			System.out.println(url);
+			System.out.println(jarURL);
+			InputStream is = jarURL.openConnection().getInputStream();
+			Object ret = Rdr.getStreamAsBytes(new BufferedInputStream(is), null);
+			System.out.println("length = " + (ret instanceof byte[] ? ((byte[]) ret).length + "\t" 
+			+ new String((byte[]) ret).substring(0,400) + "..." : ret.toString()));
+		} catch (IOException e3) {
+			e3.printStackTrace();
+		}
+		
+		
+		
+		URL readme = Test_URL.class.getClassLoader().getResource("file://c:/test/t.htm");
+		
+		System.out.println(readme);
+		
+
+		
+		try (InputStream in = new URL("https://stolaf.edu/people/hansonr").openStream()) {
+			
+			// Java or JavaScript:
+			System.out.println("length = " + IOUtils.readFully(in, -1, true).length);
+			
+			URL noHost;
+			Path path;
+
+//			//noHost = new URL("file:///c:/temp/t");
+//			noHost = new URL("file:///./temp/t");
+//			System.out.println(noHost.toString());
+//			URI u = new URI(noHost.toString());
+//			System.out.println(u);
+//			path = Paths.get(u);
+//			System.out.println(Files.readAllBytes(path).length);
+
+			// method 1: relative path -- Java or JavaScript; the document base
+			path = Paths.get("/./README.txt");
+			System.out.println(path.toAbsolutePath());
+			System.out.println(new String(Files.readAllBytes(path)));
+			path = Paths.get("./README.txt");
+			System.out.println(path.toAbsolutePath());
+			System.out.println(new String(Files.readAllBytes(path)));
+			
+			
+			// method 2: relative https -- JavaScript only
+			noHost = new URL("https:/./README.txt");
+			URI uri = new URI(noHost.toString());
+			path = Paths.get(uri);
+			// JavaScript only:
+			
+			System.out.println(String.join("\n",Files.readAllLines(path)));
+
+		} catch (Exception e2) {
+			// This error thrown in Java only
+			e2.printStackTrace();
+		}
+
+		dumpHeaders("http://www.opensourcephysics.org");
+		dumpHeaders("https://www.compadre.org");
+
+		try {
+			URI uriNoScheme = new URI("../../test");
+			URI uriRel = new URI("https://4virology.net:8080../../test/");
+			System.out.println(uriRel.getPort());
+			// can't do thi as port is -1 from trying to parse "8080.." : URL u =
+			// uriRel.toURL();
+			System.out.println(uriRel.getAuthority());
+			System.out.println(uriRel.getPath());
+//			URI uri = new URI("https://4virology.net/");
+			URL url = new URL("https://asfadlkfj");
+			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+			assert (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND);
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+
+		try {
+
+			String path = "https://rest.ensembl.org/info/ping?content-type=application/json";
+			URL url = new URL(path);
+			System.out.println("getting " + url);
+			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+			connection.setRequestMethod("GET");
+			connection.setRequestProperty("Content-Type", getRequestMimeType());
+			connection.setRequestProperty("Accept", getResponseMimeType());
+
+			connection.setUseCaches(false);
+			connection.setDoInput(true);
+			connection.setDoOutput(/* multipleIds */true);
+
+			connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
+			connection.setReadTimeout(10000);
+
+			InputStream fis = url.openStream();
+			BufferedInputStream bis = new BufferedInputStream(fis);
+			String s = Rdr.streamToUTF8String(bis);
+			bis.close();
+			System.out.println(s);
+			assert (s.equals("{\"ping\":1}\n"));
+
+			assert checkEnsembl();
+
+			testPost();
+
+			System.out.println("Test_URL OK");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
 
 	/**
 	 * Checks Ensembl's REST 'ping' endpoint, and returns true if response indicates
@@ -59,7 +193,7 @@ public class Test_URL extends Test_ {
 			 * expect {"ping":1} if ok if ping takes more than 2 seconds to respond, treat
 			 * as if unavailable
 			 */
-			br = getHttpResponse(ping, null, 2 * 1000);
+			br = getHttpResponse(ping, null, 4 * 1000);
 			if (br == null) {
 				// error reponse status
 				return false;
@@ -191,62 +325,6 @@ public class Test_URL extends Test_ {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
-
-	public static void main(String[] args) { 
-
-		dumpHeaders("http://www.opensourcephysics.org");
-		dumpHeaders("https://www.compadre.org");
-
-		try {
-			URI uriNoScheme = new URI("../../test");
-			URI uriRel = new URI("https://4virology.net:8080../../test/");
-			System.out.println(uriRel.getPort());
-			// can't do thi as port is -1 from trying to parse "8080.." : URL u = uriRel.toURL();
-			System.out.println(uriRel.getAuthority());
-			System.out.println(uriRel.getPath());		
-//			URI uri = new URI("https://4virology.net/");
-			URL url = new URL("https://asfadlkfj");
-			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-			assert (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND);
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}
-
-		try {
-
-			String path = "https://rest.ensembl.org/info/ping?content-type=application/json";
-			URL url = new URL(path);
-			System.out.println("getting " + url);
-		    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-		    connection.setRequestMethod("GET");
-		    connection.setRequestProperty("Content-Type", getRequestMimeType());
-		    connection.setRequestProperty("Accept", getResponseMimeType());
-
-		    connection.setUseCaches(false);
-		    connection.setDoInput(true);
-		    connection.setDoOutput(/*multipleIds*/true);
-
-		    connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
-		    connection.setReadTimeout(10000);
-
-						
-			InputStream fis = url.openStream();
-			BufferedInputStream bis = new BufferedInputStream(fis);
-			String s = Rdr.streamToUTF8String(bis);
-			bis.close();
-			System.out.println(s);
-			assert(s.equals("{\"ping\":1}\n"));
-
-			assert checkEnsembl();
-
-			testPost();
-
-			System.out.println("Test_URL OK");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
 	}
 
 	private static void dumpHeaders(String url) {

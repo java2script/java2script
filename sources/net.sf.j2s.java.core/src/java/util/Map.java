@@ -1231,6 +1231,11 @@ public interface Map<K,V> {
 	static int 秘hasKey(Map map, Object key) {
 		
 		/**
+		 * 
+		 * Note that JavaScript Map.has() will distinguish between new String("") and "". 
+		 * And yet Java will not. So the "1" return here must be handled as "invalid -- convert now"
+		 * even if it is just a remove or contains check.
+		 * 
 		 * @j2sNative
 		 * 
 		 * 			return (!map.秘m ? 0 : key != null && typeof key != "string" 
@@ -1242,5 +1247,24 @@ public interface Map<K,V> {
 		}
 	}
 
+	
+	static void 秘set(Map map, Object key, Object value) {
+		/**
+		 * @j2sNative
+		 * 
+		 * map.秘m.set(key == null ? null : key + "", value)
+		 */
+	}
+
+	static Object 秘get(Object map, Object key) {
+		/**
+		 * @j2sNative
+		 * 
+		 * return map.秘m.get(key == null ? null : key + "")
+		 */
+		{
+		return null;
+		}
+	}
 
 }

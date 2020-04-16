@@ -32,8 +32,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import swingjs.JSTempFile;
-
 /**
  * Instances of the file descriptor class serve as an opaque handle
  * to the underlying machine-specific structure representing an open
@@ -237,7 +235,7 @@ public final class FileDescriptor {
     synchronized void attach(Closeable c) {
 
     	_file = (/**  @j2sNative c._file || */null);
-		isTempFile = _file instanceof JSTempFile;
+		isTempFile = _file != null && _file.秘isTempFile;
     	
 		if (parent == null) {
 			// first caller gets to do this

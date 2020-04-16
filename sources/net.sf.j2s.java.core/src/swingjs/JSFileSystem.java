@@ -37,6 +37,7 @@ import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.FileAttributeView;
+import java.nio.file.attribute.FileStoreAttributeView;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.UserPrincipalLookupService;
 import java.nio.file.spi.FileSystemProvider;
@@ -56,6 +57,60 @@ import javajs.util.AU;
  *
  */
 public class JSFileSystem extends FileSystem {
+
+	public static class JSFileStore extends FileStore {
+
+		@Override
+		public String name() {
+			return "JSFileSystem";
+		}
+
+		@Override
+		public String type() {
+			return "java.util.Hashtable";
+		}
+
+		@Override
+		public boolean isReadOnly() {
+			return false;
+		}
+
+		@Override
+		public long getTotalSpace() throws IOException {
+			return Integer.MAX_VALUE * 256;
+		}
+
+		@Override
+		public long getUsableSpace() throws IOException {
+			return Integer.MAX_VALUE * 256;
+		}
+
+		@Override
+		public long getUnallocatedSpace() throws IOException {
+			return Integer.MAX_VALUE * 256;
+		}
+
+		@Override
+		public boolean supportsFileAttributeView(Class<? extends FileAttributeView> type) {
+			return false;
+		}
+
+		@Override
+		public boolean supportsFileAttributeView(String name) {
+			return false;
+		}
+
+		@Override
+		public <V extends FileStoreAttributeView> V getFileStoreAttributeView(Class<V> type) {
+			return null;
+		}
+
+		@Override
+		public Object getAttribute(String attribute) throws IOException {
+			return null;
+		}
+
+	}
 
 	public static class JSMappedByteBuffer extends MappedByteBuffer {
 
@@ -274,6 +329,7 @@ public class JSFileSystem extends FileSystem {
 		}
 
 		public void doSave() {
+			// From RandomAccessFile
 			bc.doSave = true;
 		}
 
@@ -523,7 +579,7 @@ public class JSFileSystem extends FileSystem {
 				秘bytes = null;
 				JSUtil.cacheFileData(path.name, null);
 			} else if (write) {
-				if (!doSave)
+				if (!doSave && !path.isTempFile)
 					return;
 				if (len < 秘bytes.length)
 					秘bytes = Arrays.copyOf(秘bytes, len);
@@ -580,13 +636,14 @@ public class JSFileSystem extends FileSystem {
 
 
 		private byte[] getBytes() {
-			if (秘bytes == null)
-				秘bytes = path.秘bytes;
 			if (秘bytes == null) {
-				秘bytes = JSUtil.getFileAsBytes(path.toString());
+				秘bytes = path.秘bytes;
+				if (秘bytes == null) {
+					秘bytes = JSUtil.getFileAsBytes(path.toJSName());
+				}
+				if (秘bytes != null)
+					len = 秘bytes.length;
 			}
-			if (秘bytes != null)
-				len = 秘bytes.length;
 			return 秘bytes;
 		}
 
@@ -692,10 +749,14 @@ public class JSFileSystem extends FileSystem {
 		}
 
 		public JSPath(String name, JSFileSystem jsFileSystem) {
-			while (name.startsWith("././"))
-				name = name.substring(3);
-			this.name = name;
 			this.fileSystem = jsFileSystem;
+			while (name.startsWith("././"))
+				name = name.substring(2);
+			this.name = name;
+			if (isAbsolute() && !name.startsWith(fileSystem.scheme + "://")) {
+				name = fileSystem.scheme + "://" + name.substring(name.indexOf("/") + 1);
+			}
+			this.name = name;
 		}
 
 		public JSPath(Path jsPath) {
@@ -711,7 +772,7 @@ public class JSFileSystem extends FileSystem {
 
 		@Override
 		public boolean isAbsolute() {
-			return name.indexOf(fileSystem.scheme + "://") == 0;
+			return name.indexOf(fileSystem.scheme + ":/") == 0;
 		}
 
 		@Override
@@ -842,7 +903,7 @@ public class JSFileSystem extends FileSystem {
 		@Override
 		public URI toUri() {
 			try {
-				return new URI(isAbsolute() ? name : "http://./" + name);
+				return new URI(toString());
 			} catch (URISyntaxException e) {
 				return null;
 			}
@@ -850,7 +911,7 @@ public class JSFileSystem extends FileSystem {
 
 		@Override
 		public Path toAbsolutePath() {
-			Path path = getPath(isAbsolute() ? name : "http://./" + name);
+			Path path = getPath(toString());
 			((JSPath) path).秘bytes = 秘bytes;
 			return path;
 		}
@@ -893,7 +954,14 @@ public class JSFileSystem extends FileSystem {
 
 		@Override
 		public String toString() {
-			return name;
+			String prefix = fileSystem.scheme;
+			if (isAbsolute() || prefix == "file") {
+				return name;
+			}
+//			if (prefix == "file")
+//				prefix = "http";
+			prefix = (name.startsWith("/") ? "" : prefix + "://./");
+			return (name.startsWith(prefix) ? name : prefix + name);
 		}
 
 		public void setAttribute(String attribute, Object value) {
@@ -903,7 +971,13 @@ public class JSFileSystem extends FileSystem {
 
 		public void set(byte[] bytes, File file) {
             	秘bytes = bytes;
-            	setIsTempFile(file instanceof JSTempFile);
+            	setIsTempFile(file.秘isTempFile);
+		}
+
+		public String toJSName() {
+			if (fileSystem.scheme != "file")
+				return toString();
+			return (name.startsWith("file:") ? name : "file:/" + name);
 		}
 
 	}
@@ -911,10 +985,18 @@ public class JSFileSystem extends FileSystem {
 	public static class JSFileSystemProvider extends FileSystemProvider {
 
 		private static Map<String, JSFileSystem> fsMap = new Hashtable<>();
+		
+		/** Could be "file" or "http" or "https"
+		 */
+		private String scheme;
+
+		public JSFileSystemProvider(String scheme) {
+			this.scheme = scheme;
+		}
 
 		@Override
 		public String getScheme() {
-			return null;
+			return scheme;
 		}
 
 		@Override
@@ -964,25 +1046,30 @@ public class JSFileSystem extends FileSystem {
 
 		@Override
 		public void createDirectory(Path dir, FileAttribute<?>... attrs) throws IOException {
-			ni();
-			throw new IOException();
+//			ni();
+//			throw new IOException();
 		}
 
 		@Override
 		public void delete(Path path) throws IOException {
-			JSUtil.removeCachedFileData(path.toString());
+			JSUtil.removeCachedFileData(((JSPath) path).toJSName());
 		}
 
 		@Override
 		public void copy(Path source, Path target, CopyOption... options) throws IOException {
-			ni();
-			throw new IOException();
+			byte[] bytes = ((JSPath) source).秘bytes;
+			if (bytes == null) {
+				bytes = JSUtil.getFileAsBytes(source.toString());
+			}
+			if (bytes == null)
+				throw new IOException("JSFileSystem " + source + " has no bytes");
+			JSUtil.cacheFileData(target.toString(), ((JSPath) target).秘bytes = bytes);
 		}
 
 		@Override
 		public void move(Path source, Path target, CopyOption... options) throws IOException {
-			ni();
-			throw new IOException();
+			copy(source, target, options);
+			JSUtil.removeCachedFileData(source.toString());
 		}
 
 		@Override
@@ -997,8 +1084,7 @@ public class JSFileSystem extends FileSystem {
 
 		@Override
 		public FileStore getFileStore(Path path) throws IOException {
-			ni();
-			return null;
+			return new JSFileSystem.JSFileStore();
 		}
 
 		@Override
@@ -1110,7 +1196,7 @@ public class JSFileSystem extends FileSystem {
 
 	@Override
 	public FileSystemProvider provider() {
-		return new JSFileSystemProvider();
+		return new JSFileSystemProvider(scheme);
 	}
 
 	private static void ni() {

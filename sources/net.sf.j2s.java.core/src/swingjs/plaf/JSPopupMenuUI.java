@@ -92,6 +92,8 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 	
 	private static JSSwingMenu j2sSwingMenu;
 
+	private static Component lastInvoker;
+
 	private JPopupMenu popupMenu;
 //	private PopupMenuListener popupMenuListener;
 
@@ -200,6 +202,7 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 					updateMenu(true);
 				}
 			}
+			lastInvoker = menu.getInvoker();
 			// issue here?? jc.addNotify();
 			//have to cheat here; these values are private to JMenu.
 			int x = /** @j2sNative this.menu.desiredLocationX || */0;
@@ -1193,8 +1196,13 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 		case "collapseAll":
 			hideMenusAndToolTip();
 			isMenuOpen = false;
-			j2smenu.options.jPopupMenu.visible = false;
-			((JComponent) j2smenu.options.jPopupMenu.getInvoker()).getRootPane().requestFocus();
+			c = j2smenu.options.jPopupMenu;
+			c.visible = false;
+			JSPopupMenuUI ui = (JSPopupMenuUI) c.getUI();
+			JComponent invoker = ((JComponent)((JPopupMenu)c).getInvoker());
+			if (invoker instanceof JMenu)
+				invoker = invoker.getRootPane();
+			invoker.requestFocus();
 			break;
 		case "setFocus":
 			isMenuOpen = true;
@@ -1243,6 +1251,10 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
     
 	public static void closeAllMenus() {
 		// top-level or submenu:
+		if (lastInvoker != null) {
+			lastInvoker.requestFocus();
+			lastInvoker = null;
+		}
 		JSUtil.jQuery.$(".ui-j2smenu").hide();
 		JSUtil.jQuery.$(".ui-j2smenu-node").removeClass("ui-state-active").removeClass("ui-state-focus");
 	}

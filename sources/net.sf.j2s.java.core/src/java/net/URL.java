@@ -36,6 +36,7 @@ import java.io.InputStream;
 import java.util.Hashtable;
 
 import javajs.util.AjaxURLConnection;
+import javajs.util.AjaxURLStreamHandlerFactory;
 
 /**
  * Class <code>URL</code> represents a Uniform Resource Locator, a pointer to a
@@ -550,6 +551,7 @@ public/* SwingJS final */class URL {// implements Serializable {
 	 */
 	public URL(URL context, String spec, URLStreamHandler handler)
 			throws MalformedURLException {
+		spec = spec.trim();
 		String original = spec;
 		int i, limit, c;
 		int start = 0;
@@ -567,13 +569,14 @@ public/* SwingJS final */class URL {// implements Serializable {
 
 		try {
 			limit = spec.length();
-			while ((limit > 0) && (spec.charAt(limit - 1) <= ' ')) {
-				limit--; // eliminate trailing whitespace
-			}
-			while ((start < limit) && (spec.charAt(start) <= ' ')) {
-				start++; // eliminate leading whitespace
-			}
-
+// BH: ?? This is exactly what String.trim() does....
+//			while ((limit > 0) && (spec.charAt(limit - 1) <= ' ')) {
+//				limit--; // eliminate trailing whitespace
+//			}
+//			while ((start < limit) && (spec.charAt(start) <= ' ')) {
+//				start++; // eliminate leading whitespace
+//			}
+//
 			if (spec.regionMatches(true, start, "url:", 0, 4)) {
 				start += 4;
 			}
@@ -972,7 +975,7 @@ public/* SwingJS final */class URL {// implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		return toExternalForm();
+		return handler.toExternalForm(this);
 	}
 
 	/**
@@ -1176,7 +1179,7 @@ public/* SwingJS final */class URL {// implements Serializable {
 			if (秘factory == null) {
 				// SwingJS -- we always use javajs.util.AjaxURLStreamHandlerFactory
 				try {
-					URL.setURLStreamHandlerFactory((URLStreamHandlerFactory) Class.forName("javajs.util.AjaxURLStreamHandlerFactory").newInstance());
+					URL.setURLStreamHandlerFactory(new AjaxURLStreamHandlerFactory());
 				} catch (Exception e) {
 					
 				}
