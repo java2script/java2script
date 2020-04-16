@@ -111,16 +111,26 @@ class FileSystem {
 	}
 
 	private boolean _regular(File file) {
-		return !_isDir(file);
+		return _isValid(file) && !_isDir(file);
 	}
 
+	private boolean _isValid(File file) {
+		return file.toString().indexOf(":") < 0;
+	}
+	
 	boolean _exists(File file) {
-		return (file.秘bytes != null || (file.秘bytes=JSUtil.getFileAsBytes(file)) != null);
+		return _isValid(file) && (file.秘bytes != null || file.getPrefixLength() == file.path.length() // is a directory
+				|| file.秘isTempFile ? (file.秘bytes =  _getTempFileBytes(file)) != null
+						: (file.秘bytes = JSUtil.getFileAsBytes(file)) != null);
+	}
+
+	private static byte[] _getTempFileBytes(File file) {
+		return (byte[]) JSUtil.getCachedFileData(file.path, true);
 	}
 
 	boolean _isDir(File file) {
-		// only an approximation.
-		return (file.getPrefixLength() == file.path.length() || !_exists(file));
+		// only an approximation. avoiding xxxx:  here completely
+		return (file.秘bytes == null && _isValid(file) && (file.getPrefixLength() == file.path.length() || !_exists(file)));
 	}
 
 	/**
@@ -244,11 +254,18 @@ class FileSystem {
 //                                               useCanonPrefixCache);
 //  }
 //
-//  /**
-//  * Convert the given pathname string to normal form.  If the string is
-//  * already in normal form then it is simply returned.
-//  */
-// public abstract String normalize(String path);
+	/**
+	 * Convert the given pathname string to normal form. If the string is already in
+	 * normal form then it is simply returned.
+	 */
+	public String normalize(String path) {
+		return path.replace('\\', '/');
+	}
+
+	public long getLength(File file) {
+		return (_exists(file) && file.秘bytes != null ? file.秘bytes.length : 0);
+	}
+
 //
 //
 // /**

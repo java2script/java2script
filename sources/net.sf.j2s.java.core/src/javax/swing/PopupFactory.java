@@ -497,7 +497,8 @@ public class PopupFactory {
         //
         @Override
 				public void hide() {
-            super.hide();
+        	// was super.hide(), but this also disposes of contents BH 2020.04.10
+			getComponent().hide();
             recycleHeavyWeightPopup(this);
         }
 

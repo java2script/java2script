@@ -268,7 +268,7 @@ public final class ImageIO {
 	public static boolean writeJS(RenderedImage im, String formatName, File output)
 			throws IOException {
 		ImageWriter writer = getWriter(formatName);
-		return (writer != null && ((JSImageWriter)writer).write(im, output.getName(), null));
+		return (writer != null && ((JSImageWriter)writer).write(im, output.getPath(), null));
 	}
 
 	/**

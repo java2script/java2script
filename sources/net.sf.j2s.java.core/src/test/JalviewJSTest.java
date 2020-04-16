@@ -10,6 +10,7 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.Label;
 import java.awt.MediaTracker;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -20,6 +21,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 
 import javax.swing.AbstractButton;
@@ -55,6 +57,43 @@ import javax.swing.event.MenuListener;
  */
 public class JalviewJSTest extends JPanel implements MenuListener, ItemListener {
 
+	public static final int SHIFT_DOWN_MASK;
+	public static final int ALT_DOWN_MASK;
+	public static final int SHORTCUT_MASK;
+
+	static {
+		float modern = 11;
+
+		float specversion = /** @j2sNative 1.8 || */
+				Float.parseFloat(System.getProperty("java.specification.version"));
+
+		// BH technically, these are not masks; they are bits.
+		if (specversion >= modern) {
+			SHIFT_DOWN_MASK = 0x040; // KeyEvent.SHIFT_DOWN_MASK;
+			ALT_DOWN_MASK = 0x200; // KeyEvent.ALT_DOWN_MASK;
+
+		} else {
+			SHIFT_DOWN_MASK = 0x01; // KeyEvent.SHIFT_MASK;
+			ALT_DOWN_MASK = 0x08; // KeyEvent.ALT_MASK;
+		}
+
+		int mask = 0;
+		try {
+			Toolkit tk = Toolkit.getDefaultToolkit();
+			mask = (int) tk.getClass()
+					.getMethod(specversion >= modern ? "getMenuShortcutKeyMaskEx" : "getMenuShortcutKeyMask",
+							new Class<?>[0]).invoke(tk);
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+
+		SHORTCUT_MASK = mask;
+
+		System.out.println(
+				"ShortcutKey: " + specversion + " " + SHIFT_DOWN_MASK + " " + ALT_DOWN_MASK + " " + SHORTCUT_MASK + " " 
+				+ Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+	}
+
 	public static void main(String[] args) {
 		new JalviewJSTest().doTest();
 	}
@@ -64,26 +103,25 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 
 	JMenuBar mb = new JMenuBar();
 	JFrame frame = new JFrame("JalviewJSTest") {
-		
+
 		public void invalidate() {
 			System.out.println("frame invalidate");
 			super.invalidate();
 		}
-		
+
 	};
 	JMenu mRight = new JMenu("right") {
 		@Override
 		// TODO NOT WORKING IN JAVASCRIPT
 		public void processKeyEvent(KeyEvent e, MenuElement[] path, MenuSelectionManager m) {
-			System.out.println("RIGHT JMenu path length=" + path.length + " key=" + e.getKeyCode()); 	
+			System.out.println("RIGHT JMenu path length=" + path.length + " key=" + e.getKeyCode());
 			for (int i = 0; i < path.length; i++)
-				System.out.println("[" + i + "]" + path[i].getClass().getName()  + "  "+ (path[i] instanceof JMenuItem ? ((JMenuItem) path[i]).getText() : ""));
+				System.out.println("[" + i + "]" + path[i].getClass().getName() + "  "
+						+ (path[i] instanceof JMenuItem ? ((JMenuItem) path[i]).getText() : ""));
 			super.processKeyEvent(e, path, m);
 		}
 	};
 
-	
-	
 	int nAction = 0;
 
 	ActionListener listener = new ActionListener() {
@@ -116,19 +154,20 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		@Override
 		public void mouseEntered(MouseEvent e) {
 			// TODO Auto-generated method stub
-			
+
 		}
 
 		@Override
 		public void mouseExited(MouseEvent e) {
 			// TODO Auto-generated method stub
-			
+
 		}
-		
+
 	};
 	private JLabel status;
 	private JMenu menu, menu1, menu2;
 	private JCheckBoxMenuItem cb4m;
+
 	/**
 	 * Put some content in a JFrame and show it
 	 */
@@ -169,7 +208,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		frame.setContentPane(getVisualPaneContent(menu, menu1, menu2));
 		frame.pack();
 		System.out.println(frame.getContentPane());
-		//frame.setBackground(Color.blue);
+		// frame.setBackground(Color.blue);
 		// note -- this blue color is never seen
 		JPopupMenu pmenu = new JPopupMenu();
 		JMenuItem b = new JMenuItem("testing1");
@@ -187,7 +226,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				
+
 //				frame.dispose();
 //				System.out.println("frame after dispose " + frame.isValid());
 //				frame.show();
@@ -201,12 +240,12 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 				System.out.println(frame.getContentPane());
 				System.out.println(frame.getContentPane().getComponent(0));
 				System.out.println(frame.getContentPane().getComponent(0).getBackground());
-				
-				((JPanel)frame.getContentPane()).setOpaque(true);
-				
+
+				((JPanel) frame.getContentPane()).setOpaque(true);
+
 				invalidate();
 				repaint();
-				//System.out.println(e.getButton());
+				// System.out.println(e.getButton());
 				if (e.getButton() != MouseEvent.BUTTON3)
 					return;
 				int n = pmenu.getComponentCount();
@@ -244,10 +283,11 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 
 			@Override
 			public void mouseWheelMoved(MouseWheelEvent e) {
-	
-					System.out.println("mouse wheel " + e.getModifiers() + " " + e.isShiftDown());
-			}});
-		
+
+				System.out.println("mouse wheel " + e.getModifiers() + " " + e.isShiftDown());
+			}
+		});
+
 		frame.setVisible(true);
 
 //		JDesktopPane d = new JDesktopPane();
@@ -292,10 +332,8 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("t1 is " + t1.getText());
 			}
-			
-		});
-		
 
+		});
 
 		JLabel l1 = new JLabel(getImage("test2.png"));
 		l1.setText("trailing right");
@@ -310,34 +348,33 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		l2.setHorizontalTextPosition(SwingConstants.LEADING);
 		l2.setHorizontalAlignment(SwingConstants.LEFT);
 		l2.setBorder(new LineBorder(Color.red, 7));
-		
+
 		Label awtlabel = new Label("AWT");
 		awtlabel.setFont(font);
 		awtlabel.setAlignment(Label.LEFT);
 		firstColumn.add(awtlabel);
 		awtlabel.setBackground(Color.white);
-		
-		
+
 		JButton b1 = new JButton("right left");
 		b1.setIcon(getImage("test2.png"));
 		b1.setFont(font);
 		// totally ignored
-		//b1.setMargin(new Insets(5,35,5,5));
-		//b1.setBorder(null);
+		// b1.setMargin(new Insets(5,35,5,5));
+		// b1.setBorder(null);
 		b1.setHorizontalTextPosition(SwingConstants.RIGHT);
 		b1.setHorizontalAlignment(SwingConstants.LEFT);
-		Insets i = (b1.getBorder() instanceof CompoundBorder ? 
-				((CompoundBorder) b1.getBorder()).getOutsideBorder().getBorderInsets(b1) :   
-				b1.getInsets());
+		Insets i = (b1.getBorder() instanceof CompoundBorder
+				? ((CompoundBorder) b1.getBorder()).getOutsideBorder().getBorderInsets(b1)
+				: b1.getInsets());
 
-		Insets ii = (b1.getBorder() instanceof CompoundBorder ? 
-				((CompoundBorder) b1.getBorder()).getInsideBorder().getBorderInsets(b1) :   
-				null);
+		Insets ii = (b1.getBorder() instanceof CompoundBorder
+				? ((CompoundBorder) b1.getBorder()).getInsideBorder().getBorderInsets(b1)
+				: null);
 
-		System.out.println(b1.getBorder() + "\n" + 
-		
+		System.out.println(b1.getBorder() + "\n" +
+
 				i + "\n" + ii + "\n" + b1.getInsets() + "\n" + b1.getMargin());
-		
+
 		System.out.println(b1.getPreferredSize());
 		JCheckBox cb3 = new JCheckBox("leading,left-to-right,rt");
 		cb3.setFont(font);
@@ -382,7 +419,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		firstColumn.add(rb3);
 		firstColumn.setBounds(100, 40, 200, 500);
 
-		JMenuItem cb3m = new JMenuItem("tooltiptest");//XXleading,left-to-rightXX");
+		JMenuItem cb3m = new JMenuItem("tooltiptest");// XXleading,left-to-rightXX");
 		cb3m.setToolTipText("testing");
 		cb3m.setFont(font);
 		cb3m.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
@@ -393,7 +430,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 			@Override
 			public void doClick() {
 				super.doClick();
-				System.out.println("JalviewJSTest checkbox Clicked!"  + getState());				
+				System.out.println("JalviewJSTest checkbox Clicked!" + getState());
 			}
 		};
 		cb4m.setMnemonic('X');
@@ -403,16 +440,17 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		cb4m.setHorizontalTextPosition(SwingConstants.LEADING);
 		cb4m.addActionListener(listener);
 
-		JCheckBoxMenuItem cb5m = new JCheckBoxMenuItem("XXCb5mtrailing,left-to-rightXX"){
+		JCheckBoxMenuItem cb5m = new JCheckBoxMenuItem("XXCb5mtrailing,left-to-rightXX") {
 			@Override
 			public void processKeyEvent(KeyEvent e, MenuElement[] path, MenuSelectionManager m) {
-				System.out.println("CB5M JMenu path length=" + path.length + " key=" + e.getKeyCode()); 	
+				System.out.println("CB5M JMenu path length=" + path.length + " key=" + e.getKeyCode());
 				for (int i = 0; i < path.length; i++)
-					System.out.println("[" + i + "]" + path[i].getClass().getName()  + "  "+ (path[i] instanceof JMenuItem ? ((JMenuItem) path[i]).getText() : ""));
+					System.out.println("[" + i + "]" + path[i].getClass().getName() + "  "
+							+ (path[i] instanceof JMenuItem ? ((JMenuItem) path[i]).getText() : ""));
 				super.processKeyEvent(e, path, m);
 			}
 		};
-		
+
 		cb5m.setFont(font);
 		cb5m.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 		cb5m.setHorizontalTextPosition(SwingConstants.TRAILING);
@@ -462,23 +500,23 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		mb5.setHorizontalTextPosition(SwingConstants.RIGHT);
 		addListeners(mb5);
 
-		cb4m.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.ALT_MASK | ActionEvent.CTRL_MASK | ActionEvent.SHIFT_MASK));
+		cb4m.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
+				ActionEvent.ALT_MASK | ActionEvent.CTRL_MASK | ActionEvent.SHIFT_MASK));
 
-		JMenu m1 = new JMenu("left")
- 		{
+		JMenu m1 = new JMenu("left") {
 			@Override
 			public void processKeyEvent(KeyEvent e, MenuElement[] path, MenuSelectionManager m) {
-				System.out.println("LEFT JMenu path length=" + path.length + " key=" + e.getKeyCode()); 	
+				System.out.println("LEFT JMenu path length=" + path.length + " key=" + e.getKeyCode());
 				for (int i = 0; i < path.length; i++)
-					System.out.println("[" + i + "]" + path[i].getClass().getName()  + "  "+ (path[i] instanceof JMenuItem ? ((JMenuItem) path[i]).getText() : ""));
-				// consuming the event preclude any further key processing. 
+					System.out.println("[" + i + "]" + path[i].getClass().getName() + "  "
+							+ (path[i] instanceof JMenuItem ? ((JMenuItem) path[i]).getText() : ""));
+				// consuming the event preclude any further key processing.
 				// other than that, I don't see the use of this.
-				// path[] is to this 
-				//e.consume();
+				// path[] is to this
+				// e.consume();
 				super.processKeyEvent(e, path, m);
 			}
-		}
-		;
+		};
 		m1.addMenuListener(new MenuListener() {
 
 			private boolean haveCb4m;
@@ -497,7 +535,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 					m.add(cb4m2);
 				}
 				haveCb4m = !haveCb4m;
-				
+
 			}
 
 			@Override
@@ -507,9 +545,9 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 			@Override
 			public void menuCanceled(MenuEvent e) {
 			}
-		  	
+
 		});
-		
+
 		m1.setMnemonic('l');
 		m1.setFont(font);
 		m1.addMenuListener(this);
@@ -525,26 +563,24 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		btn.setFont(font);
 		menu.add(btn);
 		testbtn = new JMenuItem("testingbtn");
-		testbtn.setFont(font); 
+		testbtn.setFont(font);
 		testbtn.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("You pressed button " + ((JMenuItem)e.getSource()).getText());
+				System.out.println("You pressed button " + ((JMenuItem) e.getSource()).getText());
 			}
-			
+
 		});
 
-	    addMenuActionAndAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, false), testbtn,
-	    		new ActionListener()
-	    {
-	      @Override
-	      public void actionPerformed(ActionEvent e)
-	      {
-	    	  System.out.println("testbtn via ESC");
-	        frame.setBackground(Color.yellow);
-	      }
-	    });
+		addMenuActionAndAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, false), testbtn,
+				new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						System.out.println("testbtn via ESC");
+						frame.setBackground(Color.yellow);
+					}
+				});
 
 		menu.add(testbtn);
 
@@ -562,7 +598,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		btn = new JMenuItem("-");
 		btn.setFont(font);
 		mRight.add(btn);
-		
+
 		JMenu mRight2 = new JMenu("right2");
 
 		mRight.add(mRight2);
@@ -571,9 +607,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		mRight2.add(mb4);
 		mRight2.addMenuListener(this);
 
-
 		JPanel theTab = new JPanel();
-
 
 		JButton bh = new JButton("<html>remove <i>testbtn</i></html>") {
 			{
@@ -598,7 +632,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 					public void actionPerformed(ActionEvent e) {
 						testbtn.setText("test" + ++ntest);
 						System.out.println("JalviewJSTest adding testbtn");
-						
+
 						menu.add(testbtn);
 
 					}
@@ -628,12 +662,10 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		return panel;
 	}
 
-	  protected void addMenuActionAndAccelerator(KeyStroke keyStroke,
-	          JMenuItem menuItem, ActionListener actionListener)
-	  {
-	    menuItem.setAccelerator(keyStroke);
-	    menuItem.addActionListener(actionListener);
-	  }
+	protected void addMenuActionAndAccelerator(KeyStroke keyStroke, JMenuItem menuItem, ActionListener actionListener) {
+		menuItem.setAccelerator(keyStroke);
+		menuItem.addActionListener(actionListener);
+	}
 
 	private void addListeners(AbstractButton c) {
 		c.addActionListener(listener);

@@ -798,6 +798,7 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
       b = appendMap({},b);
       isNew = true;
     }
+    b[getClassName(outerObj, true)] = outerObj;
     // add all superclass references for outer object
     addB$Keys(clazz1, isNew, b, outerObj, objThis);
   }
@@ -821,6 +822,11 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
   Clazz._initClass(clazz,1,0,objThis);
 };
 
+
+var fixBRefs = function(cl, obj, outerObj) {
+	// see Clazz.super_
+	obj.b$[cl.superclazz.$this$0] = outerObj;
+}
 
 var stripJavaLang = function(s) {
 	return (
@@ -1014,7 +1020,15 @@ Clazz.newPackage = function (pkgName) {
   return Clazz.lastPackage = pkg;
 };
 
-Clazz.super_ = function(cl, obj) {
+Clazz.super_ = function(cl, obj, outerObj) {
+  if (outerObj) {
+	  // inner class is subclassing an inner class in another class using OuterClass.super()
+	  fixBRefs(cl, obj, outerObj);
+	  return;
+  }
+
+  // implicit super() call 
+  
   if (cl.superclazz && cl.superclazz.c$) {
     // added [] here to account for the possibility of vararg default constructor
     cl.superclazz.c$.apply(obj, [[]]);
@@ -3130,31 +3144,6 @@ var getURIField = function(name, def) {
 	}
 }
 
-var fixAgent = function(agent) {return "" + ((agent = agent.split(";")[0]),
-	  (agent + (agent.indexOf("(") >= 0 && agent.indexOf(")") < 0 ? ")" : ""))) }
-
-var agent = navigator.userA;
-var sysprops = {
-		"file.separator" : "/",
-		"line.separator" : "\n",
-		"java.awt.printerjob" : "swingjs.JSPrinterJob",
-		"java.class.path" : "/",
-		"java.class.version" : "80",
-		"java.home" : "https://.",
-		"java.vendor" : "java2script/SwingJS/OpenJDK",
-		"java.vendor.url" : "https://github.com/BobHanson/java2script",
-		"java.version" : "1.8",
-		"os.arch" : navigator.userAgent,
-		"os.name" : fixAgent(navigator.userAgent).split("(")[0],
-		"os.version": fixAgent(navigator.appVersion).replace(fixAgent(navigator.userAgent), ""),
-		"path.separator" : ":",
-		"user.dir" : "https://.",
-		"user.home" : "https://.",
-		"user.name" : "user",
-		"javax.xml.datatype.DatatypeFactory" : "swingjs.xml.JSJAXBDatatypeFactory",
-		"javax.xml.bind.JAXBContextFactory" : "swingjs.xml.JSJAXBContextFactory"	
-}
-
 Clazz._setDeclared("java.lang.System", java.lang.System = System = {});
 ;(function(C$){
 
@@ -3279,12 +3268,43 @@ C$.getenv$=function () {
 	return env || (env = Clazz.load("java.util.Properties"));
 }
 
+
+
 C$.exit$I=function (status) {
 	Clazz.loadClass("java.lang.Runtime").getRuntime$().exit$I(status | 0);
 }
 
 C$.gc$=C$.runFinalization$=C$.runFinalizersOnExit$Z=C$.load$S=C$.loadLibrary$S=C$.mapLibraryName$S=
 	function (libname) {return null;}
+
+var fixAgent = function(agent) {return "" + ((agent = agent.split(";")[0]),
+		  (agent + (agent.indexOf("(") >= 0 && agent.indexOf(")") < 0 ? ")" : ""))) }
+
+	var agent = navigator.userA;
+	var sysprops = {
+			"file.separator" : "/",
+			"line.separator" : "\n",
+			"java.awt.printerjob" : "swingjs.JSPrinterJob",
+			"java.class.path" : "/",
+			"java.class.version" : "80",
+			"java.home" : "https://.",
+			"java.vendor" : "java2script/SwingJS/OpenJDK",
+			"java.vendor.url" : "https://github.com/BobHanson/java2script",
+			"java.version" : "1.8",
+			"java.vm.version" : "1.8",
+			"java.specification.version" : "1.8",
+			"java.io.tmpdir" : J2S.getGlobal("j2s.tmpdir"),
+			"os.arch" : navigator.userAgent,
+			"os.name" : fixAgent(navigator.userAgent).split("(")[0],
+			"os.version": fixAgent(navigator.appVersion).replace(fixAgent(navigator.userAgent), ""),
+			"path.separator" : ":",
+			"user.dir" : "https://.",
+			"user.home" : "https://.",
+			"user.name" : "user",
+			"javax.xml.datatype.DatatypeFactory" : "swingjs.xml.JSJAXBDatatypeFactory",
+			"javax.xml.bind.JAXBContextFactory" : "swingjs.xml.JSJAXBContextFactory"	
+	}
+
 
 })(System);
 
@@ -5340,10 +5360,14 @@ Integer.sum$I$I = Long.sum$J$J = Float.sum$F$F = Double.sum$D$D = 		function(a,b
 
 // NOTE THAT java.util.Date, like java.lang.Math, is unqualified by the transpiler -- this is NOT necessary
 
+;(function() {
+
 Clazz._setDeclared("java.util.Date", java.util.Date=Date);
 //Date.TYPE="java.util.Date";
 Date.__CLASS_NAME__="Date";
 addInterface(Date,[java.io.Serializable,java.lang.Comparable]);
+
+Date.parse$S = Date.parse;
 
 m$(java.util.Date, ["c$", "c$$S", "c$$J"], function(t) {
   this.setTime$J(typeof t == "string" ? Date.parse(t) : t ? t : System.currentTimeMillis$())
@@ -5380,6 +5404,13 @@ function(){
 var ht=this.getTime();
 return parseInt(ht)^parseInt((ht>>32));
 });
+
+Date.prototype.toString$ = Date.prototype.toString;
+m$(java.util.Date,"toString",
+function(){
+return this.toString$().split("(")[0].trim();
+});
+})();
 
 var notImplemented = function(why) {return function() {System.err.println(why + " has not been implemented.")}};
 

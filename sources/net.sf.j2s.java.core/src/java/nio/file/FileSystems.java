@@ -99,7 +99,7 @@ public final class FileSystems {
 	}
 
 	private static FileSystemProvider getDefaultProvider() {
-		return new JSFileSystem.JSFileSystemProvider();
+		return new JSFileSystem.JSFileSystemProvider("file");
 	}
 
 	public static FileSystem getDefault() {
@@ -107,7 +107,6 @@ public final class FileSystems {
 	}
 
 	public static FileSystem getFileSystem(URI uri) {
-		String scheme = uri.getScheme();
 		return getDefaultProvider().getFileSystem(uri);
 	}
 

@@ -222,4 +222,33 @@ public class ByteArrayInputStream extends InputStream {
 //    }
 //
 
+	
+
+	/**
+	 * Java 9
+	 * 
+	 * @param out
+	 * @return
+	 * @throws IOException
+	 */
+	@Override
+	public long transferTo(OutputStream out)
+            throws IOException {
+		byte[] b = (pos == 0 ? buf : readAllBytes());
+		out.write(b);
+		return b.length;
+	}
+	
+	/**
+	 * Java 9
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
+	@Override
+	public byte[] readAllBytes() throws IOException {
+		byte[] b = new byte[this.available()];
+		read(b, 0, b.length);
+		return b;
+	}
 }

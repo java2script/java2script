@@ -9,6 +9,7 @@ import javajs.api.JSFunction;
 import swingjs.api.js.JSSwingMenu;
 
 
+
 public interface J2SInterface {
 
 	void addBinaryFileType(String ext);
@@ -70,6 +71,8 @@ public interface J2SInterface {
 	int setWindowZIndex(DOMNode domNode, int pos);
 
 	void unsetMouse(DOMNode frameNode);
+
+	String fixCachePath(String uri);
 
 
 }

@@ -186,7 +186,7 @@ public final class ServiceLoader<S>
     implements Iterable<S>
 {
 
-    private static final String PREFIX = "META-INF/services/";
+    //private static final String PREFIX = "META-INF/services/";
 
     // The class or interface representing the service being loaded
     private final Class<S> service;
@@ -239,44 +239,45 @@ public final class ServiceLoader<S>
         throw new ServiceConfigurationError(service.getName() + ": " + msg);
     }
 
-    private static void fail(Class<?> service, URL u, int line, String msg)
-        throws ServiceConfigurationError
-    {
-        fail(service, u + ":" + line + ": " + msg);
-    }
+//    private static void fail(Class<?> service, URL u, int line, String msg)
+//        throws ServiceConfigurationError
+//    {
+//        fail(service, u + ":" + line + ": " + msg);
+//    }
 
-    // Parse a single line from the given configuration file, adding the name
-    // on the line to the names list.
-    //
-    private int parseLine(Class<?> service, URL u, BufferedReader r, int lc,
-                          List<String> names)
-        throws IOException, ServiceConfigurationError
-    {
-        String ln = r.readLine();
-        if (ln == null) {
-            return -1;
-        }
-        int ci = ln.indexOf('#');
-        if (ci >= 0) ln = ln.substring(0, ci);
-        ln = ln.trim();
-        int n = ln.length();
-        if (n != 0) {
-            if ((ln.indexOf(' ') >= 0) || (ln.indexOf('\t') >= 0))
-                fail(service, u, lc, "Illegal configuration-file syntax");
-            int cp = ln.codePointAt(0);
-            if (!Character.isJavaIdentifierStart(cp))
-                fail(service, u, lc, "Illegal provider-class name: " + ln);
-            for (int i = Character.charCount(cp); i < n; i += Character.charCount(cp)) {
-                cp = ln.codePointAt(i);
-                if (!Character.isJavaIdentifierPart(cp) && (cp != '.'))
-                    fail(service, u, lc, "Illegal provider-class name: " + ln);
-            }
-            if (!providers.containsKey(ln) && !names.contains(ln))
-                names.add(ln);
-        }
-        return lc + 1;
-    }
-
+//    // Parse a single line from the given configuration file, adding the name
+//    // on the line to the names list.
+//    //
+//    private int parseLine(Class<?> service, URL u, BufferedReader r, int lc,
+//                          List<String> names)
+//        throws IOException, ServiceConfigurationError
+//    {
+//        String ln = r.readLine();
+//        if (ln == null) {
+//            return -1;
+//        }
+//        int ci = ln.indexOf('#');
+//        if (ci >= 0) ln = ln.substring(0, ci);
+//        ln = ln.trim();
+//        int n = ln.length();
+//        if (n != 0) {
+//            if ((ln.indexOf(' ') >= 0) || (ln.indexOf('\t') >= 0))
+//                fail(service, u, lc, "Illegal configuration-file syntax");
+//            int cp = ln.codePointAt(0);
+//            if (!Character.isJavaIdentifierStart(cp))
+//                fail(service, u, lc, "Illegal provider-class name: " + ln);
+//            for (int i = Character.charCount(cp); i < n; i += Character.charCount(cp)) {
+//                cp = ln.codePointAt(i);
+//                if (!Character.isJavaIdentifierPart(cp) && (cp != '.'))
+//                    fail(service, u, lc, "Illegal provider-class name: " + ln);
+//            }
+//            if (!providers.containsKey(ln) && !names.contains(ln))
+//                names.add(ln);
+//        }
+//        return lc + 1;
+//    }
+//
+//   
     // Parse the content of the given URL as a provider-configuration file.
     //
     // @param  service
@@ -294,29 +295,29 @@ public final class ServiceLoader<S>
     //         If an I/O error occurs while reading from the given URL, or
     //         if a configuration-file format error is detected
     //
-    private Iterator<String> parse(Class<?> service, URL u)
-        throws ServiceConfigurationError
-    {
-        InputStream in = null;
-        BufferedReader r = null;
-        ArrayList<String> names = new ArrayList<>();
-        try {
-            in = u.openStream();
-            r = new BufferedReader(new InputStreamReader(in, "utf-8"));
-            int lc = 1;
-            while ((lc = parseLine(service, u, r, lc, names)) >= 0);
-        } catch (IOException x) {
-            fail(service, "Error reading configuration file", x);
-        } finally {
-            try {
-                if (r != null) r.close();
-                if (in != null) in.close();
-            } catch (IOException y) {
-                fail(service, "Error closing configuration file", y);
-            }
-        }
-        return names.iterator();
-    }
+//    private Iterator<String> parse(Class<?> service, URL u)
+//        throws ServiceConfigurationError
+//    {
+//        InputStream in = null;
+//        BufferedReader r = null;
+//        ArrayList<String> names = new ArrayList<>();
+//        try {
+//            in = u.openStream();
+//            r = new BufferedReader(new InputStreamReader(in, "utf-8"));
+//            int lc = 1;
+//            while ((lc = parseLine(service, u, r, lc, names)) >= 0);
+//        } catch (IOException x) {
+//            fail(service, "Error reading configuration file", x);
+//        } finally {
+//            try {
+//                if (r != null) r.close();
+//                if (in != null) in.close();
+//            } catch (IOException y) {
+//                fail(service, "Error closing configuration file", y);
+//            }
+//        }
+//        return names.iterator();
+//    }
 
     // Private inner class implementing fully-lazy provider lookup
     //
@@ -326,8 +327,8 @@ public final class ServiceLoader<S>
 
         Class<S> service;
         ClassLoader loader;
-        Enumeration<URL> configs = null;
-        Iterator<String> pending = null;
+//        Enumeration<URL> configs = null;
+//        Iterator<String> pending = null;
         String nextName = null;
 
         private LazyIterator(Class<S> service, ClassLoader loader) {
@@ -336,28 +337,30 @@ public final class ServiceLoader<S>
         }
 
         private boolean hasNextService() {
-            if (nextName != null) {
-                return true;
-            }
-            if (configs == null) {
-                try {
-                    String fullName = PREFIX + service.getName();
-                    if (loader == null)
-                        configs = ClassLoader.getSystemResources(fullName);
-                    else
-                        configs = loader.getResources(fullName);
-                } catch (IOException x) {
-                    fail(service, "Error locating configuration files", x);
-                }
-            }
-            while ((pending == null) || !pending.hasNext()) {
-                if (!configs.hasMoreElements()) {
-                    return false;
-                }
-                pending = parse(service, configs.nextElement());
-            }
-            nextName = pending.next();
-            return true;
+        	return false;
+// SwingJS no JAR files
+//            if (nextName != null) {
+//                return true;
+//            }
+//            if (configs == null) {
+//                try {
+//                    String fullName = PREFIX + service.getName();
+//                    if (loader == null)
+//                        configs = ClassLoader.getSystemResources(fullName);
+//                    else
+//                        configs = loader.getResources(fullName);
+//                } catch (IOException x) {
+//                    fail(service, "Error locating configuration files", x);
+//                }
+//            }
+//            while ((pending == null) || !pending.hasNext()) {
+//                if (!configs.hasMoreElements()) {
+//                    return false;
+//                }
+//                pending = parse(service, configs.nextElement());
+//            }
+//            nextName = pending.next();
+//            return true;
         }
 
         private S nextService() {
@@ -388,29 +391,34 @@ public final class ServiceLoader<S>
             throw new Error();          // This cannot happen
         }
 
-        public boolean hasNext() {
+        @Override
+		public boolean hasNext() {
             if (acc == null) {
                 return hasNextService();
             } else {
                 PrivilegedAction<Boolean> action = new PrivilegedAction<Boolean>() {
-                    public Boolean run() { return hasNextService(); }
+                    @Override
+					public Boolean run() { return hasNextService(); }
                 };
                 return AccessController.doPrivileged(action, acc);
             }
         }
 
-        public S next() {
+        @Override
+		public S next() {
             if (acc == null) {
                 return nextService();
             } else {
                 PrivilegedAction<S> action = new PrivilegedAction<S>() {
-                    public S run() { return nextService(); }
+                    @Override
+					public S run() { return nextService(); }
                 };
                 return AccessController.doPrivileged(action, acc);
             }
         }
 
-        public void remove() {
+        @Override
+		public void remove() {
             throw new UnsupportedOperationException();
         }
 
@@ -462,25 +470,29 @@ public final class ServiceLoader<S>
      * @return  An iterator that lazily loads providers for this loader's
      *          service
      */
-    public Iterator<S> iterator() {
+    @Override
+	public Iterator<S> iterator() {
         return new Iterator<S>() {
 
             Iterator<Map.Entry<String,S>> knownProviders
                 = providers.entrySet().iterator();
 
-            public boolean hasNext() {
+            @Override
+			public boolean hasNext() {
                 if (knownProviders.hasNext())
                     return true;
                 return lookupIterator.hasNext();
             }
 
-            public S next() {
+            @Override
+			public S next() {
                 if (knownProviders.hasNext())
                     return knownProviders.next().getValue();
                 return lookupIterator.next();
             }
 
-            public void remove() {
+            @Override
+			public void remove() {
                 throw new UnsupportedOperationException();
             }
 
@@ -579,7 +591,8 @@ public final class ServiceLoader<S>
      *
      * @return  A descriptive string
      */
-    public String toString() {
+    @Override
+	public String toString() {
         return "java.util.ServiceLoader[" + service.getName() + "]";
     }
 

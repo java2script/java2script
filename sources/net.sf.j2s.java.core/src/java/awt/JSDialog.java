@@ -697,7 +697,7 @@ public class JSDialog extends Window {
     }
 
 	@Override
-	protected ComponentPeer getOrCreatePeer() {
+	public ComponentPeer getOrCreatePeer() {
 		return (ui == null ? null : peer == null ? (peer = getToolkit().createDialog((Dialog) (Object) this)) : peer);
 	}
     /**

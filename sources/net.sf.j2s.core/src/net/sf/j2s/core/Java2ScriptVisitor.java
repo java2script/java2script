@@ -134,7 +134,10 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
 // TODO: superclass inheritance for JAXB XmlAccessorType
+// TODO: inner classes of interface are duplicated
 
+//BH 2020.04.15 -- 3.2.9-v1g fix for qualified super() in inner classes using Class.super_ call (Tracker)
+//BH 2020.04.05 -- 3.2.9-v1f (Boolean ? ...) not unboxed
 //BH 2020.03.21 -- 3.2.9-v1e better v1c 
 //BH 2020.03.20 -- 3.2.9-v1d proper check for new String("x") == "x" (should be false), but new integer(3) == 3 (true) 
 //BH 2020.03.20 -- 3.2.9-v1c more efficient static call from 3.2.9-v1a 
@@ -860,46 +863,46 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		buffer.append(")");
 	}
 
-	/**
-	 * 3.2.9.v1a 
-	 * 
-	 * Static method invocations must process parameters before initializing the method's class
-	 * if any parameter either calls a method or defines a static variable. We do this by changing
-	 *  
-	 *  $I$(3).xxxx(x,y,z)
-	 *  
-	 *    to 
-	 *    
-	 *  (function(a,b){b.apply(null,a)})([x,y,z],$I$(3).xxxx)
-	 * 
-	 * In addition, for constructors, Clazz.new_ needs to have the parameters as the first
-	 * parameter and the constructor method as the second parameter:
-	 * 
-	 *   Clazz.new_([args],constr)
-	 * 
-	 * The method invocation has not been closed at this point.
-	 * 
-	 * @param pt   start of method name
-	 * @param pt1  end of method name
-	 */
-	private void checkStaticParams(int pt, int pt1, boolean isConstructor) {
-		String args;
-		// must switch from Clazz.new_($I$(3).xxxx,[x,y,z] to Clazz.new([x,y,z],$I$(3).xxxx
-	    // ............................^pt........^pt1           
-		// must switch from $I$(3).xxxx(x,y,z  to (function(a,f){return f.apply(null,a)})([x,y,z],$I$(3).xxxx
-		// .................^pt........^pt1
-		if (pt1 == pt 
-				|| buffer.charAt(pt) != '$' 
-				|| (args = buffer.substring(pt1 + 1)).indexOf("(") < 0 && args.indexOf("=") < 0)
-			return;
-		String f = buffer.substring(pt, pt1);
-		buffer.setLength(pt);
-		if (!isConstructor) {
-			args = "(function(a,f){return f.apply(null,a)})([" + args + "]";			
-		}
-		buffer.append(args).append(",").append(f);
-	}
-
+//	/**
+//	 * 3.2.9.v1a 
+//	 * 
+//	 * Static method invocations must process parameters before initializing the method's class
+//	 * if any parameter either calls a method or defines a static variable. We do this by changing
+//	 *  
+//	 *  $I$(3).xxxx(x,y,z)
+//	 *  
+//	 *    to 
+//	 *    
+//	 *  (function(a,b){b.apply(null,a)})([x,y,z],$I$(3).xxxx)
+//	 * 
+//	 * In addition, for constructors, Clazz.new_ needs to have the parameters as the first
+//	 * parameter and the constructor method as the second parameter:
+//	 * 
+//	 *   Clazz.new_([args],constr)
+//	 * 
+//	 * The method invocation has not been closed at this point.
+//	 * 
+//	 * @param pt   start of method name
+//	 * @param pt1  end of method name
+//	 */
+//	private void checkStaticParams(int pt, int pt1, boolean isConstructor) {
+//		String args;
+//		// must switch from Clazz.new_($I$(3).xxxx,[x,y,z] to Clazz.new([x,y,z],$I$(3).xxxx
+//	    // ............................^pt........^pt1           
+//		// must switch from $I$(3).xxxx(x,y,z  to (function(a,f){return f.apply(null,a)})([x,y,z],$I$(3).xxxx
+//		// .................^pt........^pt1
+//		if (pt1 == pt 
+//				|| buffer.charAt(pt) != '$' 
+//				|| (args = buffer.substring(pt1 + 1)).indexOf("(") < 0 && args.indexOf("=") < 0)
+//			return;
+//		String f = buffer.substring(pt, pt1);
+//		buffer.setLength(pt);
+//		if (!isConstructor) {
+//			args = "(function(a,f){return f.apply(null,a)})([" + args + "]";			
+//		}
+//		buffer.append(args).append(",").append(f);
+//	}
+//
 	
 	/**
 	 * 3.2.9.v1c
@@ -2902,6 +2905,13 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			buffer.append("Clazz.super_(C$, this);\n");
 			return;
 		}
+
+		if (node.getExpression() != null) {
+			buffer.append(";Clazz.super_(C$,this,");
+			node.getExpression().accept(this);
+			buffer.append(")");
+		}
+
 		buffer.append(getFinalMethodNameWith$Params(";C$.superclazz.c$", node.resolveConstructorBinding(), null, false,
 				METHOD_NOTSPECIAL));
 		buffer.append(".apply(this,[");
@@ -3458,7 +3468,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		ITypeBinding binding = node.resolveTypeBinding();
 		Expression expThen = node.getThenExpression();
 		Expression expElse = node.getElseExpression();
-		node.getExpression().accept(this);
+		Expression exp = node.getExpression();
+		exp.accept(this);
+		if (exp.resolveUnboxing())
+			buffer.append(".booleanValue$()");
 		buffer.append(" ? ");
 		addExpressionAsTargetType(expThen, binding, "e", null);
 		buffer.append(" : ");
@@ -4784,7 +4797,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 */
 	private String getSyntheticReference(String className) {
 		return "this" + (className.equals("java.lang.Object") || className.equals("Object") ? ""
-				: className.equals(this$0Name) ? ".this$0"
+				//: className.equals(this$0Name) ? ".this$0"
 						: ".b$['" + getFinalJ2SClassName(className, FINAL_RAW) + "']");
 	}
 
@@ -6507,12 +6520,31 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			return type.substring(0, type.indexOf(","));
 		}
 
-		private final static String[] knownClasses = new String[] { "java.lang.Object", "java.lang.Class",
-				"java.lang.String", "java.lang.Byte", "java.lang.Character", "java.lang.Short", "java.lang.Long",
-				"java.lang.Integer", "java.lang.Float", "java.lang.Double", "java.io.Serializable",
-				"java.lang.Iterable", "java.lang.CharSequence", "java.lang.Cloneable", "java.lang.Comparable",
-				"java.lang.Runnable", "java.lang.System", "java.lang.ClassLoader", "java.lang.Math",
-				"java.lang.Number" };
+		private final static String[] knownClasses = new String[] { 
+				"java.lang.Object", 
+				"java.lang.Class",
+				"java.lang.String",
+				"java.lang.Number", 
+				"java.lang.Byte", 
+				"java.lang.Character", 
+				"java.lang.Short", 
+				"java.lang.Long",
+				"java.lang.Integer", 
+				"java.lang.Float", 
+				"java.lang.Double", 
+				"java.lang.Boolean",
+				"java.lang.Iterable", 
+				"java.lang.CharSequence", 
+				"java.lang.Cloneable", 
+				"java.lang.Comparable",
+				"java.lang.Runnable", 
+				"java.lang.System", 
+				"java.lang.Throwable", 
+				"java.lang.ClassLoader", 
+				"java.lang.Math", 
+				"java.io.Serializable",
+				"java.util.Date"
+				};
 		private final static Set<String> knownClassHash = new HashSet<String>();
 		static {
 			for (int i = knownClasses.length; --i >= 0;)

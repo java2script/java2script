@@ -25,11 +25,7 @@
 
 package java.io;
 
-import java.nio.channels.FileChannel;
-//import sun.nio.ch.FileChannelImpl;
-
 import swingjs.JSFileSystem.JSFileChannel;
-import swingjs.JSTempFile;
 import swingjs.JSUtil;
 
 
@@ -61,10 +57,7 @@ class FileInputStream extends InputStream
      * (null if the stream is created with a file descriptor)
      */
     private final String path;
-
     private JSFileChannel channel = null;
-
-//    private final Object closeLock = new Object();
     private volatile boolean closed = false;
 
 	public File _file;
@@ -97,9 +90,7 @@ class FileInputStream extends InputStream
      * @see        java.lang.SecurityManager#checkRead(java.lang.String)
      */
     public FileInputStream(String name) throws FileNotFoundException {
-        this((File) (name == null ? null 
-        		: name.startsWith(File.temporaryDirectory) ? new JSTempFile(name) 
-        				: new File(name)));
+        this((File) (name == null ? null : new File(name)));
     }
 
     /**
@@ -427,4 +418,38 @@ class FileInputStream extends InputStream
             close();
         }
     }
+	/**
+	 * Java 9
+	 * 
+	 * @param out
+	 * @return
+	 * @throws IOException
+	 */
+	@Override
+	public long transferTo(OutputStream out)  throws IOException {
+		if (channel != null) { 
+			return super.transferTo(out);
+		}
+		byte[] b = (is.pos == 0 ? is.buf : is.readAllBytes());
+		out.write(b);
+		return b.length;		
+	}
+	
+	/**
+	 * Java 9
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
+	@Override
+	public byte[] readAllBytes() throws IOException {
+		if (channel != null)
+			super.readAllBytes();
+		if (is.pos == 0)
+			return is.buf;
+		byte[] b = new byte[available()];
+		read(b, 0, b.length);
+		return b;
+	}
+
 }

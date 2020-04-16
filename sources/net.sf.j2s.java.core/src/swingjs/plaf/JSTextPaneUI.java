@@ -24,6 +24,11 @@
  */
 package swingjs.plaf;
 
+import java.awt.Color;
+
+import swingjs.JSToolkit;
+import swingjs.api.js.DOMNode;
+
 public class JSTextPaneUI extends JSEditorPaneUI {
 
 	
@@ -37,5 +42,13 @@ public class JSTextPaneUI extends JSEditorPaneUI {
 	protected String getPropertyPrefix() {
         return "TextPane";
     }
+    
+    
+
+	protected void enableNode(DOMNode node, boolean b) {
+		super.enableNode(node, b);
+	}
+
+
     
 }

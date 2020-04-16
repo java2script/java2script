@@ -369,6 +369,8 @@ public class Hashtable<K,V>
 		case NOT_SIMPLE:
 			break;
 		case INVALID_KEY:
+			Map.秘ensureJavaMap(this);
+			break;
 		case NO_SUCH_KEY:
 			return false;
 		case HAS_KEY:
@@ -408,6 +410,8 @@ public class Hashtable<K,V>
 		case NOT_SIMPLE:
 			break;
 		case INVALID_KEY:
+			Map.秘ensureJavaMap(this);
+			break;
 		case NO_SUCH_KEY:
 			return null;
 		case HAS_KEY:
@@ -581,6 +585,8 @@ public class Hashtable<K,V>
 		case NOT_SIMPLE:
 			break;
 		case INVALID_KEY:
+			Map.秘ensureJavaMap(this);
+			break;
 		case NO_SUCH_KEY:
 			return null;
 		case HAS_KEY:
@@ -856,24 +862,27 @@ public class Hashtable<K,V>
             Object key = entry.getKey();
             
             switch (Map.秘hasKey(Hashtable.this, key)) {
+            case NOT_SIMPLE:
+            	break;
+            case INVALID_KEY:
+    			Map.秘ensureJavaMap(Hashtable.this);
+    			break;
             case HAS_KEY:
 				Object value = entry.getValue();
 				Object v = Hashtable.this.get(key);
 				return (value == v || value != null && value.equals(key));
-            case NOT_SIMPLE:
-	            Entry<?,?>[] tab = table;
-	            int hash = key.hashCode();
-	            int index = (hash & 0x7FFFFFFF) % tab.length;
-
-	            for (Entry<?,?> e = tab[index]; e != null; e = e.next_)
-	                if (e.hash==hash && e.equals(entry))
-	                    return true;
-	            return false;
-			default:
-            case INVALID_KEY:
             case NO_SUCH_KEY:
             	return false;
             }
+            Entry<?,?>[] tab = table;
+            int hash = key.hashCode();
+            int index = (hash & 0x7FFFFFFF) % tab.length;
+
+            for (Entry<?,?> e = tab[index]; e != null; e = e.next_)
+                if (e.hash==hash && e.equals(entry))
+                    return true;
+            return false;
+
         }
 
         @Override
@@ -884,6 +893,11 @@ public class Hashtable<K,V>
             Object key = entry.getKey();
             
             switch (Map.秘hasKey(Hashtable.this, key)) {
+            case NOT_SIMPLE:
+	            break;
+            case INVALID_KEY:
+    			Map.秘ensureJavaMap(Hashtable.this);
+    			break;
             case HAS_KEY:
 				Object value = entry.getValue();
 				if (value == null)
@@ -894,11 +908,8 @@ public class Hashtable<K,V>
 					return true;
 				}
 				return false;
-            case INVALID_KEY:
             case NO_SUCH_KEY:
 				return false;
-            case NOT_SIMPLE:
-	            break;
 			}
             Entry<?,?>[] tab = table;
             int hash = key.hashCode();
@@ -1151,6 +1162,8 @@ public class Hashtable<K,V>
 
 		
 		switch (Map.秘hasKey(this, key)) {
+		case NOT_SIMPLE:
+			break;
 		case INVALID_KEY:
 			Map.秘ensureJavaMap(this);
 			break;
@@ -1196,7 +1209,11 @@ public class Hashtable<K,V>
     public synchronized boolean remove(Object key, Object value) {
         Objects.requireNonNull(value);
    		switch (Map.秘hasKey(this, key)) {
-		case INVALID_KEY:
+   		case NOT_SIMPLE:
+   			break;
+   		case INVALID_KEY:
+			Map.秘ensureJavaMap(this);
+			break;
 		case NO_SUCH_KEY:
 			return false;
 		case HAS_KEY:
@@ -1244,6 +1261,8 @@ public class Hashtable<K,V>
 		case NOT_SIMPLE:
 			break;
 		case INVALID_KEY:
+			Map.秘ensureJavaMap(this);
+			break;
 		case NO_SUCH_KEY:
 			return false;
 		case HAS_KEY:
@@ -1286,7 +1305,11 @@ public class Hashtable<K,V>
     public synchronized V replace(K key, V value) {
     	
 		switch (Map.秘hasKey(this, key)) {
+		case NOT_SIMPLE:
+			break;
 		case INVALID_KEY:
+			Map.秘ensureJavaMap(this);
+			break;
 		case NO_SUCH_KEY:
 			return null;
 		case HAS_KEY:
@@ -1384,6 +1407,8 @@ public class Hashtable<K,V>
 		case NOT_SIMPLE:
 			break;
 		case INVALID_KEY:
+			Map.秘ensureJavaMap(this);
+			break;
 		case NO_SUCH_KEY:
 			return null;
 		case HAS_KEY:

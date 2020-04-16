@@ -19,6 +19,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.JTextPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
@@ -66,11 +67,14 @@ public class Test_Clipboard extends JFrame {
 		add(p, BorderLayout.CENTER);
 		this.setLocation(300, 300);
 
-		JTextArea area = new JTextArea(10, 50);
+		//JTextArea area = new JTextArea(10, 50);
+		JTextPane area = new JTextPane();
+		
 		area.setText("this\nis\na\ntest\n" + new Date());
 		p.add(area);
+		//area.setOpaque(false);
    
-		area.setBackground(Color.orange);
+		//area.setBackground(Color.orange);
 
 		String[] columnNames = { "First Name", "Last Name", "Sport", "# of Years",
 				// "Vegetarian"

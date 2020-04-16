@@ -27,9 +27,7 @@ package java.io;
 
 import java.nio.channels.FileChannel;
 
-import javajs.util.OC;
 import swingjs.JSFileSystem.JSFileChannel;
-import swingjs.JSTempFile;
 import swingjs.JSUtil;
 
 /**
@@ -149,8 +147,7 @@ public class FileOutputStream extends OutputStream {
 	 * @since JDK1.1
 	 */
 	public FileOutputStream(String name, boolean append) throws FileNotFoundException {
-		this(name == null ? (File) null
-				: name.startsWith(File.temporaryDirectory) ? new JSTempFile(name) : new File(name), append);
+		this(name == null ? (File) null: new File(name), append);
 	}
 
 	/**
@@ -373,8 +370,7 @@ public class FileOutputStream extends OutputStream {
 				if (channel == null) {
 					bos.close();
 					fd._file.秘bytes = 秘bytes = bos.toByteArray();
-					if (!fd._isTempFile())
-						JSUtil.saveFile(path, 秘bytes, null, null);
+					JSUtil.saveFile(path, 秘bytes, null, null);
 				} else {
 					channel.close();
 				}

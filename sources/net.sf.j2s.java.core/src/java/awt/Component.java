@@ -75,6 +75,7 @@ import sun.awt.AppContext;
 import sun.awt.CausedFocusEvent;
 import sun.awt.RequestFocusController;
 import sun.awt.SunToolkit;
+import sun.awt.dnd.SunDropTargetEvent;
 import swingjs.JSToolkit;
 
 /**
@@ -3803,10 +3804,10 @@ public abstract class Component implements ImageObserver/*
 		 * notify AWTEventListeners.
 		 */
 
-		// if (e instanceof SunDropTargetEvent) {
-		// ((SunDropTargetEvent)e).dispatch();
-		// return;
-		// }
+		 if (e instanceof SunDropTargetEvent) {
+			 ((SunDropTargetEvent)e).dispatch();
+			 return;
+		 }
 
 		if (!e.focusManagerIsDispatching) {
 			// Invoke the private focus retargeting method which provides

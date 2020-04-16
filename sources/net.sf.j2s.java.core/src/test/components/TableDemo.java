@@ -106,8 +106,8 @@ public class TableDemo extends JPanel {
 		table.setUI(new BasicTableUI() {
 			@Override
 			public void paint(Graphics g, JComponent c) {
-				try { throw new NullPointerException();}catch (Exception e) {e.printStackTrace();}
-				System.err.println("TableDemoUI g.clip=" +  g.getClipBounds());
+//				try { throw new NullPointerException();}catch (Exception e) {e.printStackTrace();}
+//				System.err.println("TableDemoUI g.clip=" +  g.getClipBounds());
 				super.paint(g,  c);
 				
 			}
@@ -115,7 +115,8 @@ public class TableDemo extends JPanel {
 		});
 
 
-		table.setRowHeight(40);
+		table.setRowHeight(16);
+		table.setRowMargin(1);
 		table.setPreferredScrollableViewportSize(new Dimension(500, 300));
 		table.setFillsViewportHeight(true);
 

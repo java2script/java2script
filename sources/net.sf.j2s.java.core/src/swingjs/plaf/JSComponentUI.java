@@ -177,7 +177,13 @@ public class JSComponentUI extends ComponentUI
 	protected static boolean debugging;
 
 	/**
-	 * a unique id
+	 * this initial unique id, such as testApplet_EditorPaneUI_1553
+	 */
+	protected String id0;
+
+	/**
+	 * a unique id for a given revision of an element, such as
+	 * testApplet_EditorPaneUI_1553_1611
 	 */
 	protected String id;
 
@@ -731,9 +737,12 @@ public class JSComponentUI extends ComponentUI
 	protected void newID(boolean forceNew) {
 		classID = c.getUIClassID();
 		notImplemented = (classID == "ComponentUI");
-		if (id == null || forceNew) {
+		boolean firstTime = (id == null);
+		if (firstTime || forceNew) {
 			num = ++incr;
 			id = c.getHTMLName(classID) + "_" + num;
+			if (firstTime) 
+				id0 = id;
 		}
 	}
 
@@ -947,6 +956,10 @@ public class JSComponentUI extends ComponentUI
 		}
 	}
 
+	/**
+	 * Called by DefaultFocusTraversalPolicy only.
+	 * Overridden to return true in buttons, menu items, JEditorPane, JTextPane, JTextArea
+	 */
 	@Override
 	public boolean isFocusable() {
 		// meaning "can use TAB to set their focus" within a focus cycle
@@ -970,7 +983,7 @@ public class JSComponentUI extends ComponentUI
 //		return (jc.isFocusable() && setFocusable());
 	}
 
-	protected boolean setFocusable() {
+	public boolean setFocusable() {
 		if (focusNode == null) 
 		  addFocusHandler();
 		if (focusNode != null)
@@ -984,16 +997,14 @@ public class JSComponentUI extends ComponentUI
 				 */false;
 	}
 
-	@Override
-	public boolean requestFocus(Component lightweightChild, boolean temporary, boolean focusedWindowChangeAllowed,
-			long time, Cause cause) {
-		if (lightweightChild == null)
-			return focus();
-		if (!jc.isFocusable())
-			return false;
-		setFocusable();
-		return JSToolkit.requestFocus(lightweightChild);
-	}
+	private Runnable focusRunnable = new Runnable() {
+
+		@Override
+		public void run() {
+			focus();
+		}
+		
+	};
 
 	/**
 	 * Outgoing: Initiate a focus() event in the system directly
@@ -1017,6 +1028,29 @@ public class JSComponentUI extends ComponentUI
 			c.requestFocus();
 	}
 
+	/**
+	 * A Window ComponentPeer method called from Component.requestFocusHelper
+	 * in response to a requestFocus() call.
+	 * 
+	 * @param me  The lightweight component to receive the focus.
+	 * @param temporary ignored
+	 * @param focusedWindowChangeAllowed ignored
+	 * @param time ignored
+	 * @param cause ignored
+	 * @return true if successful
+	 */
+	@Override
+	public boolean requestFocus(Component me, boolean temporary, boolean focusedWindowChangeAllowed, long time,
+			Cause cause) {
+		if (me == null)
+			return focus();
+		if (!me.isFocusable())
+			return false;
+		JSComponentUI ui = ((JSComponent) me).秘getUI();
+		ui.setFocusable();
+		JSToolkit.dispatch(ui.focusRunnable, 50, 0);
+		return true;
+	}
 	/**
 	 * Add the $().focus() and $().blur() events to a DOM button.
 	 * 
@@ -1518,11 +1552,6 @@ public class JSComponentUI extends ComponentUI
 	protected void checkAllowDivOverflow() {
 		JRootPane root = jc.getRootPane();
 		allowDivOverflow = (root != null && "false".equals(root.getClientProperty("swingjs.overflow.hidden")));
-	}
-
-	public void setAllowPaintedBackground(boolean TF) {
-		// listCellRenderer does not allow this.
-		allowPaintedBackground = TF;
 	}
 
 	public DOMNode getDOMNode() {
@@ -2368,9 +2397,14 @@ public class JSComponentUI extends ComponentUI
 	protected String fixText(String t) {
 		if (t != null) {
 			if (isHTML) {
-				// 
+				// file:///./testing -> swingjs/j2s///./  which is OK
+				// file://./testing ->  swingjs/j2s//./  which is OK, but not Java
+				// file://testing ->    swingjs/j2s/testing
+				// file:/testing -->    swintjs/j2s/testing
+				String rp = J2S.getResourcePath("",  true);
+				t = PT.rep(t, "file:/", t.indexOf(rp) >= 0 ? "" : rp);
 			} else if (valueNode == null) {
-				t = (t.indexOf("\u0000") >= 0 ? PT.rep(t, "\u0000", "") : t).replace(' ', '\u00A0');
+				t = PT.rep(t, "\u0000", "").replace(' ', '\u00A0');
 			}
 		}
 		return t;
@@ -2882,11 +2916,12 @@ public class JSComponentUI extends ComponentUI
 				break;
 			case SwingConstants.LEFT:
 			case SwingConstants.LEADING:
-				DOMNode.setStyles(actionNode, "left", "0px", "transform", "scale(0.75,0.75) translate(-5px,-20px)");
+				DOMNode.setStyles(actionNode, "left", "0px", 
+						"top", "50%", "transform", "scale(0.75,0.75) translateX(-50%) translateY(-50%) translate(-10px,-10px)");
 				break;
 			case SwingConstants.CENTER:
-				DOMNode.setStyles(actionNode, "left", (width / 2) + "px", "transform",
-						"scale(0.75,0.75) translate(-15px,-15px)"); // admittedly, a hack
+				DOMNode.setStyles(actionNode, "left", "50%", "top", "50%", "transform",
+						"scale(0.75,0.75) translateX(-50%) translateY(-50%) translate(-10px,-10px)");// translate(-20px,-20px)"); // admittedly, a hack translate(-50%,-50%) does not work- still need the -10,-10
 				break;
 			}
 
@@ -3107,7 +3142,6 @@ public class JSComponentUI extends ComponentUI
 	@Override
 	public void reparent(ContainerPeer newContainer) {
 		JSUtil.notImplemented("");
-
 	}
 
 	@Override
@@ -3505,10 +3539,12 @@ public class JSComponentUI extends ComponentUI
 	public void clearPaintPath() {
 		JSComponent c = jc;
 		while (c != null) {
-			((JSComponentUI) c.ui).inPaintPath = true;
-
+			JSComponentUI ui = c.秘getUI();
+			if (ui == null)
+				return;
+			ui.inPaintPath = true;
 			c.秘setPaintsSelf(JSComponent.PAINTS_SELF_ALWAYS);
-			((JSComponentUI) c.ui).setTransparent();
+			ui.setTransparent();
 			c = c.getParent();
 		}
 	}
