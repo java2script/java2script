@@ -85,15 +85,13 @@ public class PerformanceLogger {
 
     static {
         String perfLoggingProp =
-            java.security.AccessController.doPrivileged(
-            new sun.security.action.GetPropertyAction("sun.perflog"));
+            (System.getProperty("sun.perflog"));
         if (perfLoggingProp != null) {
             perfLoggingOn = true;
 
             // Check if we should use nanoTime
             String perfNanoProp =
-                java.security.AccessController.doPrivileged(
-                new sun.security.action.GetPropertyAction("sun.perflog.nano"));
+            		(System.getProperty("sun.perflog.nano"));
             if (perfNanoProp != null) {
                 useNanoTime = true;
             }

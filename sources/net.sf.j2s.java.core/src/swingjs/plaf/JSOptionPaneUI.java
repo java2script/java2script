@@ -97,8 +97,7 @@ public class JSOptionPaneUI extends JSPanelUI {
 
 
     static {
-        newline = java.security.AccessController.doPrivileged(
-                                new GetPropertyAction("line.separator"));
+        newline = (System.getProperty("line.separator"));
         if (newline == null) {
             newline = "\n";
         }

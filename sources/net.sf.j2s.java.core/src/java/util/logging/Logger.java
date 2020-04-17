@@ -26,7 +26,6 @@
 
 package java.util.logging;
 
-import java.lang.ref.WeakReference;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
@@ -36,7 +35,7 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Supplier;
-import sun.reflect.CallerSensitive;
+
 import sun.reflect.Reflection;
 
 /**
@@ -489,7 +488,7 @@ public class Logger {
 
     // Synchronization is not required here. All synchronization for
     // adding a new Logger object is handled by LogManager.addLogger().
-    @CallerSensitive
+    
     public static Logger getLogger(String name) {
         // This method is intentionally not a wrapper around a call
         // to getLogger(name, resourceBundleName). If it were then
@@ -549,7 +548,7 @@ public class Logger {
 
     // Synchronization is not required here. All synchronization for
     // adding a new Logger object is handled by LogManager.addLogger().
-    @CallerSensitive
+    
     public static Logger getLogger(String name, String resourceBundleName) {
         Class<?> callerClass = Reflection.getCallerClass();
         Logger result = demandLogger(name, resourceBundleName, callerClass);
@@ -634,7 +633,7 @@ public class Logger {
 
     // Synchronization is not required here. All synchronization for
     // adding a new anonymous Logger object is handled by doSetParent().
-    @CallerSensitive
+    
     public static Logger getAnonymousLogger(String resourceBundleName) {
         LogManager manager = LogManager.getLogManager();
         // cleanup some Loggers that have been GC'ed

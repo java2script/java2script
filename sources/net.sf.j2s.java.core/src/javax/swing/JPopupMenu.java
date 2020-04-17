@@ -97,8 +97,8 @@ public class JPopupMenu extends JComponent implements MenuElement {
      */
     private static final Object defaultLWPopupEnabledKey = new Object(); // JPopupMenu.defaultLWPopupEnabledKey
 
-    /** Bug#4425878-Property javax.swing.adjustPopupLocationToFit introduced */
-    static boolean popupPostionFixDisabled = false;
+//    /** Bug#4425878-Property javax.swing.adjustPopupLocationToFit introduced */
+//    static boolean popupPostionFixDisabled = false;
 
 //    static {
 ////        popupPostionFixDisabled = java.security.AccessController.doPrivileged(
@@ -291,8 +291,10 @@ public class JPopupMenu extends JComponent implements MenuElement {
     Point adjustPopupLocationToFitScreen(int xposition, int yposition) {
         Point p = new Point(xposition, yposition);
 
-        if(popupPostionFixDisabled == true || GraphicsEnvironment.isHeadless())
-            return p;
+  //      if(popupPostionFixDisabled == true
+        //		|| GraphicsEnvironment.isHeadless()
+//        		)
+//            return p;
 
 //        Toolkit toolkit = Toolkit.getDefaultToolkit();
 //        Rectangle screenBounds;
@@ -793,9 +795,9 @@ public class JPopupMenu extends JComponent implements MenuElement {
         }
 
         // adjust the location of the popup
-        Point p = adjustPopupLocationToFitScreen(desiredLocationX,desiredLocationY);
-        desiredLocationX = p.x;
-        desiredLocationY = p.y;
+//        Point p = adjustPopupLocationToFitScreen(desiredLocationX,desiredLocationY);
+//        desiredLocationX = p.x;
+//        desiredLocationY = p.y;
         haveLoc = true;
 
         Popup newPopup = ((PopupMenuUI)getUI()).getPopup(this, desiredLocationX,

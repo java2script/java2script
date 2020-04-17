@@ -3219,6 +3219,8 @@ C$.setProperties$java_util_Properties=function (props) {
 }
 
 C$.getProperty$S=function (key) {
+	if (key == "java.awt.headless")
+		return Clazz._isHeadless;
 	C$.checkKey$S(key);
 	var p = (C$.props == null ? sysprops[key] : C$.props.getProperty$S(key))
 	return (p == null ? null : p);

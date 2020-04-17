@@ -25,9 +25,6 @@
 
 package java.security;
 
-import sun.security.util.Debug;
-import sun.reflect.CallerSensitive;
-import sun.reflect.Reflection;
 
 /**
  * <p> The AccessController class is used for access control operations
@@ -294,7 +291,6 @@ public final class AccessController {
      * @see java.security.DomainCombiner
      */
 
-    @CallerSensitive
     public static <T> T doPrivileged(PrivilegedAction<T> action) {
     	return action.run();
     }
@@ -324,7 +320,7 @@ public final class AccessController {
      *
      * @since 1.6
      */
-    @CallerSensitive
+    
     public static <T> T doPrivilegedWithCombiner(PrivilegedAction<T> action) {
     	return action.run();
 //        AccessControlContext acc = getStackAccessControlContext();
@@ -370,7 +366,7 @@ public final class AccessController {
      * @see #doPrivileged(PrivilegedAction)
      * @see #doPrivileged(PrivilegedExceptionAction,AccessControlContext)
      */
-    @CallerSensitive
+    
     public static  <T> T doPrivileged(PrivilegedAction<T> action,
                                             AccessControlContext context) {
     	return action.run();
@@ -421,7 +417,7 @@ public final class AccessController {
      *
      * @since 1.8
      */
-    @CallerSensitive
+    
     public static <T> T doPrivileged(PrivilegedAction<T> action,
         AccessControlContext context, Permission... perms) {
     	return action.run();
@@ -485,7 +481,7 @@ public final class AccessController {
      *
      * @since 1.8
      */
-    @CallerSensitive
+    
     public static <T> T doPrivilegedWithCombiner(PrivilegedAction<T> action,
         AccessControlContext context, Permission... perms) {
     	return action.run();
@@ -530,7 +526,7 @@ public final class AccessController {
      * @see #doPrivilegedWithCombiner(PrivilegedExceptionAction)
      * @see java.security.DomainCombiner
      */
-    @CallerSensitive
+    
     public static <T> T
         doPrivileged(PrivilegedExceptionAction<T> action)
         throws PrivilegedActionException {
@@ -566,7 +562,7 @@ public final class AccessController {
      *
      * @since 1.6
      */
-    @CallerSensitive
+    
     public static <T> T doPrivilegedWithCombiner(PrivilegedExceptionAction<T> action)
         throws PrivilegedActionException
     {
@@ -658,7 +654,7 @@ public final class AccessController {
      * @see #doPrivileged(PrivilegedAction)
      * @see #doPrivileged(PrivilegedAction,AccessControlContext)
      */
-    @CallerSensitive
+    
     public static <T> T
         doPrivileged(PrivilegedExceptionAction<T> action,
                      AccessControlContext context)
@@ -708,7 +704,7 @@ public final class AccessController {
 	 *
 	 * @since 1.8
 	 */
-	@CallerSensitive
+	
 	public static <T> T doPrivileged(PrivilegedExceptionAction<T> action, AccessControlContext context,
 			Permission... perms) throws PrivilegedActionException {
 		return justDoIt(action);
@@ -765,7 +761,7 @@ public final class AccessController {
      *
      * @since 1.8
      */
-    @CallerSensitive
+    
     public static <T> T doPrivilegedWithCombiner(PrivilegedExceptionAction<T> action,
                                                  AccessControlContext context,
                                                  Permission... perms)
@@ -774,7 +770,7 @@ public final class AccessController {
     	return justDoIt(action);
   }
     
-    @CallerSensitive
+    
     private static <T> T justDoIt(PrivilegedAction<T> action) throws PrivilegedActionException {
     	try {
 			return action.run();
@@ -784,7 +780,7 @@ public final class AccessController {
 
 	}
 
-    @CallerSensitive
+    
     private static <T> T justDoIt(PrivilegedExceptionAction<T> action) throws PrivilegedActionException {
     	try {
 			return action.run();

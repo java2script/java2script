@@ -45,7 +45,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamField;
 import java.io.Serializable;
-import java.security.AccessController;
+//import java.security.AccessController;
 import java.text.MessageFormat;
 import java.util.spi.LocaleNameProvider;
 
@@ -875,11 +875,11 @@ public final class Locale implements Cloneable, Serializable {
 
     private static Locale initDefault() {
         String language, region, script, country, variant;
-        language = AccessController.doPrivileged(
-            new GetPropertyAction("user.language", "en"));
+        language = 
+            System.getProperty("user.language", "en");
         // for compatibility, check for old user.region property
-        region = AccessController.doPrivileged(
-            new GetPropertyAction("user.region"));
+        region = 
+            System.getProperty("user.region");
         if (region != null) {
             // region can be of form country, country_variant, or _variant
             int i = region.indexOf('_');
@@ -892,12 +892,12 @@ public final class Locale implements Cloneable, Serializable {
             }
             script = "";
         } else {
-            script = AccessController.doPrivileged(
-                new GetPropertyAction("user.script", ""));
-            country = AccessController.doPrivileged(
-                new GetPropertyAction("user.country", ""));
-            variant = AccessController.doPrivileged(
-                new GetPropertyAction("user.variant", ""));
+            script = 
+                System.getProperty("user.script", "");
+            country = 
+                System.getProperty("user.country", "");
+            variant = 
+                System.getProperty("user.variant", "");
         }
 
         return getInstance(language, script, country, variant, null);
@@ -905,14 +905,14 @@ public final class Locale implements Cloneable, Serializable {
 
     private static Locale initDefault(Locale.Category category) {
         return getInstance(
-            AccessController.doPrivileged(
-                new GetPropertyAction(category.languageKey, defaultLocale.getLanguage())),
-            AccessController.doPrivileged(
-                new GetPropertyAction(category.scriptKey, defaultLocale.getScript())),
-            AccessController.doPrivileged(
-                new GetPropertyAction(category.countryKey, defaultLocale.getCountry())),
-            AccessController.doPrivileged(
-                new GetPropertyAction(category.variantKey, defaultLocale.getVariant())),
+            
+                System.getProperty(category.languageKey, defaultLocale.getLanguage()),
+            
+                System.getProperty(category.scriptKey, defaultLocale.getScript()),
+            
+                System.getProperty(category.countryKey, defaultLocale.getCountry()),
+            
+                System.getProperty(category.variantKey, defaultLocale.getVariant()),
             null);
     }
 

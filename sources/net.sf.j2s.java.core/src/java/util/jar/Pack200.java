@@ -794,8 +794,7 @@ public abstract class Pack200 {
             Class<?> impl = (PACK_PROVIDER.equals(prop))? packerImpl: unpackerImpl;
             if (impl == null) {
                 // The first time, we must decide which class to use.
-                implName = java.security.AccessController.doPrivileged(
-                    new sun.security.action.GetPropertyAction(prop,""));
+                implName = System.getProperty(prop,"");
                 if (implName != null && !implName.equals(""))
                     impl = Class.forName(implName);
                 else if (PACK_PROVIDER.equals(prop))

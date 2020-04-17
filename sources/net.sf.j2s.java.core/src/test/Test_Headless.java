@@ -17,9 +17,9 @@ static {
 	 */
 }
 	public static void main(String[] args) {
-		String[] files = /** @j2sNative Clazz.ClassFilesLoaded.sort() || */null;
+		String[] files = /** @j2sNative Clazz.ClassFilesLoaded.sort() || */new String[0];
 		String s = /** @j2sNative  files.join('\n') || */null;
-		System.out.println("Hello, world! (headless) \n" + s + "\n\n" + files.length + " classes loaded");
+		System.out.println("Hello, world! (headless)\n\nclasses:\n" + s + "\n" + files.length + " classes loaded\n");
 	}
 
 }

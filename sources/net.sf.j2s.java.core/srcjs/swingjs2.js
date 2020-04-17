@@ -10725,7 +10725,8 @@ J2S || (J2S = {
 		_useEval: true, // false here uses new Function() in j2sClazz.js, but then that totally messes up debugging
 		_verbose: false,
 		_lang: null,
-		_appArgs: null
+		_appArgs: null,
+		_defaultID: 0,
    });
 
 // for now, Clazz is a window global. Wouldn't be hard to encapsulate that, 
@@ -10764,6 +10765,7 @@ if (getFlag("j2s")) {
 	J2S._debugCode = getFlag("j2sdebugcode");    // same as j2snocore?
 	J2S._debugCore = getFlag("j2sdebugcore");    // same as j2snozcore?
 	J2S._debugPaint = getFlag("j2sdebugpaint");  // repaint manager information
+	J2S._headless = getFlag("j2sheadless");      // run headlessly
 	J2S._lang = getURIField("j2slang", null);    // preferred language; application should check
 	 // will alert in system.out.println with a message when events occur
 	J2S._loadcore = !getFlag("j2snocore");		 // no core files 
@@ -10813,7 +10815,7 @@ window.J2S = J2S = (function() {
 													// (pixels)
 			/*
 			 * By setting the J2S.allowedJmolSize[] variable in the webpage
-			 * before calling J2S.getApplet(), limits for applet size can be
+			 * before calling SwingJS.getApplet(), limits for applet size can be
 			 * overriden. 2048 standard for GeoWall
 			 * (http://geowall.geo.lsa.umich.edu/home.html)
 			 */
@@ -11408,7 +11410,7 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 		if (applet._cacheFiles && !fileName.endsWith(".js")) {
 			var data = J2S._fileCache[fileName];
 			if (data) {
-				System.out.println("using " + (data.length)
+				System.out.println("j2sApplet using " + (data.length)
 						+ " bytes of cached data for " + fileName);
 				fSuccess(data);
 				return null;
@@ -11768,7 +11770,7 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 				var data = null;
 				if (evt.target.readyState == FileReader.DONE) {
 					var data = evt.target.result;
-					System.out.println("J2S.getFileFromDialog format=" + format 
+					System.out.println("j2sApplet J2S.getFileFromDialog format=" + format 
 								+ " file name=" + file.name  + " size=" + (data.length || data.byteLength));
 					switch (format) {
 					case "java.util.Map":
@@ -12879,9 +12881,17 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	var __profiling;
 
 	J2S.getProfile = function(doProfile) {
-		if (!__profiling)
-			Clazz._startProfiling(__profiling = (arguments.length == 0 || doProfile));
-		return Clazz.getProfile();
+		if (__profiling || arguments.length == 1 && !doProfile) {
+			var s = Clazz.getProfile();
+			System.out.println(s);
+			alert(s);
+			return;
+		} 
+		var seconds = (arguments[0] === true ? 0 : +(arguments.length == 0 ? prompt("How many seconds?", "0 (until I click again)") : arguments[0]));
+		if (isNaN(seconds))
+			seconds = 0;
+		
+		Clazz.startProfiling(__profiling = (seconds || arguments.length == 0 || doProfile));
 	}
 
 	J2S._getAttr = function(s, a) {
@@ -13032,7 +13042,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			return;
 		}
 		e.push("done");
-		var s = "J2SApplet exec " + e[0]._id + " " + e[3] + " " + e[2];
+		var s = "j2sApplet exec " + e[0]._id + " " + e[3] + " " + e[2];
 		if (self.System)
 			System.out.println(s);
 		// alert(s)
@@ -13048,9 +13058,9 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			// create the Clazz object
 			J2S.LoadClazz(Clazz);
 			if (J2S._strict)
-				System.err.println("j2sstrict - 'use strict' will be used - this is experimental");
+				System.err.println("j2sApplet j2sstrict - 'use strict' will be used - this is experimental");
 			if (J2S._startProfiling) 
-				Clazz.startProfiling();
+				J2S.getProfile();
 			if (applet._noMonitor)
 				Clazz._LoaderProgressMonitor.showStatus = function() {
 				}
@@ -13356,10 +13366,10 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 				alert("There was an unknown problem loading java.lang.Class.");
 			}
 			J2S._registerApplet(applet._id, applet);
-			if (!applet.__Info.args || applet.__Info.args == "?") {
-				if (J2S._appArgs)
-					applet.__Info.args = decodeURIComponent(J2S.appArgs);
+			if (J2S._appArgs || applet.__Info.args == "?") {
+				applet.__Info.args = (J2S._appArgs ? decodeURIComponent(J2S.appArgs).split("|") : []);
 			}
+			J2S._lang && (applet.__Info.language = J2S._lang);
 			var isApp = applet._isApp = !!applet.__Info.main; 
 			try {
 				var clazz = (applet.__Info.main || applet.__Info.code);
@@ -13376,8 +13386,11 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 					//cl.$static$ && cl.$static$();
 					if (clazz.indexOf("_.") == 0)
 						J2S.setWindowVar(clazz.substring(2), cl);
-					if (isApp && cl.j2sHeadless)
-						applet.__Info.headless = true;
+					applet.__Info.headless = (J2S._headless || isApp && !!cl.j2sHeadless);
+					if (applet.__Info.headless) {
+						Clazz._isHeadless = "true";
+						System.out.println("j2sApplet running headlessly");
+					}
 				} catch (e) {
 					alert("Java class " + clazz + " was not found.");
 					return;
@@ -13561,7 +13574,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 					return null;
 				} else {
 					System.out
-							.println("Jsmol.js J2S.loadImage using data URI for "
+							.println("j2sApplet J2S.loadImage using data URI for "
 									+ id)
 				}
 				image.src = (typeof bytes == "string" ? bytes : "data:"
@@ -13585,7 +13598,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			J2S.setCanvasImage(canvas, width, height);
 			// return a null canvas and the error in path if there is a problem
 		} else {
-			System.out.println("J2S.loadImage reading cached image for " + id)
+			System.out.println("j2sApplet J2S.loadImage reading cached image for " + id)
 		}
 		return (bytes == null ? fOnload(canvas, path) : canvas);
 	};
@@ -17160,6 +17173,8 @@ C$.setProperties$java_util_Properties=function (props) {
 }
 
 C$.getProperty$S=function (key) {
+	if (key == "java.awt.headless")
+		return Clazz._isHeadless;
 	C$.checkKey$S(key);
 	var p = (C$.props == null ? sysprops[key] : C$.props.getProperty$S(key))
 	return (p == null ? null : p);
@@ -20038,11 +20053,21 @@ if (typeof(SwingJS) == "undefined") {
 (function (SwingJS, $, J2S) {
 
 	SwingJS.getApplet = function(id, Info, checkOnly) {
+		if (arguments.length == 1 && typeof id == "object") {
+			// allow for getApplet(Info)
+			Info = id;
+			id = null;
+		}
 		return SwingJS._Applet._get(id, Info, checkOnly);
 	}
 
   	// optional Info here	
 	SwingJS.getAppletHtml = function(applet, Info) {
+		if (arguments.length == 1 && typeof applet == "object" && !applet._code) {
+			// allow for getApplet(Info)
+			Info = applet;
+			applet = null;
+		}
 		if (Info) {
 			var d = SwingJS._document;
 			SwingJS._document = null;
@@ -20122,6 +20147,7 @@ if (typeof(SwingJS) == "undefined") {
 			disableInitialConsole: false,
 			debug: false
 		};	 
+		id || (id = Info.name) || (id = "j2sApplet" + J2S._defaultID++);
     
 		J2S._addDefaultInfo(Info, DefaultInfo);
 		

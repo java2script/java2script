@@ -89,7 +89,7 @@ public class Button extends swingjs.a2s.Button {// Component implements Accessib
 	 * @see java.awt.GraphicsEnvironment#isHeadless
 	 */
 	public Button(String label) throws HeadlessException {
-		GraphicsEnvironment.checkHeadless();
+		//GraphicsEnvironment.checkHeadless();
 		setText(label);
 	}
 
