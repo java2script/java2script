@@ -1,0 +1,31 @@
+<!DOCTYPE html>	 				
+<html>	 				
+<head><title>URL command line flags for SwingJS</title></head>	 				<title>URL command line flags for SwingJS</title>
+<body><h3>URL command-line arguments for SwingJS</h3>	 				URL command-line arguments for SwingJS
+"<br>To enable these flags, simply add them after # or ? on your page."					"To enable these flags, simply add them after # or ? on your page."
+<br>The test is very simple -- just a case-sensitive string check. 					The test is very simple -- just a case-sensitive string check. 
+<br>Separate them with &amp; For example:					Separate them with &amp; For example:
+<br><a href=test_Test_Class.html?j2sverbose;j2snozcore;j2strace=applet>test_Test_Class.html?j2sverbose;j2snozcore;j2strace=applet</a>					<a href=test_Test_Class.html?j2sverbose;j2snozcore;j2strace=applet>test_Test_Class.html?j2sverbose;j2snozcore;j2strace=applet</a>
+<br><table width=800 border=1>	 				
+"<tr><th colspan=""2""></th></tr>"	 				
+"<tr><td>j2sargs=a|b|c</td><td>arguments to be passed on to application.main(); use ""|"" to separate arguments.</td></tr>"	 	j2sargs=a|b|c			"arguments to be passed on to application.main(); use ""|"" to separate arguments."
+<tr><td>j2sdebugclip</td><td>shows all show/restore and clip operations in JSGraphics2D</td></tr>	 	j2sdebugclip			shows all show/restore and clip operations in JSGraphics2D
+<tr><td>j2sdebugcode</td><td>same as j2snocore?</td></tr>	 	j2sdebugcode			same as j2snocore?
+<tr><td>j2sdebugcore</td><td>same as j2snozcore?</td></tr>	 	j2sdebugcore			same as j2snozcore?
+<tr><td>j2sdebugpaint</td><td>report repaint manager information</td></tr>	 	j2sdebugpaint			report repaint manager information
+<tr><td>j2sevents</td><td>report ComponentEvent instances</td></tr>	 	j2sevents			report ComponentEvent instances
+<tr><td>j2sfilter=xxx</td><td>remove messages with the specified text from System.out</td></tr>	 	j2sfilter=xxx			remove messages with the specified text from System.out
+<tr><td>j2slang=EN_us</td><td>preferred language; application should check</td></tr>	 	j2slang=EN_us			preferred language; application should check
+<tr><td>j2smouse</td><td>report mouse events other than mousemove</td></tr>	 	j2smouse			report mouse events other than mousemove
+"<tr><td>j2smousemove</td><td>report all mouse events, including mousemove</td></tr>"	 	j2smousemove			"report all mouse events, including mousemove"
+<tr><td>j2snocore</td><td>do not load core files (from j2s/core/)</td></tr>	 	j2snocore			do not load core files (from j2s/core/)
+<tr><td>j2snoeval</td><td>use new Function() instead of eval(); breaks debugging</td></tr>	 	j2snoeval			use new Function() instead of eval(); breaks debugging
+"<tr><td>j2snooutput</td><td>no System.out, only System.err message</td></tr>"	 	j2snooutput			"no System.out, only System.err message"
+"<tr><td>j2snozcore</td><td>use the uncompressed j2s/core/xxxcore.js files, not the compressed core.z.js files</td></tr>"	 	j2snozcore			"use the uncompressed j2s/core/xxxcore.js files, not the compressed core.z.js files"
+"<tr><td>j2sprofile</td><td>track object creation; use J2S.getProfile() when you want a report, after that J2S.getProfile() or J2S.getProfile(nsec) to restart profiling anytime.</td></tr>"	 	j2sprofile			"track object creation; use J2S.getProfile() when you want a report, after that J2S.getProfile() or J2S.getProfile(nsec) to restart profiling anytime."
+<tr><td>j2sstrict</td><td>strict mode -- experimental</td></tr>	 	j2sstrict			strict mode -- experimental
+<tr><td>j2strace</td><td>look only for these</td></tr>	 	j2strace			look only for these
+<tr><td>j2sverbose</td><td>file loading reports</td></tr>	 	j2sverbose			file loading reports
+</table>	 				
+</body>	 				
+</html>	 				

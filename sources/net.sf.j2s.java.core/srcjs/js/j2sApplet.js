@@ -2381,7 +2381,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			if (J2S._strict)
 				System.err.println("j2sstrict - 'use strict' will be used - this is experimental");
 			if (J2S._startProfiling) 
-				Clazz.startProfiling();
+				J2S.getProfile();
 			if (applet._noMonitor)
 				Clazz._LoaderProgressMonitor.showStatus = function() {
 				}
@@ -2688,8 +2688,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			}
 			J2S._registerApplet(applet._id, applet);
 			if (!applet.__Info.args || applet.__Info.args == "?") {
-				if (J2S._appArgs)
-					applet.__Info.args = decodeURIComponent(J2S.appArgs);
+				applet.__Info.args = (J2S._appArgs ? decodeURIComponent(J2S.appArgs).split("|") : []);
 			}
 			var isApp = applet._isApp = !!applet.__Info.main; 
 			try {
