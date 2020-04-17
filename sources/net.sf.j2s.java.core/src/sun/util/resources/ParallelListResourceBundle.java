@@ -33,9 +33,9 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicMarkableReference;
+import java.util.HashMap; // SwingJS was Concurrent
+import java.util.Map; // SwingJS was Concurrent
+//import java.util.concurrent.atomic.AtomicMarkableReference;
 
 /**
  * ParallelListResourceBundle is another variant of ListResourceBundle
@@ -46,11 +46,10 @@ import java.util.concurrent.atomic.AtomicMarkableReference;
  * @author Masayoshi Okutsu
  */
 public abstract class ParallelListResourceBundle extends ResourceBundle {
-    private volatile ConcurrentMap<String, Object> lookup;
+    private volatile Map<String, Object> lookup;
     private volatile Set<String> keyset;
-    private final AtomicMarkableReference<Object[][]> parallelContents
-            = new AtomicMarkableReference<>(null, false);
-
+    private Object[][] parallelContents;
+    private boolean done = false;
     /**
      * Sole constructor.  (For invocation by subclass constructors, typically
      * implicit.)
@@ -87,26 +86,34 @@ public abstract class ParallelListResourceBundle extends ResourceBundle {
      */
     public void setParallelContents(OpenListResourceBundle rb) {
         if (rb == null) {
-            parallelContents.compareAndSet(null, null, false, true);
+            compareAndSet(null, null, false, true);
         } else {
-            parallelContents.compareAndSet(null, rb.getContents(), false, false);
+            compareAndSet(null, rb.getContents(), false, false);
         }
     }
 
-    /**
+    private void compareAndSet(Object[][] orig, Object[][] val, boolean wasdone, boolean done) {
+    	if (parallelContents == orig && this.done == wasdone) {
+    		parallelContents = val; this.done = done;
+    	}
+	}
+
+	/**
      * Returns true if any parallel contents have been set or if this bundle is
      * marked as complete.
      *
      * @return true if any parallel contents have been processed
      */
     boolean areParallelContentsComplete() {
-        // Quick check for `complete'
-        if (parallelContents.isMarked()) {
-            return true;
-        }
-        boolean[] done = new boolean[1];
-        Object[][] data = parallelContents.get(done);
-        return data != null || done[0];
+    	return parallelContents != null;
+//    	return true;
+//        // Quick check for `complete'
+//        if (parallelContents.isMarked()) {
+//            return true;
+//        }
+//        boolean[] done = new boolean[1];
+//        Object[][] data = parallelContents.get(done);
+//        return data != null || done[0];
     }
 
     @Override
@@ -162,21 +169,21 @@ public abstract class ParallelListResourceBundle extends ResourceBundle {
      * Loads the lookup table if they haven't been loaded already.
      */
     void loadLookupTablesIfNecessary() {
-        ConcurrentMap<String, Object> map = lookup;
+        Map<String, Object> map = lookup;
         if (map == null) {
-            map = new ConcurrentHashMap<>();
+            map = new HashMap<>();
             for (Object[] item : getContents()) {
                 map.put((String) item[0], item[1]);
             }
         }
 
         // If there's any parallel contents data, merge the data into map.
-        Object[][] data = parallelContents.getReference();
+        Object[][] data = parallelContents;
         if (data != null) {
             for (Object[] item : data) {
                 map.putIfAbsent((String) item[0], item[1]);
             }
-            parallelContents.set(null, true);
+            parallelContents = null;
         }
         if (lookup == null) {
             synchronized (this) {

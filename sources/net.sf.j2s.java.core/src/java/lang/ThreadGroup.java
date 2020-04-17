@@ -1055,7 +1055,7 @@ class ThreadGroup implements Thread.UncaughtExceptionHandler {
 	}
 
 	public void 秘exit() {
-		ArrayList<Object> q = 秘getTimerQueue();
+		ArrayList<Object> q = 秘systemExited ? null : 秘timerQueue;//秘getTimerQueue();
 		if (q != null)
 			for (int i = q.size(); --i >= 0;) {
 				Timer t = (Timer) q.get(i);

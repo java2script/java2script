@@ -26,7 +26,6 @@
 package java.nio;
 
 import java.io.FileDescriptor;
-import sun.misc.Unsafe;
 
 /**
  * A direct byte buffer whose content is a memory-mapped region of a file.
