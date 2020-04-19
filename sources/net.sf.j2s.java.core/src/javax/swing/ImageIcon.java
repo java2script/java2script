@@ -36,6 +36,7 @@ import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import swingjs.JSGraphics2D;
+import swingjs.JSToolkit;
 
 /**
  * An implementation of the Icon interface that paints Icons
@@ -148,7 +149,11 @@ public class ImageIcon implements Icon {
      * @see #ImageIcon(String)
      */
     public ImageIcon(String filename, String description) {
-        image = Toolkit.getDefaultToolkit().getImage(filename);
+    	if (description != null && description.indexOf("jsvideo") >= 0) {
+    		image = ((JSToolkit)Toolkit.getDefaultToolkit()).getVideo(filename);
+    	} else {
+    		image = Toolkit.getDefaultToolkit().getImage(filename);
+    	}
         if (image == null) {
             return;
         }
@@ -186,7 +191,11 @@ public class ImageIcon implements Icon {
      * @see #ImageIcon(String)
      */
     public ImageIcon(URL location, String description) {
-        image = Toolkit.getDefaultToolkit().getImage(location);
+    	if (description != null && description.indexOf("jsvideo") >= 0) {
+    		image = ((JSToolkit)Toolkit.getDefaultToolkit()).getVideo(location);
+    	} else {
+    		image = Toolkit.getDefaultToolkit().getImage(location);
+    	}
         if (image == null) {
             return;
         }
@@ -249,7 +258,11 @@ public class ImageIcon implements Icon {
      * @see    java.awt.Toolkit#createImage
      */
     public ImageIcon (byte[] imageData, String description) {
-        this.image = Toolkit.getDefaultToolkit().createImage(imageData);
+    	if (description != null && description.indexOf("jsvideo") >= 0) {
+    		image = ((JSToolkit)Toolkit.getDefaultToolkit()).createVideo(imageData);
+    	} else {
+    	       this.image = Toolkit.getDefaultToolkit().createImage(imageData);
+    	}
         if (image == null) {
             return;
         }
@@ -315,6 +328,16 @@ public class ImageIcon implements Icon {
 //        }
     }
 
+    /**
+     * SwingJS delayed video size
+     * 
+     * @param w
+     * @param h
+     */
+    public void 秘setIconSize(int w, int h) {
+    	width = w;
+    	height = h;
+    }
 //    /**
 //     * Returns an ID to use with the MediaTracker in loading an image.
 //     */

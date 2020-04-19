@@ -993,5 +993,9 @@ public class JSUtil implements JSUtilI {
 		return bytes;
 	}
 
+	public static String getWebPathFor(String path) {
+		return path.startsWith("http") ? path : J2S.getResourcePath(path, true);
+	}
+
 }
 

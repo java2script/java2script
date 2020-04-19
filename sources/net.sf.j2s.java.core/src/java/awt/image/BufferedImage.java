@@ -50,6 +50,7 @@ import sun.awt.image.SunWritableRaster;
 import swingjs.JSGraphics2D;
 import swingjs.JSGraphicsCompositor;
 import swingjs.JSUtil;
+import swingjs.api.JSUtilI;
 import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Canvas;
 
@@ -250,7 +251,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * in a single byte array in the order B, G, R, A from lower to higher byte
 	 * addresses within each pixel.
 	 */
-	public static final int TYPE_4BYTE_HTML5 = -6;
+	public static final int TYPE_4BYTE_HTML5 = JSUtilI.TYPE_4BYTE_HTML5;
 	/**
 	 * Represents an image with 8-bit RGBA color components with the colors Blue,
 	 * Green, and Red stored in 3 bytes and 1 byte of alpha. The image has a
@@ -389,6 +390,9 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @see #TYPE_USHORT_555_RGB
 	 */
 	public BufferedImage(int width, int height, int imageType) {
+		秘init(width, height, imageType);
+	}
+	protected void 秘init(int width, int height, int imageType) {
 		this.width = width;
 		this.height = height;
 		秘wxh = width * height;

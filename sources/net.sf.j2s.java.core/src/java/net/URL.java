@@ -1007,9 +1007,11 @@ public/* SwingJS final */class URL {// implements Serializable {
 	 * @return a URI instance equivalent to this URL.
 	 * @since 1.5
 	 */
-	// public URI toURI() throws URISyntaxException {
-	// return new URI (toString());
-	// }
+	 public URI toURI() throws URISyntaxException {
+		 URI uri = new URI (toString());
+		 uri.秘bytes = (byte[]) _streamData;
+		 return uri;
+	 }
 
 	/**
 	 * Returns a <code>URLConnection</code> object that represents a connection to

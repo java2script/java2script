@@ -45,6 +45,7 @@ import javax.swing.event.MenuListener;
  * class, allowing comparison between Java and Javascript execution.
  */
 public class Test_Label extends JPanel implements MenuListener, ItemListener {
+
 	public static void main(String[] args) {
 		new Test_Label().doTest();
 	}

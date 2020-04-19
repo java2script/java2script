@@ -125,7 +125,7 @@ import swingjs.api.js.JQueryObject;
  * 
  * Some UIs (JSSpinnerUI, JSComboBoxUI, JSFrameUI, and JSTextUI) set jqevent.target["data-ui"] 
  * to point to themselves. This allows the control an option to handle the raw jQuery
- * event directly, bypassing the Java dispatch system entirely, id desired.
+ * event directly, bypassing the Java dispatch system entirely, if desired.
  * 
  * TODO: We should not use this method. It bypasses the normal Java LightWeightDispatcher,
  * which has a protected processEvent(AWTEvent) method that 
@@ -417,11 +417,6 @@ public class JSComponentUI extends ComponentUI
 	 * "left" "right" "center" if defined
 	 */
 	protected String textAlign;
-
-	/**
-	 * Labels with icons will have this
-	 */
-	protected int iconHeight;
 
 	/**
 	 * jSButtonUI buttonListener
@@ -1536,6 +1531,11 @@ public class JSComponentUI extends ComponentUI
 	 */
 	protected boolean isSticky;
 
+	/**
+	 * an icon created using "jsvideo" as its description
+	 */
+	protected boolean isVideoIcon;
+
 	private static DOMNode tempDiv;
 
 	/**
@@ -2427,11 +2427,39 @@ public class JSComponentUI extends ComponentUI
 			icon = currentIcon = getIcon(jc, icon);
 			$(iconNode).empty();
 			if (currentIcon != null) {
-				imageNode = ((BufferedImage)currentIcon.getImage()).秘getImageNode(BufferedImage.GET_IMAGE_FOR_ICON);
+				imageNode = ((BufferedImage) currentIcon.getImage()).秘getImageNode(BufferedImage.GET_IMAGE_FOR_ICON);
+				if (DOMNode.getAttr(imageNode, "tagName") == "VIDEO")
+					isVideoIcon = imagePersists = true;
 				iconNode.appendChild(imageNode);
-				iconHeight = icon.getIconHeight();
-				DOMNode.setStyles(imageNode, "visibility", (isLabel ? "hidden" : null));
-				DOMNode.setStyles(iconNode, "height", iconHeight + "px", "width", icon.getIconWidth() + "px");
+				int w,h;
+				if (isVideoIcon) {
+					if (jc.isPreferredSizeSet()) {
+						w = jc.getPreferredSize().width;
+						h = jc.getPreferredSize().height;
+					} else {
+						w = DOMNode.getAttrInt(imageNode, "videoWidth");
+						h = DOMNode.getAttrInt(imageNode, "videoHeight");
+					}
+					if (w > 0 && h > 0) {
+						((ImageIcon) icon).秘setIconSize(w, h);
+						DOMNode.setStyles(imageNode, "height", h + "px", "width", w  + "px");
+						DOMNode.setStyles(iconNode, "height", h + "px", "width", w  + "px");
+					}
+					// might have to do this if we have problems with onloadmetadata
+//					if (isVideoIcon && iconHeight == 1) {
+//						iconHeight = icon.getIconHeight();
+//						// video is still loading
+//						setDataUI(imageNode);
+//						setTainted(true);
+//					} else {
+//					}
+				} else {
+					w = icon.getIconWidth();
+					h = icon.getIconHeight();
+					DOMNode.setStyles(iconNode, "height", h + "px", "width", w  + "px");
+					if (!imagePersists)
+						DOMNode.setStyles(imageNode, "visibility", "hidden");
+				}
 			}
 		}
 		if (text == null) {
@@ -2448,8 +2476,7 @@ public class JSComponentUI extends ComponentUI
 				DOMNode.setStyles(textNode, "white-space", "nowrap");
 			if (icon == null) {
 				// tool tip does not allow text alignment
-				if (iconNode != null && allowTextAlignment 
-						&& isMenuItem && actionNode == null && text != null) {
+				if (iconNode != null && allowTextAlignment && isMenuItem && actionNode == null && text != null) {
 					DOMNode.addHorizontalGap(iconNode, gap + MENUITEM_OFFSET);
 				}
 			} else {
@@ -2481,9 +2508,9 @@ public class JSComponentUI extends ComponentUI
 			prop = "innerHTML";
 			obj = textNode;
 			// IT TURNS OUT...
-			// that for a <button> element to properly align vertically, 
-			// the font must be set for the button element, not in a child element. 
-			
+			// that for a <button> element to properly align vertically,
+			// the font must be set for the button element, not in a child element.
+
 			setCssFont(domNode, getFont()); // for vertical centering
 			setCssFont(textNode, getFont());
 			if (!isHTML)
