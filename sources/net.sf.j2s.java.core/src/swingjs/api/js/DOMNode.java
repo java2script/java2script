@@ -21,6 +21,8 @@ import swingjs.plaf.JSComponentUI;
  */
 public abstract class DOMNode {
 
+	// "abstract" in the sense that these are the exact calls to JavaScript
+	
 
 	public abstract String[] getAttributeNames();
 
@@ -28,9 +30,9 @@ public abstract class DOMNode {
 
 	public abstract void setAttribute(String attr, String val);
 
-	// "abstract" in the sense that these are the exact calls to JavaScript
-	
 	public abstract void appendChild(DOMNode node);
+	
+	public abstract void prepend(DOMNode node);
 	
 	public abstract void insertBefore(DOMNode node, DOMNode refNode);
 	

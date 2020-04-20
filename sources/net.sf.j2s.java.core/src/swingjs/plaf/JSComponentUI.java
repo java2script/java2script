@@ -36,6 +36,7 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
@@ -350,7 +351,7 @@ public class JSComponentUI extends ComponentUI
 	 * an icon image -- non-null means we do have an icon
 	 * 
 	 */
-	protected DOMNode imageNode;
+	public DOMNode imageNode;
 
 	/**
 	 * the HTML5 input element being pressed, if the control is a radio or checkbox
@@ -1122,7 +1123,7 @@ public class JSComponentUI extends ComponentUI
 	private boolean keysEnabled;
 
 	private int mnemonic;
-
+	
 	/**
 	 * for DOMNode will be turning into boolean true/false for attribute
 	 */
@@ -1291,11 +1292,16 @@ public class JSComponentUI extends ComponentUI
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		// domNode null could be a new table component
-		if (isUIDisabled || domNode == null)
+		if (isUIDisabled)
 			return;
 		String prop = e.getPropertyName();
 		Object value = e.getNewValue();
-		
+		if (prop == "jscanvas") {
+			jc.秘g = (JSGraphics2D)(Object) Boolean.TRUE;
+			setTainted();
+		}
+		if (domNode == null)
+			return;
 		
 		if (prop == "ancestor") {
 			if (isAWT) 
@@ -1363,12 +1369,15 @@ public class JSComponentUI extends ComponentUI
 		if (!isMenu && cellComponent == null)
 			getDOMNode();
 		
-		
 		switch (prop) {
+		case JLayeredPane.LAYER_PROPERTY:
+			setZ(((Integer)e.getNewValue()).intValue());
+			setTainted();
+			return;
 		case "border":
 			jc.秘setPaintsSelf(JSComponent.PAINTS_SELF_UNKNOWN);
 			setTainted();
-			break;
+			return;
 		case "preferredSize":
 			// size has been set by JComponent layout
 			preferredSize = (Dimension) e.getNewValue(); 
@@ -1878,6 +1887,11 @@ public class JSComponentUI extends ComponentUI
 		}
 		if (outerNode == null)
 			createOuterNode();
+		else if (DOMNode.getParent(domNode) != outerNode)
+			outerNode.appendChild(domNode);
+		Integer order = (Integer) jc.getClientProperty(JLayeredPane.LAYER_PROPERTY);
+		if (order != null)
+			setZ(order.intValue());
 		setOuterLocationFromComponent();
 		if (n > 0 && containerNode == null)
 			containerNode = outerNode;
@@ -3225,6 +3239,8 @@ public class JSComponentUI extends ComponentUI
 	 * @param z
 	 */
 	public void setZ(int z) {
+		if (z == -30000) // content pane
+			return;
 		DOMNode.setPositionAbsolute(domNode);
 		DOMNode.setZ(domNode, z);
 		DOMNode.setZ(outerNode, z);// saves it
@@ -3529,22 +3545,29 @@ public class JSComponentUI extends ComponentUI
 	public void paintBackground(JSGraphics2D g) {
 		boolean isOpaque = c.isOpaque();
 		boolean paintsSelf = jc.秘paintsSelf();
-		//System.out.println("paintback " + this.id  + " " + (/** @j2sNative this.jc.text||*/"")+ " " + isOpaque + " " + paintsSelf + " " + g);
+		// System.out.println("paintback " + this.id + " " + (/** @j2sNative
+		// this.jc.text||*/"")+ " " + isOpaque + " " + paintsSelf + " " + g);
 		Color color = (this.backgroundColor == null ? getBackground() : this.backgroundColor);
 		if (g == null) {
 			if (!paintsSelf)
 				setBackgroundDOM(domNode, color);
 			// preliminary -- DOM only, when the background is set
-		} else if (allowPaintedBackground && isOpaque) {
+		} else if (allowPaintedBackground && (isOpaque || jc.秘g != null)) {
 			// all opaque components must paint their background
 			// just in case they have painted CHILDREN
-			g.setBackground(color);
+			if (isOpaque == (color.getAlpha() == 255)) {
+				g.setBackground(color);
+			} else {
+				g.setBackground(new Color(color.getRed(), color.getGreen(), color.getBlue(), isOpaque ? 255 : 0));
+			}
 			g.clearRect(0, 0, c.getWidth(), c.getHeight());
-			isOpaque = cellComponent == null && !jc.秘paintsSelf();
-			if (!isOpaque && isWindow) {
-				JComponent c = (JComponent) jc.getRootPane().getContentPane();
-				c.秘setPaintsSelf(JSComponent.PAINTS_SELF_YES);
-				((JSComponentUI)c.ui).setTransparent();
+			if (isOpaque) {
+				isOpaque = cellComponent == null && !jc.秘paintsSelf();
+				if (!isOpaque && isWindow) {
+					JComponent c = (JComponent) jc.getRootPane().getContentPane();
+					c.秘setPaintsSelf(JSComponent.PAINTS_SELF_YES);
+					((JSComponentUI) c.ui).setTransparent();
+				}
 			}
 		}
 		if (allowPaintedBackground && !isOpaque)

@@ -51,6 +51,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -75,6 +76,7 @@ import javajs.util.Lst;
 import sun.font.FontDesignMetrics;
 import swingjs.JSGraphics2D;
 import swingjs.JSUtil;
+import swingjs.api.js.DOMNode;
 import swingjs.plaf.JSComponentUI;
 
 /**
@@ -581,18 +583,11 @@ public abstract class JComponent extends Container {
 	 * @return a <code>Graphics</code> object configured for this component
 	 */
 	protected Graphics getComponentGraphics(Graphics g) {
-		Graphics componentGraphics = g;
-		// if (ui != null && DEBUG_GRAPHICS_LOADED) {
-		// if ((DebugGraphics.debugComponentCount() != 0) &&
-		// (shouldDebugGraphics() != 0) &&
-		// !(g instanceof DebugGraphics)) {
-		// componentGraphics = new DebugGraphics(g,this);
-		// }
-		// }
-		componentGraphics.setColor(getForeground());
-		componentGraphics.setFont(getFont());
-
-		return componentGraphics;
+		if (秘g != null)
+			g = 秘checkG();
+		g.setColor(getForeground());
+		g.setFont(getFont());
+		return g;
 	}
 
 	/**
@@ -624,13 +619,7 @@ public abstract class JComponent extends Container {
 		if (ui != null && g != null) {
 			Graphics scratchGraphics = g.create();
 			try {
-				// note that this update will fill the component's background, but  
-				// that is not what we are worried about. What we are worried about
-				// is if this method is overridden and is written to.
-				//秘isBackgroundPainted = false;
 				ui.update(scratchGraphics, this);
-				//JSGraphics2D jsg = 秘getJSGraphic2D(scratchGraphics);		
-				//秘isBackgroundPainted = (jsg != null && jsg.isBackgroundPainted());
 			} catch (Throwable t) {
 				t.printStackTrace();
 			}	finally {

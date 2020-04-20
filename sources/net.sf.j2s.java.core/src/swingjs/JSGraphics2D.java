@@ -8,7 +8,6 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.Image;
 import java.awt.Paint;
@@ -34,13 +33,9 @@ import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.renderable.RenderableImage;
 import java.text.AttributedCharacterIterator;
-import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import sun.font.TextSource;
 import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Canvas;
 import swingjs.api.js.HTML5CanvasContext2D;
@@ -64,8 +59,6 @@ public class JSGraphics2D implements
 	private static final int DRAW_NOCLOSE = 0;
 	private static final int DRAW_CLOSE = 1;
 	private static final int FILL = 2;
-
-//	private boolean backgroundPainted;
 
 	public int constrainX;
 	public int constrainY;
@@ -249,7 +242,6 @@ public class JSGraphics2D implements
 	}
 
 	public void clearRect(int x, int y, int width, int height) {
-//		backgroundPainted = true;
 		clearRectPriv(x, y, width, height);
 	}
 
@@ -325,7 +317,6 @@ public class JSGraphics2D implements
 	public void fillRect(int x, int y, int width, int height) {
 		if (width <= 0 || height <= 0)
 			return;
-//		backgroundPainted = true;
 		ctx.fillRect(x, y, width, height);
 	}
 
@@ -587,7 +578,6 @@ public class JSGraphics2D implements
 	public boolean drawImage(Image img, int x, int y, int width, int height, ImageObserver observer) {
 		if (width <= 0 || height <= 0)
 			return true;
-//		backgroundPainted = true;
 		if (img != null) {
 			DOMNode imgNode = ((BufferedImage) img).秘getImageNode(BufferedImage.GET_IMAGE_ALLOW_NULL);
 			if (imgNode == null) {
@@ -625,7 +615,6 @@ public class JSGraphics2D implements
 	@SuppressWarnings("unused")
 	public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2, int sx1, int sy1, int sx2, int sy2,
 			ImageObserver observer) {
-//		backgroundPainted = true;
 		if (img != null) {
 			byte[] bytes = null;
 			DOMNode imgNode = ((BufferedImage) img).秘getImageNode(BufferedImage.GET_IMAGE_ALLOW_NULL);
@@ -768,9 +757,6 @@ public class JSGraphics2D implements
 			nx = w;
 			ny = h;
 		}
-	}
-
-	private void loadCTX(int x, int y, int w, int h, int[] pixels, double m4, double m5, boolean isOpaque) {
 	}
 
 	private static boolean isTranslationOnly(double[] m) {
@@ -988,15 +974,14 @@ public class JSGraphics2D implements
 		return clipRect.intersects(x, y, width, height);
 	}
 
-	private int alpha;
-
 	private void setGraphicsColor(Color c) {
 		if (c == null)
 			return; // this was the case with a JRootPanel graphic call
 		int a = c.getAlpha();
 		// set alpha only if it is new and if this color has an alpha not 0xFF
-		if (a != alpha && a != 255)
-			ctx.globalAlpha = (alpha = a) / 256F;
+		float fa = a / 255F;
+		if (ctx.globalAlpha != fa)
+			ctx.globalAlpha = fa;
 		ctx.fillStyle = ctx.strokeStyle = JSToolkit.getCSSColor(c);
 	}
 
@@ -1219,21 +1204,11 @@ public class JSGraphics2D implements
 
 	public void setAlpha(float f) {
 		ctx.globalAlpha = f;
-		alpha = (int) Math.floor(f * 256 + 0.0039);
 	}
 
 	public HTML5Canvas getCanvas() {
 		return canvas;
 	}
-
-//	/**
-//	 * used to determine if it is likely that the background was painted
-//	 * 
-//	 * @return background taint count
-//	 */
-//	public boolean isBackgroundPainted() {
-//		return backgroundPainted;
-//	}
 
 	/////////////// saving of the state ////////////////
 
@@ -1243,7 +1218,6 @@ public class JSGraphics2D implements
 	private final static int SAVE_TRANSFORM = 3;
 	private final static int SAVE_FONT = 4;
 	private final static int SAVE_CLIP = 5;
-	private final static int SAVE_BACKGROUND_PAINTED = 6;
 	private final static int SAVE_MAX = 7;
 
 	/**
@@ -1272,8 +1246,6 @@ public class JSGraphics2D implements
 		map[SAVE_TRANSFORM] = transform;
 		map[SAVE_FONT] = font;
 		map[SAVE_CLIP] = currentClip;
-//		map[SAVE_BACKGROUND_PAINTED] = (backgroundPainted ? Boolean.TRUE : Boolean.FALSE);
-//		backgroundPainted = false;
 		return HTML5CanvasContext2D.push(ctx, map);
 	}
 
@@ -1342,16 +1314,11 @@ public class JSGraphics2D implements
 		@SuppressWarnings("unused")
 		int a = SAVE_ALPHA;
 		setAlpha(/** @j2sNative map[a] || */0);
-//			Float alpha = (Float) map[SAVE_ALPHA];
-//			if (alpha != null) {
-//			setAlpha(alpha.floatValue());
-//		}
 		shader = null;
 		setStroke((Stroke) map[SAVE_STROKE]);
 		setTransform((AffineTransform) map[SAVE_TRANSFORM]);
 		setFont((Font) map[SAVE_FONT]);
 		currentClip = (Shape) map[SAVE_CLIP];
-//		backgroundPainted = ((Boolean) map[SAVE_BACKGROUND_PAINTED]).booleanValue();
 	}
 
 	public Graphics create(int x, int y, int width, int height) {
@@ -1419,6 +1386,14 @@ public class JSGraphics2D implements
 			System.out.println("dispose to " + initialState);
 		}
 		reset(initialState);
+	}
+
+	public int getWidth() {
+		return width;
+	}
+
+	public int getHeight() {
+		return height;
 	}
 
 }

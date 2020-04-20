@@ -1780,7 +1780,7 @@ public class JSComboBoxUI extends JSLightweightUI {
 					isDisplaySizeDirty = true;
 					comboBox.revalidate();
 					listBox.setModel(newModel);
-					setTainted(true);
+					setTainted();
 					updateDOMNode();
 					popup.updateList();
 					popup.updateSelectedIndex();

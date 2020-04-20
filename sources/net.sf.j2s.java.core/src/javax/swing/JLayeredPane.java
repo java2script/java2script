@@ -171,7 +171,7 @@ public class JLayeredPane extends JComponent /* implements Accessible */ {
     /** Convenience object defining the Drag layer. Equivalent to new Integer(400).*/
     public final static Integer DRAG_LAYER = new Integer(400);
     /** Convenience object defining the Frame Content layer.
-      * This layer is normally only use to positon the contentPane and menuBar
+      * This layer is normally only use to position the contentPane and menuBar
       * components of JFrame.
       * Equivalent to new Integer(-30000).
       * @see JFrame
