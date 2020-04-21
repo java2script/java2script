@@ -582,16 +582,25 @@ public abstract class JSComponent extends Component {
     }
 
 
-	protected Graphics 秘checkG() {
+    /**
+     * Check that a local graphic has the correct size of canvas, and if it does not, 
+     * replace it. Maybe could just flat out change its size.
+     * 
+     * @return the JSGraphics coercion of the possibly new JSGraphics object as a "Graphics"
+     */
+	protected JSGraphics2D 秘checkG() {
+		// I know, it's an insane amount of cast coercion
 		boolean isNew = ((Object) 秘g) == Boolean.TRUE;
 		if (isNew || 秘g.getWidth() != width || 秘g.getHeight() != height) {
 			if (!isNew)
 				DOMNode.dispose(秘g.getCanvas());
 			秘g = (JSGraphics2D) (Object) ((BufferedImage) createImage(width, height)).秘getImageGraphic();
 			DOMNode c = 秘g.getCanvas();
-			秘getUI().getDOMNode().prepend(c);
+			DOMNode d = 秘getUI().getDOMNode();
+			if (d != c)
+				d.prepend(c);
 		}
-		return (Graphics) (Object) this.秘g;
+		return this.秘g;
 	}
 
 	/**

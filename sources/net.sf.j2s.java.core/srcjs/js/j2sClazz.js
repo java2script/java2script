@@ -766,10 +766,8 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
   var haveFinals = (finalVars || outerObj && outerObj.$finals$);
   if (!outerObj || !objThis)
     return;
-  var clazz1 = getClazz(outerObj);
-  if (clazz1 == outerObj) {
-    outerObj = objThis;
-  }
+  var clazz1 = (outerObj.__CLASS_NAME__ ? getClazz(outerObj) : null);
+  (!clazz1 || clazz1 == outerObj) && (outerObj = objThis);
 
   if (haveFinals) {
     // f$ is short for the once-chosen "$finals$"
@@ -800,7 +798,7 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
     }
     b[getClassName(outerObj, true)] = outerObj;
     // add all superclass references for outer object
-    addB$Keys(clazz1, isNew, b, outerObj, objThis);
+    clazz1 && addB$Keys(clazz1, isNew, b, outerObj, objThis);
   }
   var clazz2 = (clazz.superclazz == clazz1 ? null : clazz.superclazz || null);
   if (clazz2) {
@@ -3036,7 +3034,7 @@ Con.consoleOutput = function (s, color) {
   if (!con) {
     return false; // BH this just means we have turned off all console action
   }
-  if (con == window.console) {
+   if (con == window.console) {
     if (color == "red")
       con.err(s);
     else
@@ -3045,13 +3043,20 @@ Con.consoleOutput = function (s, color) {
   }
   if (con && typeof con == "string")
     con = document.getElementById(con)
+
+	if (s == '\0') {
+	  con.innerHTML = "";
+	  con.lineCount = 0;
+	  return;
+	}
+   
   if (Con.linesCount > Con.maxTotalLines) {
-    for (var i = 0; i < Con.linesCount - Con.maxTotalLines; i++) {
+    for (var i = 0; i < 1000; i++) {
       if (con && con.childNodes.length > 0) {
-        con.removeChild (con.childNodes[0]);
+        con.removeChild(con.childNodes[0]);
       }
     }
-    Con.linesCount = Con.maxTotalLines;
+    Con.linesCount = Con.maxTotalLines - 1000;
   }
 
   var willMeetLineBreak = false;

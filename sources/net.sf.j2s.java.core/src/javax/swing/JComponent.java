@@ -584,7 +584,7 @@ public abstract class JComponent extends Container {
 	 */
 	protected Graphics getComponentGraphics(Graphics g) {
 		if (秘g != null)
-			g = 秘checkG();
+			g = (Graphics) (Object) 秘checkG();
 		g.setColor(getForeground());
 		g.setFont(getFont());
 		return g;

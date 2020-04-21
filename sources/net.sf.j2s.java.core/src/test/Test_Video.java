@@ -4,23 +4,11 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.color.ColorSpace;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.ComponentColorModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.DataBufferByte;
-import java.awt.image.DataBufferUShort;
-import java.awt.image.IndexColorModel;
-import java.awt.image.PackedColorModel;
-import java.awt.image.Raster;
-import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -31,15 +19,15 @@ import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
+import javax.swing.Timer;
 import javax.swing.WindowConstants;
-import javax.swing.border.EmptyBorder;
 
-import sun.awt.image.PixelConverter;
-import swingjs.JSUtil;
+import swingjs.api.js.HTML5Video;
 
 /**
  * Test of <video> tag.
@@ -47,58 +35,212 @@ import swingjs.JSUtil;
  * @author RM
  *
  */
-public class Test_Video extends Test_ {
+public class Test_Video {
 
 	public static void main(String[] args) {
 		new Test_Video();
 	}
+	private HTML5Video jsvideo;
 
 	public Test_Video() {
 		JFrame main = new JFrame();
 		main.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		ImageIcon icon;
 
-		String video = (
-		// "test/jmoljana_960x540.png");
-		// fails"test/EnergyTransfer.mp4"
-		"test/jmoljana.mp4");
-		URL videoURL;
-		try {
-			videoURL = new URL("https://chemapps.stolaf.edu/test/duet.mp4");
-		} catch (MalformedURLException e1) {
-			videoURL = null;
-		}
-		boolean testRemote = false;
+		
+		
+		boolean testRemote = false;// setting this true requires Java 9
 		boolean isJS = /** @j2sNative true || */
 				false;
 		boolean asBytes = true;
 
+		isDiscrete = true;
+		
+		
+		
+		String video = (
+		// "test/jmoljana_960x540.png");
+		// fails"test/EnergyTransfer.mp4"
+		//"test/jmoljana.mp4",
+		"test/duet.mp4");
+		
+		
+//		URL videoURL;
+//		try {
+//			videoURL = new URL("https://chemapps.stolaf.edu/test/duet.mp4");
+//		} catch (MalformedURLException e1) {
+//			videoURL = null;
+//		}
+		
+		
 		if (!isJS) {
 			icon = new ImageIcon("src/test/video_image.png");
 		} else if (asBytes) {
 			try {
-				byte[] bytes = Files.readAllBytes(new File(video).toPath());
+				byte[] bytes;
+//				if (testRemote) {
+//					bytes = videoURL.openStream().readAllBytes();// Argh! Java 9!
+//				} else {
+					bytes = Files.readAllBytes(new File(video).toPath());
+//				}
 				icon = new ImageIcon(bytes, "jsvideo");
 			} catch (IOException e1) {
 				icon = null;
 			}
-		} else if (testRemote) {
-			icon = new ImageIcon(videoURL, "jsvideo");
+//		} else if (testRemote) {
+//			icon = new ImageIcon(videoURL, "jsvideo");
 		} else {
 			icon = new ImageIcon(video, "jsvideo");
 		}
 		JLabel label = new JLabel(icon);
+		
 		int w = 1920 / 4;
 		Dimension dim = new Dimension(w, w * 9 / 16);
+		
 		addLayerPane(label, main, dim);
+		jsvideo = (HTML5Video) label.getClientProperty("jsvideo");
+		HTML5Video.addActionListener(jsvideo, new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String event = e.getActionCommand();
+				Object[] sources = (Object[]) e.getSource();
+				HTML5Video target = (HTML5Video) sources[0];
+				Object jsevent = sources[1];
+				System.out.println(event + " " + target + " " + jsevent);
+			}
+			 
+		});
+
+//		try {
+//			jsvideo.play();
+//		} catch (Throwable e) {
+//			System.out.println("couldn't play (yet)" + e);
+//		}
+//
 		addControls(label, main);
 		main.pack();
 		main.setVisible(true);
+
+		HTML5Video.setProperty(jsvideo, "currentTime", 0);
+
+		showAllProperties();
 	}
+	
+	private void showProperty(String key) {
+		System.out.println(key +"=" + HTML5Video.getProperty(jsvideo, key));
+	}
+	
+	
+	private void showAllProperties() {
+		for (int i = 0; i < allprops.length; i++)
+			showProperty(allprops[i]);		
+	}
+	
+	private static String[] allprops = {
+			"audioTracks",//
+			"autoplay",//
+			"buffered",//
+			"controller",//
+			"controls",//
+			"controlsList",//
+			"crossOrigin",//
+			"currentSrc",//
+			"currentTime",//
+			"defaultMuted",//
+			"defaultPlaybackRate",//
+			"disableRemotePlayback",//
+			"duration",//
+			"ended",//
+			"error",//
+			"loop",//
+			"mediaGroup",//
+			"mediaKeys",//
+			"mozAudioCaptured",//
+			"mozFragmentEnd",//
+			"mozFrameBufferLength",//
+			"mozSampleRate",//
+			"muted",//
+			"networkState",//
+			"paused",//
+			"playbackRate",//
+			"played",//
+			"preload",//
+			"preservesPitch",//
+			"readyState",//
+			"seekable",//
+			"seeking",//
+			"sinkId",//
+			"src",//
+			"srcObject",//
+			"textTracks",//
+			"videoTracks",//
+			"volume",//
+			"initialTime",//
+			"mozChannels",//
+
+	};
+	
+	
+	double vt, vt0;
+	long t0 = 0;
+	double duration;
+	int totalTime;
+	int delay = 33;
+	Timer timer;
+	Object[] playListener;
+	
+	private void playVideoDiscretely(HTML5Video v) {
+		vt0 = vt = HTML5Video.getCurrentTime(v);
+		t0 = System.currentTimeMillis() - (int) (vt * 1000);
+		duration = ((Double) HTML5Video.getProperty(v, "duration")).doubleValue();
+		if (vt >= duration) {
+			vt = 0;
+			playing = false;
+		}
+		
+		ActionListener listener = new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.print("\0");
+				vt += delay/1000.0;
+				System.out.println("setting time to " + vt);
+				HTML5Video.setCurrentTime(v, vt);
+				long dt = System.currentTimeMillis() - t0;
+				double dtv = vt-vt0;
+				System.out.println((dtv - dt/1000.) + 
+						" " + HTML5Video.getProperty(jsvideo, "paused") +
+						" " + HTML5Video.getProperty(jsvideo, "seeking"));
+				if (vt >= duration) {
+					playing = false;
+					removePlayListener(v);
+				}
+			}
+			
+		};
+		playListener = HTML5Video.addActionListener(v, listener, "canplaythrough");
+		t0 = System.currentTimeMillis();
+		listener.actionPerformed(null);
+	}
+	
+	protected void removePlayListener(HTML5Video v) {
+		if (playListener != null)
+			HTML5Video.removeActionListener(v, playListener);
+		playListener = null;
+	}
+	
 	private JLayeredPane layerPane;
 	private JPanel drawLayer;
 
 	private List<Point> points = new ArrayList<Point>();
+
+
+	protected boolean isDiscrete;
+
+
+	protected boolean playing;
+
 	
 	private void addLayerPane(JLabel label, JFrame main, Dimension dim) {
 		label.setPreferredSize(dim);
@@ -154,16 +296,28 @@ public class Test_Video extends Test_ {
 	}
 
 	private void addControls(JLabel label, JFrame main) {
+
+		JCheckBox discrete = new JCheckBox("discrete");
+
 		JButton play = new JButton("play");
 		play.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				/**
-				 * @j2sNative
-				 * 
-				 * 			label.ui.imageNode.play();
-				 */
+				if (playing)
+					return;
+				isDiscrete = discrete.isSelected();
+				try {
+					playing = true;
+					if (isDiscrete) {
+						playVideoDiscretely(jsvideo);
+					} else {
+						jsvideo.play();
+					}
+				} catch (Throwable e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 
 		});
@@ -172,11 +326,15 @@ public class Test_Video extends Test_ {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				/**
-				 * @j2sNative
-				 * 
-				 * 			label.ui.imageNode.pause();
-				 */
+				try {
+					playing = false;
+					duration = 0; // turns off timer 
+					jsvideo.pause();
+					removePlayListener(jsvideo);
+				} catch (Throwable e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 
 		});
@@ -204,13 +362,50 @@ public class Test_Video extends Test_ {
 
 		});
 	
+		JButton show = new JButton("show");
+		show.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				showAllProperties();
+			}
+
+		});
+	
+
 		JPanel controls = new JPanel();
 		controls.add(new JLabel("click to mark     "));
+		controls.add(discrete);
 		controls.add(play);
 		controls.add(pause);
 		controls.add(undo);
 		controls.add(clear);
+		controls.add(show);
 		main.add(controls, BorderLayout.SOUTH);
 	}
+	
+//	Event Name 	Fired When
+//	audioprocess 	The input buffer of a ScriptProcessorNode is ready to be processed.
+//	canplay 	The browser can play the media, but estimates that not enough data has been loaded to play the media up to its end without having to stop for further buffering of content.
+//	canplaythrough 	The browser estimates it can play the media up to its end without stopping for content buffering.
+//	complete 	The rendering of an OfflineAudioContext is terminated.
+//	durationchange 	The duration attribute has been updated.
+//	emptied 	The media has become empty; for example, this event is sent if the media has already been loaded (or partially loaded), and the load() method is called to reload it.
+//	ended 	Playback has stopped because the end of the media was reached.
+//	loadeddata 	The first frame of the media has finished loading.
+//	loadedmetadata 	The metadata has been loaded.
+//	pause 	Playback has been paused.
+//	play 	Playback has begun.
+//	playing 	Playback is ready to start after having been paused or delayed due to lack of data.
+//	progress 	Fired periodically as the browser loads a resource.
+//	ratechange 	The playback rate has changed.
+//	seeked 	A seek operation completed.
+//	seeking 	A seek operation began.
+//	stalled 	The user agent is trying to fetch media data, but data is unexpectedly not forthcoming.
+//	suspend 	Media data loading has been suspended.
+//	timeupdate 	The time indicated by the currentTimeattribute has been updated.
+//	volumechange 	The volume has changed.
+//	waiting 	Playback has stopped because of a temporary lack of data
+
 
 }

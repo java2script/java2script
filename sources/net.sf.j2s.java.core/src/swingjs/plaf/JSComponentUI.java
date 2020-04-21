@@ -1887,7 +1887,7 @@ public class JSComponentUI extends ComponentUI
 		}
 		if (outerNode == null)
 			createOuterNode();
-		else if (DOMNode.getParent(domNode) != outerNode)
+		else if (domNode != outerNode && DOMNode.getParent(domNode) != outerNode)
 			outerNode.appendChild(domNode);
 		Integer order = (Integer) jc.getClientProperty(JLayeredPane.LAYER_PROPERTY);
 		if (order != null)
