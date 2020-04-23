@@ -3618,6 +3618,4 @@ public class JSComponentUI extends ComponentUI
 		return domNode != null;
 	}
 
-
-
 }

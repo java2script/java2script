@@ -1,7 +1,5 @@
 package swingjs.api.js;
 
-import javajs.api.JSFunction;
-
 public interface JQueryObject {
 
 	public interface JQEvent {
@@ -11,7 +9,7 @@ public interface JQueryObject {
 	public abstract void appendTo(Object obj);
 	public abstract JQueryObject append(Object span);
 
-	public abstract void bind(String actions, JSFunction f);
+	public abstract void bind(String actions, Object f);
 	public abstract void unbind(String actions);
 
 	public abstract void on(String eventName, Object f);
@@ -38,7 +36,7 @@ public interface JQueryObject {
 	public abstract void show();
 	public abstract void hide();
 
-	public abstract void resize(JSFunction fHandleResize);
+	public abstract void resize(Object fHandleResize);
 
 
 	/**
@@ -79,28 +77,6 @@ public interface JQueryObject {
 
 	public abstract DOMNode getElement();
 	
-	public interface J2SCB extends JQueryObject {
-
-		public abstract J2SCB j2sCB(Object options);
-
-		public abstract Object[] j2sCB(String method);
-		
-		public abstract Object[] j2sCB(String method, Object o);
-
-		public abstract Object[] j2sCB(String method, int i);
-
-		/**
-		 *
-		 * @param method
-		 * @param i
-		 * @param i2 ignored -- just to set the signature
-		 * @return
-		 */
-		public abstract int j2sCB(String OPTION, String name);
-		
-		
-	}
-
 	public static DOMNode getDOMNode(JQueryObject jnode) {
 		return (jnode == null ? null : ((DOMNode[]) (Object) jnode)[0]);
 	}

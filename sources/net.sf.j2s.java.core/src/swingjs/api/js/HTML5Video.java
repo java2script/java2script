@@ -1,8 +1,16 @@
 package swingjs.api.js;
 
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.net.URL;
 import java.util.function.Function;
+
+import javax.swing.JLabel;
+
+import swingjs.api.JSUtilI;
 
 /**
  * A full-service interface for HTML5 video element interaction. Allows setting
@@ -29,7 +37,7 @@ import java.util.function.Function;
  * @author hansonr
  *
  */
-public interface HTML5Video {
+public interface HTML5Video extends DOMNode {
 
 	public interface Promise {
 
@@ -109,6 +117,39 @@ public interface HTML5Video {
 	public static double getCurrentTime(HTML5Video v) {
 		return /** @j2sNative v.currentTime|| */
 		0;
+	}
+	
+	public static Dimension getSize(HTML5Video v) {
+		return new Dimension(/** @j2sNative v.videoWidth || */
+		0, /** @j2sNative v.videoHeight|| */
+		0);
+	}
+	
+
+	/**
+	 * 
+	 * Create a BufferedIfmage from the current frame. The image will be of type
+	 * swingjs.api.JSUtilI.TYPE_4BYTE_HTML5, matching the data buffer of HTML5
+	 * images.
+	 * 
+	 * @param v
+	 * @return
+	 */
+	public static BufferedImage getImage(HTML5Video v) {
+		Dimension d = HTML5Video.getSize(v);
+		BufferedImage image = (BufferedImage) HTML5Video.getProperty(v, "_image");
+		if (image == null || image.getWidth() != d.width || image.getHeight() != d.height) {
+			image = new BufferedImage(d.width, d.height, JSUtilI.TYPE_4BYTE_HTML5);
+			HTML5Video.setProperty(v, "_image", image);
+		}
+		Graphics g = image.createGraphics();
+		/**
+		 * @j2sNative 
+		 *  
+		 * g.canvas.getContext('2d').drawImage(v, 0, 0, d.width, d.height);
+		 */
+		g.dispose();
+		return image;
 	}
 
 	// property setting and getting
@@ -215,6 +256,12 @@ public interface HTML5Video {
 			 * 			jsvideo.removeEventListener(event, listener);
 			 */
 		}
+	}
+
+	public static JLabel createLabel(URL url) {
+		JLabel label = new JLabel();
+		// TODO
+		return label;
 	}
 
 	// HTMLMediaElement properties

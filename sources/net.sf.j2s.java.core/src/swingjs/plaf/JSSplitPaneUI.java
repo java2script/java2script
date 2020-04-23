@@ -55,7 +55,7 @@ import javax.swing.UIManager;
 
 import javajs.api.JSFunction;
 import swingjs.JSToolkit;
-import swingjs.api.js.DOMNode;
+import swingjs.api.js.JSInterface;
 
 /**
  * A Basic L&F implementation of the SplitPaneUI.
@@ -241,7 +241,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 				this.xyev = xyev;
 				this.pressedLocation = splitPane.getDividerLocation();
 				divider.setCursor(cursor);
-				DOMNode.setCursor(JSToolkit.getCursorName(cursor), null);
+				JSInterface.setCursor(JSToolkit.getCursorName(cursor));
 				return;
 			case MouseEvent.MOUSE_DRAGGED:
 				int d = this.pressedLocation + /** @j2sNative (this.isHorizontal ? xyev.dx : xyev.dy) || */
@@ -254,7 +254,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 			case MouseEvent.MOUSE_RELEASED:
 				break;
 			}
-		DOMNode.setCursor(null, null);
+		JSInterface.setCursor(null);
 		divider.setCursor(null);
 	}	
 	

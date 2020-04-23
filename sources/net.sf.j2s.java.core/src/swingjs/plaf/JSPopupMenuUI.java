@@ -66,7 +66,7 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
-		String prop = e.getPropertyName();
+		//String prop = e.getPropertyName();
 //		System.out.println("jspopiupmenuui prop " + prop);
 		super.propertyChange(e);
 	}
@@ -95,14 +95,13 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 	private static Component lastInvoker;
 
 	private JPopupMenu popupMenu;
-//	private PopupMenuListener popupMenuListener;
 
 	private JSMenuKeyListener menuKeyListener;
 	
 
 	public JSPopupMenuUI() {
 		if (j2sSwingMenu == null) {
-			j2sSwingMenu = J2S.getSwing();
+			j2sSwingMenu = (JSSwingMenu) J2S.getSwing();
 		}
 		isContainer = true;	
 		isMenuItem = true;

@@ -1,10 +1,7 @@
 package swingjs.api.js;
 
-import java.awt.Color;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D.Float;
-
-import swingjs.JSToolkit;
 
 public abstract class HTML5CanvasContext2D {
 
