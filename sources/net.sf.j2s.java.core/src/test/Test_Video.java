@@ -24,6 +24,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
@@ -32,6 +33,7 @@ import javax.swing.Timer;
 import javax.swing.WindowConstants;
 
 import swingjs.api.JSUtilI;
+import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Video;
 
 /**
@@ -100,6 +102,18 @@ public class Test_Video {
 			icon = new ImageIcon(video, "jsvideo");
 		}
 		JLabel label = new JLabel(icon);
+		
+		// A little trick to allow "final" self reference in a Runnable parameter
+		JDialog[] dialog = new JDialog[1];
+		dialog[0] = HTML5Video.createDialog(null, label, 500, new Runnable() {
+
+			@Override
+			public void run() {
+				dialog[0].setVisible(true);
+			}
+			
+		});
+		dialog[0].setOpaque(true);
 		vw = 1920;
 		vh = vw * 9/16;
 		w = 1920 / 4;
@@ -108,6 +122,7 @@ public class Test_Video {
 
 		JPanel videoPanel = getLayerPane(label, dim);
 		imageLabel = new JLabel();
+		imageLabel.setAlignmentX(0.5f);
 		int type = (isJS? JSUtilI.TYPE_4BYTE_HTML5 : BufferedImage.TYPE_4BYTE_ABGR);
 		image = new BufferedImage(w, h,type);
 		ImageIcon imageicon = new ImageIcon(image);
@@ -137,7 +152,10 @@ public class Test_Video {
 		Container cp = main.getContentPane();
 		cp.setLayout(new BoxLayout(cp, BoxLayout.Y_AXIS));
 		cp.add(videoPanel);
-		cp.add(getControls(label));
+		videoPanel.setAlignmentX(0.5f);
+		JPanel controls = getControls(label);
+		controls.setAlignmentX(0.5f);
+		cp.add(controls);
 		cp.add(imageLabel);
 		main.pack();
 		main.setVisible(true);
@@ -202,7 +220,7 @@ public class Test_Video {
 	};
 	
 	
-	double vt, vt0;
+	double vt, vt0, vt1;
 	long t0 = 0;
 	double duration;
 	int totalTime;
@@ -374,6 +392,43 @@ public class Test_Video {
 
 		});
 		
+		boolean canSeek = HTML5Video.getProperty(jsvideo, "seekToNextFrame") != null;
+		System.out.println("canSeek = " + canSeek);
+		
+		
+		JButton next = new JButton("next");
+		next.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (playing || jsvideo == null)
+					return;
+				double t = HTML5Video.getCurrentTime(jsvideo);
+				System.out.println(t + "  "+ (t - vt0));
+				vt0 = t;
+				HTML5Video.nextFrame(jsvideo, 0.03334);
+			}
+
+		});
+
+		JButton reset = new JButton("reset");
+		reset.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (jsvideo == null)
+					return;
+				vt0 = 0;
+				try {
+					HTML5Video.setCurrentTime(jsvideo,  0);
+				} catch (Throwable e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+
+		});
+		
 		JButton clear = new JButton("clear");
 		clear.addActionListener(new ActionListener() {
 
@@ -414,6 +469,8 @@ public class Test_Video {
 		controls.add(cbCapture);
 		controls.add(play);
 		controls.add(pause);
+		controls.add(next);
+		controls.add(reset);
 		controls.add(undo);
 		controls.add(clear);
 		controls.add(show);
