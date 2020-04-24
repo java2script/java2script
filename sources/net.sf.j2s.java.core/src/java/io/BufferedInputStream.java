@@ -35,7 +35,7 @@ public class BufferedInputStream extends FilterInputStream {
     /**
      * The total number of bytes inside the byte array <code>buf</code>.
      */
-    protected int count;
+    public int count;
 
     /**
      * The current limit, which when passed, invalidates the current mark.
@@ -51,7 +51,7 @@ public class BufferedInputStream extends FilterInputStream {
     /**
      * The current position within the byte array <code>buf</code>.
      */
-    protected int pos;
+    public int pos;
 
     private boolean 秘closed = false;
 

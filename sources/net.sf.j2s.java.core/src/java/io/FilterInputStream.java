@@ -31,7 +31,7 @@ public class FilterInputStream extends InputStream {
 	/**
 	 * The target InputStream which is being filtered.
 	 */
-	protected InputStream in;
+	public InputStream in;
 
 	/**
 	 * Constructs a new FilterInputStream on the InputStream <code>in</code>.

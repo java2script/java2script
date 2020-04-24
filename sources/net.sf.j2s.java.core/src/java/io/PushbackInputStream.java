@@ -54,7 +54,7 @@ class PushbackInputStream extends FilterInputStream {
      * The pushback buffer.
      * @since   JDK1.1
      */
-    protected byte[] buf;
+    public byte[] buf;
 
     /**
      * The position within the pushback buffer from which the next byte will
@@ -64,7 +64,7 @@ class PushbackInputStream extends FilterInputStream {
      *
      * @since   JDK1.1
      */
-    protected int pos;
+    public int pos;
 
     /**
      * Check to make sure that this stream has not been closed

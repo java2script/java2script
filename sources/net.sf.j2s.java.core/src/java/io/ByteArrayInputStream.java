@@ -31,7 +31,7 @@ public class ByteArrayInputStream extends InputStream {
 	/**
 	 * The current position within the byte array.
 	 */
-	protected int pos;
+	public int pos; // SwingJS was protected
 
 	/**
 	 * The current mark position. Initially set to 0 or the <code>offset</code>

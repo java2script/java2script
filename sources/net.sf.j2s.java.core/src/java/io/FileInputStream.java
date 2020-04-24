@@ -51,7 +51,7 @@ class FileInputStream extends InputStream
     /* File Descriptor - handle to the open file */
     private final FileDescriptor fd;
 
-    private ByteArrayInputStream is;
+    public ByteArrayInputStream 秘is;
     /**
      * The path of the referenced file
      * (null if the stream is created with a file descriptor)
@@ -190,7 +190,7 @@ class FileInputStream extends InputStream
 		if (bytes == null)
 		  throw new FileNotFoundException("Opening file " + file);
 		file.秘bytes = bytes;
-    	is = new ByteArrayInputStream(bytes);    	
+    	秘is = new ByteArrayInputStream(bytes);    	
     }
 
 //    /**
@@ -211,7 +211,7 @@ class FileInputStream extends InputStream
      */
     @Override
 	public int read() throws IOException {
-      return (channel == null ? is.read() : channel.read());	
+      return (channel == null ? 秘is.read() : channel.read());	
     }
 
     /**
@@ -222,7 +222,7 @@ class FileInputStream extends InputStream
      * @exception IOException If an I/O error has occurred.
      */
     private int readBytes(byte b[], int off, int len) throws IOException {
-        return channel == null ? is.read(b, off, len) : channel.readBytes(b, off, len);	    	
+        return channel == null ? 秘is.read(b, off, len) : channel.readBytes(b, off, len);	    	
     }
 
     /**
@@ -290,7 +290,7 @@ class FileInputStream extends InputStream
      */
     @Override
 	public long skip(long n) throws IOException {
-        return channel == null ? is.skip(n) : channel.skip(n);    	
+        return channel == null ? 秘is.skip(n) : channel.skip(n);    	
     }
 
     /**
@@ -312,7 +312,7 @@ class FileInputStream extends InputStream
      */
     @Override
 	public int available() throws IOException {
-    	return channel == null ? is.available() : channel.available();    	
+    	return channel == null ? 秘is.available() : channel.available();    	
     }
 
     /**
@@ -339,7 +339,7 @@ class FileInputStream extends InputStream
             @Override
 			public void close() throws IOException {
                 if (channel == null) {
-                	is.close();
+                	秘is.close();
                 } else {
                     channel.close();
                  }
@@ -385,9 +385,9 @@ class FileInputStream extends InputStream
         synchronized (this) {
             if (channel == null) {
                 try {
-                	fd._setPosAndLen(is.pos, is.pos + is.available());
+                	fd._setPosAndLen(秘is.pos, 秘is.pos + 秘is.available());
 					channel = JSFileChannel.open(fd, path, true, false, this);
-					is = null;
+					秘is = null;
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -430,7 +430,7 @@ class FileInputStream extends InputStream
 		if (channel != null) { 
 			return super.transferTo(out);
 		}
-		byte[] b = (is.pos == 0 ? is.buf : is.readAllBytes());
+		byte[] b = (秘is.pos == 0 ? 秘is.buf : 秘is.readAllBytes());
 		out.write(b);
 		return b.length;		
 	}
@@ -445,8 +445,8 @@ class FileInputStream extends InputStream
 	public byte[] readAllBytes() throws IOException {
 		if (channel != null)
 			super.readAllBytes();
-		if (is.pos == 0)
-			return is.buf;
+		if (秘is.pos == 0)
+			return 秘is.buf;
 		byte[] b = new byte[available()];
 		read(b, 0, b.length);
 		return b;

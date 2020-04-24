@@ -1731,7 +1731,7 @@ public class File
 ////    private static class LazyInitialization {
 ////        static final SecureRandom random = new SecureRandom();
 ////
-        static final String temporaryDirectory = "/TEMP/";//temporaryDirectory();
+        public static final String temporaryDirectory = System.getProperty("java.io.tmpdir");//"/TEMP/";//temporaryDirectory();
 //        static String temporaryDirectory() {
 //        	return "/TEMP/";
 //            return fs.normalize(
