@@ -1383,6 +1383,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			ASTNode body, boolean isConstructor, List<IMethodBinding> abstractMethodList, int lambdaType) {
 		String alias = (mnode == null ? null : checkJ2SMethodDoc(mnode));
 		int mods = mBinding.getModifiers();
+		ITypeBinding mClass = mBinding.getDeclaringClass();
 		boolean isNative = Modifier.isNative(mods);
 		boolean isPublic = Modifier.isPublic(mods);
 		boolean isPrivate = !isPublic && !isConstructor && isPrivate(mBinding);
@@ -1393,8 +1394,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// lambdaType != NOT_LAMBDA ? METHOD_FULLY_QUALIFIED
 		// : temp_add$UnqualifiedMethod ? METHOD_$_QUALIFIED :
 		METHOD_FULLY_QUALIFIED);
+		
 		if (isUserApplet && lambdaType == NOT_LAMBDA && !isConstructor && !isStatic && isPublic)
 			qualification |= METHOD_UNQUALIFIED;
+
+		
 		if (addGeneric) {
 			qualification |= METHOD_ADD_GENERIC;
 			if (isAbstract && abstractMethodList != null) {
@@ -1415,7 +1419,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 		if (!isPrivate)
 			logMethodDeclared(quotedFinalNameOrArray);
-		ITypeBinding mClass = mBinding.getDeclaringClass();
 		if (isConstructor && (quotedFinalNameOrArray.equals("'c$'")
 				|| mBinding.isVarargs() && mBinding.getParameterTypes().length == 1))
 			class_haveDefaultConstructor = true; // in case we are not qualifying
@@ -1590,13 +1593,13 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if (!isSpecialMethod) {
 			// TODO: for now we are just returning name$ for all lambda methods
 			// note that simpleNameInMethodBinding can return C$.xxxx
-
 			String j2sName = getFinalDotQualifiedNameForMethod(javaQualifier, mBinding,
 					METHOD_ISQUALIFIED);
+			
 
 			String finalMethodNameWith$Params = getFinalMethodNameWith$Params(j2sName, mBinding, null, true,
 					METHOD_NOTSPECIAL);
-
+			
 			if (lambdaArity >= 0) {
 				// The problem here is that we cannot apply a method from an interface
 				// because those methods are not present in JavaScript.
@@ -6411,9 +6414,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		String methodName = mBinding.getName();
 		if (j2sName == null)
 			j2sName = methodName;
-		ITypeBinding declaringClass = mBinding.getDeclaringClass();
-		String javaClassName = getUnreplacedJavaClassNameQualified(declaringClass);
-		if (NameMapper.isMethodNonqualified(javaClassName, methodName)) {
+		if (NameMapper.isMethodNonqualified(getUnreplacedJavaClassNameQualified(mBinding.getDeclaringClass()), methodName)) {
 			return j2sName;
 		}
 
@@ -6648,6 +6649,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		 * @return
 		 */
 		private static boolean isPackageOrClassNonqualified(String className) {
+			if (className.indexOf("$") >= 0)
+				return false; // inner class
 			className += ".";
 			for (int i = nonQualifiedPackages.length; --i >= 0;) {
 				String s = nonQualifiedPackages[i];
