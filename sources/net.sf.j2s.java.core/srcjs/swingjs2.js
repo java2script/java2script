@@ -10669,11 +10669,8 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
-// Note if this character 秘 does not look like a Chinese character, u79d8 
-// then DON'T SAVE THIS FILE. Open it again with a default UTF-8 editor.
-
-// J2S._version set to "3.2.4.09" 2019.10.31
-
+// BH 2020.04.24 Info.width includes "px" allowed and implies Info.isResizable:false; 
+//               fixes early hidden 100x100 size issue due to node.offsetWidth == 0 in that case
 // BH 2019.11.06 adds JFileChooser.setMultipleMode(true) and multiple-file DnD
 // BH 2019.10.31 (Karsten Blankenagel) adds Info.spinnerImage: ["none"|<j2sdir/>path|/path|http[s]://path]
 // BH 2019.10.20 fixes modal for popup dialog; still needs work for two applets?
@@ -11364,7 +11361,7 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 				+ database
 				+ (query.indexOf("?POST?") >= 0 ? "?POST?" : "")
 				+ "&query="
-				+ encodeURIComponent(query)
+				+ encodeURIComponent(query.replace(/ /g,"%20"))
 				+ (asBase64 ? "&encoding=base64" : "")
 				+ (noScript ? "" : "&script="
 						+ encodeURIComponent(J2S._getScriptForDatabase(database)));
@@ -11765,6 +11762,7 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 				}
 			};
 		var readFile = function(file) {
+			Clazz.loadClass("swingjs.JSUtil");
 			var reader = new FileReader();
 			reader.onloadend = function(evt) {
 				var data = null;
@@ -11780,14 +11778,14 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 					case "java.util.Array":
 						var e = Clazz.new_(Clazz.load("java.io.File").c$$S,
 								[ file.name ]);
-						e.秘bytes = J2S._toBytes(data);
+						swingjs.JSUtil.setFileBytesStatic$java_io_File$O(e, J2S._toBytes(data))
 						arr.push(e);
 						data = arr;
 						break;
 					case "java.io.File":
 						var f = Clazz.new_(Clazz.load("java.io.File").c$$S,
 								[ file.name ]);
-						f.秘bytes = J2S._toBytes(data);
+						swingjs.JSUtil.setFileBytesStatic$java_io_File$O(f, J2S._toBytes(data));
 						data = f;
 						break;
 					case "ArrayBuffer":
@@ -12055,18 +12053,14 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 ...<div id=\"ID_appletinfotablediv\" style=\"width:Wpx;height:Hpx;position:relative;font-size:14px;text-align:left\">IMG\
 ......<div id=\"ID_appletdiv\" style=\"z-index:"
 					+ J2S.getZ(applet, "header")
-					+ ";width:100%;height:100%;position:absolute;top:0px;left:0px;"
+					+ (applet._isResizable === false ? ";width:Wpx;height:Hpx;"
+							: ";width:100%;height:100%;") +
+							"position:absolute;top:0px;left:0px;"
 			+ (applet._spinnerImage ? 
 					"background-image:url(" + applet._spinnerImage + "); background-repeat:no-repeat; background-position:center;" : "")
 					+ css + ">";
-			var height = applet._height;
-			var width = applet._width;
-			if (typeof height !== "string" || height.indexOf("%") < 0)
-				height += "px";
-			if (typeof width !== "string" || width.indexOf("%") < 0)
-				width += "px";
-			s = s.replace(/IMG/, img).replace(/Hpx/g, height).replace(/Wpx/g,
-					width);
+			s = s.replace(/IMG/, img).replace(/Hpx/g, applet._containerHeight).replace(/Wpx/g,
+					applet._containerWidth);
 		} else {
 			s = "\
 ......</div>\
@@ -13150,6 +13144,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		this._is2D = true;
 		this._isJava = false;
 		this._isJNLP = !!Info.main;
+		if (typeof Info.	isResizable == "undefined" && ("" + Info.width).indexOf("px")>=0)
+			Info.isResizable = false;
 		this._jmolType = "J2S._Canvas2D (" + type + ")";
 		this._isLayered = Info._isLayered || false; // JSV or SwingJS are
 													// layered
@@ -13898,7 +13894,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	J2S.getResourcePath = function(path, isJavaPath) {
 		if (!path || path.indexOf("https:/") != 0
 				&& path.indexOf("https:/") != 0 && path.indexOf("file:/") != 0) {
-			var applet = Thread.currentThread$().getThreadGroup$().秘html5Applet;
+			Clazz.loadClass("swingjs.JSUtil");
+			var applet = swingjs.JSUtil.getApplet$();
 			path = (!isJavaPath && applet.__Info.resourcePath || applet.__Info.j2sPath)
 					+ "/" + (path || "");
 		}
