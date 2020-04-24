@@ -1,14 +1,24 @@
 package swingjs.api.js;
 
+import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.net.URL;
+import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.function.Function;
 
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 import swingjs.api.JSUtilI;
 
@@ -22,14 +32,15 @@ import swingjs.api.JSUtilI;
  * from byte[], File, or URL.
  * 
  * After adding the ImageIcon to a JLabel, calling
- * jlabel.getClientProperty("jsvideo") returns an object of type HTML5Video that
- * has the full suite of HTML5 video element properties, methods, and events.
+ * jlabel.getClientProperty("jsvideo") returns an HTML5 object of type
+ * HTML5Video (the &lt;video&gt; tag), which has the full suite of HTML5 video
+ * element properties, methods, and events.
  * 
  * Access to event listeners is via the method addActionListener, below, which
  * return an ActionEvent that has as its source both the video element source as
  * well as the original JavaScript event as an Object[] { jsvideo, event }. The
  * id of this ActionEvent is 12345, and its command is the name of the event,
- * for example, "canplay".
+ * for example, "canplay" or "canplaythrough".
  * 
  * See https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement for
  * details.
@@ -118,13 +129,12 @@ public interface HTML5Video extends DOMNode {
 		return /** @j2sNative v.currentTime|| */
 		0;
 	}
-	
+
 	public static Dimension getSize(HTML5Video v) {
 		return new Dimension(/** @j2sNative v.videoWidth || */
-		0, /** @j2sNative v.videoHeight|| */
-		0);
+				0, /** @j2sNative v.videoHeight|| */
+				0);
 	}
-	
 
 	/**
 	 * 
@@ -144,9 +154,9 @@ public interface HTML5Video extends DOMNode {
 		}
 		Graphics g = image.createGraphics();
 		/**
-		 * @j2sNative 
-		 *  
-		 * g.canvas.getContext('2d').drawImage(v, 0, 0, d.width, d.height);
+		 * @j2sNative
+		 * 
+		 * 			g.canvas.getContext('2d').drawImage(v, 0, 0, d.width, d.height);
 		 */
 		g.dispose();
 		return image;
@@ -165,8 +175,8 @@ public interface HTML5Video extends DOMNode {
 	public static void setProperty(HTML5Video jsvideo, String key, Object value) {
 		if (value instanceof Number) {
 			/** @j2sNative jsvideo[key] = +value; */
-		} else if (value instanceof Number || value instanceof Boolean) {
-			/** @j2sNative jsvideo[key] = !+value */
+		} else if (value instanceof Boolean) {
+			/** @j2sNative jsvideo[key] = !!+value */
 		} else {
 			/** @j2sNative jsvideo[key] = value; */
 		}
@@ -227,15 +237,18 @@ public interface HTML5Video extends DOMNode {
 				return null;
 			}
 		};
-		Object[] listeners = new Object[0];
+		ArrayList<Object> listeners = new ArrayList<>();
 		for (int i = 0; i < events.length; i++) {
-			/**
-			 * @j2sNative var func = function(event){f.apply.apply(f, [event])};
-			 *            jsvideo.addEventListener(events[i],func);
-			 *            listeners.push(events[i]); listeners.push(func);
-			 */
+			Object func = /**
+							 * @j2sNative function(event){f.apply$O.apply(f, [event])} ||
+							 */
+					null;
+			listeners.add(events[i]);
+			listeners.add(func);
+			jsvideo.addEventListener(events[i], func);
+
 		}
-		return listeners;
+		return listeners.toArray(new Object[listeners.size()]);
 	}
 
 	/**
@@ -247,24 +260,174 @@ public interface HTML5Video extends DOMNode {
 	 */
 	@SuppressWarnings("unused")
 	public static void removeActionListener(HTML5Video jsvideo, Object[] listeners) {
+		if (listeners == null) {
+			for (int i = 0; i < eventTypes.length; i++) {
+				jsvideo.removeEventListener(eventTypes[i]);
+			}
+		}
+		
 		for (int i = 0; i < listeners.length; i += 2) {
 			String event = (String) listeners[i];
 			Object listener = listeners[i + 1];
-			/**
-			 * @j2sNative
-			 * 
-			 * 			jsvideo.removeEventListener(event, listener);
-			 */
+			jsvideo.removeEventListener(event, listener);
 		}
 	}
 
-	public static JLabel createLabel(URL url) {
-		JLabel label = new JLabel();
-		// TODO
-		return label;
+	/**
+	 * Create an ImageIcon which, when placed in a JLabel, displays the video.
+	 * 
+	 * @param source
+	 * @return
+	 */
+	public static ImageIcon createIcon(Object source) {
+		try {
+			if (source instanceof URL) {
+				return new ImageIcon((URL) source, "j2svideo");
+			} else if (source instanceof byte[]) {
+				return new ImageIcon((byte[]) source, "j2svideo");
+			} else if (source instanceof File) {
+				return new ImageIcon(Files.readAllBytes(((File) source).toPath()));
+			} else {
+				return new ImageIcon(Files.readAllBytes(new File(source.toString()).toPath()));
+			}
+		} catch (Throwable t) {
+			return null;
+		}
 	}
 
-	// HTMLMediaElement properties
+	/**
+	 * Create a label that, when shown, displays the video.
+	 * 
+	 * @param source
+	 * @return
+	 */
+	public static JLabel createLabel(Object source) {
+		ImageIcon icon = (source instanceof ImageIcon ? (ImageIcon) source : createIcon(source));
+		return (icon == null ? null : new JLabel(icon));
+	}
+
+	/**
+	 * Create a dialog that includes rudimentary controls. Optional maxWidth allows image downscaling by factors of two.
+	 * 
+	 * @param parent
+	 * @param source 
+	 * @param maxWidth
+	 * @return
+	 */
+	public static JDialog createDialog(Frame parent, Object source, int maxWidth, Runnable whenReady) {
+		JDialog dialog = new JDialog(parent);
+		Container p = dialog.getContentPane();
+		p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
+		JLabel label = (source instanceof JLabel ? (JLabel) source : createLabel(source));
+		label.setAlignmentX(0.5f);
+		// not in Java! dialog.putClientProperty("j2svideo", label);
+		p.add(label);
+		label.setVisible(false);
+		p.add(getControls(label));
+		dialog.setModal(false);
+		dialog.pack();
+		dialog.setVisible(true);
+		dialog.setVisible(false);
+		HTML5Video jsvideo = (HTML5Video) label.getClientProperty("jsvideo");
+		HTML5Video.addActionListener(jsvideo, new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (label.getClientProperty("jsvideo.size") != null)
+					return;
+				Dimension dim = HTML5Video.getSize(jsvideo);
+				while (dim.width > maxWidth) {
+					dim.width /= 2;
+					dim.height /= 2;
+				}
+				label.putClientProperty("jsvideo.size", dim);
+				label.setPreferredSize(dim);
+				label.setVisible(true);
+//				label.invalidate();
+				dialog.pack();
+//				dialog.setVisible(false);
+				if (whenReady != null)
+					whenReady.run();
+			}
+			
+		}, "canplaythrough");
+		HTML5Video.setCurrentTime(jsvideo,  0);
+		return dialog;
+	}
+
+	static JPanel getControls(JLabel label) {
+
+		JPanel controls = new JPanel();
+		controls.setAlignmentX(0.5f);
+		JButton btn = new JButton("play");
+		btn.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					((HTML5Video) label.getClientProperty("jsvideo")).play();
+				} catch (Throwable e1) {
+					e1.printStackTrace();
+				}
+			}
+
+		});
+		controls.add(btn);
+
+		btn = new JButton("pause");
+		btn.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					((HTML5Video) label.getClientProperty("jsvideo")).pause();
+				} catch (Throwable e1) {
+					e1.printStackTrace();
+				}
+			}
+
+		});
+		controls.add(btn);
+		
+		btn = new JButton("reset");
+		btn.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				HTML5Video.setCurrentTime((HTML5Video) label.getClientProperty("jsvideo"), 0);
+			}
+
+		});
+		controls.add(btn);
+
+		return controls;
+	}
+
+	/**
+	 * Advance to the next frame, using seekToNextFrame() if available, or using the time difference supplied.
+	 * 
+	 * @param jsvideo
+	 * @param dt  seconds to advance if seekToNextFrame() is not available
+	 * @return true if can use seekToNextFrame()
+	 * 
+	 */
+	public static boolean nextFrame(HTML5Video jsvideo, double dt) {
+		Boolean canSeek = (Boolean) getProperty(jsvideo,"_canseek");
+		if (canSeek == null) {
+			setProperty(jsvideo, "_canseek", canSeek = Boolean.valueOf(getProperty(jsvideo, "seekToNextFrame") != null));
+		}
+		try {			
+			if (canSeek) {
+				jsvideo.seekToNextFrame();
+			} else {
+				HTML5Video.setCurrentTime(jsvideo, HTML5Video.getCurrentTime(jsvideo) + dt);						
+			}
+		} catch (Throwable e1) {
+		}
+		return canSeek.booleanValue();
+	}
+
+// HTMLMediaElement properties
 
 //	audioTracks
 //	autoplay

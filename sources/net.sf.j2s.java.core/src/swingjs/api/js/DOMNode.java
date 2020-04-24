@@ -18,29 +18,35 @@ public interface DOMNode {
 	// "abstract" in the sense that these are the exact calls to JavaScript
 	
 
-	public abstract String[] getAttributeNames();
+	public void addEventListener(String event, Object listener);
+	public void removeEventListener(String event);
+	public void removeEventListener(String event, Object listener);
 
-	public abstract String getAttribute(String name);
 
-	public abstract void setAttribute(String attr, String val);
 
-	public abstract void appendChild(DOMNode node);
+	public String[] getAttributeNames();
+
+	public String getAttribute(String name);
+
+	public void setAttribute(String attr, String val);
+
+	public void appendChild(DOMNode node);
 	
-	public abstract void prepend(DOMNode node);
+	public void prepend(DOMNode node);
 	
-	public abstract void insertBefore(DOMNode node, DOMNode refNode);
+	public void insertBefore(DOMNode node, DOMNode refNode);
 	
-	public abstract DOMNode removeChild(DOMNode node);
+	public DOMNode removeChild(DOMNode node);
 
-	public abstract void focus();
-	public abstract boolean hasFocus();
-	public abstract void blur();
+	public void focus();
+	public boolean hasFocus();
+	public void blur();
 
-	public abstract DOMNode removeAttribute(String attr);
+	public DOMNode removeAttribute(String attr);
 	
-	public abstract void setSelectionRange(int start, int end, String direction);
+	public void setSelectionRange(int start, int end, String direction);
 
-	public abstract Rectangle getBoundingClientRect();
+	public Rectangle getBoundingClientRect();
 	
 	// static convenience methods
 
