@@ -13,7 +13,7 @@ import javax.swing.JInternalFrame;
 import javax.swing.JRootPane;
 import javax.swing.RootPaneContainer;
 
-import javajs.api.JSFunction;
+import swingjs.api.js.JSFunction;
 import swingjs.JSFrameViewer;
 import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;

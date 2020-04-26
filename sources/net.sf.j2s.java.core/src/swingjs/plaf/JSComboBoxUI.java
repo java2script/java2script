@@ -49,7 +49,7 @@ import javax.swing.plaf.UIResource;
 import javax.swing.plaf.basic.BasicGraphicsUtils;
 import javax.swing.text.Position;
 
-import javajs.api.JSFunction;
+import swingjs.api.js.JSFunction;
 import sun.awt.AppContext;
 import sun.swing.DefaultLookup;
 import sun.swing.UIAction;

@@ -53,7 +53,7 @@ import javax.swing.JSplitPane;
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 
-import javajs.api.JSFunction;
+import swingjs.api.js.JSFunction;
 import swingjs.JSToolkit;
 import swingjs.api.js.JSInterface;
 

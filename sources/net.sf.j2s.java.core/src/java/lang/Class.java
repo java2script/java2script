@@ -2418,7 +2418,7 @@ public final class Class<T> {
 	 * @since JDK1.1
 	 */
 	
-	@SuppressWarnings({ "unused", "null" })
+	@SuppressWarnings({ "unused" })
 	public InputStream getResourceAsStream(String name) {
 		// allows an optional second argument to be a base directory in JavaScript 
 		// "System" class loader will not have this.$clazz$
@@ -2431,7 +2431,11 @@ public final class Class<T> {
 	    name = name.replace('\\','/');
 	    String baseFolder = null;
 	    String fname= name;
-		if (!name.startsWith(File.temporaryDirectory)) {
+		if (name.startsWith(File.temporaryDirectory)) {
+			data = JSUtil.getCachedFileData(name,  true);
+			if (data == null)
+				return null;
+		} else {
 		/**
 		 * @j2sNative
 	    if (arguments.length == 2 && name.indexOf ('/') != 0) { // additional argument

@@ -10,7 +10,7 @@ import java.util.EventObject;
 import javax.swing.JComponent;
 import javax.swing.JList;
 
-import javajs.api.JSFunction;
+import swingjs.api.js.JSFunction;
 import swingjs.JSKeyEvent;
 import swingjs.JSMouse;
 import swingjs.api.js.DOMNode;

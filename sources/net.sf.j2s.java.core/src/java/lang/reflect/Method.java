@@ -18,7 +18,7 @@ package java.lang.reflect;
 import java.lang.annotation.Annotation;
 import java.util.Map;
 
-import javajs.api.JSFunction;
+import swingjs.api.js.JSFunction;
 import sun.reflect.annotation.AnnotationParser;
 
 /**
