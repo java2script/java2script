@@ -30,6 +30,7 @@ public class CorePlugin extends Plugin {
 	// if you change the x.x.x number, be sure to also indicate that in 
 	// j2sApplet.js and also (Bob only) update.bat, update-clean.bat
 
+	// BH 2020.04.26 -- 3.2.9-v1h fix for inner classes of interfaces duplicated; fix for api.js inner class method names unqualified
 	// BH 2020.04.15 -- 3.2.9-v1g fix for qualified super() in inner classes using Class.super_ call (Tracker)
 	// BH 2020.04.05 -- 3.2.9-v1f (Boolean ? ...) not unboxed
 	// BH 2020.03.21 -- 3.2.9-v1e better v1c 

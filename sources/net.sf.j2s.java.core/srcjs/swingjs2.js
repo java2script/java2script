@@ -11436,25 +11436,6 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 		return data;
 	}
 
-	J2S._loadFileData = function(applet, fileName, fSuccess, fError, info) {
-		info || (info = {});
-		var isRaw = [];
-		fileName = J2S._checkFileName(applet, fileName, isRaw);
-		fSuccess = J2S._checkCache(applet, fileName, fSuccess);
-		if (isRaw[0]) {
-			J2S._getRawDataFromServer("_", fileName, fSuccess, fError, info);
-			return;
-		}
-		info.type = "GET";
-		info.dataType = "text";
-		info.url = fileName;
-		info.async = J2S._asynchronous;
-		info.success = function(a) { J2S._loadSuccess(a, fSuccess) };
-		info.error = function() { J2S._loadError(fError) };
-		J2S._checkAjaxPost(info);
-		J2S._ajax(info);
-	}
-
 	J2S._checkAjaxPost = function(info) {
 		var pt = info.url.indexOf("?POST?");
 		if (pt > 0) {
@@ -11530,7 +11511,27 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 
 	var knownDomains = {};
 
-	J2S.getFileData = function(fileName, fSuccess, doProcess, info) {
+	// old? for Jmol? Not used in SwingJS 
+	J2S._loadFileData = function(applet, fileName, fSuccess, fError, info) {
+		info || (info = {});
+		var isRaw = [];
+		fileName = J2S._checkFileName(applet, fileName, isRaw);
+		fSuccess = J2S._checkCache(applet, fileName, fSuccess);
+		if (isRaw[0]) {
+			J2S._getRawDataFromServer("_", fileName, fSuccess, fError, info);
+			return;
+		}
+		info.type = "GET";
+		info.dataType = "text";
+		info.url = fileName;
+		info.async = J2S._asynchronous;
+		info.success = function(a) { J2S._loadSuccess(a, fSuccess) };
+		info.error = function() { J2S._loadError(fError) };
+		J2S._checkAjaxPost(info);
+		J2S._ajax(info);
+	}
+
+	J2S.getFileData = function(fileName, fWhenDone, doProcess, info) {
 		if (info === true)
 			info = {isBinary: true};
 		info || (info = {});
@@ -11567,18 +11568,18 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 				&& fileName.indexOf(document.location.host) >= 0);
 		var isHttps2Http = (J2S._httpProto == "https://" && fileName.indexOf("http://") == 0);
 		var cantDoSynchronousLoad = (!isMyHost && J2S.$supportsIECrossDomainScripting());
-		var mustCallHome = !isFile && (isHttps2Http || asBase64 || !fSuccess && cantDoSynchronousLoad);
+		var mustCallHome = !isFile && (isHttps2Http || asBase64 || !fWhenDone && cantDoSynchronousLoad);
 		var url;
 		var isNotDirectCall = !mustCallHome && !isFile && !isMyHost && !(url = J2S._isDirectCall(fileName));
 		fileName = url || fileName;
 		var data = null;
 		if (mustCallHome || isNotDirectCall) {
-			data = J2S._getRawDataFromServer("_", fileName, fSuccess, fSuccess,
+			data = J2S._getRawDataFromServer("_", fileName, fWhenDone, fWhenDone,
 					asBase64, true, info);
 		} else {
 			fileName = fileName.replace(/file:\/\/\/\//, "file://"); // opera
 			if (!isTyped)info.dataType = (isBinary ? "binary" : "text");
-			info.async = !!fSuccess;
+			info.async = !!fWhenDone;
 			if (isPost) {
 				info.type = "POST";
 				info.url = fileName.split("?POST?")[0]
@@ -11587,12 +11588,12 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 				info.type = "GET";
 				info.url = fileName;
 			}
-			if (fSuccess) {
-				info.success = function(data) { fSuccess(J2S._xhrReturn(info.xhr)) };
-				info.error = function() { fSuccess(info.xhr.statusText) };
+			if (fWhenDone) {
+				info.success = function(data) { fWhenDone(J2S._xhrReturn(info.xhr)) };
+				info.error = function() { fWhenDone(info.xhr.statusText) };
 			}
 			info.xhr = J2S.$ajax(info);
-			if (!fSuccess) {
+			if (!fWhenDone) {
 				data = J2S._xhrReturn(info.xhr);
 				if (data == null)
 					doProcess = null; 
@@ -11778,14 +11779,14 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 					case "java.util.Array":
 						var e = Clazz.new_(Clazz.load("java.io.File").c$$S,
 								[ file.name ]);
-						swingjs.JSUtil.setFileBytesStatic$java_io_File$O(e, J2S._toBytes(data))
+						swingjs.JSUtil.setFileBytesStatic$$O$O(e, J2S._toBytes(data))
 						arr.push(e);
 						data = arr;
 						break;
 					case "java.io.File":
 						var f = Clazz.new_(Clazz.load("java.io.File").c$$S,
-								[ file.name ]);
-						swingjs.JSUtil.setFileBytesStatic$java_io_File$O(f, J2S._toBytes(data));
+								[ J2S.getGlobal("j2s.tmpdir") + "OPEN/" + file.name ]);
+						swingjs.JSUtil.setFileBytesStatic$O$O(f, J2S._toBytes(data));
 						data = f;
 						break;
 					case "ArrayBuffer":
@@ -13077,6 +13078,10 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		}
 		__nextExecution();
 	};
+	
+	J2S.showStatus = function(msg, doFadeout) {
+		Clazz._LoaderProgressMonitor.showStatus(msg, doFadeout);
+	}
 
 	J2S.debugClip = function() { return J2S._debugClip };
 	
@@ -14717,7 +14722,7 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
   var haveFinals = (finalVars || outerObj && outerObj.$finals$);
   if (!outerObj || !objThis)
     return;
-  var clazz1 = (outerObj.__CLASS_NAME__ ? getClazz(outerObj) : null);
+  var clazz1 = (outerObj.__CLASS_NAME__ || outerObj instanceof String ? getClazz(outerObj) : null);
   (!clazz1 || clazz1 == outerObj) && (outerObj = objThis);
 
   if (haveFinals) {
@@ -15956,6 +15961,7 @@ Clazz.newInterface(java.lang,"Runnable");
 
 
 ;(function(){var P$=java.lang,I$=[[0,'java.util.stream.StreamSupport','java.util.Spliterators','java.lang.CharSequence$lambda1','java.lang.CharSequence$lambda2']],$I$=function(i){return I$[i]||(I$[i]=Clazz.load(I$[0][i]))};
+
 var C$=Clazz.newInterface(P$, "CharSequence");
 C$.$defaults$ = function(C$){
 
