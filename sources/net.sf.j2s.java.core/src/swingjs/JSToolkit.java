@@ -63,7 +63,7 @@ import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
 
-import javajs.api.JSFunction;
+import swingjs.api.js.JSFunction;
 import javajs.util.JSThread;
 import javajs.util.PT;
 import sun.awt.AppContext;
@@ -342,8 +342,11 @@ public class JSToolkit extends SunToolkit
 			t = Thread.秘thisThread;
 		t = (/** @j2sNative !self.java || */
 		t.getThreadGroup().秘systemExited ? null : t);
+		
+		//System.out.println("JSToolkit current was " + Thread.秘thisThread);
 		if (setCurrent && t != null)
 			Thread.秘thisThread = t;
+		//System.out.println("JSToolkit current now " + Thread.秘thisThread);
 		return t;
 	}
 
@@ -373,7 +376,8 @@ public class JSToolkit extends SunToolkit
 					"";
 			System.out.println(s);
 		}
-		getCurrentThread(thread0);
+		if (getCurrentThread(null) == t)
+			getCurrentThread(thread0);
 		SwingJS.eventID = id0;
 		/**
 		 * @j2sNative }; setTimeout(ff, 0);
