@@ -305,8 +305,13 @@ public class JSImagekit implements ImageConsumer {
 	}
 
 	public Image createVideo(Path path) {
-		JSImage jsimage = new JSImage((byte[])null, 1, 1, path.toString());
-		jsimage.setImageNode((JSPath) path, null, "video");
+		byte[] bytes = JSUtil.getBytes(path);
+		if (bytes == null)
+			bytes = (byte[]) JSUtil.getCachedFileData(path.toString(), true);
+		if (bytes != null)
+			JSUtil.setFileBytesStatic(path, bytes);
+		JSImage jsimage = new JSImage(bytes, 1, 1, path.toString());
+		jsimage.setImageNode((JSPath) path, bytes, "video");
 		return jsimage;
 	}
 

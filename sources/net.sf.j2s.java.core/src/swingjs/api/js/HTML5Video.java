@@ -282,9 +282,9 @@ public interface HTML5Video extends DOMNode {
 	public static ImageIcon createIcon(Object source) {
 		try {
 			if (source instanceof URL) {
-				return new ImageIcon((URL) source, "j2svideo");
+				return new ImageIcon((URL) source, "jsvideo");
 			} else if (source instanceof byte[]) {
-				return new ImageIcon((byte[]) source, "j2svideo");
+				return new ImageIcon((byte[]) source, "jsvideo");
 			} else if (source instanceof File) {
 				return new ImageIcon(Files.readAllBytes(((File) source).toPath()));
 			} else {
@@ -320,7 +320,7 @@ public interface HTML5Video extends DOMNode {
 		p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
 		JLabel label = (source instanceof JLabel ? (JLabel) source : createLabel(source));
 		label.setAlignmentX(0.5f);
-		// not in Java! dialog.putClientProperty("j2svideo", label);
+		// not in Java! dialog.putClientProperty("jsvideo", label);
 		p.add(label);
 		label.setVisible(false);
 		p.add(getControls(label));
