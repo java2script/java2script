@@ -295,6 +295,7 @@ class Thread implements Runnable {
 			//  is to force generation of necessary methods when using it.
     		 秘thisThread.setPriority(NORM_PRIORITY);
     	}
+    	//System.out.println("Thread.currentThread is " + 秘thisThread);
     	return 秘thisThread;
     }
 

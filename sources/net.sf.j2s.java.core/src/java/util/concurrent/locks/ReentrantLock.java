@@ -132,41 +132,45 @@ public class ReentrantLock implements Lock, java.io.Serializable {
          * try for trylock method.
          */
         final boolean nonfairTryAcquire(int acquires) {
-            final Thread current = Thread.currentThread();
-            int c = getState();
-            if (c == 0) {
-                if (compareAndSetState(0, acquires)) {
-                    setExclusiveOwnerThread(current);
-                    return true;
-                }
-            }
-            else if (current == getExclusiveOwnerThread()) {
-                int nextc = c + acquires;
-                if (nextc < 0) // overflow
-                    throw new Error("Maximum lock count exceeded");
-                setState(nextc);
-                return true;
-            }
-            return false;
+        	return true;
+//        	
+//            final Thread current = Thread.currentThread();
+//            int c = getState();
+//            if (c == 0) {
+//                if (compareAndSetState(0, acquires)) {
+//                    setExclusiveOwnerThread(current);
+//                    return true;
+//                }
+//            }
+//            else if (current == getExclusiveOwnerThread()) {
+//                int nextc = c + acquires;
+//                if (nextc < 0) // overflow
+//                    throw new Error("Maximum lock count exceeded");
+//                setState(nextc);
+//                return true;
+//            }
+//            return false;
         }
 
         protected final boolean tryRelease(int releases) {
-            int c = getState() - releases;
-            if (Thread.currentThread() != getExclusiveOwnerThread())
-                throw new IllegalMonitorStateException();
-            boolean free = false;
-            if (c == 0) {
-                free = true;
-                setExclusiveOwnerThread(null);
-            }
-            setState(c);
-            return free;
+        	return true;
+//            int c = getState() - releases;
+//            if (Thread.currentThread() != getExclusiveOwnerThread())
+//                throw new IllegalMonitorStateException();
+//            boolean free = false;
+//            if (c == 0) {
+//                free = true;
+//                setExclusiveOwnerThread(null);
+//            }
+//            setState(c);
+//            return free;
         }
 
         protected final boolean isHeldExclusively() {
-            // While we must in general read state before owner,
-            // we don't need to do so to check if current thread is owner
-            return true;//getExclusiveOwnerThread() == Thread.currentThread();
+        	return false;
+                //   While we must in general read state before owner,
+                // we don't need to do so to check if current thread is owner
+            //SwingJS return true;//getExclusiveOwnerThread() == Thread.currentThread();
         }
 
         final ConditionObject newCondition() {

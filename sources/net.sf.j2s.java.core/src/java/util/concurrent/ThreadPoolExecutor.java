@@ -37,6 +37,9 @@ package java.util.concurrent;
 import java.util.concurrent.locks.AbstractQueuedSynchronizer;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
+
+import javajs.async.SwingJSUtils;
+
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.*;
 
@@ -892,31 +895,31 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * @return true if successful
      */
     private boolean addWorker(Runnable firstTask, boolean core) {
-        retry:
-        for (;;) {
-            int c = ctl.get();
-            int rs = runStateOf(c);
-
-            // Check if queue empty only if necessary.
-            if (rs >= SHUTDOWN &&
-                ! (rs == SHUTDOWN &&
-                   firstTask == null &&
-                   ! workQueue.isEmpty()))
-                return false;
-
-            for (;;) {
-                int wc = workerCountOf(c);
-                if (wc >= CAPACITY ||
-                    wc >= (core ? corePoolSize : maximumPoolSize))
-                    return false;
-                if (compareAndIncrementWorkerCount(c))
-                    break retry;
-                c = ctl.get();  // Re-read ctl
-                if (runStateOf(c) != rs)
-                    continue retry;
-                // else CAS failed due to workerCount change; retry inner loop
-            }
-        }
+//        retry:
+//        for (;;) {
+//            int c = ctl.get();
+//            int rs = runStateOf(c);
+//
+//            // Check if queue empty only if necessary.
+//            if (rs >= SHUTDOWN &&
+//                ! (rs == SHUTDOWN &&
+//                   firstTask == null &&
+//                   ! workQueue.isEmpty()))
+//                return false;
+//
+//            for (;;) {
+//                int wc = workerCountOf(c);
+//                if (wc >= CAPACITY ||
+//                    wc >= (core ? corePoolSize : maximumPoolSize))
+//                    return false;
+//                if (compareAndIncrementWorkerCount(c))
+//                    break retry;
+//                c = ctl.get();  // Re-read ctl
+//                if (runStateOf(c) != rs)
+//                    continue retry;
+//                // else CAS failed due to workerCount change; retry inner loop
+//            }
+//        }
 
         boolean workerStarted = false;
         boolean workerAdded = false;
@@ -1016,7 +1019,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
                 if (workerCountOf(c) >= min)
                     return; // replacement not needed
             }
-            addWorker(null, false);
+//            addWorker(null, false);
         }
     }
 
@@ -1129,7 +1132,9 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
         w.unlock(); // allow interrupts
         boolean completedAbruptly = true;
         try {
-            while (task != null || (task = getTask()) != null) {
+          //  while (task != null) || (task = getTask()) != null) 
+        	if (task != null) // SwingJS
+        	{
                 w.lock();
                 // If pool is stopping, ensure thread is interrupted;
                 // if not, ensure thread is not interrupted.  This
@@ -1140,25 +1145,32 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
                       runStateAtLeast(ctl.get(), STOP))) &&
                     !wt.isInterrupted())
                     wt.interrupt();
-                try {
-                    beforeExecute(wt, task);
-                    Throwable thrown = null;
-                    try {
-                        task.run();
-                    } catch (RuntimeException x) {
-                        thrown = x; throw x;
-                    } catch (Error x) {
-                        thrown = x; throw x;
-                    } catch (Throwable x) {
-                        thrown = x; throw new Error(x);
-                    } finally {
-                        afterExecute(task, thrown);
-                    }
-                } finally {
-                    task = null;
-                    w.completedTasks++;
-                    w.unlock();
-                }
+                	// run on event queue
+                	SwingJSUtils.StateHelper.delayedRun(100, new Runnable() {
+                		public void run() {
+                            try {
+                            beforeExecute(wt, task);
+                            Throwable thrown = null;
+                            try {
+                                task.run();
+                            } catch (RuntimeException x) {
+                                thrown = x; throw x;
+                            } catch (Error x) {
+                                thrown = x; throw x;
+                            } catch (Throwable x) {
+                                thrown = x; throw new Error(x);
+                            } finally {
+                                afterExecute(task, thrown);
+                            }
+                            } finally {
+//                                task = null;
+                                w.completedTasks++;
+                                w.unlock();
+                            }
+
+                		}
+                	});
+                	
             }
             completedAbruptly = false;
         } finally {
