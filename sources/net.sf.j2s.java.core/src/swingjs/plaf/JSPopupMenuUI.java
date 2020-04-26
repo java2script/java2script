@@ -55,7 +55,6 @@ import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 import swingjs.api.js.JQueryObject;
 import swingjs.api.js.JQueryObject.JQEvent;
-import swingjs.api.js.JSSwingMenu;
 import swingjs.jquery.JQueryUI;
 
 public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
@@ -87,10 +86,42 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 	static {
 		JQueryUI.loadJQMenu();
 	}
+	
+	private interface api {
+		
+		interface js {
+			
+			/**
+			 * An abstract class to cover the JavaScript calls made to j2sMenu
+			 * @author hansonr
+			 *
+			 */
+			abstract class JSSwingMenu {
+
+				class Options {
+					JPopupMenu jPopupMenu;
+					int delay;
+					boolean disabled;
+					JQueryObject focus, blur, select;
+				}
+				
+			JQueryObject active, activeMenu, element;
+			Options options;
+			abstract void disposeMenu(JPopupMenu menu);
+			abstract void hideMenu(JPopupMenu menu);
+			abstract void setMenu(JPopupMenu menu);
+			abstract void showMenu(JPopupMenu menu, int x, int y);
+			abstract void updateMenu(JPopupMenu menu, boolean andShow);
+			abstract void updateMenuItem(JPopupMenu menu, DOMNode domNode);
+			abstract JSSwingMenu getInstance(JPopupMenu menu);
+			abstract void _keydown(Object jqevent);
+			}
+		}
+	}
 
 	// a frameless independent window
 	
-	private static JSSwingMenu j2sSwingMenu;
+	private static api.js.JSSwingMenu j2sSwingMenu;
 
 	private static Component lastInvoker;
 
@@ -101,7 +132,7 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 
 	public JSPopupMenuUI() {
 		if (j2sSwingMenu == null) {
-			j2sSwingMenu = (JSSwingMenu) J2S.getSwing();
+			j2sSwingMenu = (api.js.JSSwingMenu) J2S.getSwing();
 		}
 		isContainer = true;	
 		isMenuItem = true;
@@ -1149,7 +1180,7 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 	@SuppressWarnings({ "unused" })
 	public static void processJ2SMenuCmd(Object[] data) {
 		String trigger = (String) data[0];
-		JSSwingMenu j2smenu = (JSSwingMenu) data[1];
+		api.js.JSSwingMenu j2smenu = (api.js.JSSwingMenu) data[1];
 		JQueryObject.JQEvent e = (JQEvent) data[2];
 		JQueryObject t = (JQueryObject) data[3]; // could actually be e in some cases
 		Object n = data[4];
