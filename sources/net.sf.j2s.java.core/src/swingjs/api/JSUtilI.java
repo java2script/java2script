@@ -2,10 +2,14 @@ package swingjs.api;
 
 import java.awt.Component;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Properties;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import swingjs.api.js.HTML5Applet;
 
@@ -181,7 +185,16 @@ public interface JSUtilI {
 	boolean setFileBytes(File f, Object isOrBytes);
 
 	/**
-	 * Same as setFileBytes, but also caches the data if it is a JSTempFile.
+	 * Set the given URL object's _streamData field from an InputStream or a byte[] array.
+	 * 
+	 * @param f
+	 * @param isOrBytes BufferedInputStream, ByteArrayInputStream, FileInputStream, or byte[]
+	 * @return
+	 */
+	boolean setURLBytes(URL url, Object isOrBytes);
+
+	/**
+	 * Same as setFileBytes.
 	 * 
 	 * @param is
 	 * @param outFile
@@ -196,6 +209,15 @@ public interface JSUtilI {
 	   */
 	void setJavaScriptMapObjectEnabled(boolean enabled);
 
+
+	/**
+	 * Open a URL in a browser tab.
+	 * 
+	 * @param url
+	 * @param target null or specific tab, such as "_blank"
+	 */
+	void displayURL(String url, String target);
+
 	/**
 	 * Retrieve cached bytes for a path (with unnormalized name)
 	 * from J2S._javaFileCache.
@@ -209,14 +231,61 @@ public interface JSUtilI {
 	/**
 	 * Attach cached bytes to a file-like object, including URL,
 	 * or anything having a 秘bytes field (File, URI, Path)
-	 * from J2S._javaFileCache.
+	 * from J2S._javaFileCache. That is, allow two such objects
+	 * to share the same underlying byte[ ] array.
 	 * 
 	 * 
 	 * @param URLorURIorFile
-	 * @return
+	 * @return byte[] or null
 	 */
 	byte[] addJSCachedBytes(Object URLorURIorFile);
 
-	void displayURL(String url, String target);
+	/**
+	 * Seek an open ZipInputStream to the supplied ZipEntry, if possible.
+	 * 
+	 * @param zis the ZipInputStream
+	 * @param ze  the ZipEntry
+	 * @return the length of this entry, or -1 if, for whatever reason, this was not possible
+	 */
+	long seekZipEntry(ZipInputStream zis, ZipEntry ze);
+
+	/**
+	 * Retrieve the byte array associated with a ZipEntry.
+	 * 
+	 * @param ze
+	 * @return
+	 */
+	byte[] getZipBytes(ZipEntry ze);
+
+	/**
+	 * Java 9 method to read all (remaining) bytes from an InputStream. In SwingJS,
+	 * this may just create a new reference to an underlying Int8Array without
+	 * copying it.
+	 * 
+	 * @param zis
+	 * @return
+	 * @throws IOException 
+	 */
+	byte[] readAllBytes(InputStream zis) throws IOException;
+
+	/**
+	 * Java 9 method to transfer all (remaining) bytes from an InputStream to an OutputStream.
+	 * 
+	 * @param is
+	 * @param out
+	 * @return
+	 * @throws IOException
+	 */
+	long transferTo(InputStream is, OutputStream out) throws IOException;
+
+	/**
+	 * Retrieve any bytes already attached to this URL.
+	 * 
+	 * @param url
+	 * @return
+	 */
+	byte[] getURLBytes(URL url);
+
+	void showStatus(String msg, boolean doFadeOut);
 
 }
