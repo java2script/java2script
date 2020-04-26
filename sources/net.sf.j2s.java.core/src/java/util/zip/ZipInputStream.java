@@ -28,12 +28,11 @@
 
 package java.util.zip;
 
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.EOFException;
-import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PushbackInputStream;
 import java.io.UnsupportedEncodingException;
 
@@ -65,7 +64,7 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
   private static final int STORED = ZipEntry.STORED;
   private static final int DEFLATED = ZipEntry.DEFLATED;
 
-  private boolean closed = false;
+//  private boolean closed = false; ! SwingJS no - InflaterInputStream has this
   // this flag is set to true after EOF has reached for
   // one entry
   private boolean entryEOF = false;
@@ -98,65 +97,17 @@ private boolean isPushback;
    *        the actual input stream
    */
   public ZipInputStream(InputStream in) {
-    super(getByteStream(in, -1), newInflater(), 512);
+    super(秘getByteStream(in, GET_BYTE_STREAM_FOR_ZIP), newInflater(), 512);
     isPushback = this.in instanceof PushbackInputStream;
-    //usesDefaultInflater = true;
     String charset = "UTF-8";
-//    try {
-//      new String(byteTest, charset);
-//    } catch (UnsupportedEncodingException e) {
-//      throw new NullPointerException("charset is invalid");
-//    }
+    //usesDefaultInflater = true;
+	//    try {
+	//      new String(byteTest, charset);
+	//    } catch (UnsupportedEncodingException e) {
+	//      throw new NullPointerException("charset is invalid");
+	//    }
     this.zc = charset;
   }
-
-	/**
-	 * SwingJS -- we can optimize this process by directly accessing the
-	 * ByteArrayInputStream rather than a series of BufferedInputStreams or
-	 * FileInputStreams. Anything else -- particularly a ZipInputStream -- is too
-	 * much to handle.
-	 * 
-	 * @param ins
-	 * @param pt
-	 * @return
-	 */
-	private static InputStream getByteStream(InputStream ins, int pt) {
-		InputStream newIn = ins;
-		boolean isRoot = (pt == -1);
-		if (isRoot)
-			pt = 0;
-		switch (/** @j2sNative ins.__CLASS_NAME__|| */
-		"") {
-		case "java.io.ByteArrayInputStream":
-			((ByteArrayInputStream) ins).pos -= pt;
-			break;
-		case "java.io.FileInputStream":
-			newIn = ((FileInputStream) ins).秘is;
-			break;
-		case "java.io.BufferedInputStream":
-			pt += ((BufferedInputStream) ins).count - ((BufferedInputStream) ins).pos;
-			newIn = ((BufferedInputStream) ins).in;
-			break;
-		default:
-			newIn = null;
-		}
-		if (newIn != null && newIn != ins)
-			newIn = getByteStream(newIn, pt);
-		ins = (newIn != null ? newIn : isRoot ? ins : null);
-		if (!isRoot)
-			return ins;
-		return newIn == null ? new PushbackInputStream(ins, 1024) : newIn;
-	}
-
-//  /**
-//   * BH: Addeed to allow full reset of a bundled stream
-//   */
-//  @Override
-//  public void resetStream() {
-//    in.resetStream();
-//    inflater =  newInflater();
-//  }
-//
 
   private static Inflater newInflater() {
     return (Inflater) new Inflater().init(0, true);
@@ -179,7 +130,7 @@ private boolean isPushback;
        * @since 1.7
        */
       public ZipInputStream(InputStream in, String charset){
-          super(getByteStream(in, -1), new Inflater(), 512);
+          super(秘getByteStream(in, GET_BYTE_STREAM_FOR_ZIP), new Inflater(), 512);
 //          //usesDefaultInflater = true;
 //          try {
 //            new String(byteTest, charset);
@@ -192,30 +143,6 @@ private boolean isPushback;
           this.zc = charset;
       }
 
-	/**
-	 * Reads the next ZIP file entry and positions the stream at the beginning of
-	 * the entry data.
-	 * 
-	 * @return the next ZIP file entry, or null if there are no more entries
-	 * @exception ZipException if a ZIP file error has occurred
-	 * @exception IOException  if an I/O error has occurred
-	 */
-	public ZipEntry getNextEntry() throws IOException {
-		ensureOpen();
-		if (entry != null) {
-			closeEntry();
-		}
-		if ((entry = readLOC()) == null) {
-			return null;
-		}
-		initEntry();
-		if (!entry.isDirectory()) {
-			entry.秘source = this;
-			entry.秘entryOffset = 秘getEntryOffset(entry);
-		}
-		return entry;
-	}
-
 	private void initEntry() {
 		crc.reset();
 		inflater = inf = newInflater();
@@ -223,44 +150,6 @@ private boolean isPushback;
 			remaining = entry.size;
 		}
 		entryEOF = false;
-	}
-
-	/**
-	 * This is based on using only BufferedInputStreams and ByteArrayInputStreams as
-	 * fodder for ZipInputStream. This is typically the case. Maybe always.
-	 * 
-	 * @param entry
-	 * @return
-	 */
-	private int 秘getEntryOffset(ZipEntry entry) {
-		if (!isPushback) {
-			//System.out.println("ZISB " + entry.name + " " + ((ByteArrayInputStream) in).pos);
-			return ((ByteArrayInputStream) in).pos;
-		}
-		PushbackInputStream pis = (PushbackInputStream) in;
-		if (!(pis.in instanceof ByteArrayInputStream)) {
-			return -1;
-		}
-//		System.out.println("ZIS " + entry.name + " " + ((ByteArrayInputStream) pis.in).pos + "-"
-//				+ (pis.buf.length - pis.pos) + " avail=" + this.inflater.avail_in);
-		return ((ByteArrayInputStream) pis.in).pos - (pis.buf.length - pis.pos);
-	}
-
-	public long setEntry(ZipEntry entry) {
-		this.entry = entry;
-		this.closed = false;
-		initEntry();
-		int pos = entry.秘entryOffset;
-		if (isPushback)
-			return -1;
-		((ByteArrayInputStream) in).pos = pos;
-//		
-//		PushbackInputStream pis = (PushbackInputStream) in;
-//		pis.pos = pis.buf.length;
-//		if (!(pis.in instanceof ByteArrayInputStream))
-//			return -1;
-//		((ByteArrayInputStream) pis.in).pos = pos;
-		return entry.getSize();
 	}
 
 /**
@@ -627,4 +516,104 @@ private boolean isPushback;
   private static final long get64(byte b[], int off) {
     return get32(b, off) | (get32(b, off + 4) << 32);
   }
+  
+	/**
+	 * SwingJS addition
+	 * 
+	 * Reads the next ZIP file entry and positions the stream at the beginning of
+	 * the entry data.
+	 * 
+	 * @return the next ZIP file entry, or null if there are no more entries
+	 * @exception ZipException if a ZIP file error has occurred
+	 * @exception IOException  if an I/O error has occurred
+	 */
+	public ZipEntry getNextEntry() throws IOException {
+		ensureOpen();
+		if (entry != null) {
+			closeEntry();
+		}
+		if ((entry = readLOC()) == null) {
+			return null;
+		}
+		initEntry();
+		if (!entry.isDirectory()) {
+			entry.秘source = in;
+			entry.秘entryOffset = 秘getEntryOffset(entry);
+		}
+		return entry;
+	}
+
+	/**
+	 * SwingJS addition: 
+	 * 
+	 * 
+	 * This is based on using only BufferedInputStreams and ByteArrayInputStreams as
+	 * fodder for ZipInputStream. This is typically the case. Maybe always.
+	 * 
+	 * @param entry
+	 * @return
+	 */
+	private int 秘getEntryOffset(ZipEntry entry) {
+		if (!isPushback) {
+			//System.out.println("ZISB " + entry.name + " " + ((ByteArrayInputStream) in).pos);
+			return ((ByteArrayInputStream) in).pos;
+		}
+		PushbackInputStream pis = (PushbackInputStream) in;
+		if (!(pis.in instanceof ByteArrayInputStream)) {
+			return -1;
+		}
+//		System.out.println("ZIS " + entry.name + " " + ((ByteArrayInputStream) pis.in).pos + "-"
+//				+ (pis.buf.length - pis.pos) + " avail=" + this.inflater.avail_in);
+		return ((ByteArrayInputStream) pis.in).pos - (pis.buf.length - pis.pos);
+	}
+
+	/**
+	 * Set the stream to the specified entry, if possible -- that is, if the underlying input stream
+	 * some set of BufferedInputStreams and a FileInputStream or a ByteArrayInputStream. 
+	 * 
+	 * @param entry
+	 * @return the size of the entry, or -1 if this was not possible
+	 */
+	public long setEntry(ZipEntry entry) {
+		if (isPushback)
+			return -1;
+		this.closed = false;
+		this.entry = entry;
+		initEntry();
+		((ByteArrayInputStream) in).pos = entry.秘entryOffset;
+		return entry.getSize();
+	}
+
+	/**
+	 * Java 9
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
+	@Override
+	public byte[] readAllBytes() throws IOException {
+		if (entry == null) {
+			return new byte[0];
+		}
+		byte[] b = new byte[(int) entry.size];
+		read(b, 0, b.length);
+		return b;
+	}
+	
+	/**
+	 * Java 9
+	 * 
+	 * @param out
+	 * @return
+	 * @throws IOException
+	 */
+	@Override
+	public long transferTo(OutputStream out)
+          throws IOException {
+		byte[] b = readAllBytes();
+		out.write(b);
+		return b.length;
+	}
+	
+
 }

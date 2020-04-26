@@ -53,16 +53,11 @@ public class Test_Zipin extends Test_ {
 			System.out.println("hashcode = " + hashcode);
 			if (/** @j2sNative true || */
 			false) { 	
-				zis = new ZipInputStream(new BufferedInputStream(fis));
-				if (zis.setEntry(ze) == -1)
-					assert (false);
-				bytes = new byte[(int) ze.getSize()];
-				zis.read(bytes);
+				bytes = ze.getBytes();
+				s = new String(bytes);
+				System.out.println("hashcode = " + s.hashCode());
+				assert(s.hashCode() == hashcode);
 			}
-			zis.close();
-			s = new String(bytes);
-			System.out.println("hashcode = " + s.hashCode());
-			assert(s.hashCode() == hashcode);
 
 			System.out.println("Test_Zipin OK");
 		} catch (Exception e) {

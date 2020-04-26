@@ -229,4 +229,47 @@ public abstract class InputStream extends Object implements Closeable {
 		read(b, 0, b.length);
 		return b;
 	}
+	
+	
+	final protected static int GET_BYTE_STREAM_FOR_ZIP = -2;
+	final protected static int GET_BYTE_STREAM_OR_NULL = -1;
+	
+	/**
+	 * SwingJS -- we can optimize this process by directly accessing the
+	 * ByteArrayInputStream rather than a series of BufferedInputStreams or
+	 * FileInputStreams. Anything else -- particularly a ZipInputStream -- is too
+	 * much to handle.
+	 * 
+	 * @param ins
+	 * @param pt
+	 * @return
+	 */
+	protected static InputStream 秘getByteStream(InputStream ins, int pt) {
+		InputStream newIn = ins;
+		boolean isRoot = (pt < 0);
+		boolean asPushback = (pt == GET_BYTE_STREAM_FOR_ZIP);
+		if (isRoot)
+			pt = 0;
+		switch (/** @j2sNative ins.__CLASS_NAME__|| */
+		"") {
+		case "java.io.ByteArrayInputStream":
+			((ByteArrayInputStream) ins).pos -= pt;
+			break;
+		case "java.io.FileInputStream":
+			newIn = ((FileInputStream) ins).秘is;
+			break;
+		case "java.io.BufferedInputStream":
+			pt += ((BufferedInputStream) ins).count - ((BufferedInputStream) ins).pos;
+			newIn = ((BufferedInputStream) ins).in;
+			break;
+		default:
+			newIn = null;
+		}
+		if (newIn != null && newIn != ins)
+			newIn = 秘getByteStream(newIn, pt);
+		ins = (newIn != null ? newIn : isRoot ? ins : null);
+		return (!isRoot ? ins : newIn != null ? newIn : asPushback ? new PushbackInputStream(ins, 1024) : null);
+	}
+
+
 }

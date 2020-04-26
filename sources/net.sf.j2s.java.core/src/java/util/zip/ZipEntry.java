@@ -29,6 +29,7 @@
 package java.util.zip;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 
 /**
@@ -53,13 +54,14 @@ class ZipEntry implements ZipConstants, Cloneable {
     String comment;     // optional comment string for entry
 
     int 秘entryOffset;
-    ZipInputStream 秘source;
+    InputStream 秘source;
    
 	public byte[] getBytes() {
-		秘source.setEntry(this);
+		ZipInputStream zis = new ZipInputStream(秘source);
+		zis.setEntry(this);
 		byte[] b = new byte[(int) size];
 		try {
-			秘source.read(b);
+			zis.read(b);
 		} catch (IOException e) {
 			return null;
 		}
