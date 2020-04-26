@@ -134,8 +134,8 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
 // TODO: superclass inheritance for JAXB XmlAccessorType
-// TODO: inner classes of interface are duplicated
 
+//BH 2020.04.26 -- 3.2.9-v1h fix for inner classes of interfaces duplicated; fix for api.js inner class method names unqualified
 //BH 2020.04.15 -- 3.2.9-v1g fix for qualified super() in inner classes using Class.super_ call (Tracker)
 //BH 2020.04.05 -- 3.2.9-v1f (Boolean ? ...) not unboxed
 //BH 2020.03.21 -- 3.2.9-v1e better v1c 
@@ -2076,7 +2076,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			}
 
 			// append it to our TrailingBuffer
-
 			trailingBuffer.append(tempVisitor.buffer.toString());
 
 			return false;
@@ -2543,16 +2542,18 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// and Enum constants
 
 		if (isInterface) {
-
-			// Check for static type declarations in interfaces
-			// This will create a new visitor.
-			// Static field buffer may be filled with contents.
-
-			for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
-				ASTNode element = (ASTNode) iter.next();
-				if (element instanceof TypeDeclaration)
-					element.accept(this);
-			}
+// cause of duplicated code BH 2020.04.26
+//			if (isTopLevel) {
+//				// Check for static type declarations in interfaces
+//				// This will create a new visitor.
+//				// Static field buffer may be filled with contents.
+//
+//				for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
+//					ASTNode element = (ASTNode) iter.next();
+//					if (element instanceof TypeDeclaration)
+//						element.accept(this);
+//				}
+//			}
 			// add synthetic methods to defaults -- interface declaring an override of a
 			// generic
 			addSyntheticBridges(binding, abstractMethodList, defaults, true);
