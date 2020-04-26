@@ -766,7 +766,7 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
   var haveFinals = (finalVars || outerObj && outerObj.$finals$);
   if (!outerObj || !objThis)
     return;
-  var clazz1 = (outerObj.__CLASS_NAME__ ? getClazz(outerObj) : null);
+  var clazz1 = (outerObj.__CLASS_NAME__ || outerObj instanceof String ? getClazz(outerObj) : null);
   (!clazz1 || clazz1 == outerObj) && (outerObj = objThis);
 
   if (haveFinals) {
@@ -2005,6 +2005,7 @@ Clazz.newInterface(java.lang,"Runnable");
 
 
 ;(function(){var P$=java.lang,I$=[[0,'java.util.stream.StreamSupport','java.util.Spliterators','java.lang.CharSequence$lambda1','java.lang.CharSequence$lambda2']],$I$=function(i){return I$[i]||(I$[i]=Clazz.load(I$[0][i]))};
+
 var C$=Clazz.newInterface(P$, "CharSequence");
 C$.$defaults$ = function(C$){
 
