@@ -48,7 +48,7 @@ public class Test_JAXB_ORDERED extends Test_ {
 		try {
 			boolean isJS = /**@j2sNative true || */false;
 			// test read/write of xml written by Java if JS; JS if Java
-			String prefix = (isJS ? "swingjs/j2s/" : "src/");
+			String prefix = (isJS ? "/" : "src/");
 			String fjs = prefix +"test/jaxb_ordered_from_JS.xml";
 			String fjava = prefix + "test/jaxb_ordered_from_Java.xml";
 			String outfile = isJS ? fjs : fjava;

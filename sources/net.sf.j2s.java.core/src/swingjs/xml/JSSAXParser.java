@@ -152,7 +152,11 @@ public class JSSAXParser implements Parser, XMLReader {
 
 	private void error(Throwable e) throws SAXException {
 		System.err.println(e);
-		e.printStackTrace();
+		/**
+		 * @j2sNative
+		 * 
+		 * e.stack && System.out.println(e.stack);
+		 */
 		SAXParseException ee = new SAXParseException("Invalid Document", null);
 		if (errorHandler == null)
 			throw(ee);
