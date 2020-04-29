@@ -231,6 +231,7 @@ public interface HTML5Video extends DOMNode {
 			public Void apply(Object jsevent) {
 				String name = (/** @j2sNative jsevent.type || */
 				"?");
+				System.out.println("HTML5Video " + name);
 				ActionEvent e = new ActionEvent(new Object[] { jsvideo, jsevent }, 12345, name,
 						System.currentTimeMillis(), 0);
 				listener.actionPerformed(e);
@@ -258,7 +259,6 @@ public interface HTML5Video extends DOMNode {
 	 * @param listeners an array of event/listener pairs created by
 	 *                  addActionListener
 	 */
-	@SuppressWarnings("unused")
 	public static void removeActionListener(HTML5Video jsvideo, Object[] listeners) {
 		if (listeners == null) {
 			for (int i = 0; i < eventTypes.length; i++) {
@@ -314,7 +314,7 @@ public interface HTML5Video extends DOMNode {
 	 * @param maxWidth
 	 * @return
 	 */
-	public static JDialog createDialog(Frame parent, Object source, int maxWidth, Runnable whenReady) {
+	public static JDialog createDialog(Frame parent, Object source, int maxWidth, Function<HTML5Video, Void> whenReady) {
 		JDialog dialog = new JDialog(parent);
 		Container p = dialog.getContentPane();
 		p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
@@ -347,7 +347,7 @@ public interface HTML5Video extends DOMNode {
 				dialog.pack();
 //				dialog.setVisible(false);
 				if (whenReady != null)
-					whenReady.run();
+					whenReady.apply(jsvideo);
 			}
 			
 		}, "canplaythrough");
@@ -425,6 +425,10 @@ public interface HTML5Video extends DOMNode {
 		} catch (Throwable e1) {
 		}
 		return canSeek.booleanValue();
+	}
+
+	public static int getFrameCount(HTML5Video jsvideo) {
+		return (int) (getDuration(jsvideo) / 0.033334);
 	}
 
 // HTMLMediaElement properties

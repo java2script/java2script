@@ -18,6 +18,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -33,7 +34,6 @@ import javax.swing.Timer;
 import javax.swing.WindowConstants;
 
 import swingjs.api.JSUtilI;
-import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Video;
 
 /**
@@ -105,11 +105,12 @@ public class Test_Video {
 		
 		// A little trick to allow "final" self reference in a Runnable parameter
 		JDialog[] dialog = new JDialog[1];
-		dialog[0] = HTML5Video.createDialog(null, label, 500, new Runnable() {
+		dialog[0] = HTML5Video.createDialog(null, label, 500, new Function<HTML5Video, Void>() {
 
 			@Override
-			public void run() {
+			public Void apply(HTML5Video video) {
 				dialog[0].setVisible(true);
+				return null;
 			}
 			
 		});
