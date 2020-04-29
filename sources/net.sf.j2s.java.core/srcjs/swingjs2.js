@@ -11573,8 +11573,14 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 		var isNotDirectCall = !mustCallHome && !isFile && !isMyHost && !(url = J2S._isDirectCall(fileName));
 		fileName = url || fileName;
 		var data = null;
+		var error = null;
+		var success = null;
+		if (fWhenDone) {
+			success = function(data) { fWhenDone(isTyped ? data : J2S._strToBytes(data)) };
+			error = function() { fWhenDone(null) };
+		}
 		if (mustCallHome || isNotDirectCall) {
-			data = J2S._getRawDataFromServer("_", fileName, fWhenDone, fWhenDone,
+			data = J2S._getRawDataFromServer("_", fileName, success, error,
 					asBase64, true, info);
 		} else {
 			fileName = fileName.replace(/file:\/\/\/\//, "file://"); // opera
@@ -11589,8 +11595,14 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 				info.url = fileName;
 			}
 			if (fWhenDone) {
-				info.success = function(data) { fWhenDone(J2S._xhrReturn(info.xhr)) };
-				info.error = function() { fWhenDone(info.xhr.statusText) };
+				if (isBinary) {
+					info.success = success;
+					info.error = error;
+				} else {
+					// BH don't know why this is so complicated
+					info.success = function(data) { fWhenDone(J2S._xhrReturn(info.xhr)) };
+					info.error = function() { fWhenDone(info.xhr.statusText) };
+				}
 			}
 			info.xhr = J2S.$ajax(info);
 			if (!fWhenDone) {
@@ -11871,7 +11883,7 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 		}
 		if (postOut)
 			url += "?POST?" + postOut;
-		return J2S.getFileData(url, null, true, info);
+		return J2S.getFileData(url, info.fWhenDone, true, info);
 	}
 
 	// J2S._localFileSaveFunction -- // do something local here; Maybe try the
