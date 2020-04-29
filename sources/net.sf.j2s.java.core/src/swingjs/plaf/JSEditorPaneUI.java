@@ -254,7 +254,7 @@ public class JSEditorPaneUI extends JSTextUI {
 	private String currentHTML;
 	private boolean isStyled;
 	private String mytext;
-	private DOMNode styleNode;
+	private DOMNode bodyNode;
 	
 //	private int epTimer;
 //	@Override
@@ -339,6 +339,12 @@ public class JSEditorPaneUI extends JSTextUI {
 		return n + (/** @j2sNative sib.textContent && sib.textContent.length || */ 0);
 	}
 		
+	@Override
+	public void dispose() {
+		super.dispose();
+		mytext = currentHTML = null;
+	}
+
 //	@Override
 	public void setText(String text) {
 		Document d = editor.getDocument();
@@ -350,19 +356,19 @@ public class JSEditorPaneUI extends JSTextUI {
 		if (isHtmlKit) {
 			mytext = html = text;
 			isHTML = true;
-			domNode.setAttribute("innerHTML", "");
+			DOMNode.setAttr(domNode, "innerHTML", "");
 			// we will have to figure out a way for images and base. 
 			html = (String) editor.秘jsHTMLHelper.get("html", getInner(text, "body"));
 			DOMNode.setAttrs(domNode, "contentEditable", TRUE);
-			styleNode = DOMNode.createElement("div", id0 + "_style");
-			domNode.appendChild(styleNode);
+			bodyNode = DOMNode.createElement("div", id0 + "_body");
+			domNode.appendChild(bodyNode);
 			String[] styles = (String[]) editor.秘jsHTMLHelper.get("styles", "body");
 			if (styles != null)
-				DOMNode.setStyles(styleNode, styles);
+				DOMNode.setStyles(bodyNode, styles);
 			String css = (String) editor.秘jsHTMLHelper.get("css", id);
-	        setStyle(id + "_style", css);
+	        setStyle(id0 + "_styles", css);
 		} else {
-			styleNode = domNode;
+			bodyNode = domNode;
 			mytext = text;
 			isHTML = text.startsWith("<html");
 			if (isHTML) {
@@ -389,7 +395,7 @@ public class JSEditorPaneUI extends JSTextUI {
 			return;
 		// had text = fixText(currentText = text) here, but result was never used
 		currentText = text;
-		DOMNode.setAttr(styleNode, "innerHTML", currentHTML = html);
+		DOMNode.setAttr(bodyNode, "innerHTML", currentHTML = html);
 		updateDataUI();
 		JSToolkit.dispatch(updateRunnable, 10, 0);
 	}
@@ -412,15 +418,16 @@ public class JSEditorPaneUI extends JSTextUI {
 		if (d == null) {
 			$(body).append("<style id=" + id +">" + css + "</style>");
 		} else {
-			DOMNode.setAttr(d, "innerText", css);
+			// If I use innerText here, then \n gets turned into <br>
+			DOMNode.setAttr(d, "innerHTML", css);
 		}
 	}
 
 	private String getInner(String html, String tag) {
-		int pt = html.indexOf("<" + tag);
+		int pt = html.lastIndexOf("<" + tag);
 		if (pt >= 0) {
 			html = html.substring(html.indexOf(">", pt) + 1);
-			pt = html.lastIndexOf("</" + tag + ">");
+			pt = html.indexOf("</" + tag + ">", pt);
 			if (pt >= 0)
 				html = html.substring(0, pt);
 		}

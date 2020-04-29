@@ -3607,67 +3607,82 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
     private class Handler implements ChangeListener, ContainerListener,
                   FocusListener, MouseListener, MouseMotionListener,
                   PropertyChangeListener {
-        //
-        // PropertyChangeListener
-        //
-        @Override
+		//
+		// PropertyChangeListener
+		//
+		@Override
 		public void propertyChange(PropertyChangeEvent e) {
-            JTabbedPane pane = (JTabbedPane)e.getSource();
-            String name = e.getPropertyName();
-            boolean isScrollLayout = scrollableTabLayoutEnabled();
-            if (name == "mnemonicAt") {
-                updateMnemonics();
-                pane.秘repaint();
-            }
-            else if (name == "displayedMnemonicIndexAt") {
-                pane.秘repaint();
-            }
-            else if (name =="indexForTitle") {
-                calculatedBaseline = false;
-                updateHtmlViews((Integer)e.getNewValue());
-            } else if (name == "tabLayoutPolicy") {
-                JSTabbedPaneUI.this.uninstallUI(pane);
-                JSTabbedPaneUI.this.installUI(pane);
-                calculatedBaseline = false;
-            } else if (name == "tabPlacement") {
-                if (scrollableTabLayoutEnabled()) {
-                    tabScroller.createButtons();
-                }
-                calculatedBaseline = false;
-            } else if (name == "opaque" && isScrollLayout) {
-                boolean newVal = ((Boolean)e.getNewValue()).booleanValue();
-                tabScroller.tabPanel.setOpaque(newVal);
-                tabScroller.viewport.setOpaque(newVal);
-            } else if (name == "background" && isScrollLayout) {
-                Color newVal = (Color)e.getNewValue();
-                tabScroller.tabPanel.setBackground(newVal);
-                tabScroller.viewport.setBackground(newVal);
-                Color newColor = selectedColor == null ? newVal : selectedColor;
-                tabScroller.scrollForwardButton.setBackground(newColor);
-                tabScroller.scrollBackwardButton.setBackground(newColor);
-            } else if (name == "indexForTabComponent") {
-                if (tabContainer != null) {
-                    tabContainer.removeUnusedTabComponents();
-                }
-                Component c = tabPane.getTabComponentAt(
-                        (Integer)e.getNewValue());
-                if (c != null) {
-                    if (tabContainer == null) {
-                        installTabContainer();
-                    } else {
-                        tabContainer.add(c);
-                    }
-                }
-                tabPane.revalidate();
-                tabPane.秘repaint();
-                calculatedBaseline = false;
-            } else if (name == "indexForNullComponent") {
-                isRunsDirty = true;
-                updateHtmlViews((Integer)e.getNewValue());
-            } else if (name == "font") {
-                calculatedBaseline = false;
-            }
-        }
+			JTabbedPane pane = (JTabbedPane) e.getSource();
+			String name = e.getPropertyName();
+			boolean isScrollLayout = scrollableTabLayoutEnabled();
+			switch (name) {
+			case "mnemonicAt":
+				updateMnemonics();
+				pane.秘repaint();
+				break;
+			case "displayedMnemonicIndexAt":
+				pane.秘repaint();
+				break;
+			case "indexForTitle":
+				calculatedBaseline = false;
+				updateHtmlViews((Integer) e.getNewValue());
+				break;
+			case "tabLayoutPolicy":
+				JSTabbedPaneUI.this.uninstallUI(pane);
+				JSTabbedPaneUI.this.installUI(pane);
+				calculatedBaseline = false;
+				break;
+			case "tabPlacement":
+				if (scrollableTabLayoutEnabled()) {
+					tabScroller.createButtons();
+				}
+				calculatedBaseline = false;
+				break;
+			case "opaque":
+				if (isScrollLayout) {
+					boolean newVal = ((Boolean) e.getNewValue()).booleanValue();
+					tabScroller.tabPanel.setOpaque(newVal);
+					tabScroller.viewport.setOpaque(newVal);
+				}
+				break;
+			case "background":
+				if (isScrollLayout) {
+					Color newVal = (Color) e.getNewValue();
+					tabScroller.tabPanel.setBackground(newVal);
+					tabScroller.viewport.setBackground(newVal);
+					Color newColor = selectedColor == null ? newVal : selectedColor;
+					tabScroller.scrollForwardButton.setBackground(newColor);
+					tabScroller.scrollBackwardButton.setBackground(newColor);
+				}
+				break;
+			case "indexForTabComponent":
+				if (tabContainer != null) {
+					tabContainer.removeUnusedTabComponents();
+				}
+				Component c = tabPane.getTabComponentAt((Integer) e.getNewValue());
+				if (c != null) {
+					if (tabContainer == null) {
+						installTabContainer();
+					} else {
+						tabContainer.add(c);
+					}
+				}
+				tabPane.revalidate();
+				tabPane.秘repaint();
+				calculatedBaseline = false;
+				break;
+			case "indexForNullComponent":
+				isRunsDirty = true;
+				updateHtmlViews((Integer) e.getNewValue());
+				break;
+			case "font":
+				calculatedBaseline = false;
+				break;
+			default:
+				System.out.println("JSTabbedPaneUI prop changed " + name);
+				break;
+			}
+		}
 
         private void updateHtmlViews(int index) {
             String title = tabPane.getTitleAt(index);

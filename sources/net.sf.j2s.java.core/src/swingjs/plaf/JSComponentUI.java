@@ -733,12 +733,13 @@ public class JSComponentUI extends ComponentUI
 	protected void newID(boolean forceNew) {
 		classID = c.getUIClassID();
 		notImplemented = (classID == "ComponentUI");
-		boolean firstTime = (id == null);
+		boolean firstTime = (id0 == null);
 		if (firstTime || forceNew) {
 			num = ++incr;
-			id = c.getHTMLName(classID) + "_" + num;
+			id = c.getHTMLName(classID);
 			if (firstTime) 
 				id0 = id;
+			id += "_" + num;
 		}
 	}
 
@@ -1588,6 +1589,8 @@ public class JSComponentUI extends ComponentUI
 	protected DOMNode updateDOMNodeCUI() {
 		if (myCursor != getCursor())
 			setCursor();
+		if (outerNode != null)
+			setVisible(outerNode, jc.isVisible());
 		return domNode;
 	}
 
