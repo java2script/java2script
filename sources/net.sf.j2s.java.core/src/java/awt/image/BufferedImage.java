@@ -248,7 +248,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * Green, and Red stored in 3 bytes and 1 byte of alpha. The image has a
 	 * <code>ComponentColorModel</code> with alpha. The color data in this image is
 	 * considered not to be premultiplied with alpha. The byte data is interleaved
-	 * in a single byte array in the order B, G, R, A from lower to higher byte
+	 * in a single byte array in the order R, G, B, A from lower to higher byte
 	 * addresses within each pixel.
 	 */
 	public static final int TYPE_4BYTE_HTML5 = JSUtilI.TYPE_4BYTE_HTML5;
@@ -1902,15 +1902,15 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	}
 
 	/**
-	 * Creates an HTML5 Canvas-compatible int[] {b g r a...} array. We use int[]
+	 * Creates an HTML5 Canvas-compatible int[] {r g b a...} array. We use int[]
 	 * here just because that is what ColorModel.getComponents uses
 	 * 
 	 * @return
 	 */
 	private int[] 秘getPixelsFromRaster() {
 		// Coerse byte[] to int[] for SwingJS
-		if (imageType == TYPE_4BYTE_HTML5) 
-			return 秘pix = (int[])(Object) ((DataBufferByte) raster.getDataBuffer()).getData();
+		if (imageType == TYPE_4BYTE_HTML5)
+			return 秘pix = (int[]) (Object) ((DataBufferByte) raster.getDataBuffer()).getData();
 		int n = 秘wxh;
 		if (秘pix == null || 秘pix.length != n * 4)
 			秘pix = new int[n * 4];
@@ -1929,40 +1929,52 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		} else {
 			int nc = cm.getNumComponents();
 			raster.getPixels(0, 0, width, height, p);
-			switch (nc) {
-			case 1:
-				PixelConverter pc = PixelConverter.UshortGray.instance;
-				// gray -- first get those into the first 1/4
-				for (int i = n, pt = n * 4; --i >= 0;) {
-					int val = p[i];
-					p[--pt] = 0xFF;
-					switch (val) {
-					case 0xFFFF:
-					case 0:
-						p[--pt] = val;
-						p[--pt] = val;
-						p[--pt] = val;
-						break;
-					default:
-						int rgb = (val == 0 ? 0xFF000000 : val == 0xFFFF ? 0xFFFFFFFF : pc.pixelToRgb(val, null));
-						p[--pt] = rgb & 0xFF; // b
-						p[--pt] = (rgb >> 8) & 0xFF; // g
-						p[--pt] = (rgb >> 16) & 0xFF; // r
-						break;
-					}	
-					
+			if (cm instanceof IndexColorModel) {
+				IndexColorModel icm = (IndexColorModel) cm;
+				byte[] colors = icm.秘getColorMap();
+				for (int i = n, pt = n * 4; i > 0;) {
+					int index = (p[--i] << 2) + 4;
+					p[--pt] = colors[--index];
+					p[--pt] = colors[--index];
+					p[--pt] = colors[--index];
+					p[--pt] = colors[--index];
 				}
-				break;
-			case 3:
-				for (int i = n * 4, j = n * 3; --i >= 0;) {
-					if (i % 4 == 3)
-						p[i--] = 0xFF;
-					p[i] = p[--j];
+			} else {
+				switch (nc) {
+				case 1:
+					PixelConverter pc = PixelConverter.UshortGray.instance;
+					// gray -- first get those into the first 1/4
+					for (int i = n, pt = n * 4; --i >= 0;) {
+						int val = p[i];
+						p[--pt] = 0xFF;
+						switch (val) {
+						case 0xFFFF:
+						case 0:
+							p[--pt] = val;
+							p[--pt] = val;
+							p[--pt] = val;
+							break;
+						default:
+							int rgb = (val == 0 ? 0xFF000000 : val == 0xFFFF ? 0xFFFFFFFF : pc.pixelToRgb(val, null));
+							p[--pt] = rgb & 0xFF; // b
+							p[--pt] = (rgb >> 8) & 0xFF; // g
+							p[--pt] = (rgb >> 16) & 0xFF; // r
+							break;
+						}
+
+					}
+					break;
+				case 3:
+					for (int i = n * 4, j = n * 3; --i >= 0;) {
+						if (i % 4 == 3)
+							p[i--] = 0xFF;
+						p[i] = p[--j];
+					}
+					break;
+				case 4:
+					getRaster().getPixels(0, 0, width, height, p);
+					break;
 				}
-				break;
-			case 4:
-				getRaster().getPixels(0, 0, width, height, p);
-				break;
 			}
 		}
 		return p;
