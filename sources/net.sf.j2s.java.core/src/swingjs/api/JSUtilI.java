@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Properties;
+import java.util.function.Function;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -287,5 +288,7 @@ public interface JSUtilI {
 	byte[] getURLBytes(URL url);
 
 	void showStatus(String msg, boolean doFadeOut);
+
+	void getURLBytesAsync(URL url, Function<byte[], Void> whenDone);
 
 }

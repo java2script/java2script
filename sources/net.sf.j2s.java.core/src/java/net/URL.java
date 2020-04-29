@@ -34,6 +34,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
+import java.util.function.Function;
 
 import javajs.util.AjaxURLConnection;
 import javajs.util.AjaxURLStreamHandlerFactory;
@@ -1100,6 +1101,15 @@ public/* SwingJS final */class URL {// implements Serializable {
 	 */
 	public final InputStream openStream() throws IOException {
 		return openConnection().getInputStream();
+	}
+
+
+	public void getBytesAsync(Function<byte[], Void> whenDone) {
+		try {
+			openConnection().getBytesAsync(whenDone);
+		} catch (IOException e) {
+			whenDone.apply(null);
+		}
 	}
 
 	/**

@@ -7,6 +7,8 @@ class Testx {
 
 public class Test_ {
 
+	static boolean isBatch = false;
+	
 	static public boolean j2sHeadless = true;
 
 	private static int i_ = 0;
@@ -104,7 +106,7 @@ public class Test_ {
         
 		int val = new Test_().test3();
 		assert (val == 13 || val == 4);
-
+		isBatch = true;
 		Test_Anon.main(args);
 		Test_Appendable.main(args);
 		Test_Array.main(args);

@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.function.Function;
 import java.util.jar.JarEntry;
 import java.util.jar.JarException;
 import java.util.jar.JarFile;
@@ -71,5 +72,14 @@ public class JSJarURLConnection extends JarURLConnection {
     	JSUtil.notImplemented(null);
     	return null;
     }
+
+	@Override
+	public void getBytesAsync(Function<byte[], Void> whenDone) {
+		try {
+			whenDone.apply(getInputStream().readAllBytes());
+		} catch (IOException e) {
+			whenDone.apply(null);
+		}
+	}
 
 }

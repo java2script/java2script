@@ -19,6 +19,7 @@ import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.Function;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -1041,6 +1042,13 @@ public class JSUtil implements JSUtilI {
 	public byte[] readAllBytes(InputStream is) throws IOException {
 		return is.readAllBytes();
 	}
+	
+	@Override
+	public void getURLBytesAsync(URL url, Function<byte[], Void> whenDone) {
+		url.getBytesAsync(whenDone);
+	}
+
+
 	
 	@Override
 	public long transferTo(InputStream is, OutputStream out) throws IOException {
