@@ -12106,6 +12106,7 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 				&& (obj._z = obj.__Info.z = getZOrders(Info.zIndexBase));
 		obj._width = Info.width;
 		obj._height = Info.height;
+		obj._isResizable = Info.isResizable;
 		obj._noscript = !obj._isJava && Info.noscript;
 		obj._console = Info.console;
 		obj._cacheFiles = !!Info.cacheFiles;
@@ -13161,8 +13162,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		this._is2D = true;
 		this._isJava = false;
 		this._isJNLP = !!Info.main;
-		if (typeof Info.	isResizable == "undefined" && ("" + Info.width).indexOf("px")>=0)
-			Info.isResizable = false;
+		if (typeof Info.isResizable == "undefined")
+			Info.isResizable = (("" + Info.width).indexOf("px")< 0);
 		this._jmolType = "J2S._Canvas2D (" + type + ")";
 		this._isLayered = Info._isLayered || false; // JSV or SwingJS are
 													// layered

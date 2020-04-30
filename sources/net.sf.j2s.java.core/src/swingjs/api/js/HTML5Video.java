@@ -155,7 +155,6 @@ public interface HTML5Video extends DOMNode {
 		Graphics g = image.createGraphics();
 		/**
 		 * @j2sNative
-		 * 
 		 * 			g.canvas.getContext('2d').drawImage(v, 0, 0, d.width, d.height);
 		 */
 		g.dispose();

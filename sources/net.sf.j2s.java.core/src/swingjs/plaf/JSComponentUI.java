@@ -1720,7 +1720,7 @@ public class JSComponentUI extends ComponentUI
 		String w0 = null, h0 = null, w0i = null, h0i = null, position = null;
 		DOMNode parentNode = null;
 		boolean hasFocus = false;
-		if (scrollPaneUI != null) {
+		if (scrollPaneUI != null && scrollPaneUI.c.getWidth() != 0) {
 			w = scrollPaneUI.c.getWidth();
 			h = scrollPaneUI.c.getHeight();
 		} else if (usePreferred && preferredSize != null) {
@@ -2344,7 +2344,7 @@ public class JSComponentUI extends ComponentUI
 			if (scrollPaneUI != null) {
 				width = Math.min(width, scrollPaneUI.c.getWidth());
 				height = Math.min(height, scrollPaneUI.c.getHeight());
-			}	
+			} 
 			if (width > 0 && height > 0)
 				setSizeFromComponent(width, height, op);
 			break;

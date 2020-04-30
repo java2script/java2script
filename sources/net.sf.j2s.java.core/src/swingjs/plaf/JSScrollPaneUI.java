@@ -1372,4 +1372,12 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 		}
 	}
 
+
+	@Override
+	public void setBounds(int x, int y, int w, int h, int op) {
+		super.setBounds(x, y, w, h, op);
+		if (scrollBarUIDisabled && scrolledUI != null) {
+			scrolledUI.setBounds(x,  y,  w,  h,  op);
+		}
+	}
 }

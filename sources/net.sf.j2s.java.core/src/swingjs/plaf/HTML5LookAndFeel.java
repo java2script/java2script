@@ -790,12 +790,12 @@ public class HTML5LookAndFeel extends LookAndFeel {
 		 new Object[] {new Integer(6), zero, zero, zero});
 		//
 		//
-		// // *** ProgessBar value objects
-		//
-		// Object progressBarBorder =
-		// new SwingLazyValue(
-		// "javax.swing.plaf.basic.BasicBorders",
-		// "getProgressBarBorder");
+		 // *** ProgessBar value objects
+		
+		 Object progressBarBorder =
+		 new SwingLazyValue(
+		 "javax.swing.plaf.basic.BasicBorders",
+		 "getProgressBarBorder");
 		//
 		// // ** ScrollBar value objects
 		//
@@ -1435,12 +1435,12 @@ public class HTML5LookAndFeel extends LookAndFeel {
 	       textText,
 
 				// *** ProgressBar
-				// "ProgressBar.font", dialogPlain12,
-				// "ProgressBar.foreground", textHighlight,
-				// "ProgressBar.background", control,
-				// "ProgressBar.selectionForeground", control,
-				// "ProgressBar.selectionBackground", textHighlight,
-				// "ProgressBar.border", progressBarBorder,
+				 "ProgressBar.font", dialogPlain12,
+				 "ProgressBar.foreground", Color.GRAY,
+				 "ProgressBar.background", control,
+				 "ProgressBar.selectionForeground", control,
+				 "ProgressBar.selectionBackground", Color.GRAY,
+				 "ProgressBar.border", progressBarBorder,
 				"ProgressBar.cellLength",
 				new Integer(1),
 				"ProgressBar.cellSpacing",
