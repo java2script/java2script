@@ -31,8 +31,8 @@ import javajs.async.SwingJSUtils.StateMachine;
  * 
  * void doneAsync()
  * 
- * Both init() and doneAsync() are technically optional - they may be empty.
- * doInBackground(), however, is the key method where, like SwingWorker's
+ * Both initAsync() and doneAsync() are technically optional - they may be empty.
+ * doInBackgroundAsync(), however, is the key method where, like SwingWorker's
  * doInBackground, the main work is done. The supplied progress parameter
  * reminds the subclass of where it is at, and the return value allows the
  * subclass to update the progress field in both the SwingWorker and the
