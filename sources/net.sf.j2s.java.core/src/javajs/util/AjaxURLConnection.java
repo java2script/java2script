@@ -9,6 +9,8 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -59,9 +61,50 @@ public class AjaxURLConnection extends HttpURLConnection {
 
 	@Override
 	public String getHeaderField(String name) {
-		return /** @j2sNative this.info && this.info.xhr && this.info.xhr.getResponseHeader(name) || */null;
+		try {
+			if (getResponseCode() != -1) {
+				return /**
+						 * @j2sNative this.info && this.info.xhr &&
+						 *            this.info.xhr.getResponseHeader(name) ||
+						 */
+				null;
+			}
+		} catch (IOException e) {
+		}
+		return null;
 	}
 
+	
+	@SuppressWarnings("unused")
+	@Override
+	public Map<String, List<String>> getHeaderFields() {
+		Map<String, List<String>> map = new HashMap<>();
+		try {
+			if (getResponseCode() != -1) {
+				String[] data = null;
+				/**
+				 * @j2sNative data = this.info && this.info.xhr &&
+				 *            this.info.xhr.getAllResponseHeaders(); data && (data =
+				 *            data.trim().split("\n"));
+				 */
+				// ["content-length: 996"
+				// , "content-type: text/plain; charset=x-user-defined"
+				// , "last-modified: Fri, 01 May 2020 11:54:13 GMT"]
+				if (data != null) {
+					for (int i = 0; i < data.length; i++) {
+						String[] parts = data[i].split(":");
+						String key = parts[0].trim();
+						List<String> list = map.get(key);
+						if (list == null)
+							map.put(key, list = new ArrayList<>());
+						list.add(parts[1].trim());
+					}
+				}
+			}
+		} catch (IOException e) {
+		}
+		return map;
+	}
 
 	/**
 	 * 
@@ -421,7 +464,7 @@ public class AjaxURLConnection extends HttpURLConnection {
 		return doAjax(false, null);
 	}
 
-	@Override
+	@Override	
 	public int getResponseCode() throws IOException {
 		/*
 		 * Check to see if have the response code already
