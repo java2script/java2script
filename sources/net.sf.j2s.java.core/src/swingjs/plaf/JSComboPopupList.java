@@ -10,16 +10,34 @@ import java.util.EventObject;
 import javax.swing.JComponent;
 import javax.swing.JList;
 
-import javajs.api.JSFunction;
+import swingjs.api.js.JSFunction;
 import swingjs.JSKeyEvent;
 import swingjs.JSMouse;
 import swingjs.api.js.DOMNode;
-import swingjs.api.js.JQueryObject.J2SCB;
+import swingjs.api.js.JQueryObject;
 
 class JSComboPopupList extends JList {
 
+	// the ".api.js." in these method names cause them to be unqualified, all ending up method j2sCB() 
+	private interface api {
+		interface js extends JQueryObject {
+
+			abstract js j2sCB(Object options);
+
+			abstract Object[] j2sCB(String method);
+
+			abstract Object[] j2sCB(String method, Object o);
+
+			abstract Object[] j2sCB(String method, int i);
+
+			abstract int j2sCB(String OPTION, String name);
+
+		}
+	}
+
+
 	private final JSComboBoxUI cbui;
-	private J2SCB j2scb;
+	private api.js j2scb;
 
 	JSComboPopupList(JSComboBoxUI ui) {
 		super(ui.comboBox.getModel());
@@ -53,7 +71,7 @@ class JSComboPopupList extends JList {
 	void createJ2SCB() {
 		if (j2scb != null)
 			j2scb.j2sCB("destroy");
-		j2scb = (J2SCB) cbui.$(cbui.domNode);
+		j2scb = (api.js) cbui.$(cbui.domNode);
 		@SuppressWarnings("unused")
 		Object me = this;
 		JSFunction fChange = /** @j2sNative function(){p$1.fChange$O$O$S$O.apply(me,arguments)} || */

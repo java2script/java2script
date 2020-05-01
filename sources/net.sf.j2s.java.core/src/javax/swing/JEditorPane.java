@@ -1436,11 +1436,11 @@ public class JEditorPane extends JTextComponent {
 		try {
 			Document doc = getDocument();
 			if (doc instanceof HTMLDocument) {
-				if (t.indexOf("<body>")< 0)
+				if (t.indexOf("<body")< 0)
 				t = "<body>" + t + "</body>";
-				if (t.indexOf("<head>")< 0)
+				if (t.indexOf("<head")< 0)
 				t = "<head>" + t + "</head>";
-				if (t.indexOf("<html>")< 0)
+				if (t.indexOf("<html")< 0)
 				t = "<html>" + t + "</html>";
 			}
 			if (秘jsHTMLHelper != null)

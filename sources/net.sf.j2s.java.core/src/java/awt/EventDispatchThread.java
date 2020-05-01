@@ -33,7 +33,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 
-import javajs.api.JSFunction;
+import swingjs.api.js.JSFunction;
 import javajs.util.JSThread;
 import javajs.util.Lst;
 //import java.util.logging.*;

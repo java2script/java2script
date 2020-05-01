@@ -69,14 +69,10 @@ public class URLClassPath {
     private static final boolean DISABLE_JAR_CHECKING;
 
     static {
-        JAVA_VERSION = java.security.AccessController.doPrivileged(
-            new GetPropertyAction("java.version"));
-        DEBUG        = (java.security.AccessController.doPrivileged(
-            new GetPropertyAction("sun.misc.URLClassPath.debug")) != null);
-        DEBUG_LOOKUP_CACHE = (java.security.AccessController.doPrivileged(
-            new GetPropertyAction("sun.misc.URLClassPath.debugLookupCache")) != null);
-        String p = java.security.AccessController.doPrivileged(
-            new GetPropertyAction("sun.misc.URLClassPath.disableJarChecking"));
+        JAVA_VERSION = (System.getProperty("java.version"));
+        DEBUG        = (System.getProperty("sun.misc.URLClassPath.debug") != null);
+        DEBUG_LOOKUP_CACHE = (System.getProperty("sun.misc.URLClassPath.debugLookupCache") != null);
+        String p = (System.getProperty("sun.misc.URLClassPath.disableJarChecking"));
         DISABLE_JAR_CHECKING = p != null ? p.equals("true") || p.equals("") : false;
     }
 

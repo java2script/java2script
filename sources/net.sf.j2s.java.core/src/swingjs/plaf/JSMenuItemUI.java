@@ -9,7 +9,6 @@ import javax.swing.JMenuItem;
 import javax.swing.event.MenuKeyListener;
 
 import swingjs.api.js.DOMNode;
-import swingjs.api.js.JSSwingMenu;
 
 public class JSMenuItemUI extends JSButtonUI {
 	

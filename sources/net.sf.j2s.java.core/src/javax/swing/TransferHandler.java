@@ -680,7 +680,7 @@ public class TransferHandler {
 			action = NONE;
 		}
 
-		if (action != NONE && !GraphicsEnvironment.isHeadless()) {
+		if (action != NONE) {// && !GraphicsEnvironment.isHeadless()) {
 			if (recognizer == null) {
 				recognizer = new SwingDragGestureRecognizer(new DragHandler());
 			}

@@ -132,8 +132,7 @@ public abstract class LocaleProviderAdapter {
         adapterCache = new ConcurrentHashMap<>();
 
     static {
-        String order = AccessController.doPrivileged(
-                           new sun.security.action.GetPropertyAction("java.locale.providers"));
+        String order = (System.getProperty("java.locale.providers"));
         List<Type> typeList = new ArrayList<>();
 
         // Check user specified adapter preference

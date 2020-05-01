@@ -5,13 +5,13 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.JSComponent;
 import java.awt.Toolkit;
-import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -19,10 +19,14 @@ import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.Function;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import javax.swing.JComponent;
 import javax.swing.plaf.ComponentUI;
 
+import swingjs.api.js.JSFunction;
 import javajs.util.AU;
 import javajs.util.AjaxURLConnection;
 import javajs.util.PT;
@@ -118,7 +122,7 @@ public class JSUtil implements JSUtilI {
 	 * @return may be byte[], String, or javajs.util.SB if found; Boolean FALSE if not found
 	 */
 	@SuppressWarnings("unused")
-	private static Object getFileContents(Object uriOrJSFile, boolean asBytes) {
+	private static Object getFileContents(Object uriOrJSFile, boolean asBytes, JSFunction fWhenDone) {
 		boolean isFile = (uriOrJSFile instanceof File);
 		String uri = uriOrJSFile.toString();
 		if (isFile) {
@@ -148,13 +152,14 @@ public class JSUtil implements JSUtilI {
 			// Java applications may use "./" here
 			if (!isFile) {
 				try {
-					BufferedInputStream stream = (BufferedInputStream) new URL(uri).getContent();
+					URL url = new URL(uri);
+					BufferedInputStream stream = (BufferedInputStream) url.getContent();
 					return (asBytes ? Rdr.getStreamAsBytes(stream, null) : Rdr.streamToUTF8String(stream));
 				} catch (Exception e) {
 				}
 			}
 			// bypasses AjaxURLConnection
-			data = J2S.getFileData(uri, null, false, asBytes);
+			data = J2S.getFileData(uri, fWhenDone, false, asBytes);
 			if (data == null)
 				removeCachedFileData(uri);
 
@@ -174,7 +179,7 @@ public class JSUtil implements JSUtilI {
 	 * @return
 	 */
 	public static String getFileAsString(String filename) {
-		Object data = getFileContents(filename, false);
+		Object data = getFileContents(filename, false, null);
 		return ensureString(data);
 	}
 
@@ -232,7 +237,7 @@ public class JSUtil implements JSUtilI {
 	 * @return byte[] or null
 	 */
 	public static byte[] getFileAsBytes(Object file) {
-		Object data = getFileContents(file, true);
+		Object data = getFileContents(file, true, null);
 		if (data == null || data == Boolean.FALSE)
 			return null;
 		byte[] b = null;
@@ -744,9 +749,19 @@ public class JSUtil implements JSUtilI {
 		return new Color(rgb[0], rgb[1], rgb[2]);
 	}
 
-	public static byte[] getFileBytes(File f) {
-		return f.秘bytes;
+	/**
+	 * 
+	 * @param f anything with 秘bytes (File, JSPath)
+	 * @return
+	 */
+	public static byte[] getBytes(Object f) {
+		return ((File) f).秘bytes;
 	}
+
+	@Override
+	public byte[] getURLBytes(URL url) {
+		return (byte[]) url._streamData;
+	};
 	
 	@Override
 	public byte[] getBytes(File f) {
@@ -782,24 +797,6 @@ public class JSUtil implements JSUtilI {
 		ThreadGroup g = (c == null ? Thread.currentThread().getThreadGroup() : c.getAppContext().getThreadGroup());
 		return ((JSThreadGroup) g).getHtmlApplet();
 	}
-
-	public static boolean setFileBytesStatic(File f, Object isOrBytes) {
-		// Used in JalviewJS
-		if (isOrBytes instanceof InputStream) {
-			f.秘bytes = /**
-						 * @j2sNative (isOrBytes.$in.$in || isOrBytes.$in).buf ||
-						 */
-					null;
-		} else if (isOrBytes instanceof byte[]) {
-			f.秘bytes = /**
-						 * @j2sNative isOrBytes ||
-						 */
-				null;
-		} else {
-			f.秘bytes = null;
-		}
-		return (f.秘bytes != null);
-	} 
 
 	@Override
 	public HashMap<?,?> getJSContext(Object key) {
@@ -874,19 +871,53 @@ public class JSUtil implements JSUtilI {
 
 	@Override
 	public boolean streamToFile(InputStream is, File outFile) {
-		boolean ok = JSUtil.setFileBytesStatic(outFile, is);
-		if (ok && outFile.秘isTempFile) {
-			String path = outFile.getAbsolutePath();
-			cacheFileData(path, outFile.秘bytes);
+		try {
+			return JSUtil.setFileBytesStatic(outFile, is.readAllBytes());
+		} catch (IOException e) {
+			return false;
 		}
-		return ok;
 	}
 
+	@Override
+	public boolean setURLBytes(URL url, Object isOrBytes) {
+		return setFileBytesStatic((File)(Object) url, isOrBytes);
+	}
 	@Override
 	public boolean setFileBytes(File f, Object isOrBytes) {
 		return setFileBytesStatic(f, isOrBytes);
 	}
 	
+	@Deprecated
+	private static boolean setFileBytesStatic(File f, Object isOrBytes) {
+		// Used in JalviewJS  -- keep this signature here for now.
+		return setFileBytesStatic((Object) f, isOrBytes);
+	}
+	
+	public static boolean setFileBytesStatic(Object f, Object isOrBytes) {
+		byte[] bytes;
+		if (isOrBytes instanceof InputStream) {
+			try {
+				bytes = ((InputStream) isOrBytes).readAllBytes();
+			} catch (IOException e) {
+				bytes = null;
+			}
+		} else if (isOrBytes instanceof byte[]) {
+			bytes = (byte[]) isOrBytes;
+		} else {
+			bytes = null;
+		}
+		if (f instanceof URL) {
+			((URL) f)._streamData = bytes;
+		} else {
+			File outFile = (File) f;
+			outFile.秘bytes = bytes;
+			if (outFile.秘isTempFile) {
+				cacheFileData(outFile.getAbsolutePath(), bytes);
+			}
+		}
+		return (bytes != null);
+	} 
+
 	/**
 	 * Add a known domain that implements access-control-allow-origin:*
 	 * 
@@ -991,6 +1022,42 @@ public class JSUtil implements JSUtilI {
 			((File) URLorURIorFile).秘bytes = bytes;
 		}
 		return bytes;
+	}
+
+	public static String getWebPathFor(String path) {
+		return path.startsWith("http") ? path : J2S.getResourcePath(path, true);
+	}
+
+	@Override
+	public long seekZipEntry(ZipInputStream zis, ZipEntry ze) {
+		return zis.setEntry(ze);
+	}
+
+	@Override
+	public byte[] getZipBytes(ZipEntry ze) {
+		return ze.getBytes();
+	}
+
+	@Override
+	public byte[] readAllBytes(InputStream is) throws IOException {
+		return is.readAllBytes();
+	}
+	
+	@Override
+	public void getURLBytesAsync(URL url, Function<byte[], Void> whenDone) {
+		url.getBytesAsync(whenDone);
+	}
+
+
+	
+	@Override
+	public long transferTo(InputStream is, OutputStream out) throws IOException {
+		return is.transferTo(out);
+	}
+
+	@Override
+	public void showStatus(String msg, boolean doFadeOut) {
+		J2S.showStatus(msg, doFadeOut);
 	}
 
 }

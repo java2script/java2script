@@ -651,7 +651,7 @@ class Java2ScriptCompiler {
 				"</script>\n" + 
 				"<div style=\"position:absolute;left:900px;top:30px;width:600px;height:300px;\">\n" + 
 				"<div id=\"sysoutdiv\" contentEditable=\"true\" style=\"border:1px solid green;width:100%;height:95%;overflow:auto\"></div>\n" + 
-				"This is System.out. <a href=\"javascript:testApplet._clearConsole()\">clear it</a> <br>Add ?j2snocore to URL to see full class list; ?j2sdebug to use uncompressed j2s/core files <br><a href=\"javascript:getClassList()\">get _j2sClassList.txt</a>\n" + 
+				"This is System.out. <a href=\"javascript:testApplet._clearConsole()\">clear it</a>  <a href='javascript:J2S.getProfile()'>start/stop profiling</a><br>see <a href=___j2sflags.htm>___j2sflags.htm</a> for SwingJS URL command-line options<br><a href=\"javascript:getClassList()\">get _j2sClassList.txt</a>\n" + 
 				"</div>\n" + 
 				"</body>\n" + 
 				"</html>\n";

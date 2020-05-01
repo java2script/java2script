@@ -88,7 +88,7 @@ public class JSLabelUI extends JSLightweightUI {
 			DOMNode.setStyles(textNode, "overflow", null, "white-space", null);
 		else
 			DOMNode.setStyles(textNode, "overflow", "hidden", "white-space", "nowrap");
-		if (icon != null && imageNode != null) { // Tree node?
+		if (icon != null && imageNode != null && !isVideoIcon) { // Tree node?
 			// The graphics object is translated to the label,
 			// not the image, at this point. In order to get
 			// a clientRectangle, the node must be visible, even for just

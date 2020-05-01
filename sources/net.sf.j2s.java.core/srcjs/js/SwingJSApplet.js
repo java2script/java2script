@@ -19,11 +19,21 @@ if (typeof(SwingJS) == "undefined") {
 (function (SwingJS, $, J2S) {
 
 	SwingJS.getApplet = function(id, Info, checkOnly) {
+		if (arguments.length == 1 && typeof id == "object") {
+			// allow for getApplet(Info)
+			Info = id;
+			id = null;
+		}
 		return SwingJS._Applet._get(id, Info, checkOnly);
 	}
 
   	// optional Info here	
 	SwingJS.getAppletHtml = function(applet, Info) {
+		if (arguments.length == 1 && typeof applet == "object" && !applet._code) {
+			// allow for getApplet(Info)
+			Info = applet;
+			applet = null;
+		}
 		if (Info) {
 			var d = SwingJS._document;
 			SwingJS._document = null;
@@ -103,6 +113,7 @@ if (typeof(SwingJS) == "undefined") {
 			disableInitialConsole: false,
 			debug: false
 		};	 
+		id || (id = Info.name) || (id = "j2sApplet" + J2S._defaultID++);
     
 		J2S._addDefaultInfo(Info, DefaultInfo);
 		

@@ -25,16 +25,17 @@
 
 package java.nio.file;
 
-import java.util.Set;
-import java.util.EnumSet;
-import java.security.SecureRandom;
-import static java.security.AccessController.*;
+import static java.nio.file.attribute.PosixFilePermission.OWNER_EXECUTE;
+import static java.nio.file.attribute.PosixFilePermission.OWNER_READ;
+import static java.nio.file.attribute.PosixFilePermission.OWNER_WRITE;
+
 import java.io.IOException;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
-import static java.nio.file.attribute.PosixFilePermission.*;
-import sun.security.action.GetPropertyAction;
+import java.security.SecureRandom;
+import java.util.EnumSet;
+import java.util.Set;
 
 
 /**
@@ -47,7 +48,7 @@ class TempFileHelper {
 
     // temporary directory location
     private static final Path tmpdir =
-        Paths.get(doPrivileged(new GetPropertyAction("java.io.tmpdir")));
+			Paths.get((System.getProperty("java.io.tmpdir")));
 
     private static final boolean isPosix =
         FileSystems.getDefault().supportedFileAttributeViews().contains("posix");

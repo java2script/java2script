@@ -88,6 +88,7 @@ public class JSButtonUI extends JSLightweightUI {
 		// this one is only for a simple button
 		if (domNode == null) {
 			isSimpleButton = true;
+			imagePersists = true; // at least for now.
 			allowPaintedBackground = false;
 			setDoPropagate();
 			domNode = enableNode = buttonNode = newDOMObject("button", id + "_dom", "type", "button", "style", "padding:0");
@@ -799,7 +800,6 @@ public class JSButtonUI extends JSLightweightUI {
 
 	@Override
 	public void paint(Graphics g, JComponent c) {
-		imagePersists = true; // at least for now.
 		if (jc.秘paintsSelfEntirely())
 			DOMNode.setStyles(centeringNode, "visibility", "visible");
 		super.paint(g, c);

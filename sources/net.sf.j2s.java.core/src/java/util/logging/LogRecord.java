@@ -33,6 +33,9 @@ import sun.misc.JavaLangAccess;
 import sun.misc.SharedSecrets;
 
 /**
+ * 
+ * SwingJS - disabled resourceBundle
+ * 
  * LogRecord objects are used to pass logging requests between
  * the logging framework and individual log Handlers.
  * <p>
@@ -139,7 +142,7 @@ public class LogRecord implements java.io.Serializable {
 
     private transient boolean needToInferCaller;
     private transient Object parameters[];
-    private transient ResourceBundle resourceBundle;
+//    private transient ResourceBundle resourceBundle;
 
     /**
      * Returns the default value for a new LogRecord's threadID.
@@ -214,7 +217,7 @@ public class LogRecord implements java.io.Serializable {
      * @return the localization resource bundle
      */
     public ResourceBundle getResourceBundle() {
-        return resourceBundle;
+        return null;//resourceBundle;
     }
 
     /**
@@ -223,7 +226,7 @@ public class LogRecord implements java.io.Serializable {
      * @param bundle  localization bundle (may be null)
      */
     public void setResourceBundle(ResourceBundle bundle) {
-        resourceBundle = bundle;
+        //resourceBundle = bundle;
     }
 
     /**
@@ -510,23 +513,23 @@ public class LogRecord implements java.io.Serializable {
                 parameters[i] = in.readObject();
             }
         }
-        // If necessary, try to regenerate the resource bundle.
-        if (resourceBundleName != null) {
-            try {
-                // use system class loader to ensure the ResourceBundle
-                // instance is a different instance than null loader uses
-                final ResourceBundle bundle =
-                        ResourceBundle.getBundle(resourceBundleName,
-                                Locale.getDefault(),
-                                ClassLoader.getSystemClassLoader());
-                resourceBundle = bundle;
-            } catch (MissingResourceException ex) {
-                // This is not a good place to throw an exception,
-                // so we simply leave the resourceBundle null.
-                resourceBundle = null;
-            }
-        }
-
+//        // If necessary, try to regenerate the resource bundle.
+//        if (resourceBundleName != null) {
+//            try {
+//                // use system class loader to ensure the ResourceBundle
+//                // instance is a different instance than null loader uses
+//                final ResourceBundle bundle =
+//                        ResourceBundle.getBundle(resourceBundleName,
+//                                Locale.getDefault(),
+//                                ClassLoader.getSystemClassLoader());
+//                resourceBundle = bundle;
+//            } catch (MissingResourceException ex) {
+//                // This is not a good place to throw an exception,
+//                // so we simply leave the resourceBundle null.
+//                resourceBundle = null;
+//            }
+//        }
+//
         needToInferCaller = false;
     }
 

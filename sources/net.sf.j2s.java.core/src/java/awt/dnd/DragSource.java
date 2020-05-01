@@ -126,9 +126,9 @@ public class DragSource implements Serializable {
      */
 
     private static Cursor load(String name) {
-        if (GraphicsEnvironment.isHeadless()) {
-            return null;
-        }
+//        if (GraphicsEnvironment.isHeadless()) {
+//            return null;
+//        }
 
         try {
             return (Cursor)Toolkit.getDefaultToolkit().getDesktopProperty(name);
@@ -201,7 +201,8 @@ public class DragSource implements Serializable {
         load("DnD.Cursor.LinkNoDrop");
 
     private static final DragSource dflt =
-        (GraphicsEnvironment.isHeadless()) ? null : new DragSource();
+        //(GraphicsEnvironment.isHeadless()) ? null : 
+        	new DragSource();
 
     /**
      * Internal constants for serialization.

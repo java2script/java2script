@@ -38,8 +38,14 @@ import java.awt.peer.LightweightPeer;
 import java.awt.peer.WindowPeer;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.AttributedCharacterIterator.Attribute;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -57,7 +63,7 @@ import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
 
-import javajs.api.JSFunction;
+import swingjs.api.js.JSFunction;
 import javajs.util.JSThread;
 import javajs.util.PT;
 import sun.awt.AppContext;
@@ -336,8 +342,11 @@ public class JSToolkit extends SunToolkit
 			t = Thread.秘thisThread;
 		t = (/** @j2sNative !self.java || */
 		t.getThreadGroup().秘systemExited ? null : t);
+		
+		//System.out.println("JSToolkit current was " + Thread.秘thisThread);
 		if (setCurrent && t != null)
 			Thread.秘thisThread = t;
+		//System.out.println("JSToolkit current now " + Thread.秘thisThread);
 		return t;
 	}
 
@@ -367,7 +376,8 @@ public class JSToolkit extends SunToolkit
 					"";
 			System.out.println(s);
 		}
-		getCurrentThread(thread0);
+		if (getCurrentThread(null) == t)
+			getCurrentThread(thread0);
 		SwingJS.eventID = id0;
 		/**
 		 * @j2sNative }; setTimeout(ff, 0);
@@ -580,12 +590,12 @@ public class JSToolkit extends SunToolkit
 		return createImage(JSToolkit.class.getResource(filename));
 	}
 
+
 	@Override
 	public Image getImage(URL url) {
 		return createImage(url);
 	}
-	
-	
+		
 	@Override
 	public Image createImage(ImageProducer producer) {
 		JSImagekit kit = new JSImagekit();
@@ -646,10 +656,30 @@ public class JSToolkit extends SunToolkit
 		return true;
 	}
 
-	public static boolean hasFocus(Component c) {
-	  JSComponentUI ui = getUI(c, false);
-		return (ui != null && !ui.isNull && ui.hasFocus());
+	//// video ////
+
+	public Image getVideo(String filename) {
+		return createVideo(new File(filename).toPath());
 	}
+
+	public Image getVideo(URL url) {
+		try {
+			return createVideo(Paths.get(url.toURI()));
+		} catch (URISyntaxException e) {
+			return null;
+		}
+	}
+
+	public Image createVideo(Path path) {
+		return getImagekit().createVideo(path);
+	}
+
+	public Image createVideo(byte[] bytes) {
+		return getImagekit().createVideo(bytes);
+	}
+
+	
+	///// audio ////
 
 	private static JSAudio audioPlayer;
 
@@ -674,9 +704,6 @@ public class JSToolkit extends SunToolkit
 	public static AudioClip getAudioClip(URL url) {
 		return getAudioPlayer().getAudioClip(url);
 	}
-
-
-
 
 	/**
 	 * Simple way to play any audio file
@@ -940,11 +967,16 @@ public class JSToolkit extends SunToolkit
 	}
 
 	private static KeyboardFocusManagerPeer focusManager;
+	
 	private static KeyboardFocusManagerPeer getFocusPeer() {
 		return (focusManager == null ? focusManager = new JSFocusPeer() : focusManager);
 	}
-
 	
+	public static boolean hasFocus(Component c) {
+	  JSComponentUI ui = getUI(c, false);
+		return (ui != null && !ui.isNull && ui.hasFocus());
+	}
+
 //	@Override
 	public KeyboardFocusManagerPeer getKeyboardFocusManagerPeer() {
 		return getFocusPeer();

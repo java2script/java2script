@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head><title>URL command line flags for SwingJS</title></head>
+<body><h3>URL command-line arguments for SwingJS</h3>
+<br>To enable these flags, simply add them after # or ? on your page.
+<br>The test is very simple -- just a case-sensitive string check. 
+<br>Separate them with &amp; For example:
+<br><a href="test_Test_Class.html?j2sverbose&j2snozcore&j2strace=applet">test_Test_Class.html?j2sverbose&j2snozcore&j2strace=applet</a>
+<br><br><table width=800 border=1 cellpadding=5>
+<tr><th colspan="2"></th></tr>
+<tr><td>j2sargs=a|b|c</td><td>arguments to be passed on to application.main(); use "|" to separate arguments. Overrides Info.args, which should be an array of strings, if present</td></tr>
+<tr><td>j2sdebugclip</td><td>shows all show/restore and clip operations in JSGraphics2D</td></tr>
+<tr><td>j2sdebugcode</td><td>deprecated; see j2snocore</td></tr>
+<tr><td>j2sdebugcore</td><td>deprecated; see j2snozcore</td></tr>
+<tr><td>j2sdebugpaint</td><td>report repaint manager information</td></tr>
+<tr><td>j2sevents</td><td>report ComponentEvent instances</td></tr>
+<tr><td>j2sfilter=xxx</td><td>remove messages with the specified text from System.out</td></tr>
+<tr><td>j2sheadless</td><td>run headlessly (must be a main()-based application or library without Swing or AWT)</td></tr>
+<tr><td>j2slang=en_US</td><td>default language for java.util.Locale (overrides Info.language)</td></tr>
+<tr><td>j2smouse</td><td>report mouse events other than mousemove</td></tr>
+<tr><td>j2smousemove</td><td>report all mouse events, including mousemove</td></tr>
+<tr><td>j2snocore</td><td>do not load core files (from j2s/core/)</td></tr>
+<tr><td>j2snoeval</td><td>use new Function() instead of eval(); breaks debugging, experimental</td></tr>
+<tr><td>j2snooutput</td><td>report only System.err message, not  System.out </td></tr>
+<tr><td>j2snozcore</td><td>use the uncompressed j2s/core/xxxcore.js files, not the compressed core.z.js files</td></tr>
+<tr><td>j2sprofile</td><td>track object creation; use J2S.getProfile() when you want a report; J2S.getProfile() or J2S.getProfile(nsec) to restart profiling anytime.</td></tr>
+<tr><td>j2sstrict</td><td>strict mode -- experimental</td></tr>
+<tr><td>j2strace=xxx or j2strace="xxx"</td><td>throw up an alert in the browser and a debugger statement in the developer whenever the specified text is found in System.out or System.err; if quotes are used, this must be an exact match to the entire output text (particularly useful when the message is something like "0", which otherwise would be next to impossible to find.</td></tr>
+<tr><td>j2sverbose</td><td>report all files loaded using AJAX</td></tr>
+</table>
+</body>
+</html>

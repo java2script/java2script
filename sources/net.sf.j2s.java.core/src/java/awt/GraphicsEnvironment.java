@@ -120,7 +120,11 @@ public abstract class GraphicsEnvironment {
      * @since 1.4
      */
     public static boolean isHeadless() {
-        return false;//getHeadlessProperty();
+    	return getHeadlessProperty();
+    }
+    
+    private static boolean getHeadlessProperty() {
+    	return ("true" == System.getProperty("java.awt.headless"));
     }
 
 //    /**
@@ -141,8 +145,8 @@ public abstract class GraphicsEnvironment {
      * @return the value of the property "java.awt.headless"
      * @since 1.4
      */
-    private static boolean getHeadlessProperty() {
-    	return false;
+//    private static boolean getHeadlessProperty() {
+//    	return false;
 //        if (headless == null) {
 //            java.security.AccessController.doPrivileged(
 //            new java.security.PrivilegedAction() {
@@ -170,7 +174,7 @@ public abstract class GraphicsEnvironment {
 //            );
 //        }
 //        return headless.booleanValue();
-    }
+//    }
 
     /**
      * Check for headless state and throw HeadlessException if headless
@@ -182,25 +186,27 @@ public abstract class GraphicsEnvironment {
 //        }
     }
 
-    /**
-     * Returns whether or not a display, keyboard, and mouse can be
-     * supported in this graphics environment.  If this returns true,
-     * <code>HeadlessException</code> will be thrown from areas of the
-     * graphics environment that are dependent on a display, keyboard, or
-     * mouse.
-     * @return <code>true</code> if a display, keyboard, and mouse
-     * can be supported in this environment; <code>false</code>
-     * otherwise
-     * @see java.awt.HeadlessException
-     * @see #isHeadless
-     * @since 1.4
-     */
-    public boolean isHeadlessInstance() {
-        // By default (local graphics environment), simply check the
-        // headless property.
-        return getHeadlessProperty();
-    }
+	/**
+	 * Returns whether or not a display, keyboard, and mouse can be supported in
+	 * this graphics environment. If this returns true,
+	 * <code>HeadlessException</code> will be thrown from areas of the graphics
+	 * environment that are dependent on a display, keyboard, or mouse.
+	 * 
+	 * @return <code>true</code> if a display, keyboard, and mouse can be supported
+	 *         in this environment; <code>false</code> otherwise
+	 * @see java.awt.HeadlessException
+	 * @see #isHeadless
+	 * @since 1.4
+	 */
+	public boolean isHeadlessInstance() {
+		// By default (local graphics environment), simply check the
+		// headless property.
+		return (headless != null ? headless
+				: (headless = getHeadlessProperty() ? Boolean.TRUE : Boolean.FALSE))
+		.booleanValue();
+	}
 
+    private Boolean headless;
 //    /**
 //     * Returns an array of all of the screen <code>GraphicsDevice</code>
 //     * objects.

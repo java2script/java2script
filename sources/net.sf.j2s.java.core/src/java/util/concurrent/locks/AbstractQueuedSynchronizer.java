@@ -2039,6 +2039,8 @@ public abstract class AbstractQueuedSynchronizer
          * </ol>
          */
         public final void await() throws InterruptedException {
+        	
+        	
             if (Thread.interrupted())
                 throw new InterruptedException();
             Node node = addConditionWaiter();

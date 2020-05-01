@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Function;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -46,6 +47,7 @@ public class Test_URL extends Test_ {
 	protected static String getResponseMimeType() {
 		return "application/json";
 	}
+	@SuppressWarnings("unused")
 	public static void main(String[] args) {
 
 
@@ -77,9 +79,7 @@ public class Test_URL extends Test_ {
 		URL readme = Test_URL.class.getClassLoader().getResource("file://c:/test/t.htm");
 		
 		System.out.println(readme);
-		
 
-		
 		try (InputStream in = new URL("https://stolaf.edu/people/hansonr").openStream()) {
 			
 			// Java or JavaScript:

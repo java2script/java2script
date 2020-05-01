@@ -18,7 +18,7 @@ import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-import javajs.api.JSFunction;
+import swingjs.api.js.JSFunction;
 import swingjs.api.js.DOMNode;
 
 /**

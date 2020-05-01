@@ -134,8 +134,9 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
 // TODO: superclass inheritance for JAXB XmlAccessorType
-// TODO: inner classes of interface are duplicated
 
+//BH 2020.05.01 -- 3.2.9-v1i fix for nested lambda methods
+//BH 2020.04.26 -- 3.2.9-v1h fix for inner classes of interfaces duplicated; fix for api.js inner class method names unqualified
 //BH 2020.04.15 -- 3.2.9-v1g fix for qualified super() in inner classes using Class.super_ call (Tracker)
 //BH 2020.04.05 -- 3.2.9-v1f (Boolean ? ...) not unboxed
 //BH 2020.03.21 -- 3.2.9-v1e better v1c 
@@ -1383,6 +1384,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			ASTNode body, boolean isConstructor, List<IMethodBinding> abstractMethodList, int lambdaType) {
 		String alias = (mnode == null ? null : checkJ2SMethodDoc(mnode));
 		int mods = mBinding.getModifiers();
+		ITypeBinding mClass = mBinding.getDeclaringClass();
 		boolean isNative = Modifier.isNative(mods);
 		boolean isPublic = Modifier.isPublic(mods);
 		boolean isPrivate = !isPublic && !isConstructor && isPrivate(mBinding);
@@ -1393,8 +1395,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// lambdaType != NOT_LAMBDA ? METHOD_FULLY_QUALIFIED
 		// : temp_add$UnqualifiedMethod ? METHOD_$_QUALIFIED :
 		METHOD_FULLY_QUALIFIED);
+		
 		if (isUserApplet && lambdaType == NOT_LAMBDA && !isConstructor && !isStatic && isPublic)
 			qualification |= METHOD_UNQUALIFIED;
+
+		
 		if (addGeneric) {
 			qualification |= METHOD_ADD_GENERIC;
 			if (isAbstract && abstractMethodList != null) {
@@ -1415,7 +1420,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 		if (!isPrivate)
 			logMethodDeclared(quotedFinalNameOrArray);
-		ITypeBinding mClass = mBinding.getDeclaringClass();
 		if (isConstructor && (quotedFinalNameOrArray.equals("'c$'")
 				|| mBinding.isVarargs() && mBinding.getParameterTypes().length == 1))
 			class_haveDefaultConstructor = true; // in case we are not qualifying
@@ -1590,13 +1594,13 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if (!isSpecialMethod) {
 			// TODO: for now we are just returning name$ for all lambda methods
 			// note that simpleNameInMethodBinding can return C$.xxxx
-
 			String j2sName = getFinalDotQualifiedNameForMethod(javaQualifier, mBinding,
 					METHOD_ISQUALIFIED);
+			
 
 			String finalMethodNameWith$Params = getFinalMethodNameWith$Params(j2sName, mBinding, null, true,
 					METHOD_NOTSPECIAL);
-
+			
 			if (lambdaArity >= 0) {
 				// The problem here is that we cannot apply a method from an interface
 				// because those methods are not present in JavaScript.
@@ -2018,6 +2022,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if (binding == null)
 			return false;
 
+		
 //		checkGenericBinding(binding, binding);
 
 		ASTNode parent = node.getParent();
@@ -2032,6 +2037,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		boolean isTopLevel = (!isLambda && binding.isTopLevel());
 		boolean isAbstract = ((binding.getModifiers() & Modifier.ABSTRACT) != 0);
 
+		
 		if (!isTopLevel && !isAnonymous && node != innerNode) {
 			// inner named class first pass only
 
@@ -2071,9 +2077,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			} else {
 				tempVisitor.addClassOrInterface(node, binding, bodyDeclarations, type);
 			}
-
 			// append it to our TrailingBuffer
-
 			trailingBuffer.append(tempVisitor.buffer.toString());
 
 			return false;
@@ -2131,6 +2135,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			finalShortClassName = class_fullName.substring(pt1 + 1);
 			finalPackageName = checkPackageP$Name(class_fullName.substring(0, pt1));
 		}
+
+		int lc = lambdaCount;
 
 		// add the anonymous wrapper if needed
 
@@ -2540,16 +2546,18 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// and Enum constants
 
 		if (isInterface) {
-
-			// Check for static type declarations in interfaces
-			// This will create a new visitor.
-			// Static field buffer may be filled with contents.
-
-			for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
-				ASTNode element = (ASTNode) iter.next();
-				if (element instanceof TypeDeclaration)
-					element.accept(this);
-			}
+// cause of duplicated code BH 2020.04.26
+//			if (isTopLevel) {
+//				// Check for static type declarations in interfaces
+//				// This will create a new visitor.
+//				// Static field buffer may be filled with contents.
+//
+//				for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
+//					ASTNode element = (ASTNode) iter.next();
+//					if (element instanceof TypeDeclaration)
+//						element.accept(this);
+//				}
+//			}
 			// add synthetic methods to defaults -- interface declaring an override of a
 			// generic
 			addSyntheticBridges(binding, abstractMethodList, defaults, true);
@@ -2575,7 +2583,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			xml_annotationType = ANNOTATION_TYPE_UNKNOWN;
 			// class_hasTypeAnnotations = false;
 		}
-
 		buffer.append(trailingBuffer.getString()); // also writes the assert string
 		if (isAnonymous) {
 			// if anonymous, restore old static def buffer
@@ -2606,6 +2613,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				class_annotations = oldAnnotations;
 			}
 		}
+		
+
+		lambdaCount = lc;
+
+		
 		return isStatic;
 	}
 
@@ -4944,7 +4956,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private int lambdaCount = 0;
 
 	private String getMyJavaClassNameLambda(boolean andIncrement) {
-		return package_name + "." + class_shortName.replace('.', '$') + "$lambda"
+		return package_name + "." + class_shortName.replace('.', '$')
+				+ (class_shortName.indexOf("$lambda") >= 0 ? "$" : "$lambda")
 				+ (andIncrement ? ++lambdaCount : lambdaCount);
 	}
 
@@ -6411,9 +6424,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		String methodName = mBinding.getName();
 		if (j2sName == null)
 			j2sName = methodName;
-		ITypeBinding declaringClass = mBinding.getDeclaringClass();
-		String javaClassName = getUnreplacedJavaClassNameQualified(declaringClass);
-		if (NameMapper.isMethodNonqualified(javaClassName, methodName)) {
+		if (NameMapper.isMethodNonqualified(getUnreplacedJavaClassNameQualified(mBinding.getDeclaringClass()), methodName)) {
 			return j2sName;
 		}
 
@@ -6648,6 +6659,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		 * @return
 		 */
 		private static boolean isPackageOrClassNonqualified(String className) {
+			if (className.indexOf("$") >= 0)
+				return false; // inner class
 			className += ".";
 			for (int i = nonQualifiedPackages.length; --i >= 0;) {
 				String s = nonQualifiedPackages[i];

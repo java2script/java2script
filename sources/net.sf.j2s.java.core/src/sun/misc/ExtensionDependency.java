@@ -430,8 +430,7 @@ public class ExtensionDependency {
      * </p>
      */
     private static File[] getExtDirs() {
-        String s = java.security.AccessController.doPrivileged(
-                new sun.security.action.GetPropertyAction("java.ext.dirs"));
+        String s = System.getProperty("java.ext.dirs");
 
         File[] dirs;
         if (s != null) {

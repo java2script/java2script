@@ -224,10 +224,11 @@ public class Taskbar {
   
     	String msg = "Taskbar API is not supported in SwingJS";
     	JSUtil.notImplemented(msg);
-    	if (GraphicsEnvironment.isHeadless()) throw new HeadlessException();
+    	return null;
+//    	if (GraphicsEnvironment.isHeadless()) throw new HeadlessException();
 
 //        if (!Taskbar.isTaskbarSupported()) {
-            throw new UnsupportedOperationException(msg);
+//            throw new UnsupportedOperationException(msg);
 //        }
 //
 //        sun.awt.AppContext context = sun.awt.AppContext.getAppContext();

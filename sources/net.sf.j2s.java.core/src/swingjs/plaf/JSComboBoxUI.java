@@ -49,7 +49,7 @@ import javax.swing.plaf.UIResource;
 import javax.swing.plaf.basic.BasicGraphicsUtils;
 import javax.swing.text.Position;
 
-import javajs.api.JSFunction;
+import swingjs.api.js.JSFunction;
 import sun.awt.AppContext;
 import sun.swing.DefaultLookup;
 import sun.swing.UIAction;
@@ -1780,7 +1780,7 @@ public class JSComboBoxUI extends JSLightweightUI {
 					isDisplaySizeDirty = true;
 					comboBox.revalidate();
 					listBox.setModel(newModel);
-					setTainted(true);
+					setTainted();
 					updateDOMNode();
 					popup.updateList();
 					popup.updateSelectedIndex();

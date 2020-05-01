@@ -1,15 +1,7 @@
 package swingjs.api.js;
 
-import java.applet.AudioClip;
-import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Image;
-import java.awt.JSComponent;
 import java.awt.Rectangle;
-
-import swingjs.JSGraphics2D;
-import swingjs.JSUtil;
-import swingjs.plaf.JSComponentUI;
 
 /**
  * A mix of direct DOM calls on DOM nodes and convenience methods to do that.
@@ -19,34 +11,42 @@ import swingjs.plaf.JSComponentUI;
  * @author hansonr
  *
  */
-public abstract class DOMNode {
+public interface DOMNode {
 
-
-	public abstract String[] getAttributeNames();
-
-	public abstract String getAttribute(String name);
-
-	public abstract void setAttribute(String attr, String val);
+	public static JQuery jQuery = /** @j2sNative jQuery.$ || (jQuery.$ = jQuery) || */null;
 
 	// "abstract" in the sense that these are the exact calls to JavaScript
 	
-	public abstract void appendChild(DOMNode node);
-	
-	public abstract void insertBefore(DOMNode node, DOMNode refNode);
-	
-	public abstract DOMNode removeChild(DOMNode node);
 
-	public abstract void focus();
-	public abstract boolean hasFocus();
-	public abstract void blur();
-	
-	public abstract boolean play();
+	public void addEventListener(String event, Object listener);
+	public void removeEventListener(String event);
+	public void removeEventListener(String event, Object listener);
 
-	public abstract DOMNode removeAttribute(String attr);
-	
-	public abstract void setSelectionRange(int start, int end, String direction);
 
-	public abstract Rectangle getBoundingClientRect();
+
+	public String[] getAttributeNames();
+
+	public String getAttribute(String name);
+
+	public void setAttribute(String attr, String val);
+
+	public void appendChild(DOMNode node);
+	
+	public void prepend(DOMNode node);
+	
+	public void insertBefore(DOMNode node, DOMNode refNode);
+	
+	public DOMNode removeChild(DOMNode node);
+
+	public void focus();
+	public boolean hasFocus();
+	public void blur();
+
+	public DOMNode removeAttribute(String attr);
+	
+	public void setSelectionRange(int start, int end, String direction);
+
+	public Rectangle getBoundingClientRect();
 	
 	// static convenience methods
 
@@ -191,18 +191,6 @@ public abstract class DOMNode {
 		return DOMNode.setStyles(node, "position", "absolute");
 	}
 
-	public static void setCursor(String c, Component comp) {
-		JSComponentUI ui = (comp == null ? null : ((JSComponent) comp).秘getUI());
-		@SuppressWarnings("unused")
-		DOMNode node = (ui == null ? null : ui.getDOMNode());
-		/**
-		 * @j2sNative
-		 * 
-		 * if (node == null) {document.body.style.cursor = c} else {  node.style.cursor = c }
-		 * 
-		 */
-	}
-
 	public static void addHorizontalGap(DOMNode domNode, int gap) {
 		DOMNode label = DOMNode.setStyles(DOMNode.createElement("label", null), 
 				"letter-spacing", gap + "px", "font-size", "0pt");
@@ -219,19 +207,6 @@ public abstract class DOMNode {
 		parent.appendChild(node);
 	}
 	
-	public static AudioClip getAudioElement(String filePath, boolean isLoop) {
-		AudioClip clip = (AudioClip) DOMNode.setAttrs(DOMNode.createElement("audio", null), 
-				"controls", "true", (isLoop ? "loop" : null), (isLoop ? "true" : null), "src", filePath);
-		// alias the actual audio element methods to SwingJS-qualified methods.
-		/**
-		 * @j2sNative
-		 *  clip.play$ = clip.play;
-		 *  clip.stop$ = clip.stop;
-		 *  clip.loop$ = clip.loop;
-		 */
-		return clip;
-	}
-
 	// static jQuery calls
 	
 	/**
@@ -241,7 +216,7 @@ public abstract class DOMNode {
 	 * @return height
 	 */
 	public static int getHeight(DOMNode node) {
-		return JSUtil.jQuery.$(node).height();
+		return jQuery.$(node).height();
 	}
 
 	/**
@@ -251,7 +226,7 @@ public abstract class DOMNode {
 	 * @return width
 	 */
 	public static int getWidth(DOMNode node) {
-		return JSUtil.jQuery.$(node).width();
+		return jQuery.$(node).width();
 	}
 
 	/**
@@ -265,7 +240,7 @@ public abstract class DOMNode {
 	 */
 	public static void dispose(DOMNode node) {
 		if (node != null)		
-			JSUtil.jQuery.$(node).remove();
+			jQuery.$(node).remove();
 	}
 
 	/**
@@ -307,21 +282,14 @@ public abstract class DOMNode {
 		DOMNode p = getParent(node);
 		try {
 			if (p != null)
-				JSUtil.jQuery.$(node).detach();
+				jQuery.$(node).detach();
 		} catch (Throwable e) {
 			// ignore
 		}
 		 if (container == null)
 		 	return p; 
-		 JSUtil.jQuery.$(container).append(node);
+		 jQuery.$(container).append(node);
 		return container;
-	}
-
-	public static Component getComponentFor(DOMNode node) {
-		if (node == null)
-			return null;
-		JSComponentUI ui = (JSComponentUI) (/** @j2sNative node.ui || node["data-ui"] || node["data-component"] || node["data-textcomponent"] || */  null);
-		return (ui == null ? null : ui.jc);
 	}
 
 	public static Object getEmbedded(String name, String type) {

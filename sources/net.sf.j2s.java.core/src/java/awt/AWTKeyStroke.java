@@ -29,15 +29,12 @@ package java.awt;
 
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
 import sun.awt.AppContext;
-import swingjs.JSUtil;
 
 /**
  * An <code>AWTKeyStroke</code> represents a key action on the keyboard, or
@@ -188,29 +185,19 @@ public class AWTKeyStroke {
 			throw new ClassCastException("subclass is not derived from AWTKeyStroke");
 		}
 
-		Constructor ctor = getCtor(subclass);
-
-		String couldNotInstantiate = "subclass could not be instantiated";
-
-		if (ctor == null) {
-			throw new IllegalArgumentException(couldNotInstantiate);
-		}
+//		Constructor ctor = getCtor(subclass);
+//
+//
+//		if (ctor == null) {
+//			throw new IllegalArgumentException(couldNotInstantiate);
+//		}
+		AWTKeyStroke stroke = null;
 		try {
-			AWTKeyStroke stroke = (AWTKeyStroke) ctor.newInstance((Object[]) null);
-			if (stroke == null) {
-				throw new IllegalArgumentException(couldNotInstantiate);
-			}
-		} catch (NoSuchMethodError e) {
-			throw new IllegalArgumentException(couldNotInstantiate);
-		} catch (ExceptionInInitializerError e) {
-			throw new IllegalArgumentException(couldNotInstantiate);
-		} catch (InstantiationException e) {
-			throw new IllegalArgumentException(couldNotInstantiate);
-		} catch (IllegalAccessException e) {
-			throw new IllegalArgumentException(couldNotInstantiate);
-		} catch (InvocationTargetException e) {
-			throw new IllegalArgumentException(couldNotInstantiate);
+			stroke = (AWTKeyStroke) subclass.newInstance();
+		} catch (Throwable t) {
 		}
+		if (stroke == null)
+			throw new IllegalArgumentException("AWTKeystroke subclass could not be instantiated");
 
 		synchronized (AWTKeyStroke.class) {
 			AppContext.getAppContext().put(AWTKeyStroke.class, subclass);
@@ -219,19 +206,19 @@ public class AWTKeyStroke {
 		}
 	}
 
-	/*
-	 * returns noarg Constructor for class with accessible flag. No security
-	 * threat as accessible flag is set only for this Constructor object, not for
-	 * Class constructor.
-	 */
-	private static Constructor getCtor(final Class clazz) {
-		try {
-			return clazz.getDeclaredConstructor((Class[]) null);
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
+//	/*
+//	 * returns noarg Constructor for class with accessible flag. No security
+//	 * threat as accessible flag is set only for this Constructor object, not for
+//	 * Class constructor.
+//	 */
+//	private static Constructor getCtor(final Class clazz) {
+//		try {
+//			return clazz.getDeclaredConstructor((Class[]) null);
+//		} catch (Throwable e) {
+//			e.printStackTrace();
+//		}
+//		return null;
+//	}
 
 	private static synchronized AWTKeyStroke getCachedStroke
         (char keyChar, int keyCode, int modifiers, boolean onKeyRelease)
@@ -246,15 +233,8 @@ public class AWTKeyStroke {
 
         if (cacheKey == null) {
             try {
-                Class clazz = getAWTKeyStrokeClass();
-                cacheKey = (AWTKeyStroke)getCtor(clazz).newInstance((Object[]) null);
-                AppContext.getAppContext().put(APP_CONTEXT_KEYSTROKE_KEY, cacheKey);
-            } catch (InstantiationException e) {
-                assert(false);
-            } catch (IllegalAccessException e) {
-                assert(false);
-            } catch (InvocationTargetException e) {
-                assert(false);
+                cacheKey = (AWTKeyStroke) getAWTKeyStrokeClass().newInstance();
+            } catch (Throwable t) {
             }
         }
         cacheKey.keyChar = keyChar;
@@ -262,10 +242,10 @@ public class AWTKeyStroke {
         cacheKey.modifiers = mapNewModifiers(mapOldModifiers(modifiers));
         cacheKey.onKeyRelease = onKeyRelease;
 
-        AWTKeyStroke stroke = (AWTKeyStroke)cache.get(cacheKey.toString());
+        AWTKeyStroke stroke = (AWTKeyStroke)cache.get(cacheKey.秘toString());
         if (stroke == null) {
             stroke = cacheKey;
-            cache.put(stroke.toString(), stroke);
+            cache.put(stroke.秘toString(), stroke);
             AppContext.getAppContext().remove(APP_CONTEXT_KEYSTROKE_KEY);
         }
         return stroke;
@@ -710,15 +690,17 @@ public class AWTKeyStroke {
 	 */
 	@Override
 	public String toString() {
-		if (keyCode == KeyEvent.VK_UNDEFINED) {
-			return getModifiersText(modifiers) + "typed " + keyChar;
-		} else {
-			return getModifiersText(modifiers)
-					+ (onKeyRelease ? "released" : "pressed") + " " + getVKText(keyCode);
-		}
+		return (keyCode == KeyEvent.VK_UNDEFINED ? getModifiersText(modifiers) + "typed " + keyChar
+				: getModifiersText(modifiers) + (onKeyRelease ? "released" : "pressed") + " " + getVKText(keyCode));
+	}
+	
+	public String 秘toString() {
+		// SwingJS just the keycode, avoiding VKCollection.js
+		return getModifiersText(modifiers)
+				+ (onKeyRelease ? "released" : "pressed") + " " + keyCode;
 	}
 
-	static String getModifiersText(int modifiers) {
+	static private String getModifiersText(int modifiers) {
 		StringBuilder buf = new StringBuilder();
 
 		if ((modifiers & InputEvent.SHIFT_DOWN_MASK) != 0) {
@@ -749,14 +731,10 @@ public class AWTKeyStroke {
 		return buf.toString();
 	}
 
-	static String getVKText(int keyCode) {
-		VKCollection vkCollect = getVKCollection();
+	static private String getVKText(int keyCode) {
 		Integer key = Integer.valueOf(keyCode);
-		String name = vkCollect.findName(key);
-		if (name != null) {
-			return name.substring(3);
-		}
-		return "UNKNOWN";
+		String name = getVKCollection().findName(key);
+		return (name == null ? "UNKNOWN" : name.substring(3));
 	}
 
 	/**

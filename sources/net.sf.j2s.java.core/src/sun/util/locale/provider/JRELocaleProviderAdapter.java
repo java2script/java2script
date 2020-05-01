@@ -439,9 +439,7 @@ public class JRELocaleProviderAdapter extends LocaleProviderAdapter implements R
             synchronized (JRELocaleProviderAdapter.class) {
                 if (isNonENSupported == null) {
                     final String sep = File.separator;
-                    String localeDataJar =
-                            java.security.AccessController.doPrivileged(
-                            new sun.security.action.GetPropertyAction("java.home"))
+                    String localeDataJar = System.getProperty("java.home")
                             + sep + "lib" + sep + "ext" + sep + LOCALE_DATA_JAR_NAME;
 
                     /*

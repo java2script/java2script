@@ -36,6 +36,7 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
@@ -51,7 +52,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.UIResource;
 
-import javajs.api.JSFunction;
+import swingjs.api.js.JSFunction;
 import javajs.util.PT;
 import sun.awt.CausedFocusEvent.Cause;
 import swingjs.JSFocusPeer;
@@ -125,7 +126,7 @@ import swingjs.api.js.JQueryObject;
  * 
  * Some UIs (JSSpinnerUI, JSComboBoxUI, JSFrameUI, and JSTextUI) set jqevent.target["data-ui"] 
  * to point to themselves. This allows the control an option to handle the raw jQuery
- * event directly, bypassing the Java dispatch system entirely, id desired.
+ * event directly, bypassing the Java dispatch system entirely, if desired.
  * 
  * TODO: We should not use this method. It bypasses the normal Java LightWeightDispatcher,
  * which has a protected processEvent(AWTEvent) method that 
@@ -350,7 +351,7 @@ public class JSComponentUI extends ComponentUI
 	 * an icon image -- non-null means we do have an icon
 	 * 
 	 */
-	protected DOMNode imageNode;
+	public DOMNode imageNode;
 
 	/**
 	 * the HTML5 input element being pressed, if the control is a radio or checkbox
@@ -417,11 +418,6 @@ public class JSComponentUI extends ComponentUI
 	 * "left" "right" "center" if defined
 	 */
 	protected String textAlign;
-
-	/**
-	 * Labels with icons will have this
-	 */
-	protected int iconHeight;
 
 	/**
 	 * jSButtonUI buttonListener
@@ -737,12 +733,13 @@ public class JSComponentUI extends ComponentUI
 	protected void newID(boolean forceNew) {
 		classID = c.getUIClassID();
 		notImplemented = (classID == "ComponentUI");
-		boolean firstTime = (id == null);
+		boolean firstTime = (id0 == null);
 		if (firstTime || forceNew) {
 			num = ++incr;
-			id = c.getHTMLName(classID) + "_" + num;
+			id = c.getHTMLName(classID);
 			if (firstTime) 
 				id0 = id;
+			id += "_" + num;
 		}
 	}
 
@@ -1127,7 +1124,7 @@ public class JSComponentUI extends ComponentUI
 	private boolean keysEnabled;
 
 	private int mnemonic;
-
+	
 	/**
 	 * for DOMNode will be turning into boolean true/false for attribute
 	 */
@@ -1296,11 +1293,16 @@ public class JSComponentUI extends ComponentUI
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		// domNode null could be a new table component
-		if (isUIDisabled || domNode == null)
+		if (isUIDisabled)
 			return;
 		String prop = e.getPropertyName();
 		Object value = e.getNewValue();
-		
+		if (prop == "jscanvas") {
+			jc.秘g = (JSGraphics2D)(Object) Boolean.TRUE;
+			setTainted();
+		}
+		if (domNode == null)
+			return;
 		
 		if (prop == "ancestor") {
 			if (isAWT) 
@@ -1368,12 +1370,15 @@ public class JSComponentUI extends ComponentUI
 		if (!isMenu && cellComponent == null)
 			getDOMNode();
 		
-		
 		switch (prop) {
+		case JLayeredPane.LAYER_PROPERTY:
+			setZ(((Integer)e.getNewValue()).intValue());
+			setTainted();
+			return;
 		case "border":
 			jc.秘setPaintsSelf(JSComponent.PAINTS_SELF_UNKNOWN);
 			setTainted();
-			break;
+			return;
 		case "preferredSize":
 			// size has been set by JComponent layout
 			preferredSize = (Dimension) e.getNewValue(); 
@@ -1536,6 +1541,11 @@ public class JSComponentUI extends ComponentUI
 	 */
 	protected boolean isSticky;
 
+	/**
+	 * an icon created using "jsvideo" as its description
+	 */
+	protected boolean isVideoIcon;
+
 	private static DOMNode tempDiv;
 
 	/**
@@ -1579,6 +1589,8 @@ public class JSComponentUI extends ComponentUI
 	protected DOMNode updateDOMNodeCUI() {
 		if (myCursor != getCursor())
 			setCursor();
+		if (outerNode != null)
+			setVisible(outerNode, jc.isVisible());
 		return domNode;
 	}
 
@@ -1708,7 +1720,7 @@ public class JSComponentUI extends ComponentUI
 		String w0 = null, h0 = null, w0i = null, h0i = null, position = null;
 		DOMNode parentNode = null;
 		boolean hasFocus = false;
-		if (scrollPaneUI != null) {
+		if (scrollPaneUI != null && scrollPaneUI.c.getWidth() != 0) {
 			w = scrollPaneUI.c.getWidth();
 			h = scrollPaneUI.c.getHeight();
 		} else if (usePreferred && preferredSize != null) {
@@ -1878,6 +1890,11 @@ public class JSComponentUI extends ComponentUI
 		}
 		if (outerNode == null)
 			createOuterNode();
+		else if (domNode != outerNode && DOMNode.getParent(domNode) != outerNode)
+			outerNode.appendChild(domNode);
+		Integer order = (Integer) jc.getClientProperty(JLayeredPane.LAYER_PROPERTY);
+		if (order != null)
+			setZ(order.intValue());
 		setOuterLocationFromComponent();
 		if (n > 0 && containerNode == null)
 			containerNode = outerNode;
@@ -2327,7 +2344,7 @@ public class JSComponentUI extends ComponentUI
 			if (scrollPaneUI != null) {
 				width = Math.min(width, scrollPaneUI.c.getWidth());
 				height = Math.min(height, scrollPaneUI.c.getHeight());
-			}	
+			} 
 			if (width > 0 && height > 0)
 				setSizeFromComponent(width, height, op);
 			break;
@@ -2427,11 +2444,39 @@ public class JSComponentUI extends ComponentUI
 			icon = currentIcon = getIcon(jc, icon);
 			$(iconNode).empty();
 			if (currentIcon != null) {
-				imageNode = ((BufferedImage)currentIcon.getImage()).秘getImageNode(BufferedImage.GET_IMAGE_FOR_ICON);
+				imageNode = ((BufferedImage) currentIcon.getImage()).秘getImageNode(BufferedImage.GET_IMAGE_FOR_ICON);
+				if (DOMNode.getAttr(imageNode, "tagName") == "VIDEO")
+					isVideoIcon = imagePersists = true;
 				iconNode.appendChild(imageNode);
-				iconHeight = icon.getIconHeight();
-				DOMNode.setStyles(imageNode, "visibility", (isLabel ? "hidden" : null));
-				DOMNode.setStyles(iconNode, "height", iconHeight + "px", "width", icon.getIconWidth() + "px");
+				int w,h;
+				if (isVideoIcon) {
+					if (jc.isPreferredSizeSet()) {
+						w = jc.getPreferredSize().width;
+						h = jc.getPreferredSize().height;
+					} else {
+						w = DOMNode.getAttrInt(imageNode, "videoWidth");
+						h = DOMNode.getAttrInt(imageNode, "videoHeight");
+					}
+					if (w > 0 && h > 0) {
+						((ImageIcon) icon).秘setIconSize(w, h);
+						DOMNode.setStyles(imageNode, "height", h + "px", "width", w  + "px");
+						DOMNode.setStyles(iconNode, "height", h + "px", "width", w  + "px");
+					}
+					// might have to do this if we have problems with onloadmetadata
+//					if (isVideoIcon && iconHeight == 1) {
+//						iconHeight = icon.getIconHeight();
+//						// video is still loading
+//						setDataUI(imageNode);
+//						setTainted(true);
+//					} else {
+//					}
+				} else {
+					w = icon.getIconWidth();
+					h = icon.getIconHeight();
+					DOMNode.setStyles(iconNode, "height", h + "px", "width", w  + "px");
+					if (!imagePersists)
+						DOMNode.setStyles(imageNode, "visibility", "hidden");
+				}
 			}
 		}
 		if (text == null) {
@@ -2448,8 +2493,7 @@ public class JSComponentUI extends ComponentUI
 				DOMNode.setStyles(textNode, "white-space", "nowrap");
 			if (icon == null) {
 				// tool tip does not allow text alignment
-				if (iconNode != null && allowTextAlignment 
-						&& isMenuItem && actionNode == null && text != null) {
+				if (iconNode != null && allowTextAlignment && isMenuItem && actionNode == null && text != null) {
 					DOMNode.addHorizontalGap(iconNode, gap + MENUITEM_OFFSET);
 				}
 			} else {
@@ -2481,9 +2525,9 @@ public class JSComponentUI extends ComponentUI
 			prop = "innerHTML";
 			obj = textNode;
 			// IT TURNS OUT...
-			// that for a <button> element to properly align vertically, 
-			// the font must be set for the button element, not in a child element. 
-			
+			// that for a <button> element to properly align vertically,
+			// the font must be set for the button element, not in a child element.
+
 			setCssFont(domNode, getFont()); // for vertical centering
 			setCssFont(textNode, getFont());
 			if (!isHTML)
@@ -3198,6 +3242,8 @@ public class JSComponentUI extends ComponentUI
 	 * @param z
 	 */
 	public void setZ(int z) {
+		if (z == -30000) // content pane
+			return;
 		DOMNode.setPositionAbsolute(domNode);
 		DOMNode.setZ(domNode, z);
 		DOMNode.setZ(outerNode, z);// saves it
@@ -3502,22 +3548,29 @@ public class JSComponentUI extends ComponentUI
 	public void paintBackground(JSGraphics2D g) {
 		boolean isOpaque = c.isOpaque();
 		boolean paintsSelf = jc.秘paintsSelf();
-		//System.out.println("paintback " + this.id  + " " + (/** @j2sNative this.jc.text||*/"")+ " " + isOpaque + " " + paintsSelf + " " + g);
+		// System.out.println("paintback " + this.id + " " + (/** @j2sNative
+		// this.jc.text||*/"")+ " " + isOpaque + " " + paintsSelf + " " + g);
 		Color color = (this.backgroundColor == null ? getBackground() : this.backgroundColor);
 		if (g == null) {
 			if (!paintsSelf)
 				setBackgroundDOM(domNode, color);
 			// preliminary -- DOM only, when the background is set
-		} else if (allowPaintedBackground && isOpaque) {
+		} else if (allowPaintedBackground && (isOpaque || jc.秘g != null)) {
 			// all opaque components must paint their background
 			// just in case they have painted CHILDREN
-			g.setBackground(color);
+			if (isOpaque == (color.getAlpha() == 255)) {
+				g.setBackground(color);
+			} else {
+				g.setBackground(new Color(color.getRed(), color.getGreen(), color.getBlue(), isOpaque ? 255 : 0));
+			}
 			g.clearRect(0, 0, c.getWidth(), c.getHeight());
-			isOpaque = cellComponent == null && !jc.秘paintsSelf();
-			if (!isOpaque && isWindow) {
-				JComponent c = (JComponent) jc.getRootPane().getContentPane();
-				c.秘setPaintsSelf(JSComponent.PAINTS_SELF_YES);
-				((JSComponentUI)c.ui).setTransparent();
+			if (isOpaque) {
+				isOpaque = cellComponent == null && !jc.秘paintsSelf();
+				if (!isOpaque && isWindow) {
+					JComponent c = (JComponent) jc.getRootPane().getContentPane();
+					c.秘setPaintsSelf(JSComponent.PAINTS_SELF_YES);
+					((JSComponentUI) c.ui).setTransparent();
+				}
 			}
 		}
 		if (allowPaintedBackground && !isOpaque)
@@ -3567,7 +3620,5 @@ public class JSComponentUI extends ComponentUI
 	public boolean isDisplayable() {
 		return domNode != null;
 	}
-
-
 
 }

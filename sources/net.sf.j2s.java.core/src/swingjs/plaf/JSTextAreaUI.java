@@ -2,6 +2,7 @@ package swingjs.plaf;
 
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.beans.PropertyChangeEvent;
 
 import javax.swing.JComponent;
@@ -203,6 +204,10 @@ public class JSTextAreaUI extends JSTextUI {
 		/**
 		 * @j2sNative this.domNode.scrollTo && this.domNode.scrollTo(0, pt);
 		 */
+	}
+	public void scrollToVisible(Rectangle aRect) {
+		DOMNode.setAttrInt(domNode, "scrollLeft", aRect.x);
+		DOMNode.setAttrInt(domNode, "scrollTop", aRect.y);
 	}
 
 }

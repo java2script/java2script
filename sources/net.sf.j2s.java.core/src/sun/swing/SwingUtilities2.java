@@ -583,39 +583,39 @@ public class SwingUtilities2 {
 //        }
 
         // If we get here we're not printing
-        AATextInfo info = drawTextAntialiased(c);
-        if (info != null && (g instanceof Graphics2D)) {
-            Graphics2D g2 = (Graphics2D)g;
-
-            Object oldContrast = null;
-            Object oldAAValue = g2.getRenderingHint(KEY_TEXT_ANTIALIASING);
-            if (info.aaHint != oldAAValue) {
-                g2.setRenderingHint(KEY_TEXT_ANTIALIASING, info.aaHint);
-            } else {
-                oldAAValue = null;
-            }
-            if (info.lcdContrastHint != null) {
-                oldContrast = g2.getRenderingHint(RenderingHints.KEY_TEXT_LCD_CONTRAST);
-                if (info.lcdContrastHint.equals(oldContrast)) {
-                    oldContrast = null;
-                } else {
-                    g2.setRenderingHint(RenderingHints.KEY_TEXT_LCD_CONTRAST,
-                                        info.lcdContrastHint);
-                }
-            }
-
+//        AATextInfo info = drawTextAntialiased(c);
+//        if (info != null && (g instanceof Graphics2D)) {
+//            Graphics2D g2 = (Graphics2D)g;
+//
+//            Object oldContrast = null;
+//            Object oldAAValue = g2.getRenderingHint(KEY_TEXT_ANTIALIASING);
+//            if (info.aaHint != oldAAValue) {
+//                g2.setRenderingHint(KEY_TEXT_ANTIALIASING, info.aaHint);
+//            } else {
+//                oldAAValue = null;
+//            }
+//            if (info.lcdContrastHint != null) {
+//                oldContrast = g2.getRenderingHint(RenderingHints.KEY_TEXT_LCD_CONTRAST);
+//                if (info.lcdContrastHint.equals(oldContrast)) {
+//                    oldContrast = null;
+//                } else {
+//                    g2.setRenderingHint(RenderingHints.KEY_TEXT_LCD_CONTRAST,
+//                                        info.lcdContrastHint);
+//                }
+//            }
+//
+//            g.drawString(text, x, y);
+//
+//            if (oldAAValue != null) {
+//                g2.setRenderingHint(KEY_TEXT_ANTIALIASING, oldAAValue);
+//            }
+//            if (oldContrast != null) {
+//                g2.setRenderingHint(RenderingHints.KEY_TEXT_LCD_CONTRAST, oldContrast);
+//            }
+//        }
+//        else {
             g.drawString(text, x, y);
-
-            if (oldAAValue != null) {
-                g2.setRenderingHint(KEY_TEXT_ANTIALIASING, oldAAValue);
-            }
-            if (oldContrast != null) {
-                g2.setRenderingHint(RenderingHints.KEY_TEXT_LCD_CONTRAST, oldContrast);
-            }
-        }
-        else {
-            g.drawString(text, x, y);
-        }
+//        }
     }
 
 

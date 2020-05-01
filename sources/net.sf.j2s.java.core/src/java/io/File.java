@@ -1731,7 +1731,7 @@ public class File
 ////    private static class LazyInitialization {
 ////        static final SecureRandom random = new SecureRandom();
 ////
-        static final String temporaryDirectory = "/TEMP/";//temporaryDirectory();
+        public static final String temporaryDirectory = System.getProperty("java.io.tmpdir");//"/TEMP/";//temporaryDirectory();
 //        static String temporaryDirectory() {
 //        	return "/TEMP/";
 //            return fs.normalize(
@@ -1753,6 +1753,7 @@ public class File
         f.秘isTempFile = true;
         return f;
     }
+
 //
 //    private static boolean checkAndCreate(String filename, SecurityManager sm,
 //                                          boolean restrictive)
@@ -1771,29 +1772,19 @@ public class File
 //        return fs.createFileExclusively(filename, restrictive);
 //    }
 //    
-    // The resulting temporary file may have more restrictive access permission
-    // on some platforms, if restrictive is true.
-    private static File createTempFile0(String prefix, String suffix,
-                                        File directory, boolean restrictive)
-        throws IOException
-    {
-        if (prefix == null) throw new NullPointerException();
-        if (prefix.length() < 3)
-            throw new IllegalArgumentException("Prefix string too short");
-        String s = (suffix == null) ? ".tmp" : suffix;
-        directory = new File(temporaryDirectory + (directory == null ? "" : directory));
-        // we ensure that there is a clear marker for a temporary directory in SwingJS
-//        if (directory == null) {
-//            String tmpDir = temporaryDirectory();
-//            directory = new File(tmpDir);//, fs.prefixLength(tmpDir));
-//        }
-//        SecurityManager sm = System.getSecurityManager();
-        File f;
-//        do {
-            f = generateFile(prefix, s, directory);
-//        } while (!checkAndCreate(f.getPath(), sm, restrictive));
-        return f;
-    }
+	// The resulting temporary file may have more restrictive access permission
+	// on some platforms, if restrictive is true.
+	private static File createTempFile0(String prefix, String suffix, File directory, boolean restrictive)
+			throws IOException {
+		if (prefix == null)
+			throw new NullPointerException();
+		if (prefix.length() < 3)
+			throw new IllegalArgumentException("Prefix string too short");
+		String s = (suffix == null) ? ".tmp" : suffix;
+		directory = new File(temporaryDirectory + (directory == null ? "" : directory));
+		// we ensure that there is a clear marker for a temporary directory in SwingJS
+		return generateFile(prefix, s, directory);
+	}
 
     /**
      * <p> Creates a new empty file in the specified directory, using the

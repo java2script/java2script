@@ -104,7 +104,7 @@ public class SwingUtilities implements SwingConstants
             if ((dropHandler == null) || (dropHandler instanceof UIResource)) {
                 if (t == null) {
                     c.setDropTarget(null);
-                } else if (!GraphicsEnvironment.isHeadless()) {
+                } else {//if (!GraphicsEnvironment.isHeadless()) {
                     c.setDropTarget(new TransferHandler.SwingDropTarget(c));
                 }
             }
