@@ -32,16 +32,19 @@
 package test.components;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Insets;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.Random;
 
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -51,110 +54,134 @@ import javax.swing.JTextArea;
 
 import javajs.async.AsyncSwingWorker;
 
-public class ProgressMonitorDemo extends JPanel implements ActionListener, PropertyChangeListener {
+public class ProgressMonitorDemo extends JPanel implements PropertyChangeListener {
 
-	private AsyncTask task;
-
-	private JButton startButton;
-	private JTextArea taskOutput;
-
-	
 	/**
 	 * A demonstration of subclassing javajs.async.AsyncSwingWorker.
 	 * 
 	 * Executes asynchronous tasks using a SwingWorker. Unlike a standard SwingWorker, 
 	 * AsyncSwingWorker may itself not be synchronous. For example, it might load a file asynchronously. 
 	 * Whereas a standard SwingWorker would execute done() long before the file was loaded, 
-	 * this class will wait until progress has been asynchronously set to 100 or the task is
-	 * cancelled before executing that method. 
+	 * this class will wait until progress has been asynchronously set at or above its maximum value,
+	 * or the task is canceled before executing that method. 
+	 * 
+	 * Note that while SwingWorkers are limited to progress [0,100], AsyncSwingWorker allows arbitrary 
+	 * progress [min,max], same as progressMonitor. 
 	 * 
 	 * @author hansonr
 	 *
 	 */
 	static class AsyncTask extends AsyncSwingWorker {
 
-		/**
-		 * @param owner
-		 * @param title
-		 * @param delayMillis
-		 */
-		AsyncTask(Component owner, String title, int delayMillis) {
-			super(owner, title, delayMillis);
+		AsyncTask(Component owner, String title, int delayMillis, int min, int max) {
+			super(owner, title, delayMillis, min, max);
 		}
 
 		@Override
 		public void initAsync() {
-			System.out.println("AsyncTask init");
+			System.out.println("AsyncTask.initAsync");
 		}
-
-		private Random random = new Random();
 
 		@Override
 		public int doInBackgroundAsync(int progress) {
 			// this doInBackground is special -- we get to do bits of the 
 			// overall process based on our own progress indicator, whatever that is. 
 			// in this example, we are just incrementing the progress.
-			return progress + random.nextInt(10);
+			return progress + (int)((max > min ? 1 : -1) * (1 + Math.random() * 10));
 		}
 
 		@Override
 		public void doneAsync() {
-			System.out.println("AsyncTask done");
+			System.out.println("AsyncTask.doneAsync");
 		}
-
 		
+		
+		/// optional calls
 
-
+		@Override
+		public String getNote(int progress) {
+			return "processing " + progress + "/" + getProgressPercent() + "%";
+		}
 	}
 
-	public ProgressMonitorDemo() {
-		super(new BorderLayout());
-
-		// Create the demo's UI.
-		startButton = new JButton("Start");
-		startButton.setActionCommand("start");
-		startButton.addActionListener(this);
-
-		taskOutput = new JTextArea(5, 20);
-		taskOutput.setMargin(new Insets(5, 5, 5, 5));
-		taskOutput.setEditable(false);
-
-		add(startButton, BorderLayout.PAGE_START);
-		add(new JScrollPane(taskOutput), BorderLayout.CENTER);
-		setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-	}
-
-	/**
-	 * Invoked when the user presses the start button.
-	 */
-	@Override
-	public void actionPerformed(ActionEvent evt) {
-		startButton.setEnabled(false);
-		int delayMillis = 100; // just something for this example; 0 would be fine here.
-		task = new AsyncTask(this, "Some task...", delayMillis);
-		task.addPropertyChangeListener(this);
-		task.execute();
-	}
-
+	
+	//// demo implementation ////
+	
+	private AsyncTask task;
+	
 	/**
 	 * Invoked when task's progress property changes.
 	 */
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		if ("progress" == evt.getPropertyName()) {
-			append(task.getNote());
-			if (task.isCancelled() || task.isDone()) {
-				append(task.isCancelled() ? "Task canceled.\n" : "Task completed.\n");
+		// BH note that these events are filtered by the progress monitor
+		// so this is an UNRELIABLE way of knowing the point 
+		String msg = evt.getPropertyName() + "=" + evt.getNewValue() + "\n";
+		append(msg);
+		switch (evt.getPropertyName()) {
+		case "progress":
+			append(task.getNote() + "\n");
+			break;
+		case "state":
+			switch (evt.getNewValue().toString()) {
+			case AsyncSwingWorker.DONE_ASYNC:
 				Toolkit.getDefaultToolkit().beep();
+				append("Task completed.\n");
+				startButton.setEnabled(true);				
+				break;
+			case AsyncSwingWorker.CANCELED_ASYNC:
+				append("Task canceled.\n");
 				startButton.setEnabled(true);
-			}
+				break;
+				}
 		}
+		append(null);
 	}
 
+	///// demo GUI /////
+
+	private JButton startButton;
+	private JTextArea taskOutput;
+
 	private void append(String line) {
+		if (line == null) {
+			taskOutput.scrollRectToVisible(new Rectangle(0,Integer.MAX_VALUE	,1,1));
+			return;
+		}
 		taskOutput.append(line);
-		// taskOutputE.setText(taskOutputE.getText() + line);
+	}
+
+	public ProgressMonitorDemo() {
+		super(new BorderLayout());
+
+		setPreferredSize(new Dimension(600,150));
+		// Create the demo's UI.
+		startButton = new JButton("Start");
+		startButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent evt) {
+				startButton.setEnabled(false);
+				taskOutput.setText("");
+				int delayMillis = 100; // just something for this example; 0 would be fine here.
+				task = new AsyncTask(ProgressMonitorDemo.this, "Some task...", delayMillis, 350, 150);
+				task.addPropertyChangeListener(ProgressMonitorDemo.this);
+				task.execute();
+			}
+
+		});
+
+		taskOutput = new JTextArea(5, 20);
+		taskOutput.setMargin(new Insets(5, 5, 5, 5));
+		taskOutput.setEditable(false);
+
+		JPanel p = new JPanel();
+		p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
+		p.add(startButton);
+		p.setOpaque(false);
+		add(p, BorderLayout.NORTH);
+		add(new JScrollPane(taskOutput), BorderLayout.CENTER);
+		setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 
 	}
 
@@ -170,13 +197,13 @@ public class ProgressMonitorDemo extends JPanel implements ActionListener, Prope
 		// Create and set up the content pane.
 		JComponent newContentPane = new ProgressMonitorDemo();
 		newContentPane.setOpaque(true); // content panes must be opaque
+		newContentPane.setBackground(Color.lightGray);
 		frame.setContentPane(newContentPane);
 
-		frame.setLocation(300,300);
+		frame.setLocation(100,100);
 		// Display the window.
 		frame.pack();
 		frame.setVisible(true);
-		frame.invalidate();
 	}
 
 	public static void main(String[] args) {

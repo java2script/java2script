@@ -41,6 +41,8 @@ import javax.swing.text.Element;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.PlainDocument;
 
+import swingjs.plaf.JSTextAreaUI;
+
 /**
  * A <code>JTextArea</code> is a multi-line area that displays plain text.
  * It is intended to be a lightweight component that provides source
@@ -765,7 +767,15 @@ public class JTextArea extends JTextComponent {
         }
     }
 
+	@Override
+	public void scrollRectToVisible(Rectangle aRect) {
+		if (parent instanceof JViewport) {
+			((JViewport) parent).scrollRectToVisible(aRect);
+		}
+		((JSTextAreaUI) this.秘getUI()).scrollToVisible(aRect);
+	}
 
+    
     // --- variables -------------------------------------------------
 
     public int rows;

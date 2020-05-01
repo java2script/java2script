@@ -166,7 +166,7 @@ public class ProgressMonitor {
 
 			contentPane.setLayout(new BorderLayout());
 			contentPane.add(this, BorderLayout.CENTER);
-			contentPane.add(Box.createVerticalStrut(5), BorderLayout.SOUTH);
+			//contentPane.add(Box.createVerticalStrut(5), BorderLayout.SOUTH);
 			dialog.pack();
 			dialog.setLocationRelativeTo(parentComponent);
 			dialog.addWindowListener(new WindowAdapter() {

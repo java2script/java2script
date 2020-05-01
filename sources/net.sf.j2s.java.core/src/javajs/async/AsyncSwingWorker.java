@@ -20,8 +20,8 @@ import javajs.async.SwingJSUtils.StateMachine;
  * 
  * Whereas a standard SwingWorker would execute done() long before the
  * asynchronous task completed, this class will wait until progress has been
- * asynchronously set to 100 or the task is cancelled before executing that
- * method.
+ * asynchronously set greater or equal to its max value or the task is canceled
+ * before executing that method.
  * 
  * Three methods must be supplied by the subclass:
  * 
@@ -31,11 +31,11 @@ import javajs.async.SwingJSUtils.StateMachine;
  * 
  * void doneAsync()
  * 
- * Both initAsync() and doneAsync() are technically optional - they may be empty.
- * doInBackgroundAsync(), however, is the key method where, like SwingWorker's
- * doInBackground, the main work is done. The supplied progress parameter
- * reminds the subclass of where it is at, and the return value allows the
- * subclass to update the progress field in both the SwingWorker and the
+ * Both initAsync() and doneAsync() are technically optional - they may be
+ * empty. doInBackgroundAsync(), however, is the key method where, like
+ * SwingWorker's doInBackground, the main work is done. The supplied progress
+ * parameter reminds the subclass of where it is at, and the return value allows
+ * the subclass to update the progress field in both the SwingWorker and the
  * ProgressMonitor.
  * 
  * 
@@ -45,7 +45,10 @@ import javajs.async.SwingJSUtils.StateMachine;
 public abstract class AsyncSwingWorker extends SwingWorker<Void, Void> implements StateMachine {
 	
 
-	protected int progress = 0;
+	public static final String DONE_ASYNC = "DONE_ASYNC";
+	public static final String CANCELED_ASYNC = "CANCELED_ASYNC";
+
+	protected int progressAsync;
 	
 	/**
 	 * Override to provide initial tasks.
@@ -54,7 +57,7 @@ public abstract class AsyncSwingWorker extends SwingWorker<Void, Void> implement
 	
 	/**
 	 * Given the last progress, do some portion of the task that the SwingWorker would do in the background, and return the new progress.
-	 * returning 100 will complete the task.
+	 * returning max or above will complete the task.
 	 * 
 	 * @param progress
 	 * @return new progress
@@ -62,15 +65,18 @@ public abstract class AsyncSwingWorker extends SwingWorker<Void, Void> implement
 	abstract public int doInBackgroundAsync(int progress);
 	
 	/**
-	 * Do something when the task is finished or cancelled.
+	 * Do something when the task is finished or canceled.
 	 * 
 	 */
 	abstract public void doneAsync();
 
 
-	private ProgressMonitor progressMonitor;
-	private int delayMillis;
-	private String note;
+	protected ProgressMonitor progressMonitor;
+	protected int delayMillis;
+	protected String note;
+	protected int min;
+	protected int max;
+	protected int progressPercent;
 
 	/**
 	 * Construct an asynchronous SwingWorker task that optionally will display a
@@ -83,15 +89,55 @@ public abstract class AsyncSwingWorker extends SwingWorker<Void, Void> implement
 	 * @param title A non-null title indicates we want to use a ProgressMonitor with that title line.
 	 * 
 	 * @param delayMillis A positive number indicating the delay we want before executions, during which progress will be reported. 
+	 * 
+	 * @param min  The first progress value. No range limit.
+	 * 
+	 * @param max  The last progress value. No range limit; may be greater than min.
+	 * 
 	 */
-	public AsyncSwingWorker(Component owner, String title, int delayMillis) {
+	public AsyncSwingWorker(Component owner, String title, int delayMillis, int min, int max) {
 		if (title != null) {
-			progressMonitor = new ProgressMonitor(owner, title, "", 0, 100);
-			progressMonitor.setProgress(0); // displays monitor
+			progressMonitor = new ProgressMonitor(owner, title, "", Math.min(min,  max), Math.max(min, max));
+			progressMonitor.setProgress(Math.min(min,  max)); // displays monitor
 		}
 		this.delayMillis = Math.max(1, delayMillis);
+		this.min = min;
+		this.max = max;
 	}
 
+	public int getMinimum() {
+		return min;
+	}
+
+	public void setMinimum(int min) {
+		this.min = min;
+		if (progressMonitor != null)
+			progressMonitor.setMinimum(min);
+	}
+
+	public int getMaximum() {
+		return max;
+	}
+
+	public void setMaximum(int max) {
+		if (progressMonitor != null)
+			progressMonitor.setMaximum(max);
+		this.max = max;
+	}
+
+
+	public int getProgressPercent() {
+		return progressPercent;
+	}
+
+	public void setNote(String note) {
+		this.note = note;
+		if (progressMonitor != null)
+			progressMonitor.setNote(note);
+	}
+
+
+	
 	/**
 	 * Cancel the asynchronous process.
 	 * 
@@ -101,12 +147,12 @@ public abstract class AsyncSwingWorker extends SwingWorker<Void, Void> implement
 	}
 
 	/**
-	 * Check to see if the asynchronous process has been cancelled. 
+	 * Check to see if the asynchronous process has been canceled. 
 	 *
 	 * @return true if StateHelper is not alive anymore
 	 * 
 	 */
-	public boolean isCancelledAsync() {
+	public boolean isCanceledAsync() {
 		return !helper.isAlive();
 	}
 	
@@ -126,7 +172,7 @@ public abstract class AsyncSwingWorker extends SwingWorker<Void, Void> implement
 	 * @param progress
 	 * @return
 	 */
-	public String setNote(int progress) {
+	public String getNote(int progress) {
 		return String.format("Completed %d%%.\n", progress);
 	}
 	
@@ -140,9 +186,25 @@ public abstract class AsyncSwingWorker extends SwingWorker<Void, Void> implement
 	}
 
 	public int getProgressAsync() {
-		return progress;
+		return progressAsync;
 	}
 
+	/**
+	 * Set the [min,max] progress safely.
+	 * 
+	 * SwingWorker only allows progress between 0 and 100. 
+	 * This method safely translates [min,max] to [0,100].
+	 * 
+	 * @param n
+	 */
+	public void setProgressAsync(int n) {
+		n = (max > min ? Math.max(min, Math.min(n, max))
+				: Math.max(max, Math.min(n, min)));
+		progressAsync = n;
+		n = (int) ((n - min) * 100 / (max - min));
+		n = (n < 0 ? 0 : n > 100 ? 100 : n);
+		progressPercent = n;
+	}
 	
 	
 	///// the StateMachine /////
@@ -179,36 +241,41 @@ public abstract class AsyncSwingWorker extends SwingWorker<Void, Void> implement
 		while (helper.isAlive()) {
 			switch (helper.getState()) {
 			case STATE_INIT:
+				setProgressAsync(min);
 				initAsync();
 				helper.setState(STATE_WAIT);
 				continue;
 			case STATE_LOOP:
-				progress = doInBackgroundAsync(progress);
-				progress = Math.min(progress, 100);
-				note = setNote(progress);
-				if (progressMonitor != null) {
-					progressMonitor.setNote(note);
-					progressMonitor.setProgress(progress);
-				}
-				if (progress >= 100 || isCancelled()) {
+				if (checkCanceled()) {
 					helper.setState(STATE_DONE);
+					firePropertyChange("state", null, CANCELED_ASYNC);
+					continue;
 				} else {
-					helper.setState(STATE_WAIT);
+					progressAsync = doInBackgroundAsync(progressAsync);
+					setProgressAsync(progressAsync);
+					setNote(getNote(progressAsync));
+					setProgress(progressPercent);
+					if (progressMonitor != null)
+						progressMonitor.setProgress(max > min ? progressAsync : max + min - progressAsync);
+					helper.setState(progressAsync == max ? STATE_DONE : STATE_WAIT);
+					continue;
 				}
-				setProgress(progress);
-				continue;
 			case STATE_WAIT:
 				helper.setState(STATE_LOOP);
 				helper.sleep(delayMillis);
 				return true;
+			default:
 			case STATE_DONE:
-				// Put the reallyDone() method on the AWTEventQueue
-				// just as the done() method was.
+				if (progressMonitor != null)
+					progressMonitor.close();
+				// Put the doneAsync() method on the AWTEventQueue
+				// just as for SwingWorker.done().
 				SwingUtilities.invokeLater(new Runnable() {
 
 					@Override
 					public void run() {
 						doneAsync();
+						firePropertyChange("state", null, DONE_ASYNC);
 					}
 
 				});
@@ -218,16 +285,28 @@ public abstract class AsyncSwingWorker extends SwingWorker<Void, Void> implement
 		return false;
 	}
 
-    //// final SwingWorker methods not to be used by subclasses ////
-	
+    private boolean checkCanceled() {
+    	if (isMonitorCanceled() || isCancelled()) {
+    		helper.interrupt();
+    		return true;
+    	}
+		return false;
+	}
+
+	//// final SwingWorker methods not to be used by subclasses ////
+
+	private boolean isMonitorCanceled() {
+		return (progressMonitor != null && progressMonitor.isCanceled());
+	}
+
 	/**
 	 * see SwingWorker, made final here.
 	 * 
 	 */
 	@Override
 	final protected Void doInBackground() throws Exception {
-		helper = new StateHelper(AsyncSwingWorker.this);
-		setProgress(0);
+		helper = new StateHelper(this);
+		setProgressAsync(min);
 		helper.next(STATE_INIT);
 		return null;
 	}
@@ -239,6 +318,5 @@ public abstract class AsyncSwingWorker extends SwingWorker<Void, Void> implement
 	@Override
 	final public void done() {
 	}
-
 
 }
