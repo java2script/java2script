@@ -392,6 +392,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 		"textHighlight", "#B8CFE5", /* Text color when selected */
 		"textHighlightText", "#000000", /* Text color when selected */
 		"textInactiveText", "#808080", /* Text color when disabled */
+		"control2", "#E0E0E0", // slightly darker than control
 		"control", "#EEEEEE", // SECONDARY3 Default color for controls (buttons, sliders, etc)
 		"controlText", "#333333", //  Default color for text in controls 
 		"controlHighlight", "#C0C0C0", /*
@@ -548,6 +549,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 		ColorUIResource scrollBarTrack = new ColorUIResource(224, 224, 224);
 
 		Color control = table.getColor("control");
+		Color control2 = table.getColor("control2");
 		Color controlDkShadow = table.getColor("controlDkShadow");
 		Color controlHighlight = table.getColor("controlHighlight");
 	  Color controlLtHighlight = table.getColor("controlLtHighlight");
@@ -900,7 +902,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				// *** Buttons
 				// "Button.defaultButtonFollowsFocus", Boolean.TRUE,
 				// "Button.font", dialogPlain12,
-			 "Button.background", control,
+			 "Button.background", control2,
 			 "Button.foreground", controlText,
 			 "Button.inactiveForeground", disabledTextColor,
 				// "Button.shadow", controlShadow,
