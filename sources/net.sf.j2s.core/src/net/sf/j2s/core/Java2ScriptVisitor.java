@@ -135,6 +135,7 @@ import org.eclipse.jdt.core.dom.WildcardType;
 
 // TODO: superclass inheritance for JAXB XmlAccessorType
 
+//BH 2020.05.01 -- 3.2.9-v1i fix for nested lambda methods
 //BH 2020.04.26 -- 3.2.9-v1h fix for inner classes of interfaces duplicated; fix for api.js inner class method names unqualified
 //BH 2020.04.15 -- 3.2.9-v1g fix for qualified super() in inner classes using Class.super_ call (Tracker)
 //BH 2020.04.05 -- 3.2.9-v1f (Boolean ? ...) not unboxed
@@ -2021,6 +2022,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if (binding == null)
 			return false;
 
+		
 //		checkGenericBinding(binding, binding);
 
 		ASTNode parent = node.getParent();
@@ -2035,6 +2037,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		boolean isTopLevel = (!isLambda && binding.isTopLevel());
 		boolean isAbstract = ((binding.getModifiers() & Modifier.ABSTRACT) != 0);
 
+		
 		if (!isTopLevel && !isAnonymous && node != innerNode) {
 			// inner named class first pass only
 
@@ -2074,7 +2077,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			} else {
 				tempVisitor.addClassOrInterface(node, binding, bodyDeclarations, type);
 			}
-
 			// append it to our TrailingBuffer
 			trailingBuffer.append(tempVisitor.buffer.toString());
 
@@ -2133,6 +2135,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			finalShortClassName = class_fullName.substring(pt1 + 1);
 			finalPackageName = checkPackageP$Name(class_fullName.substring(0, pt1));
 		}
+
+		int lc = lambdaCount;
 
 		// add the anonymous wrapper if needed
 
@@ -2579,7 +2583,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			xml_annotationType = ANNOTATION_TYPE_UNKNOWN;
 			// class_hasTypeAnnotations = false;
 		}
-
 		buffer.append(trailingBuffer.getString()); // also writes the assert string
 		if (isAnonymous) {
 			// if anonymous, restore old static def buffer
@@ -2610,6 +2613,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				class_annotations = oldAnnotations;
 			}
 		}
+		
+
+		lambdaCount = lc;
+
+		
 		return isStatic;
 	}
 
@@ -4948,7 +4956,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private int lambdaCount = 0;
 
 	private String getMyJavaClassNameLambda(boolean andIncrement) {
-		return package_name + "." + class_shortName.replace('.', '$') + "$lambda"
+		return package_name + "." + class_shortName.replace('.', '$')
+				+ (class_shortName.indexOf("$lambda") >= 0 ? "$" : "$lambda")
 				+ (andIncrement ? ++lambdaCount : lambdaCount);
 	}
 
