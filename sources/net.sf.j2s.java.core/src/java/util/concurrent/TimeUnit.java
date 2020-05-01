@@ -35,6 +35,8 @@
 
 package java.util.concurrent;
 
+import swingjs.JSUtil;
+
 /**
  * A <tt>TimeUnit</tt> represents time durations at a given unit of
  * granularity and provides utility methods to convert across units,
@@ -350,6 +352,7 @@ public enum TimeUnit {
      * @see Thread#sleep
      */
     public void sleep(long timeout) throws InterruptedException {
+    	JSUtil.notImplemented("TimeUnit.sleep will not work in JavaScript");
         if (timeout > 0) {
             long ms = toMillis(timeout);
             int ns = excessNanos(timeout, ms);
