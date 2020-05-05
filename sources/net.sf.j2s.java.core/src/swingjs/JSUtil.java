@@ -41,6 +41,7 @@ import swingjs.api.js.HTML5Applet;
 import swingjs.api.js.J2SInterface;
 import swingjs.api.js.JQuery;
 import swingjs.json.JSON;
+import swingjs.plaf.JSComponentUI;
 import swingjs.plaf.JSFrameUI;
 
 public class JSUtil implements JSUtilI {
@@ -388,7 +389,7 @@ public class JSUtil implements JSUtilI {
 	static String processCSS(String css, String path) {
 		if (path != null && css.indexOf("images/") >= 0) {
 			path = path.substring(0, path.lastIndexOf("/") + 1) + "images/";
-			css = PT.rep(css, "images/", path);
+			css = css.replaceAll("images/", path);
 		}
 		jQuery.$("head").append(jQuery.$("<style type='text/css'>" + css + "</style>"));
 	return css;
@@ -577,7 +578,7 @@ public class JSUtil implements JSUtilI {
 		String region, country, variant;
 		if (language == null)
 			language = J2S.getDefaultLanguage(true);
-		language = language.replace('-','_');
+		language = language.replaceAll("-","_");
 		if (language == null || language.length() == 0 || language.equalsIgnoreCase("en"))
 			language = "en_US";
 		int i = language.indexOf('_');
@@ -1058,6 +1059,11 @@ public class JSUtil implements JSUtilI {
 	@Override
 	public void showStatus(String msg, boolean doFadeOut) {
 		J2S.showStatus(msg, doFadeOut);
+	}
+
+	@Override
+	public void setUIEnabled(JComponent jc, boolean enabled) {
+		((JSComponentUI) jc.getUI()).setUIDisabled(!enabled);
 	}
 
 }

@@ -774,8 +774,8 @@ public class JSButtonUI extends JSLightweightUI {
 	//
 
 	@Override
-	protected Dimension getCSSAdjustment(boolean addingCSS) {
-		return new Dimension((itemNode == null ? 0 : 10), 0);
+	protected Dimension getCSSAdjustment(boolean addingCSS, boolean mutable) {
+		return mutable || itemNode != null ? new Dimension((itemNode == null ? 0 : 10), 0) : ZERO_SIZE;
 	}
 
 	@Override
