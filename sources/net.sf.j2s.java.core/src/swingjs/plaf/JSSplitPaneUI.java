@@ -1418,21 +1418,21 @@ public class JSSplitPaneUI extends JSPanelUI {
 		 * Returns the width of the passed in Components preferred size.
 		 */
 		protected int getPreferredSizeOfComponent(Component c) {
-			return getSizeForPrimaryAxis(c.getPreferredSize());
+			return c == null ? 0 : getSizeForPrimaryAxis(c.getPreferredSize());
 		}
 
 		/**
 		 * Returns the width of the passed in Components minimum size.
 		 */
 		int getMinimumSizeOfComponent(Component c) {
-			return getSizeForPrimaryAxis(c.getMinimumSize());
+			return c == null ? 0 : getSizeForPrimaryAxis(c.getMinimumSize());
 		}
 
 		/**
 		 * Returns the width of the passed in component.
 		 */
 		protected int getSizeOfComponent(Component c) {
-			return getSizeForPrimaryAxis(c.getSize());
+			return c == null ? 0 : getSizeForPrimaryAxis(c.getSize());
 		}
 
 		/**

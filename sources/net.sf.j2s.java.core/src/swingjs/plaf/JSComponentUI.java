@@ -1483,7 +1483,7 @@ public class JSComponentUI extends ComponentUI
 	 */
 	protected boolean isUIDisabled;
 
-	protected boolean setUIDisabled(boolean b) {
+	public boolean setUIDisabled(boolean b) {
 		return isUIDisabled = b;
 	}
 
@@ -1808,7 +1808,7 @@ public class JSComponentUI extends ComponentUI
 			}
 		}
 		// allow a UI to slightly adjust its dimension
-		Dimension dim = getCSSAdjustment(addCSS);
+		Dimension dim = getCSSAdjustment(addCSS, true);
 		dim.width += w;
 		dim.height += h;
 		DOMNode.setStyles(node, "position", null);
@@ -1833,16 +1833,19 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	/**
-	 * allows for can be overloaded to allow some special adjustments
+	 * allows for can be overloaded to allow some special adjustments;
+	 * must be mutable
 	 * 
-	 * @param addingCSS TODO
+	 * @param addingCSS see subclasses
+	 * @param mutable TODO
 	 * 
 	 * @return
 	 */
-	protected Dimension getCSSAdjustment(boolean addingCSS) {
-		return new Dimension(0, 0);
+	protected Dimension getCSSAdjustment(boolean addingCSS, boolean mutable) {
+		return mutable ? new Dimension(0, 0) : ZERO_SIZE;
 	}
 
+	protected static Dimension ZERO_SIZE = new Dimension(0, 0);
 	protected static Dimension ANY_SIZE = new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE);
 	
 	/**
@@ -2372,7 +2375,7 @@ public class JSComponentUI extends ComponentUI
 	private void setSizeFromComponent(int width, int height, int op) {
 		// allow for special adjustments
 		// currently MenuItem, TextField, and TextArea
-		Dimension size = getCSSAdjustment(true);
+		Dimension size = getCSSAdjustment(true, false);
 		// if (this.width != width || this.height != height) {
 		this.width = width;
 		this.height = height;
@@ -2405,6 +2408,14 @@ public class JSComponentUI extends ComponentUI
 						: (icon instanceof ImageIcon) ? (ImageIcon) icon : JSToolkit.createImageIcon(jc, icon, id + "tmpIcon"));
 	}
 
+	@SuppressWarnings("unused")
+	private static Object re0 = /** @j2sNative new RegExp("\u0000","gm") || */null;
+	@SuppressWarnings("unused")
+	private static Object reSpace = /** @j2sNative new RegExp(" ","gm") || */null;
+	@SuppressWarnings("unused")
+	private static Object reLT = /** @j2sNative new RegExp("<","gm") || */null;
+	
+	
 	/**
 	 * remove 0x0000 and replace space with nonbreaking space if not a textarea
 	 * 
@@ -2419,9 +2430,9 @@ public class JSComponentUI extends ComponentUI
 				// file://testing ->    swingjs/j2s/testing
 				// file:/testing -->    swintjs/j2s/testing
 				String rp = J2S.getResourcePath("",  true);
-				t = PT.rep(t, "file:/", t.indexOf(rp) >= 0 ? "" : rp);
+				t = t.replaceAll("file:/",  t.indexOf(rp) >= 0 ? "" : rp);
 			} else if (valueNode == null) {
-				t = PT.rep(t, "\u0000", "").replace(' ', '\u00A0');
+				/** @j2sNative t = t.replace(C$.re0, "").replace(C$.reSpace, "\u00A0"); */
 			}
 		}
 		return t;
@@ -2508,9 +2519,9 @@ public class JSComponentUI extends ComponentUI
 			if (text.indexOf("<html>") == 0) {
 				isHTML = true;
 				// PhET uses <html> in labels and uses </br>
-				text = PT.rep(text.substring(6), "</br>", "");
-				text = PT.rep(text, "</html>", "");
-				text = PT.rep(text, "href=", "target=_blank href=");
+				text = text.substring(6).replaceAll("</br>", "");
+				text = text.replaceAll("</html>", "");
+				text = text.replaceAll("href=", "target=_blank href=");
 			} else if (jc.getClientProperty("html") != null) {
 				isHTML = true;
 			} else if (mnemonicIndex >= 0) {
@@ -2530,8 +2541,9 @@ public class JSComponentUI extends ComponentUI
 
 			setCssFont(domNode, getFont()); // for vertical centering
 			setCssFont(textNode, getFont());
-			if (!isHTML)
-				text = PT.rep(text, "<", "&lt;").replace(' ', '\u00A0');
+			if (!isHTML) {
+				/** @j2sNative text = text.replace(C$.reLT, "&lt;").replace(C$.reSpace, "\u00A0");*/
+			}
 		} else if (valueNode != null) {
 			prop = "value";
 			obj = valueNode;

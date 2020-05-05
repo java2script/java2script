@@ -498,12 +498,12 @@ public class JSEditorPaneUI extends JSTextUI {
 		} else {
 			String t = text.substring(start, isDiv ? end - 1 : end);
 			if (t.indexOf(' ') >= 0)
-				t = t.replace(' ', '\u00A0');
+				t = t.replaceAll(" ", "\u00A0");
 			if (t.indexOf('\t') >= 0) {
-				t = PT.rep(t,  "\t", JSTAB);
+				t = t.replaceAll("\t", JSTAB);
 			}
 			if (t.indexOf('<') >= 0) {
-				t = PT.rep(PT.rep(t,  "<", "&lt;"), ">", "&gt;");
+				t = t.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 			}
 			sb.append(t);
 		}
@@ -603,10 +603,10 @@ public class JSEditorPaneUI extends JSTextUI {
 		return false;
 	}
 
-	@Override
-	protected Dimension getCSSAdjustment(boolean addingCSS) {
-		return new Dimension(0, 0);
-	}
+//	@Override
+//	protected Dimension getCSSAdjustment(boolean addingCSS, boolean mutable) {
+//		return mutable ? new Dimension(0, 0) : ZERO_SIZE;
+//	}
 
 	@Override
 	protected String getPropertyPrefix() {
@@ -704,7 +704,7 @@ public class JSEditorPaneUI extends JSTextUI {
 	
 	@Override
 	public String getJSTextValue() {
-		String s = getInnerTextSafely(domNode, false, null).toString().replace('\u00A0',' '); // &nbsp;
+		String s = getInnerTextSafely(domNode, false, null).toString().replaceAll("\u00A0"," "); // &nbsp;
 //		System.out.println("getjSTextValue " + s);
 		return s;
 	}
@@ -887,12 +887,17 @@ public class JSEditorPaneUI extends JSTextUI {
 		 * 
 		//System.out.println("getJSMandD " + [toEnd,toStart]);
 		 * 
-		 * 			var s = window.getSelection(); anode = s.anchorNode; apt =
+		 * 			var s = window.getSelection(); anode = s.anchorNode; 
+		 *   if (anode) {
+		 * 
+		 *            apt =
 		 *            s.anchorOffset; if (anode.tagName) { anode =
 		 *            anode.childNodes[apt]; apt = 0; } else { alen = anode.length; apar
 		 *            = anode.parentElement; } fnode = s.focusNode; fpt = s.focusOffset;
 		 *            if (fnode.tagName) { fnode = fnode.childNodes[fpt]; fpt = 0; }
 		 *            else { flen = fnode.length; fpar = fnode.parentElement; }
+		 *            
+		 *            }
 		 */
 
 		if (anode == null || fnode == null) {

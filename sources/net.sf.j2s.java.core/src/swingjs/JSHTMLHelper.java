@@ -216,7 +216,7 @@ public class JSHTMLHelper {
             	css += s + "\n";
             }
         }
-        return PT.rep(css, "NamedStyle:", "#" + id + " ").replace('=',':').replace(',',';');
+        return css.replaceAll("NamedStyle:", "#" + id + " ").replaceAll("=",":").replaceAll(",", ";");
 	}
 
 

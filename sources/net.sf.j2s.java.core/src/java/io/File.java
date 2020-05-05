@@ -604,7 +604,7 @@ public class File
      * @since   JDK1.1
      */
     public String getCanonicalPath() throws IOException {
-    	return this.path.replace('\\', '/');
+    	return this.path.replaceAll("\\\\", "/");
 //        return fs.canonicalize(fs.resolve(this));
     }
 
@@ -636,7 +636,7 @@ public class File
 
     private static String slashify(String path, boolean isDirectory) {
         String p = path;
-        p = p.replace('\\','/');
+        p = p.replaceAll("\\\\", "/");
         if (!p.startsWith("/"))
             p = "/" + p;
         if (!p.endsWith("/") && isDirectory)

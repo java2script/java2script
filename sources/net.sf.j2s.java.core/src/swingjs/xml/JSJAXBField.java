@@ -505,7 +505,7 @@ class JSJAXBField implements Cloneable {
 	 * @param attr
 	 */
 	private void addXMLAttributes(String tag, String data, Map<String, String> attr) {
-		data = "<__ " + data.replace('{', '\'').replace('}', '\'') + " />";
+		data = "<__ " + data.replaceAll("\\{", "'").replaceAll("\\}", "'") + " />";
 		// System.out.println(data);
 		DOMNode doc = JSUtil.jQuery.parseXML(data);
 		DOMNode node = DOMNode.firstChild(doc);
