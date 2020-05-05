@@ -1013,7 +1013,7 @@ public class SwingUtilities implements SwingConstants
             		textR.width = 1;
             		textR.height = fm.getHeight();
             	} else {
-            		String t = text.replace(' ', '\u00A0'); // no-break space
+            		String t = text.replaceAll(" ","\u00A0"); // no-break space
             		if (t != text && /** @j2sNative ui.textNode.innerHTML != t || */false)
             			DOMNode.setAttr(ui.textNode, "innerHTML", t);
             		Dimension d = ui.getHTMLSize(ui.textNode);
