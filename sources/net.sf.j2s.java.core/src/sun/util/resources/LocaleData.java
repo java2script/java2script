@@ -223,7 +223,7 @@ public class LocaleData {
                     Locale loc = l.next();
                     String lstr;
                     if (loc.getScript().length() > 0) {
-                        lstr = loc.toLanguageTag().replace('-', '_');
+                        lstr = loc.toLanguageTag().replaceAll("-","_");
                     } else {
                         lstr = loc.toString();
                         int idx = lstr.indexOf("_#");
