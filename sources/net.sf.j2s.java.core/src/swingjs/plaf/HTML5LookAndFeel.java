@@ -549,7 +549,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 		ColorUIResource scrollBarTrack = new ColorUIResource(224, 224, 224);
 
 		Color control = table.getColor("control");
-		Color control2 = table.getColor("control2");
+		Color control2 = table.getColor("control");// this didn't work
 		Color controlDkShadow = table.getColor("controlDkShadow");
 		Color controlHighlight = table.getColor("controlHighlight");
 	  Color controlLtHighlight = table.getColor("controlLtHighlight");
