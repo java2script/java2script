@@ -421,7 +421,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
     public AbstractStringBuilder append(Object obj) {
         /**
          * @j2sNative
-         *  this.秘s += obj;
+         *  this.秘s += (obj == null ? null : obj.toString());
          */
     	return this;
     }
