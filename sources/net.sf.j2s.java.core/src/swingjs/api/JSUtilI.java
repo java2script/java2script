@@ -12,6 +12,8 @@ import java.util.function.Function;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import javax.swing.JComponent;
+
 import swingjs.api.js.HTML5Applet;
 
 public interface JSUtilI {
@@ -290,5 +292,7 @@ public interface JSUtilI {
 	void showStatus(String msg, boolean doFadeOut);
 
 	void getURLBytesAsync(URL url, Function<byte[], Void> whenDone);
+
+	void setUIEnabled(JComponent jc, boolean enabled);
 
 }
