@@ -82,6 +82,15 @@ public interface JSUtilI {
 	 */
 	Object getAppletAttribute(String key);
 
+
+	/**
+	 * Get an attribute of applet's Info map for the applet found using
+	 * getApplet(null). That is, applet.__Info[InfoKey].
+	 * 
+	 * @param infoKey
+	 */
+	Object getAppletInfo(String infoKey);
+
 	/**
 	 * Get the code base (swingjs/j2s, probably) for the applet found using
 	 * getApplet(null).

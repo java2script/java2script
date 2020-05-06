@@ -1,28 +1,53 @@
+j2sApplet exec testApplet start applet null
+transpiler was unknown now 3.2.9-v1 for java.lang.Class
+swingjs.api.Interface creating instance of javajs.util.AjaxURLStreamHandlerFactory
+JSApp get parameter: language = null
+swingjs.JSUtil initialized;debug=false
+JSApp get parameter: name = testApplet
+JSApp get parameter: syncId = 022516724642611
+JSApp initialized
+JSAppletViewer initializing2
+JSToolkit initialized
+JSGraphicsConfiguration initialized
+swingjs.api.Interface creating instance of swingjs.JSGraphicsEnvironment
+JSGraphicsEnvironment initialized
+swingjs.api.Interface creating instance of swingjs.JSScreenDevice
+JSScreenDevice initialized
+JSAppletViewer thread run1 mode=0 status=0
+JSAppletViewer thread run1 mode=1 status=1
+JSAppletViewer runloader
+JSApp get parameter: main = test.Derivative
+swingjs.api.Interface creating instance of swingjs.JSDummyApplet
+swingjs.api.Interface creating instance of swingjs.plaf.HTML5LookAndFeel
+testApplet loaded
+JSAppletViewer thread run1 mode=1 status=76
+testApplet running test.Derivative
+Running main(args) in class test.Derivative
 1.8 Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0
-Direct: ...........-8069730.430666382........148
-Direct: ...........-8069730.430666382........149
-Direct: ...........-8069730.430666382........151
-Unwrapped: ........-7908873.121916154................ 155
-Unwrapped: ........-7908873.121916154................ 170
-Unwrapped: ........-7908873.121916154................ 195
-Wrapped: ..........-8069730.430666382........................166
-Wrapped: ..........-8069730.430666382........................148
-Wrapped: ..........-8069730.430666382........................141
-Direct: ...........-8069730.430666382........139
-Unwrapped: ........-7908873.121916154................ 138
-Wrapped: ..........-8069730.430666382........................140
-Direct: ...........-8069730.430666382........165
-Unwrapped: ........-7908873.121916154................ 200
-Wrapped: ..........-8069730.430666382........................142
-Direct: ...........-8069730.430666382........141
-Unwrapped: ........-7908873.121916154................ 140
-Wrapped: ..........-8069730.430666382........................147
-Wrapped: ..........-8069730.430666382........................143
-Wrapped: ..........-8069730.430666382........................140
+Direct: ...........-8069730.430666382........131
+Direct: ...........-8069730.430666382........128
+Direct: ...........-8069730.430666382........123
+Unwrapped: ........-8069730.430666382................ 128
+Unwrapped: ........-8069730.430666382................ 127
+Unwrapped: ........-8069730.430666382................ 124
+Wrapped: ..........-8069730.430666382........................132
 Wrapped: ..........-8069730.430666382........................134
-Unwrapped: ........-7908873.121916154................ 124
-Unwrapped: ........-7908873.121916154................ 121
-Unwrapped: ........-7908873.121916154................ 124
+Wrapped: ..........-8069730.430666382........................130
+Direct: ...........-8069730.430666382........121
+Unwrapped: ........-8069730.430666382................ 125
+Wrapped: ..........-8069730.430666382........................130
+Direct: ...........-8069730.430666382........120
+Unwrapped: ........-8069730.430666382................ 125
+Wrapped: ..........-8069730.430666382........................129
+Direct: ...........-8069730.430666382........120
+Unwrapped: ........-8069730.430666382................ 124
+Wrapped: ..........-8069730.430666382........................132
+Wrapped: ..........-8069730.430666382........................131
+Wrapped: ..........-8069730.430666382........................130
+Wrapped: ..........-8069730.430666382........................130
+Unwrapped: ........-8069730.430666382................ 122
+Unwrapped: ........-8069730.430666382................ 124
+Unwrapped: ........-8069730.430666382................ 124
+Direct: ...........-8069730.430666382........121
 Direct: ...........-8069730.430666382........122
 Direct: ...........-8069730.430666382........121
-Direct: ...........-8069730.430666382........124

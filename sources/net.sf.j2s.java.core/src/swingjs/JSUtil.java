@@ -948,6 +948,19 @@ public class JSUtil implements JSUtilI {
 	}
 
 	@Override
+	public Object getAppletInfo(String infoKey) {
+		@SuppressWarnings("unused")
+		HTML5Applet applet = getApplet();
+		/** @j2sNative
+		 * 
+		 * var val = applet.__Info[infoKey];
+		 * return (val == null ? null : val);
+		 */ {
+			 return null;
+		 	}
+	}
+
+	@Override
 	public void setAppletInfo(String infoKey, Object val) {
 		HTML5Applet applet = getApplet();
 		/** @j2sNative

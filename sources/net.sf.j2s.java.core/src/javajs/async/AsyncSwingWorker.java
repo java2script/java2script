@@ -10,7 +10,7 @@ import javajs.async.SwingJSUtils.StateHelper;
 import javajs.async.SwingJSUtils.StateMachine;
 
 /**
- * Executes asynchronous tasks using a SwingWorker in Java or JavaScript,
+ * Executes synchronous or asynchronous tasks using a SwingWorker in Java or JavaScript,
  * equivalently.
  * 
  * Unlike a standard SwingWorker, AsyncSwingWorker may itself be asynchronous.
@@ -37,6 +37,9 @@ import javajs.async.SwingJSUtils.StateMachine;
  * parameter reminds the subclass of where it is at, and the return value allows
  * the subclass to update the progress field in both the SwingWorker and the
  * ProgressMonitor.
+ * 
+ * If it is desired to run the AsyncSwingWorker synchonously, call the 
+ * executeSynchronously() method rather than execute(). Never call SwingWorker.run(). 
  * 
  * 
  * @author hansonr
@@ -78,6 +81,9 @@ public abstract class AsyncSwingWorker extends SwingWorker<Void, Void> implement
 	protected int max;
 	protected int progressPercent;
 
+	protected boolean isAsync;
+	private Exception exception;
+	
 	/**
 	 * Construct an asynchronous SwingWorker task that optionally will display a
 	 * ProgressMonitor. Progress also can be monitored by adding a PropertyChangeListener
@@ -96,13 +102,35 @@ public abstract class AsyncSwingWorker extends SwingWorker<Void, Void> implement
 	 * 
 	 */
 	public AsyncSwingWorker(Component owner, String title, int delayMillis, int min, int max) {
-		if (title != null) {
+		if (title != null && delayMillis > 0) {
 			progressMonitor = new ProgressMonitor(owner, title, "", Math.min(min,  max), Math.max(min, max));
 			progressMonitor.setProgress(Math.min(min,  max)); // displays monitor
 		}
-		this.delayMillis = Math.max(1, delayMillis);
+		this.delayMillis = Math.max(0, delayMillis);
+		this.isAsync = (delayMillis > 0);
+		
 		this.min = min;
 		this.max = max;
+	}
+
+	public void executeAsync() {
+		super.execute();
+	}
+	
+	public void executeSynchronously() {
+		isAsync = false;
+		delayMillis = 0;
+		try {
+			doInBackground();
+		} catch (Exception e) {
+			exception = e;
+			e.printStackTrace();
+			cancelAsync();
+		}
+	}
+
+	public Exception getException() {
+		return exception;
 	}
 
 	public int getMinimum() {
@@ -270,20 +298,28 @@ public abstract class AsyncSwingWorker extends SwingWorker<Void, Void> implement
 					progressMonitor.close();
 				// Put the doneAsync() method on the AWTEventQueue
 				// just as for SwingWorker.done().
-				SwingUtilities.invokeLater(new Runnable() {
+				if (isAsync)
+				{
+					SwingUtilities.invokeLater(doneRunnable);
+				} else {
+					doneRunnable.run();
+				}
 
-					@Override
-					public void run() {
-						doneAsync();
-						firePropertyChange("state", null, DONE_ASYNC);
-					}
-
-				});
 				return false;
 			}
 		}
 		return false;
 	}
+	
+	private Runnable doneRunnable = new Runnable() {
+		@Override
+		public void run() {
+			doneAsync();
+			firePropertyChange("state", null, DONE_ASYNC);
+		}
+
+	};
+
 
     private boolean checkCanceled() {
     	if (isMonitorCanceled() || isCancelled()) {
