@@ -137,6 +137,28 @@ public class Test_Dialog2 extends JFrame {
 		});
 		p.add(b);
 
+		b = new JButton("OptionDialog");
+		b.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				new AsyncDialog().showOptionDialog(Test_Dialog2.this, "Pick one of the following three options:", "Option title",
+						0, 0, null, new Object[] {"Option A", "Option B", "Option C"} , "Option B", new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						String msg = "Option selected " + ((AsyncDialog)e.getSource()).getValue() + " (" + e.getActionCommand() + ")";
+						System.out.println(msg);
+						status.setText(msg);
+					}
+					
+				});
+			}
+
+		});
+		p.add(b);
+
+
+
 		b = new JButton("FileOpenDialog");
 		b.addActionListener(new ActionListener() {
 
