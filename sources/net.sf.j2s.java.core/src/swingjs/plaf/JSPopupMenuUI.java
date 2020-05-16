@@ -1196,8 +1196,10 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 		
 		int eventID = 0;
 		
-//		System.out.println("pm " + trigger);
+	//	System.out.println("pm " + trigger);
 		switch (trigger) {
+		case "_hidePopupMenu":
+		case "_hide":
 		case "clearOut":
 		case "collapse":
 		case "expand":
@@ -1217,8 +1219,6 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 		case "refresh":
 		case "select":
 		case "_activate":
-		case "_hide":
-		case "_hidePopupMenu":
 		case "_move":
 		case "_show":
 		case "_startOpening":
@@ -1285,7 +1285,7 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 			lastInvoker.requestFocus();
 			lastInvoker = null;
 		}
-		JSUtil.jQuery.$(".ui-j2smenu").hide();
+		JSUtil.jQuery.$(".ui-j2smenu").hide().attr("aria-hidden","true").attr("aria-expanded","false");
 		JSUtil.jQuery.$(".ui-j2smenu-node").removeClass("ui-state-active").removeClass("ui-state-focus");
 	}
 

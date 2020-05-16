@@ -1367,7 +1367,7 @@ public class JSComponentUI extends ComponentUI
 	protected void propertyChangedCUI(PropertyChangeEvent e, String prop) {
 		// don't want to update a menu until we have to, after its place is set
 		// and we know it is not a JMenuBar menu
-		if (!isMenu && cellComponent == null)
+		if (allowPropertyUpdate() && cellComponent == null)
 			getDOMNode();
 		
 		switch (prop) {
@@ -1436,6 +1436,11 @@ public class JSComponentUI extends ComponentUI
 		}
 	}	
 	
+	protected boolean allowPropertyUpdate() {
+		return true;
+	}
+
+
 	protected void setMnemonic(int newValue) {
 		// need to handle non-menu mnemonics as well
 		if (newValue == mnemonic || domNode == null)
@@ -2539,8 +2544,12 @@ public class JSComponentUI extends ComponentUI
 			// that for a <button> element to properly align vertically,
 			// the font must be set for the button element, not in a child element.
 
-			setCssFont(domNode, getFont()); // for vertical centering
-			setCssFont(textNode, getFont());
+			Font f = getFont();
+			setCssFont(domNode, f); // for vertical centering
+			setCssFont(textNode, f);
+			if (menuAnchorNode != null) {
+				setCssFont(menuAnchorNode, f); // for vertical centering
+			}
 			if (!isHTML) {
 				/** @j2sNative text = text.replace(C$.reLT, "&lt;").replace(C$.reSpace, "\u00A0");*/
 			}
@@ -2898,7 +2907,7 @@ public class JSComponentUI extends ComponentUI
 				addJSKeyVal(cssIcon, "top", top + "%", "transform",
 						"translateY(-" + itop + "%)" + (iscale == null ? "" : iscale));
 			} else {
-				DOMNode.setStyles(menuAnchorNode, "height", h + "px");
+				DOMNode.setStyles(menuAnchorNode, "height", "1em");
 //				if (wIcon > 0)
 	//				addJSKeyVal(cssTxt, "top", "50%", "transform", "translateY(-50%)");
 				addJSKeyVal(cssIcon, "top", "50%", "transform", "translateY(-80%) scale(0.6,0.6)");
@@ -3605,7 +3614,7 @@ public class JSComponentUI extends ComponentUI
 		JSComponent c = jc;
 		while (c != null) {
 			JSComponentUI ui = c.秘getUI();
-			if (ui == null)
+			if (ui == null || ui.isWindow)
 				return;
 			ui.inPaintPath = true;
 			c.秘setPaintsSelf(JSComponent.PAINTS_SELF_ALWAYS);

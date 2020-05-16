@@ -150,7 +150,7 @@ public class JSButtonUI extends JSLightweightUI {
 		menuAnchorNode = newDOMObject("div", id + "_a");// this needed? , "tabindex", "8");
 		if (type != "_bar") {
 			addClass(menuAnchorNode, "a");
-			DOMNode.setStyles(menuAnchorNode, "margin", "1px 2px 1px 2px");
+//			DOMNode.setStyles(menuAnchorNode, "margin", "1px 2px 1px 2px", "height", "1em");
 		}
 		itemNode.appendChild(menuAnchorNode);
 		setDoPropagate();
