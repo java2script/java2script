@@ -273,11 +273,15 @@ public class ButtonListener
 	public void mousePressed(MouseEvent e) {
 		if (SwingUtilities.isLeftMouseButton(e)) {
 			AbstractButton b = (AbstractButton) e.getSource();
-			if (b.getUIClassID() == "MenuUI" && ((JMenu) b).isTopLevelMenu()) {
-				((JMenu) b).setPopupMenuVisible(!((JMenu) b).isPopupMenuVisible());
-				JComponent root = ((JComponent) b.getTopLevelAncestor()).getRootPane();
-				root.requestFocus();
-				//JSFocusPeer.focus(((JSComponentUI) root.getUI()).focusNode);
+			JSComponentUI ui = b.秘getUI();
+			if (ui.isMenu) {
+				JMenu jm = (JMenu) b;
+				if (jm.isTopLevelMenu()) {
+					jm.setPopupMenuVisible(!jm.isPopupMenuVisible());
+					JComponent root = ((JComponent) b.getTopLevelAncestor()).getRootPane();
+					root.requestFocus();
+				}
+				jm.menuSelectionChanged(true);		
 			}
 		}
 	}
@@ -290,6 +294,7 @@ public class ButtonListener
 				return;
 			b.doClick(0);
 			verifyButtonClick(b, true);
+			JSComponentUI ui = b.秘getUI();
 		}
 	}
 
