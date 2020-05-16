@@ -114,7 +114,7 @@ public final class DataBufferUShort extends DataBuffer
      * @param size The size of the <CODE>DataBuffer</CODE> bank.
      */
     public DataBufferUShort(short dataArray[], int size) {
-        super(UNTRACKABLE, TYPE_USHORT, size);
+        super(STABLE, TYPE_USHORT, size);
         if (dataArray == null) {
             throw new NullPointerException("dataArray is null");
         }
@@ -232,7 +232,7 @@ public final class DataBufferUShort extends DataBuffer
      * @return The first unsigned-short data array.
      */
     public short[] getData() {
-        theTrackable.setUntrackable();
+        秘setUntrackable();
         return data;
     }
 
@@ -248,7 +248,7 @@ public final class DataBufferUShort extends DataBuffer
      * @return The data array for the specified bank.
      */
     public short[] getData(int bank) {
-        theTrackable.setUntrackable();
+        秘setUntrackable();
         return bankdata[bank];
     }
 
@@ -263,7 +263,7 @@ public final class DataBufferUShort extends DataBuffer
      * @return All of the data arrays.
      */
     public short[][] getBankData() {
-        theTrackable.setUntrackable();
+        秘setUntrackable();
         return (short[][]) bankdata.clone();
     }
 

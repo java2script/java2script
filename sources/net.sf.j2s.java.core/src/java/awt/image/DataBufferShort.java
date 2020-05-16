@@ -197,7 +197,7 @@ public final class DataBufferShort extends DataBuffer
      * @return The first short data array.
      */
     public short[] getData() {
-        theTrackable.setUntrackable();
+        秘setUntrackable();
         return data;
     }
 
@@ -213,7 +213,7 @@ public final class DataBufferShort extends DataBuffer
      * @return The data array for the specified bank.
      */
     public short[] getData(int bank) {
-        theTrackable.setUntrackable();
+        秘setUntrackable();
         return bankdata[bank];
     }
 
@@ -228,7 +228,7 @@ public final class DataBufferShort extends DataBuffer
      * @return All of the data arrays.
      */
     public short[][] getBankData() {
-        theTrackable.setUntrackable();
+        秘setUntrackable();
         return (short[][]) bankdata.clone();
     }
 

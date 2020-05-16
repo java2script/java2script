@@ -196,7 +196,7 @@ public final class DataBufferFloat extends DataBuffer {
      * @return the first float data array.
      */
     public float[] getData() {
-        theTrackable.setUntrackable();
+        秘setUntrackable();
         return data;
     }
 
@@ -212,7 +212,7 @@ public final class DataBufferFloat extends DataBuffer {
      * @return the data array specified by <code>bank</code>.
      */
     public float[] getData(int bank) {
-        theTrackable.setUntrackable();
+        秘setUntrackable();
         return bankdata[bank];
     }
 
@@ -227,7 +227,7 @@ public final class DataBufferFloat extends DataBuffer {
      * @return all data arrays for this data buffer.
      */
     public float[][] getBankData() {
-        theTrackable.setUntrackable();
+        秘setUntrackable();
         return (float[][]) bankdata.clone();
     }
 

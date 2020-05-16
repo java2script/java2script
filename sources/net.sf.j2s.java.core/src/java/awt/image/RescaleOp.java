@@ -398,8 +398,6 @@ public class RescaleOp implements BufferedImageOp, RasterOp {
             //
 
         // added 2002.02.24 PhET AbstractMediaButtons
-    	src.秘ensureHavePixels(false);
-    	
             WritableRaster srcRaster = src.getRaster();
             WritableRaster dstRaster = dst.getRaster();
 

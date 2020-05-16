@@ -194,7 +194,7 @@ public final class DataBufferDouble extends DataBuffer {
      * @return the first double data array.
      */
     public double[] getData() {
-        theTrackable.setUntrackable();
+        秘setUntrackable();
         return data;
     }
 
@@ -210,7 +210,7 @@ public final class DataBufferDouble extends DataBuffer {
      * @return the data array specified by <code>bank</code>.
      */
     public double[] getData(int bank) {
-        theTrackable.setUntrackable();
+        秘setUntrackable();
         return bankdata[bank];
     }
 
@@ -225,7 +225,7 @@ public final class DataBufferDouble extends DataBuffer {
      * @return all data arrays from this data buffer.
      */
     public double[][] getBankData() {
-        theTrackable.setUntrackable();
+        秘setUntrackable();
         return (double[][]) bankdata.clone();
     }
 

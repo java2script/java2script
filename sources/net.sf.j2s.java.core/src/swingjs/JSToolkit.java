@@ -596,6 +596,9 @@ public class JSToolkit extends SunToolkit
 		return createImage(url);
 	}
 		
+	/**
+	 * From, for example, MemoryImageSource
+	 */
 	@Override
 	public Image createImage(ImageProducer producer) {
 		JSImagekit kit = new JSImagekit();
@@ -664,6 +667,9 @@ public class JSToolkit extends SunToolkit
 
 	public Image getVideo(URL url) {
 		try {
+			if (url.getProtocol() == "jar") {
+				return createVideo(JSUtil.getFileAsBytes(url));
+			}
 			return createVideo(Paths.get(url.toURI()));
 		} catch (URISyntaxException e) {
 			return null;

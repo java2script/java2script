@@ -143,21 +143,17 @@ public interface HTML5Video extends DOMNode {
 	 * images.
 	 * 
 	 * @param v
+	 * @param imageType  if Integer.MIN_VALUE, swingjs.api.JSUtilI.TYPE_4BYTE_HTML5
 	 * @return
 	 */
-	public static BufferedImage getImage(HTML5Video v) {
+	public static BufferedImage getImage(HTML5Video v, int imageType) {
 		Dimension d = HTML5Video.getSize(v);
 		BufferedImage image = (BufferedImage) HTML5Video.getProperty(v, "_image");
 		if (image == null || image.getWidth() != d.width || image.getHeight() != d.height) {
-			image = new BufferedImage(d.width, d.height, JSUtilI.TYPE_4BYTE_HTML5);
+			image = new BufferedImage(d.width, d.height, imageType == Integer.MIN_VALUE ? JSUtilI.TYPE_4BYTE_HTML5 : imageType);
 			HTML5Video.setProperty(v, "_image", image);
 		}
-		Graphics g = image.createGraphics();
-		/**
-		 * @j2sNative
-		 * 			g.canvas.getContext('2d').drawImage(v, 0, 0, d.width, d.height);
-		 */
-		g.dispose();
+		HTML5Canvas.setImageNode(v, image);
 		return image;
 	}
 
@@ -245,7 +241,8 @@ public interface HTML5Video extends DOMNode {
 					null;
 			listeners.add(events[i]);
 			listeners.add(func);
-			jsvideo.addEventListener(events[i], func);
+			if (jsvideo != null)
+				jsvideo.addEventListener(events[i], func);
 
 		}
 		return listeners.toArray(new Object[listeners.size()]);

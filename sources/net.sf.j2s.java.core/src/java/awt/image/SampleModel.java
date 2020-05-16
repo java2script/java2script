@@ -363,6 +363,9 @@ public abstract class SampleModel
     public Object getDataElements(int x, int y, int w, int h,
                                   Object obj, DataBuffer data) {
 
+    	
+     	data.秘setDoCheckImage(false);
+        
         int type = getTransferType();
         int numDataElems = getNumDataElements();
         int cnt = 0;
@@ -439,53 +442,55 @@ public abstract class SampleModel
             obj = (Object)idata;
             break;
 
-//        case DataBuffer.TYPE_FLOAT:
-//
-//            float[] fdata;
-//            float[] ftemp;
-//
-//            if (obj == null)
-//                fdata = new float[numDataElems*w*h];
-//            else
-//                fdata = (float[])obj;
-//
-//            for (int i=y; i<y+h; i++) {
-//                for (int j=x; j<x+w; j++) {
-//                    o = getDataElements(j, i, o, data);
-//                    ftemp = (float[])o;
-//                    for (int k=0; k<numDataElems; k++) {
-//                        fdata[cnt++] = ftemp[k];
-//                    }
-//                }
-//            }
-//
-//            obj = (Object)fdata;
-//            break;
-//
-//        case DataBuffer.TYPE_DOUBLE:
-//
-//            double[] ddata;
-//            double[] dtemp;
-//
-//            if (obj == null)
-//                ddata = new double[numDataElems*w*h];
-//            else
-//                ddata = (double[])obj;
-//
-//            for (int i=y; i<y+h; i++) {
-//                for (int j=x; j<x+w; j++) {
-//                    o = getDataElements(j, i, o, data);
-//                    dtemp = (double[])o;
-//                    for (int k=0; k<numDataElems; k++) {
-//                        ddata[cnt++] = dtemp[k];
-//                    }
-//                }
-//            }
-//
-//            obj = (Object)ddata;
-//            break;
+        case DataBuffer.TYPE_FLOAT:
+
+            float[] fdata;
+            float[] ftemp;
+
+            if (obj == null)
+                fdata = new float[numDataElems*w*h];
+            else
+                fdata = (float[])obj;
+
+            for (int i=y; i<y+h; i++) {
+                for (int j=x; j<x+w; j++) {
+                    o = getDataElements(j, i, o, data);
+                    ftemp = (float[])o;
+                    for (int k=0; k<numDataElems; k++) {
+                        fdata[cnt++] = ftemp[k];
+                    }
+                }
+            }
+
+            obj = (Object)fdata;
+            break;
+
+        case DataBuffer.TYPE_DOUBLE:
+
+            double[] ddata;
+            double[] dtemp;
+
+            if (obj == null)
+                ddata = new double[numDataElems*w*h];
+            else
+                ddata = (double[])obj;
+
+            for (int i=y; i<y+h; i++) {
+                for (int j=x; j<x+w; j++) {
+                    o = getDataElements(j, i, o, data);
+                    dtemp = (double[])o;
+                    for (int k=0; k<numDataElems; k++) {
+                        ddata[cnt++] = dtemp[k];
+                    }
+                }
+            }
+
+            obj = (Object)ddata;
+            break;
         }
 
+     	data.秘setDoCheckImage(true);
+        
         return obj;
     }
 
@@ -584,6 +589,8 @@ public abstract class SampleModel
     public void setDataElements(int x, int y, int w, int h,
                                 Object obj, DataBuffer data) {
 
+     	data.秘setDoCheckImage(false);
+
         int cnt = 0;
 //        Object o = null;
         int type = getTransferType();
@@ -673,6 +680,7 @@ public abstract class SampleModel
             break;
         }
 
+     	data.秘setDoCheckImage(true);
     }
 
     /**
@@ -760,6 +768,8 @@ public abstract class SampleModel
     public int[] getPixels(int x, int y, int w, int h,
                            int iArray[], DataBuffer data) {
 
+    	data.秘setDoCheckImage(false);
+    	
         int pixels[];
         int Offset=0;
 
@@ -776,7 +786,9 @@ public abstract class SampleModel
             }
         }
 
-        return pixels;
+     	data.秘setDoCheckImage(true);
+        
+     	return pixels;
     }
 
     /**
@@ -801,6 +813,8 @@ public abstract class SampleModel
     public float[] getPixels(int x, int y, int w, int h,
                              float fArray[], DataBuffer data) {
 
+    	data.秘setDoCheckImage(false);
+
         float pixels[];
         int Offset = 0;
 
@@ -816,6 +830,7 @@ public abstract class SampleModel
                 }
             }
         }
+    	data.秘setDoCheckImage(true);
 
         return pixels;
     }
@@ -845,6 +860,8 @@ public abstract class SampleModel
         double pixels[];
         int    Offset = 0;
 
+    	data.秘setDoCheckImage(false);
+
         if (dArray != null)
             pixels = dArray;
         else
@@ -858,6 +875,7 @@ public abstract class SampleModel
                 }
             }
         }
+    	data.秘setDoCheckImage(true);
 
         return pixels;
     }
@@ -953,6 +971,8 @@ public abstract class SampleModel
         int pixels[];
         int Offset=0;
 
+    	data.秘setDoCheckImage(false);
+
         if (iArray != null)
             pixels = iArray;
         else
@@ -963,6 +983,7 @@ public abstract class SampleModel
                 pixels[Offset++] = getSample(j, i, b, data);
             }
         }
+    	data.秘setDoCheckImage(true);
 
         return pixels;
     }
@@ -994,6 +1015,9 @@ public abstract class SampleModel
                               DataBuffer data) {
         float pixels[];
         int   Offset=0;
+        
+    	data.秘setDoCheckImage(false);
+
 
         if (fArray != null)
             pixels = fArray;
@@ -1005,6 +1029,8 @@ public abstract class SampleModel
                 pixels[Offset++] = getSampleFloat(j, i, b, data);
             }
         }
+
+    	data.秘setDoCheckImage(true);
 
         return pixels;
     }
@@ -1037,6 +1063,8 @@ public abstract class SampleModel
         double pixels[];
         int    Offset=0;
 
+    	data.秘setDoCheckImage(false);
+
         if (dArray != null)
             pixels = dArray;
         else
@@ -1047,6 +1075,7 @@ public abstract class SampleModel
                 pixels[Offset++] = getSampleDouble(j, i, b, data);
             }
         }
+    	data.秘setDoCheckImage(true);
 
         return pixels;
     }
@@ -1131,6 +1160,7 @@ public abstract class SampleModel
     public void setPixels(int x, int y, int w, int h,
                           int iArray[], DataBuffer data) {
         int Offset=0;
+    	data.秘setDoCheckImage(false);
 
         for (int i=y; i<(y+h); i++) {
             for (int j=x; j<(x+w); j++) {
@@ -1139,6 +1169,7 @@ public abstract class SampleModel
                 }
             }
         }
+    	data.秘setDoCheckImage(true);
     }
 
     /**
@@ -1163,6 +1194,8 @@ public abstract class SampleModel
                           float fArray[], DataBuffer data) {
         int Offset=0;
 
+    	data.秘setDoCheckImage(false);
+
         for (int i=y; i<(y+h); i++) {
             for (int j=x; j<(x+w); j++) {
                 for(int k=0; k<numBands; k++) {
@@ -1170,6 +1203,9 @@ public abstract class SampleModel
                 }
             }
         }
+        
+    	data.秘setDoCheckImage(true);
+
     }
 
     /**
@@ -1193,6 +1229,7 @@ public abstract class SampleModel
     public void setPixels(int x, int y, int w, int h,
                           double dArray[], DataBuffer data) {
         int Offset=0;
+    	data.秘setDoCheckImage(false);
 
         for (int i=y; i<(y+h); i++) {
             for (int j=x; j<(x+w); j++) {
@@ -1201,6 +1238,7 @@ public abstract class SampleModel
                 }
             }
         }
+    	data.秘setDoCheckImage(true);
     }
 
     /**
@@ -1305,12 +1343,18 @@ public abstract class SampleModel
                            int iArray[], DataBuffer data) {
 
         int Offset=0;
+        
+    	data.秘setDoCheckImage(false);
+
 
         for (int i=y; i<(y+h); i++) {
             for (int j=x; j<(x+w); j++) {
                 setSample(j, i, b, iArray[Offset++], data);
             }
         }
+        
+    	data.秘setDoCheckImage(true);
+
     }
 
     /**
@@ -1336,12 +1380,16 @@ public abstract class SampleModel
     public void setSamples(int x, int y, int w, int h, int b,
                            float fArray[], DataBuffer data) {
         int Offset=0;
+    	data.秘setDoCheckImage(false);
 
         for (int i=y; i<(y+h); i++) {
             for (int j=x; j<(x+w); j++) {
                 setSample(j, i, b, fArray[Offset++], data);
             }
         }
+        
+    	data.秘setDoCheckImage(true);
+
     }
 
     /**
@@ -1367,12 +1415,14 @@ public abstract class SampleModel
     public void setSamples(int x, int y, int w, int h, int b,
                            double dArray[], DataBuffer data) {
         int Offset=0;
+    	data.秘setDoCheckImage(false);
 
         for (int i=y; i<(y+h); i++) {
             for (int j=x; j<(x+w); j++) {
                 setSample(j, i, b, dArray[Offset++], data);
             }
         }
+    	data.秘setDoCheckImage(true);
     }
 
     /**

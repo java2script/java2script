@@ -125,10 +125,10 @@ import sun.awt.image.SunWritableRaster;
  */
 public class Raster {
 
-	private BufferedImage image; // SwingJS -- necessary?
+    BufferedImage 秘image; // SwingJS -- necessary!
 
-	public void setImage(BufferedImage image) {
-		this.image = image;
+	void 秘setImage(BufferedImage image) {
+		秘image = image;
 	}
 
     /**
@@ -1113,6 +1113,7 @@ public class Raster {
         }
        this.sampleModel = sampleModel;
        this.dataBuffer = dataBuffer;
+       dataBuffer.秘image = 秘image;
        minX = aRegion.x;
        minY = aRegion.y;
        width = aRegion.width;
@@ -1443,6 +1444,7 @@ public class Raster {
      *  @return the <code>DataBuffer</code> of this <code>Raster</code>.
      */
     public DataBuffer getDataBuffer() {
+    	dataBuffer.秘image = 秘image;
         return dataBuffer;
     }
 

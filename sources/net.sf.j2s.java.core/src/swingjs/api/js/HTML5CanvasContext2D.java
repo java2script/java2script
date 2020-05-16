@@ -159,4 +159,6 @@ public abstract class HTML5CanvasContext2D {
 		 */
 		}
 
+	abstract public void drawImage(DOMNode domNode, int x, int y);
+
 }

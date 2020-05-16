@@ -42,6 +42,13 @@ public interface JSUtilI {
 	 * 
 	 */
 	public static final int TYPE_4BYTE_HTML5 = -6;
+	
+	/**
+	 * The HTML5 VIDEO element wrapped in a BufferedImage. 
+	 * 
+	 * To be extended to allow video capture?
+	 */
+	public static final int TYPE_HTML5_VIDEO = Integer.MIN_VALUE;
 
 	/**
 	 * Indicate to SwingJS that the given file type is binary.
@@ -298,10 +305,28 @@ public interface JSUtilI {
 	 */
 	byte[] getURLBytes(URL url);
 
+	/**
+	 * Set a message in the lower-left-hand corner SwingJS status block.
+	 * 
+	 * @param msg
+	 * @param doFadeOut
+	 */
 	void showStatus(String msg, boolean doFadeOut);
 
+	/**
+	 * Asynchronously retrieve the byte[] for a URL.
+	 * 
+	 * @param url
+	 * @param whenDone
+	 */
 	void getURLBytesAsync(URL url, Function<byte[], Void> whenDone);
 
+	/**
+	 * Experimental method to completely disable a Swing Component's user interface.
+	 * 
+	 * @param jc
+	 * @param enabled
+	 */
 	void setUIEnabled(JComponent jc, boolean enabled);
 
 }

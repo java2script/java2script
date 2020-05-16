@@ -201,7 +201,7 @@ public final class DataBufferByte extends DataBuffer
      * @return The first byte data array.
      */
     public byte[] getData() {
-        theTrackable.setUntrackable();
+        秘setUntrackable();
         return data;
     }
 
@@ -217,7 +217,7 @@ public final class DataBufferByte extends DataBuffer
      * @return The data array for the specified bank.
      */
     public byte[] getData(int bank) {
-        theTrackable.setUntrackable();
+        秘setUntrackable();
         return bankdata[bank];
     }
 
@@ -232,7 +232,7 @@ public final class DataBufferByte extends DataBuffer
      * @return All of the data arrays.
      */
     public byte[][] getBankData() {
-        theTrackable.setUntrackable();
+        秘setUntrackable();
         return (byte[][]) bankdata.clone();
     }
 

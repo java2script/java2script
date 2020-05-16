@@ -97,7 +97,6 @@ public class OffScreenImageSource implements ImageProducer {
 
     private void sendPixels() {
         ColorModel cm = image.getColorModel();
-		image.秘ensureHavePixels(true);
         WritableRaster raster = image.getRaster();
         int numDataElements = raster.getNumDataElements();
         int dataType = raster.getDataBuffer().getDataType();

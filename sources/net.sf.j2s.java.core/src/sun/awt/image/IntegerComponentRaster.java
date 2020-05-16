@@ -81,7 +81,7 @@ public class IntegerComponentRaster extends SunWritableRaster {
     protected int           pixelStride;
 
     /** The image data array. */
-    protected int[]         data;
+    public /** SwingJS was protected */ int[]         data;
 
     /** The number of data elements required to store a pixel. */
     protected int           numDataElems;

@@ -114,7 +114,7 @@ public class Test_Video {
 			}
 			
 		});
-		dialog[0].setOpaque(true);
+		//dialog[0].setOpaque(true);
 		vw = 1920;
 		vh = vw * 9/16;
 		w = 1920 / 4;
@@ -160,7 +160,10 @@ public class Test_Video {
 		cp.add(imageLabel);
 		main.pack();
 		main.setVisible(true);
-
+		//main.setBackground(Color.orange);
+		//main.getRootPane().setOpaque(true);
+		System.out.println(main.isOpaque() + " " + Integer.toHexString(main.getBackground().getRGB()));
+//		cp.setBackground(Color.red);
 		HTML5Video.setProperty(jsvideo, "currentTime", 0);
 
 		showAllProperties();
@@ -243,11 +246,7 @@ public class Test_Video {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (cbCapture.isSelected()) {
-					BufferedImage img = HTML5Video.getImage(jsvideo);
-					Graphics g = image.getGraphics();
-					g.drawImage(img, 0, 0, w, h, 0, 0, vw, vh, null);
-					g.dispose();
-					imageLabel.repaint();
+					grabImage();
 				}
 				System.out.print("\0");
 				vt += delay / 1000000.0;
@@ -269,6 +268,14 @@ public class Test_Video {
 		listener.actionPerformed(null);
 	}
 	
+	protected void grabImage() {
+		BufferedImage img = HTML5Video.getImage(jsvideo, Integer.MIN_VALUE);
+		Graphics g = image.getGraphics();
+		g.drawImage(img, 0, 0, w, h, 0, 0, vw, vh, null);
+		g.dispose();
+		imageLabel.repaint();
+	}
+
 	protected void removePlayListener(HTML5Video v) {
 		if (playListener != null)
 			HTML5Video.removeActionListener(v, playListener);
@@ -337,6 +344,7 @@ public class Test_Video {
 		JPanel p = new JPanel();
 		p.add(layerPane, BorderLayout.CENTER);
 		lockDim(p, dim);
+		
 		return p;
 	}
 
@@ -349,6 +357,14 @@ public class Test_Video {
 	private JPanel getControls(JLabel label) {
 
 		cbCapture = new JCheckBox("capture");
+		cbCapture.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				grabImage();
+			}
+			
+		});
 		cbDiscrete = new JCheckBox("discrete");
 
 		JButton play = new JButton("play");

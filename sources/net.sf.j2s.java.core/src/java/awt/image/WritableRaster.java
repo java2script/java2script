@@ -221,6 +221,7 @@ public class WritableRaster extends Raster {
                                               int w, int h,
                                               int childMinX, int childMinY,
                                               int bandList[]) {
+	
         if (parentX < this.minX) {
             throw new RasterFormatException("parentX lies outside raster");
         }
@@ -259,7 +260,7 @@ public class WritableRaster extends Raster {
                                   this);
     }
 
-    /**
+	/**
      * Sets the data for a single pixel from a
      * primitive array of type TransferType.  For image data supported by
      * the Java 2D(tm) API, this will be one of DataBuffer.TYPE_BYTE,
@@ -425,6 +426,7 @@ public class WritableRaster extends Raster {
      * @throws NullPointerException if srcRaster is null.
      */
     public void setRect(int dx, int dy, Raster srcRaster) {
+		dataBuffer.秘checkImage();
         int width  = srcRaster.getWidth();
         int height = srcRaster.getHeight();
         int srcOffX = srcRaster.getMinX();

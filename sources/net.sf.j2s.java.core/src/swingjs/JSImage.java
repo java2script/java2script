@@ -3,13 +3,12 @@ package swingjs;
 import java.awt.Component;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.awt.image.MemoryImageSource;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
-import javax.swing.SwingUtilities;
 
 import javajs.util.Base64;
 import swingjs.JSFileSystem.JSPath;
@@ -43,24 +42,27 @@ public class JSImage extends BufferedImage {
 	public String src;
 
 	/**
-	 * Frome JSImageKit reading pixels from an image file.
+	 * Frome JSImageKit reading pixels from an image file or MemoryImageSource
 	 * 
 	 * @param argb
 	 * @param width
 	 * @param height
 	 * @param src
 	 */
-	public JSImage(int[] argb, int width, int height, String src) {
-		super(width, height, TYPE_INT_ARGB);
+	public JSImage(int[] argb, int width, int height, String src, int type) {
+		super(width, height, type);
+		MemoryImageSource m; // just an Eclipse tag so we can find this reference;
 		this.src = src;
-		秘setPixels(argb);
+		if (argb != null)
+			秘setPixels(argb);
 	}
 
-	public JSImage(byte[] pixelBytes, int width, int height, String src) {
+	public JSImage(byte[] pixelBytes, int width, int height, String src, int type) {
 		// Actually do not know what I am supposed to do with this.
-		super(width, height, TYPE_INT_ARGB);
+		super(width, height, type);
 		this.src = src;
-		秘setPixels((int[]) (Object) pixelBytes);
+		if (pixelBytes != null)
+			秘setPixels((int[]) (Object) pixelBytes);
 	}
 
 	/**
@@ -71,10 +73,11 @@ public class JSImage extends BufferedImage {
 	 */
 	@SuppressWarnings("unused")
 	void setImageNode(JSPath source, byte[] b, String type) {
+		Object src = null;
 		DOMNode img = null;
 		if (type == "video") {
 			try {
-				String src = (source == null ? null : JSUtil.getWebPathFor(source.toString()));
+				src = (source == null ? null : JSUtil.getWebPathFor(source.toString()));
 				if (b == null && source != null)
 					b = source.秘bytes;
 				System.out.println("JSImage video " + src + " " + (b == null ? 0 : b.length));
@@ -109,11 +112,12 @@ public class JSImage extends BufferedImage {
 						}
 					}					
 				};
+				if (b != null)
+					src = JSImagekit.getDataBlob(b, null);
 				/**
 				 * @j2sNative
 				 * 
-				 * 			//document.body.appendChild(img);
-				 * 			img.src = (b == null ? src : URL.createObjectURL(new Blob([b])));
+				 * 			img.src = src;
 				 * 			img.onloadedmetadata = function(){ r.run$()};
 				 *          img.load();
 				 */
@@ -125,9 +129,14 @@ public class JSImage extends BufferedImage {
 			/**
 			 * @j2sNative img = new Image(this.width, this.height); img.src = dataurl;
 			 */
+// I could not get Blob to work here. The image never transfers
+//			src = JSImagekit.getDataBlob(b, "image/" + type);
+//			/**
+//			 * @j2sNative img = new Image(this.width, this.height); img.src = src;
+//			 */
 
 		}
-		秘imgNode = img;
+		秘setImageNode(img, true);
 	}
 
 	/**
