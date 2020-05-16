@@ -40,6 +40,7 @@ package java.beans;
 public class PropertyChangeSupport {
     private PropertyChangeListenerMap map = new PropertyChangeListenerMap();
 
+    boolean doDebug = false;
     /**
      * Constructs a <code>PropertyChangeSupport</code> object.
      *
@@ -49,7 +50,14 @@ public class PropertyChangeSupport {
         if (sourceBean == null) {
             throw new NullPointerException();
         }
+        
+        
         source = sourceBean;
+
+    
+    doDebug = source.getClass().getName().indexOf("org.open") >= 0;
+    
+    
     }
 
     /**
@@ -156,6 +164,15 @@ public class PropertyChangeSupport {
 		if (listener == null || propertyName == null) {
 			return;
 		}
+		
+		if (doDebug) {
+			String target = listener.getClass().getName();
+			if (target.indexOf("org.")>=0)
+			System.out.println("PropChangeSupport adding " + this.source.getClass().getSimpleName() 
+					+ " " + propertyName + " for " + listener.getClass().getSimpleName());
+			
+		}
+
 		listener = this.map.extract(listener);
 		if (listener != null) {
 			this.map.add(propertyName, listener);
@@ -292,8 +309,21 @@ public class PropertyChangeSupport {
 
     private void fire(PropertyChangeListener[] listeners, PropertyChangeEvent event) {
         if (listeners != null) {
-        	for (int i = 0, n = listeners.length; i < n; i++)
+        	for (int i = 0, n = listeners.length; i < n; i++) {
+     
+        		
+        		
+  if (doDebug) {
+		String target = listeners[i].getClass().getName();
+		if (target.indexOf("org.")>=0)
+		System.out.println("PChS firing " + this.source.getClass().getSimpleName() 
+				+ " " + event.getPropertyName() + " to " + listeners[i].getClass().getSimpleName());
+
+  }
+
+        		
                 listeners[i].propertyChange(event);
+        	}
         }
     }
 
