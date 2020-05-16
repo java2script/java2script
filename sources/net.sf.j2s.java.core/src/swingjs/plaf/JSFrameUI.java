@@ -146,7 +146,8 @@ public class JSFrameUI extends JSWindowUI implements FramePeer, JSComponentUI.Em
 		}
 		String strColor = toCSSString(c.getBackground());
 		DOMNode.setStyles(domNode, "background-color", strColor);
-		DOMNode.setStyles(frameNode, "background", "#DDD");// strColor);
+		DOMNode.setStyles(frameNode, "background", strColor);
+		// Why did I set background to DDD? 2019-03-15 12:25:57 commit ca0130f819e926a987a1010569a2fcb5c36ced7c
 		DOMNode.setStyles(frameNode, "color", toCSSString(c.getForeground()));
 		setInnerComponentBounds(width, height);
 		setTitle(frame.getTitle());
