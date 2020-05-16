@@ -197,7 +197,14 @@ public class AjaxURLConnection extends HttpURLConnection {
 			responseCode = (isEmpty ? HTTP_NOT_FOUND : HTTP_ACCEPTED);
 		} else {
 			if (myURL.startsWith("file:")) {
-				myURL = JSUtil.J2S.getResourcePath("", true) + myURL.substring(5);
+				String path = JSUtil.J2S.getResourcePath("", true);
+				String base = JSUtil.getAppletDocumentPath();
+				if (myURL.indexOf(path) >= 0)
+					myURL = path + myURL.split(path)[1];
+				else if (base != null && myURL.indexOf(base) == 0)
+					myURL = myURL.substring(base.length());
+				else
+					myURL = path + myURL.substring(5);
 			}
 			result = J2S.doAjax(myURL, postOut, bytesOut, info);
 			if (whenDone != null)
