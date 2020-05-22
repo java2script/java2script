@@ -28,7 +28,9 @@ package swingjs.plaf;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.JSComponent;
 import java.awt.Point;
@@ -47,6 +49,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Enumeration;
@@ -58,6 +61,7 @@ import javax.swing.CellRendererPane;
 import javax.swing.Icon;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -545,7 +549,7 @@ public class JSTreeUI extends JSPanelUI {
 	}
 
 	protected boolean getShowsRootHandles() {
-		return (tree != null) ? tree.getShowsRootHandles() : false;
+		return tree != null && tree.getShowsRootHandles();
 	}
 
 	/**
@@ -793,31 +797,93 @@ public class JSTreeUI extends JSPanelUI {
 		// developer changes the font, it's there responsibility to update
 		// the row height.
 
-		setExpandedIcon((Icon) UIManager.get("Tree.expandedIcon"));
-		setCollapsedIcon((Icon) UIManager.get("Tree.collapsedIcon"));
+		setIcons();
 
 		setLeftChildIndent(((Integer) UIManager.get("Tree.leftChildIndent")).intValue());
 		setRightChildIndent(((Integer) UIManager.get("Tree.rightChildIndent")).intValue());
+		paintLines = UIManager.getBoolean("Tree.paintLines");
+		lineTypeDashed = UIManager.getBoolean("Tree.lineTypeDashed");
+		Long l = (Long) UIManager.get("Tree.timeFactor");
+		Object scrollsOnExpand = UIManager.get("Tree.scrollsOnExpand");
+		Object showsRootHandles = UIManager.get("Tree.showsRootHandles");
 
 		LookAndFeel.installProperty(tree, "rowHeight", UIManager.get("Tree.rowHeight"));
 
 		largeModel = (tree.isLargeModel() && tree.getRowHeight() > 0);
 
-		Object scrollsOnExpand = UIManager.get("Tree.scrollsOnExpand");
 		if (scrollsOnExpand != null) {
 			LookAndFeel.installProperty(tree, "scrollsOnExpand", scrollsOnExpand);
 		}
 
-		paintLines = UIManager.getBoolean("Tree.paintLines");
-		lineTypeDashed = UIManager.getBoolean("Tree.lineTypeDashed");
-
-		Long l = (Long) UIManager.get("Tree.timeFactor");
 		timeFactor = (l != null) ? l.longValue() : 1000L;
 
-		Object showsRootHandles = UIManager.get("Tree.showsRootHandles");
 		if (showsRootHandles != null) {
 			LookAndFeel.installProperty(tree, JTree.SHOWS_ROOT_HANDLES_PROPERTY, showsRootHandles);
 		}
+	}
+
+	private void setIcons() {
+		JLabel label;
+		Icon iexp = (Icon) UIManager.get("Tree.expandedIcon");
+		Icon icol = (Icon) UIManager.get("Tree.collapsedIcon");
+		if (iexp == null) {
+			label = new JLabel("\u2BC8");
+			label.setFont(new Font(Font.DIALOG, Font.PLAIN, 16));
+			iexp = new TextIcon(label, 0, 2);
+			label = new JLabel("\u2BC6");
+			label.setFont(new Font(Font.DIALOG, Font.PLAIN, 16));
+			icol = new TextIcon(label, 0, 0);
+	    	UIManager.getDefaults().put("Tree.leftChildIndent", 10);
+	    	UIManager.getDefaults().put("Tree.rightChildIndent", 5);
+	    	UIManager.getDefaults().put("Tree.paintLines", false);
+		}
+		setExpandedIcon(iexp);
+		setCollapsedIcon(icol);
+	}
+
+	class TextIcon implements Icon {
+		private JLabel label;
+		private int width, height;
+		private double scale;
+		private int xoff;
+		private int yoff;
+
+		TextIcon(JLabel label, int xoff, int yoff) {
+			setLabel(label, xoff, yoff);
+		}
+		
+		protected void setLabel(JLabel label, int xoff, int yoff) {
+			this.label = label;
+			Dimension dim = label.getPreferredSize();
+			width = dim.width;
+			height = dim.height;
+			scale = height / 19.;
+			System.out.println(dim + " " + scale);
+			this.xoff = xoff;
+			this.yoff = yoff;
+		}
+
+		@Override
+		public void paintIcon(Component c, Graphics g, int x, int y) {
+			Graphics2D g2 = (Graphics2D) g;
+			g.setColor(Color.BLACK);
+			g2.translate(x + width / 2, y + height / 2);
+			g2.scale(scale, scale);
+			g.drawString(label.getText(), (int) ((-width / 2. + xoff) / scale), (int) ((height / 4.+ yoff) / scale));
+			g2.scale(1 / scale, 1 / scale);
+			g2.translate(-x - width / 2, -y - height / 2);
+		}
+
+		@Override
+		public int getIconWidth() {
+			return width;
+		}
+
+		@Override
+		public int getIconHeight() {
+			return height;
+		}
+		
 	}
 
 	protected void installListeners() {
@@ -1222,69 +1288,75 @@ public class JSTreeUI extends JSPanelUI {
 			// Find each parent and have them draw a line to their last child
 			parentPath = parentPath.getParentPath();
 			while (parentPath != null) {
-				paintVerticalPartOfLeg(g, paintBounds, insets, parentPath);
-				drawingCache.put(parentPath, Boolean.TRUE);
 				parentPath = parentPath.getParentPath();
 			}
-			boolean done = false;
 			// Information for the node being rendered.
 			boolean isExpanded;
 			boolean hasBeenExpanded;
 			boolean isLeaf;
 			Rectangle boundsBuffer = new Rectangle();
 			Rectangle bounds;
-			TreePath path;
+			TreePath path = null;
 			boolean rootVisible = isRootVisible();
 
-			while (!done && paintingEnumerator.hasMoreElements()) {
-				path = (TreePath) paintingEnumerator.nextElement();
-				if (path != null) {
-					isLeaf = treeModel.isLeaf(path.getLastPathComponent());
-					if (isLeaf)
-						isExpanded = hasBeenExpanded = false;
-					else {
-						isExpanded = treeState.getExpandedState(path);
-						hasBeenExpanded = tree.hasBeenExpanded(path);
-					}
-					bounds = getPathBounds(path, insets, boundsBuffer);
-					if (bounds == null)
-						// This will only happen if the model changes out
-						// from under us (usually in another thread).
-						// Swing isn't multithreaded, but I'll put this
-						// check in anyway.
-						return;
-					// See if the vertical line to the parent has been drawn.
+			if (rootVisible)
+				displayJSPath(initialPath, false);
+
+			while (paintingEnumerator.hasMoreElements()) {
+				
+				if (paintLines)
+					paintVerticalPartOfLeg(g, paintBounds, insets, parentPath);
+				
+				drawingCache.put(parentPath, Boolean.TRUE);
+				
+				if (row == 1) // only reveal the rest if there is more than one row
+					displayJSPath(initialPath, true);
+				if ((path = (TreePath) paintingEnumerator.nextElement()) == null) {
+					break;
+				}
+				isLeaf = treeModel.isLeaf(path.getLastPathComponent());
+				if (isLeaf) {
+					isExpanded = hasBeenExpanded = false;
+				} else {
+					isExpanded = treeState.getExpandedState(path);
+					hasBeenExpanded = tree.hasBeenExpanded(path);
+				}
+				bounds = getPathBounds(path, insets, boundsBuffer);
+				if (bounds == null)
+					// This will only happen if the model changes out
+					// from under us (usually in another thread).
+					// Swing isn't multithreaded, but I'll put this
+					// check in anyway.
+					return;
+				// See if the vertical line to the parent has been drawn.
+				if (paintLines) {
 					parentPath = path.getParentPath();
+					boolean paintHorizLeg = (rootVisible && row == 0);
 					if (parentPath != null) {
 						if (drawingCache.get(parentPath) == null) {
 							paintVerticalPartOfLeg(g, paintBounds, insets, parentPath);
 							drawingCache.put(parentPath, Boolean.TRUE);
 						}
+						paintHorizLeg = true;
+					}
+					if (paintHorizLeg)
 						paintHorizontalPartOfLeg(g, paintBounds, insets, bounds, path, row, isExpanded, hasBeenExpanded,
 								isLeaf);
-					} else if (rootVisible && row == 0) {
-						paintHorizontalPartOfLeg(g, paintBounds, insets, bounds, path, row, isExpanded, hasBeenExpanded,
-								isLeaf);
-					}
-					if (shouldPaintExpandControl(path, row, isExpanded, hasBeenExpanded, isLeaf)) {
-						paintExpandControl(g, paintBounds, insets, bounds, path, row, isExpanded, hasBeenExpanded,
-								isLeaf);
-					}
-					paintRow(g, paintBounds, insets, bounds, path, row, isExpanded, hasBeenExpanded, isLeaf);
-					if ((bounds.y + bounds.height) >= endY)
-						done = true;
-				} else {
-					done = true;
 				}
+				if (shouldPaintExpandControl(path, row, isExpanded, hasBeenExpanded, isLeaf)) {
+					paintExpandControl(g, paintBounds, insets, bounds, path, row, isExpanded, hasBeenExpanded, isLeaf);
+				}
+				paintRow(g, paintBounds, insets, bounds, path, row, isExpanded, hasBeenExpanded, isLeaf);
+				if ((bounds.y + bounds.height) >= endY)
+					break;
 				row++;
 			}
 		}
-
 		paintDropLine(g);
 
 		// Empty out the renderer pane, allowing renderers to be gc'ed.
-		
-		//rendererPane.removeAll();
+
+		// rendererPane.removeAll();
 
 		drawingCache.clear();
 	}
@@ -1403,10 +1475,6 @@ public class JSTreeUI extends JSPanelUI {
 	 */
 	protected void paintHorizontalPartOfLeg(Graphics g, Rectangle clipBounds, Insets insets, Rectangle bounds,
 			TreePath path, int row, boolean isExpanded, boolean hasBeenExpanded, boolean isLeaf) {
-		if (!paintLines) {
-			return;
-		}
-
 		// Don't paint the legs for the root'ish node if the
 		int depth = path.getPathCount() - 1;
 		if ((depth == 0 || (depth == 1 && !isRootVisible())) && !getShowsRootHandles()) {
@@ -1419,24 +1487,19 @@ public class JSTreeUI extends JSPanelUI {
 		int clipBottom = clipBounds.y + clipBounds.height;
 		int lineY = bounds.y + bounds.height / 2;
 
+		int x0 = bounds.x;
+		int x1 = bounds.x;
 		if (leftToRight) {
-			int leftX = bounds.x - getRightChildIndent();
-			int nodeX = bounds.x - getHorizontalLegBuffer();
-
-			if (lineY >= clipTop && lineY < clipBottom && nodeX >= clipLeft && leftX < clipRight && leftX < nodeX) {
-
-				g.setColor(getHashColor());
-				paintHorizontalLine(g, tree, lineY, leftX, nodeX - 1);
-			}
+			x1 = x0 - getHorizontalLegBuffer();
+			x0 -= getRightChildIndent();
 		} else {
-			int nodeX = bounds.x + bounds.width + getHorizontalLegBuffer();
-			int rightX = bounds.x + bounds.width + getRightChildIndent();
+			x1 = x0 + bounds.width + getRightChildIndent();
+			x0 += bounds.width + getHorizontalLegBuffer();
+		}
+		if (lineY >= clipTop && lineY < clipBottom && x1 >= clipLeft && x0 < clipRight && x0 < x1) {
 
-			if (lineY >= clipTop && lineY < clipBottom && rightX >= clipLeft && nodeX < clipRight && nodeX < rightX) {
-
-				g.setColor(getHashColor());
-				paintHorizontalLine(g, tree, lineY, nodeX, rightX - 1);
-			}
+			g.setColor(getHashColor());
+			paintHorizontalLine(g, tree, lineY, x0, x1 - 1);
 		}
 	}
 
@@ -1445,10 +1508,6 @@ public class JSTreeUI extends JSPanelUI {
 	 * <code>clipBounds</code>, <code>insets</code>.
 	 */
 	protected void paintVerticalPartOfLeg(Graphics g, Rectangle clipBounds, Insets insets, TreePath path) {
-		if (!paintLines) {
-			return;
-		}
-
 		int depth = path.getPathCount() - 1;
 		if (depth == 0 && !getShowsRootHandles() && !isRootVisible()) {
 			return;
@@ -1538,6 +1597,7 @@ public class JSTreeUI extends JSPanelUI {
 
 	private void displayJSPath(TreePath path, boolean isExpanded) {
 		String myid = getPathID(path);		
+//		System.out.println("displayjspath " + isExpanded + " " + path);
 		$("[id^=" + myid + "_]").css("display",isExpanded ? "block" : "none");
 	}
 //
@@ -1563,6 +1623,7 @@ public class JSTreeUI extends JSPanelUI {
 //	}
 //	
 
+	
 	/**
 	 * Paints the renderer part of a row. The receiver should NOT modify
 	 * <code>clipBounds</code>, or <code>insets</code>.
@@ -1604,7 +1665,6 @@ public class JSTreeUI extends JSPanelUI {
 		String myid = getPathID(path);
 		JQueryObject jnode = $((DOMNode) (Object) ("#" + myid));
 		DOMNode div = JQueryObject.getDOMNode(jnode);
-		//System.out.println("updateItemHTML " + " " + myid + " " + path);
 		if (div == null) {
 			div = newDOMObject("div", myid);
 			div.appendChild(node);			
@@ -1629,14 +1689,11 @@ public class JSTreeUI extends JSPanelUI {
 			boolean isLeaf) {
 		if (isLeaf)
 			return false;
-
 		int depth = path.getPathCount() - 1;
-
-		if ((depth == 0 || (depth == 1 && !isRootVisible())) && !getShowsRootHandles())
-			return false;
-		return true;
+		return getShowsRootHandles() || depth != 0 && (isRootVisible() || depth != 1);
 	}
 
+	
 	/**
 	 * Paints a vertical line.
 	 */
@@ -1679,7 +1736,7 @@ public class JSTreeUI extends JSPanelUI {
 	private int findCenteredX(int x, int iconWidth) {
 		return leftToRight ? x - (int) Math.ceil(iconWidth / 2.0) : x - (int) Math.floor(iconWidth / 2.0);
 	}
-
+	
 	//
 	// Generic painting methods
 	//
@@ -1797,15 +1854,13 @@ public class JSTreeUI extends JSPanelUI {
 	 * Updates how much each depth should be offset by.
 	 */
 	protected void updateDepthOffset() {
-		if (isRootVisible()) {
-			if (getShowsRootHandles())
-				depthOffset = 1;
-			else
-				depthOffset = 0;
-		} else if (!getShowsRootHandles())
-			depthOffset = -1;
-		else
-			depthOffset = 0;
+		// rvis   srh
+		//   t     t    1
+		//   t     f    0
+		//   f     t    0
+		//   f     f    -1
+		
+		depthOffset = (isRootVisible() ? 1 : 0) - (getShowsRootHandles() ? 0 : 1);
 	}
 
 	/**

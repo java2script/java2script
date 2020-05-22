@@ -51,6 +51,7 @@ import javax.swing.JSplitPane;
 import javax.swing.UIManager;
 
 import javax.swing.JTree;
+import javax.swing.UIDefaults;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 import javax.swing.event.TreeSelectionEvent;
@@ -78,7 +79,11 @@ public class TreeDemo extends JPanel
 
     public TreeDemo() {
         super(new GridLayout(1,0));
-
+    	UIManager.getDefaults().put("Tree.leftChildIndent", 10);
+    	UIManager.getDefaults().put("Tree.rightChildIndent", 5);
+    	UIManager.getDefaults().put("Tree.paintLines", false);
+//        System.out.println(UIManager.getBoolean("Tree.paintLines"));
+        
         //Create the nodes.
         DefaultMutableTreeNode top =
             new DefaultMutableTreeNode("The Java Series");
@@ -89,6 +94,7 @@ public class TreeDemo extends JPanel
         tree.getSelectionModel().setSelectionMode
                 (TreeSelectionModel.SINGLE_TREE_SELECTION);
 
+//        tree.setRowHeight(30);
         //Listen for when the selection changes.
         tree.addTreeSelectionListener(this);
 
@@ -271,6 +277,7 @@ public class TreeDemo extends JPanel
         //Display the window.
         frame.pack();
         frame.setVisible(true);
+        
     }
 
     public static void main(String[] args) {

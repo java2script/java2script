@@ -1787,16 +1787,9 @@ public class JSComponentUI extends ComponentUI
 					DOMNode.setStyles(this.iconNode, "position", null);
 				}
 			}
-
-			if (tempDiv == null) {
-				tempDiv = DOMNode.createElement("div", "_temp");
-				DOMNode.setTopLeftAbsolute(tempDiv, 0, -100000);
-				$(body).after(tempDiv);
-			}
+			
 			parentNode = DOMNode.transferTo(node, null);
-			tempDiv.appendChild(node);
-			Rectangle r = tempDiv.getBoundingClientRect();
-			tempDiv.removeChild(node);
+			Rectangle r = getBoundingRect(node);
 			
 
 			// From the DOM; Will be Rectangle2D.double, actually.
@@ -1836,6 +1829,19 @@ public class JSComponentUI extends ComponentUI
 		}
 		return dim;
 	}
+
+	protected Rectangle getBoundingRect(DOMNode node) {
+		if (tempDiv == null) {
+			tempDiv = DOMNode.createElement("div", "_temp");
+			DOMNode.setTopLeftAbsolute(tempDiv, 0, -100000);
+			$(body).after(tempDiv);
+		}
+		tempDiv.appendChild(node);
+		Rectangle r = tempDiv.getBoundingClientRect();
+		tempDiv.removeChild(node);
+		return r;
+	}
+
 
 	/**
 	 * allows for can be overloaded to allow some special adjustments;
@@ -2735,7 +2741,7 @@ public class JSComponentUI extends ComponentUI
 						menuAnchorNode.appendChild(accelNode = DOMNode.createElement("span", id + "_acc"));
 						addClass(accelNode, "ui-j2smenu-accel");
 						DOMNode.setAttr(accelNode, "role", "menuitem");
-						DOMNode.setStyles(accelNode, "font-size", "10px");
+						DOMNode.setStyles(accelNode, "font-size", "0.8em");
 						setMenuItem(accelNode);
 					}
 				}
@@ -2748,8 +2754,9 @@ public class JSComponentUI extends ComponentUI
 				}
 			}
 			if (!isMenu || isMenuItem)
-				DOMNode.setStyles(menuAnchorNode, "width", "90%", "min-width",
-					Math.max(75, (wCtr + wAccel + margins.left + margins.right) * 1.1) + "px"); // was 95%, but then the blue background extends past right end of menu item
+				DOMNode.setStyles(menuAnchorNode, //"width", "90%", 
+						"min-width",
+					Math.max(75, (23 + 15 + wCtr + wAccel + margins.left + margins.right)) + "px"); // was 95%, but then the blue background extends past right end of menu item
 		}
 
 		if (alignHCenter) {

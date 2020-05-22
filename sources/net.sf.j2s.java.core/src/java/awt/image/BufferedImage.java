@@ -1383,11 +1383,20 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 			秘g.dispose();
 	}
 
+	/** because we are using this in HTML5Canvas, which is a public interface
+	 * and the Mandarin char was causing problems.
+	 * 
+	 * @param node
+	 * @param async
+	 */
+	public void _setImageNode(Object node, boolean async) {
+		秘setImageNode(node, async);
+	}
 
 	/**
 	 * Set the image from an external HTML5 IMG, CANVAS, or VIDEO source.
 	 * 
-	 * Do not change the signature of this method. HTML5Canvas calls it as j2sNative
+	 * Do not change the signature of this method. (older) HTML5Canvas calls it as j2sNative
 	 * 
 	 * 
 	 * @param node

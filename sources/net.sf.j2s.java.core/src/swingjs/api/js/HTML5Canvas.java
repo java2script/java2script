@@ -34,12 +34,14 @@ public interface HTML5Canvas extends DOMNode {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			image.秘setImageNode$O$Z(sourceNode);
+		 * 			image._setImageNode$O$Z(sourceNode, false);
 		 * 
 		 */		{
-			 //image.秘setImageNode(sourceNode, false);
+			// image._setImageNode(sourceNode, false);
 		 }
 	}
+	
+	
 
 	static HTML5Canvas createCanvas(int width, int height, String id) {
 		HTML5Canvas canvas = (HTML5Canvas) DOMNode.createElement("canvas", (id == null ? "img" + Math.random() : id + ""));

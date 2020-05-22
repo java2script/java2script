@@ -55,7 +55,7 @@ public class PropertyChangeSupport {
         source = sourceBean;
 
     
-    doDebug = source.getClass().getName().indexOf("org.open") >= 0;
+//    doDebug = source.getClass().getName().indexOf("org.open") >= 0;
     
     
     }

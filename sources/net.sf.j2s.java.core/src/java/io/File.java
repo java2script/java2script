@@ -28,8 +28,10 @@
 
 package java.io;
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.security.AccessControlException;
@@ -644,66 +646,66 @@ public class File
         return p;
     }
 
-//    /**
-//     * Converts this abstract pathname into a <code>file:</code> URL.  The
-//     * exact form of the URL is system-dependent.  If it can be determined that
-//     * the file denoted by this abstract pathname is a directory, then the
-//     * resulting URL will end with a slash.
-//     *
-//     * @return  A URL object representing the equivalent file URL
-//     *
-//     * @throws  MalformedURLException
-//     *          If the path cannot be parsed as a URL
-//     *
-//     * @see     #toURI()
-//     * @see     java.net.URI
-//     * @see     java.net.URI#toURL()
-//     * @see     java.net.URL
-//     * @since   1.2
-//     *
-//     * @deprecated This method does not automatically escape characters that
-//     * are illegal in URLs.  It is recommended that new code convert an
-//     * abstract pathname into a URL by first converting it into a URI, via the
-//     * {@link #toURI() toURI} method, and then converting the URI into a URL
-//     * via the {@link java.net.URI#toURL() URI.toURL} method.
-//     */
-//    @Deprecated
-//    public URL toURL() throws MalformedURLException {
-//        return new URL("file", "", slashify(getAbsolutePath(), isDirectory()));
-//    }
-//
-//    /**
-//     * Constructs a <tt>file:</tt> URI that represents this abstract pathname.
-//     *
-//     * <p> The exact form of the URI is system-dependent.  If it can be
-//     * determined that the file denoted by this abstract pathname is a
-//     * directory, then the resulting URI will end with a slash.
-//     *
-//     * <p> For a given abstract pathname <i>f</i>, it is guaranteed that
-//     *
-//     * <blockquote><tt>
-//     * new {@link #File(java.net.URI) File}(</tt><i>&nbsp;f</i><tt>.toURI()).equals(</tt><i>&nbsp;f</i><tt>.{@link #getAbsoluteFile() getAbsoluteFile}())
-//     * </tt></blockquote>
-//     *
-//     * so long as the original abstract pathname, the URI, and the new abstract
-//     * pathname are all created in (possibly different invocations of) the same
-//     * Java virtual machine.  Due to the system-dependent nature of abstract
-//     * pathnames, however, this relationship typically does not hold when a
-//     * <tt>file:</tt> URI that is created in a virtual machine on one operating
-//     * system is converted into an abstract pathname in a virtual machine on a
-//     * different operating system.
-//     *
-//     * @return  An absolute, hierarchical URI with a scheme equal to
-//     *          <tt>"file"</tt>, a path representing this abstract pathname,
-//     *          and undefined authority, query, and fragment components
-//     * @throws SecurityException If a required system property value cannot
-//     * be accessed.
-//     *
-//     * @see #File(java.net.URI)
-//     * @see java.net.URI
-//     * @see java.net.URI#toURL()
-//     * @since 1.4
-//     */
+    /**
+     * Converts this abstract pathname into a <code>file:</code> URL.  The
+     * exact form of the URL is system-dependent.  If it can be determined that
+     * the file denoted by this abstract pathname is a directory, then the
+     * resulting URL will end with a slash.
+     *
+     * @return  A URL object representing the equivalent file URL
+     *
+     * @throws  MalformedURLException
+     *          If the path cannot be parsed as a URL
+     *
+     * @see     #toURI()
+     * @see     java.net.URI
+     * @see     java.net.URI#toURL()
+     * @see     java.net.URL
+     * @since   1.2
+     *
+     * @deprecated This method does not automatically escape characters that
+     * are illegal in URLs.  It is recommended that new code convert an
+     * abstract pathname into a URL by first converting it into a URI, via the
+     * {@link #toURI() toURI} method, and then converting the URI into a URL
+     * via the {@link java.net.URI#toURL() URI.toURL} method.
+     */
+    @Deprecated
+    public URL toURL() throws MalformedURLException {
+        return new URL("file", "", slashify(getAbsolutePath(), false));
+    }
+
+    /**
+     * Constructs a <tt>file:</tt> URI that represents this abstract pathname.
+     *
+     * <p> The exact form of the URI is system-dependent.  If it can be
+     * determined that the file denoted by this abstract pathname is a
+     * directory, then the resulting URI will end with a slash.
+     *
+     * <p> For a given abstract pathname <i>f</i>, it is guaranteed that
+     *
+     * <blockquote><tt>
+     * new {@link #File(java.net.URI) File}(</tt><i>&nbsp;f</i><tt>.toURI()).equals(</tt><i>&nbsp;f</i><tt>.{@link #getAbsoluteFile() getAbsoluteFile}())
+     * </tt></blockquote>
+     *
+     * so long as the original abstract pathname, the URI, and the new abstract
+     * pathname are all created in (possibly different invocations of) the same
+     * Java virtual machine.  Due to the system-dependent nature of abstract
+     * pathnames, however, this relationship typically does not hold when a
+     * <tt>file:</tt> URI that is created in a virtual machine on one operating
+     * system is converted into an abstract pathname in a virtual machine on a
+     * different operating system.
+     *
+     * @return  An absolute, hierarchical URI with a scheme equal to
+     *          <tt>"file"</tt>, a path representing this abstract pathname,
+     *          and undefined authority, query, and fragment components
+     * @throws SecurityException If a required system property value cannot
+     * be accessed.
+     *
+     * @see #File(java.net.URI)
+     * @see java.net.URI
+     * @see java.net.URI#toURL()
+     * @since 1.4
+     */
     public URI toURI() {
         try {
             String sp = slashify(getAbsoluteFile().getPath(), false);
@@ -779,7 +781,7 @@ public class File
      *          method denies read access to the file or directory
      */
     public boolean exists() {
-        return fs._exists(this);
+        return this.path.indexOf("!/") < 0 && fs._exists(this);
     }
 
     /**
@@ -800,7 +802,7 @@ public class File
 //        if (security != null) {
 //            security.checkRead(path);
 //        }
-        return fs._isDir(this);
+    	return this.path.indexOf("!/") < 0 && fs._isDir(this);
 //    
 //    	return false;
 //    	// BH 2019.09.23 return true;

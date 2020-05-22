@@ -358,7 +358,10 @@ public class AjaxURLConnection extends HttpURLConnection {
 		Object data = urlCache.get(getCacheKey());
 		if (data == null)
 			return null;
+		@SuppressWarnings("unused")
 		URL url = this.url;
+		if (data instanceof byte[])
+			url._streamData = data;
 		boolean isAjax = /** @j2sNative url.ajax || */
 				false;
 		BufferedInputStream bis = getBIS(data, isAjax);

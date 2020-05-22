@@ -277,9 +277,14 @@ public class ButtonListener
 			if (ui.isMenu) {
 				JMenu jm = (JMenu) b;
 				if (jm.isTopLevelMenu()) {
-					jm.setPopupMenuVisible(!jm.isPopupMenuVisible());
+					//jm.setPopupMenuVisible(!jm.isPopupMenuVisible());
 					JComponent root = ((JComponent) b.getTopLevelAncestor()).getRootPane();
 					root.requestFocus();
+					JMenuBar mb = (JMenuBar) jm.getParent();
+					int i = mb.getSelectionModel().getSelectedIndex();
+					if (i >= 0)
+						mb.getMenu(i).setSelected(false);
+					// this will drive the menubar selection to -1
 				}
 				jm.menuSelectionChanged(true);		
 			}

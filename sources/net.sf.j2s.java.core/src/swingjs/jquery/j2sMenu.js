@@ -535,7 +535,7 @@ Swing.__getMenuStyle = function(applet) { return '\
 	.swingjsPopupMenu .ui-j2s-menuBar-menu:focus{outline:none;background:#d0e5f5}\
 	.swingjsPopupMenu .ui-j2smenu{outline:none;margin-top:-3px;position:absolute}\
 	.swingjsPopupMenu .ui-j2smenu-item{outline:none;cursor:pointer;margin:0 0 0 0;padding:0.1em;width:100%}\
-	.swingjsPopupMenu .a:focus{outline:none;cursor:pointer;margin:0 0 0 0;padding:0.1em;width:90%}\
+	.swingjsPopupMenu .a:focus{outline:none;cursor:pointer;margin:0 0 0 0;padding:0.1em}\
 	.swingjsPopupMenu .ui-j2smenu-divider{margin:3px 1px;height:0;transform:translateY(-4px);position:absolute;font-size:0;line-height:0px;border-width:2px 0 0 0;width:93%;}\
 	.swingjsPopupMenu .ui-j2smenu-item .a{display:block;padding:0.05em 0.4em;white-space:nowrap;border:1px solid transparent}\
 	.swingjsPopupMenu .ui-j2smenu-icons{position:relative}\
