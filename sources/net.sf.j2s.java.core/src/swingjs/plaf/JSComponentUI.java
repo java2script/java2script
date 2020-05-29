@@ -1145,6 +1145,8 @@ public class JSComponentUI extends ComponentUI
     protected static final int SOME_MOUSE_EVENT = -1;
     protected static final int SOME_KEY_EVENT = -2;
 
+	public static final int CONTENT_PANE_Z = -30000;
+
 	/**
 	 * Set the node to accept key events and possibly focusout
 	 * 
@@ -1372,7 +1374,7 @@ public class JSComponentUI extends ComponentUI
 		
 		switch (prop) {
 		case JLayeredPane.LAYER_PROPERTY:
-			setZ(((Integer)e.getNewValue()).intValue());
+			setZ(getInheritedZ() + ((Integer)e.getNewValue()).intValue());
 			setTainted();
 			return;
 		case "border":
@@ -1907,8 +1909,8 @@ public class JSComponentUI extends ComponentUI
 		else if (domNode != outerNode && DOMNode.getParent(domNode) != outerNode)
 			outerNode.appendChild(domNode);
 		Integer order = (Integer) jc.getClientProperty(JLayeredPane.LAYER_PROPERTY);
-		if (order != null)
-			setZ(order.intValue());
+		if (order != null && order.intValue() != CONTENT_PANE_Z)
+			setZ(getInheritedZ() + order.intValue());
 		setOuterLocationFromComponent();
 		if (n > 0 && containerNode == null)
 			containerNode = outerNode;
@@ -3270,7 +3272,7 @@ public class JSComponentUI extends ComponentUI
 	 * @param z
 	 */
 	public void setZ(int z) {
-		if (z == -30000) // content pane
+		if (z == CONTENT_PANE_Z) // content pane
 			return;
 		DOMNode.setPositionAbsolute(domNode);
 		DOMNode.setZ(domNode, z);
@@ -3646,7 +3648,7 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	public boolean isDisplayable() {
-		return domNode != null;
+		return !isDisposed && domNode != null;
 	}
 
 }

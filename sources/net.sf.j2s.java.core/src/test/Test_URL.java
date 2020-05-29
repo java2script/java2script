@@ -36,6 +36,7 @@ import sun.misc.IOUtils;
 
 public class Test_URL extends Test_ {
 
+	
 	private static final int DEFAULT_READ_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 
 	private static final int CONNECT_TIMEOUT_MS = 10 * 1000; // 10 seconds

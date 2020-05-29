@@ -823,7 +823,7 @@ class VKCollection {
 		 */
 		for (int i = 0; i < list.length; i++)
 		{  
-			put((String) list[i][0], Integer.valueOf((String) list[i][1]));
+			put((String) list[i][0], Integer.valueOf(/** @j2sNative list[i][1] ||*/0));
 		}	
 		
 	}

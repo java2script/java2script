@@ -125,6 +125,8 @@ public class JSComboBoxUI extends JSLightweightUI {
 		//System.out.println("\n\nJSComboBoxUI prop " + name + "\n old " + e.getOldValue() + "\n new " + e.getNewValue());
 		switch (name) {
 		case "ancestor":
+			if (e.getNewValue() != null)
+				popup.updateZIndex();
 			//System.out.println("JSComboBoxUI " + id + " prop " + name + " " + jc.getTopLevelAncestor());
 			break;
 		case "updateSwingJS":
@@ -1019,7 +1021,7 @@ public class JSComboBoxUI extends JSLightweightUI {
 			popup.updateCSS();
 		}
 		popup.updateSelectedIndex();
-		popup.setPopupVisible(false);
+	//	popup.setPopupVisible(false);
 		// SwingJS -- not doing this for now.
 //        hasFocus = comboBox.hasFocus();
 //        if ( !comboBox.isEditable() ) {

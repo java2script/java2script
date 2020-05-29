@@ -16,6 +16,7 @@ import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
+import javax.swing.JLayeredPane;
 import javax.swing.LookAndFeel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -358,6 +359,8 @@ public class JSInternalFrameUI extends JSFrameUI {
 		Object newValue = evt.getNewValue();
 		Object oldValue = evt.getOldValue();
 
+		if (JLayeredPane.LAYER_PROPERTY == prop)
+			return;
 		if (JInternalFrame.IS_CLOSED_PROPERTY == prop) {
 			if (newValue == Boolean.TRUE) {
 //                // Cancel a resize in progress if the internal frame

@@ -3687,7 +3687,14 @@ function(i){
 
 m$(Integer,"parseInt$S$I",
 function(s,radix){
- var v = parseInt(s, radix);
+ var v = (s.indexOf(".") >= 0 ? NaN : parseInt(s, radix));
+ if (!isNaN(v)) {
+	 // check for trailing garbage
+	 var v1 = parseInt(s + "1", radix);
+	 if (v1 == v)
+		 v = NaN;
+ }
+
  if (isNaN(v) || v < minInt || v > maxInt){
 	throw Clazz.new_(NumberFormatException.c$$S, ["parsing " + s + " radix " + radix]);
  }
@@ -3696,6 +3703,9 @@ return v;
 
 m$(Integer,"parseInt$S",
 function(s){
+	var v = +s;
+	if (isNaN(v))
+		s= "?" + s; // just to ensure it gets trapped
 return Integer.parseInt$S$I(s, 10);
 }, 1);
 

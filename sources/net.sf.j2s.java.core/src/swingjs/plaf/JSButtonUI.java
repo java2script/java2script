@@ -147,6 +147,7 @@ public class JSButtonUI extends JSLightweightUI {
 		itemNode = newDOMObject("li", id);
 		if (text == null && icon == null)
 			return itemNode;
+		DOMNode.setStyles(itemNode, "outline", "none");
 		menuAnchorNode = newDOMObject("div", id + "_a");// this needed? , "tabindex", "8");
 		if (type != "_bar") {
 			addClass(menuAnchorNode, "a");
