@@ -300,7 +300,7 @@ window.J2S = J2S = (function() {
 	}
 
 	var fixProtocol = function(url) {
-		if (url.indexOf("file://") >= 0)
+		if (!J2S._isFile && url.indexOf("file://") >= 0)
 			url = "http" + url.substring(4);
 		// force https if page is https
 		if (J2S._httpProto == "https://" && url.indexOf("http://") == 0)
@@ -877,7 +877,8 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 			fileName = fileName.substring(10);
 		else if (fileName.indexOf("http://./") == 0)
 			fileName = fileName.substring(9);
-		else if (fileName.indexOf("file:") >= 0)
+		else if (fileName.indexOf("file:/") >= 0 
+				&& fileName.indexOf(J2S.thisApplet.__Info.j2sPath) != 0)
 			fileName = "./" + fileName.substring(5);
 		isBinary = (isBinary || J2S.isBinaryUrl(fileName));
 		var isPDB = (fileName.indexOf("pdb.gz") >= 0 && fileName
@@ -953,7 +954,7 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 	}
 
 	J2S._xhrReturn = function(xhr) {
-		if (xhr.state() == "rejected")
+		if (xhr.state() == "rejected" && !xhr.responseText)
 			return null;
 		if (!xhr.responseText && !xhr.responseJSON 
 				|| Clazz.instanceOf(xhr.response, self.ArrayBuffer)) {
