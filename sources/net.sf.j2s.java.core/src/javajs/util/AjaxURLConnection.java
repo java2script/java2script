@@ -18,7 +18,7 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 
 import javajs.api.js.J2SObjectInterface;
-import swingjs.JSUtil;
+import swingjs.api.JSUtilI;
 
 /**
  * 
@@ -27,6 +27,14 @@ import swingjs.JSUtil;
  */
 public class AjaxURLConnection extends HttpURLConnection {
 
+	static private JSUtilI jsutil = null;
+	static {
+		try {
+			jsutil = (JSUtilI) Class.forName("swingjs.JSUtil").newInstance();
+		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
 	public static class AjaxHttpsURLConnection extends AjaxURLConnection {
 
 		static {
@@ -130,7 +138,7 @@ public class AjaxURLConnection extends HttpURLConnection {
 		getBytesOut();
 		J2SObjectInterface J2S = /** @j2sNative self.J2S || */
 				null;
-		Object info = null;
+		Object info = null; 
 		/**
 		 * @j2sNative
 		 * 
@@ -188,7 +196,8 @@ public class AjaxURLConnection extends HttpURLConnection {
 		String myURL = url.toString();
 		boolean isEmpty = false;
 		if (myURL.startsWith("file:/TEMP/")) {
-			result = JSUtil.getCachedFileData(myURL, true);
+			
+			result = jsutil.getCachedBytes(myURL);
 			isEmpty = (result == null);
 			if (whenDone != null) {
 				whenDone.apply(isEmpty ? null : result);
@@ -197,8 +206,8 @@ public class AjaxURLConnection extends HttpURLConnection {
 			responseCode = (isEmpty ? HTTP_NOT_FOUND : HTTP_ACCEPTED);
 		} else {
 			if (myURL.startsWith("file:")) {
-				String path = JSUtil.J2S.getResourcePath("", true);
-				String base = JSUtil.getAppletDocumentPath();
+				String path = jsutil.getCodeBase().toString();
+				String base = jsutil.getDocumentBase().toString();
 				if (myURL.indexOf(path) >= 0)
 					myURL = path + myURL.split(path)[1];
 				else if (base != null && myURL.indexOf(base) == 0)
