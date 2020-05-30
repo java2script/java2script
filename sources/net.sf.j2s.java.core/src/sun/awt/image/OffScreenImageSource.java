@@ -52,6 +52,8 @@ public class OffScreenImageSource implements ImageProducer {
     public OffScreenImageSource(BufferedImage image,
                                 Hashtable properties) {
         this.image = image;
+		image.getRaster().getDataBuffer().秘setUntrackable();
+
         if (properties != null) {
             this.properties = properties;
         } else {
@@ -103,6 +105,7 @@ public class OffScreenImageSource implements ImageProducer {
         int[] scanline = new int[width*numDataElements];
         boolean needToCvt = true;
 
+        raster.getDataBuffer().秘setDoCheckImage(false);
         if (cm instanceof IndexColorModel) {
             byte[] pixels = new byte[width];
             theConsumer.setColorModel(cm);
@@ -191,6 +194,7 @@ public class OffScreenImageSource implements ImageProducer {
                                       width);
             }
         }
+        raster.getDataBuffer().秘setDoCheckImage(true);
     }
 
     private void produce() {

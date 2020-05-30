@@ -969,6 +969,7 @@ public class JSUtil implements JSUtilI {
 
 	@Override
 	public void setAppletInfo(String infoKey, Object val) {
+		@SuppressWarnings("unused")
 		HTML5Applet applet = getApplet();
 		/** @j2sNative
 		 * 
@@ -995,6 +996,10 @@ public class JSUtil implements JSUtilI {
 		}
 	}
 	
+	/**
+	 * Note that the document path INCLUDES the complete URL for the page, not just the directory.
+	 * @return
+	 */
 	public static String getAppletDocumentPath() {
 		try {
 			JSFrameViewer ap = (JSFrameViewer) DOMNode.getAttr(getApplet(), "_appletPanel");

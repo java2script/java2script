@@ -74,7 +74,7 @@ public final class DataBufferShort extends DataBuffer
      * @param size The size of the <CODE>DataBuffer</CODE>.
      */
     public DataBufferShort(int size) {
-        super(STABLE, TYPE_SHORT,size);
+        super(/*?*/UNTRACKABLE, TYPE_SHORT,size);
         data = new short[size];
         bankdata = new short[1][];
         bankdata[0] = data;
@@ -88,7 +88,7 @@ public final class DataBufferShort extends DataBuffer
      * @param numBanks The number of banks in the a<CODE>DataBuffer</CODE>.
      */
     public DataBufferShort(int size, int numBanks) {
-        super(STABLE, TYPE_SHORT,size,numBanks);
+        super(/*?*/UNTRACKABLE, TYPE_SHORT,size,numBanks);
         bankdata = new short[numBanks][];
         for (int i= 0; i < numBanks; i++) {
             bankdata[i] = new short[size];

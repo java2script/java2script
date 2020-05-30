@@ -76,7 +76,7 @@ public final class DataBufferByte extends DataBuffer
      * @param size The size of the <CODE>DataBuffer</CODE>.
      */
     public DataBufferByte(int size) {
-      super(STABLE, TYPE_BYTE, size);
+      super(/*?*/UNTRACKABLE, TYPE_BYTE, size);
       data = new byte[size];
       bankdata = new byte[1][];
       bankdata[0] = data;
@@ -90,7 +90,7 @@ public final class DataBufferByte extends DataBuffer
      * @param numBanks The number of banks in the a<CODE>DataBuffer</CODE>.
      */
     public DataBufferByte(int size, int numBanks) {
-        super(STABLE, TYPE_BYTE, size, numBanks);
+        super(/*?*/UNTRACKABLE, TYPE_BYTE, size, numBanks);
         bankdata = new byte[numBanks][];
         for (int i= 0; i < numBanks; i++) {
             bankdata[i] = new byte[size];

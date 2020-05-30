@@ -65,7 +65,7 @@ public final class DataBufferFloat extends DataBuffer {
      * @param size The number of elements in the DataBuffer.
      */
     public DataBufferFloat(int size) {
-        super(STABLE, TYPE_FLOAT, size);
+        super(/*?*/UNTRACKABLE, TYPE_FLOAT, size);
         data = new float[size];
         bankdata = new float[1][];
         bankdata[0] = data;
@@ -82,7 +82,7 @@ public final class DataBufferFloat extends DataBuffer {
      *        <code>DataBuffer</code>.
      */
     public DataBufferFloat(int size, int numBanks) {
-        super(STABLE, TYPE_FLOAT, size, numBanks);
+        super(/*?*/UNTRACKABLE, TYPE_FLOAT, size, numBanks);
         bankdata = new float[numBanks][];
         for (int i= 0; i < numBanks; i++) {
             bankdata[i] = new float[size];

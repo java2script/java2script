@@ -38,6 +38,10 @@
 
 package java.awt.image;
 import java.awt.Rectangle;
+
+import sun.java2d.StateTrackable.State;
+import sun.java2d.StateTrackableDelegate;
+
 import java.awt.Point;
 
 /**
@@ -742,5 +746,10 @@ public class WritableRaster extends Raster {
         sampleModel.setSamples(x-sampleModelTranslateX,y-sampleModelTranslateY,
                               w,h,b,dArray,dataBuffer);
     }
+
+	public void 秘setStable(boolean stable) {
+		if (dataBuffer.theTrackable.getState() != State.STABLE)
+			dataBuffer.theTrackable = StateTrackableDelegate.createInstance(State.STABLE);
+	}
 
 }

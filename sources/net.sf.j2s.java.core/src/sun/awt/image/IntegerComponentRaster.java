@@ -81,7 +81,7 @@ public class IntegerComponentRaster extends SunWritableRaster {
     protected int           pixelStride;
 
     /** The image data array. */
-    public /** SwingJS was protected */ int[]         data;
+    public /** SwingJS was protected */ int[] data;
 
     /** The number of data elements required to store a pixel. */
     protected int           numDataElems;
@@ -254,6 +254,7 @@ public class IntegerComponentRaster extends SunWritableRaster {
      * Returns a reference to the data array.
      */
     public int[] getDataStorage() {
+        dataBuffer.秘checkImage();
         return data;
     }
 
@@ -280,6 +281,7 @@ public class IntegerComponentRaster extends SunWritableRaster {
             throw new ArrayIndexOutOfBoundsException
                 ("Coordinate out of bounds!");
         }
+        dataBuffer.秘checkImage();
         int outData[];
         if (obj == null) {
             outData = new int[numDataElements];
@@ -329,6 +331,7 @@ public class IntegerComponentRaster extends SunWritableRaster {
             throw new ArrayIndexOutOfBoundsException
                 ("Coordinate out of bounds!");
         }
+        dataBuffer.秘checkImage();
         int outData[];
         if (obj instanceof int[]) {
             outData = (int[])obj;
@@ -341,7 +344,6 @@ public class IntegerComponentRaster extends SunWritableRaster {
         int off = 0;
         int xstart;
         int ystart;
-
         for (ystart=0; ystart < h; ystart++, yoff += scanlineStride) {
             xoff = yoff;
             for (xstart=0; xstart < w; xstart++, xoff += pixelStride) {
@@ -374,6 +376,8 @@ public class IntegerComponentRaster extends SunWritableRaster {
             throw new ArrayIndexOutOfBoundsException
                 ("Coordinate out of bounds!");
         }
+        dataBuffer.秘checkImage();
+
         int inData[] = (int[])obj;
 
         int off = (y-minY)*scanlineStride +
@@ -429,6 +433,7 @@ public class IntegerComponentRaster extends SunWritableRaster {
         if (width <= 0 || height <= 0) {
             return;
         }
+        dataBuffer.秘checkImage();
 
         // Write inRaster (minX, minY) to (dstX, dstY)
 
@@ -508,6 +513,7 @@ public class IntegerComponentRaster extends SunWritableRaster {
             throw new ArrayIndexOutOfBoundsException
                 ("Coordinate out of bounds!");
         }
+        dataBuffer.秘checkImage();
         int inData[] = (int[])obj;
 
         int yoff = (y-minY)*scanlineStride +

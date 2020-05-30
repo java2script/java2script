@@ -38,7 +38,7 @@
 
 package java.awt.image;
 
-import static sun.java2d.StateTrackable.State.STABLE;
+import static sun.java2d.StateTrackable.State.UNTRACKABLE;
 
 import sun.awt.image.DataStealer;
 import sun.awt.image.SunWritableRaster;
@@ -111,22 +111,29 @@ public abstract class DataBuffer {
 
 	public BufferedImage 秘image;
 	
-	protected void 秘setUntrackable() {
-		秘checkImage();
+	public void 秘setUntrackable() {
 		theTrackable.setUntrackable();
+		秘checkImage();
 	}
 
+	/**
+	 * track a nested set of calls to avoid image conversion once it has been done 
+	 * once within a method; positive values skip checking during for loops, for example,
+	 * while 0 indicates we need to check for changes.
+	 */
 	protected int checkImageDepth = 0;
 
 	/**
-	 * start with false, end with true; can be nested.
+	 * Ensure that the associated BufferedImage has converted any
+	 * changes generated using Graphics to its bitmap. But then
+	 * turn off (false) this feature until we turn it back on (true)
 	 * 
-	 * @param b
+	 * @param allowChecking set to false before a series of transfers, then finally set that true
 	 */
-	public void 秘setDoCheckImage(boolean b) {
-		if (!b && checkImageDepth == 0 && 秘image != null)
-			秘image.秘ensureRasterUpToDate();
-		checkImageDepth = Math.max(0, checkImageDepth + (b ? 1 : -1));
+	public void 秘setDoCheckImage(boolean allowChecking) {
+		if (!allowChecking)
+			秘checkImage();
+		checkImageDepth = Math.max(0, checkImageDepth + (allowChecking ? -1 : 1));
 	}
 	
 	/**
@@ -167,7 +174,7 @@ public abstract class DataBuffer {
 	 * @param size     the size of the banks
 	 */
 	protected DataBuffer(int dataType, int size) {
-		this(STABLE, dataType, size);
+		this(UNTRACKABLE, dataType, size);
 	}
 
 	/**
@@ -197,7 +204,7 @@ public abstract class DataBuffer {
 	 * @param numBanks the number of banks in this <code>DataBuffer</code>
 	 */
 	protected DataBuffer(int dataType, int size, int numBanks) {
-		this(STABLE, dataType, size, numBanks);
+		this(UNTRACKABLE, dataType, size, numBanks);
 	}
 
 	/**
@@ -230,7 +237,7 @@ public abstract class DataBuffer {
 	 * @param offset   the offset for each bank
 	 */
 	protected DataBuffer(int dataType, int size, int numBanks, int offset) {
-		this(STABLE, dataType, size, numBanks, offset);
+		this(UNTRACKABLE, dataType, size, numBanks, offset);
 	}
 
 	/**
@@ -272,7 +279,7 @@ public abstract class DataBuffer {
 	 *                                        <code>offsets</code>
 	 */
 	protected DataBuffer(int dataType, int size, int numBanks, int offsets[]) {
-		this(STABLE, dataType, size, numBanks, offsets);
+		this(UNTRACKABLE, dataType, size, numBanks, offsets);
 	}
 
 	/**

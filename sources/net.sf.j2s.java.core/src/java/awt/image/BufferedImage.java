@@ -151,7 +151,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 			if ((秘state & (1<< i)) != 0)
 				s += states[i] + ";";
 		}
-		return "rasterStolen=" + dataStolen() + " " + (s == "" ? "UN" : s) 
+		return "rasterStolen=" + isDataStolen() + " " + (s == "" ? "UN" : s) 
 				+ " unDisposedGraphicCount=" + gCount
 				+ " data[0]=" + (data == null ? null : Integer.toHexString(data[0]));
 	}
@@ -182,7 +182,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		return ((秘state & STATE_GRAPHICS) != 0);
 	}
 
-	private boolean dataStolen() {
+	private boolean isDataStolen() {
 		boolean b = raster.dataBuffer.theTrackable.getState() == sun.java2d.StateTrackable.State.UNTRACKABLE;
 		return b;
 	}
@@ -606,20 +606,18 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 			colorModel = new IndexColorModel(8, 256, cmap, 0, false, -1, DataBuffer.TYPE_BYTE);
 			raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE, width, height, 1, null);
 			break;
-		case TYPE_USHORT_565_RGB: {
+		case TYPE_USHORT_565_RGB:
 			colorModel = new DirectColorModel(16, DCM_565_RED_MASK, DCM_565_GRN_MASK, DCM_565_BLU_MASK);
 			raster = colorModel.createCompatibleWritableRaster(width, height);
-		}
 			break;
-		case TYPE_USHORT_555_RGB: {
+		case TYPE_USHORT_555_RGB:
 			colorModel = new DirectColorModel(15, DCM_555_RED_MASK, DCM_555_GRN_MASK, DCM_555_BLU_MASK);
 			raster = colorModel.createCompatibleWritableRaster(width, height);
-		}
 			break;
-
 		default:
 			throw new IllegalArgumentException("Unknown image type " + imageType);
 		}
+		raster.秘setStable(true);
 		this.imageType = imageType;
 	}
 
@@ -904,7 +902,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	}
 
 	void 秘ensureRasterUpToDate() {
-		if (dataStolen() || !haveRaster() && 秘state != STATE_UNINITIALIZED) {
+		if (isDataStolen() || !haveRaster() && 秘state != STATE_UNINITIALIZED) {
 			秘updateStateFromHTML5Canvas(0, false);
 			秘state &= ~(STATE_GRAPHICS | STATE_IMAGENODE_AVAIL);
 		}
@@ -992,7 +990,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @see #setRGB(int, int, int, int, int[], int, int)
 	 */
 	public int getRGB(int x, int y) {
-		if (!dataStolen() && (haveCanvas() 
+		if (!isDataStolen() && (haveCanvas() 
 				|| 秘state == STATE_UNINITIALIZED)
 				&& 	秘ensureCanGetRGBPixels()
 			) {
@@ -1032,7 +1030,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @see #setRGB(int, int, int, int, int[], int, int)
 	 */
 	public int[] getRGB(int startX, int startY, int w, int h, int[] rgbArray, int offset, int scansize) {
-		if (!dataStolen()
+		if (!isDataStolen()
 				&& (haveCanvas() || 秘state == STATE_IMAGENODE_AVAIL || 秘state == STATE_UNINITIALIZED)
 				&& 	秘ensureCanGetRGBPixels()
 				) {
@@ -1111,7 +1109,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @see #getRGB(int, int, int, int, int[], int, int)
 	 */
 	public synchronized void setRGB(int x, int y, int rgb) {
-		if (!dataStolen() && (haveCanvas() 
+		if (!isDataStolen() && (haveCanvas() 
 				|| 秘state == STATE_IMAGENODE_AVAIL || 秘state == STATE_UNINITIALIZED)
 				&& 	秘ensureCanGetRGBPixels()
 				) {
@@ -1154,7 +1152,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @see #getRGB(int, int, int, int, int[], int, int)
 	 */
 	public void setRGB(int startX, int startY, int w, int h, int[] rgbArray, int offset, int scansize) {
-		if (!dataStolen() && (haveCanvas() || 秘state == STATE_IMAGENODE_AVAIL || 秘state == STATE_UNINITIALIZED)
+		if (!isDataStolen() && (haveCanvas() || 秘state == STATE_IMAGENODE_AVAIL || 秘state == STATE_UNINITIALIZED)
 				&& 	秘ensureCanGetRGBPixels()
 				) {
 			int[] pixels = (int[]) 秘pix;
@@ -1373,7 +1371,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 
 	@Override
 	public void flush() {
-		if (dataStolen())
+		if (isDataStolen())
 			秘state |= STATE_RASTER;
 		if (haveRaster() && 秘pix == null) {
 			秘getPixelsFromRaster(0);
@@ -1452,6 +1450,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		秘pix = pixels;
 		秘canvas.getContext("2d").drawImage(秘imgNode = node, 0, 0, width, height);
 		秘setImageFromHTML5Canvas(this.秘g);
+		raster.秘setStable(true);
  		秘state |= STATE_IMAGENODE_AVAIL;
 	}
 
@@ -1986,14 +1985,24 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		int h = height;
 		byte[] data = HTML5Canvas.getDataBufferBytes(canvas, node, w, h);
 		DataBuffer buf = raster.getDataBuffer();
-		// from
 		秘pix = null;
+		boolean haveHTML5Pixels = false;
 		switch (imageType) {
 		case TYPE_INT_RGB:
 		case TYPE_INT_ARGB_PRE:// #3
 		case TYPE_INT_ARGB:
 			// convert canvas [r g b a r g b a ...] into [argb argb argb ...]
 			toIntARGB(data, (int[]) (秘pix = ((DataBufferInt) buf).data));
+			// Jmol, for instance, uses a 4 * w * h buffer for antialiasing
+			if (((int[])秘pix).length != 秘wxh)
+				秘pix = null;
+			break;
+		case TYPE_4BYTE_HTML5:
+			data = ((DataBufferByte) buf).data;
+			if (nBits != 32) {
+				秘pix = data;
+				haveHTML5Pixels = true;
+			}
 			break;
 		case TYPE_INT_BGR: // #4
 			// convert canvas [r g b a r g b a ...] into [0bgr 0bgr 0bgr ...]
@@ -2024,15 +2033,11 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 			JSUtil.notImplemented("BufferedImage setPixels for type " + imageType);
 			break;
 		}
-		if (nBits == 32 && ((int[])秘pix).length != 秘wxh) {
-			data = (byte[]) 秘pix;
-			秘pix = null;
-		}
-		if (秘pix == null)
+		if (秘pix == null) {
 			toIntARGB(data, (int[]) (秘pix = new int[data.length >> 2]));
-
+		}
 		秘state = STATE_GRAPHICS_AVAIL | STATE_RASTER_AVAIL;
-		秘state |= (((int[]) 秘pix).length == 秘wxh ? STATE_HAVE_PIXELS32 : STATE_HAVE_PIXELS8);
+		秘state |= (haveHTML5Pixels ? STATE_HAVE_PIXELS8 : STATE_HAVE_PIXELS32);
 		秘imgNode = (andSetImageNode ? canvas : null);
 		if (andSetImageNode) {
 			秘state |= STATE_IMAGENODE_AVAIL;
@@ -2150,19 +2155,19 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 */
 	public Object get秘pixFromRaster() {
 		if (!haveRaster())
-			return null;
-		
+			return null;		
 		SunWritableRaster r = (SunWritableRaster) raster;
 		switch (imageType) {
 		case TYPE_INT_RGB:
 		case TYPE_INT_ARGB:
+			// Jmol, for instance, uses a 4*w*h raster when antialiased
+			if (((DataBufferInt)r.dataBuffer).data.length != 秘wxh)
+				break;
+			return ((DataBufferInt) r.dataBuffer).data;
 		case TYPE_4BYTE_HTML5:
-			// if the raster has been created using Raster.createWritableRaster, so we
-			// already have its pixels.
-			return (r.秘pix == null ? 秘pix : r.秘pix);
-		default:
-			return 秘getPixelsFromRaster(8);
+			return 秘pix;
 		}
+		return 秘getPixelsFromRaster(8);
 	}
 
 	/**
@@ -2291,7 +2296,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	public DOMNode 秘getImageNode(int mode) {
 		if (秘state == STATE_VIDEO)
 			return 秘imgNode;
-		if (dataStolen())
+		if (isDataStolen())
 			秘state |= STATE_RASTER_AVAIL;
 		
 		// If we have raster data and are not forcing, return the canvas if it exists.
@@ -2301,10 +2306,10 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		switch (mode) {
 		default:
 		case GET_IMAGE_ALLOW_NULL:
-			return dataStolen() ? null : (DOMNode) (haveRaster() || 秘canvas != null ? 秘canvas
+			return isDataStolen() ? null : (DOMNode) (haveRaster() || 秘canvas != null ? 秘canvas
 					: 秘imgNode != null ? 秘imgNode : createImageNode());
 		case GET_IMAGE_FOR_ICON:
-			if (!dataStolen())
+			if (!isDataStolen())
 				return (DOMNode) (秘canvas != null ? 秘canvas : 秘imgNode != null ? 秘imgNode : createImageNode());
 			// $fall-through$
 		case GET_IMAGE_FROM_RASTER:
@@ -2338,6 +2343,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 			case TYPE_INT_ARGB_PRE:
 			case TYPE_INT_ARGB:
 				((DataBufferInt) raster.dataBuffer).data = ((IntegerComponentRaster) raster).data = argb;
+				raster.秘setStable(true);
 				秘state |= STATE_RASTER_AVAIL;
 				break;
 			default:

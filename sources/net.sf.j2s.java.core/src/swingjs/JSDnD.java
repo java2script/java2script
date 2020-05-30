@@ -332,7 +332,7 @@ public class JSDnD {
 		
 		private void addFile(String name, byte[] data) {
 			File file = new File(temp + name);
-			file.秘bytes = data;
+			JSUtil.setFileBytesStatic(file, data);
 			files.add(file);
 		}
 

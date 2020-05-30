@@ -177,6 +177,7 @@ public class IntegerInterleavedRaster extends IntegerComponentRaster {
 	 */
 	@Override
 	public int[] getDataStorage() {
+        dataBuffer.秘checkImage();
 		return data;
 	}
 
@@ -200,6 +201,8 @@ public class IntegerInterleavedRaster extends IntegerComponentRaster {
 		if ((x < this.minX) || (y < this.minY) || (x >= this.maxX) || (y >= this.maxY)) {
 			throw new ArrayIndexOutOfBoundsException("Coordinate out of bounds!");
 		}
+        dataBuffer.秘checkImage();
+
 		int outData[];
 		if (obj == null) {
 			outData = new int[1];
@@ -239,6 +242,7 @@ public class IntegerInterleavedRaster extends IntegerComponentRaster {
 	 */
 	@Override
 	public Object getDataElements(int x, int y, int w, int h, Object obj) {
+		dataBuffer.秘checkImage();
 		if ((x < this.minX) || (y < this.minY) || (x + w > this.maxX) || (y + h > this.maxY)) {
 			throw new ArrayIndexOutOfBoundsException("Coordinate out of bounds!");
 		}
@@ -278,6 +282,8 @@ public class IntegerInterleavedRaster extends IntegerComponentRaster {
 		if ((x < this.minX) || (y < this.minY) || (x >= this.maxX) || (y >= this.maxY)) {
 			throw new ArrayIndexOutOfBoundsException("Coordinate out of bounds!");
 		}
+        dataBuffer.秘checkImage();
+
 		int inData[] = (int[]) obj;
 
 		int off = (y - minY) * scanlineStride + (x - minX) + dataOffsets[0];
@@ -326,6 +332,7 @@ public class IntegerInterleavedRaster extends IntegerComponentRaster {
 		if (width <= 0 || height <= 0) {
 			return;
 		}
+        dataBuffer.秘checkImage();
 
 		// Write inRaster (minX, minY) to (dstX, dstY)
 
@@ -389,6 +396,7 @@ public class IntegerInterleavedRaster extends IntegerComponentRaster {
 		if ((x < this.minX) || (y < this.minY) || (x + w > this.maxX) || (y + h > this.maxY)) {
 			throw new ArrayIndexOutOfBoundsException("Coordinate out of bounds!");
 		}
+        dataBuffer.秘checkImage();
 		int inData[] = (int[]) obj;
 		int yoff = (y - minY) * scanlineStride + (x - minX) + dataOffsets[0];
 		int off = 0;

@@ -271,11 +271,9 @@ public class Raster {
         case DataBuffer.TYPE_BYTE:
             d = new DataBufferByte(size);
             break;
-
         case DataBuffer.TYPE_USHORT:
             d = new DataBufferUShort(size);
             break;
-
         default:
             throw new IllegalArgumentException("Unsupported data type " +
                                                 dataType);
@@ -948,77 +946,60 @@ public class Raster {
         return createWritableRaster(sm, sm.createDataBuffer(), location);
     }
 
-    /**
-     *  Creates a WritableRaster with the specified SampleModel and DataBuffer.
-     *  The upper left corner of the Raster is given by the location argument.
-     *  If location is null, (0, 0) will be used.
-     *  @param sm the specified <code>SampleModel</code>
-     *  @param db the specified <code>DataBuffer</code>
-     *  @param location the upper-left corner of the
-     *         <code>WritableRaster</code>
-     *  @return a <code>WritableRaster</code> with the specified
-     *          <code>SampleModel</code>, <code>DataBuffer</code>, and
-     *          location.
-     * @throws RasterFormatException if computing either
-     *         <code>location.x + sm.getWidth()</code> or
-     *         <code>location.y + sm.getHeight()</code> results in integer
-     *         overflow
-     * @throws RasterFormatException if <code>db</code> has more
-     *         than one bank and <code>sm</code> is a
-     *         PixelInterleavedSampleModel, SinglePixelPackedSampleModel,
-     *         or MultiPixelPackedSampleModel.
-     * @throws NullPointerException if either SampleModel or DataBuffer is null
-     */
-    public static WritableRaster createWritableRaster(SampleModel sm,
-                                                      DataBuffer db,
-                                                      Point location) {
-        if ((sm == null) || (db == null)) {
-            throw new NullPointerException("SampleModel and DataBuffer cannot be null");
-        }
-        if (location == null) {
-           location = new Point(0,0);
-        }
+	/**
+	 * Creates a WritableRaster with the specified SampleModel and DataBuffer. The
+	 * upper left corner of the Raster is given by the location argument. If
+	 * location is null, (0, 0) will be used.
+	 * 
+	 * @param sm       the specified <code>SampleModel</code>
+	 * @param db       the specified <code>DataBuffer</code>
+	 * @param location the upper-left corner of the <code>WritableRaster</code>
+	 * @return a <code>WritableRaster</code> with the specified
+	 *         <code>SampleModel</code>, <code>DataBuffer</code>, and location.
+	 * @throws RasterFormatException if computing either
+	 *                               <code>location.x + sm.getWidth()</code> or
+	 *                               <code>location.y + sm.getHeight()</code>
+	 *                               results in integer overflow
+	 * @throws RasterFormatException if <code>db</code> has more than one bank and
+	 *                               <code>sm</code> is a
+	 *                               PixelInterleavedSampleModel,
+	 *                               SinglePixelPackedSampleModel, or
+	 *                               MultiPixelPackedSampleModel.
+	 * @throws NullPointerException  if either SampleModel or DataBuffer is null
+	 */
+	public static WritableRaster createWritableRaster(SampleModel sm, DataBuffer db, Point location) {
+		if ((sm == null) || (db == null)) {
+			throw new NullPointerException("SampleModel and DataBuffer cannot be null");
+		}
+		if (location == null) {
+			location = new Point(0, 0);
+		}
 
-        int dataType = sm.getDataType();
+		int dataType = sm.getDataType();
 
-		SunWritableRaster r = null;
-
-        if (sm instanceof PixelInterleavedSampleModel) {
-            switch(dataType) {
-                case DataBuffer.TYPE_BYTE:
-				r = new ByteInterleavedRaster(sm, db, location);
-				break;
-                case DataBuffer.TYPE_USHORT:
-				r = new ShortInterleavedRaster(sm, db, location);
-				break;
-            }
-        } else if (sm instanceof SinglePixelPackedSampleModel) {
-            switch(dataType) {
-                case DataBuffer.TYPE_BYTE:
-				r = new ByteInterleavedRaster(sm, db, location);
-				break;
-                case DataBuffer.TYPE_USHORT:
-				r = new ShortInterleavedRaster(sm, db, location);
-				break;
-                case DataBuffer.TYPE_INT:
-				r = new IntegerInterleavedRaster(sm, db, location);
-					//r = new SunWritableRaster(sm, db, location);
-					// TODO -- THIS IS NOT GENERALLY RIGHT
-				r.秘pix = SunWritableRaster.stealData((DataBufferInt) db, 0);
-				break;
-            }
+		if (sm instanceof PixelInterleavedSampleModel) {
+			switch (dataType) {
+			case DataBuffer.TYPE_BYTE:
+				return new ByteInterleavedRaster(sm, db, location);
+			case DataBuffer.TYPE_USHORT:
+				return new ShortInterleavedRaster(sm, db, location);
+			}
+		} else if (sm instanceof SinglePixelPackedSampleModel) {
+			switch (dataType) {
+			case DataBuffer.TYPE_BYTE:
+				return new ByteInterleavedRaster(sm, db, location);
+			case DataBuffer.TYPE_USHORT:
+				return new ShortInterleavedRaster(sm, db, location);
+			case DataBuffer.TYPE_INT:
+				return new IntegerInterleavedRaster(sm, db, location);
+			}
 		} else if (sm instanceof MultiPixelPackedSampleModel && dataType == DataBuffer.TYPE_BYTE
 				&& sm.getSampleSize(0) < 8) {
-			r = new BytePackedRaster(sm, db, location);
-        }
-
-		if (r == null) {
-        // we couldn't do anything special - do the generic thing
-
-			r = new SunWritableRaster(sm,db,location);
+			return new BytePackedRaster(sm, db, location);
 		}
-		return r;
-    }
+		// we couldn't do anything special - do the generic thing
+		return new SunWritableRaster(sm, db, location);
+	}
 
     /**
      *  Constructs a Raster with the given SampleModel.  The Raster's
