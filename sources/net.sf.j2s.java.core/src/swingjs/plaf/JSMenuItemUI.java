@@ -9,7 +9,6 @@ import javax.swing.JMenuItem;
 import javax.swing.event.MenuKeyListener;
 
 import swingjs.api.js.DOMNode;
-import swingjs.api.js.JSSwingMenu;
 
 public class JSMenuItemUI extends JSButtonUI {
 	
@@ -50,8 +49,8 @@ public class JSMenuItemUI extends JSButtonUI {
 	}
 
 	@Override
-	protected Dimension getCSSAdjustment(boolean addingCSS) {
-		return new Dimension(isMenu && containerNode == null ? 0 : 5, 0);
+	protected Dimension getCSSAdjustment(boolean addingCSS, boolean mutable) {
+		return mutable || !isMenu || containerNode != null ? new Dimension(isMenu && containerNode == null ? 0 : 5, 0) : ZERO_SIZE;
 	}
 	
 	@Override

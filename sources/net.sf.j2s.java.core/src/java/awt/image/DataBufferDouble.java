@@ -65,7 +65,7 @@ public final class DataBufferDouble extends DataBuffer {
      * @param size The number of elements in the <code>DataBuffer</code>.
      */
     public DataBufferDouble(int size) {
-        super(STABLE, TYPE_DOUBLE, size);
+        super(/*?*/UNTRACKABLE, TYPE_DOUBLE, size);
         data = new double[size];
         bankdata = new double[1][];
         bankdata[0] = data;
@@ -81,7 +81,7 @@ public final class DataBufferDouble extends DataBuffer {
      * @param numBanks The number of banks in the <code>DataBuffer</code>.
      */
     public DataBufferDouble(int size, int numBanks) {
-        super(STABLE, TYPE_DOUBLE, size, numBanks);
+        super(/*?*/UNTRACKABLE, TYPE_DOUBLE, size, numBanks);
         bankdata = new double[numBanks][];
         for (int i= 0; i < numBanks; i++) {
             bankdata[i] = new double[size];
@@ -194,7 +194,7 @@ public final class DataBufferDouble extends DataBuffer {
      * @return the first double data array.
      */
     public double[] getData() {
-        theTrackable.setUntrackable();
+        秘setUntrackable();
         return data;
     }
 
@@ -210,7 +210,7 @@ public final class DataBufferDouble extends DataBuffer {
      * @return the data array specified by <code>bank</code>.
      */
     public double[] getData(int bank) {
-        theTrackable.setUntrackable();
+        秘setUntrackable();
         return bankdata[bank];
     }
 
@@ -225,7 +225,7 @@ public final class DataBufferDouble extends DataBuffer {
      * @return all data arrays from this data buffer.
      */
     public double[][] getBankData() {
-        theTrackable.setUntrackable();
+        秘setUntrackable();
         return (double[][]) bankdata.clone();
     }
 

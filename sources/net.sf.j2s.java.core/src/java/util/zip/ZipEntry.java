@@ -28,6 +28,8 @@
 
 package java.util.zip;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 
 /**
@@ -51,6 +53,22 @@ class ZipEntry implements ZipConstants, Cloneable {
     byte[] extra;       // optional extra field data for entry
     String comment;     // optional comment string for entry
 
+    int 秘entryOffset;
+    InputStream 秘source;
+   
+	public byte[] getBytes() {
+		ZipInputStream zis = new ZipInputStream(秘source);
+		zis.setEntry(this);
+		byte[] b = new byte[(int) size];
+		try {
+			zis.read(b);
+		} catch (IOException e) {
+			return null;
+		}
+		return b;
+	}
+    
+    
     /**
      * Compression method for uncompressed entries.
      */

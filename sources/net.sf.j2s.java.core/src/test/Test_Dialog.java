@@ -86,10 +86,12 @@ public class Test_Dialog extends JFrame implements PropertyChangeListener {
 	}
 
 	// JSComponent.DialogCaller interface
-	public void onDialogReturn(int value) {
+	public void onDialogReturn(int value) {	
 		if (value != Math.floor(value))
 			return; // in JavaScript, this will be NaN
 		System.out.println("int value is " + value);
+		
+	status.setText("You chose option " + value);
 	}
 
 	// JSComponent.DialogCaller interface
@@ -166,6 +168,20 @@ public class Test_Dialog extends JFrame implements PropertyChangeListener {
 		});
 		p.add(b);
 
+
+		b = new JButton("OptionDialog");
+		b.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Test_Dialog.this.onDialogReturn(JOptionPane.showOptionDialog(Test_Dialog.this, "Pick one of the following three options:", "Option title",
+						0, 0, null, new Object[] {"Option A", "Option B", "Option C"} , "Option B"));
+			}
+
+		});
+		p.add(b);
+
+		
 		b = new JButton("FileOpenDialog");
 		b.addActionListener(new ActionListener() {
 

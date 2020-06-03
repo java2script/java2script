@@ -1772,7 +1772,7 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 
 	void redrawList() {
 		needFilling = true;
-		setTainted(true);
+		setTainted();
 		list.revalidate();
 		list.秘repaint();
 	}

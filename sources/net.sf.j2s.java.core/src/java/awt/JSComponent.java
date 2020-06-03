@@ -28,6 +28,7 @@
 package java.awt;
 
 import java.awt.event.KeyListener;
+import java.awt.image.BufferedImage;
 import java.awt.peer.ComponentPeer;
 import java.awt.peer.LightweightPeer;
 import java.beans.PropertyChangeListener;
@@ -52,6 +53,7 @@ import swingjs.JSAppletViewer;
 import swingjs.JSFrameViewer;
 import swingjs.JSGraphics2D;
 import swingjs.JSUtil;
+import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Canvas;
 import swingjs.plaf.JSComponentUI;
 
@@ -113,6 +115,7 @@ public abstract class JSComponent extends Component {
 	protected int 秘num;
 	private static int 秘incr;
 	private Insets 秘tempInsets;
+	public JSGraphics2D 秘g;
 	public JSGraphics2D 秘gtemp; // indicates that we are painting, so that g.setBackground() should also be set 
 
 	public boolean 秘isRootPane, 秘isContentPane;
@@ -577,6 +580,28 @@ public abstract class JSComponent extends Component {
     final public boolean 秘isFocusSetAndEnabled() {
         return 秘isFocusableSet && isFocusable();
     }
+
+
+    /**
+     * Check that a local graphic has the correct size of canvas, and if it does not, 
+     * replace it. Maybe could just flat out change its size.
+     * 
+     * @return the JSGraphics coercion of the possibly new JSGraphics object as a "Graphics"
+     */
+	protected JSGraphics2D 秘checkG() {
+		// I know, it's an insane amount of cast coercion
+		boolean isNew = ((Object) 秘g) == Boolean.TRUE;
+		if (isNew || 秘g.getWidth() != width || 秘g.getHeight() != height) {
+			if (!isNew)
+				DOMNode.dispose(秘g.getCanvas());
+			秘g = (JSGraphics2D) (Object) ((BufferedImage) createImage(width, height)).秘getImageGraphic();
+			DOMNode c = 秘g.getCanvas();
+			DOMNode d = 秘getUI().getDOMNode();
+			if (d != c)
+				d.prepend(c);
+		}
+		return this.秘g;
+	}
 
 	/**
 	 * This method is added to ensure that if a jpanel or other object's

@@ -104,7 +104,7 @@ public class Runtime {
      */
     public void exit(int status) {
 		Thread.currentThread().getThreadGroup().秘exit();
-		JSAppletViewer v = JSToolkit.getAppletViewer();
+		JSAppletViewer v = /** @j2sNative !swingjs.JSToolkit ? null : */JSToolkit.getAppletViewer();
 		if (v != null)
 			v.exit();
 

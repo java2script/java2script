@@ -14,8 +14,11 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.ImageConsumer;
+import java.awt.image.MemoryImageSource;
 import java.awt.image.WritableRaster;
+import java.nio.file.Path;
 
+import swingjs.JSFileSystem.JSPath;
 import swingjs.api.Interface;
 import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Canvas;
@@ -36,6 +39,7 @@ public class JSImagekit implements ImageConsumer {
 	private static final int JPG = 1;
 	private static final int GIF = 2;
 	private static final int BMP = 3;
+	private static final int VIDEO = 4;
 	private static final int JPG_SOF0 = 0xC0FF;
 	private static final int JPG_SOF2 = 0xC2FF;
 
@@ -52,7 +56,7 @@ public class JSImagekit implements ImageConsumer {
 	 */
 	public JSImage createImageFromBytes(byte[] data, int imageoffset,
 			int imagelength, String name) {
-		return createImageFromBytesStatic(data, imageoffset, imagelength, name);
+		return createImageFromBytesStatic(data, imageoffset, imagelength, name, UNK);
 	}
 
 	private int width;
@@ -70,6 +74,10 @@ public class JSImagekit implements ImageConsumer {
 	
 	@Override
 	public void imageComplete(int status) {
+		MemoryImageSource m; // just an Eclipse tag so we can find this reference;
+		// note that this image is LIVE, meaning the ImageProducer can 
+		// use newPixels() to update it.
+
 		// from MemoryImageSource.newPixels()
 		// 
 		// meaning: "The pixels are ready, so make the image now"
@@ -77,9 +85,9 @@ public class JSImagekit implements ImageConsumer {
 		//TODO: not considering pixelbytes
 		//
 		if (pixels != null)
-			jsimage = new JSImage(pixels, width, height, null);
+			jsimage = new JSImage(pixels, width, height, null, BufferedImage.TYPE_INT_ARGB);
 		else
-			jsimage = new JSImage(pixelBytes, width, height, null);
+			jsimage = new JSImage(pixelBytes, width, height, null, BufferedImage.TYPE_INT_ARGB);
   }
 
 	public Image getCreatedImage() {
@@ -153,8 +161,8 @@ public class JSImagekit implements ImageConsumer {
 		JSUtil.notImplemented("byte-based image pixels");
 	}
 
-	private static JSImage createImageFromBytesStatic(byte[] data, int imageoffset,
-			int imagelength, String name) {
+	private static JSImage createImageFromBytesStatic(byte[] data, int imageoffset, int imagelength, String name,
+			int imageType) {
 		int w = 0, h = 0;
 		int[] argb = null;
 		byte[] b = null;
@@ -163,20 +171,24 @@ public class JSImagekit implements ImageConsumer {
 			// this is from Component.createImage();
 			w = imageoffset;
 			h = imagelength;
+		} else if (imageType == VIDEO) {
+			b = data;
+			w = imageoffset;
+			h = imagelength;
+			type = "video";
 		} else {
 			if (imagelength < 0)
 				imagelength = data.length;
-		  // not implemented in JavaScript:
+			// not implemented in JavaScript:
 			// b = Arrays.copyOfRange(data, imageoffset, imagelength);
 			int n = imagelength - imageoffset;
-      System.arraycopy(data, imageoffset, b = new byte[n], 0, n);
-			if (b.length < 10)//was 54??? I have no recollection of why that might be.
+			System.arraycopy(data, imageoffset, b = new byte[n], 0, n);
+			if (b.length < 10)// was 54??? I have no recollection of why that might be.
 				return null;
-			switch (getSourceType(b)) {
+			switch (imageType == UNK ? getSourceType(b) : imageType) {
 			case BMP:
 				// just get bytes directly
-				BMPDecoder ie = (BMPDecoder) Interface.getInstance(
-						"javajs.img.BMPDecoder", true);
+				BMPDecoder ie = (BMPDecoder) Interface.getInstance("javajs.img.BMPDecoder", true);
 				Object[] o = ie.decodeWindowsBMP(b);
 				if (o == null || o[0] == null)
 					return null;
@@ -212,17 +224,17 @@ public class JSImagekit implements ImageConsumer {
 				type = "gif";
 				break;
 			case UNK:
-				System.out.println("JSImagekit: Unknown image type: " + b[0] + " "
-						+ b[1] + " " + b[2] + " " + b[3]);
+				System.out.println("JSImagekit: Unknown image type: " + b[0] + " " + b[1] + " " + b[2] + " " + b[3]);
 				data = null;
 				break;
 			}
 		}
 		if (w == 0 || h == 0)
 			return null;
-		JSImage jsimage = new JSImage(argb, w, h, name); 
+		JSImage jsimage = new JSImage(argb, w, h, name,
+				imageType == VIDEO ? BufferedImage.TYPE_HTML5_VIDEO : BufferedImage.TYPE_INT_ARGB);
 		if (data != null && argb == null)
-			jsimage.getDOMImage(b, type);
+			jsimage.setImageNode(null, b, type);
 		return jsimage;
 	}
 
@@ -279,23 +291,35 @@ public class JSImagekit implements ImageConsumer {
 			imgIcon = new ImageIcon(img, "paintedIcon");
 		}
 		icon.paintIcon(c, (Graphics)(Object) g, 0, 0);
-		img.setImageFromHTML5Canvas(g);
+		img.秘setImageFromHTML5Canvas(g);
 		g.dispose();
 		((ImageIcon) icon).秘tempIcon = imgIcon;
 		return imgIcon;
 	}
 
 	public static JSGraphics2D createCanvasGraphics(int width, int height, String id) {
-		HTML5Canvas canvas = (HTML5Canvas) DOMNode.createElement("canvas", (id == null ? "img" + Math.random() : id + ""));
-		DOMNode.setStyles(canvas, "width", width + "px", "height", height + "px");
-		/**
-		 * @j2sNative
-		 * 
-		 * canvas.width = width;
-		 * canvas.height = height;
-		 * 
-		 */
-		return new JSGraphics2D(canvas);
+		return new JSGraphics2D(HTML5Canvas.createCanvas(width, height, id));
+	}
+
+	public Image createVideo(Path path) {
+		byte[] bytes = JSUtil.getBytes(path);
+		if (bytes == null)
+			bytes = (byte[]) JSUtil.getCachedFileData(path.toString(), true);
+		if (bytes != null)
+			JSUtil.setFileBytesStatic(path, bytes);
+		JSImage jsimage = new JSImage(bytes, 1, 1, path.toString(), BufferedImage.TYPE_HTML5_VIDEO);
+		jsimage.setImageNode((JSPath) path, bytes, "video");
+		return jsimage;
+	}
+
+	public Image createVideo(byte[] bytes) {
+		return createImageFromBytesStatic(bytes, 1, 1, null, VIDEO);
+	}
+
+	public static Object getDataBlob(byte[] b, String type) {
+		if (type == null)
+			return (/** @j2sNative URL.createObjectURL(new Blob([b])) || */null);
+		return (/** @j2sNative URL.createObjectURL(new Blob([b], {type:type})) || */null);
 	}
 
 

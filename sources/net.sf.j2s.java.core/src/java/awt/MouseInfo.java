@@ -69,9 +69,9 @@ public class MouseInfo {
      * @since     1.5
      */
     public static PointerInfo getPointerInfo() throws HeadlessException {
-        if (GraphicsEnvironment.isHeadless()) {
-            throw new HeadlessException();
-        }
+//        if (GraphicsEnvironment.isHeadless()) {
+//            throw new HeadlessException();
+//        }
 //
 //        SecurityManager security = System.getSecurityManager();
 //        if (security != null) {
@@ -117,9 +117,9 @@ public class MouseInfo {
      * @since 1.5
      */
     public static int getNumberOfButtons() throws HeadlessException {
-        if (GraphicsEnvironment.isHeadless()) {
-            throw new HeadlessException();
-        }
+//        if (GraphicsEnvironment.isHeadless()) {
+//            throw new HeadlessException();
+//        }
         return 2; // SwingJS what the heck. No one has a 3-button mouse anymore
 //        Object prop = Toolkit.getDefaultToolkit().
 //                              getDesktopProperty("awt.mouse.numButtons");

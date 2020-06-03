@@ -37,6 +37,7 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import sun.net.www.MessageHeader;
 import sun.security.util.SecurityConstants;
@@ -1688,5 +1689,7 @@ public abstract class URLConnection //
 	public String toString() {
 		return this.getClass().getName() + ":" + url;
 	}
+
+	public abstract void getBytesAsync(Function<byte[], Void> whenDone);
 
 }

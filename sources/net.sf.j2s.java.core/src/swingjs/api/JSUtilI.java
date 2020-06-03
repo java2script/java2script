@@ -2,14 +2,53 @@ package swingjs.api;
 
 import java.awt.Component;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Properties;
+import java.util.function.Function;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+import javax.swing.JComponent;
 
 import swingjs.api.js.HTML5Applet;
 
 public interface JSUtilI {
+
+	/**
+	 * The HTML5 canvas delivers [r g b a r g b a ...] which is not a Java option.
+	 * The closest Java option is TYPE_4BYTE_ABGR, but that is not quite what we
+	 * need. SwingJS decodes TYPE_4BYTE_HTML5 as TYPE_4BYTE_RGBA"
+	 * 
+	 * ColorSpace cs = ColorSpace.getInstance(ColorSpace.CS_sRGB);
+	 * 
+	 * int[] nBits = { 8, 8, 8, 8 };
+	 * 
+	 * int[] bOffs = { 0, 1, 2, 3 };
+	 * 
+	 * colorModel = new ComponentColorModel(cs, nBits, true, false,
+	 * Transparency.TRANSLUCENT, DataBuffer.TYPE_BYTE);
+	 * 
+	 * raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE, width, height,
+	 * width * 4, 4, bOffs, null);
+	 * 
+	 * Note, however, that this buffer type should only be used for direct buffer access
+	 * using
+	 * 
+	 * 
+	 * 
+	 */
+	public static final int TYPE_4BYTE_HTML5 = -6;
+	
+	/**
+	 * The HTML5 VIDEO element wrapped in a BufferedImage. 
+	 * 
+	 * To be extended to allow video capture?
+	 */
+	public static final int TYPE_HTML5_VIDEO = Integer.MIN_VALUE;
 
 	/**
 	 * Indicate to SwingJS that the given file type is binary.
@@ -49,6 +88,15 @@ public interface JSUtilI {
 	 * @return
 	 */
 	Object getAppletAttribute(String key);
+
+
+	/**
+	 * Get an attribute of applet's Info map for the applet found using
+	 * getApplet(null). That is, applet.__Info[InfoKey].
+	 * 
+	 * @param infoKey
+	 */
+	Object getAppletInfo(String infoKey);
 
 	/**
 	 * Get the code base (swingjs/j2s, probably) for the applet found using
@@ -156,7 +204,16 @@ public interface JSUtilI {
 	boolean setFileBytes(File f, Object isOrBytes);
 
 	/**
-	 * Same as setFileBytes, but also caches the data if it is a JSTempFile.
+	 * Set the given URL object's _streamData field from an InputStream or a byte[] array.
+	 * 
+	 * @param f
+	 * @param isOrBytes BufferedInputStream, ByteArrayInputStream, FileInputStream, or byte[]
+	 * @return
+	 */
+	boolean setURLBytes(URL url, Object isOrBytes);
+
+	/**
+	 * Same as setFileBytes.
 	 * 
 	 * @param is
 	 * @param outFile
@@ -171,6 +228,15 @@ public interface JSUtilI {
 	   */
 	void setJavaScriptMapObjectEnabled(boolean enabled);
 
+
+	/**
+	 * Open a URL in a browser tab.
+	 * 
+	 * @param url
+	 * @param target null or specific tab, such as "_blank"
+	 */
+	void displayURL(String url, String target);
+
 	/**
 	 * Retrieve cached bytes for a path (with unnormalized name)
 	 * from J2S._javaFileCache.
@@ -184,14 +250,83 @@ public interface JSUtilI {
 	/**
 	 * Attach cached bytes to a file-like object, including URL,
 	 * or anything having a 秘bytes field (File, URI, Path)
-	 * from J2S._javaFileCache.
+	 * from J2S._javaFileCache. That is, allow two such objects
+	 * to share the same underlying byte[ ] array.
 	 * 
 	 * 
 	 * @param URLorURIorFile
-	 * @return
+	 * @return byte[] or null
 	 */
 	byte[] addJSCachedBytes(Object URLorURIorFile);
 
-	void displayURL(String url, String target);
+	/**
+	 * Seek an open ZipInputStream to the supplied ZipEntry, if possible.
+	 * 
+	 * @param zis the ZipInputStream
+	 * @param ze  the ZipEntry
+	 * @return the length of this entry, or -1 if, for whatever reason, this was not possible
+	 */
+	long seekZipEntry(ZipInputStream zis, ZipEntry ze);
+
+	/**
+	 * Retrieve the byte array associated with a ZipEntry.
+	 * 
+	 * @param ze
+	 * @return
+	 */
+	byte[] getZipBytes(ZipEntry ze);
+
+	/**
+	 * Java 9 method to read all (remaining) bytes from an InputStream. In SwingJS,
+	 * this may just create a new reference to an underlying Int8Array without
+	 * copying it.
+	 * 
+	 * @param zis
+	 * @return
+	 * @throws IOException 
+	 */
+	byte[] readAllBytes(InputStream zis) throws IOException;
+
+	/**
+	 * Java 9 method to transfer all (remaining) bytes from an InputStream to an OutputStream.
+	 * 
+	 * @param is
+	 * @param out
+	 * @return
+	 * @throws IOException
+	 */
+	long transferTo(InputStream is, OutputStream out) throws IOException;
+
+	/**
+	 * Retrieve any bytes already attached to this URL.
+	 * 
+	 * @param url
+	 * @return
+	 */
+	byte[] getURLBytes(URL url);
+
+	/**
+	 * Set a message in the lower-left-hand corner SwingJS status block.
+	 * 
+	 * @param msg
+	 * @param doFadeOut
+	 */
+	void showStatus(String msg, boolean doFadeOut);
+
+	/**
+	 * Asynchronously retrieve the byte[] for a URL.
+	 * 
+	 * @param url
+	 * @param whenDone
+	 */
+	void getURLBytesAsync(URL url, Function<byte[], Void> whenDone);
+
+	/**
+	 * Experimental method to completely disable a Swing Component's user interface.
+	 * 
+	 * @param jc
+	 * @param enabled
+	 */
+	void setUIEnabled(JComponent jc, boolean enabled);
 
 }

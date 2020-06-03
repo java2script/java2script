@@ -273,7 +273,9 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 
 	void showTipWindow() {
 		
-
+		if (toolTipText == null) {
+			return;
+		}
 		//System.out.println("ttm showtipwindow1");
 		
 		if (insideComponent == null || !insideComponent.isShowing())
@@ -522,7 +524,7 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 				boolean sameLoc = (preferredLocation != null) ? preferredLocation.equals(newPreferredLocation)
 						: (newPreferredLocation == null);
 
-				if (!sameComponent || !toolTipText.equals(newToolTipText) || !sameLoc) {
+				if (!sameComponent || toolTipText != null && !toolTipText.equals(newToolTipText) || !sameLoc) {
 					toolTipText = newToolTipText;
 					preferredLocation = newPreferredLocation;
 					showTipWindow();

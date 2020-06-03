@@ -1365,7 +1365,7 @@ public abstract class Toolkit {
         if (this != Toolkit.getDefaultToolkit()) {
             return Toolkit.getDefaultToolkit().getSystemSelection();
         } else {
-            GraphicsEnvironment.checkHeadless();
+            //GraphicsEnvironment.checkHeadless();
             return null;
         }
     }

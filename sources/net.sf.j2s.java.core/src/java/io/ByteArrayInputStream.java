@@ -26,12 +26,12 @@ public class ByteArrayInputStream extends InputStream {
 	/**
 	 * The <code>byte</code> array containing the bytes to stream over.
 	 */
-	protected byte[] buf;
+	public byte[] buf;
 
 	/**
 	 * The current position within the byte array.
 	 */
-	protected int pos;
+	public int pos; // SwingJS was protected
 
 	/**
 	 * The current mark position. Initially set to 0 or the <code>offset</code>
@@ -247,8 +247,6 @@ public class ByteArrayInputStream extends InputStream {
 	 */
 	@Override
 	public byte[] readAllBytes() throws IOException {
-		byte[] b = new byte[this.available()];
-		read(b, 0, b.length);
-		return b;
+		return (pos == 0 ? buf : super.readAllBytes());
 	}
 }

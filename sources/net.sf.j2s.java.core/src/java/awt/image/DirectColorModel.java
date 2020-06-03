@@ -28,8 +28,8 @@
 
 package java.awt.image;
 
-import java.awt.color.ColorSpace;
 import java.awt.Transparency;
+import java.awt.color.ColorSpace;
 
 /**
  * The <code>DirectColorModel</code> class is a <code>ColorModel</code>
@@ -114,14 +114,14 @@ public class DirectColorModel extends PackedColorModel {
     private int green_mask;
     private int blue_mask;
     private int alpha_mask;
-    private int red_offset;
-    private int green_offset;
-    private int blue_offset;
-    private int alpha_offset;
-    private int red_scale;
-    private int green_scale;
-    private int blue_scale;
-    private int alpha_scale;
+//    private int red_offset;
+//    private int green_offset;
+//    private int blue_offset;
+//    private int alpha_offset;
+//    private int red_scale;
+//    private int green_scale;
+//    private int blue_scale;
+//    private int alpha_scale;
     private boolean is_LinearRGB;
     private int lRGBprecision;
     private byte[] tosRGB8LUT;
@@ -1192,14 +1192,15 @@ public class DirectColorModel extends PackedColorModel {
      *            <code>transferType</code> is not supported by this
      *            color model
      */
-    final public ColorModel coerceData (WritableRaster raster,
+    @Override
+	final public ColorModel coerceData (WritableRaster raster,
                                         boolean isAlphaPremultiplied)
     {
         if (!supportsAlpha ||
             this.isAlphaPremultiplied() == isAlphaPremultiplied) {
             return this;
         }
-
+        
         int w = raster.getWidth();
         int h = raster.getHeight();
         int aIdx = numColorComponents;
@@ -1369,7 +1370,8 @@ public class DirectColorModel extends PackedColorModel {
       * @return <code>true</code> if <code>raster</code> is compatible
       * with this <code>ColorModel</code>; <code>false</code> otherwise.
       */
-    public boolean isCompatibleRaster(Raster raster) {
+    @Override
+	public boolean isCompatibleRaster(Raster raster) {
         SampleModel sm = raster.getSampleModel();
         SinglePixelPackedSampleModel spsm;
         if (sm instanceof SinglePixelPackedSampleModel) {
@@ -1396,26 +1398,26 @@ public class DirectColorModel extends PackedColorModel {
         // Set the private fields
         // REMIND: Get rid of these from the native code
         red_mask     = maskArray[0];
-        red_offset   = maskOffsets[0];
+//        red_offset   = maskOffsets[0];
         green_mask   = maskArray[1];
-        green_offset = maskOffsets[1];
+//        green_offset = maskOffsets[1];
         blue_mask    = maskArray[2];
-        blue_offset  = maskOffsets[2];
-        if (nBits[0] < 8) {
-            red_scale = (1 << nBits[0]) - 1;
-        }
-        if (nBits[1] < 8) {
-            green_scale = (1 << nBits[1]) - 1;
-        }
-        if (nBits[2] < 8) {
-            blue_scale = (1 << nBits[2]) - 1;
-        }
+//        blue_offset  = maskOffsets[2];
+//        if (nBits[0] < 8) {
+//            red_scale = (1 << nBits[0]) - 1;
+//        }
+//        if (nBits[1] < 8) {
+//            green_scale = (1 << nBits[1]) - 1;
+//        }
+//        if (nBits[2] < 8) {
+//            blue_scale = (1 << nBits[2]) - 1;
+//        }
         if (supportsAlpha) {
             alpha_mask   = maskArray[3];
-            alpha_offset = maskOffsets[3];
-            if (nBits[3] < 8) {
-                alpha_scale = (1 << nBits[3]) - 1;
-            }
+//            alpha_offset = maskOffsets[3];
+//            if (nBits[3] < 8) {
+//                alpha_scale = (1 << nBits[3]) - 1;
+//            }
         }
     }
 

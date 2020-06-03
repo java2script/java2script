@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.function.Function;
 import java.util.jar.JarEntry;
 import java.util.jar.JarException;
 import java.util.jar.JarFile;
@@ -30,22 +31,24 @@ public class JSJarURLConnection extends JarURLConnection {
 
 	@Override
 	public void connect() throws IOException {
+		if (url._streamData != null)
+			return;
 		BufferedInputStream bis = (BufferedInputStream) getJarFileURL().openStream();
 		byte[] bytes = ZipTools.getZipFileContentsAsBytes(bis, new String[] { getEntryName() }, 0);
 		if (bytes == null)
 			throw new JarException("Jar entry " + getEntryName() + " was not found in " + getJarFileURL());
-		getURL()._streamData = bytes;
+		url._streamData = bytes;
 		return;
 	}
 	@Override
 	public InputStream getInputStream() {
-		if (!connected)
+		if (!connected && url._streamData == null)
 			try {
 				connect();
 			} catch (IOException e) {
 				return null;
 			}
-		return new ByteArrayInputStream((byte[]) getURL()._streamData);
+		return new ByteArrayInputStream((byte[]) url._streamData);
 	}
 
     public Manifest getManifest() throws IOException {
@@ -71,5 +74,14 @@ public class JSJarURLConnection extends JarURLConnection {
     	JSUtil.notImplemented(null);
     	return null;
     }
+
+	@Override
+	public void getBytesAsync(Function<byte[], Void> whenDone) {
+		try {
+			whenDone.apply(getInputStream().readAllBytes());
+		} catch (IOException e) {
+			whenDone.apply(null);
+		}
+	}
 
 }

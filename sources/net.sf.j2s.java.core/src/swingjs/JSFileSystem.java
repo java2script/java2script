@@ -986,7 +986,7 @@ public class JSFileSystem extends FileSystem {
 
 		private static Map<String, JSFileSystem> fsMap = new Hashtable<>();
 		
-		/** Could be "file" or "http" or "https"
+		/** Could be "file" or "jar" or "http" or "https"
 		 */
 		private String scheme;
 

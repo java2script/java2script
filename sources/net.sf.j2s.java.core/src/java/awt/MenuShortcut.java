@@ -182,9 +182,9 @@ public class MenuShortcut //implements java.io.Serializable
      */
     public String toString() {
         int modifiers = 0;
-        if (!GraphicsEnvironment.isHeadless()) {
+      //  if (!GraphicsEnvironment.isHeadless()) {
             modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
-        }
+      //  }
         if (usesShiftModifier()) {
             modifiers |= Event.SHIFT_MASK;
         }

@@ -30,11 +30,13 @@ import java.awt.Component;
  * questions.
  */
 import java.awt.Dimension;
+import java.awt.JSComponent;
 import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 
 import javax.swing.InputMap;
@@ -55,10 +57,9 @@ import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 import swingjs.api.js.JQueryObject;
 import swingjs.api.js.JQueryObject.JQEvent;
-import swingjs.api.js.JSSwingMenu;
 import swingjs.jquery.JQueryUI;
 
-public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
+public class JSPopupMenuUI extends JSPanelUI implements ContainerListener, MouseListener {
 
 
 	public static final String UI_DISABLED = "ui-j2smenu-disabled ui-state-disabled";
@@ -66,7 +67,7 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
-		String prop = e.getPropertyName();
+		//String prop = e.getPropertyName();
 //		System.out.println("jspopiupmenuui prop " + prop);
 		super.propertyChange(e);
 	}
@@ -87,22 +88,53 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 	static {
 		JQueryUI.loadJQMenu();
 	}
+	
+	private interface api {
+		
+		interface js {
+			
+			/**
+			 * An abstract class to cover the JavaScript calls made to j2sMenu
+			 * @author hansonr
+			 *
+			 */
+			abstract class JSSwingMenu {
+
+				class Options {
+					JPopupMenu jPopupMenu;
+					int delay;
+					boolean disabled;
+					JQueryObject focus, blur, select;
+				}
+				
+			JQueryObject active, activeMenu, element;
+			Options options;
+			abstract void disposeMenu(JPopupMenu menu);
+			abstract void hideMenu(JPopupMenu menu);
+			abstract void setMenu(JPopupMenu menu);
+			abstract void showMenu(JPopupMenu menu, int x, int y);
+			abstract void updateMenu(JPopupMenu menu, boolean andShow);
+			abstract void updateMenuItem(JPopupMenu menu, DOMNode domNode);
+			abstract JSSwingMenu getInstance(JPopupMenu menu);
+			abstract void _keydown(Object jqevent);
+			}
+		}
+	}
 
 	// a frameless independent window
 	
-	private static JSSwingMenu j2sSwingMenu;
+	private static api.js.JSSwingMenu j2sSwingMenu;
 
 	private static Component lastInvoker;
 
 	private JPopupMenu popupMenu;
-//	private PopupMenuListener popupMenuListener;
 
 	private JSMenuKeyListener menuKeyListener;
 	
 
 	public JSPopupMenuUI() {
 		if (j2sSwingMenu == null) {
-			j2sSwingMenu = J2S.getSwing();
+			j2sSwingMenu = (api.js.JSSwingMenu) J2S.getSwing();
 		}
 		isContainer = true;	
 		isMenuItem = true;
@@ -198,6 +230,8 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 					menu = (JPopupMenu) jc;
 					j2sSwingMenu.setMenu(menu);
 					isTainted = false;
+					JSComponent.秘getTopInvokableAncestor(jc, true).removeMouseListener(this);
+					JSComponent.秘getTopInvokableAncestor(jc, true).addMouseListener(this);
 				} else {
 					updateMenu(true);
 				}
@@ -237,7 +271,8 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 		//System.out.println("jspopupmenu updateMenu andshow=" + andShow);
 		setTainted();
 		setHTMLElement();
-		JSPopupMenuUI.j2sSwingMenu.updateMenu(menu, andShow);
+		if (andShow)
+			JSPopupMenuUI.j2sSwingMenu.updateMenu(menu, andShow);
 	}
 	
 	
@@ -1150,7 +1185,7 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 	@SuppressWarnings({ "unused" })
 	public static void processJ2SMenuCmd(Object[] data) {
 		String trigger = (String) data[0];
-		JSSwingMenu j2smenu = (JSSwingMenu) data[1];
+		api.js.JSSwingMenu j2smenu = (api.js.JSSwingMenu) data[1];
 		JQueryObject.JQEvent e = (JQEvent) data[2];
 		JQueryObject t = (JQueryObject) data[3]; // could actually be e in some cases
 		Object n = data[4];
@@ -1166,8 +1201,10 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 		
 		int eventID = 0;
 		
-//		System.out.println("pm " + trigger);
+	//	System.out.println("pm " + trigger);
 		switch (trigger) {
+		case "_hidePopupMenu":
+		case "_hide":
 		case "clearOut":
 		case "collapse":
 		case "expand":
@@ -1187,8 +1224,6 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 		case "refresh":
 		case "select":
 		case "_activate":
-		case "_hide":
-		case "_hidePopupMenu":
 		case "_move":
 		case "_show":
 		case "_startOpening":
@@ -1200,9 +1235,13 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 			c.visible = false;
 			JSPopupMenuUI ui = (JSPopupMenuUI) c.getUI();
 			JComponent invoker = ((JComponent)((JPopupMenu)c).getInvoker());
-			if (invoker instanceof JMenu)
+			if (invoker instanceof JMenu) {
+				((JMenu) invoker).setSelected(false);
 				invoker = invoker.getRootPane();
+			}
 			invoker.requestFocus();
+			
+	        MenuSelectionManager.defaultManager().setSelectedPath(null);
 			break;
 		case "setFocus":
 			isMenuOpen = true;
@@ -1254,9 +1293,39 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 		if (lastInvoker != null) {
 			lastInvoker.requestFocus();
 			lastInvoker = null;
+	        MenuSelectionManager.defaultManager().setSelectedPath(null);
 		}
-		JSUtil.jQuery.$(".ui-j2smenu").hide();
+		JSUtil.jQuery.$(".ui-j2smenu").hide().attr("aria-hidden","true").attr("aria-expanded","false");
 		JSUtil.jQuery.$(".ui-j2smenu-node").removeClass("ui-state-active").removeClass("ui-state-focus");
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		closeAllMenus();
 	}
 
 

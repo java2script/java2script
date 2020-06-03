@@ -1538,4 +1538,20 @@ public class IndexColorModel extends ColorModel {
                          + " isAlphaPre = "+isAlphaPremultiplied
                          );
     }
+
+    private byte[] 秘colormap;
+	public byte[] 秘getColorMap() {
+		if (秘colormap != null)
+			return 秘colormap;
+		int n = getMapSize();
+		byte[] rgba = new byte[n * 4];
+		for (int i = 0, pt = 0; i < n; i++) {
+        // REMIND: Needs to change if different color space
+	        rgba[pt++] = (byte) getRed(i);
+	        rgba[pt++] = (byte) getGreen(i);
+	        rgba[pt++] = (byte) getBlue(i);
+	        rgba[pt++] = (byte) getAlpha(i);
+		}
+		return rgba;
+	}
 }

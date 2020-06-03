@@ -1,14 +1,16 @@
 package swingjs.api.js;
 
-import java.awt.JSComponent;
+import java.awt.Component;
 import java.awt.Point;
 import java.util.Hashtable;
 
-import javajs.api.JSFunction;
-//import javajs.util.JSThread;
-import swingjs.api.js.JSSwingMenu;
 
-
+/**
+ * An interface to J2S.xxx() functions.
+ * 
+ * @author hansonr
+ *
+ */
 
 public interface J2SInterface {
 
@@ -31,9 +33,9 @@ public interface J2SInterface {
 	 */
 	String getDefaultLanguage(boolean isAll);
 
-	Object getFileData(String fileName, Object fSuccess, boolean doProcess, boolean isBinary);
+	Object getFileData(String fileName, Object fWhenDone, boolean doProcess, boolean isBinary);
 
-	void getFileFromDialog(JSFunction f, String type);
+	void getFileFromDialog(Object fWhenDone, String type);
 
 	Object getJavaResource(String resourceName, boolean isJavaPath);
 	
@@ -47,7 +49,7 @@ public interface J2SInterface {
 
 	Hashtable<String, Object> getSetJavaFileCache(Object object);
 	
-	JSSwingMenu getSwing();
+	Object getSwing(); // JSSwingMenu 
 	
 	int getZ(HTML5Applet applet, String frameType);
 
@@ -60,7 +62,7 @@ public interface J2SInterface {
 
 	void saveFile(String fileName, Object data, String mimeType, String encoding);
 	
-	void setDragDropTarget(JSComponent target, DOMNode node, boolean adding);
+	void setDragDropTarget(Component target, DOMNode node, boolean adding);
 
 	void setDraggable(DOMNode tagNode, Object targetNodeOrFDown);
 	
@@ -73,6 +75,8 @@ public interface J2SInterface {
 	void unsetMouse(DOMNode frameNode);
 
 	String fixCachePath(String uri);
+
+	void showStatus(String msg, boolean doFadeOut);
 
 
 }

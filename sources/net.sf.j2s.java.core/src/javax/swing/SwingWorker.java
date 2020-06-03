@@ -35,11 +35,16 @@ import java.beans.PropertyChangeSupport;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 //import java.util.concurrent.ExecutorService;
 //import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.LinkedBlockingQueue;
 //import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RunnableFuture;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 //import java.util.concurrent.ThreadFactory;
 //import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -233,7 +238,7 @@ public abstract class SwingWorker<T, V> implements RunnableFuture<T> {
     /**
      * number of worker threads.
      */
-    private static final int MAX_WORKER_THREADS = 10;
+    private static final int MAX_WORKER_THREADS = 1; // Java 10
 
     /**
      * current progress.
@@ -541,8 +546,9 @@ public abstract class SwingWorker<T, V> implements RunnableFuture<T> {
      * {@code doInBackground} method twice.
      */
     public final void execute() {
-    	run();
-//SwingJS        getWorkersExecutorService().execute(this);
+ //   	run();
+//SwingJS  
+    	getWorkersExecutorService().execute(this);
     }
 
     // Future methods START
@@ -752,71 +758,58 @@ public abstract class SwingWorker<T, V> implements RunnableFuture<T> {
     }
 
 
-//    /**
-//     * returns workersExecutorService.
-//     *
-//     * returns the service stored in the appContext or creates it if
-//     * necessary.
-//     *
-//     * @return ExecutorService for the {@code SwingWorkers}
-//     */
-//    private static synchronized ExecutorService getWorkersExecutorService() {
-//        final AppContext appContext = AppContext.getAppContext();
-//        ExecutorService executorService =
-//            (ExecutorService) appContext.get(SwingWorker.class);
-//        if (executorService == null) {
-//            //this creates daemon threads.
-//            ThreadFactory threadFactory =
-//                new ThreadFactory() {
-//                    final ThreadFactory defaultFactory =
-//                        Executors.defaultThreadFactory();
-//                    public Thread newThread(final Runnable r) {
-//                        Thread thread =
-//                            defaultFactory.newThread(r);
-//                        thread.setName("SwingWorker-"
-//                            + thread.getName());
-//                        thread.setDaemon(true);
-//                        return thread;
-//                    }
-//                };
-//
-//            executorService =
-//                new ThreadPoolExecutor(MAX_WORKER_THREADS, MAX_WORKER_THREADS,
-//                                       10L, TimeUnit.MINUTES,
-//                                       new LinkedBlockingQueue<Runnable>(),
-//                                       threadFactory);
-//            appContext.put(SwingWorker.class, executorService);
-//
-//            // Don't use ShutdownHook here as it's not enough. We should track
-//            // AppContext disposal instead of JVM shutdown, see 6799345 for details
-//            final ExecutorService es = executorService;
-//            appContext.addPropertyChangeListener(AppContext.DISPOSED_PROPERTY_NAME,
-//                new PropertyChangeListener() {
-//                    @Override
-//                    public void propertyChange(PropertyChangeEvent pce) {
-//                        boolean disposed = (Boolean)pce.getNewValue();
-//                        if (disposed) {
-//                            final WeakReference<ExecutorService> executorServiceRef =
-//                                new WeakReference<ExecutorService>(es);
-//                            final ExecutorService executorService =
-//                                executorServiceRef.get();
-//                            if (executorService != null) {
-//                                AccessController.doPrivileged(
-//                                    new PrivilegedAction<Void>() {
-//                                        public Void run() {
-//                                            executorService.shutdown();
-//                                            return null;
-//                                        }
-//                                    }
-//                                );
-//                            }
-//                        }
-//                    }
-//                }
-//            );
-//        }
-//        return executorService;
-//    }
+    /**
+     * returns workersExecutorService.
+     *
+     * returns the service stored in the appContext or creates it if
+     * necessary.
+     *
+     * @return ExecutorService for the {@code SwingWorkers}
+     */
+    private static synchronized ExecutorService getWorkersExecutorService() {
+        final AppContext appContext = AppContext.getAppContext();
+        ExecutorService executorService =
+            (ExecutorService) appContext.get(SwingWorker.class);
+        if (executorService == null) {
+			// this creates daemon threads.
+            ThreadFactory threadFactory =
+                new ThreadFactory() {
+                    final ThreadFactory defaultFactory =
+                        Executors.defaultThreadFactory();
+                    public Thread newThread(final Runnable r) {
+                        Thread thread =
+                            defaultFactory.newThread(r);
+                        thread.setName("SwingWorker-"
+                            + thread.getName());
+                        thread.setDaemon(true);
+                        return thread;
+                    }
+                };
+
+            executorService =
+                new ThreadPoolExecutor(MAX_WORKER_THREADS, MAX_WORKER_THREADS,
+                                       10L, TimeUnit.MINUTES,
+                                       new LinkedBlockingQueue<Runnable>(),
+                                       threadFactory);
+            appContext.put(SwingWorker.class, executorService);
+
+            // Don't use ShutdownHook here as it's not enough. We should track
+            // AppContext disposal instead of JVM shutdown, see 6799345 for details
+            final ExecutorService es = executorService;
+            appContext.addPropertyChangeListener(AppContext.DISPOSED_PROPERTY_NAME,
+                new PropertyChangeListener() {
+                    @Override
+                    public void propertyChange(PropertyChangeEvent pce) {
+                        boolean disposed = (Boolean)pce.getNewValue();
+                        if (disposed) {
+                            es.shutdown();
+                        }
+                    }
+                }
+            );
+        }
+        return executorService;
+    }
 
     private static final Object DO_SUBMIT_KEY = "SwingWorker_doSubmit";
     private static AccumulativeRunnable<Runnable> getDoSubmit() {

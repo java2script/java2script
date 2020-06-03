@@ -7,6 +7,7 @@ import java.nio.CharBuffer;
 
 import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 
+import javajs.util.PT;
 import javajs.util.SB;
 
 public class Test_String extends Test_ {
@@ -180,6 +181,9 @@ public class Test_String extends Test_ {
 		boolean \u79d8 = true; // Mandarin "secret" 秘
 
 		System.out.println(秘);
+		
+		
+
 
 		System.out.println("Test_String OK");
 	}

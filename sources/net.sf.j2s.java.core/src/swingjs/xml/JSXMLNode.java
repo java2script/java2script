@@ -9,7 +9,6 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 
 public class JSXMLNode implements Node {
@@ -41,6 +40,9 @@ public class JSXMLNode implements Node {
 		case "clonedeep": 
 			/** @j2sNative n = this.node.cloneNode(true); */
 			break;
+		case "attributes":
+			/** @j2sNative n = this.node.attributes;n && (n.nodeType = 2); */
+			break;
 		default:
 			/** @j2sNative n = this.node[type]; */
 			break;
@@ -61,6 +63,8 @@ public class JSXMLNode implements Node {
 			return new JSXMLElement().setNode(n);
 		case Node.TEXT_NODE:
 			return new JSXMLText().setNode(n);
+		case Node.ATTRIBUTE_NODE:
+			return new JSXMLAttributes().setNode(n);
 		case Node.COMMENT_NODE:
 			return new JSXMLComment().setNode(n);
 		default:
@@ -122,8 +126,7 @@ public class JSXMLNode implements Node {
 
 	@Override
 	public NamedNodeMap getAttributes() {
-		// TODO Auto-generated method stub
-		return null;
+		return (NamedNodeMap) get("attributes");
 	}
 
 	@Override
@@ -294,7 +297,7 @@ public class JSXMLNode implements Node {
 
 	@Override
 	public boolean hasAttributes() {
-		return /** @j2sNative this.node.hasAttributes || */false; 
+		return /** @j2sNative this.node.hasAttributes() || */false; 
 	}
 
 	public NodeList getElementsByAttributeValue(String namespaceURI, String localName, String value) {

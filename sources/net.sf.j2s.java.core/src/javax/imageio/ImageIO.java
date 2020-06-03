@@ -450,8 +450,7 @@ public final class ImageIO {
          * java.io.tmpdir system property.
          */
         private static String getTempDir() {
-            GetPropertyAction a = new GetPropertyAction("java.io.tmpdir");
-            return (String)AccessController.doPrivileged(a);
+            return System.getProperty("java.io.tmpdir");
         }
 
         /**

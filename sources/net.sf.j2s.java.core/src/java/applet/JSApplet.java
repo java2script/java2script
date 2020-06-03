@@ -88,7 +88,10 @@ public class JSApplet extends JSPanel {
 //        }
     }
 
- 
+	public Object getClientProperty(Object key) {
+		return null;
+	}
+
     /**
      * SwingJS -- from Window
      * 

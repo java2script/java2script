@@ -519,7 +519,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		case "Slider.paintThumbArrowShape":
 			// checkedLabelBaselines = false;
 			calculateGeometry();
-			setTainted(true);// slider.repaint();
+			setTainted();// slider.repaint();
 			break;
 		case "componentOrientation":
 			calculateGeometry();

@@ -32,8 +32,6 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import swingjs.JSGraphics2D;
-
 /**
  * This class is an implementation of the ImageProducer interface which
  * uses an array to produce pixel values for an Image.  Here is an example
@@ -455,19 +453,9 @@ public class MemoryImageSource implements ImageProducer {
      * @see #setAnimated
      * @see #setFullBufferUpdates
      */
-    @SuppressWarnings({ "unused" })
 	public synchronized void newPixels(int x, int y, int w, int h,
-                                       boolean framenotify) {
-    	
-    	Object pixels = this.pixels;
-    	BufferedImage img = /** @j2sNative pixels.img || */ null;
-    	JSGraphics2D g = (img == null ? null : img.秘g);
-    	if (img != null && g != null) {
-    		img.秘pix = (int[]) pixels;
-       	    g.drawImage(img, 0, 0, null);
-        	img.秘pix = null;
-    	}
-
+                                       boolean framenotify) {    	
+    	BufferedImage.秘newPixelsFromMemorySource(this.pixels);
     	if (animating) {
             if (fullbuffers) {
                 x = y = 0;

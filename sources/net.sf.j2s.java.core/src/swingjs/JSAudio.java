@@ -57,7 +57,7 @@ public class JSAudio implements AudioClip {
 			if (bytes == null)
 				return;
 			myURI = getBase64(bytes, format);
-			myPlayer = DOMNode.getAudioElement(myURI, false);			
+			myPlayer = getAudioElement(myURI, false);			
 		} catch (Exception e) {
 			System.out.println("Exception creating AudioClip for " + url);
 			e.printStackTrace();
@@ -67,6 +67,19 @@ public class JSAudio implements AudioClip {
 	public AudioClip getAudioClip(URL url) {
 		JSAudio jsAudio = new JSAudio(url);
 		return jsAudio;
+	}
+
+	public static AudioClip getAudioElement(String filePath, boolean isLoop) {
+		AudioClip clip = (AudioClip) DOMNode.setAttrs(DOMNode.createElement("audio", null), 
+				"controls", "true", (isLoop ? "loop" : null), (isLoop ? "true" : null), "src", filePath);
+		// alias the actual audio element methods to SwingJS-qualified methods.
+		/**
+		 * @j2sNative
+		 *  clip.play$ = clip.play;
+		 *  clip.stop$ = clip.stop;
+		 *  clip.loop$ = clip.loop;
+		 */
+		return clip;
 	}
 
 
@@ -179,7 +192,7 @@ public class JSAudio implements AudioClip {
 		}
 		if (data == null)
 			return null;			
-		return DOMNode.getAudioElement(getBase64(data, format), false);
+		return getAudioElement(getBase64(data, format), false);
 	}
 
 	

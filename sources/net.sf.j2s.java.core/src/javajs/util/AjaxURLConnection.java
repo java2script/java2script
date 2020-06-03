@@ -9,13 +9,16 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Function;
 
 import javajs.api.js.J2SObjectInterface;
-import swingjs.JSUtil;
+import swingjs.api.JSUtilI;
 
 /**
  * 
@@ -24,6 +27,14 @@ import swingjs.JSUtil;
  */
 public class AjaxURLConnection extends HttpURLConnection {
 
+	static private JSUtilI jsutil = null;
+	static {
+		try {
+			jsutil = (JSUtilI) Class.forName("swingjs.JSUtil").newInstance();
+		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
 	public static class AjaxHttpsURLConnection extends AjaxURLConnection {
 
 		static {
@@ -58,7 +69,49 @@ public class AjaxURLConnection extends HttpURLConnection {
 
 	@Override
 	public String getHeaderField(String name) {
-		return /** @j2sNative this.info && this.info.xhr && this.info.xhr.getResponseHeader(name) || */null;
+		try {
+			if (getResponseCode() != -1) {
+				return /**
+						 * @j2sNative this.info && this.info.xhr &&
+						 *            this.info.xhr.getResponseHeader(name) ||
+						 */
+				null;
+			}
+		} catch (IOException e) {
+		}
+		return null;
+	}
+
+	
+	@SuppressWarnings("unused")
+	@Override
+	public Map<String, List<String>> getHeaderFields() {
+		Map<String, List<String>> map = new HashMap<>();
+		try {
+			if (getResponseCode() != -1) {
+				String[] data = null;
+				/**
+				 * @j2sNative data = this.info && this.info.xhr &&
+				 *            this.info.xhr.getAllResponseHeaders(); data && (data =
+				 *            data.trim().split("\n"));
+				 */
+				// ["content-length: 996"
+				// , "content-type: text/plain; charset=x-user-defined"
+				// , "last-modified: Fri, 01 May 2020 11:54:13 GMT"]
+				if (data != null) {
+					for (int i = 0; i < data.length; i++) {
+						String[] parts = data[i].split(":");
+						String key = parts[0].trim();
+						List<String> list = map.get(key);
+						if (list == null)
+							map.put(key, list = new ArrayList<>());
+						list.add(parts[1].trim());
+					}
+				}
+			}
+		} catch (IOException e) {
+		}
+		return map;
 	}
 
 	/**
@@ -81,16 +134,19 @@ public class AjaxURLConnection extends HttpURLConnection {
 	 * 
 	 */
 	@SuppressWarnings("null")
-	private Object doAjax(boolean isBinary) {
+	private Object doAjax(boolean isBinary, Function<Object, Void> whenDone) {
 		getBytesOut();
 		J2SObjectInterface J2S = /** @j2sNative self.J2S || */
 				null;
-		Object info = null;
+		Object info = null; 
 		/**
 		 * @j2sNative
 		 * 
 		 * 			info = this.ajax || {}; if (!info.dataType) { info.isBinary =
 		 *            !!isBinary; }
+		 *            
+		 *          whenDone && (info.fWhenDone = function(data){whenDone.apply$O(data)});
+		 *          
 		 */
 		this.info = info;
 		Map<String, List<String>> map = getRequestProperties();
@@ -140,14 +196,28 @@ public class AjaxURLConnection extends HttpURLConnection {
 		String myURL = url.toString();
 		boolean isEmpty = false;
 		if (myURL.startsWith("file:/TEMP/")) {
-			result = JSUtil.getCachedFileData(myURL, true);
+			
+			result = jsutil.getCachedBytes(myURL);
 			isEmpty = (result == null);
+			if (whenDone != null) {
+				whenDone.apply(isEmpty ? null : result);
+				return null;
+			}
 			responseCode = (isEmpty ? HTTP_NOT_FOUND : HTTP_ACCEPTED);
 		} else {
 			if (myURL.startsWith("file:")) {
-				myURL = JSUtil.J2S.getResourcePath("", true) + myURL.substring(5);
+				String path = jsutil.getCodeBase().toString();
+				String base = jsutil.getDocumentBase().toString();
+				if (myURL.indexOf(path) >= 0)
+					myURL = path + myURL.split(path)[1];
+				else if (base != null && myURL.indexOf(base) == 0)
+					myURL = myURL.substring(base.length());
+				else
+					myURL = path + myURL.substring(5);
 			}
 			result = J2S.doAjax(myURL, postOut, bytesOut, info);
+			if (whenDone != null)
+				return null;
 		// the problem is that jsmol.php is still returning crlf even if output is 0
 		// bytes
 		// and it is not passing through the not-found state, just 200
@@ -157,6 +227,7 @@ public class AjaxURLConnection extends HttpURLConnection {
 			 * 			isEmpty = (!result || result.length == 2 && result[0] == 13 &&
 			 *            result[1] == 10); if (isEmpty) result = new Int8Array;
 			 */
+
 			responseCode = isEmpty ? HTTP_NOT_FOUND : /** @j2sNative info.xhr.status || */
 				0;
 		}
@@ -201,6 +272,66 @@ public class AjaxURLConnection extends HttpURLConnection {
 			throw new FileNotFoundException("opening " + url);
 		return is;
 	}
+	
+
+	@Override
+	public void getBytesAsync(Function<byte[], Void> whenDone) {
+		getInputStreamAsync(new Function<InputStream, Void>() {
+
+			@Override
+			public Void apply(InputStream is) {
+				try {
+					if (is != null) {
+						whenDone.apply(is.readAllBytes());
+						return null;
+					}
+				} catch (IOException e) {
+				}
+				whenDone.apply(null);
+				return null;
+			}
+			
+		});
+		
+	}
+
+	private void getInputStreamAsync(Function<InputStream, Void> whenDone) {
+		if (is != null) {
+			whenDone.apply(is);
+			return;
+		}
+		responseCode = -1;
+		getInputStreamAndResponseAsync(whenDone);
+	}
+
+	private void getInputStreamAndResponseAsync(Function<InputStream, Void> whenDone) {
+		BufferedInputStream is = getAttachedStreamData(url, false);
+		if (is != null || doCache() 
+				&& (is = getCachedStream(false)) != null) {
+			whenDone.apply(is);
+			return;
+		}
+		doAjax(true, new Function<Object, Void>() {
+
+			@Override
+			public Void apply(Object data) {
+				if (data instanceof String) {
+					whenDone.apply(null);
+					return null;
+				}
+				BufferedInputStream is = attachStreamData(url, data);
+				if (doCache() && is != null) {
+					isNetworkError(is);
+					setCachedStream();
+				} else if (isNetworkError(is)) {
+					is = null;
+				}
+				whenDone.apply(is);
+				return null;
+			}
+			
+		});
+	}
 
 	private InputStream getInputStreamAndResponse(boolean allowNWError) {
 		BufferedInputStream is = getAttachedStreamData(url, false);
@@ -208,7 +339,7 @@ public class AjaxURLConnection extends HttpURLConnection {
 				&& (is = getCachedStream(allowNWError)) != null) {
 			return is;
 		}
-		is = attachStreamData(url, doAjax(ajax == null));
+		is = attachStreamData(url, doAjax(ajax == null, null));
 		if (doCache() && is != null) {
 			isNetworkError(is);
 			setCachedStream();
@@ -236,7 +367,10 @@ public class AjaxURLConnection extends HttpURLConnection {
 		Object data = urlCache.get(getCacheKey());
 		if (data == null)
 			return null;
+		@SuppressWarnings("unused")
 		URL url = this.url;
+		if (data instanceof byte[])
+			url._streamData = data;
 		boolean isAjax = /** @j2sNative url.ajax || */
 				false;
 		BufferedInputStream bis = getBIS(data, isAjax);
@@ -346,10 +480,10 @@ public class AjaxURLConnection extends HttpURLConnection {
 	 * @return javajs.util.SB or byte[], depending upon the file type
 	 */
 	public Object getContents() {
-		return doAjax(false);
+		return doAjax(false, null);
 	}
 
-	@Override
+	@Override	
 	public int getResponseCode() throws IOException {
 		/*
 		 * Check to see if have the response code already
@@ -393,4 +527,5 @@ public class AjaxURLConnection extends HttpURLConnection {
 	public String toString() {
 		return (url == null ? "[AjaxURLConnection]" : url.toString());
 	}
+
 }

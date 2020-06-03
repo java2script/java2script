@@ -388,6 +388,7 @@ public class SinglePixelPackedSampleModel extends SampleModel
             throw new ArrayIndexOutOfBoundsException
                 ("Coordinate out of bounds!");
         }
+		data.秘setDoCheckImage(false);
 
         int type = getTransferType();
 
@@ -435,7 +436,7 @@ public class SinglePixelPackedSampleModel extends SampleModel
             obj = (Object)idata;
             break;
         }
-
+		data.秘setDoCheckImage(true);
         return obj;
     }
 
@@ -491,6 +492,8 @@ public class SinglePixelPackedSampleModel extends SampleModel
             throw new ArrayIndexOutOfBoundsException
                 ("Coordinate out of bounds!");
         }
+		data.秘setDoCheckImage(false);
+
         int pixels[];
         if (iArray != null) {
            pixels = iArray;
@@ -510,6 +513,9 @@ public class SinglePixelPackedSampleModel extends SampleModel
            }
            lineOffset += scanlineStride;
         }
+        
+		data.秘setDoCheckImage(true);
+
         return pixels;
     }
 
@@ -561,6 +567,9 @@ public class SinglePixelPackedSampleModel extends SampleModel
             throw new ArrayIndexOutOfBoundsException
                 ("Coordinate out of bounds!");
         }
+        
+		data.秘setDoCheckImage(false);
+
         int samples[];
         if (iArray != null) {
            samples = iArray;
@@ -578,6 +587,8 @@ public class SinglePixelPackedSampleModel extends SampleModel
            }
            lineOffset += scanlineStride;
         }
+		data.秘setDoCheckImage(true);
+
         return samples;
     }
 
@@ -623,6 +634,8 @@ public class SinglePixelPackedSampleModel extends SampleModel
                 ("Coordinate out of bounds!");
         }
 
+		data.秘setDoCheckImage(false);
+
         int type = getTransferType();
 
         switch(type) {
@@ -645,6 +658,7 @@ public class SinglePixelPackedSampleModel extends SampleModel
             data.setElem(y*scanlineStride+x, iarray[0]);
             break;
         }
+		data.秘setDoCheckImage(true);
     }
 
     /**
@@ -695,6 +709,8 @@ public class SinglePixelPackedSampleModel extends SampleModel
                 ("Coordinate out of bounds!");
         }
 
+		data.秘setDoCheckImage(false);
+
         int lineOffset = y*scanlineStride + x;
         int srcOffset = 0;
 
@@ -711,6 +727,9 @@ public class SinglePixelPackedSampleModel extends SampleModel
            }
            lineOffset += scanlineStride;
         }
+        
+		data.秘setDoCheckImage(true);
+
     }
 
     /**
@@ -761,6 +780,9 @@ public class SinglePixelPackedSampleModel extends SampleModel
             throw new ArrayIndexOutOfBoundsException
                 ("Coordinate out of bounds!");
         }
+        
+		data.秘setDoCheckImage(false);
+
         int lineOffset = y*scanlineStride + x;
         int srcOffset = 0;
 
@@ -774,6 +796,9 @@ public class SinglePixelPackedSampleModel extends SampleModel
            }
            lineOffset += scanlineStride;
         }
+        
+		data.秘setDoCheckImage(true);
+
     }
 
     @Override

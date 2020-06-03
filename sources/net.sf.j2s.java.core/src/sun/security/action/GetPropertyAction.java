@@ -49,8 +49,7 @@ package sun.security.action;
  * @since 1.2
  */
 
-public class GetPropertyAction
-        implements java.security.PrivilegedAction<String> {
+public class GetPropertyAction {
     private String theProp;
     private String defaultVal;
 
@@ -83,7 +82,6 @@ public class GetPropertyAction
      * @return the string value of the system property,
      *         or the default value if there is no property with that key.
      */
-    @Override
 		public String run() {
         String value = System.getProperty(theProp);
         return (value == null ? defaultVal : value);

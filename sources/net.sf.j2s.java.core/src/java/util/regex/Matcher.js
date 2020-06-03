@@ -4,33 +4,39 @@
 //BH fix for String not having .length() or .subSequence()
 //BH fix for not reinitializing correctly
 //BH note that start(groupIndex) is not implemented for groupIndex > 0
-(function(){Clazz.newPackage("java.util.regex");
+
+(function(){var P$=Clazz.newPackage("java.util.regex");
 
 var C$=Clazz.newClass(java.util.regex,"Matcher",function(){
   Clazz.newInstance(this,arguments);
 },null,"java.util.regex.MatchResult");
 
+C$.$clinit$=2;
 
-C$.$clinit$ = function() {
-delete C$.$clinit$;
-Clazz.load(C$, 1);
-};
+Clazz.newMeth(C$, '$init$', function () {
+},1);
 
-(function(){
+Clazz.newMeth(C$);
 
-  var C$=Clazz.newClass(java.util.regex,"Matcher$1",function(){
-    Clazz.newInstance(this, arguments[0], true);
-  });
-  
-  C$.$clinit$ = function() {delete C$.$clinit$;Clazz.load(C$, 1);}
+;
+(function(){/*c*/var C$=Clazz.newClass(P$.Matcher, "Matcher1", function(){
+Clazz.newInstance(this, arguments[0],true,C$);
+});
 
-  Clazz.newMeth(C$, "$init$", function() {
-      this.grN=0;
-  }, 1);
-  Clazz.newMeth(C$,"toString", function(){
-    return this.b$["java.util.regex.Matcher"].group$I(this.grN);
-  });
-})();
+C$.$clinit$=2;
+
+Clazz.newMeth(C$, '$init$', function () {
+this.grN=0;
+},1);
+
+C$.$fields$=[['I',['grN']]]
+
+Clazz.newMeth(C$, 'toString', function () {
+return this.b$['java.util.regex.Matcher'].group$I.apply(this.b$['java.util.regex.Matcher'], [this.grN]);
+});
+
+Clazz.newMeth(C$);
+})()
 
 Clazz.newMeth(C$, 'c$$java_util_regex_Pattern$CharSequence', function(pat,cs){
   this.pat=pat;
@@ -120,7 +126,7 @@ Clazz.newMeth(C$,"processReplacement$S",function(replacement){
     if(this.replacementParts==null){
       return this.processedRepl;
     }else{
-      var sb=new StringBuffer();
+      var sb=Clazz.new_("java.lang.StringBuffer");
       for(var i=0;i<this.replacementParts.length;i++){
         sb.append$S(this.replacementParts[i]);
       }
@@ -128,8 +134,8 @@ Clazz.newMeth(C$,"processReplacement$S",function(replacement){
     }
   }else{
     this.replacement=replacement;
-    var repl=replacement.toCharArray();
-    var res=new StringBuffer();
+    var repl=replacement.toCharArray$();
+    var res=Clazz.new_("java.lang.StringBuffer");
     this.replacementParts=null;
     var index=0;
     var replacementPos=0;
@@ -145,7 +151,7 @@ Clazz.newMeth(C$,"processReplacement$S",function(replacement){
       }else{
         if((repl[index]).charCodeAt(0)==('$').charCodeAt(0)){
           if(this.replacementParts==null){
-            this.replacementParts=Clazz.array(String, 0);
+            this.replacementParts=[];
           }
           try{
             var gr=Integer.parseInt$S(String.instantialize(repl,++index,1));
@@ -153,7 +159,7 @@ Clazz.newMeth(C$,"processReplacement$S",function(replacement){
               this.replacementParts[this.replacementParts.length]=res.subSequence$I$I(replacementPos,res.length$());
               replacementPos=res.length$();
             }
-            this.replacementParts[this.replacementParts.length]= Clazz.new_(Clazz.load("java.util.regex.Matcher$1").c$,[this]);
+            this.replacementParts[this.replacementParts.length]= Clazz.new_(P$.Matcher.Matcher1.c$,[this]);
             var group=this.group$I(gr);
             replacementPos+=group.length;
             res.append$S(group);
@@ -205,7 +211,7 @@ Clazz.newMeth(C$,"appendTail$StringBuffer",function(sb){
 Clazz.newMeth(C$,"replaceFirst$S",function(replacement){
   this.reset$();
   if(this.find$()){
-    var sb=new StringBuffer();
+    var sb=Clazz.new_("java.lang.StringBuffer");
     this.appendReplacement$StringBuffer$S(sb,replacement);
     return this.appendTail$StringBuffer(sb).toString();
   }
@@ -213,7 +219,7 @@ Clazz.newMeth(C$,"replaceFirst$S",function(replacement){
 });
 
 Clazz.newMeth(C$,"replaceAll$S", function(replacement){
-  var sb=new StringBuffer();
+  var sb=Clazz.new_("java.lang.StringBuffer");
   this.reset$();
   while(this.find$()){
     this.appendReplacement$StringBuffer$S(sb,replacement);
@@ -327,3 +333,4 @@ Clazz.newMeth(C$,"usePattern$java.util_regex_Pattern",function(pat){
 });
 
 })();
+// BH 2020.05.04

@@ -28,17 +28,29 @@
 
 package java.util.zip;
 
-import java.io.InputStream;
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
 import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PushbackInputStream;
 import java.io.UnsupportedEncodingException;
+
+import swingjs.JSUtil;
 
 /**
  * Modified by Bob Hanson for compatibility with jzlib
  * 
  * This class implements an input stream filter for reading files in the ZIP
  * file format. Includes support for both compressed and uncompressed entries.
+ * 
+ * For SwingJS, we generally have a ByteArrayInputStream, which means there is no
+ * issue about closing, and there is no need for a PushbackInputStream. We can 
+ * dispense with any BufferedInputStream wrappers as well. 
+ * 
+ * In addition, we can use the ZipEntry to "randomly access" the zip stream and 
+ * re-read entries without any contents searching. Just go to the position and unzip.
+ * 
  * 
  * @author David Connelly
  */
@@ -52,12 +64,13 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
   private static final int STORED = ZipEntry.STORED;
   private static final int DEFLATED = ZipEntry.DEFLATED;
 
-  private boolean closed = false;
+//  private boolean closed = false; ! SwingJS no - InflaterInputStream has this
   // this flag is set to true after EOF has reached for
   // one entry
   private boolean entryEOF = false;
 
   private String zc;
+private boolean isPushback;
 
   /**
    * Check to make sure that this stream has not been closed
@@ -73,6 +86,9 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
   /**
    * Creates a new ZIP input stream.
    * 
+   * SwingJS - probably strips off any BufferedInputStreams and ends up with a
+   * raw ByteArrayInputStream.
+   * 
    * <p>
    * The UTF-8 {@link java.nio.charset.Charset charset} is used to decode the
    * entry names.
@@ -81,86 +97,62 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
    *        the actual input stream
    */
   public ZipInputStream(InputStream in) {
-    super(new PushbackInputStream(in, 1024), newInflater(), 512);
-    //usesDefaultInflater = true;
+    super(秘getByteStream(in, GET_BYTE_STREAM_FOR_ZIP), newInflater(), 512);
+    isPushback = this.in instanceof PushbackInputStream;
     String charset = "UTF-8";
-    try {
-      new String(byteTest, charset);
-    } catch (UnsupportedEncodingException e) {
-      throw new NullPointerException("charset is invalid");
-    }
+    //usesDefaultInflater = true;
+	//    try {
+	//      new String(byteTest, charset);
+	//    } catch (UnsupportedEncodingException e) {
+	//      throw new NullPointerException("charset is invalid");
+	//    }
     this.zc = charset;
   }
-
-//  /**
-//   * BH: Addeed to allow full reset of a bundled stream
-//   */
-//  @Override
-//  public void resetStream() {
-//    in.resetStream();
-//    inflater =  newInflater();
-//  }
-//
 
   private static Inflater newInflater() {
     return (Inflater) new Inflater().init(0, true);
   }
 
-  private byte[] byteTest = new byte[] { 0x20 };
+//  private byte[] byteTest = new byte[] { 0x20 };
 
-  //    /**
-  //     * Creates a new ZIP input stream.
-  //     *
-  //     * @param in the actual input stream
-  //     *
-  //     * @param charset
-  //     *        The {@linkplain java.nio.charset.Charset charset} to be
-  //     *        used to decode the ZIP entry name (ignored if the
-  //     *        <a href="package-summary.html#lang_encoding"> language
-  //     *        encoding bit</a> of the ZIP entry's general purpose bit
-  //     *        flag is set).
-  //     *
-  //     * @since 1.7
-  //     */
-  //    public ZipInputStream(InputStream in, String charset){
-  //        super(new PushbackInputStream(in, 1024), new Inflater(true), 512);
-  //        //usesDefaultInflater = true;
-  //        try {
-  //          new String(byteTest, charset);
-  //        } catch (UnsupportedEncodingException e) {
-  //          throw new NullPointerException("charset is invalid");
-  //        }
-  //        this.zc = charset;
-  //    }
+      /**
+       * Creates a new ZIP input stream.
+       *
+       * @param in the actual input stream
+       *
+       * @param charset
+       *        The {@linkplain java.nio.charset.Charset charset} to be
+       *        used to decode the ZIP entry name (ignored if the
+       *        <a href="package-summary.html#lang_encoding"> language
+       *        encoding bit</a> of the ZIP entry's general purpose bit
+       *        flag is set).
+       *
+       * @since 1.7
+       */
+      public ZipInputStream(InputStream in, String charset){
+          super(秘getByteStream(in, GET_BYTE_STREAM_FOR_ZIP), new Inflater(), 512);
+//          //usesDefaultInflater = true;
+//          try {
+//            new String(byteTest, charset);
+//          } catch (UnsupportedEncodingException e) {
+//            throw new NullPointerException("charset is invalid");
+//          }
+          if (!charset.equalsIgnoreCase("UTF-8"))
+        	  JSUtil.notImplemented("ZipInputStream charset " + charset);
+          charset = "UTF-8";
+          this.zc = charset;
+      }
 
-  /**
-   * Reads the next ZIP file entry and positions the stream at the beginning of
-   * the entry data.
-   * 
-   * @return the next ZIP file entry, or null if there are no more entries
-   * @exception ZipException
-   *            if a ZIP file error has occurred
-   * @exception IOException
-   *            if an I/O error has occurred
-   */
-  public ZipEntry getNextEntry() throws IOException {
-    ensureOpen();
-    if (entry != null) {
-      closeEntry();
-    }
-    crc.reset();
-    inflater = inf = newInflater();
-    if ((entry = readLOC()) == null) {
-      return null;
-    }
-    if (entry.method == STORED) {
-      remaining = entry.size;
-    }
-    entryEOF = false;
-    return entry;
-  }
+	private void initEntry() {
+		crc.reset();
+		inflater = inf = newInflater();
+		if (entry.method == STORED) {
+			remaining = entry.size;
+		}
+		entryEOF = false;
+	}
 
-  /**
+/**
    * Closes the current ZIP entry and positions the stream for reading the next
    * entry.
    * 
@@ -365,8 +357,9 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
       e.size = get32(tmpbuf, LOCLEN);
     }
     len = get16(tmpbuf, LOCEXT);
+    byte[] bb = new byte[len + 4];
     if (len > 0) {
-      byte[] bb = new byte[len];
+      bb = new byte[len + 4];
       readFully(bb, 0, len);
       e.setExtra(bb);
       // extra fields are in "HeaderID(2)DataSize(2)Data... format
@@ -426,7 +419,7 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
   private void readEnd(ZipEntry e) throws IOException {
     int n = inf.getAvailIn();
     if (n > 0) {
-      ((PushbackInputStream) in).unread(buf, len - n, n);
+      unread(buf, len, n);
       this.eof = false;
     }
     if ((flag & 8) == 8) {
@@ -442,8 +435,7 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
               - ZipConstants64.ZIP64_EXTCRC);
           e.size = get64(tmpbuf, ZipConstants64.ZIP64_EXTLEN
               - ZipConstants64.ZIP64_EXTCRC);
-          ((PushbackInputStream) in).unread(tmpbuf, ZipConstants64.ZIP64_EXTHDR
-              - ZipConstants64.ZIP64_EXTCRC - 1, ZipConstants64.ZIP64_EXTCRC);
+          unread(tmpbuf, ZipConstants64.ZIP64_EXTHDR - 1, ZipConstants64.ZIP64_EXTCRC);
         } else {
           e.crc = get32(tmpbuf, ZipConstants64.ZIP64_EXTCRC);
           e.csize = get64(tmpbuf, ZipConstants64.ZIP64_EXTSIZ);
@@ -456,8 +448,7 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
           e.crc = sig;
           e.csize = get32(tmpbuf, EXTSIZ - EXTCRC);
           e.size = get32(tmpbuf, EXTLEN - EXTCRC);
-          ((PushbackInputStream) in)
-              .unread(tmpbuf, EXTHDR - EXTCRC - 1, EXTCRC);
+          unread(tmpbuf, EXTHDR - 1, EXTCRC);
         } else {
           e.crc = get32(tmpbuf, EXTCRC);
           e.csize = get32(tmpbuf, EXTSIZ);
@@ -480,7 +471,15 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
     }
   }
 
-  /*
+  private void unread(byte[] b, int len, int n) throws IOException {
+	  if (isPushback) {
+		  ((PushbackInputStream) in).unread(b, len - n, n);
+	  } else {
+		  ((ByteArrayInputStream) in).pos -= n;
+	  }
+  }
+
+/*
    * Reads bytes, blocking until all bytes are read.
    */
   private void readFully(byte[] b, int off, int len) throws IOException {
@@ -517,4 +516,104 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
   private static final long get64(byte b[], int off) {
     return get32(b, off) | (get32(b, off + 4) << 32);
   }
+  
+	/**
+	 * SwingJS addition
+	 * 
+	 * Reads the next ZIP file entry and positions the stream at the beginning of
+	 * the entry data.
+	 * 
+	 * @return the next ZIP file entry, or null if there are no more entries
+	 * @exception ZipException if a ZIP file error has occurred
+	 * @exception IOException  if an I/O error has occurred
+	 */
+	public ZipEntry getNextEntry() throws IOException {
+		ensureOpen();
+		if (entry != null) {
+			closeEntry();
+		}
+		if ((entry = readLOC()) == null) {
+			return null;
+		}
+		initEntry();
+		if (!entry.isDirectory()) {
+			entry.秘source = in;
+			entry.秘entryOffset = 秘getEntryOffset(entry);
+		}
+		return entry;
+	}
+
+	/**
+	 * SwingJS addition: 
+	 * 
+	 * 
+	 * This is based on using only BufferedInputStreams and ByteArrayInputStreams as
+	 * fodder for ZipInputStream. This is typically the case. Maybe always.
+	 * 
+	 * @param entry
+	 * @return
+	 */
+	private int 秘getEntryOffset(ZipEntry entry) {
+		if (!isPushback) {
+			//System.out.println("ZISB " + entry.name + " " + ((ByteArrayInputStream) in).pos);
+			return ((ByteArrayInputStream) in).pos;
+		}
+		PushbackInputStream pis = (PushbackInputStream) in;
+		if (!(pis.in instanceof ByteArrayInputStream)) {
+			return -1;
+		}
+//		System.out.println("ZIS " + entry.name + " " + ((ByteArrayInputStream) pis.in).pos + "-"
+//				+ (pis.buf.length - pis.pos) + " avail=" + this.inflater.avail_in);
+		return ((ByteArrayInputStream) pis.in).pos - (pis.buf.length - pis.pos);
+	}
+
+	/**
+	 * Set the stream to the specified entry, if possible -- that is, if the underlying input stream
+	 * some set of BufferedInputStreams and a FileInputStream or a ByteArrayInputStream. 
+	 * 
+	 * @param entry
+	 * @return the size of the entry, or -1 if this was not possible
+	 */
+	public long setEntry(ZipEntry entry) {
+		if (isPushback)
+			return -1;
+		this.closed = false;
+		this.entry = entry;
+		initEntry();
+		((ByteArrayInputStream) in).pos = entry.秘entryOffset;
+		return entry.getSize();
+	}
+
+	/**
+	 * Java 9
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
+	@Override
+	public byte[] readAllBytes() throws IOException {
+		if (entry == null) {
+			return new byte[0];
+		}
+		byte[] b = new byte[(int) entry.size];
+		read(b, 0, b.length);
+		return b;
+	}
+	
+	/**
+	 * Java 9
+	 * 
+	 * @param out
+	 * @return
+	 * @throws IOException
+	 */
+	@Override
+	public long transferTo(OutputStream out)
+          throws IOException {
+		byte[] b = readAllBytes();
+		out.write(b);
+		return b.length;
+	}
+	
+
 }

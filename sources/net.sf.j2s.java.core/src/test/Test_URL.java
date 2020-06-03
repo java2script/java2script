@@ -4,32 +4,26 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import javajs.util.PT;
 import javajs.util.Rdr;
 import sun.misc.IOUtils;
 
@@ -46,45 +40,44 @@ public class Test_URL extends Test_ {
 	protected static String getResponseMimeType() {
 		return "application/json";
 	}
-	public static void main(String[] args) {
 
+	@SuppressWarnings("unused")
+	public static void main(String[] args) {
 
 		try {
 			// jar:file:C:/temp/car.trz!/Car in a loop with friction.trk
 			File fi = new File("src/test/test.xlsx").getAbsoluteFile();
 			System.out.println(fi.getAbsolutePath());
-		//	FileInputStream fis = new FileInputStream(fi);
+			// FileInputStream fis = new FileInputStream(fi);
 			URL url;
 			URL jarURL;
-			
-			String jarpath = /** @j2sNative "./test/test.xlsx" || */"src/test/test.xlsx";
+
+			String jarpath = /** @j2sNative "./test/test.xlsx" || */
+					"src/test/test.xlsx";
 			url = new URL("file", null, "C:/temp/car.trz");
-			jarURL = new URL("jar", null,  url + "!/Car in a loop with friction.trk");//"!/xl/worksheets/sheet1.xml");
+			jarURL = new URL("jar", null, url + "!/Car in a loop with friction.trk");// "!/xl/worksheets/sheet1.xml");
 			url = new URL("file", null, jarpath);
-			jarURL = new URL("jar", null,  url + "!/xl/worksheets/sheet1.xml");
+			jarURL = new URL("jar", null, url + "!/xl/worksheets/sheet1.xml");
 			System.out.println(url);
 			System.out.println(jarURL);
 			InputStream is = jarURL.openConnection().getInputStream();
 			Object ret = Rdr.getStreamAsBytes(new BufferedInputStream(is), null);
-			System.out.println("length = " + (ret instanceof byte[] ? ((byte[]) ret).length + "\t" 
-			+ new String((byte[]) ret).substring(0,400) + "..." : ret.toString()));
+			System.out.println("length = " + (ret instanceof byte[]
+					? ((byte[]) ret).length + "\t" + new String((byte[]) ret).substring(0, 400) + "..."
+					: ret.toString()));
 		} catch (IOException e3) {
 			e3.printStackTrace();
 		}
-		
-		
-		
-		URL readme = Test_URL.class.getClassLoader().getResource("file://c:/test/t.htm");
-		
-		System.out.println(readme);
-		
 
-		
+		URL readme = Test_URL.class.getClassLoader().getResource("file://c:/test/t.htm");
+
+		System.out.println(readme);
+
 		try (InputStream in = new URL("https://stolaf.edu/people/hansonr").openStream()) {
-			
+
 			// Java or JavaScript:
 			System.out.println("length = " + IOUtils.readFully(in, -1, true).length);
-			
+
 			URL noHost;
 			Path path;
 
@@ -103,15 +96,14 @@ public class Test_URL extends Test_ {
 			path = Paths.get("./README.txt");
 			System.out.println(path.toAbsolutePath());
 			System.out.println(new String(Files.readAllBytes(path)));
-			
-			
+
 			// method 2: relative https -- JavaScript only
 			noHost = new URL("https:/./README.txt");
 			URI uri = new URI(noHost.toString());
 			path = Paths.get(uri);
 			// JavaScript only:
-			
-			System.out.println(String.join("\n",Files.readAllLines(path)));
+
+			System.out.println(String.join("\n", Files.readAllLines(path)));
 
 		} catch (Exception e2) {
 			// This error thrown in Java only
@@ -171,7 +163,6 @@ public class Test_URL extends Test_ {
 		}
 
 	}
-
 
 	/**
 	 * Checks Ensembl's REST 'ping' endpoint, and returns true if response indicates
@@ -329,20 +320,59 @@ public class Test_URL extends Test_ {
 
 	private static void dumpHeaders(String url) {
 		try {
-			//URL u = new URL("https://physlets.org/tracker/library/cabrillo_collection.xml");
+			// URL u = new
+			// URL("https://physlets.org/tracker/library/cabrillo_collection.xml");
 			URL u = new URL(url);
 			URLConnection uc = u.openConnection();
 			Map<String, List<String>> fields = uc.getHeaderFields();
-			for (Entry<String, List<String>> e: fields.entrySet()) {
+			for (Entry<String, List<String>> e : fields.entrySet()) {
 				String key = e.getKey();
-				 List<String> list = e.getValue();
-				System.out.println(key + "  " + list);				
+				List<String> list = e.getValue();
+				System.out.println(key + "  " + list);
 			}
-			
-		
+
 		} catch (IOException e3) {
 			// TODO Auto-generated catch block
 			e3.printStackTrace();
 		}
 	}
+
+	static Object getURLContents(URL url, Object bytesOrString) {
+		URLConnection conn = null;
+		try {
+			conn = url.openConnection();
+			String type = null;
+			byte[] outputBytes = null;
+			String post = null;
+
+			// conn.setRequestProperty("Accept",
+			// "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+			// Map<String, List<String>> x = conn.getRequestProperties();
+			
+			if (bytesOrString instanceof byte[]) {
+				outputBytes = (byte[]) bytesOrString;
+				type = "application/octet-stream;";
+			} else if (bytesOrString instanceof String) {
+				post = (String) bytesOrString;
+				type = "application/x-www-form-urlencoded";
+			}
+			conn.setRequestProperty("User-Agent", "Java2Script/SwingJS");
+			if (type != null) {
+				conn.setRequestProperty("Content-Type", type);
+				conn.setDoOutput(true);
+				if (outputBytes == null) {
+					OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+					wr.write(post);
+					wr.flush();
+				} else {
+					conn.getOutputStream().write(outputBytes);
+					conn.getOutputStream().flush();
+				}
+			}
+			return new BufferedInputStream(conn.getInputStream());
+		} catch (IOException e) {
+			return e.toString();
+		}
+	}
+
 }

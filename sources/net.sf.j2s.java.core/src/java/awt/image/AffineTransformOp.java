@@ -302,7 +302,7 @@ public class AffineTransformOp implements BufferedImageOp, RasterOp {
             Graphics2D g = origDst.createGraphics();
             try {
                 g.setComposite(AlphaComposite.Src);
-                ((JSGraphics2D)(Object) g).drawImageFromRaster(dst, 0, 0, null);
+                ((JSGraphics2D)(Object) g).drawImageFromPixelsOrRaster(dst, 0, 0, null);
             } finally {
                 g.dispose();
             }

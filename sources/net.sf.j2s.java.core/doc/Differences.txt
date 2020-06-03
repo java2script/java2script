@@ -108,6 +108,14 @@ array in the class (and are not accessible by reflection). Private parameterless
 methods retain their simple Java name, since they cannot conflict with field names.
 
 This renaming of methods has a few consequences, which are discussed more fully below.
+See particularly the section on "qualified field and method names", where it is described
+how you can use packages or classes or interfaces with ".api.js" in them to represent JavaScript
+objects for which all method names are to be left unqualified. Note that it is not 
+possible to cherry-pick methods to be unqualified; only full packages, classes or 
+interfaces can hold this status.
+
+The swingjs.api.js package in particular contains a number of useful interfaces that
+you can import into your project for JavaScript-specific capabilities.
 
 
 Applet vs. Application
@@ -430,6 +438,7 @@ System.exit(0) does not stop all processes
 list cell renderers must be JComponents
 myClass.getField not implemented
 "window" and other reserved JavaScript names
+reserved field and method names
 qualified field and method names
 missing Math methods
 Component.getGraphics(), Graphics.dispose()
@@ -1070,14 +1079,47 @@ But that is not a java.lang.reflection.Field object.
 No reserved top-level JavaScript name is allowed for a package name. So, for example, 
 one must rename packages such as "window" or "document" to names such as "win" or "doc".
 
-qualified field and method names
---------------------------------
+reserved field and method names
+-------------------------------
 
 In order to minimize the chance of added SwingJS field and method names colliding with ones 
 developers might use in subclassing Java classes, we have added U+79D8 (first character of Mandarin 
 "secret") to the characters already disrecommended by Java documentation ("$" and "_"). The only problem
 would be if you use that character followed by certain English words in certain classes. For example
 \u79D8canvas for JComponents (in java.awt.JSComponent) and \u79D8byte (in java.io.File).
+
+qualified field and method names
+--------------------------------
+
+Method names in SwingJS are fully qualified, meaning two methods with the same Java name but different
+parameters, such as write(int) and write(double), must not have the same name in JavaScript. (In this
+case, we will have write$I and write$D.) However, in certain cases it may be desirable to leave the
+method names unqualified. In particular, when an interface actually represents a JavaScript object, 
+the transpiler can leave a method name unqualified. The default situation for this is a class name 
+includes ".api.js" (case-sensitive). This means that any method in any class in a package js within 
+a package api, or any private interface js that has an outer interface api, will have all-unqualified
+methods. An example of this is swingjs.plaf.JSComboPopupList, which needs to communicate with a jQuery 
+object directly using the following interface:
+
+	private interface api {
+
+		interface js extends JQueryObject {
+
+			abstract js j2sCB(Object options);
+
+			abstract Object[] j2sCB(String method);
+
+			abstract Object[] j2sCB(String method, Object o);
+
+			abstract Object[] j2sCB(String method, int i);
+
+			abstract int j2sCB(String OPTION, String name);
+
+		}
+	}
+
+Notice that all these variants of j2sCB() will call the same method in JavaScript by design.
+
 
 missing Math methods
 --------------------

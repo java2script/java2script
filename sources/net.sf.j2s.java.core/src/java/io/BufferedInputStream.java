@@ -35,7 +35,7 @@ public class BufferedInputStream extends FilterInputStream {
     /**
      * The total number of bytes inside the byte array <code>buf</code>.
      */
-    protected int count;
+    public int count;
 
     /**
      * The current limit, which when passed, invalidates the current mark.
@@ -51,7 +51,7 @@ public class BufferedInputStream extends FilterInputStream {
     /**
      * The current position within the byte array <code>buf</code>.
      */
-    protected int pos;
+    public int pos;
 
     private boolean 秘closed = false;
 
@@ -370,12 +370,30 @@ public class BufferedInputStream extends FilterInputStream {
         return read + in.skip(amount - read);
     }
 
-//    /**
-//     * BH: Addeed to allow full reset of a bundled stream
-//     */
-//    @Override
-//    public void resetStream() {
-//      markpos = pos = count = 0;
-//      in.resetStream();
-//    }
+	/**
+	 * Java 9
+	 * 
+	 * @param out
+	 * @return
+	 * @throws IOException
+	 */
+	@Override
+	public long transferTo(OutputStream out)
+            throws IOException {
+		byte[] b = readAllBytes();
+		out.write(b);
+		return b.length;
+	}
+	
+	/**
+	 * Java 9
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
+	@Override
+	public byte[] readAllBytes() throws IOException {
+		InputStream base = 秘getByteStream(this, GET_BYTE_STREAM_OR_NULL);
+		return (base == null ? super.readAllBytes() : base.readAllBytes());
+	}
 }

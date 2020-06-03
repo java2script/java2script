@@ -464,9 +464,9 @@ public final class SystemColor extends Color implements java.io.Serializable {
      * Called from <init> & toolkit to update the above systemColors cache.
      */
     private static void updateSystemColors() {
-        if (!GraphicsEnvironment.isHeadless()) {
-            Toolkit.getDefaultToolkit().loadSystemColors(systemColors);
-        }
+        //if (!GraphicsEnvironment.isHeadless()) {
+        // SwingJS does not implement this    Toolkit.getDefaultToolkit().loadSystemColors(systemColors);
+       // }
         for (int i = 0; i < systemColors.length; i++) {
             systemColorObjects[i].value = systemColors[i];
         }

@@ -1180,8 +1180,8 @@ public class ExtendedCharsets
         if (!sun.misc.VM.isBooted())
             return;
 
-        String map = AccessController.doPrivileged(
-            new GetPropertyAction("sun.nio.cs.map"));
+        String map = 
+            new GetPropertyAction("sun.nio.cs.map").run();
         boolean sjisIsMS932 = false;
         boolean iso2022jpIsMS50221 = false;
         boolean iso2022jpIsMS50220 = false;
@@ -1301,8 +1301,8 @@ public class ExtendedCharsets
 
             }
         }
-        String osName = AccessController.doPrivileged(
-            new GetPropertyAction("os.name"));
+        String osName = 
+            new GetPropertyAction("os.name").run();
         if ("SunOS".equals(osName) || "Linux".equals(osName) || "AIX".equals(osName)
                || osName.contains("OS X")) {
             charset("x-COMPOUND_TEXT", "COMPOUND_TEXT",

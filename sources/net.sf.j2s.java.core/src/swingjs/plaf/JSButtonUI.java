@@ -88,6 +88,7 @@ public class JSButtonUI extends JSLightweightUI {
 		// this one is only for a simple button
 		if (domNode == null) {
 			isSimpleButton = true;
+			imagePersists = true; // at least for now.
 			allowPaintedBackground = false;
 			setDoPropagate();
 			domNode = enableNode = buttonNode = newDOMObject("button", id + "_dom", "type", "button", "style", "padding:0");
@@ -146,10 +147,11 @@ public class JSButtonUI extends JSLightweightUI {
 		itemNode = newDOMObject("li", id);
 		if (text == null && icon == null)
 			return itemNode;
+		DOMNode.setStyles(itemNode, "outline", "none");
 		menuAnchorNode = newDOMObject("div", id + "_a");// this needed? , "tabindex", "8");
 		if (type != "_bar") {
 			addClass(menuAnchorNode, "a");
-			DOMNode.setStyles(menuAnchorNode, "margin", "1px 2px 1px 2px");
+//			DOMNode.setStyles(menuAnchorNode, "margin", "1px 2px 1px 2px", "height", "1em");
 		}
 		itemNode.appendChild(menuAnchorNode);
 		setDoPropagate();
@@ -773,8 +775,8 @@ public class JSButtonUI extends JSLightweightUI {
 	//
 
 	@Override
-	protected Dimension getCSSAdjustment(boolean addingCSS) {
-		return new Dimension((itemNode == null ? 0 : 10), 0);
+	protected Dimension getCSSAdjustment(boolean addingCSS, boolean mutable) {
+		return mutable || itemNode != null ? new Dimension((itemNode == null ? 0 : 10), 0) : ZERO_SIZE;
 	}
 
 	@Override
@@ -799,7 +801,6 @@ public class JSButtonUI extends JSLightweightUI {
 
 	@Override
 	public void paint(Graphics g, JComponent c) {
-		imagePersists = true; // at least for now.
 		if (jc.秘paintsSelfEntirely())
 			DOMNode.setStyles(centeringNode, "visibility", "visible");
 		super.paint(g, c);

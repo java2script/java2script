@@ -254,7 +254,7 @@ public class JSEditorPaneUI extends JSTextUI {
 	private String currentHTML;
 	private boolean isStyled;
 	private String mytext;
-	private DOMNode styleNode;
+	private DOMNode bodyNode;
 	
 //	private int epTimer;
 //	@Override
@@ -339,6 +339,12 @@ public class JSEditorPaneUI extends JSTextUI {
 		return n + (/** @j2sNative sib.textContent && sib.textContent.length || */ 0);
 	}
 		
+	@Override
+	public void dispose() {
+		super.dispose();
+		mytext = currentHTML = null;
+	}
+
 //	@Override
 	public void setText(String text) {
 		Document d = editor.getDocument();
@@ -350,19 +356,19 @@ public class JSEditorPaneUI extends JSTextUI {
 		if (isHtmlKit) {
 			mytext = html = text;
 			isHTML = true;
-			domNode.setAttribute("innerHTML", "");
+			DOMNode.setAttr(domNode, "innerHTML", "");
 			// we will have to figure out a way for images and base. 
 			html = (String) editor.秘jsHTMLHelper.get("html", getInner(text, "body"));
 			DOMNode.setAttrs(domNode, "contentEditable", TRUE);
-			styleNode = DOMNode.createElement("div", id0 + "_style");
-			domNode.appendChild(styleNode);
+			bodyNode = DOMNode.createElement("div", id0 + "_body");
+			domNode.appendChild(bodyNode);
 			String[] styles = (String[]) editor.秘jsHTMLHelper.get("styles", "body");
 			if (styles != null)
-				DOMNode.setStyles(styleNode, styles);
+				DOMNode.setStyles(bodyNode, styles);
 			String css = (String) editor.秘jsHTMLHelper.get("css", id);
-	        setStyle(id + "_style", css);
+	        setStyle(id0 + "_styles", css);
 		} else {
-			styleNode = domNode;
+			bodyNode = domNode;
 			mytext = text;
 			isHTML = text.startsWith("<html");
 			if (isHTML) {
@@ -389,7 +395,7 @@ public class JSEditorPaneUI extends JSTextUI {
 			return;
 		// had text = fixText(currentText = text) here, but result was never used
 		currentText = text;
-		DOMNode.setAttr(styleNode, "innerHTML", currentHTML = html);
+		DOMNode.setAttr(bodyNode, "innerHTML", currentHTML = html);
 		updateDataUI();
 		JSToolkit.dispatch(updateRunnable, 10, 0);
 	}
@@ -412,15 +418,16 @@ public class JSEditorPaneUI extends JSTextUI {
 		if (d == null) {
 			$(body).append("<style id=" + id +">" + css + "</style>");
 		} else {
-			DOMNode.setAttr(d, "innerText", css);
+			// If I use innerText here, then \n gets turned into <br>
+			DOMNode.setAttr(d, "innerHTML", css);
 		}
 	}
 
 	private String getInner(String html, String tag) {
-		int pt = html.indexOf("<" + tag);
+		int pt = html.lastIndexOf("<" + tag);
 		if (pt >= 0) {
 			html = html.substring(html.indexOf(">", pt) + 1);
-			pt = html.lastIndexOf("</" + tag + ">");
+			pt = html.indexOf("</" + tag + ">", pt);
 			if (pt >= 0)
 				html = html.substring(0, pt);
 		}
@@ -491,12 +498,12 @@ public class JSEditorPaneUI extends JSTextUI {
 		} else {
 			String t = text.substring(start, isDiv ? end - 1 : end);
 			if (t.indexOf(' ') >= 0)
-				t = t.replace(' ', '\u00A0');
+				t = t.replaceAll(" ", "\u00A0");
 			if (t.indexOf('\t') >= 0) {
-				t = PT.rep(t,  "\t", JSTAB);
+				t = t.replaceAll("\t", JSTAB);
 			}
 			if (t.indexOf('<') >= 0) {
-				t = PT.rep(PT.rep(t,  "<", "&lt;"), ">", "&gt;");
+				t = t.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 			}
 			sb.append(t);
 		}
@@ -596,10 +603,10 @@ public class JSEditorPaneUI extends JSTextUI {
 		return false;
 	}
 
-	@Override
-	protected Dimension getCSSAdjustment(boolean addingCSS) {
-		return new Dimension(0, 0);
-	}
+//	@Override
+//	protected Dimension getCSSAdjustment(boolean addingCSS, boolean mutable) {
+//		return mutable ? new Dimension(0, 0) : ZERO_SIZE;
+//	}
 
 	@Override
 	protected String getPropertyPrefix() {
@@ -697,7 +704,7 @@ public class JSEditorPaneUI extends JSTextUI {
 	
 	@Override
 	public String getJSTextValue() {
-		String s = getInnerTextSafely(domNode, false, null).toString().replace('\u00A0',' '); // &nbsp;
+		String s = getInnerTextSafely(domNode, false, null).toString().replaceAll("\u00A0"," "); // &nbsp;
 //		System.out.println("getjSTextValue " + s);
 		return s;
 	}
@@ -880,12 +887,17 @@ public class JSEditorPaneUI extends JSTextUI {
 		 * 
 		//System.out.println("getJSMandD " + [toEnd,toStart]);
 		 * 
-		 * 			var s = window.getSelection(); anode = s.anchorNode; apt =
+		 * 			var s = window.getSelection(); anode = s.anchorNode; 
+		 *   if (anode) {
+		 * 
+		 *            apt =
 		 *            s.anchorOffset; if (anode.tagName) { anode =
 		 *            anode.childNodes[apt]; apt = 0; } else { alen = anode.length; apar
 		 *            = anode.parentElement; } fnode = s.focusNode; fpt = s.focusOffset;
 		 *            if (fnode.tagName) { fnode = fnode.childNodes[fpt]; fpt = 0; }
 		 *            else { flen = fnode.length; fpar = fnode.parentElement; }
+		 *            
+		 *            }
 		 */
 
 		if (anode == null || fnode == null) {

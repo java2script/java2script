@@ -1055,7 +1055,7 @@ class ThreadGroup implements Thread.UncaughtExceptionHandler {
 	}
 
 	public void 秘exit() {
-		ArrayList<Object> q = 秘getTimerQueue();
+		ArrayList<Object> q = 秘systemExited ? null : 秘timerQueue;//秘getTimerQueue();
 		if (q != null)
 			for (int i = q.size(); --i >= 0;) {
 				Timer t = (Timer) q.get(i);
@@ -1072,5 +1072,18 @@ class ThreadGroup implements Thread.UncaughtExceptionHandler {
 		g.秘appletViewer = 秘appletViewer;
 		g.秘html5Applet = 秘html5Applet;
 		g.秘timerQueue = 秘timerQueue;
+	}
+
+	public JSAppletViewer 秘getAppletViewer() {
+		JSAppletViewer a = this.秘appletViewer;
+		if (a == null) {
+			/**
+			 * @j2sNative
+			 * 
+			 * 			a = this.秘html5Applet._appletPanel;
+			 */
+			this.秘appletViewer = a;
+		}
+		return a;
 	}
 }

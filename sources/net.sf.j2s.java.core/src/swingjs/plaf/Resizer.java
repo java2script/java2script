@@ -13,10 +13,11 @@ import javax.swing.JInternalFrame;
 import javax.swing.JRootPane;
 import javax.swing.RootPaneContainer;
 
-import javajs.api.JSFunction;
+import swingjs.api.js.JSFunction;
 import swingjs.JSFrameViewer;
 import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
+import swingjs.api.js.JSInterface;
 
 public class Resizer {
 
@@ -117,7 +118,7 @@ public class Resizer {
 		case MouseEvent.MOUSE_PRESSED:
 			DOMNode.setStyles(resizer, "background-color", "green");
 			DOMNode.setVisible(rubberBand, true);
-			DOMNode.setCursor("nwse-resize", null);
+			JSInterface.setCursor("nwse-resize");
 			// set cursor to dragging
 			break;
 		case MouseEvent.MOUSE_DRAGGED:
@@ -126,7 +127,7 @@ public class Resizer {
 		case MouseEvent.MOUSE_RELEASED:
 			DOMNode.setStyles(resizer, "background-color", "red");
 			DOMNode.setVisible(rubberBand, false);
-			DOMNode.setCursor("auto", null);
+			JSInterface.setCursor("auto");
 			fHandleDOMResize(null, dx, dy);
 		}
 	}

@@ -53,9 +53,9 @@ import javax.swing.JSplitPane;
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 
-import javajs.api.JSFunction;
+import swingjs.api.js.JSFunction;
 import swingjs.JSToolkit;
-import swingjs.api.js.DOMNode;
+import swingjs.api.js.JSInterface;
 
 /**
  * A Basic L&F implementation of the SplitPaneUI.
@@ -241,7 +241,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 				this.xyev = xyev;
 				this.pressedLocation = splitPane.getDividerLocation();
 				divider.setCursor(cursor);
-				DOMNode.setCursor(JSToolkit.getCursorName(cursor), null);
+				JSInterface.setCursor(JSToolkit.getCursorName(cursor));
 				return;
 			case MouseEvent.MOUSE_DRAGGED:
 				int d = this.pressedLocation + /** @j2sNative (this.isHorizontal ? xyev.dx : xyev.dy) || */
@@ -254,7 +254,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 			case MouseEvent.MOUSE_RELEASED:
 				break;
 			}
-		DOMNode.setCursor(null, null);
+		JSInterface.setCursor(null);
 		divider.setCursor(null);
 	}	
 	
@@ -1418,21 +1418,21 @@ public class JSSplitPaneUI extends JSPanelUI {
 		 * Returns the width of the passed in Components preferred size.
 		 */
 		protected int getPreferredSizeOfComponent(Component c) {
-			return getSizeForPrimaryAxis(c.getPreferredSize());
+			return c == null ? 0 : getSizeForPrimaryAxis(c.getPreferredSize());
 		}
 
 		/**
 		 * Returns the width of the passed in Components minimum size.
 		 */
 		int getMinimumSizeOfComponent(Component c) {
-			return getSizeForPrimaryAxis(c.getMinimumSize());
+			return c == null ? 0 : getSizeForPrimaryAxis(c.getMinimumSize());
 		}
 
 		/**
 		 * Returns the width of the passed in component.
 		 */
 		protected int getSizeOfComponent(Component c) {
-			return getSizeForPrimaryAxis(c.getSize());
+			return c == null ? 0 : getSizeForPrimaryAxis(c.getSize());
 		}
 
 		/**

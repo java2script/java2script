@@ -68,7 +68,7 @@ abstract public class ZStream {
 
 	byte[] in; // next input byte
 	int in_index;
-	int avail_in; // number of bytes available at next_in
+	public int avail_in; // number of bytes available at next_in
 	protected long total_in; // total nb of input bytes read so far
 
 	byte[] next_out; // next output byte should be put there

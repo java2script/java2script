@@ -271,14 +271,14 @@ public class JSMenuBarUI extends JSPanelUI implements ContainerListener {
 		//
 		@Override
 		public void stateChanged(ChangeEvent e) {
-			int i, c;
-			for (i = 0, c = menuBar.getMenuCount(); i < c; i++) {
+			for (int i = 0, c = menuBar.getMenuCount(); i < c; i++) {
 				JMenu menu = menuBar.getMenu(i);
 				if (menu != null && menu.isSelected()) {
 					menuBar.getSelectionModel().setSelectedIndex(i);
-					break;
+					return;
 				}
 			}
+			menuBar.getSelectionModel().clearSelection();
 		}
 
 		//

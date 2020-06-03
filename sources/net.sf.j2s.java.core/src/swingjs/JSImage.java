@@ -3,9 +3,17 @@ package swingjs;
 import java.awt.Component;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.awt.image.MemoryImageSource;
+import java.io.File;
+import java.io.IOException;
+
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 
 import javajs.util.Base64;
+import swingjs.JSFileSystem.JSPath;
 import swingjs.api.js.DOMNode;
+import swingjs.plaf.JSComponentUI;
 
 /**
  * A JavaScript version of BufferedImage.
@@ -34,24 +42,27 @@ public class JSImage extends BufferedImage {
 	public String src;
 
 	/**
-	 * Frome JSImageKit reading pixels from an image file.
+	 * Frome JSImageKit reading pixels from an image file or MemoryImageSource
 	 * 
 	 * @param argb
 	 * @param width
 	 * @param height
 	 * @param src
 	 */
-	public JSImage(int[] argb, int width, int height, String src) {
-		super(width, height, TYPE_INT_ARGB);
+	public JSImage(int[] argb, int width, int height, String src, int type) {
+		super(width, height, type);
+		MemoryImageSource m; // just an Eclipse tag so we can find this reference;
 		this.src = src;
-		秘setPixels(argb);
+		if (argb != null)
+			秘setPixels(argb);
 	}
 
-	public JSImage(byte[] pixelBytes, int width, int height, String src) {
+	public JSImage(byte[] pixelBytes, int width, int height, String src, int type) {
 		// Actually do not know what I am supposed to do with this.
-		super(width, height, TYPE_INT_ARGB);
+		super(width, height, type);
 		this.src = src;
-		秘setPixels((int[]) (Object) pixelBytes);
+		if (pixelBytes != null)
+			秘setPixels((int[]) (Object) pixelBytes);
 	}
 
 	/**
@@ -61,15 +72,71 @@ public class JSImage extends BufferedImage {
 	 * @param type
 	 */
 	@SuppressWarnings("unused")
-	public void getDOMImage(byte[] b, String type) {
-		String dataurl = "data:image/" + type + ";base64," + Base64.getBase64(b).toString();
+	void setImageNode(JSPath source, byte[] b, String type) {
+		Object src = null;
 		DOMNode img = null;
-		/**
-		 * @j2sNative img = new Image(this.width, this.height); //if (this.callback)
-		 *            img.onload = this.callback; img.src = dataurl;
-		 */
+		if (type == "video") {
+			try {
+				src = (source == null ? null : JSUtil.getWebPathFor(source.toString()));
+				if (b == null && source != null)
+					b = source.秘bytes;
+				System.out.println("JSImage video " + src + " " + (b == null ? 0 : b.length));
+				img = DOMNode.createElement("video", File.createTempFile("video_", "").getName());
+				DOMNode node = img;
+				Runnable r = new Runnable() {
+					// set dimension when available
+					@Override
+					public void run() {
+						int w = 0, h = 0;
+						DOMNode n = node;
+						/**
+						 * @j2sNative
+						 * 
+						 * 			w = n.width = n.videoWidth; h = n.height = n.videoHeight;
+						 * 
+						 */
+						JSComponentUI ui = (JSComponentUI) DOMNode.getAttr(node, "data-ui");
+						System.out.println("JSImage w,h " + w + " " + h);
+						秘init(w, h, TYPE_INT_ARGB);
+						if (ui != null && ui.jc instanceof JLabel) {
+							JLabel label = (JLabel) ui.jc;
+							w = label.getWidth();
+							h = label.getHeight();
+							n.setAttribute("width", w + "");
+							n.setAttribute("height", h + "");
+							ui.setTainted();
+							ImageIcon icon = (ImageIcon) label.getIcon();
+							if (icon != null) {
+								icon.秘setIconSize(w, h);
+							}
+						}
+					}					
+				};
+				if (b != null)
+					src = JSImagekit.getDataBlob(b, null);
+				/**
+				 * @j2sNative
+				 * 
+				 * 			img.src = src;
+				 * 			img.onloadedmetadata = function(){ r.run$()};
+				 *          img.load();
+				 */
 
-		秘imgNode = img;
+			} catch (IOException e) {
+			}
+		} else {
+			String dataurl = "data:image/" + type + ";base64," + Base64.getBase64(b).toString();
+			/**
+			 * @j2sNative img = new Image(this.width, this.height); img.src = dataurl;
+			 */
+// I could not get Blob to work here. The image never transfers
+//			src = JSImagekit.getDataBlob(b, "image/" + type);
+//			/**
+//			 * @j2sNative img = new Image(this.width, this.height); img.src = src;
+//			 */
+
+		}
+		秘setImageNode(img, true);
 	}
 
 	/**

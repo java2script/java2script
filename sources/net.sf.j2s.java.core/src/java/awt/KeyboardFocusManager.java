@@ -577,13 +577,13 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 	 */
 	public void clearGlobalFocusOwner() throws SecurityException {
 		//checkReplaceKFMPermission();
-		if (!GraphicsEnvironment.isHeadless()) {
+//		if (!GraphicsEnvironment.isHeadless()) {
 			// Toolkit must be fully initialized, otherwise
 			// _clearGlobalFocusOwner will crash or throw an exception
 			Toolkit.getDefaultToolkit();
 
 			_clearGlobalFocusOwner();
-		}
+//		}
 	}
 
 	private void _clearGlobalFocusOwner() {
@@ -2870,11 +2870,11 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 
 	// Returns the value of this KeyEvent's field isProxyActive
 	static boolean isProxyActive(KeyEvent e) {
-		if (!GraphicsEnvironment.isHeadless()) {
+		//if (!GraphicsEnvironment.isHeadless()) {
 			return isProxyActiveImpl(e);
-		} else {
-			return false;
-		}
+//		} else {
+//			return false;
+//		}
 	}
 
 	private static HeavyweightFocusRequest getLastHWRequest() {

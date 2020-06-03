@@ -10669,11 +10669,8 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
-// Note if this character 秘 does not look like a Chinese character, u79d8 
-// then DON'T SAVE THIS FILE. Open it again with a default UTF-8 editor.
-
-// J2S._version set to "3.2.4.09" 2019.10.31
-
+// BH 2020.04.24 Info.width includes "px" allowed and implies Info.isResizable:false; 
+//               fixes early hidden 100x100 size issue due to node.offsetWidth == 0 in that case
 // BH 2019.11.06 adds JFileChooser.setMultipleMode(true) and multiple-file DnD
 // BH 2019.10.31 (Karsten Blankenagel) adds Info.spinnerImage: ["none"|<j2sdir/>path|/path|http[s]://path]
 // BH 2019.10.20 fixes modal for popup dialog; still needs work for two applets?
@@ -10725,7 +10722,8 @@ J2S || (J2S = {
 		_useEval: true, // false here uses new Function() in j2sClazz.js, but then that totally messes up debugging
 		_verbose: false,
 		_lang: null,
-		_appArgs: null
+		_appArgs: null,
+		_defaultID: 0,
    });
 
 // for now, Clazz is a window global. Wouldn't be hard to encapsulate that, 
@@ -10764,6 +10762,7 @@ if (getFlag("j2s")) {
 	J2S._debugCode = getFlag("j2sdebugcode");    // same as j2snocore?
 	J2S._debugCore = getFlag("j2sdebugcore");    // same as j2snozcore?
 	J2S._debugPaint = getFlag("j2sdebugpaint");  // repaint manager information
+	J2S._headless = getFlag("j2sheadless");      // run headlessly
 	J2S._lang = getURIField("j2slang", null);    // preferred language; application should check
 	 // will alert in system.out.println with a message when events occur
 	J2S._loadcore = !getFlag("j2snocore");		 // no core files 
@@ -10813,7 +10812,7 @@ window.J2S = J2S = (function() {
 													// (pixels)
 			/*
 			 * By setting the J2S.allowedJmolSize[] variable in the webpage
-			 * before calling J2S.getApplet(), limits for applet size can be
+			 * before calling SwingJS.getApplet(), limits for applet size can be
 			 * overriden. 2048 standard for GeoWall
 			 * (http://geowall.geo.lsa.umich.edu/home.html)
 			 */
@@ -10970,7 +10969,7 @@ window.J2S = J2S = (function() {
 	}
 
 	var fixProtocol = function(url) {
-		if (url.indexOf("file://") >= 0)
+		if (!J2S._isFile && url.indexOf("file://") >= 0)
 			url = "http" + url.substring(4);
 		// force https if page is https
 		if (J2S._httpProto == "https://" && url.indexOf("http://") == 0)
@@ -11362,7 +11361,7 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 				+ database
 				+ (query.indexOf("?POST?") >= 0 ? "?POST?" : "")
 				+ "&query="
-				+ encodeURIComponent(query)
+				+ encodeURIComponent(query.replace(/ /g,"%20"))
 				+ (asBase64 ? "&encoding=base64" : "")
 				+ (noScript ? "" : "&script="
 						+ encodeURIComponent(J2S._getScriptForDatabase(database)));
@@ -11408,7 +11407,7 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 		if (applet._cacheFiles && !fileName.endsWith(".js")) {
 			var data = J2S._fileCache[fileName];
 			if (data) {
-				System.out.println("using " + (data.length)
+				System.out.println("j2sApplet using " + (data.length)
 						+ " bytes of cached data for " + fileName);
 				fSuccess(data);
 				return null;
@@ -11435,25 +11434,6 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 		if (data == null && key.indexOf("file:/") == 0)
 			data = J2S._javaFileCache.get$O(key.substring(6));
 		return data;
-	}
-
-	J2S._loadFileData = function(applet, fileName, fSuccess, fError, info) {
-		info || (info = {});
-		var isRaw = [];
-		fileName = J2S._checkFileName(applet, fileName, isRaw);
-		fSuccess = J2S._checkCache(applet, fileName, fSuccess);
-		if (isRaw[0]) {
-			J2S._getRawDataFromServer("_", fileName, fSuccess, fError, info);
-			return;
-		}
-		info.type = "GET";
-		info.dataType = "text";
-		info.url = fileName;
-		info.async = J2S._asynchronous;
-		info.success = function(a) { J2S._loadSuccess(a, fSuccess) };
-		info.error = function() { J2S._loadError(fError) };
-		J2S._checkAjaxPost(info);
-		J2S._ajax(info);
 	}
 
 	J2S._checkAjaxPost = function(info) {
@@ -11531,7 +11511,27 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 
 	var knownDomains = {};
 
-	J2S.getFileData = function(fileName, fSuccess, doProcess, info) {
+	// old? for Jmol? Not used in SwingJS 
+	J2S._loadFileData = function(applet, fileName, fSuccess, fError, info) {
+		info || (info = {});
+		var isRaw = [];
+		fileName = J2S._checkFileName(applet, fileName, isRaw);
+		fSuccess = J2S._checkCache(applet, fileName, fSuccess);
+		if (isRaw[0]) {
+			J2S._getRawDataFromServer("_", fileName, fSuccess, fError, info);
+			return;
+		}
+		info.type = "GET";
+		info.dataType = "text";
+		info.url = fileName;
+		info.async = J2S._asynchronous;
+		info.success = function(a) { J2S._loadSuccess(a, fSuccess) };
+		info.error = function() { J2S._loadError(fError) };
+		J2S._checkAjaxPost(info);
+		J2S._ajax(info);
+	}
+
+	J2S.getFileData = function(fileName, fWhenDone, doProcess, info) {
 		if (info === true)
 			info = {isBinary: true};
 		info || (info = {});
@@ -11546,7 +11546,8 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 			fileName = fileName.substring(10);
 		else if (fileName.indexOf("http://./") == 0)
 			fileName = fileName.substring(9);
-		else if (fileName.indexOf("file:") >= 0)
+		else if (fileName.indexOf("file:/") >= 0 
+				&& fileName.indexOf(J2S.thisApplet.__Info.j2sPath) != 0)
 			fileName = "./" + fileName.substring(5);
 		isBinary = (isBinary || J2S.isBinaryUrl(fileName));
 		var isPDB = (fileName.indexOf("pdb.gz") >= 0 && fileName
@@ -11568,18 +11569,24 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 				&& fileName.indexOf(document.location.host) >= 0);
 		var isHttps2Http = (J2S._httpProto == "https://" && fileName.indexOf("http://") == 0);
 		var cantDoSynchronousLoad = (!isMyHost && J2S.$supportsIECrossDomainScripting());
-		var mustCallHome = !isFile && (isHttps2Http || asBase64 || !fSuccess && cantDoSynchronousLoad);
+		var mustCallHome = !isFile && (isHttps2Http || asBase64 || !fWhenDone && cantDoSynchronousLoad);
 		var url;
 		var isNotDirectCall = !mustCallHome && !isFile && !isMyHost && !(url = J2S._isDirectCall(fileName));
 		fileName = url || fileName;
 		var data = null;
+		var error = null;
+		var success = null;
+		if (fWhenDone) {
+			success = function(data) { fWhenDone(isTyped ? data : J2S._strToBytes(data)) };
+			error = function() { fWhenDone(null) };
+		}
 		if (mustCallHome || isNotDirectCall) {
-			data = J2S._getRawDataFromServer("_", fileName, fSuccess, fSuccess,
+			data = J2S._getRawDataFromServer("_", fileName, success, error,
 					asBase64, true, info);
 		} else {
 			fileName = fileName.replace(/file:\/\/\/\//, "file://"); // opera
 			if (!isTyped)info.dataType = (isBinary ? "binary" : "text");
-			info.async = !!fSuccess;
+			info.async = !!fWhenDone;
 			if (isPost) {
 				info.type = "POST";
 				info.url = fileName.split("?POST?")[0]
@@ -11588,12 +11595,18 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 				info.type = "GET";
 				info.url = fileName;
 			}
-			if (fSuccess) {
-				info.success = function(data) { fSuccess(J2S._xhrReturn(info.xhr)) };
-				info.error = function() { fSuccess(info.xhr.statusText) };
+			if (fWhenDone) {
+				if (isBinary) {
+					info.success = success;
+					info.error = error;
+				} else {
+					// BH don't know why this is so complicated
+					info.success = function(data) { fWhenDone(J2S._xhrReturn(info.xhr)) };
+					info.error = function() { fWhenDone(info.xhr.statusText) };
+				}
 			}
 			info.xhr = J2S.$ajax(info);
-			if (!fSuccess) {
+			if (!fWhenDone) {
 				data = J2S._xhrReturn(info.xhr);
 				if (data == null)
 					doProcess = null; 
@@ -11610,7 +11623,7 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 	}
 
 	J2S._xhrReturn = function(xhr) {
-		if (xhr.state() == "rejected")
+		if (xhr.state() == "rejected" && !xhr.responseText)
 			return null;
 		if (!xhr.responseText && !xhr.responseJSON 
 				|| Clazz.instanceOf(xhr.response, self.ArrayBuffer)) {
@@ -11763,12 +11776,13 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 				}
 			};
 		var readFile = function(file) {
+			Clazz.loadClass("swingjs.JSUtil");
 			var reader = new FileReader();
 			reader.onloadend = function(evt) {
 				var data = null;
 				if (evt.target.readyState == FileReader.DONE) {
 					var data = evt.target.result;
-					System.out.println("J2S.getFileFromDialog format=" + format 
+					System.out.println("j2sApplet J2S.getFileFromDialog format=" + format 
 								+ " file name=" + file.name  + " size=" + (data.length || data.byteLength));
 					switch (format) {
 					case "java.util.Map":
@@ -11778,14 +11792,14 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 					case "java.util.Array":
 						var e = Clazz.new_(Clazz.load("java.io.File").c$$S,
 								[ file.name ]);
-						e.秘bytes = J2S._toBytes(data);
+						swingjs.JSUtil.setFileBytesStatic$$O$O(e, J2S._toBytes(data))
 						arr.push(e);
 						data = arr;
 						break;
 					case "java.io.File":
 						var f = Clazz.new_(Clazz.load("java.io.File").c$$S,
-								[ file.name ]);
-						f.秘bytes = J2S._toBytes(data);
+								[ J2S.getGlobal("j2s.tmpdir") + "OPEN/" + file.name ]);
+						swingjs.JSUtil.setFileBytesStatic$O$O(f, J2S._toBytes(data));
 						data = f;
 						break;
 					case "ArrayBuffer":
@@ -11870,7 +11884,7 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 		}
 		if (postOut)
 			url += "?POST?" + postOut;
-		return J2S.getFileData(url, null, true, info);
+		return J2S.getFileData(url, info.fWhenDone, true, info);
 	}
 
 	// J2S._localFileSaveFunction -- // do something local here; Maybe try the
@@ -12053,18 +12067,14 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 ...<div id=\"ID_appletinfotablediv\" style=\"width:Wpx;height:Hpx;position:relative;font-size:14px;text-align:left\">IMG\
 ......<div id=\"ID_appletdiv\" style=\"z-index:"
 					+ J2S.getZ(applet, "header")
-					+ ";width:100%;height:100%;position:absolute;top:0px;left:0px;"
+					+ (applet._isResizable === false ? ";width:Wpx;height:Hpx;"
+							: ";width:100%;height:100%;") +
+							"position:absolute;top:0px;left:0px;"
 			+ (applet._spinnerImage ? 
 					"background-image:url(" + applet._spinnerImage + "); background-repeat:no-repeat; background-position:center;" : "")
 					+ css + ">";
-			var height = applet._height;
-			var width = applet._width;
-			if (typeof height !== "string" || height.indexOf("%") < 0)
-				height += "px";
-			if (typeof width !== "string" || width.indexOf("%") < 0)
-				width += "px";
-			s = s.replace(/IMG/, img).replace(/Hpx/g, height).replace(/Wpx/g,
-					width);
+			s = s.replace(/IMG/, img).replace(/Hpx/g, applet._containerHeight).replace(/Wpx/g,
+					applet._containerWidth);
 		} else {
 			s = "\
 ......</div>\
@@ -12097,6 +12107,7 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 				&& (obj._z = obj.__Info.z = getZOrders(Info.zIndexBase));
 		obj._width = Info.width;
 		obj._height = Info.height;
+		obj._isResizable = Info.isResizable;
 		obj._noscript = !obj._isJava && Info.noscript;
 		obj._console = Info.console;
 		obj._cacheFiles = !!Info.cacheFiles;
@@ -12359,7 +12370,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	});
 	
 	J2S.$bind('body', 'mouseup touchend', function(ev) {
-		mouseup(null, ev);
+		mouseUp(null, ev);
 		return true;
 	});
 
@@ -12376,7 +12387,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		return handled;
 	};
 
-	var mouseup = function(who, ev) {
+	var mouseUp = function(who, ev) {
 		if (J2S._traceMouse)
 			J2S.traceMouse(who,"UP", ev);
 
@@ -12441,67 +12452,64 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		].join().replace(":,",":"));
 	}
 
-	J2S.setMouse = function(who, isSwingJS) {
-		// swingjs.api.J2SInterface
-
-
-		J2S.$bind(who, (J2S._haveMouse ? 'mousemove' : 'mousemove touchmove'), function(ev) { 
-
-			// ignore touchmove if J2S._haveMouse
-			
-			if (ev.type == "touchmove" && 
-					(J2S._firstTouch || J2S._haveMouse)) {
-				return;
-			}
-			
-			if (J2S._dmouseOwner) {
-				if (J2S._dmouseDrag)
-					J2S._dmouseDrag(ev);
-				else
-					J2S._dmouseOwner = null;
-			}
-			
-			if (J2S._traceMouseMove)
-				J2S.traceMouse(who, "MOVE", ev);
-
-			if (doIgnore(ev))
-				return true;
-
-			if (ev.target.getAttribute("role")) {
-				return true;
-			}
-
-			// defer to console or menu when dragging within this who
-
-			if (J2S._mouseOwner && J2S._mouseOwner != who
-					&& J2S._mouseOwner.isDragging) {
-				if (!J2S._mouseOwner.mouseMove)
-					return true;
-				J2S._mouseOwner.mouseMove(ev);
-				return false;
-			}
-			return J2S._drag(who, ev, 503);
-		});
-
-		J2S.$bind(who, 'click', function(ev) {
-			if (J2S._traceMouse)
-				J2S.traceMouse(who,"CLICK", ev);
-
-			if (doIgnore(ev))
-				return true;
-			if (ev.target.getAttribute("role")) {
-				return true;
-			}
-
-			J2S.setMouseOwner(null);
-			var xym = getXY(who, ev, 0);
-			if (!xym)
-				return false;
-			who.applet._processEvent(500, xym, ev, who._frameViewer);// MouseEvent.MOUSE_CLICK
-			return true; // was false
-		});
+	var mouseMove = function(who, ev) {
+		// ignore touchmove if J2S._haveMouse
 		
-		J2S.$bind(who, 'DOMMouseScroll mousewheel', function(ev) { // Zoom
+		if (ev.type == "touchmove" && 
+				(J2S._firstTouch || J2S._haveMouse)) {
+			return;
+		}
+		
+		if (J2S._dmouseOwner) {
+			if (J2S._dmouseDrag)
+				J2S._dmouseDrag(ev);
+			else
+				J2S._dmouseOwner = null;
+		}
+		
+		if (J2S._traceMouseMove)
+			J2S.traceMouse(who, "MOVE", ev);
+
+		if (doIgnore(ev))
+			return true;
+
+		if (ev.target.getAttribute("role")) {
+			return true;
+		}
+
+		// defer to console or menu when dragging within this who
+
+		if (J2S._mouseOwner && J2S._mouseOwner != who
+				&& J2S._mouseOwner.isDragging) {
+			if (!J2S._mouseOwner.mouseMove)
+				return true;
+			J2S._mouseOwner.mouseMove(ev);
+			return false;
+		}
+		return J2S._drag(who, ev, 503);
+	}
+	
+	var mouseClick = function(who, ev) {
+		if (J2S._traceMouse)
+			J2S.traceMouse(who,"CLICK", ev);
+
+		if (doIgnore(ev))
+			return true;
+		if (ev.target.getAttribute("role")) {
+			return true;
+		}
+
+		J2S.setMouseOwner(null);
+		var xym = getXY(who, ev, 0);
+		if (!xym)
+			return false;
+		who.applet._processEvent(500, xym, ev, who._frameViewer);// MouseEvent.MOUSE_CLICK
+		return true; // was false
+	}
+	
+	var mouseWheel = function(who, ev) {
+		
+		// Zoom
 			// not for wheel event, or action will not take place on handle and
 			// track
 			// if (doIgnore(ev))
@@ -12531,128 +12539,148 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 				who.applet._processEvent(507, xym, ev, who._frameViewer);
 			}
 			return !!(ui || target);
-		});
 
-		J2S.$bind(who, (J2S._haveMouse ? 'mousedown' : 'mousedown touchstart'), function(ev) {
-			if (J2S._traceMouse)
-				J2S.traceMouse(who,"DOWN", ev);
+	}
+	
+	var mouseDown = function(who, ev) {
 
-			// If we have a mousedown on the applet, then disable touch; 
-			// otherwise, if J2S._firstTouch is undefined (!!x != x), set J2S._firstTouch
-			// and ignore future touch events (through the first touchend):
-			
-			if (ev.type == "mousedown") {
-			    J2S._haveMouse = true;
-			} else { 
-			    if (J2S._haveMouse) return;
-			    if (!!J2S._firstTouch != J2S._firstTouch) {
-				J2S._firstTouch = true;
-			        return;
-			    }
-			}
+		
+		if (J2S._traceMouse)
+			J2S.traceMouse(who,"DOWN", ev);
 
-			lastDragx = lastDragy = 99999;
+		// If we have a mousedown on the applet, then disable touch; 
+		// otherwise, if J2S._firstTouch is undefined (!!x != x), set J2S._firstTouch
+		// and ignore future touch events (through the first touchend):
+		
+		if (ev.type == "mousedown") {
+		    J2S._haveMouse = true;
+		} else { 
+		    if (J2S._haveMouse) return;
+		    if (!!J2S._firstTouch != J2S._firstTouch) {
+			J2S._firstTouch = true;
+		        return;
+		    }
+		}
 
-			if (doIgnore(ev))
-				return true;
+		lastDragx = lastDragy = 99999;
 
-			J2S.setMouseOwner(who, true, ev.target);
-			var ui = ev.target["data-ui"];
-			var target = ev.target["data-component"];
-			var handled = (ui && ui.handleJSEvent$O$I$O(who, 501, ev));
-			if (checkStopPropagation(ev, ui, handled, target))
-				return true;
-			who.isDragging = true;
-			if ((ev.type == "touchstart") && J2S._gestureUpdate(who, ev))
-				return !!target;
-			J2S._setConsoleDiv(who.applet._console);
-			var xym = getXY(who, ev, 0);
-			if (xym) {
-				if (ev.button != 2 && J2S.Swing && J2S.Swing.hideMenus)
-					J2S.Swing.hideMenus(who.applet);
-//				if (who._frameViewer && who._frameViewer.isFrame)
-//					J2S.setWindowZIndex(who._frameViewer.top.ui.domNode,
-//							Integer.MAX_VALUE);
-				who.applet._processEvent(501, xym, ev, who._frameViewer); // MouseEvent.MOUSE_PRESSED
-			}
+		if (doIgnore(ev))
+			return true;
 
-			return !!(ui || target);
-//			return !!target || ui && ui.j2sDoPropagate;
-		});
+		J2S.setMouseOwner(who, true, ev.target);
+		var ui = ev.target["data-ui"];
+		var target = ev.target["data-component"];
+		var handled = (ui && ui.handleJSEvent$O$I$O(who, 501, ev));
+		if (checkStopPropagation(ev, ui, handled, target))
+			return true;
+		who.isDragging = true;
+		if ((ev.type == "touchstart") && J2S._gestureUpdate(who, ev))
+			return !!target;
+		J2S._setConsoleDiv(who.applet._console);
+		var xym = getXY(who, ev, 0);
+		if (xym) {
+			if (ev.button != 2 && J2S.Swing && J2S.Swing.hideMenus)
+				J2S.Swing.hideMenus(who.applet);
+//			if (who._frameViewer && who._frameViewer.isFrame)
+//				J2S.setWindowZIndex(who._frameViewer.top.ui.domNode,
+//						Integer.MAX_VALUE);
+			who.applet._processEvent(501, xym, ev, who._frameViewer); // MouseEvent.MOUSE_PRESSED
+		}
 
-		J2S.$bind(who, (J2S._haveMouse ? 'mouseup' : 'mouseup touchend'), function(ev) {
-			return mouseup(who, ev);
-		});
+		return !!(ui || target);
+//		return !!target || ui && ui.j2sDoPropagate;
 
-		J2S.$bind(who, 'mouseenter', function(ev) {
-			if (J2S._traceMouse)
-				J2S.traceMouse(who,"ENTER", ev);
+	}
+	
+	var mouseEnter = function(who, ev) {
+		if (J2S._traceMouse)
+			J2S.traceMouse(who,"ENTER", ev);
 
-			if (doIgnore(ev))
-				return true;
-			if (ev.target.getAttribute("role")) {
-				return true;
-			}
+		if (doIgnore(ev))
+			return true;
+		if (ev.target.getAttribute("role")) {
+			return true;
+		}
 
-			if (who.applet._appletPanel)
-				who.applet._appletPanel.startHoverWatcher$Z(true);
-			if (J2S._mouseOwner && !J2S._mouseOwner.isDragging)
-				J2S.setMouseOwner(null);
-			var xym = getXY(who, ev, 0);
-			if (!xym)
-				return false;
-			who.applet._processEvent(504, xym, ev, who._frameViewer);// MouseEvent.MOUSE_ENTERED
+		if (who.applet._appletPanel)
+			who.applet._appletPanel.startHoverWatcher$Z(true);
+		if (J2S._mouseOwner && !J2S._mouseOwner.isDragging)
+			J2S.setMouseOwner(null);
+		var xym = getXY(who, ev, 0);
+		if (!xym)
 			return false;
-		});
+		who.applet._processEvent(504, xym, ev, who._frameViewer);// MouseEvent.MOUSE_ENTERED
+		return false;
+	}
 
-		J2S.$bind(who, 'mouseleave', function(ev) {
-			if (J2S._traceMouse)
-				J2S.traceMouse(who,"OUT", ev);
+	var mouseLeave = function(who, ev) {
+		if (J2S._traceMouse)
+			J2S.traceMouse(who,"OUT", ev);
 
-			if (doIgnore(ev))
-				return true;
-			if (ev.target.getAttribute("role")) {
-				return true;
-			}
-			
-			if (J2S._mouseOwner && !J2S._mouseOwner.isDragging)
-				J2S.setMouseOwner(null);
-			if (who.applet._appletPanel)
-				who.applet._appletPanel.startHoverWatcher$Z(false);
-			var xym = getXY(who, ev, 0);
-			if (!xym)
-				return false;
-			who.applet._processEvent(505, xym, ev);// MouseEvent.MOUSE_EXITED
+		if (doIgnore(ev))
+			return true;
+		if (ev.target.getAttribute("role")) {
+			return true;
+		}
+		
+		if (J2S._mouseOwner && !J2S._mouseOwner.isDragging)
+			J2S.setMouseOwner(null);
+		if (who.applet._appletPanel)
+			who.applet._appletPanel.startHoverWatcher$Z(false);
+		var xym = getXY(who, ev, 0);
+		if (!xym)
 			return false;
-		});
+		who.applet._processEvent(505, xym, ev);// MouseEvent.MOUSE_EXITED
+		return false;
+	}
+	
+	var mouseMoveOut = function(who, ev) {
+		if (!who.isDragging || who != J2S._mouseOwner)
+			return;
+		if (J2S._traceMouse)
+			J2S.traceMouse(who,"OUTJSMOL", ev);
+		return J2S._drag(who, ev, 503);
+	}
+	
+	var mouseUpOut = function(who, ev) {
+		if (!who.isDragging || who != J2S._mouseOwner)
+			return true;
+		if (J2S._traceMouse)
+			J2S.traceMouse(who,"UPJSMOL", ev);
+		return J2S._drag(who, ev, 502);
+	}
+	
+	J2S.setMouse = function(who, isSwingJS) {
+		// swingjs.api.J2SInterface
+
+
+		J2S.$bind(who, (J2S._haveMouse ? 'mousemove' : 'mousemove touchmove'), 
+				function(ev) { return mouseMove(who, ev) });
+
+		J2S.$bind(who, 'click', function(ev) { return mouseClick(who, ev) });
+		
+		J2S.$bind(who, 'DOMMouseScroll mousewheel', function(ev) { return mouseWheel(who, ev) });
+
+		J2S.$bind(who, (J2S._haveMouse ? 'mousedown' : 'mousedown touchstart'), 
+				function(ev) { return mouseDown(who, ev) });
+
+		J2S.$bind(who, (J2S._haveMouse ? 'mouseup' : 'mouseup touchend'), 
+				function(ev) { return mouseUp(who, ev) });
+
+		J2S.$bind(who, 'mouseenter', function(ev) { return mouseEnter(who, ev) });
+
+		J2S.$bind(who, 'mouseleave', function(ev) { return mouseLeave(who, ev) });
 
 		// context menu is fired on mouse down, not up, and it's handled already
 		// anyway.
 
-		J2S.$bind(who, "contextmenu", function() {
-			return false;
-		});
+		J2S.$bind(who, "contextmenu", function() { return false });
 
-		J2S.$bind(who, 'mousemoveoutjsmol', function(evspecial, target, ev) {
+		J2S.$bind(who, 'mousemoveoutjsmol', 
+				function(evspecial, target, ev) { return mouseMoveOut(who, ev) });
 
-			if (!who.isDragging || who != J2S._mouseOwner)
-				return;
-
-			if (J2S._traceMouse)
-				J2S.traceMouse(who,"OUTJSMOL", ev);
-
-			return J2S._drag(who, ev, 503);
-		});
-
-		J2S.$bind(who, 'mouseupoutjsmol', function(evspecial, target, ev) {
-
-			if (!who.isDragging || who != J2S._mouseOwner)
-				return true;
-			if (J2S._traceMouse)
-				J2S.traceMouse(who,"UPJSMOL", ev);
-
-			return J2S._drag(who, ev, 502);
-		});
+		J2S.$bind(who, 'mouseupoutjsmol', 
+				function(evspecial, target, ev) { return mouseUpOut(who, ev) });
 
 		if (who.applet._is2D && !who.applet._isApp) {
 			J2S.$resize(function() {
@@ -12879,9 +12907,17 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	var __profiling;
 
 	J2S.getProfile = function(doProfile) {
-		if (!__profiling)
-			Clazz._startProfiling(__profiling = (arguments.length == 0 || doProfile));
-		return Clazz.getProfile();
+		if (__profiling || arguments.length == 1 && !doProfile) {
+			var s = Clazz.getProfile();
+			System.out.println(s);
+			alert(s);
+			return;
+		} 
+		var seconds = (arguments[0] === true ? 0 : +(arguments.length == 0 ? prompt("How many seconds?", "0 (until I click again)") : arguments[0]));
+		if (isNaN(seconds))
+			seconds = 0;
+		
+		Clazz.startProfiling(__profiling = (seconds || arguments.length == 0 || doProfile));
 	}
 
 	J2S._getAttr = function(s, a) {
@@ -13032,7 +13068,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			return;
 		}
 		e.push("done");
-		var s = "J2SApplet exec " + e[0]._id + " " + e[3] + " " + e[2];
+		var s = "j2sApplet exec " + e[0]._id + " " + e[3] + " " + e[2];
 		if (self.System)
 			System.out.println(s);
 		// alert(s)
@@ -13048,9 +13084,9 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			// create the Clazz object
 			J2S.LoadClazz(Clazz);
 			if (J2S._strict)
-				System.err.println("j2sstrict - 'use strict' will be used - this is experimental");
+				System.err.println("j2sApplet j2sstrict - 'use strict' will be used - this is experimental");
 			if (J2S._startProfiling) 
-				Clazz.startProfiling();
+				J2S.getProfile();
 			if (applet._noMonitor)
 				Clazz._LoaderProgressMonitor.showStatus = function() {
 				}
@@ -13073,6 +13109,10 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		}
 		__nextExecution();
 	};
+	
+	J2S.showStatus = function(msg, doFadeout) {
+		Clazz._LoaderProgressMonitor.showStatus(msg, doFadeout);
+	}
 
 	J2S.debugClip = function() { return J2S._debugClip };
 	
@@ -13140,6 +13180,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		this._is2D = true;
 		this._isJava = false;
 		this._isJNLP = !!Info.main;
+		if (typeof Info.isResizable == "undefined")
+			Info.isResizable = (("" + Info.width).indexOf("px")< 0);
 		this._jmolType = "J2S._Canvas2D (" + type + ")";
 		this._isLayered = Info._isLayered || false; // JSV or SwingJS are
 													// layered
@@ -13356,10 +13398,10 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 				alert("There was an unknown problem loading java.lang.Class.");
 			}
 			J2S._registerApplet(applet._id, applet);
-			if (!applet.__Info.args || applet.__Info.args == "?") {
-				if (J2S._appArgs)
-					applet.__Info.args = decodeURIComponent(J2S.appArgs);
+			if (J2S._appArgs || applet.__Info.args == "?") {
+				applet.__Info.args = (J2S._appArgs ? decodeURIComponent(J2S.appArgs).split("|") : []);
 			}
+			J2S._lang && (applet.__Info.language = J2S._lang);
 			var isApp = applet._isApp = !!applet.__Info.main; 
 			try {
 				var clazz = (applet.__Info.main || applet.__Info.code);
@@ -13376,8 +13418,11 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 					//cl.$static$ && cl.$static$();
 					if (clazz.indexOf("_.") == 0)
 						J2S.setWindowVar(clazz.substring(2), cl);
-					if (isApp && cl.j2sHeadless)
-						applet.__Info.headless = true;
+					applet.__Info.headless = (J2S._headless || isApp && !!cl.j2sHeadless);
+					if (applet.__Info.headless) {
+						Clazz._isHeadless = "true";
+						System.out.println("j2sApplet running headlessly");
+					}
 				} catch (e) {
 					alert("Java class " + clazz + " was not found.");
 					return;
@@ -13561,7 +13606,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 					return null;
 				} else {
 					System.out
-							.println("Jsmol.js J2S.loadImage using data URI for "
+							.println("j2sApplet J2S.loadImage using data URI for "
 									+ id)
 				}
 				image.src = (typeof bytes == "string" ? bytes : "data:"
@@ -13585,7 +13630,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			J2S.setCanvasImage(canvas, width, height);
 			// return a null canvas and the error in path if there is a problem
 		} else {
-			System.out.println("J2S.loadImage reading cached image for " + id)
+			System.out.println("j2sApplet J2S.loadImage reading cached image for " + id)
 		}
 		return (bytes == null ? fOnload(canvas, path) : canvas);
 	};
@@ -13885,7 +13930,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	J2S.getResourcePath = function(path, isJavaPath) {
 		if (!path || path.indexOf("https:/") != 0
 				&& path.indexOf("https:/") != 0 && path.indexOf("file:/") != 0) {
-			var applet = Thread.currentThread$().getThreadGroup$().秘html5Applet;
+			Clazz.loadClass("swingjs.JSUtil");
+			var applet = swingjs.JSUtil.getApplet$();
 			path = (!isJavaPath && applet.__Info.resourcePath || applet.__Info.j2sPath)
 					+ "/" + (path || "");
 		}
@@ -14707,10 +14753,8 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
   var haveFinals = (finalVars || outerObj && outerObj.$finals$);
   if (!outerObj || !objThis)
     return;
-  var clazz1 = getClazz(outerObj);
-  if (clazz1 == outerObj) {
-    outerObj = objThis;
-  }
+  var clazz1 = (outerObj.__CLASS_NAME__ || outerObj instanceof String ? getClazz(outerObj) : null);
+  (!clazz1 || clazz1 == outerObj) && (outerObj = objThis);
 
   if (haveFinals) {
     // f$ is short for the once-chosen "$finals$"
@@ -14741,7 +14785,7 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
     }
     b[getClassName(outerObj, true)] = outerObj;
     // add all superclass references for outer object
-    addB$Keys(clazz1, isNew, b, outerObj, objThis);
+    clazz1 && addB$Keys(clazz1, isNew, b, outerObj, objThis);
   }
   var clazz2 = (clazz.superclazz == clazz1 ? null : clazz.superclazz || null);
   if (clazz2) {
@@ -15097,6 +15141,11 @@ var addProfileNew = function(c, t) {
 	  s += "[]";
 	  t = 0;
   }
+  if (J2S._traceOutput && (s.indexOf(J2S._traceOutput) >= 0 || '"' + s + '"' == J2S._traceOutput)) {
+    alert(s + "\n\n" + Clazz._getStackTrace());
+    doDebugger();
+  }
+
   var p = _profileNew[s]; 
   p || (p = _profileNew[s] = [0,0]);
   p[0]++;
@@ -15948,6 +15997,7 @@ Clazz.newInterface(java.lang,"Runnable");
 
 
 ;(function(){var P$=java.lang,I$=[[0,'java.util.stream.StreamSupport','java.util.Spliterators','java.lang.CharSequence$lambda1','java.lang.CharSequence$lambda2']],$I$=function(i){return I$[i]||(I$[i]=Clazz.load(I$[0][i]))};
+
 var C$=Clazz.newInterface(P$, "CharSequence");
 C$.$defaults$ = function(C$){
 
@@ -16977,7 +17027,7 @@ Con.consoleOutput = function (s, color) {
   if (!con) {
     return false; // BH this just means we have turned off all console action
   }
-  if (con == window.console) {
+   if (con == window.console) {
     if (color == "red")
       con.err(s);
     else
@@ -16986,13 +17036,20 @@ Con.consoleOutput = function (s, color) {
   }
   if (con && typeof con == "string")
     con = document.getElementById(con)
+
+	if (s == '\0') {
+	  con.innerHTML = "";
+	  con.lineCount = 0;
+	  return;
+	}
+   
   if (Con.linesCount > Con.maxTotalLines) {
-    for (var i = 0; i < Con.linesCount - Con.maxTotalLines; i++) {
+    for (var i = 0; i < 1000; i++) {
       if (con && con.childNodes.length > 0) {
-        con.removeChild (con.childNodes[0]);
+        con.removeChild(con.childNodes[0]);
       }
     }
-    Con.linesCount = Con.maxTotalLines;
+    Con.linesCount = Con.maxTotalLines - 1000;
   }
 
   var willMeetLineBreak = false;
@@ -17160,6 +17217,8 @@ C$.setProperties$java_util_Properties=function (props) {
 }
 
 C$.getProperty$S=function (key) {
+	if (key == "java.awt.headless")
+		return Clazz._isHeadless;
 	C$.checkKey$S(key);
 	var p = (C$.props == null ? sysprops[key] : C$.props.getProperty$S(key))
 	return (p == null ? null : p);
@@ -17615,7 +17674,14 @@ function(i){
 
 m$(Integer,"parseInt$S$I",
 function(s,radix){
- var v = parseInt(s, radix);
+ var v = (s.indexOf(".") >= 0 ? NaN : parseInt(s, radix));
+ if (!isNaN(v)) {
+	 // check for trailing garbage
+	 var v1 = parseInt(s + "1", radix);
+	 if (v1 == v)
+		 v = NaN;
+ }
+
  if (isNaN(v) || v < minInt || v > maxInt){
 	throw Clazz.new_(NumberFormatException.c$$S, ["parsing " + s + " radix " + radix]);
  }
@@ -17624,6 +17690,9 @@ return v;
 
 m$(Integer,"parseInt$S",
 function(s){
+	var v = +s;
+	if (isNaN(v))
+		s= "?" + s; // just to ensure it gets trapped
 return Integer.parseInt$S$I(s, 10);
 }, 1);
 
@@ -18513,25 +18582,36 @@ CharSequence.$defaults$(String);
 sp.compareToIgnoreCase$S = function(str) { return String.CASE_INSENSITIVE_ORDER.compare$S$S(this, str);}
 
 sp.replace$ = function(c1,c2){
-  if (c1 == c2 || this.indexOf (c1) < 0) return "" + this;
+  if (c1 == c2 || this.indexOf(c1) < 0) return "" + this;
   if (c1.length == 1) {
     if ("\\$.*+|?^{}()[]".indexOf(c1) >= 0)   
       c1 = "\\" + c1;
   } else {    
-    c1=c1.replace(/([\\\$\.\*\+\|\?\^\{\}\(\)\[\]])/g,function($0,$1){
-      return "\\"+$1;
-    });
+    c1=c1.replace(/([\\\$\.\*\+\|\?\^\{\}\(\)\[\]])/g,function($0,$1){return "\\"+$1;});
   }
   return this.replace(new RegExp(c1,"gm"),c2);
 };
 
-sp.replaceAll$S$S=sp.replaceAll$CharSequence$CharSequence=function(exp,str){
-var regExp=new RegExp(exp,"gm");
-return this.replace(regExp,str);
+// experimental -- only marginally faster:
+var reCache = new Map();
+sp.replace2$ = function(c1,c2){
+	  if (c1 == c2 || this.indexOf(c1) < 0) return "" + this;
+	  var re;
+	  if (c1.length == 1) {
+		re = reCache.get(c1);
+		re || reCache.set(c1, re = new RegExp("\\$.*+|?^{}()[]".indexOf(c1) == 0 ? "\\" + c1 : c1, 'gm'));
+	  } else {    
+	    re = new RegExp(c1.replace(/([\\\$\.\*\+\|\?\^\{\}\(\)\[\]])/g,function($0,$1){return "\\"+$1;}), 'gm');
+	  }
+	  return this.replace(re,c2);
+};
+
+// fastest:
+sp.replaceAll$=sp.replaceAll$S$S=sp.replaceAll$CharSequence$CharSequence=function(exp,str){
+return this.replace(new RegExp(exp,"gm"),str);
 };
 sp.replaceFirst$S$S=function(exp,str){
-var regExp=new RegExp(exp,"m");
-return this.replace(regExp,str);
+return this.replace(new RegExp(exp,"m"),str);
 };
 sp.matches$S=function(exp){
 if(exp!=null){
@@ -20038,11 +20118,21 @@ if (typeof(SwingJS) == "undefined") {
 (function (SwingJS, $, J2S) {
 
 	SwingJS.getApplet = function(id, Info, checkOnly) {
+		if (arguments.length == 1 && typeof id == "object") {
+			// allow for getApplet(Info)
+			Info = id;
+			id = null;
+		}
 		return SwingJS._Applet._get(id, Info, checkOnly);
 	}
 
   	// optional Info here	
 	SwingJS.getAppletHtml = function(applet, Info) {
+		if (arguments.length == 1 && typeof applet == "object" && !applet._code) {
+			// allow for getApplet(Info)
+			Info = applet;
+			applet = null;
+		}
 		if (Info) {
 			var d = SwingJS._document;
 			SwingJS._document = null;
@@ -20122,6 +20212,7 @@ if (typeof(SwingJS) == "undefined") {
 			disableInitialConsole: false,
 			debug: false
 		};	 
+		id || (id = Info.name) || (id = "j2sApplet" + J2S._defaultID++);
     
 		J2S._addDefaultInfo(Info, DefaultInfo);
 		

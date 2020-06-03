@@ -307,7 +307,7 @@ public class JMenu extends JMenuItem implements MenuElement
         // name of the item twice.
 
         if (b != model.isSelected()) {
-            getModel().setSelected(b);
+           model.setSelected(b);
         }
     }
 
@@ -337,7 +337,8 @@ public class JMenu extends JMenuItem implements MenuElement
 //            System.out.println("in JMenu.setPopupMenuVisible " + b);
 //            // Thread.dumpStack();
 //        }
-
+		if (!isEnabled())
+			return;
     	if (b && popupMenu.getPeer() == null)
     		popupMenu.addNotify();// BH SwingJS 
         boolean isVisible = isPopupMenuVisible();

@@ -42,11 +42,11 @@ public class InflaterInputStream extends FilterInputStream {
 
   protected int len;
 
-  private boolean closed = false;
+  protected boolean closed = false; // why private?? ZipInputStream need this
 
   protected boolean eof = false; // BH FIX -- was private; needs to be unset after an unread operation
 
-  private boolean close_in = true;
+  private boolean close_in = false; // SwingJS was true
 
   protected static final int DEFAULT_BUFSIZE = 512;
 /*
@@ -98,7 +98,7 @@ public class InflaterInputStream extends FilterInputStream {
   public int read(byte[] b, int off, int len) throws IOException {
     return readInf(b, off, len);
   }
-
+ 
   
   protected int readInf(byte[] b, int off, int len) throws IOException {
     if (closed) {
