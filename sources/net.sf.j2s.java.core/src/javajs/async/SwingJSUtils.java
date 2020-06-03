@@ -23,7 +23,7 @@ import javax.swing.Timer;
  * alternatives to using getCodeBase() for loading resources, due to issues in
  * Eclipse setting that incorrectly (but no problem in JavaScript)
  * 
- * StateMachine and StateHelper
+ * 
  * 
  * @author hansonr
  *
@@ -40,7 +40,7 @@ public class SwingJSUtils {
 	 * 
 	 * Then, if it is desired also to have Java also set this, add
 	 * 
-	 *  if (dim) setSize(dim);  
+	 *  if (dim != null) setSize(dim);  
 	 *  
 	 *  to the applet's init() method.
 	 * 
@@ -176,93 +176,31 @@ public class SwingJSUtils {
 
 	
 	/**
-	 * A simple interface to the machine loop to replace a thread with a run()
-	 * method such as:
-	 * 
+	 * A simple interface to the machine loop, generally of the form 
 	 * <code>
-			public void run() {
-			while (thread != null) {
-				if (integrator != null)
-					integrator.integrate(this);
-	
-				animationRedraw0();
-	
-				try {
-					int minTime = getProperties().minThreadSleepTime.getValue();
-					int delayTime = getProperties().animationDelay.getValue();
-	
-					thread.sleep(minTime + delayTime);
-				} catch (InterruptedException e) {
-				}
-			}
-		}
-	 * </code>
-	 * 
-	 * with:
-	 * 
-	 * <code>
-		public void run() {
-		  thread.setPriority(Thread.MIN_PRIORITY);
-		  stateHelper = new SwingJSUtils.StateHelper(this);
-		  stateHelper.next(STATE_INIT);
-	    }
-	 * </code>
-	 * 
-	 * with
-	 * 
-	 * <code>
-	public boolean stateLoop() {
-		while (thread != null && !thread.isInterrupted() && stateHelper.isAlive()) {
-			switch (stateHelper.getState()) {
-			default:
-			case STATE_INIT:
-				stateHelper.setState(STATE_LOOP);
-				break;
-			case STATE_LOOP:
-				if (integrator != null)
-					integrator.integrate(this);
-				animationRedraw0();
-				int minTime = getProperties().minThreadSleepTime.getValue();
-				int delayTime = getProperties().animationDelay.getValue();
-				stateHelper.delayedState(minTime + delayTime, STATE_LOOP);
-				return true;
-			case STATE_DONE:
-				return false;
-			}
-		}
-		return false;
-	}
-	 * </code>
-	 * 
-	 * 
-	 * or more generally implemented as something like
-	 * 
-	 * <code>
-	 * public boolean stateLoop() {
+	 *   public boolean stateLoop() {
 	 *   while (stateHepler.isAlive()) {
 	 *     switch (stateHelper.getState()) {
 	 *     case STATE_XXX:
-	 *        // code here, continuing on to STATE_YYY after 100 ms
+	 *        ...
 	 *        return stateHelper.delayState(100,STATE_YYY);
 	 *     case STATE_YYY:
-	 *        // code here, continuing on immediately to STATE_ZZZ
+	 *        ...
 	 *        stateHelper.setState(STATE_ZZZ);
 	 *        continue;
 	 *     case STATE_ZZZ:
-	 *        // code here, continuing on, setting the state to STATE_XXX but to an ActionListener after 100 ms
+	 *        ...
 	 *        return stateHelper.delayAction(100, MY_ID, "myCommand", myListener, STATE_XXX); 	 *   
 	 *     case STATE_DONE:
-	 *        // final state code
+	 *        ...
 	 *        stateHelper.interrupt();
 	 *        return false;
 	 *     }
 	 *     return true;
 	 *   }
 	 *   return false;
-	 * }
+	 *   }
 	 * </code>
-	 * 
-	 * 
 	 * @author hansonr
 	 *
 	 */
@@ -374,7 +312,7 @@ public class SwingJSUtils {
 		 * @author Bob Hanson hansonr@stolaf.edu
 		 */
 		public boolean next(int state, int level) {
-			return nextStatePriv((Object) this, state, level);
+			return nextStatePriv(this, state, level);
 		}
 
 		private static boolean nextStatePriv(Object oThis, int state, int level) {
@@ -601,7 +539,7 @@ public class SwingJSUtils {
 						levelNext == UNCHANGED ? me.level : levelNext);
 			return true;
 		}
-		
+
 		/**
 		 * sleep and then execute the next state
 		 * @param ms
@@ -610,7 +548,6 @@ public class SwingJSUtils {
 			int next = stateNext;
 			delayedState(ms, next);
 		}
-
 	}
 	
 	/**
@@ -622,6 +559,93 @@ public class SwingJSUtils {
 	public static BufferedInputStream openStream(Class<?> base, String fileName) {
 		String s = (String) getResource(base, fileName, String.class);
         return new BufferedInputStream(new ByteArrayInputStream(s.getBytes()));
+	}
+
+
+	public static class Performance {
+
+		public final static int TIME_RESET = 0;
+
+		public final static int TIME_MARK = 1;
+
+		public static final int TIME_SET = 2;
+
+		public static final int TIME_GET = 3;
+
+		public static long time, mark, set, duration;
+
+		/**
+		 * typical usage:
+		 * 
+		 * Performance.timeCheck(null, Platform.TIME_MARK);
+		 * 
+		 * ...
+		 * 
+		 * Performance.timeCheck("some message", Platform.TIME_MARK);
+		 * 
+		 * reset...[set/mark]n...get  (total time) (time spent between set and mark)
+		 * 
+		 * set...get   (total time) (time spent between set and get)
+		 * 
+		 * long t0 = now(0); ........ ; dt = now(t0); (time since t0)e
+		 * 
+		 * @param msg
+		 * @param mode
+		 */
+		public static void timeCheck(String msg, int mode) {
+			msg = timeCheckStr(msg, mode);
+			if (msg != null)
+				System.err.println(msg);
+		}
+
+		public static long now(long t) {
+			return System.currentTimeMillis() - t;
+		}
+		
+		public static String timeCheckStr(String msg, int mode) {
+			long t = System.currentTimeMillis();
+			switch (mode) {
+			case TIME_RESET:
+				time = mark = t;
+				duration = set = 0;
+				if (msg != null) {
+					return ("Platform: timer reset\t\t\t" + msg);
+				}
+				break;
+			case TIME_SET:
+				if (time == 0)
+					time = t;
+				set = t;
+				break;
+			case TIME_MARK:
+				if (set > 0) {
+					// total time between set/mark points
+					duration += (t - set);
+				} else {
+					if (time == 0) {
+						time = mark = t;
+					}
+					if (msg != null) {
+						long m0 = mark;
+						mark = t;
+						return ("Platform: timer mark\t" + ((t - time) / 1000f) + "\t" + ((t - m0) / 1000f) + "\t"
+								+ msg);
+					}
+					mark = t;
+				}
+				break;
+			case TIME_GET:
+				if (msg != null) {
+					if (mark < set)
+						duration = t - set;
+					return ("Platform: timer get\t" + ((t - time) / 1000f) + "\t" + ((duration) / 1000f) + "\t" + msg);
+				}
+				set = 0;
+				break;
+			}
+			return null;
+		}
+
 	}
 
 }

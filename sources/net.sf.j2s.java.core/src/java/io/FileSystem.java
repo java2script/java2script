@@ -259,7 +259,7 @@ class FileSystem {
 	 * normal form then it is simply returned.
 	 */
 	public String normalize(String path) {
-		return path.replace('\\', '/');
+		return path.replaceAll("\\\\", "/");
 	}
 
 	public long getLength(File file) {

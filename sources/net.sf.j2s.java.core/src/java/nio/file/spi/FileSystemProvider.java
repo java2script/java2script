@@ -119,7 +119,7 @@ public abstract class FileSystemProvider {
 //        ServiceLoader<FileSystemProvider> sl = ServiceLoader
 //            .load(FileSystemProvider.class, ClassLoader.getSystemClassLoader());
 
-        String[] sl = new String[] { "file" , "http", "https" };
+        String[] sl = new String[] { "file" , "jar", "http", "https" };
         // ServiceConfigurationError may be throw here
         for (String scheme : sl) {
             //String scheme = provider.getScheme();

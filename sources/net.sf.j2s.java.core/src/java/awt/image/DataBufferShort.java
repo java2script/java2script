@@ -74,7 +74,7 @@ public final class DataBufferShort extends DataBuffer
      * @param size The size of the <CODE>DataBuffer</CODE>.
      */
     public DataBufferShort(int size) {
-        super(STABLE, TYPE_SHORT,size);
+        super(/*?*/UNTRACKABLE, TYPE_SHORT,size);
         data = new short[size];
         bankdata = new short[1][];
         bankdata[0] = data;
@@ -88,7 +88,7 @@ public final class DataBufferShort extends DataBuffer
      * @param numBanks The number of banks in the a<CODE>DataBuffer</CODE>.
      */
     public DataBufferShort(int size, int numBanks) {
-        super(STABLE, TYPE_SHORT,size,numBanks);
+        super(/*?*/UNTRACKABLE, TYPE_SHORT,size,numBanks);
         bankdata = new short[numBanks][];
         for (int i= 0; i < numBanks; i++) {
             bankdata[i] = new short[size];
@@ -197,7 +197,7 @@ public final class DataBufferShort extends DataBuffer
      * @return The first short data array.
      */
     public short[] getData() {
-        theTrackable.setUntrackable();
+        秘setUntrackable();
         return data;
     }
 
@@ -213,7 +213,7 @@ public final class DataBufferShort extends DataBuffer
      * @return The data array for the specified bank.
      */
     public short[] getData(int bank) {
-        theTrackable.setUntrackable();
+        秘setUntrackable();
         return bankdata[bank];
     }
 
@@ -228,7 +228,7 @@ public final class DataBufferShort extends DataBuffer
      * @return All of the data arrays.
      */
     public short[][] getBankData() {
-        theTrackable.setUntrackable();
+        秘setUntrackable();
         return (short[][]) bankdata.clone();
     }
 

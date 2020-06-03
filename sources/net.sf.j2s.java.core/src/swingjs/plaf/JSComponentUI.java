@@ -1145,6 +1145,8 @@ public class JSComponentUI extends ComponentUI
     protected static final int SOME_MOUSE_EVENT = -1;
     protected static final int SOME_KEY_EVENT = -2;
 
+	public static final int CONTENT_PANE_Z = -30000;
+
 	/**
 	 * Set the node to accept key events and possibly focusout
 	 * 
@@ -1367,12 +1369,12 @@ public class JSComponentUI extends ComponentUI
 	protected void propertyChangedCUI(PropertyChangeEvent e, String prop) {
 		// don't want to update a menu until we have to, after its place is set
 		// and we know it is not a JMenuBar menu
-		if (!isMenu && cellComponent == null)
+		if (allowPropertyUpdate() && cellComponent == null)
 			getDOMNode();
 		
 		switch (prop) {
 		case JLayeredPane.LAYER_PROPERTY:
-			setZ(((Integer)e.getNewValue()).intValue());
+			setZ(getInheritedZ() + ((Integer)e.getNewValue()).intValue());
 			setTainted();
 			return;
 		case "border":
@@ -1401,8 +1403,11 @@ public class JSComponentUI extends ComponentUI
 			return;
 		case "text":
 			String val = ((AbstractButton) c).getText();
-			if (val == null ? currentText != null : !val.equals(currentText))
+			if (val == null ? currentText != null : !val.equals(currentText)) {
 				setIconAndText(prop, currentIcon, currentGap, (String) val);
+				if (isMenuItem && textNode != null)
+					this.setAlignments((AbstractButton) c, true);
+			}
 			return;
 		case "iconTextGap":
 			if (iconNode != null) {
@@ -1436,6 +1441,11 @@ public class JSComponentUI extends ComponentUI
 		}
 	}	
 	
+	protected boolean allowPropertyUpdate() {
+		return true;
+	}
+
+
 	protected void setMnemonic(int newValue) {
 		// need to handle non-menu mnemonics as well
 		if (newValue == mnemonic || domNode == null)
@@ -1483,7 +1493,7 @@ public class JSComponentUI extends ComponentUI
 	 */
 	protected boolean isUIDisabled;
 
-	protected boolean setUIDisabled(boolean b) {
+	public boolean setUIDisabled(boolean b) {
 		return isUIDisabled = b;
 	}
 
@@ -1782,16 +1792,9 @@ public class JSComponentUI extends ComponentUI
 					DOMNode.setStyles(this.iconNode, "position", null);
 				}
 			}
-
-			if (tempDiv == null) {
-				tempDiv = DOMNode.createElement("div", "_temp");
-				DOMNode.setTopLeftAbsolute(tempDiv, 0, -100000);
-				$(body).after(tempDiv);
-			}
+			
 			parentNode = DOMNode.transferTo(node, null);
-			tempDiv.appendChild(node);
-			Rectangle r = tempDiv.getBoundingClientRect();
-			tempDiv.removeChild(node);
+			Rectangle r = getBoundingRect(node);
 			
 
 			// From the DOM; Will be Rectangle2D.double, actually.
@@ -1808,7 +1811,7 @@ public class JSComponentUI extends ComponentUI
 			}
 		}
 		// allow a UI to slightly adjust its dimension
-		Dimension dim = getCSSAdjustment(addCSS);
+		Dimension dim = getCSSAdjustment(addCSS, true);
 		dim.width += w;
 		dim.height += h;
 		DOMNode.setStyles(node, "position", null);
@@ -1832,17 +1835,33 @@ public class JSComponentUI extends ComponentUI
 		return dim;
 	}
 
+	protected Rectangle getBoundingRect(DOMNode node) {
+		if (tempDiv == null) {
+			tempDiv = DOMNode.createElement("div", "_temp");
+			DOMNode.setTopLeftAbsolute(tempDiv, 0, -100000);
+			$(body).after(tempDiv);
+		}
+		tempDiv.appendChild(node);
+		Rectangle r = tempDiv.getBoundingClientRect();
+		tempDiv.removeChild(node);
+		return r;
+	}
+
+
 	/**
-	 * allows for can be overloaded to allow some special adjustments
+	 * allows for can be overloaded to allow some special adjustments;
+	 * must be mutable
 	 * 
-	 * @param addingCSS TODO
+	 * @param addingCSS see subclasses
+	 * @param mutable TODO
 	 * 
 	 * @return
 	 */
-	protected Dimension getCSSAdjustment(boolean addingCSS) {
-		return new Dimension(0, 0);
+	protected Dimension getCSSAdjustment(boolean addingCSS, boolean mutable) {
+		return mutable ? new Dimension(0, 0) : ZERO_SIZE;
 	}
 
+	protected static Dimension ZERO_SIZE = new Dimension(0, 0);
 	protected static Dimension ANY_SIZE = new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE);
 	
 	/**
@@ -1893,8 +1912,8 @@ public class JSComponentUI extends ComponentUI
 		else if (domNode != outerNode && DOMNode.getParent(domNode) != outerNode)
 			outerNode.appendChild(domNode);
 		Integer order = (Integer) jc.getClientProperty(JLayeredPane.LAYER_PROPERTY);
-		if (order != null)
-			setZ(order.intValue());
+		if (order != null && order.intValue() != CONTENT_PANE_Z)
+			setZ(getInheritedZ() + order.intValue());
 		setOuterLocationFromComponent();
 		if (n > 0 && containerNode == null)
 			containerNode = outerNode;
@@ -2372,7 +2391,7 @@ public class JSComponentUI extends ComponentUI
 	private void setSizeFromComponent(int width, int height, int op) {
 		// allow for special adjustments
 		// currently MenuItem, TextField, and TextArea
-		Dimension size = getCSSAdjustment(true);
+		Dimension size = getCSSAdjustment(true, false);
 		// if (this.width != width || this.height != height) {
 		this.width = width;
 		this.height = height;
@@ -2405,6 +2424,14 @@ public class JSComponentUI extends ComponentUI
 						: (icon instanceof ImageIcon) ? (ImageIcon) icon : JSToolkit.createImageIcon(jc, icon, id + "tmpIcon"));
 	}
 
+	@SuppressWarnings("unused")
+	private static Object re0 = /** @j2sNative new RegExp("\u0000","gm") || */null;
+	@SuppressWarnings("unused")
+	private static Object reSpace = /** @j2sNative new RegExp(" ","gm") || */null;
+	@SuppressWarnings("unused")
+	private static Object reLT = /** @j2sNative new RegExp("<","gm") || */null;
+	
+	
 	/**
 	 * remove 0x0000 and replace space with nonbreaking space if not a textarea
 	 * 
@@ -2419,9 +2446,9 @@ public class JSComponentUI extends ComponentUI
 				// file://testing ->    swingjs/j2s/testing
 				// file:/testing -->    swintjs/j2s/testing
 				String rp = J2S.getResourcePath("",  true);
-				t = PT.rep(t, "file:/", t.indexOf(rp) >= 0 ? "" : rp);
+				t = t.replaceAll("file:/",  t.indexOf(rp) >= 0 ? "" : rp);
 			} else if (valueNode == null) {
-				t = PT.rep(t, "\u0000", "").replace(' ', '\u00A0');
+				/** @j2sNative t = t.replace(C$.re0, "").replace(C$.reSpace, "\u00A0"); */
 			}
 		}
 		return t;
@@ -2508,9 +2535,9 @@ public class JSComponentUI extends ComponentUI
 			if (text.indexOf("<html>") == 0) {
 				isHTML = true;
 				// PhET uses <html> in labels and uses </br>
-				text = PT.rep(text.substring(6), "</br>", "");
-				text = PT.rep(text, "</html>", "");
-				text = PT.rep(text, "href=", "target=_blank href=");
+				text = text.substring(6).replaceAll("</br>", "");
+				text = text.replaceAll("</html>", "");
+				text = text.replaceAll("href=", "target=_blank href=");
 			} else if (jc.getClientProperty("html") != null) {
 				isHTML = true;
 			} else if (mnemonicIndex >= 0) {
@@ -2528,10 +2555,15 @@ public class JSComponentUI extends ComponentUI
 			// that for a <button> element to properly align vertically,
 			// the font must be set for the button element, not in a child element.
 
-			setCssFont(domNode, getFont()); // for vertical centering
-			setCssFont(textNode, getFont());
-			if (!isHTML)
-				text = PT.rep(text, "<", "&lt;").replace(' ', '\u00A0');
+			Font f = getFont();
+			setCssFont(domNode, f); // for vertical centering
+			setCssFont(textNode, f);
+			if (menuAnchorNode != null) {
+				setCssFont(menuAnchorNode, f); // for vertical centering
+			}
+			if (!isHTML) {
+				/** @j2sNative text = text.replace(C$.reLT, "&lt;").replace(C$.reSpace, "\u00A0");*/
+			}
 		} else if (valueNode != null) {
 			prop = "value";
 			obj = valueNode;
@@ -2714,7 +2746,7 @@ public class JSComponentUI extends ComponentUI
 						menuAnchorNode.appendChild(accelNode = DOMNode.createElement("span", id + "_acc"));
 						addClass(accelNode, "ui-j2smenu-accel");
 						DOMNode.setAttr(accelNode, "role", "menuitem");
-						DOMNode.setStyles(accelNode, "font-size", "10px");
+						DOMNode.setStyles(accelNode, "font-size", "0.8em");
 						setMenuItem(accelNode);
 					}
 				}
@@ -2727,8 +2759,9 @@ public class JSComponentUI extends ComponentUI
 				}
 			}
 			if (!isMenu || isMenuItem)
-				DOMNode.setStyles(menuAnchorNode, "width", "90%", "min-width",
-					Math.max(75, (wCtr + wAccel + margins.left + margins.right) * 1.1) + "px"); // was 95%, but then the blue background extends past right end of menu item
+				DOMNode.setStyles(menuAnchorNode, //"width", "90%", 
+						"min-width",
+					Math.max(75, (23 + 15 + wCtr + wAccel + margins.left + margins.right)) + "px"); // was 95%, but then the blue background extends past right end of menu item
 		}
 
 		if (alignHCenter) {
@@ -2886,7 +2919,7 @@ public class JSComponentUI extends ComponentUI
 				addJSKeyVal(cssIcon, "top", top + "%", "transform",
 						"translateY(-" + itop + "%)" + (iscale == null ? "" : iscale));
 			} else {
-				DOMNode.setStyles(menuAnchorNode, "height", h + "px");
+				DOMNode.setStyles(menuAnchorNode, "height", "1em");
 //				if (wIcon > 0)
 	//				addJSKeyVal(cssTxt, "top", "50%", "transform", "translateY(-50%)");
 				addJSKeyVal(cssIcon, "top", "50%", "transform", "translateY(-80%) scale(0.6,0.6)");
@@ -3242,7 +3275,7 @@ public class JSComponentUI extends ComponentUI
 	 * @param z
 	 */
 	public void setZ(int z) {
-		if (z == -30000) // content pane
+		if (z == CONTENT_PANE_Z) // content pane
 			return;
 		DOMNode.setPositionAbsolute(domNode);
 		DOMNode.setZ(domNode, z);
@@ -3593,7 +3626,7 @@ public class JSComponentUI extends ComponentUI
 		JSComponent c = jc;
 		while (c != null) {
 			JSComponentUI ui = c.秘getUI();
-			if (ui == null)
+			if (ui == null || ui.isWindow)
 				return;
 			ui.inPaintPath = true;
 			c.秘setPaintsSelf(JSComponent.PAINTS_SELF_ALWAYS);
@@ -3618,7 +3651,7 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	public boolean isDisplayable() {
-		return domNode != null;
+		return !isDisposed && domNode != null;
 	}
 
 }

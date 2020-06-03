@@ -18,6 +18,15 @@ public class Test_Regex extends Test_ {
 		String s = Arrays.toString(splitUnquoted("this; is \"a;test\"", ";"));
 		System.out.println(s);
 		assert(s.equals("[this,  is \"a;test\"]"));
+		
+		s = "x/2 is a very excellent 1/x or x";
+		
+		assert("y/2 is a very excellent 1/y or y".equals((" " +s + " ").replaceAll("(\\W)x(\\W)", "$1y$2").trim()));
+		
+		System.out.println(Pattern.compile("(\\W)y(\\W)").matcher("(m*(@^2+~^2)/r+m*g*(1-y/r))*(1-y/r)" ).replaceAll("$1`$2").trim());
+
+		System.out.println(Pattern.compile("(\\W)y(\\W)").matcher(" y+ y*2 " ).replaceAll("$1`$2").trim());
+
 		System.out.println("Test_Regex OK");
 	}
 	
@@ -63,4 +72,17 @@ public class Test_Regex extends Test_ {
 	}
 
 
+	class Matcher1 {
+		
+		int grN = 0;
+		
+		public String toString() {
+			return group(grN);
+		}
+		
+	}
+	
+	String group(int n) {
+		return "" + n;
+	}
 }

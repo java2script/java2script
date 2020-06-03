@@ -8,32 +8,27 @@ public class JSXMLAttr extends JSXMLNode implements Attr {
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
-		return null;
+		return /** @j2sNative 1 ? this.name : */"";
 	}
 
 	@Override
 	public boolean getSpecified() {
-		// TODO Auto-generated method stub
-		return false;
+		return /** @j2sNative 1 ? this.specified : */false;
 	}
 
 	@Override
 	public String getValue() {
-		// TODO Auto-generated method stub
-		return null;
+		return /** @j2sNative 1 ? this.value : */"";
 	}
 
 	@Override
 	public void setValue(String value) throws DOMException {
-		// TODO Auto-generated method stub
-
+		/** @j2sNative this.value = value */;
 	}
 
 	@Override
 	public Element getOwnerElement() {
-		// TODO Auto-generated method stub
-		return null;
+		return (Element) newNode(/** @j2sNative this.ownerElement || */null);
 	}
 
 }

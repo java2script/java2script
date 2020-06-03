@@ -704,9 +704,7 @@ public class JPopupMenu extends JComponent implements MenuElement {
 		}
 		getUI().setVisible(b);
 		if (!b) {
-			popup = null;
-			
-			System.out.println("JPopupMenu.setVis false to invoker " + invoker);
+			popup = null;			
 			// SwingJS added
 			if (invoker != null && invoker.isFocusable())
 				invoker.requestFocus();

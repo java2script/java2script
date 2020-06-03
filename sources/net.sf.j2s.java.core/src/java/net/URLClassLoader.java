@@ -26,33 +26,28 @@
 package java.net;
 
 import java.io.Closeable;
-import java.io.File;
-import java.io.FilePermission;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.AccessControlContext;
-import java.security.AccessController;
-import java.security.CodeSigner;
-import java.security.CodeSource;
-import java.security.Permission;
-import java.security.PermissionCollection;
-import java.security.PrivilegedAction;
-import java.security.PrivilegedExceptionAction;
+//import java.security.AccessController;
+//import java.security.CodeSource;
+//import java.security.PermissionCollection;
+//import java.security.Permissions;
+//import java.security.PrivilegedAction;
+//import java.security.PrivilegedExceptionAction;
 import java.security.SecureClassLoader;
 import java.util.Enumeration;
-import java.util.List;
+//import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.Set;
+//import java.util.Set;
 import java.util.WeakHashMap;
-import java.util.jar.Attributes;
-import java.util.jar.Attributes.Name;
+//import java.util.jar.Attributes;
+//import java.util.jar.Attributes.Name;
 import java.util.jar.JarFile;
-import java.util.jar.Manifest;
-import sun.misc.Resource;
+//import java.util.jar.Manifest;
+
+//import sun.misc.Resource;
 import sun.misc.URLClassPath;
-import sun.net.www.ParseUtil;
-import sun.security.util.SecurityConstants;
 
 /**
  * This class loader is used to load classes and resources from a search
@@ -74,49 +69,50 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
     /* The search path for classes and resources */
     private final URLClassPath ucp;
 
-    /* The context to be used when loading classes and resources */
-    private final AccessControlContext acc;
-
-    /**
-     * Constructs a new URLClassLoader for the given URLs. The URLs will be
-     * searched in the order specified for classes and resources after first
-     * searching in the specified parent class loader. Any URL that ends with
-     * a '/' is assumed to refer to a directory. Otherwise, the URL is assumed
-     * to refer to a JAR file which will be downloaded and opened as needed.
-     *
-     * <p>If there is a security manager, this method first
-     * calls the security manager's {@code checkCreateClassLoader} method
-     * to ensure creation of a class loader is allowed.
-     *
-     * @param urls the URLs from which to load classes and resources
-     * @param parent the parent class loader for delegation
-     * @exception  SecurityException  if a security manager exists and its
-     *             {@code checkCreateClassLoader} method doesn't allow
-     *             creation of a class loader.
-     * @exception  NullPointerException if {@code urls} is {@code null}.
-     * @see SecurityManager#checkCreateClassLoader
-     */
+//    /* The context to be used when loading classes and resources */
+//    private final AccessControlContext acc;
+//
+	/**
+	 * Constructs a new URLClassLoader for the given URLs. The URLs will be searched
+	 * in the order specified for classes and resources after first searching in the
+	 * specified parent class loader. Any URL that ends with a '/' is assumed to
+	 * refer to a directory. Otherwise, the URL is assumed to refer to a JAR file
+	 * which will be downloaded and opened as needed.
+	 *
+	 * <p>
+	 * If there is a security manager, this method first calls the security
+	 * manager's {@code checkCreateClassLoader} method to ensure creation of a class
+	 * loader is allowed.
+	 *
+	 * @param urls   the URLs from which to load classes and resources
+	 * @param parent the parent class loader for delegation
+	 * @exception SecurityException    if a security manager exists and its
+	 *                                 {@code checkCreateClassLoader} method doesn't
+	 *                                 allow creation of a class loader.
+	 * @exception NullPointerException if {@code urls} is {@code null}.
+	 * @see SecurityManager#checkCreateClassLoader
+	 */
     public URLClassLoader(URL[] urls, ClassLoader parent) {
         super(parent);
-        // this is to make the stack depth consistent with 1.1
-        SecurityManager security = System.getSecurityManager();
-        if (security != null) {
-            security.checkCreateClassLoader();
-        }
+//        // this is to make the stack depth consistent with 1.1
+//        SecurityManager security = System.getSecurityManager();
+//        if (security != null) {
+//            security.checkCreateClassLoader();
+//        }
         ucp = new URLClassPath(urls);
-        this.acc = AccessController.getContext();
+//        this.acc = AccessController.getContext();
     }
 
     URLClassLoader(URL[] urls, ClassLoader parent,
                    AccessControlContext acc) {
         super(parent);
-        // this is to make the stack depth consistent with 1.1
-        SecurityManager security = System.getSecurityManager();
-        if (security != null) {
-            security.checkCreateClassLoader();
-        }
+//        // this is to make the stack depth consistent with 1.1
+//        SecurityManager security = System.getSecurityManager();
+//        if (security != null) {
+//            security.checkCreateClassLoader();
+//        }
         ucp = new URLClassPath(urls);
-        this.acc = acc;
+//        this.acc = acc;
     }
 
     /**
@@ -142,24 +138,24 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
      */
     public URLClassLoader(URL[] urls) {
         super();
-        // this is to make the stack depth consistent with 1.1
-        SecurityManager security = System.getSecurityManager();
-        if (security != null) {
-            security.checkCreateClassLoader();
-        }
+//        // this is to make the stack depth consistent with 1.1
+//        SecurityManager security = System.getSecurityManager();
+//        if (security != null) {
+//            security.checkCreateClassLoader();
+//        }
         ucp = new URLClassPath(urls);
-        this.acc = AccessController.getContext();
+//        this.acc = AccessController.getContext();
     }
 
     URLClassLoader(URL[] urls, AccessControlContext acc) {
         super();
-        // this is to make the stack depth consistent with 1.1
-        SecurityManager security = System.getSecurityManager();
-        if (security != null) {
-            security.checkCreateClassLoader();
-        }
+//        // this is to make the stack depth consistent with 1.1
+//        SecurityManager security = System.getSecurityManager();
+//        if (security != null) {
+//            security.checkCreateClassLoader();
+//        }
         ucp = new URLClassPath(urls);
-        this.acc = acc;
+//        this.acc = acc;
     }
 
     /**
@@ -186,13 +182,13 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
     public URLClassLoader(URL[] urls, ClassLoader parent,
                           URLStreamHandlerFactory factory) {
         super(parent);
-        // this is to make the stack depth consistent with 1.1
-        SecurityManager security = System.getSecurityManager();
-        if (security != null) {
-            security.checkCreateClassLoader();
-        }
+//        // this is to make the stack depth consistent with 1.1
+//        SecurityManager security = System.getSecurityManager();
+//        if (security != null) {
+//            security.checkCreateClassLoader();
+//        }
         ucp = new URLClassPath(urls, factory);
-        acc = AccessController.getContext();
+//        acc = AccessController.getContext();
     }
 
     /* A map (used as a set) to keep track of closeable local resources
@@ -228,7 +224,8 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
      *
      * @since  1.7
      */
-    public InputStream getResourceAsStream(String name) {
+    @Override
+	public InputStream getResourceAsStream(String name) {
         URL url = getResource(name);
         try {
             if (url == null) {
@@ -283,39 +280,40 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
     *
     * @since 1.7
     */
-    public void close() throws IOException {
-        SecurityManager security = System.getSecurityManager();
-        if (security != null) {
-            security.checkPermission(new RuntimePermission("closeClassLoader"));
-        }
-        List<IOException> errors = ucp.closeLoaders();
-
-        // now close any remaining streams.
-
-        synchronized (closeables) {
-            Set<Closeable> keys = closeables.keySet();
-            for (Closeable c : keys) {
-                try {
-                    c.close();
-                } catch (IOException ioex) {
-                    errors.add(ioex);
-                }
-            }
-            closeables.clear();
-        }
-
-        if (errors.isEmpty()) {
-            return;
-        }
-
-        IOException firstex = errors.remove(0);
-
-        // Suppress any remaining exceptions
-
-        for (IOException error: errors) {
-            firstex.addSuppressed(error);
-        }
-        throw firstex;
+    @Override
+	public void close() throws IOException {
+//        SecurityManager security = System.getSecurityManager();
+//        if (security != null) {
+//            security.checkPermission(new RuntimePermission("closeClassLoader"));
+//        }
+//        List<IOException> errors = ucp.closeLoaders();
+//
+//        // now close any remaining streams.
+//
+//        synchronized (closeables) {
+//            Set<Closeable> keys = closeables.keySet();
+//            for (Closeable c : keys) {
+//                try {
+//                    c.close();
+//                } catch (IOException ioex) {
+//                    errors.add(ioex);
+//                }
+//            }
+//            closeables.clear();
+//        }
+//
+//        if (errors.isEmpty()) {
+//            return;
+//        }
+//
+//        IOException firstex = errors.remove(0);
+//
+//        // Suppress any remaining exceptions
+//
+//        for (IOException error: errors) {
+//            firstex.addSuppressed(error);
+//        }
+//        throw firstex;
     }
 
     /**
@@ -342,215 +340,217 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
         return ucp.getURLs();
     }
 
-    /**
-     * Finds and loads the class with the specified name from the URL search
-     * path. Any URLs referring to JAR files are loaded and opened as needed
-     * until the class is found.
-     *
-     * @param name the name of the class
-     * @return the resulting class
-     * @exception ClassNotFoundException if the class could not be found,
-     *            or if the loader is closed.
-     * @exception NullPointerException if {@code name} is {@code null}.
-     */
-    protected Class<?> findClass(final String name)
-        throws ClassNotFoundException
-    {
-        final Class<?> result;
-        try {
-            result = AccessController.doPrivileged(
-                new PrivilegedExceptionAction<Class<?>>() {
-                    public Class<?> run() throws ClassNotFoundException {
-                        String path = name.replace('.', '/').concat(".class");
-                        Resource res = ucp.getResource(path, false);
-                        if (res != null) {
-                            try {
-                                return defineClass(name, res);
-                            } catch (IOException e) {
-                                throw new ClassNotFoundException(name, e);
-                            }
-                        } else {
-                            return null;
-                        }
-                    }
-                }, acc);
-        } catch (java.security.PrivilegedActionException pae) {
-            throw (ClassNotFoundException) pae.getException();
-        }
-        if (result == null) {
-            throw new ClassNotFoundException(name);
-        }
-        return result;
-    }
-
-    /*
-     * Retrieve the package using the specified package name.
-     * If non-null, verify the package using the specified code
-     * source and manifest.
-     */
-    private Package getAndVerifyPackage(String pkgname,
-                                        Manifest man, URL url) {
-        Package pkg = getPackage(pkgname);
-        if (pkg != null) {
-            // Package found, so check package sealing.
-            if (pkg.isSealed()) {
-                // Verify that code source URL is the same.
-                if (!pkg.isSealed(url)) {
-                    throw new SecurityException(
-                        "sealing violation: package " + pkgname + " is sealed");
-                }
-            } else {
-                // Make sure we are not attempting to seal the package
-                // at this code source URL.
-                if ((man != null) && isSealed(pkgname, man)) {
-                    throw new SecurityException(
-                        "sealing violation: can't seal package " + pkgname +
-                        ": already loaded");
-                }
-            }
-        }
-        return pkg;
-    }
-
-    // Also called by VM to define Package for classes loaded from the CDS
-    // archive
-    private void definePackageInternal(String pkgname, Manifest man, URL url)
-    {
-        if (getAndVerifyPackage(pkgname, man, url) == null) {
-            try {
-                if (man != null) {
-                    definePackage(pkgname, man, url);
-                } else {
-                    definePackage(pkgname, null, null, null, null, null, null, null);
-                }
-            } catch (IllegalArgumentException iae) {
-                // parallel-capable class loaders: re-verify in case of a
-                // race condition
-                if (getAndVerifyPackage(pkgname, man, url) == null) {
-                    // Should never happen
-                    throw new AssertionError("Cannot find package " +
-                                             pkgname);
-                }
-            }
-        }
-    }
-
-    /*
-     * Defines a Class using the class bytes obtained from the specified
-     * Resource. The resulting Class must be resolved before it can be
-     * used.
-     */
-    private Class<?> defineClass(String name, Resource res) throws IOException {
-        long t0 = System.nanoTime();
-        int i = name.lastIndexOf('.');
-        URL url = res.getCodeSourceURL();
-        if (i != -1) {
-            String pkgname = name.substring(0, i);
-            // Check if package already loaded.
-            //Manifest man = res.getManifest();
-            definePackageInternal(pkgname, null, url);
-        }
-        // Now read the class bytes and define the class
-        java.nio.ByteBuffer bb = res.getByteBuffer();
-        if (bb != null) {
-            // Use (direct) ByteBuffer:
- //           CodeSigner[] signers = res.getCodeSigners();
- //           CodeSource cs = new CodeSource(url, signers);
- //           sun.misc.PerfCounter.getReadClassBytesTime().addElapsedTimeFrom(t0);
-            return defineClass(name, bb, (CodeSource) null);
-        } else {
-            byte[] b = res.getBytes();
-            // must read certificates AFTER reading bytes.
-            //CodeSigner[] signers = res.getCodeSigners();
-            //CodeSource cs = new CodeSource(url, signers);
-            //sun.misc.PerfCounter.getReadClassBytesTime().addElapsedTimeFrom(t0);
-            return defineClass(name, b, 0, b.length, (CodeSource) null);
-        }
-    }
-
-    /**
-     * Defines a new package by name in this ClassLoader. The attributes
-     * contained in the specified Manifest will be used to obtain package
-     * version and sealing information. For sealed packages, the additional
-     * URL specifies the code source URL from which the package was loaded.
-     *
-     * @param name  the package name
-     * @param man   the Manifest containing package version and sealing
-     *              information
-     * @param url   the code source url for the package, or null if none
-     * @exception   IllegalArgumentException if the package name duplicates
-     *              an existing package either in this class loader or one
-     *              of its ancestors
-     * @return the newly defined Package object
-     */
-    protected Package definePackage(String name, Manifest man, URL url)
-        throws IllegalArgumentException
-    {
-        String path = name.replace('.', '/').concat("/");
-        String specTitle = null, specVersion = null, specVendor = null;
-        String implTitle = null, implVersion = null, implVendor = null;
-        String sealed = null;
-        URL sealBase = null;
-
-        Attributes attr = man.getAttributes(path);
-        if (attr != null) {
-            specTitle   = attr.getValue(Name.SPECIFICATION_TITLE);
-            specVersion = attr.getValue(Name.SPECIFICATION_VERSION);
-            specVendor  = attr.getValue(Name.SPECIFICATION_VENDOR);
-            implTitle   = attr.getValue(Name.IMPLEMENTATION_TITLE);
-            implVersion = attr.getValue(Name.IMPLEMENTATION_VERSION);
-            implVendor  = attr.getValue(Name.IMPLEMENTATION_VENDOR);
-            sealed      = attr.getValue(Name.SEALED);
-        }
-        attr = man.getMainAttributes();
-        if (attr != null) {
-            if (specTitle == null) {
-                specTitle = attr.getValue(Name.SPECIFICATION_TITLE);
-            }
-            if (specVersion == null) {
-                specVersion = attr.getValue(Name.SPECIFICATION_VERSION);
-            }
-            if (specVendor == null) {
-                specVendor = attr.getValue(Name.SPECIFICATION_VENDOR);
-            }
-            if (implTitle == null) {
-                implTitle = attr.getValue(Name.IMPLEMENTATION_TITLE);
-            }
-            if (implVersion == null) {
-                implVersion = attr.getValue(Name.IMPLEMENTATION_VERSION);
-            }
-            if (implVendor == null) {
-                implVendor = attr.getValue(Name.IMPLEMENTATION_VENDOR);
-            }
-            if (sealed == null) {
-                sealed = attr.getValue(Name.SEALED);
-            }
-        }
-        if ("true".equalsIgnoreCase(sealed)) {
-            sealBase = url;
-        }
-        return definePackage(name, specTitle, specVersion, specVendor,
-                             implTitle, implVersion, implVendor, sealBase);
-    }
-
-    /*
-     * Returns true if the specified package name is sealed according to the
-     * given manifest.
-     */
-    private boolean isSealed(String name, Manifest man) {
-        String path = name.replace('.', '/').concat("/");
-        Attributes attr = man.getAttributes(path);
-        String sealed = null;
-        if (attr != null) {
-            sealed = attr.getValue(Name.SEALED);
-        }
-        if (sealed == null) {
-            if ((attr = man.getMainAttributes()) != null) {
-                sealed = attr.getValue(Name.SEALED);
-            }
-        }
-        return "true".equalsIgnoreCase(sealed);
-    }
+//    /**
+//     * Finds and loads the class with the specified name from the URL search
+//     * path. Any URLs referring to JAR files are loaded and opened as needed
+//     * until the class is found.
+//     *
+//     * @param name the name of the class
+//     * @return the resulting class
+//     * @exception ClassNotFoundException if the class could not be found,
+//     *            or if the loader is closed.
+//     * @exception NullPointerException if {@code name} is {@code null}.
+//     */
+//    @Override
+//	protected Class<?> findClass(final String name)
+//        throws ClassNotFoundException
+//    {
+//        final Class<?> result;
+//        try {
+//            result = AccessController.doPrivileged(
+//                new PrivilegedExceptionAction<Class<?>>() {
+//                    @Override
+//					public Class<?> run() throws ClassNotFoundException {
+//                        String path = name.replace('.', '/').concat(".class");
+//                        Resource res = ucp.getResource(path, false);
+//                        if (res != null) {
+//                            try {
+//                                return defineClass(name, res);
+//                            } catch (IOException e) {
+//                                throw new ClassNotFoundException(name, e);
+//                            }
+//                        } else {
+//                            return null;
+//                        }
+//                    }
+//                }, acc);
+//        } catch (java.security.PrivilegedActionException pae) {
+//            throw (ClassNotFoundException) pae.getException();
+//        }
+//        if (result == null) {
+//            throw new ClassNotFoundException(name);
+//        }
+//        return result;
+//    }
+//
+//    /*
+//     * Retrieve the package using the specified package name.
+//     * If non-null, verify the package using the specified code
+//     * source and manifest.
+//     */
+//    private Package getAndVerifyPackage(String pkgname,
+//                                        Manifest man, URL url) {
+//        Package pkg = getPackage(pkgname);
+//        if (pkg != null) {
+//            // Package found, so check package sealing.
+//            if (pkg.isSealed()) {
+//                // Verify that code source URL is the same.
+//                if (!pkg.isSealed(url)) {
+//                    throw new SecurityException(
+//                        "sealing violation: package " + pkgname + " is sealed");
+//                }
+//            } else {
+//                // Make sure we are not attempting to seal the package
+//                // at this code source URL.
+//                if ((man != null) && isSealed(pkgname, man)) {
+//                    throw new SecurityException(
+//                        "sealing violation: can't seal package " + pkgname +
+//                        ": already loaded");
+//                }
+//            }
+//        }
+//        return pkg;
+//    }
+//
+//    // Also called by VM to define Package for classes loaded from the CDS
+//    // archive
+//    private void definePackageInternal(String pkgname, Manifest man, URL url)
+//    {
+//        if (getAndVerifyPackage(pkgname, man, url) == null) {
+//            try {
+//                if (man != null) {
+//                    definePackage(pkgname, man, url);
+//                } else {
+//                    definePackage(pkgname, null, null, null, null, null, null, null);
+//                }
+//            } catch (IllegalArgumentException iae) {
+//                // parallel-capable class loaders: re-verify in case of a
+//                // race condition
+//                if (getAndVerifyPackage(pkgname, man, url) == null) {
+//                    // Should never happen
+//                    throw new AssertionError("Cannot find package " +
+//                                             pkgname);
+//                }
+//            }
+//        }
+//    }
+//
+//    /*
+//     * Defines a Class using the class bytes obtained from the specified
+//     * Resource. The resulting Class must be resolved before it can be
+//     * used.
+//     */
+//    private Class<?> defineClass(String name, Resource res) throws IOException {
+//        long t0 = System.nanoTime();
+//        int i = name.lastIndexOf('.');
+//        URL url = res.getCodeSourceURL();
+//        if (i != -1) {
+//            String pkgname = name.substring(0, i);
+//            // Check if package already loaded.
+//            //Manifest man = res.getManifest();
+//            definePackageInternal(pkgname, null, url);
+//        }
+//        // Now read the class bytes and define the class
+//        java.nio.ByteBuffer bb = res.getByteBuffer();
+//        if (bb != null) {
+//            // Use (direct) ByteBuffer:
+// //           CodeSigner[] signers = res.getCodeSigners();
+// //           CodeSource cs = new CodeSource(url, signers);
+// //           sun.misc.PerfCounter.getReadClassBytesTime().addElapsedTimeFrom(t0);
+//            return defineClass(name, bb, (CodeSource) null);
+//        } else {
+//            byte[] b = res.getBytes();
+//            // must read certificates AFTER reading bytes.
+//            //CodeSigner[] signers = res.getCodeSigners();
+//            //CodeSource cs = new CodeSource(url, signers);
+//            //sun.misc.PerfCounter.getReadClassBytesTime().addElapsedTimeFrom(t0);
+//            return defineClass(name, b, 0, b.length, (CodeSource) null);
+//        }
+//    }
+//
+//    /**
+//     * Defines a new package by name in this ClassLoader. The attributes
+//     * contained in the specified Manifest will be used to obtain package
+//     * version and sealing information. For sealed packages, the additional
+//     * URL specifies the code source URL from which the package was loaded.
+//     *
+//     * @param name  the package name
+//     * @param man   the Manifest containing package version and sealing
+//     *              information
+//     * @param url   the code source url for the package, or null if none
+//     * @exception   IllegalArgumentException if the package name duplicates
+//     *              an existing package either in this class loader or one
+//     *              of its ancestors
+//     * @return the newly defined Package object
+//     */
+//    protected Package definePackage(String name, Manifest man, URL url)
+//        throws IllegalArgumentException
+//    {
+//        String path = name.replace('.', '/').concat("/");
+//        String specTitle = null, specVersion = null, specVendor = null;
+//        String implTitle = null, implVersion = null, implVendor = null;
+//        String sealed = null;
+//        URL sealBase = null;
+//
+//        Attributes attr = man.getAttributes(path);
+//        if (attr != null) {
+//            specTitle   = attr.getValue(Name.SPECIFICATION_TITLE);
+//            specVersion = attr.getValue(Name.SPECIFICATION_VERSION);
+//            specVendor  = attr.getValue(Name.SPECIFICATION_VENDOR);
+//            implTitle   = attr.getValue(Name.IMPLEMENTATION_TITLE);
+//            implVersion = attr.getValue(Name.IMPLEMENTATION_VERSION);
+//            implVendor  = attr.getValue(Name.IMPLEMENTATION_VENDOR);
+//            sealed      = attr.getValue(Name.SEALED);
+//        }
+//        attr = man.getMainAttributes();
+//        if (attr != null) {
+//            if (specTitle == null) {
+//                specTitle = attr.getValue(Name.SPECIFICATION_TITLE);
+//            }
+//            if (specVersion == null) {
+//                specVersion = attr.getValue(Name.SPECIFICATION_VERSION);
+//            }
+//            if (specVendor == null) {
+//                specVendor = attr.getValue(Name.SPECIFICATION_VENDOR);
+//            }
+//            if (implTitle == null) {
+//                implTitle = attr.getValue(Name.IMPLEMENTATION_TITLE);
+//            }
+//            if (implVersion == null) {
+//                implVersion = attr.getValue(Name.IMPLEMENTATION_VERSION);
+//            }
+//            if (implVendor == null) {
+//                implVendor = attr.getValue(Name.IMPLEMENTATION_VENDOR);
+//            }
+//            if (sealed == null) {
+//                sealed = attr.getValue(Name.SEALED);
+//            }
+//        }
+//        if ("true".equalsIgnoreCase(sealed)) {
+//            sealBase = url;
+//        }
+//        return definePackage(name, specTitle, specVersion, specVendor,
+//                             implTitle, implVersion, implVendor, sealBase);
+//    }
+//
+//    /*
+//     * Returns true if the specified package name is sealed according to the
+//     * given manifest.
+//     */
+//    private boolean isSealed(String name, Manifest man) {
+//        String path = name.replace('.', '/').concat("/");
+//        Attributes attr = man.getAttributes(path);
+//        String sealed = null;
+//        if (attr != null) {
+//            sealed = attr.getValue(Name.SEALED);
+//        }
+//        if (sealed == null) {
+//            if ((attr = man.getMainAttributes()) != null) {
+//                sealed = attr.getValue(Name.SEALED);
+//            }
+//        }
+//        return "true".equalsIgnoreCase(sealed);
+//    }
 
     /**
      * Finds the resource with the specified name on the URL search path.
@@ -559,16 +559,19 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
      * @return a {@code URL} for the resource, or {@code null}
      * if the resource could not be found, or if the loader is closed.
      */
-    public URL findResource(final String name) {
+    @Override
+	public URL findResource(final String name) {
         /*
          * The same restriction to finding classes applies to resources
          */
-        URL url = AccessController.doPrivileged(
-            new PrivilegedAction<URL>() {
-                public URL run() {
-                    return ucp.findResource(name, true);
-                }
-            }, acc);
+        URL url = //AccessController.doPrivileged(
+//            new PrivilegedAction<URL>() {
+//                @Override
+//				public URL run() {
+//                    return 
+                    		ucp.findResource(name, true);
+//                }
+//            }, acc);
 
         return url != null ? ucp.checkURL(url) : null;
     }
@@ -582,7 +585,8 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
      * @return an {@code Enumeration} of {@code URL}s
      *         If the loader is closed, the Enumeration will be empty.
      */
-    public Enumeration<URL> findResources(final String name)
+    @Override
+	public Enumeration<URL> findResources(final String name)
         throws IOException
     {
         final Enumeration<URL> e = ucp.findResources(name, true);
@@ -595,14 +599,17 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
                     return true;
                 }
                 do {
-                    URL u = AccessController.doPrivileged(
-                        new PrivilegedAction<URL>() {
-                            public URL run() {
-                                if (!e.hasMoreElements())
-                                    return null;
-                                return e.nextElement();
-                            }
-                        }, acc);
+                    URL u = null;
+//                    		AccessController.doPrivileged(
+//                        new PrivilegedAction<URL>() {
+//                            @Override
+//							public URL run() {
+                                if (e.hasMoreElements())
+                                    //return null;
+                                //return
+                                	u =	e.nextElement();
+//                            }
+//                        }, acc);
                     if (u == null)
                         break;
                     url = ucp.checkURL(u);
@@ -610,7 +617,8 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
                 return url != null;
             }
 
-            public URL nextElement() {
+            @Override
+			public URL nextElement() {
                 if (!next()) {
                     throw new NoSuchElementException();
                 }
@@ -619,102 +627,108 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
                 return u;
             }
 
-            public boolean hasMoreElements() {
+            @Override
+			public boolean hasMoreElements() {
                 return next();
             }
         };
     }
 
-    /**
-     * Returns the permissions for the given codesource object.
-     * The implementation of this method first calls super.getPermissions
-     * and then adds permissions based on the URL of the codesource.
-     * <p>
-     * If the protocol of this URL is "jar", then the permission granted
-     * is based on the permission that is required by the URL of the Jar
-     * file.
-     * <p>
-     * If the protocol is "file" and there is an authority component, then
-     * permission to connect to and accept connections from that authority
-     * may be granted. If the protocol is "file"
-     * and the path specifies a file, then permission to read that
-     * file is granted. If protocol is "file" and the path is
-     * a directory, permission is granted to read all files
-     * and (recursively) all files and subdirectories contained in
-     * that directory.
-     * <p>
-     * If the protocol is not "file", then permission
-     * to connect to and accept connections from the URL's host is granted.
-     * @param codesource the codesource
-     * @exception NullPointerException if {@code codesource} is {@code null}.
-     * @return the permissions granted to the codesource
-     */
-    protected PermissionCollection getPermissions(CodeSource codesource)
-    {
-        PermissionCollection perms = super.getPermissions(codesource);
-
-        URL url = codesource.getLocation();
-
-        Permission p;
-        URLConnection urlConnection;
-
-        try {
-            urlConnection = url.openConnection();
-            p = urlConnection.getPermission();
-        } catch (java.io.IOException ioe) {
-            p = null;
-            urlConnection = null;
-        }
-
-        if (p instanceof FilePermission) {
-            // if the permission has a separator char on the end,
-            // it means the codebase is a directory, and we need
-            // to add an additional permission to read recursively
-            String path = p.getName();
-            if (path.endsWith(File.separator)) {
-                path += "-";
-                p = new FilePermission(path, SecurityConstants.FILE_READ_ACTION);
-            }
-        } else if ((p == null) && (url.getProtocol().equals("file"))) {
-            String path = url.getFile().replace('/', File.separatorChar);
-            path = ParseUtil.decode(path);
-            if (path.endsWith(File.separator))
-                path += "-";
-            p =  new FilePermission(path, SecurityConstants.FILE_READ_ACTION);
-        } else {
-            /**
-             * Not loading from a 'file:' URL so we want to give the class
-             * permission to connect to and accept from the remote host
-             * after we've made sure the host is the correct one and is valid.
-             */
-            URL locUrl = url;
-            if (urlConnection instanceof JarURLConnection) {
-                locUrl = ((JarURLConnection)urlConnection).getJarFileURL();
-            }
-            String host = locUrl.getHost();
-            if (host != null && (host.length() > 0))
-                p = new SocketPermission(host,
-                                         SecurityConstants.SOCKET_CONNECT_ACCEPT_ACTION);
-        }
-
-        // make sure the person that created this class loader
-        // would have this permission
-
-        if (p != null) {
-            final SecurityManager sm = System.getSecurityManager();
-            if (sm != null) {
-                final Permission fp = p;
-                AccessController.doPrivileged(new PrivilegedAction<Void>() {
-                    public Void run() throws SecurityException {
-                        sm.checkPermission(fp);
-                        return null;
-                    }
-                }, acc);
-            }
-            perms.add(p);
-        }
-        return perms;
-    }
+//    /**
+//     * Returns the permissions for the given codesource object.
+//     * The implementation of this method first calls super.getPermissions
+//     * and then adds permissions based on the URL of the codesource.
+//     * <p>
+//     * If the protocol of this URL is "jar", then the permission granted
+//     * is based on the permission that is required by the URL of the Jar
+//     * file.
+//     * <p>
+//     * If the protocol is "file" and there is an authority component, then
+//     * permission to connect to and accept connections from that authority
+//     * may be granted. If the protocol is "file"
+//     * and the path specifies a file, then permission to read that
+//     * file is granted. If protocol is "file" and the path is
+//     * a directory, permission is granted to read all files
+//     * and (recursively) all files and subdirectories contained in
+//     * that directory.
+//     * <p>
+//     * If the protocol is not "file", then permission
+//     * to connect to and accept connections from the URL's host is granted.
+//     * @param codesource the codesource
+//     * @exception NullPointerException if {@code codesource} is {@code null}.
+//     * @return the permissions granted to the codesource
+//     */
+//    @Override
+//	protected PermissionCollection getPermissions(CodeSource codesource)
+//    {
+//    	// SwingJS
+//        return new Permissions(); // ProtectionDomain defers the binding
+//
+//        PermissionCollection perms = super.getPermissions(codesource);
+//
+//        URL url = codesource.getLocation();
+//
+//        Permission p;
+//        URLConnection urlConnection;
+//
+//        try {
+//            urlConnection = url.openConnection();
+//            p = urlConnection.getPermission();
+//        } catch (java.io.IOException ioe) {
+//            p = null;
+//            urlConnection = null;
+//        }
+//
+//        if (p instanceof FilePermission) {
+//            // if the permission has a separator char on the end,
+//            // it means the codebase is a directory, and we need
+//            // to add an additional permission to read recursively
+//            String path = p.getName();
+//            if (path.endsWith(File.separator)) {
+//                path += "-";
+//                p = new FilePermission(path, SecurityConstants.FILE_READ_ACTION);
+//            }
+//        } else if ((p == null) && (url.getProtocol().equals("file"))) {
+//            String path = url.getFile().replace('/', File.separatorChar);
+//            path = ParseUtil.decode(path);
+//            if (path.endsWith(File.separator))
+//                path += "-";
+//            p =  new FilePermission(path, SecurityConstants.FILE_READ_ACTION);
+//        } else {
+//            /**
+//             * Not loading from a 'file:' URL so we want to give the class
+//             * permission to connect to and accept from the remote host
+//             * after we've made sure the host is the correct one and is valid.
+//             */
+//            URL locUrl = url;
+//            if (urlConnection instanceof JarURLConnection) {
+//                locUrl = ((JarURLConnection)urlConnection).getJarFileURL();
+//            }
+//            String host = locUrl.getHost();
+//            if (host != null && (host.length() > 0))
+//                p = new SocketPermission(host,
+//                                         SecurityConstants.SOCKET_CONNECT_ACCEPT_ACTION);
+//        }
+//
+//        // make sure the person that created this class loader
+//        // would have this permission
+//
+//        if (p != null) {
+//            final SecurityManager sm = System.getSecurityManager();
+//            if (sm != null) {
+//                final Permission fp = p;
+//                AccessController.doPrivileged(new PrivilegedAction<Void>() {
+//                    @Override
+//					public Void run() throws SecurityException {
+//                        sm.checkPermission(fp);
+//                        return null;
+//                    }
+//                }, acc);
+//            }
+//            perms.add(p);
+//        }
+//        return perms;
+//    }
 
     /**
      * Creates a new instance of URLClassLoader for the specified
@@ -732,15 +746,16 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
     public static URLClassLoader newInstance(final URL[] urls,
                                              final ClassLoader parent) {
         // Save the caller's context
-        final AccessControlContext acc = AccessController.getContext();
-        // Need a privileged block to create the class loader
-        URLClassLoader ucl = AccessController.doPrivileged(
-            new PrivilegedAction<URLClassLoader>() {
-                public URLClassLoader run() {
-                    return new FactoryURLClassLoader(urls, parent, acc);
-                }
-            });
-        return ucl;
+//        final AccessControlContext acc = AccessController.getContext();
+//        // Need a privileged block to create the class loader
+//        URLClassLoader ucl = AccessController.doPrivileged(
+//            new PrivilegedAction<URLClassLoader>() {
+//                @Override
+//				public URLClassLoader run() {
+                    return new FactoryURLClassLoader(urls, parent);//, acc);
+//                }
+//            });
+//        return ucl;
     }
 
     /**
@@ -757,27 +772,29 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
      */
     public static URLClassLoader newInstance(final URL[] urls) {
         // Save the caller's context
-        final AccessControlContext acc = AccessController.getContext();
-        // Need a privileged block to create the class loader
-        URLClassLoader ucl = AccessController.doPrivileged(
-            new PrivilegedAction<URLClassLoader>() {
-                public URLClassLoader run() {
-                    return new FactoryURLClassLoader(urls, acc);
-                }
-            });
-        return ucl;
+//        final AccessControlContext acc = AccessController.getContext();
+//        // Need a privileged block to create the class loader
+//        URLClassLoader ucl = AccessController.doPrivileged(
+//            new PrivilegedAction<URLClassLoader>() {
+//                @Override
+//				public URLClassLoader run() {
+                    return new FactoryURLClassLoader(urls);//acc);
+//                }
+//            });
+//        return ucl;
     }
 
-    static {
-        sun.misc.SharedSecrets.setJavaNetAccess (
-            new sun.misc.JavaNetAccess() {
-                public URLClassPath getURLClassPath (URLClassLoader u) {
-                    return u.ucp;
-                }
-            }
-        );
-        ClassLoader.registerAsParallelCapable();
-    }
+//    static {
+//        sun.misc.SharedSecrets.setJavaNetAccess (
+//            new sun.misc.JavaNetAccess() {
+//                @Override
+//				public URLClassPath getURLClassPath (URLClassLoader u) {
+//                    return u.ucp;
+//                }
+//            }
+//        );
+//        ClassLoader.registerAsParallelCapable();
+//    }
 }
 
 final class FactoryURLClassLoader extends URLClassLoader {
@@ -786,27 +803,31 @@ final class FactoryURLClassLoader extends URLClassLoader {
         ClassLoader.registerAsParallelCapable();
     }
 
-    FactoryURLClassLoader(URL[] urls, ClassLoader parent,
-                          AccessControlContext acc) {
-        super(urls, parent, acc);
+    FactoryURLClassLoader(URL[] urls, ClassLoader parent
+    		//, AccessControlContext acc
+                          ) {
+        super(urls, parent);//, acc);
     }
 
-    FactoryURLClassLoader(URL[] urls, AccessControlContext acc) {
-        super(urls, acc);
+    FactoryURLClassLoader(URL[] urls) {//, AccessControlContext acc) {
+        super(urls);//, acc);
     }
 
-    public final Class<?> loadClass(String name, boolean resolve)
+    @Override
+	public final Class<?> loadClass(String name, boolean resolve)
         throws ClassNotFoundException
     {
-        // First check if we have permission to access the package. This
-        // should go away once we've added support for exported packages.
-        SecurityManager sm = System.getSecurityManager();
-        if (sm != null) {
-            int i = name.lastIndexOf('.');
-            if (i != -1) {
-                sm.checkPackageAccess(name.substring(0, i));
-            }
-        }
-        return super.loadClass(name, resolve);
+    	// Can't load classes from JAR files in SwingJS
+    	return null;
+//        // First check if we have permission to access the package. This
+//        // should go away once we've added support for exported packages.
+//        SecurityManager sm = System.getSecurityManager();
+//        if (sm != null) {
+//            int i = name.lastIndexOf('.');
+//            if (i != -1) {
+//                sm.checkPackageAccess(name.substring(0, i));
+//            }
+//        }
+//        return super.loadClass(name, resolve);
     }
 }

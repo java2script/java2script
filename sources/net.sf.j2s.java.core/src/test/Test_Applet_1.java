@@ -30,8 +30,19 @@ public class Test_Applet_1 extends JApplet implements AdjustmentListener, Proper
 
 	int ipt;
 
+	int width = 300;
+	
+	public int getWidth() {
+		return width;
+	}
 	@Override
 	public void init() {
+		setSize(500,500);
+		System.out.println(getWidth());
+		System.out.println(getSize());
+		System.out.println(getBounds());
+		System.out.println(getBounds(null));
+		System.out.println(width);
 		JScrollBar bar = new JScrollBar(JScrollBar.HORIZONTAL);
 		bar.addAdjustmentListener(this);
 		bar.addPropertyChangeListener(this);

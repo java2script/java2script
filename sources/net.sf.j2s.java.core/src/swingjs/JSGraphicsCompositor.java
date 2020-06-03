@@ -2,7 +2,6 @@ package swingjs;
 
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
@@ -17,7 +16,6 @@ import java.awt.image.RescaleOp;
 import java.awt.image.WritableRaster;
 
 import sun.awt.image.SunWritableRaster;
-import swingjs.api.js.DOMNode;
 
 public class JSGraphicsCompositor {
 
@@ -116,15 +114,7 @@ public class JSGraphicsCompositor {
 	 */
 	public static boolean drawImageOp(JSGraphics2D g, BufferedImage img,
 			BufferedImageOp op, int x, int y) {
-		int type = 0;
-		/**
-		 * @j2sNative
-		 * 
-		 *            type = op.swingJStype;
-		 * 
-		 */
-		{
-		}
+		int type = /** @j2sNative op.swingJStype || */0;
 		switch (type) {
 
 		case 'R':
@@ -141,7 +131,7 @@ public class JSGraphicsCompositor {
 					}
 			if (canDo) {
 				g.setAlpha(scaleFactors[3]);
-				g.drawImageFromRaster(img, x, y, null);
+				g.drawImageFromPixelsOrRaster(img, x, y, null);
 				g.setAlpha(1);
 				return true;
 			}
@@ -292,36 +282,5 @@ public class JSGraphicsCompositor {
 	private static int lookupByteBI(BufferedImage src, BufferedImage dst, byte[][] table) {
 		// SwingJS TODO
 		return 0;
-	}
-	
-	/**
-	 * Get or create a DOM image node, as needed.
-	 * Images could be from:
-	 * 
-	 * a) java.awt.Toolkit.createImage()
-	 * b) javax.imageio.ImageIO.read()
-	 * c) new java.awt.BufferedImage()
-	 * 
-	 * 
-	 *  
-	 * @param img
-	 * @return
-	 */
-	public static DOMNode createImageNode(Image img) {
-	  JSImage jsi = (JSImage) img;
-	  DOMNode imgNode = (DOMNode) jsi.秘imgNode;
-		if (imgNode == null && img instanceof BufferedImage) {
-			int w = jsi.getWidth();
-			int h = jsi.getHeight();
-			DOMNode canvas = (DOMNode) jsi.秘canvas;
-			if (canvas == null) {
-				img.getGraphics();
-				canvas = (DOMNode) jsi.秘canvas;
-			}
-			imgNode = canvas;
-			DOMNode.setSize(imgNode,  w,  h);
-		  // note: images created some other way are presumed to have int[] pix defined and possibly byte[pix]
-		}
-		return imgNode;
 	}
 }

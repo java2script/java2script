@@ -121,7 +121,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 			super.processKeyEvent(e, path, m);
 		}
 	};
-
+	
 	int nAction = 0;
 
 	ActionListener listener = new ActionListener() {
@@ -197,6 +197,27 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
 		menu = new JMenu("TESTING");
+		
+		menu.addMenuListener(new MenuListener() {
+
+			@Override
+			public void menuSelected(MenuEvent e) {
+				System.out.println("menu MenuListener sel " + e);
+			}
+
+			@Override
+			public void menuDeselected(MenuEvent e) {
+				System.out.println("menu MenuListener des " + e);
+			}
+
+			@Override
+			public void menuCanceled(MenuEvent e) {
+				System.out.println("menu MenuListener can " + e);
+			}
+				
+			});
+
+
 		menu1 = new JMenu("testing1");
 		menu2 = new JMenu("testing2");
 		menu.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -590,6 +611,27 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		mRight.add(cb6m);
 		mRight.add(rb1m);
 //		mRight.addMenuListener(this);
+
+		
+		 mRight.addMenuListener(new MenuListener() {
+
+			@Override
+			public void menuSelected(MenuEvent e) {
+				System.out.println("mRight MenuListener sel " + e);
+			}
+
+			@Override
+			public void menuDeselected(MenuEvent e) {
+				System.out.println("mRight MenuListener des " + e);
+			}
+
+			@Override
+			public void menuCanceled(MenuEvent e) {
+				System.out.println("mRight MenuListener can " + e);
+			}
+				
+			});
+
 
 		btn = new JMenuItem("-");
 		btn.setFont(font);

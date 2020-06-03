@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.JSComponent;
 import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -41,6 +42,7 @@ import swingjs.api.js.HTML5Applet;
 import swingjs.api.js.J2SInterface;
 import swingjs.api.js.JQuery;
 import swingjs.json.JSON;
+import swingjs.plaf.JSComponentUI;
 import swingjs.plaf.JSFrameUI;
 
 public class JSUtil implements JSUtilI {
@@ -128,8 +130,10 @@ public class JSUtil implements JSUtilI {
 		if (isFile) {
 			byte[] bytes = /** @j2sNative uriOrJSFile.秘bytes || */
 					null;
-			if (bytes != null)
+			if (bytes != null) {
+				setFileBytesStatic(uriOrJSFile, bytes);
 				return bytes;
+			}
 			if (((File) uriOrJSFile).秘isTempFile)
 				return getCachedFileData(uri, true);
 			uri = J2S.getResourcePath(uri, true);
@@ -160,8 +164,11 @@ public class JSUtil implements JSUtilI {
 			}
 			// bypasses AjaxURLConnection
 			data = J2S.getFileData(uri, fWhenDone, false, asBytes);
-			if (data == null)
+			if (data == null) {
 				removeCachedFileData(uri);
+			} else if (data instanceof byte[]) {
+				setFileBytesStatic(uriOrJSFile, data);
+			}
 
 		}
 		return data;
@@ -241,17 +248,18 @@ public class JSUtil implements JSUtilI {
 		if (data == null || data == Boolean.FALSE)
 			return null;
 		byte[] b = null;
-		if (data instanceof byte[])
+		if (data instanceof byte[]) {
 			b = (byte[]) data;
-		else if (data instanceof String) 
+		} else if (data instanceof String) { 
 			b = ((String) data).getBytes();
-		else if (data instanceof SB)
+		} else if (data instanceof SB) {
 			b = Rdr.getBytesFromSB((SB) data);
-		else if (data instanceof InputStream)
+		} else if (data instanceof InputStream) {
 			try {
 				b = Rdr.getLimitedStreamBytes((InputStream) data, -1);
 			} catch (IOException e) {
 			}
+		}
 		return AU.ensureSignedBytes(b);
 	}
 
@@ -388,7 +396,7 @@ public class JSUtil implements JSUtilI {
 	static String processCSS(String css, String path) {
 		if (path != null && css.indexOf("images/") >= 0) {
 			path = path.substring(0, path.lastIndexOf("/") + 1) + "images/";
-			css = PT.rep(css, "images/", path);
+			css = css.replaceAll("images/", path);
 		}
 		jQuery.$("head").append(jQuery.$("<style type='text/css'>" + css + "</style>"));
 	return css;
@@ -577,7 +585,7 @@ public class JSUtil implements JSUtilI {
 		String region, country, variant;
 		if (language == null)
 			language = J2S.getDefaultLanguage(true);
-		language = language.replace('-','_');
+		language = language.replaceAll("-","_");
 		if (language == null || language.length() == 0 || language.equalsIgnoreCase("en"))
 			language = "en_US";
 		int i = language.indexOf('_');
@@ -947,7 +955,21 @@ public class JSUtil implements JSUtilI {
 	}
 
 	@Override
+	public Object getAppletInfo(String infoKey) {
+		@SuppressWarnings("unused")
+		HTML5Applet applet = getApplet();
+		/** @j2sNative
+		 * 
+		 * var val = applet.__Info[infoKey];
+		 * return (val == null ? null : val);
+		 */ {
+			 return null;
+		 	}
+	}
+
+	@Override
 	public void setAppletInfo(String infoKey, Object val) {
+		@SuppressWarnings("unused")
 		HTML5Applet applet = getApplet();
 		/** @j2sNative
 		 * 
@@ -965,16 +987,45 @@ public class JSUtil implements JSUtilI {
 		}
 	}
 
+	public static String getAppletCodePath() {
+		try {
+			JSFrameViewer ap = (JSFrameViewer) DOMNode.getAttr(getApplet(), "_appletPanel");
+			return ap.appletCodeBase;
+		} catch (Throwable t) {
+			return null;
+		}
+	}
+	
+	/**
+	 * Note that the document path INCLUDES the complete URL for the page, not just the directory.
+	 * @return
+	 */
+	public static String getAppletDocumentPath() {
+		try {
+			JSFrameViewer ap = (JSFrameViewer) DOMNode.getAttr(getApplet(), "_appletPanel");
+			if (ap == null)
+				return null;
+			String path = ap.appletDocumentBase;
+			// File will return ./file:///xxx; url will return file:/C:/...
+			return new URL(new File(path).getParent().substring(2)).toString();
+		} catch (Throwable t) {
+			return null;
+		}
+	}
+	
+
 	@Override
 	public URL getCodeBase() {
 		JSFrameViewer ap = (JSFrameViewer) this.getAppletAttribute("_appletPanel");
+		if (ap == null)
+			return null;
 		try {
 			return new URL(ap.appletCodeBase);
 		} catch (MalformedURLException e) {
 			return null;
 		}
 	}
-
+	
 	  /**
 	   * Switch the flag in SwingJS to use or not use the JavaScript Map object in
 	   * Hashtable, HashMap, and HashSet. Default is enabled.
@@ -1058,6 +1109,11 @@ public class JSUtil implements JSUtilI {
 	@Override
 	public void showStatus(String msg, boolean doFadeOut) {
 		J2S.showStatus(msg, doFadeOut);
+	}
+
+	@Override
+	public void setUIEnabled(JComponent jc, boolean enabled) {
+		((JSComponentUI) jc.getUI()).setUIDisabled(!enabled);
 	}
 
 }

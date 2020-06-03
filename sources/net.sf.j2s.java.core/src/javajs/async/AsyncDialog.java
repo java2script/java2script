@@ -63,6 +63,8 @@ public class AsyncDialog implements PropertyChangeListener {
 	private ActionListener actionListener;
 	private Object choice;
 	private Object[] options;
+	private Object value;
+	private boolean wantsInput;
 
 	// These options can be supplemented as desired.
 
@@ -81,6 +83,7 @@ public class AsyncDialog implements PropertyChangeListener {
 
 	public void showInputDialog(Component frame, Object message, ActionListener a) {
 		setListener(a);
+		wantsInput = true;
 		process(JOptionPane.showInputDialog(frame, message));
 		unsetListener();
 	}
@@ -88,6 +91,7 @@ public class AsyncDialog implements PropertyChangeListener {
 	public void showInputDialog(Component frame, Object message, String title, int messageType, Icon icon,
 			Object[] selectionValues, Object initialSelectionValue, ActionListener a) {
 		setListener(a);
+		wantsInput = true;
 		process(JOptionPane.showInputDialog(frame, message, title, messageType, icon, selectionValues,
 				initialSelectionValue));
 		unsetListener();
@@ -214,21 +218,21 @@ public class AsyncDialog implements PropertyChangeListener {
 	 */
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		Object val = evt.getNewValue();
+		value = evt.getNewValue();
 		switch (evt.getPropertyName()) {
 		case "inputValue":			
-			process(val);
+			process(value);
 			break;
 		case "value":
-			if (val != null && options == null && !(val instanceof Integer)) {
-				process(getOptionIndex(((JOptionPane) evt.getSource()).getOptions(), val));
+			if (value != null && options == null && !(value instanceof Integer)) {
+				process(getOptionIndex(((JOptionPane) evt.getSource()).getOptions(), value));
 				return;
 			}
 			if (options != null) {
-				int i = getOptionIndex(options, val);
-				val = Integer.valueOf(i >= 0 ? i : JOptionPane.CLOSED_OPTION);
+				int i = getOptionIndex(options, value);
+				value = Integer.valueOf(i >= 0 ? i : JOptionPane.CLOSED_OPTION);
 			} 
-			process(val);
+			process(value);
 			break;
 		}
 	}
@@ -242,6 +246,13 @@ public class AsyncDialog implements PropertyChangeListener {
 		return -1;
 	}
 
+	public Object getValue() {
+		if (wantsInput || options == null)
+			return value;
+		int val = ((Integer) value).intValue();
+		return (val < 0 ? null : options[val]);
+	}
+	
 	private boolean processed;
 
 	/**

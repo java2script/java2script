@@ -52,7 +52,7 @@ public class Test_Ints extends Test_ {
 	private final static int ALT = 16;
 	
 	public static void main(String[] args) {
-
+		
 		System.out.println(0xffffffffffffffffL);
 		
 		System.out.println(Integer.MAX_VALUE);

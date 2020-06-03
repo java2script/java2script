@@ -262,7 +262,6 @@ public class ListDemoAWT extends Panel {
 		frame.setVisible(true);
 		demo.checkPeer();
 		
-		
 	}
 
 	private void checkPeer() {

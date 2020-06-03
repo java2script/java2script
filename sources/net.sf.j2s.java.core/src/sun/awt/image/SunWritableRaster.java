@@ -47,10 +47,6 @@ import sun.java2d.StateTrackableDelegate;
  */
 public class SunWritableRaster extends WritableRaster {
 
-	// temporary only, until we figure out how to do this.
-
-	public int[] 秘pix;
-
 	private static DataStealer stealer;
 
 	private static DataStealer getStealer() {
@@ -82,14 +78,14 @@ public class SunWritableRaster extends WritableRaster {
 		} : stealer);
 	}
 
-//	// SwingJS had to extract DataStealer interface to top level
-//
-//	public static void setDataStealer(DataStealer ds) {
-//		if (stealer != null) {
-//			throw new InternalError("Attempt to set DataStealer twice");
-//		}
-//		stealer = ds;
-//	}
+	// SwingJS had to extract DataStealer interface to top level
+
+	public static void setDataStealer(DataStealer ds) {
+		if (stealer != null) {
+			throw new InternalError("Attempt to set DataStealer twice");
+		}
+		stealer = ds;
+	}
 
 	// SwingJS had to switch stealer to getStealer()
 	public static byte[] stealData(DataBufferByte dbb, int bank) {

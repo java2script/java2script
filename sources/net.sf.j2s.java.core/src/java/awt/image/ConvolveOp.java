@@ -214,7 +214,7 @@ public class ConvolveOp implements BufferedImageOp, RasterOp {
         	if (origDst != dst) {
             Graphics2D g = origDst.createGraphics();
             try {
-                ((JSGraphics2D)(Object)g).drawImageFromRaster(dst, 0, 0, null);
+                ((JSGraphics2D)(Object)g).drawImageFromPixelsOrRaster(dst, 0, 0, null);
             } finally {
                 g.dispose();
             }

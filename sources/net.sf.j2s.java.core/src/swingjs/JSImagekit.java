@@ -14,6 +14,7 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.ImageConsumer;
+import java.awt.image.MemoryImageSource;
 import java.awt.image.WritableRaster;
 import java.nio.file.Path;
 
@@ -73,6 +74,10 @@ public class JSImagekit implements ImageConsumer {
 	
 	@Override
 	public void imageComplete(int status) {
+		MemoryImageSource m; // just an Eclipse tag so we can find this reference;
+		// note that this image is LIVE, meaning the ImageProducer can 
+		// use newPixels() to update it.
+
 		// from MemoryImageSource.newPixels()
 		// 
 		// meaning: "The pixels are ready, so make the image now"
@@ -80,9 +85,9 @@ public class JSImagekit implements ImageConsumer {
 		//TODO: not considering pixelbytes
 		//
 		if (pixels != null)
-			jsimage = new JSImage(pixels, width, height, null);
+			jsimage = new JSImage(pixels, width, height, null, BufferedImage.TYPE_INT_ARGB);
 		else
-			jsimage = new JSImage(pixelBytes, width, height, null);
+			jsimage = new JSImage(pixelBytes, width, height, null, BufferedImage.TYPE_INT_ARGB);
   }
 
 	public Image getCreatedImage() {
@@ -166,7 +171,7 @@ public class JSImagekit implements ImageConsumer {
 			// this is from Component.createImage();
 			w = imageoffset;
 			h = imagelength;
-		} else if (imageType == VIDEO){
+		} else if (imageType == VIDEO) {
 			b = data;
 			w = imageoffset;
 			h = imagelength;
@@ -226,7 +231,8 @@ public class JSImagekit implements ImageConsumer {
 		}
 		if (w == 0 || h == 0)
 			return null;
-		JSImage jsimage = new JSImage(argb, w, h, name);
+		JSImage jsimage = new JSImage(argb, w, h, name,
+				imageType == VIDEO ? BufferedImage.TYPE_HTML5_VIDEO : BufferedImage.TYPE_INT_ARGB);
 		if (data != null && argb == null)
 			jsimage.setImageNode(null, b, type);
 		return jsimage;
@@ -285,23 +291,14 @@ public class JSImagekit implements ImageConsumer {
 			imgIcon = new ImageIcon(img, "paintedIcon");
 		}
 		icon.paintIcon(c, (Graphics)(Object) g, 0, 0);
-		img.setImageFromHTML5Canvas(g);
+		img.秘setImageFromHTML5Canvas(g);
 		g.dispose();
 		((ImageIcon) icon).秘tempIcon = imgIcon;
 		return imgIcon;
 	}
 
 	public static JSGraphics2D createCanvasGraphics(int width, int height, String id) {
-		HTML5Canvas canvas = (HTML5Canvas) DOMNode.createElement("canvas", (id == null ? "img" + Math.random() : id + ""));
-		DOMNode.setStyles(canvas, "width", width + "px", "height", height + "px");
-		/**
-		 * @j2sNative
-		 * 
-		 * canvas.width = width;
-		 * canvas.height = height;
-		 * 
-		 */
-		return new JSGraphics2D(canvas);
+		return new JSGraphics2D(HTML5Canvas.createCanvas(width, height, id));
 	}
 
 	public Image createVideo(Path path) {
@@ -310,13 +307,19 @@ public class JSImagekit implements ImageConsumer {
 			bytes = (byte[]) JSUtil.getCachedFileData(path.toString(), true);
 		if (bytes != null)
 			JSUtil.setFileBytesStatic(path, bytes);
-		JSImage jsimage = new JSImage(bytes, 1, 1, path.toString());
+		JSImage jsimage = new JSImage(bytes, 1, 1, path.toString(), BufferedImage.TYPE_HTML5_VIDEO);
 		jsimage.setImageNode((JSPath) path, bytes, "video");
 		return jsimage;
 	}
 
 	public Image createVideo(byte[] bytes) {
 		return createImageFromBytesStatic(bytes, 1, 1, null, VIDEO);
+	}
+
+	public static Object getDataBlob(byte[] b, String type) {
+		if (type == null)
+			return (/** @j2sNative URL.createObjectURL(new Blob([b])) || */null);
+		return (/** @j2sNative URL.createObjectURL(new Blob([b], {type:type})) || */null);
 	}
 
 

@@ -70,7 +70,7 @@ public final class DataBufferInt extends DataBuffer {
 	 *          The size of the <CODE>DataBuffer</CODE>.
 	 */
 	public DataBufferInt(int size) {
-		super(STABLE, TYPE_INT, size);
+		super(/*?*/UNTRACKABLE, TYPE_INT, size);
 		data = new int[size];
 		bankdata = new int[1][];
 		bankdata[0] = data;
@@ -86,7 +86,7 @@ public final class DataBufferInt extends DataBuffer {
 	 *          The number of banks in the a<CODE>DataBuffer</CODE>.
 	 */
 	public DataBufferInt(int size, int numBanks) {
-		super(STABLE, TYPE_INT, size, numBanks);
+		super(/*?*/UNTRACKABLE, TYPE_INT, size, numBanks);
 		bankdata = new int[numBanks][];
 		for (int i = 0; i < numBanks; i++) {
 			bankdata[i] = new int[size];
@@ -209,7 +209,7 @@ public final class DataBufferInt extends DataBuffer {
 	 * @return The first integer data array.
 	 */
 	public int[] getData() {
-		theTrackable.setUntrackable();
+		秘setUntrackable();
 		return data;
 	}
 
@@ -226,7 +226,7 @@ public final class DataBufferInt extends DataBuffer {
 	 * @return The data array for the specified bank.
 	 */
 	public int[] getData(int bank) {
-		theTrackable.setUntrackable();
+		秘setUntrackable();
 		return bankdata[bank];
 	}
 
@@ -241,7 +241,7 @@ public final class DataBufferInt extends DataBuffer {
 	 * @return All of the data arrays.
 	 */
 	public int[][] getBankData() {
-		theTrackable.setUntrackable();
+		秘setUntrackable();
 		return (int[][]) bankdata.clone();
 	}
 

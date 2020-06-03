@@ -6,14 +6,14 @@ var C$=Clazz.newClass(java.util.regex,"Pattern",function(){
   Clazz.newInstance(this,arguments);
 });
 
-C$.$clinit$ = function() {delete C$.$clinit$;Clazz.load(C$, 1);}
+C$.$clinit$ = 2;
 
 Clazz.newMeth(C$,"$init$", function(){
   this.$flags=0;
   this.regexp=null;
 }, 1);
 
-Clazz.newMeth(C$,"$c", function(){
+Clazz.newMeth(C$,"c$", function(){
   C$.$init$.apply(this);
 }, 1);
 

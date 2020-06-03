@@ -1154,6 +1154,11 @@ var addProfileNew = function(c, t) {
 	  s += "[]";
 	  t = 0;
   }
+  if (J2S._traceOutput && (s.indexOf(J2S._traceOutput) >= 0 || '"' + s + '"' == J2S._traceOutput)) {
+    alert(s + "\n\n" + Clazz._getStackTrace());
+    doDebugger();
+  }
+
   var p = _profileNew[s]; 
   p || (p = _profileNew[s] = [0,0]);
   p[0]++;
@@ -3682,7 +3687,14 @@ function(i){
 
 m$(Integer,"parseInt$S$I",
 function(s,radix){
- var v = parseInt(s, radix);
+ var v = (s.indexOf(".") >= 0 ? NaN : parseInt(s, radix));
+ if (!isNaN(v)) {
+	 // check for trailing garbage
+	 var v1 = parseInt(s + "1", radix);
+	 if (v1 == v)
+		 v = NaN;
+ }
+
  if (isNaN(v) || v < minInt || v > maxInt){
 	throw Clazz.new_(NumberFormatException.c$$S, ["parsing " + s + " radix " + radix]);
  }
@@ -3691,6 +3703,9 @@ return v;
 
 m$(Integer,"parseInt$S",
 function(s){
+	var v = +s;
+	if (isNaN(v))
+		s= "?" + s; // just to ensure it gets trapped
 return Integer.parseInt$S$I(s, 10);
 }, 1);
 
@@ -4580,25 +4595,36 @@ CharSequence.$defaults$(String);
 sp.compareToIgnoreCase$S = function(str) { return String.CASE_INSENSITIVE_ORDER.compare$S$S(this, str);}
 
 sp.replace$ = function(c1,c2){
-  if (c1 == c2 || this.indexOf (c1) < 0) return "" + this;
+  if (c1 == c2 || this.indexOf(c1) < 0) return "" + this;
   if (c1.length == 1) {
     if ("\\$.*+|?^{}()[]".indexOf(c1) >= 0)   
       c1 = "\\" + c1;
   } else {    
-    c1=c1.replace(/([\\\$\.\*\+\|\?\^\{\}\(\)\[\]])/g,function($0,$1){
-      return "\\"+$1;
-    });
+    c1=c1.replace(/([\\\$\.\*\+\|\?\^\{\}\(\)\[\]])/g,function($0,$1){return "\\"+$1;});
   }
   return this.replace(new RegExp(c1,"gm"),c2);
 };
 
-sp.replaceAll$S$S=sp.replaceAll$CharSequence$CharSequence=function(exp,str){
-var regExp=new RegExp(exp,"gm");
-return this.replace(regExp,str);
+// experimental -- only marginally faster:
+var reCache = new Map();
+sp.replace2$ = function(c1,c2){
+	  if (c1 == c2 || this.indexOf(c1) < 0) return "" + this;
+	  var re;
+	  if (c1.length == 1) {
+		re = reCache.get(c1);
+		re || reCache.set(c1, re = new RegExp("\\$.*+|?^{}()[]".indexOf(c1) == 0 ? "\\" + c1 : c1, 'gm'));
+	  } else {    
+	    re = new RegExp(c1.replace(/([\\\$\.\*\+\|\?\^\{\}\(\)\[\]])/g,function($0,$1){return "\\"+$1;}), 'gm');
+	  }
+	  return this.replace(re,c2);
+};
+
+// fastest:
+sp.replaceAll$=sp.replaceAll$S$S=sp.replaceAll$CharSequence$CharSequence=function(exp,str){
+return this.replace(new RegExp(exp,"gm"),str);
 };
 sp.replaceFirst$S$S=function(exp,str){
-var regExp=new RegExp(exp,"m");
-return this.replace(regExp,str);
+return this.replace(new RegExp(exp,"m"),str);
 };
 sp.matches$S=function(exp){
 if(exp!=null){

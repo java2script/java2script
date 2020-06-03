@@ -1073,4 +1073,17 @@ class ThreadGroup implements Thread.UncaughtExceptionHandler {
 		g.秘html5Applet = 秘html5Applet;
 		g.秘timerQueue = 秘timerQueue;
 	}
+
+	public JSAppletViewer 秘getAppletViewer() {
+		JSAppletViewer a = this.秘appletViewer;
+		if (a == null) {
+			/**
+			 * @j2sNative
+			 * 
+			 * 			a = this.秘html5Applet._appletPanel;
+			 */
+			this.秘appletViewer = a;
+		}
+		return a;
+	}
 }

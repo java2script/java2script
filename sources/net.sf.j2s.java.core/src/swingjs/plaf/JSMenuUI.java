@@ -6,10 +6,12 @@ import java.beans.PropertyChangeEvent;
 
 import javax.swing.JComponent;
 import javax.swing.JMenu;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 
 import swingjs.api.js.DOMNode;
 
-public class JSMenuUI extends JSMenuItemUI {
+public class JSMenuUI extends JSMenuItemUI implements MenuListener {
 
 	private JMenu jm;
 
@@ -57,6 +59,8 @@ public class JSMenuUI extends JSMenuItemUI {
 	@Override
 	public void propertyChangedFromListener(PropertyChangeEvent e, String prop) {
 		// System.out.println("JSMenuUI prop = " + prop + " " + jm.getText());
+		if (jc.getTopLevelAncestor() != null)
+			updateDOMNode(); // font changes 
 		super.propertyChangedFromListener(e, prop);
 	}
 
@@ -86,6 +90,7 @@ public class JSMenuUI extends JSMenuItemUI {
 	public void installUI(JComponent jc) {
 		jm = (JMenu) jc;
 		super.installUI(jc);
+		jm.addMenuListener(this);
 		((JMenu) menuItem).setDelay(200);
 	}
 
@@ -121,6 +126,24 @@ public class JSMenuUI extends JSMenuItemUI {
 	@Override
 	protected String getPropertyPrefix() {
 		return "Menu";
+	}
+
+	@Override
+	public void menuSelected(MenuEvent e) {
+		if (jm.isTopLevelMenu())
+		jm.setPopupMenuVisible(true);		
+	}
+
+	@Override
+	public void menuDeselected(MenuEvent e) {
+		if (jm.isTopLevelMenu())
+		jm.setPopupMenuVisible(false);		
+	}
+
+	@Override
+	public void menuCanceled(MenuEvent e) {
+		if (jm.isTopLevelMenu())
+		jm.setPopupMenuVisible(false);		
 	}
 
 }

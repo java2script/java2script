@@ -23,6 +23,7 @@ import java.util.Map.Entry;
 import static java.lang.String.format
 ;
 class Test_Class extends Test_Class2<Integer> {
+
 	Test_Class(byte[]...d) { 
 		super(d);
 		
@@ -311,8 +312,13 @@ class Test_Class extends Test_Class2<Integer> {
 	
 	public static void main(String[] args) {
 		
+	    float specversion = Float.parseFloat(
+	                    System.getProperty("java.specification.version"));
+
 		System.out.println(System.getProperty("screen"));
-		
+
+		System.out.println(Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+
 		// tricky situation where a parameter changes a value that is also changed by the static initializer of a class:
 		boolean test1 = false;
 		if (test1) {

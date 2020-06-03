@@ -60,6 +60,9 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 		// JApplet, JDialog, JFrame (including JInternalFrame), JRootPane, JWindow
 		isFrame = true;
 		top = c;
+		if (((JSComponent) top).秘appletViewer == null) {
+			((JSComponent) top).秘appletViewer = Thread.currentThread().getThreadGroup().秘getAppletViewer();
+		}
 		appletViewer = ((JSComponent)top).秘appletViewer;
 		if (c instanceof JApplet)
 			applet = (JApplet) c;

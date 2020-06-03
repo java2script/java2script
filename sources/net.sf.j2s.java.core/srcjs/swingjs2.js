@@ -10969,7 +10969,7 @@ window.J2S = J2S = (function() {
 	}
 
 	var fixProtocol = function(url) {
-		if (url.indexOf("file://") >= 0)
+		if (!J2S._isFile && url.indexOf("file://") >= 0)
 			url = "http" + url.substring(4);
 		// force https if page is https
 		if (J2S._httpProto == "https://" && url.indexOf("http://") == 0)
@@ -11546,7 +11546,8 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 			fileName = fileName.substring(10);
 		else if (fileName.indexOf("http://./") == 0)
 			fileName = fileName.substring(9);
-		else if (fileName.indexOf("file:") >= 0)
+		else if (fileName.indexOf("file:/") >= 0 
+				&& fileName.indexOf(J2S.thisApplet.__Info.j2sPath) != 0)
 			fileName = "./" + fileName.substring(5);
 		isBinary = (isBinary || J2S.isBinaryUrl(fileName));
 		var isPDB = (fileName.indexOf("pdb.gz") >= 0 && fileName
@@ -11622,7 +11623,7 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 	}
 
 	J2S._xhrReturn = function(xhr) {
-		if (xhr.state() == "rejected")
+		if (xhr.state() == "rejected" && !xhr.responseText)
 			return null;
 		if (!xhr.responseText && !xhr.responseJSON 
 				|| Clazz.instanceOf(xhr.response, self.ArrayBuffer)) {
@@ -12369,7 +12370,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	});
 	
 	J2S.$bind('body', 'mouseup touchend', function(ev) {
-		mouseup(null, ev);
+		mouseUp(null, ev);
 		return true;
 	});
 
@@ -12386,7 +12387,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		return handled;
 	};
 
-	var mouseup = function(who, ev) {
+	var mouseUp = function(who, ev) {
 		if (J2S._traceMouse)
 			J2S.traceMouse(who,"UP", ev);
 
@@ -12451,67 +12452,64 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		].join().replace(":,",":"));
 	}
 
-	J2S.setMouse = function(who, isSwingJS) {
-		// swingjs.api.J2SInterface
-
-
-		J2S.$bind(who, (J2S._haveMouse ? 'mousemove' : 'mousemove touchmove'), function(ev) { 
-
-			// ignore touchmove if J2S._haveMouse
-			
-			if (ev.type == "touchmove" && 
-					(J2S._firstTouch || J2S._haveMouse)) {
-				return;
-			}
-			
-			if (J2S._dmouseOwner) {
-				if (J2S._dmouseDrag)
-					J2S._dmouseDrag(ev);
-				else
-					J2S._dmouseOwner = null;
-			}
-			
-			if (J2S._traceMouseMove)
-				J2S.traceMouse(who, "MOVE", ev);
-
-			if (doIgnore(ev))
-				return true;
-
-			if (ev.target.getAttribute("role")) {
-				return true;
-			}
-
-			// defer to console or menu when dragging within this who
-
-			if (J2S._mouseOwner && J2S._mouseOwner != who
-					&& J2S._mouseOwner.isDragging) {
-				if (!J2S._mouseOwner.mouseMove)
-					return true;
-				J2S._mouseOwner.mouseMove(ev);
-				return false;
-			}
-			return J2S._drag(who, ev, 503);
-		});
-
-		J2S.$bind(who, 'click', function(ev) {
-			if (J2S._traceMouse)
-				J2S.traceMouse(who,"CLICK", ev);
-
-			if (doIgnore(ev))
-				return true;
-			if (ev.target.getAttribute("role")) {
-				return true;
-			}
-
-			J2S.setMouseOwner(null);
-			var xym = getXY(who, ev, 0);
-			if (!xym)
-				return false;
-			who.applet._processEvent(500, xym, ev, who._frameViewer);// MouseEvent.MOUSE_CLICK
-			return true; // was false
-		});
+	var mouseMove = function(who, ev) {
+		// ignore touchmove if J2S._haveMouse
 		
-		J2S.$bind(who, 'DOMMouseScroll mousewheel', function(ev) { // Zoom
+		if (ev.type == "touchmove" && 
+				(J2S._firstTouch || J2S._haveMouse)) {
+			return;
+		}
+		
+		if (J2S._dmouseOwner) {
+			if (J2S._dmouseDrag)
+				J2S._dmouseDrag(ev);
+			else
+				J2S._dmouseOwner = null;
+		}
+		
+		if (J2S._traceMouseMove)
+			J2S.traceMouse(who, "MOVE", ev);
+
+		if (doIgnore(ev))
+			return true;
+
+		if (ev.target.getAttribute("role")) {
+			return true;
+		}
+
+		// defer to console or menu when dragging within this who
+
+		if (J2S._mouseOwner && J2S._mouseOwner != who
+				&& J2S._mouseOwner.isDragging) {
+			if (!J2S._mouseOwner.mouseMove)
+				return true;
+			J2S._mouseOwner.mouseMove(ev);
+			return false;
+		}
+		return J2S._drag(who, ev, 503);
+	}
+	
+	var mouseClick = function(who, ev) {
+		if (J2S._traceMouse)
+			J2S.traceMouse(who,"CLICK", ev);
+
+		if (doIgnore(ev))
+			return true;
+		if (ev.target.getAttribute("role")) {
+			return true;
+		}
+
+		J2S.setMouseOwner(null);
+		var xym = getXY(who, ev, 0);
+		if (!xym)
+			return false;
+		who.applet._processEvent(500, xym, ev, who._frameViewer);// MouseEvent.MOUSE_CLICK
+		return true; // was false
+	}
+	
+	var mouseWheel = function(who, ev) {
+		
+		// Zoom
 			// not for wheel event, or action will not take place on handle and
 			// track
 			// if (doIgnore(ev))
@@ -12541,128 +12539,148 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 				who.applet._processEvent(507, xym, ev, who._frameViewer);
 			}
 			return !!(ui || target);
-		});
 
-		J2S.$bind(who, (J2S._haveMouse ? 'mousedown' : 'mousedown touchstart'), function(ev) {
-			if (J2S._traceMouse)
-				J2S.traceMouse(who,"DOWN", ev);
+	}
+	
+	var mouseDown = function(who, ev) {
 
-			// If we have a mousedown on the applet, then disable touch; 
-			// otherwise, if J2S._firstTouch is undefined (!!x != x), set J2S._firstTouch
-			// and ignore future touch events (through the first touchend):
-			
-			if (ev.type == "mousedown") {
-			    J2S._haveMouse = true;
-			} else { 
-			    if (J2S._haveMouse) return;
-			    if (!!J2S._firstTouch != J2S._firstTouch) {
-				J2S._firstTouch = true;
-			        return;
-			    }
-			}
+		
+		if (J2S._traceMouse)
+			J2S.traceMouse(who,"DOWN", ev);
 
-			lastDragx = lastDragy = 99999;
+		// If we have a mousedown on the applet, then disable touch; 
+		// otherwise, if J2S._firstTouch is undefined (!!x != x), set J2S._firstTouch
+		// and ignore future touch events (through the first touchend):
+		
+		if (ev.type == "mousedown") {
+		    J2S._haveMouse = true;
+		} else { 
+		    if (J2S._haveMouse) return;
+		    if (!!J2S._firstTouch != J2S._firstTouch) {
+			J2S._firstTouch = true;
+		        return;
+		    }
+		}
 
-			if (doIgnore(ev))
-				return true;
+		lastDragx = lastDragy = 99999;
 
-			J2S.setMouseOwner(who, true, ev.target);
-			var ui = ev.target["data-ui"];
-			var target = ev.target["data-component"];
-			var handled = (ui && ui.handleJSEvent$O$I$O(who, 501, ev));
-			if (checkStopPropagation(ev, ui, handled, target))
-				return true;
-			who.isDragging = true;
-			if ((ev.type == "touchstart") && J2S._gestureUpdate(who, ev))
-				return !!target;
-			J2S._setConsoleDiv(who.applet._console);
-			var xym = getXY(who, ev, 0);
-			if (xym) {
-				if (ev.button != 2 && J2S.Swing && J2S.Swing.hideMenus)
-					J2S.Swing.hideMenus(who.applet);
-//				if (who._frameViewer && who._frameViewer.isFrame)
-//					J2S.setWindowZIndex(who._frameViewer.top.ui.domNode,
-//							Integer.MAX_VALUE);
-				who.applet._processEvent(501, xym, ev, who._frameViewer); // MouseEvent.MOUSE_PRESSED
-			}
+		if (doIgnore(ev))
+			return true;
 
-			return !!(ui || target);
-//			return !!target || ui && ui.j2sDoPropagate;
-		});
+		J2S.setMouseOwner(who, true, ev.target);
+		var ui = ev.target["data-ui"];
+		var target = ev.target["data-component"];
+		var handled = (ui && ui.handleJSEvent$O$I$O(who, 501, ev));
+		if (checkStopPropagation(ev, ui, handled, target))
+			return true;
+		who.isDragging = true;
+		if ((ev.type == "touchstart") && J2S._gestureUpdate(who, ev))
+			return !!target;
+		J2S._setConsoleDiv(who.applet._console);
+		var xym = getXY(who, ev, 0);
+		if (xym) {
+			if (ev.button != 2 && J2S.Swing && J2S.Swing.hideMenus)
+				J2S.Swing.hideMenus(who.applet);
+//			if (who._frameViewer && who._frameViewer.isFrame)
+//				J2S.setWindowZIndex(who._frameViewer.top.ui.domNode,
+//						Integer.MAX_VALUE);
+			who.applet._processEvent(501, xym, ev, who._frameViewer); // MouseEvent.MOUSE_PRESSED
+		}
 
-		J2S.$bind(who, (J2S._haveMouse ? 'mouseup' : 'mouseup touchend'), function(ev) {
-			return mouseup(who, ev);
-		});
+		return !!(ui || target);
+//		return !!target || ui && ui.j2sDoPropagate;
 
-		J2S.$bind(who, 'mouseenter', function(ev) {
-			if (J2S._traceMouse)
-				J2S.traceMouse(who,"ENTER", ev);
+	}
+	
+	var mouseEnter = function(who, ev) {
+		if (J2S._traceMouse)
+			J2S.traceMouse(who,"ENTER", ev);
 
-			if (doIgnore(ev))
-				return true;
-			if (ev.target.getAttribute("role")) {
-				return true;
-			}
+		if (doIgnore(ev))
+			return true;
+		if (ev.target.getAttribute("role")) {
+			return true;
+		}
 
-			if (who.applet._appletPanel)
-				who.applet._appletPanel.startHoverWatcher$Z(true);
-			if (J2S._mouseOwner && !J2S._mouseOwner.isDragging)
-				J2S.setMouseOwner(null);
-			var xym = getXY(who, ev, 0);
-			if (!xym)
-				return false;
-			who.applet._processEvent(504, xym, ev, who._frameViewer);// MouseEvent.MOUSE_ENTERED
+		if (who.applet._appletPanel)
+			who.applet._appletPanel.startHoverWatcher$Z(true);
+		if (J2S._mouseOwner && !J2S._mouseOwner.isDragging)
+			J2S.setMouseOwner(null);
+		var xym = getXY(who, ev, 0);
+		if (!xym)
 			return false;
-		});
+		who.applet._processEvent(504, xym, ev, who._frameViewer);// MouseEvent.MOUSE_ENTERED
+		return false;
+	}
 
-		J2S.$bind(who, 'mouseleave', function(ev) {
-			if (J2S._traceMouse)
-				J2S.traceMouse(who,"OUT", ev);
+	var mouseLeave = function(who, ev) {
+		if (J2S._traceMouse)
+			J2S.traceMouse(who,"OUT", ev);
 
-			if (doIgnore(ev))
-				return true;
-			if (ev.target.getAttribute("role")) {
-				return true;
-			}
-			
-			if (J2S._mouseOwner && !J2S._mouseOwner.isDragging)
-				J2S.setMouseOwner(null);
-			if (who.applet._appletPanel)
-				who.applet._appletPanel.startHoverWatcher$Z(false);
-			var xym = getXY(who, ev, 0);
-			if (!xym)
-				return false;
-			who.applet._processEvent(505, xym, ev);// MouseEvent.MOUSE_EXITED
+		if (doIgnore(ev))
+			return true;
+		if (ev.target.getAttribute("role")) {
+			return true;
+		}
+		
+		if (J2S._mouseOwner && !J2S._mouseOwner.isDragging)
+			J2S.setMouseOwner(null);
+		if (who.applet._appletPanel)
+			who.applet._appletPanel.startHoverWatcher$Z(false);
+		var xym = getXY(who, ev, 0);
+		if (!xym)
 			return false;
-		});
+		who.applet._processEvent(505, xym, ev);// MouseEvent.MOUSE_EXITED
+		return false;
+	}
+	
+	var mouseMoveOut = function(who, ev) {
+		if (!who.isDragging || who != J2S._mouseOwner)
+			return;
+		if (J2S._traceMouse)
+			J2S.traceMouse(who,"OUTJSMOL", ev);
+		return J2S._drag(who, ev, 503);
+	}
+	
+	var mouseUpOut = function(who, ev) {
+		if (!who.isDragging || who != J2S._mouseOwner)
+			return true;
+		if (J2S._traceMouse)
+			J2S.traceMouse(who,"UPJSMOL", ev);
+		return J2S._drag(who, ev, 502);
+	}
+	
+	J2S.setMouse = function(who, isSwingJS) {
+		// swingjs.api.J2SInterface
+
+
+		J2S.$bind(who, (J2S._haveMouse ? 'mousemove' : 'mousemove touchmove'), 
+				function(ev) { return mouseMove(who, ev) });
+
+		J2S.$bind(who, 'click', function(ev) { return mouseClick(who, ev) });
+		
+		J2S.$bind(who, 'DOMMouseScroll mousewheel', function(ev) { return mouseWheel(who, ev) });
+
+		J2S.$bind(who, (J2S._haveMouse ? 'mousedown' : 'mousedown touchstart'), 
+				function(ev) { return mouseDown(who, ev) });
+
+		J2S.$bind(who, (J2S._haveMouse ? 'mouseup' : 'mouseup touchend'), 
+				function(ev) { return mouseUp(who, ev) });
+
+		J2S.$bind(who, 'mouseenter', function(ev) { return mouseEnter(who, ev) });
+
+		J2S.$bind(who, 'mouseleave', function(ev) { return mouseLeave(who, ev) });
 
 		// context menu is fired on mouse down, not up, and it's handled already
 		// anyway.
 
-		J2S.$bind(who, "contextmenu", function() {
-			return false;
-		});
+		J2S.$bind(who, "contextmenu", function() { return false });
 
-		J2S.$bind(who, 'mousemoveoutjsmol', function(evspecial, target, ev) {
+		J2S.$bind(who, 'mousemoveoutjsmol', 
+				function(evspecial, target, ev) { return mouseMoveOut(who, ev) });
 
-			if (!who.isDragging || who != J2S._mouseOwner)
-				return;
-
-			if (J2S._traceMouse)
-				J2S.traceMouse(who,"OUTJSMOL", ev);
-
-			return J2S._drag(who, ev, 503);
-		});
-
-		J2S.$bind(who, 'mouseupoutjsmol', function(evspecial, target, ev) {
-
-			if (!who.isDragging || who != J2S._mouseOwner)
-				return true;
-			if (J2S._traceMouse)
-				J2S.traceMouse(who,"UPJSMOL", ev);
-
-			return J2S._drag(who, ev, 502);
-		});
+		J2S.$bind(who, 'mouseupoutjsmol', 
+				function(evspecial, target, ev) { return mouseUpOut(who, ev) });
 
 		if (who.applet._is2D && !who.applet._isApp) {
 			J2S.$resize(function() {
@@ -15123,6 +15141,11 @@ var addProfileNew = function(c, t) {
 	  s += "[]";
 	  t = 0;
   }
+  if (J2S._traceOutput && (s.indexOf(J2S._traceOutput) >= 0 || '"' + s + '"' == J2S._traceOutput)) {
+    alert(s + "\n\n" + Clazz._getStackTrace());
+    doDebugger();
+  }
+
   var p = _profileNew[s]; 
   p || (p = _profileNew[s] = [0,0]);
   p[0]++;
@@ -17651,7 +17674,14 @@ function(i){
 
 m$(Integer,"parseInt$S$I",
 function(s,radix){
- var v = parseInt(s, radix);
+ var v = (s.indexOf(".") >= 0 ? NaN : parseInt(s, radix));
+ if (!isNaN(v)) {
+	 // check for trailing garbage
+	 var v1 = parseInt(s + "1", radix);
+	 if (v1 == v)
+		 v = NaN;
+ }
+
  if (isNaN(v) || v < minInt || v > maxInt){
 	throw Clazz.new_(NumberFormatException.c$$S, ["parsing " + s + " radix " + radix]);
  }
@@ -17660,6 +17690,9 @@ return v;
 
 m$(Integer,"parseInt$S",
 function(s){
+	var v = +s;
+	if (isNaN(v))
+		s= "?" + s; // just to ensure it gets trapped
 return Integer.parseInt$S$I(s, 10);
 }, 1);
 
@@ -18549,25 +18582,36 @@ CharSequence.$defaults$(String);
 sp.compareToIgnoreCase$S = function(str) { return String.CASE_INSENSITIVE_ORDER.compare$S$S(this, str);}
 
 sp.replace$ = function(c1,c2){
-  if (c1 == c2 || this.indexOf (c1) < 0) return "" + this;
+  if (c1 == c2 || this.indexOf(c1) < 0) return "" + this;
   if (c1.length == 1) {
     if ("\\$.*+|?^{}()[]".indexOf(c1) >= 0)   
       c1 = "\\" + c1;
   } else {    
-    c1=c1.replace(/([\\\$\.\*\+\|\?\^\{\}\(\)\[\]])/g,function($0,$1){
-      return "\\"+$1;
-    });
+    c1=c1.replace(/([\\\$\.\*\+\|\?\^\{\}\(\)\[\]])/g,function($0,$1){return "\\"+$1;});
   }
   return this.replace(new RegExp(c1,"gm"),c2);
 };
 
-sp.replaceAll$S$S=sp.replaceAll$CharSequence$CharSequence=function(exp,str){
-var regExp=new RegExp(exp,"gm");
-return this.replace(regExp,str);
+// experimental -- only marginally faster:
+var reCache = new Map();
+sp.replace2$ = function(c1,c2){
+	  if (c1 == c2 || this.indexOf(c1) < 0) return "" + this;
+	  var re;
+	  if (c1.length == 1) {
+		re = reCache.get(c1);
+		re || reCache.set(c1, re = new RegExp("\\$.*+|?^{}()[]".indexOf(c1) == 0 ? "\\" + c1 : c1, 'gm'));
+	  } else {    
+	    re = new RegExp(c1.replace(/([\\\$\.\*\+\|\?\^\{\}\(\)\[\]])/g,function($0,$1){return "\\"+$1;}), 'gm');
+	  }
+	  return this.replace(re,c2);
+};
+
+// fastest:
+sp.replaceAll$=sp.replaceAll$S$S=sp.replaceAll$CharSequence$CharSequence=function(exp,str){
+return this.replace(new RegExp(exp,"gm"),str);
 };
 sp.replaceFirst$S$S=function(exp,str){
-var regExp=new RegExp(exp,"m");
-return this.replace(regExp,str);
+return this.replace(new RegExp(exp,"m"),str);
 };
 sp.matches$S=function(exp){
 if(exp!=null){

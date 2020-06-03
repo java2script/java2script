@@ -115,6 +115,8 @@ class JSComboPopupList extends JList {
 	}
 
 	void updateZIndex() {
+		if (j2scb == null) // disposed
+			return;
 		j2scb.j2sCB("setZIndex", JSComponentUI.getInheritedZ(cbui.comboBox) + 1);
 		updateCSS();
 	}

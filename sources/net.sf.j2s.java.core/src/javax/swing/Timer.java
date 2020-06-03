@@ -548,7 +548,9 @@ public class Timer implements Serializable {
 		JSToolkit.killDispatched(html5Id);
 		cancelNotify();
 		repeats = false;
-		timerQueue().remove(this);
+		ArrayList<Object> q = timerQueue();
+		if (q != null)
+			q.remove(this);
 		html5Id = Integer.MIN_VALUE;
 		// TODO Auto-generated method stub
 		

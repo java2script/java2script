@@ -612,7 +612,7 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
         Graphics bsg = getBackingStoreGraphics(g);
         try {
             super.paint(bsg);
-            ((JSGraphics2D)(Object)g).drawImageFromRaster(backingStoreImage, 0, 0, this);
+            ((JSGraphics2D)(Object)g).drawImageFromPixelsOrRaster(backingStoreImage, 0, 0, this);
         } finally {
             bsg.dispose();
         }

@@ -172,6 +172,7 @@ public abstract class JarURLConnection extends URLConnection {
         }
 
         jarFileURL = new URL(spec.substring(0, separator++));
+        jarFileURL._streamData = url._streamData;
         entryName = null;
 
         /* if ! is the last letter of the innerURL, entryName is null */

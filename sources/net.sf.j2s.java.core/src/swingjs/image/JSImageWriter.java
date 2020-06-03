@@ -218,7 +218,7 @@ public abstract class JSImageWriter extends ImageWriter {
 			} else {
 				w = image.getWidth();
 				h = image.getHeight();
-				pixels = image.getRangeRGB(0, 0, w, h, new int[w * h], 0, w);
+				pixels = image.getRGB(0, 0, w, h, new int[w * h], 0, w);
 			}
 			params.put("imageWidth", Integer.valueOf(w));
 			params.put("imageHeight", Integer.valueOf(h));

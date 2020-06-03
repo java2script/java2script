@@ -91,6 +91,8 @@ public class JSGraphics2D implements
 	private Color backgroundColor;
 	private AffineTransform fontTransform;
 
+	public BufferedImage image;
+
 	private static RenderingHints aa;
 
 	// private Color currentColor;
@@ -132,6 +134,11 @@ public class JSGraphics2D implements
 //		// http://www.rgraph.net/docs/howto-get-crisp-lines-with-no- antialias.html
 		setAntialias(true);
 		clipPriv(0, 0, width, height);
+	}
+
+	public JSGraphics2D(HTML5Canvas canvas, BufferedImage image) {
+		this(canvas);
+		this.image = image;
 	}
 
 	public void setAntialias(boolean tf) {
@@ -507,6 +514,7 @@ public class JSGraphics2D implements
 					raster.getPixels(0, 0, (int) w, (int) h, g2.buf8);
 					g2.ctx.putImageData(g2.imageData, 0, 0);
 					shaderCanvas = g2.canvas;
+					g2.dispose();
 				}
 				/**
 				 * @j2sNative this.shader.秘canvas = shaderCanvas; var a =
@@ -525,7 +533,7 @@ public class JSGraphics2D implements
 			if (winding == Path2D.WIND_EVEN_ODD) {
 				ctx.fill("evenodd");
 			} else {
-				ctx.fill();
+				ctx.fill(); // "nonzero"
 			}
 		}
 		ctx.restore();
@@ -650,7 +658,7 @@ public class JSGraphics2D implements
 	private boolean drawImageXT(Image img, AffineTransform xform, ImageObserver obs) {
 		ctx.save();
 		transformCTX(xform);
-		boolean ret = drawImageFromRaster(img, 0, 0, obs);
+		boolean ret = drawImageFromPixelsOrRaster(img, 0, 0, obs);
 		ctx.restore();
 		return ret;
 	}
@@ -662,10 +670,16 @@ public class JSGraphics2D implements
 
 	private boolean thinLine;
 
-	public boolean drawImageFromRaster(Image img, int x, int y, ImageObserver observer) {
-		if (img == null)
-			return true;
-		return drawImagePriv(img, x, y, img.getWidth(observer), img.getHeight(observer), observer);
+	/**
+	 * @param img
+	 * @param x
+	 * @param y
+	 * @param observer
+	 * @return
+	 */
+	public boolean drawImageFromPixelsOrRaster(Image img, int x, int y, ImageObserver observer) {
+		return (img == null ? true
+				: drawImagePriv(img, x, y, img.getWidth(observer), img.getHeight(observer), observer));
 	}
 
 	/**
@@ -678,26 +692,27 @@ public class JSGraphics2D implements
 	 * @param x
 	 * @param y
 	 * @param observer
-	 * @return
+	 * @return true if img is not null
 	 */
 	private boolean drawImagePriv(Image img, int x, int y, int width, int height, ImageObserver observer) {
 		double[] m = HTML5CanvasContext2D.setMatrix(ctx, transform);
 		boolean isToSelf = (this == ((BufferedImage) img).秘g);
 		boolean isOpaque = ((BufferedImage) img).秘isOpaque();
 		// if get秘pix returns pixels, we use them. Otherwise we turn this into an image
-		int[] pixels = (isTranslationOnly(m) && !isClipped(x,y,width,height) ? ((BufferedImage) img).get秘pix() : null);
+		// pixels actually could be byte[w*h*4] or int[w*h]
+		int[] pixels = (int[]) (isTranslationOnly(m) && !isClipped(x,y,width,height) ? ((BufferedImage) img).get秘pixFromRaster() : null);
 		DOMNode imgNode = null;
 		if (pixels == null) {
-			imgNode = ((BufferedImage) img).秘getImageNode(BufferedImage.GET_IMAGE_FOR_RASTER);
+			imgNode = ((BufferedImage) img).秘getImageNode(BufferedImage.GET_IMAGE_FROM_RASTER);
 			if (imgNode != null)
 				ctx.drawImage(imgNode, x, y, width, height);
 		} else {
+			boolean isPerPixel = (pixels.length == width * height);
 			if (!isOpaque)
 				buf8 = null;
 			x += m[4];
 			y += m[5];
 			getBuf8(x, y, width, height);
-			boolean isPerPixel = (pixels.length == width * height);
 			if (isPerPixel) {
 				for (int pt = 0, i = 0, n = Math.min(buf8.length / 4, pixels.length); i < n; i++) {
 					int argb = pixels[i];
@@ -976,7 +991,10 @@ public class JSGraphics2D implements
 
 	private void setGraphicsColor(Color c) {
 		if (c == null)
-			return; // this was the case with a JRootPanel graphic call
+			return; 
+		if (image != null)
+			c = image.秘getGraphicsColor(c);
+		// this was the case with a JRootPanel graphic call
 		int a = c.getAlpha();
 		// set alpha only if it is new and if this color has an alpha not 0xFF
 		float fa = a / 255F;
@@ -1386,6 +1404,10 @@ public class JSGraphics2D implements
 			System.out.println("dispose to " + initialState);
 		}
 		reset(initialState);
+		if (image != null) {
+			image.秘graphicsDisposed();
+			image = null;
+		}
 	}
 
 	public int getWidth() {

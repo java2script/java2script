@@ -33,8 +33,8 @@ public interface JQueryObject {
 	public abstract JQueryObject addClass(String name);	
 	public abstract JQueryObject removeClass(String name);
 	
-	public abstract void show();
-	public abstract void hide();
+	public abstract JQueryObject show();
+	public abstract JQueryObject hide();
 
 	public abstract void resize(Object fHandleResize);
 
