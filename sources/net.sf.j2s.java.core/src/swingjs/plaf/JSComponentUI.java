@@ -1403,8 +1403,11 @@ public class JSComponentUI extends ComponentUI
 			return;
 		case "text":
 			String val = ((AbstractButton) c).getText();
-			if (val == null ? currentText != null : !val.equals(currentText))
+			if (val == null ? currentText != null : !val.equals(currentText)) {
 				setIconAndText(prop, currentIcon, currentGap, (String) val);
+				if (isMenuItem && textNode != null)
+					this.setAlignments((AbstractButton) c, true);
+			}
 			return;
 		case "iconTextGap":
 			if (iconNode != null) {
