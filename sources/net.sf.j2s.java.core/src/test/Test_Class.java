@@ -24,8 +24,19 @@ import static java.lang.String.format
 ;
 class Test_Class extends Test_Class2<Integer> {
 
+	public int test_int = 3; // shadows Test_
+
+
+	Test_Class(short i) { 
+		super();	
+		test_int = super.test_int;
+		System.out.println("Hello?");
+	}
+	
 	Test_Class(byte[]...d) { 
 		super(d);
+		
+		test_int = super.test_int;
 		
 		assert(getClass().getPackage().toString().equals("package test"));
 		
@@ -311,6 +322,9 @@ class Test_Class extends Test_Class2<Integer> {
 	}
 	
 	public static void main(String[] args) {
+		
+		System.out.println(System.getProperty("user.dir"));
+		System.out.println(System.getProperty("user.home"));
 		
 	    float specversion = Float.parseFloat(
 	                    System.getProperty("java.specification.version"));

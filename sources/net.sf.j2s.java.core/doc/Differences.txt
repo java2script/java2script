@@ -24,10 +24,9 @@ Note that the DOCTYPE tag is critical for some browsers to switch into HTML5 mod
   
 In particular, the Mandarin character 秘 (mi; "secret") is used extensively throughout
 the SwingJS class files to distinguish j2s-specific fields and methods that must not 
-ever be overridden by subclasses. As in java.lang.Thread.java:
+ever be shadowed or overridden by subclasses. For example, we see in java.lang.Thread.java:
 
 		public static JSThread 秘thisThread;
-
 
 ----------------------------------
 
@@ -74,8 +73,8 @@ that one can call in JavaScript
 and for all practical purposes it will appear that Java is running.
 
 
-Method Disambiguation
----------------------
+Method and Field Disambiguation
+-------------------------------
 
 SwingJS has no problem with the overloading of methods, for example:
 
@@ -85,13 +84,29 @@ SwingJS has no problem with the overloading of methods, for example:
 JavaScript does not allow overloading of methods, and the common practice in
 Java of naming a field the same as a method -- isAllowed and isAllowed() -- is
 not possible in JavaScript. As a result, SwingJS implements "fully-qualified" 
-method names using "$" parameter type separation. For example, in Java we see:
+method names using "$" parameter type separation. Thus, these methods in SwingJS
+will be referred to as print$I and print$F. The rules for this encoding are
+relatively simple: 
 
-public void equals(Object o) {...}
+1. The seven primitive types in Java are encoded $I (int), $L (long), $F (float), 
+$D (double), $B (byte) $Z (boolean), and $H (short). 
+
+2. String and Object are encoded as $S and $O, respectively.
+
+3. "java_lang_" is dropped for all other classes in the java.lang package (as in Java).
+   For example:  $StringBuffer, not $java_lang_StringBuffer
+
+4. All other classes are encoded as 
+
+ "$" + Class.getName().replace(".","_")
+
+For example, in Java we see:
+
+  public void equals(Object o) {...}
 
 Whereas in SwingJS we have:
 
-Clazz.newMeth(C$, 'equals$O', function (o) {...}
+  Clazz.newMeth(C$, 'equals$O', function (o) {...}
 
 And 
 
@@ -100,6 +115,47 @@ And
 becomes
 
  this.getContentPane$().add$java_awt_Component$O(bar, "North");
+
+5. Arrays are indicated with appended "A" for each level. So
+
+  setDataVector(Object[][] dataVector, Object[] columnIdentifiers)
+  
+becomes
+
+  setDataVector$OAA$OA(dataVector, columnIdentifiers)
+
+(It is recognized that this design does introduce a bit of ambiguity, in that
+ in principal there could be user class named XA and X in the same package,
+ and methods a(X[]) and a(XA) in the same class that cannot be distinguished.
+ The benefit of this simple system, however, triumphed over the unlikelyhood
+ of that scenario.) The transpiler could be set to flag this possibility.
+
+6. Constructors are prepended with "c$". So 
+
+  public JLabel(String text) {...}
+  
+becomes:
+
+  Clazz.newMeth(C$, 'c$$S', function (text) {...});
+
+Field disambiguation involves prepending. In Java, a class and its subclass 
+can both have the same field name, such as 
+
+ boolean visible;
+ 
+When this happens, it is called "shadowing", and though not recommended, Java allows
+it. The Java2Script transpiler will prepend such shadowing fields with "$" so that the
+subclass instance has both "visible" (for use in its methods inherited from its
+superclass) and "$visible" (for its own methods). Thus, we might see in Java:
+
+  this.visible = super.visible;
+  
+while in SwingJS we will see:
+
+  this.$visible=this.visible;
+
+since JavaScript does not have the "super" keyword.
+
 
 
 Parameterless methods such as toString() are appended with "$" to become toString$().

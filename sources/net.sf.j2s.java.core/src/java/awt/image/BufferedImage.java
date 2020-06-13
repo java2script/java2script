@@ -50,6 +50,7 @@ import sun.awt.image.PixelConverter;
 import sun.awt.image.ShortComponentRaster;
 import sun.awt.image.SunWritableRaster;
 import swingjs.JSGraphics2D;
+import swingjs.JSToolkit;
 import swingjs.JSUtil;
 import swingjs.api.JSUtilI;
 import swingjs.api.js.DOMNode;
@@ -1417,14 +1418,14 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		//秘canvas.getContext("2d").drawImage(秘imgNode = node, 0, 0, width, height);
 		// we need one clock tick to access the pixels.
 		// and we need this to happen BEFORE the rest of the EventQUeue gets loaded.
-		SwingUtilities.invokeLater(new Runnable() {
+		JSToolkit.dispatch(new Runnable() {
 
 			@Override
 			public void run() {
 				秘installImage((DOMNode)node, pixels);
 			}
 			
-		});
+		}, 1, 0);
 		} else {
 			秘installImage((DOMNode)node, pixels);
 		}

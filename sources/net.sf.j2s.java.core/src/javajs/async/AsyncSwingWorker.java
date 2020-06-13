@@ -10,6 +10,8 @@ import javajs.async.SwingJSUtils.StateHelper;
 import javajs.async.SwingJSUtils.StateMachine;
 
 /**
+ * v. 2020.06.03 
+ *
  * Executes synchronous or asynchronous tasks using a SwingWorker in Java or
  * JavaScript, equivalently.
  * 
@@ -38,18 +40,65 @@ import javajs.async.SwingJSUtils.StateMachine;
  * the subclass to update the progress field in both the SwingWorker and the
  * ProgressMonitor.
  * 
- * If it is desired to run the AsyncSwingWorker synchonously, call the
+ * If it is desired to run the AsyncSwingWorker synchronously, call the
  * executeSynchronously() method rather than execute(). Never call
  * SwingWorker.run().
  * 
+ * Note that doInBackgroundAsync runs on the Java AWT event queue. This means
+ * that, unlike a true SwingWorker, it will run in event-queue sequence, after
+ * anything that that method itself adds to the queue. This is what SwingWorker itself
+ * does with its done() signal. 
+ * 
+ * If doInBackgroundAsync has tasks that are time intensive, the thing to do is to
+ * 
+ * (a) pause the timer so that when doInBackgroundAsync returns, the timer is not fired:
+ * 
+ *    setPaused(true);
+ * 
+ * (b) set the value of progress to a value you want it to have when we resume:
+ * 
+ *    setProgressAsync(n);  // Do not call SwingWorker.setProgress(int) here!
+ *    
+ * (c) start your process as new Thread, which bypasses the AWT EventQueue:
+ * 
+ *    new Thread(Runnable).start();
+ *    
+ * (d) have your thread, when it is done, return control to this worker:
+ * 
+ *    setPaused(false);
+ *    
+ * This final call restarts the worker with the currently specified progress value.
+ * Step b could be done just before Step d.
+ * 
+ * The inner class this.AsyncSubtask is designed to make pausing especially easy:
+ * 
+ *   subtask = new AsyncSubtask(35); // nextProgress value
+ *   subtask.start(new Runnable() {....});
+ * 
+ * Then, somewhere in your runnable, you would call subtask.done(), which
+ * set the progress value and make the call to setPaused(false) for you.
  * 
  * @author hansonr
  *
  */
 public abstract class AsyncSwingWorker extends SwingWorker<Void, Void> implements StateMachine {
 
+
+	// PropertyChangeEvent getPropertyName()
+	
+	private static final String PROPERTY_STATE = "state";
+	private static final String PROPERTY_PAUSE = "pause";
+	
+	// PropertyChangeEvent getNewValue()
+	
+	public static final String STARTED_ASYNC = "STARTED_ASYNC";
+	public static final String STARTED_SYNC = "STARTED_SYNC";
+	
 	public static final String DONE_ASYNC = "DONE_ASYNC";
 	public static final String CANCELED_ASYNC = "CANCELED_ASYNC";
+	
+	public static final String PAUSED = "PAUSED";
+	public static final String RESUMED = "RESUMED";
 
 	protected int progressAsync;
 
@@ -119,10 +168,12 @@ public abstract class AsyncSwingWorker extends SwingWorker<Void, Void> implement
 	}
 
 	public void executeAsync() {
+		firePropertyChange(PROPERTY_STATE, null, STARTED_ASYNC);
 		super.execute();
 	}
 
 	public void executeSynchronously() {
+		firePropertyChange(PROPERTY_STATE, null, STARTED_SYNC);
 		isAsync = false;
 		delayMillis = 0;
 		try {
@@ -244,7 +295,7 @@ public abstract class AsyncSwingWorker extends SwingWorker<Void, Void> implement
 	private final static int STATE_LOOP = 1;
 	private final static int STATE_WAIT = 2;
 	private final static int STATE_DONE = 99;
-
+	
 	private StateHelper helper;
 
 	protected StateHelper getHelper() {
@@ -254,7 +305,12 @@ public abstract class AsyncSwingWorker extends SwingWorker<Void, Void> implement
 	private boolean isPaused;
 
 	protected void setPaused(boolean tf) {
+		if (isPaused == tf)
+			return;
 		isPaused = tf;
+		firePropertyChange(PROPERTY_PAUSE, null, (tf ? PAUSED : RESUMED));
+		if (!tf)
+			stateLoop();
 	}
 
 	protected boolean isPaused() {
@@ -292,7 +348,7 @@ public abstract class AsyncSwingWorker extends SwingWorker<Void, Void> implement
 			case STATE_LOOP:
 				if (checkCanceled()) {
 					helper.setState(STATE_DONE);
-					firePropertyChange("state", null, CANCELED_ASYNC);
+					firePropertyChange(PROPERTY_STATE, null, CANCELED_ASYNC);
 				} else {
 					int ret = doInBackgroundAsync(progressAsync);					
 					if (!helper.isAlive() || isPaused) {
@@ -309,6 +365,7 @@ public abstract class AsyncSwingWorker extends SwingWorker<Void, Void> implement
 				}
 				continue;
 			case STATE_WAIT:
+				// meaning "sleep" and then "loop"
 				helper.setState(STATE_LOOP);
 				helper.sleep(delayMillis);
 				return true;
@@ -343,7 +400,7 @@ public abstract class AsyncSwingWorker extends SwingWorker<Void, Void> implement
 		@Override
 		public void run() {
 			doneAsync();
-			firePropertyChange("state", null, DONE_ASYNC);
+			firePropertyChange(PROPERTY_STATE, null, DONE_ASYNC);
 		}
 
 	};
@@ -382,4 +439,23 @@ public abstract class AsyncSwingWorker extends SwingWorker<Void, Void> implement
 	final public void done() {
 	}
 
+	public class AsyncSubtask {
+	
+		private int nextProgress;
+
+		public AsyncSubtask(int nextProgress) {
+			this.nextProgress = nextProgress;
+		}
+		
+		public void start(Runnable r) {
+			setPaused(true);
+			new Thread(r).start();
+		}
+		
+		public void done() {
+			setProgressAsync(nextProgress);
+			setPaused(false);
+		}
+	
+	}
 }

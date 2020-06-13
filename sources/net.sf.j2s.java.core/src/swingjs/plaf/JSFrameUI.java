@@ -158,11 +158,9 @@ public class JSFrameUI extends JSWindowUI implements FramePeer, JSComponentUI.Em
 	}
 
 	/**
-	 * Note: DO NOT CHANGE THE NAME OF THIS METHOD
 	 * 
 	 * @param frame
-	 * @param type
-	 *  one of: "name", "node", "init", "dim"
+	 * @param type "name", "node", "init", "dim", or any DOM attribute, such as "id"
 	 * @return
 	 */
 	@Override
@@ -212,6 +210,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer, JSComponentUI.Em
 		JSFunction fGetFrameParent = null;
 		/**
 		 * @j2sNative var me = this; fGetFrameParent = function(mode, x, y) {
+		 * 
 		 *            switch(arguments.length) { case 1: if (mode == 501)
 		 *            me.selected$(); me.hideMenu$(); return $(fnode).parent(); case 3:
 		 *            if (mode == 506) { me.moveFrame$I$I(x, y); return null; } }
@@ -219,6 +218,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer, JSComponentUI.Em
 		 *            return null; }
 		 */
 		{
+			// Java only; just for reference
 			selected();
 			moveFrame(0, 0);
 			hideMenu();

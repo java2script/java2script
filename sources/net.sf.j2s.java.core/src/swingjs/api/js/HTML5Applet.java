@@ -31,5 +31,7 @@ public interface HTML5Applet {
 
 	String _getID();
 
+	void _setAppClass(Object app);
+
 
 }

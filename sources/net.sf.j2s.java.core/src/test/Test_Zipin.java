@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -17,9 +18,19 @@ public class Test_Zipin extends Test_ {
 	public static void main(String[] args) {
 
 		try {
+			
+
+			InputStream is = Test_Zipin.class.getResourceAsStream("3c9k.xml.gz");
+			GZIPInputStream  gzis = new GZIPInputStream(is, 8096);
+			String s = new String((byte[]) Rdr.getStreamAsBytes(new BufferedInputStream(gzis), null), "utf-8");
+			System.out.println(s.length());
+			assert (s.length() == 2957648);
+			gzis.close();
+
+			
 			InputStream bzis = Test_Zipin.class.getResourceAsStream("test2.txt.bz2");
 			bzis = ZipTools.newBZip2InputStream(bzis);
-			String s = new String((byte[]) Rdr.getStreamAsBytes(new BufferedInputStream(bzis), null), "utf-8");
+			s = new String((byte[]) Rdr.getStreamAsBytes(new BufferedInputStream(bzis), null), "utf-8");
 			System.out.println(s);
 			assert (s.equals("test2 here"));
 			bzis.close();

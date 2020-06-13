@@ -112,8 +112,10 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 //
 	@Override
 	public void toFront() {
-		if (jc.秘isDesktop())
+		if (jc.秘isDesktop()) {
+			jc.requestFocus();
 			return;
+		}
 		z = J2S.setWindowZIndex(domNode, Integer.MAX_VALUE);
 		setZ(z);
 		if (modalNode != null)

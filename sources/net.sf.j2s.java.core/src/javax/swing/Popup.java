@@ -167,6 +167,7 @@ public class Popup {
 			component.setLocation(ownerX, ownerY);
 			component.getContentPane().add(contents, BorderLayout.CENTER);
 			contents.invalidate();
+			component.秘getUI().updateDOMNode();
 			if (component.isVisible()) {
 				// Do not call pack() if window is not visible to
 				// avoid early native peer creation

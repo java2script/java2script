@@ -505,11 +505,21 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		if (f == null)
 			f = jaxbClass.unmarshallerFieldMap.get("/lc/" + key.toLowerCase());		
 		if (f == null)
-			System.out.println("JSJAXBUnmarshaller could not associate a field with " + qName);
+			notifyNoField(qName);
 		return f;
 	}
 
 	///////////////////////// converting and assigning /////////////////
+
+	private static String noFields = "";
+	
+	private void notifyNoField(QName qName) {
+		String key = ";" + qName + ";";
+		if (noFields.indexOf(key) < 0) {
+			System.out.println("JSJAXBUnmarshaller could not associate a field with " + qName);
+			noFields += key;
+		}
+	}
 
 	private void setFieldValue(JSJAXBField field) {
 

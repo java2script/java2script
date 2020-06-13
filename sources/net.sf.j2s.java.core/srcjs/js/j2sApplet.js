@@ -70,8 +70,8 @@ var getURIField = function(name, def) {
 		var ref = document.location.href.toLowerCase();
 		var i = ref.indexOf(name + "=");
 		if (i >= 0)
-			def = (document.location.href + "&").substring(
-					i + name.length + 1).split("&")[0];
+			def = decodeURI((document.location.href + "&").substring(
+					i + name.length + 1).split("&")[0]);
 	} catch (e) {
 	} finally {
 		return def;
@@ -1341,7 +1341,12 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 			// when leaving page, Java applet may be dead
 			applet._appletPanel = (javaAppletPanel || javaApplet);
 			applet._applet = javaApplet;
+			!applet.getApp && (applet.getApp = function(){ applet._setThread();return javaApplet });
 			J2S.$css(J2S.$(applet, 'appletdiv'), { 'background-image': '' });
+		} else {
+			applet.getApp = null;
+			applet._applet = null;
+			applet._appletPanel = null;
 		}
 		J2S._track(applet.readyCallback(appId, fullId, isReady));
 	}
@@ -1738,13 +1743,6 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 		if (J2S._mouseOwner)
 			who = J2S._mouseOwner;
-
-//		if (ev.target.getAttribute("role")) { // JSButtonUI adds
-//												// role=menucloser to icon
-//												// and text
-//			var m = (ev.target._menu || ev.target.parentElement._menu);
-//			m && m._hideJSMenu();
-//		}
 
 		J2S.setMouseOwner(null);
 
@@ -2600,6 +2598,9 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		proto._getHtml5Canvas = function() {
 			return this._canvas
 		};
+				
+		proto._setAppClass = function(app) { this.getApp = function() {this._setThread();return app}};
+		
 		proto._getWidth = function() {
 			return (this._canvas ? this._canvas.width : 0)
 		};
@@ -2614,6 +2615,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		};
 		// //////
 
+		proto._setThread = function() { swingjs.JSToolkit.getCurrentThread$javajs_util_JSThread(this._appletPanel.appletViewer.myThread)}
 		proto._createCanvas2d = function(doReplace) {
 			var container = J2S.$(this, "appletdiv");
 			// if (doReplace) {

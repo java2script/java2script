@@ -1,5 +1,6 @@
 package javajs.async;
 
+import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -361,7 +362,7 @@ public class Assets {
 		try {
 			URL url = getInstance()._getURLFromPath(path, true);
 			if (url == null && !zipOnly) {
-				url = Assets.class.getResource(path);
+				url = Assets.class.getClassLoader().getResource(path);
 			}
 			if (url != null)
 				return url.openStream();

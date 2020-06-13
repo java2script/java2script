@@ -59,7 +59,7 @@ public class JSMenuUI extends JSMenuItemUI implements MenuListener {
 	@Override
 	public void propertyChangedFromListener(PropertyChangeEvent e, String prop) {
 		// System.out.println("JSMenuUI prop = " + prop + " " + jm.getText());
-		if (jc.getTopLevelAncestor() != null)
+		if (JSComponent.秘getTopInvokableAncestor(jc, false) != null)
 			updateDOMNode(); // font changes 
 		super.propertyChangedFromListener(e, prop);
 	}

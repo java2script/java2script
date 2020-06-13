@@ -211,7 +211,7 @@ public class JSButtonUI extends JSLightweightUI {
 	}
 
 	/**
-	 * called by JmolCore.js
+	 * called by j2sApplet.js
 	 * 
 	 * @return handled
 	 */

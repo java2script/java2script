@@ -80,6 +80,7 @@ class GZIPInputStream extends InflaterInputStream {
         readHeader(in);
     }
 
+    
 //	/**
 //	 * BH: Addeed to allow full reset of a bundled stream
 //	 */
@@ -95,17 +96,17 @@ class GZIPInputStream extends InflaterInputStream {
 //	}
 //
 
-//    /**
-//     * Creates a new input stream with a default buffer size.
-//     * @param in the input stream
-//     *
-//     * @exception ZipException if a GZIP format error has occurred or the
-//     *                         compression method used is unsupported
-//     * @exception IOException if an I/O error has occurred
-//     */
-//    public GZIPInputStream(InputStream in) throws IOException {
-//        this(in, 512);
-//    }
+    /**
+     * Creates a new input stream with a default buffer size.
+     * @param in the input stream
+     *
+     * @exception ZipException if a GZIP format error has occurred or the
+     *                         compression method used is unsupported
+     * @exception IOException if an I/O error has occurred
+     */
+    public GZIPInputStream(InputStream in) throws IOException {
+        this(in, 512);
+    }
 
     /**
      * Reads uncompressed data into an array of bytes. If <code>len</code> is not

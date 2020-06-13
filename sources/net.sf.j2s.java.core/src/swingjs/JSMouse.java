@@ -59,10 +59,7 @@ public class JSMouse {
 	}
 
 	public boolean processEvent(int id, int x, int y, int modifiers, long time, Object jqevent, int scroll) {
-		if (viewer != null && viewer.appletViewer != null && viewer.appletViewer != Thread.currentThread().getThreadGroup().秘appletViewer) {
-			JSThread t = viewer.appletViewer.myThread;
-			JSToolkit.getCurrentThread(t);
-		}
+		JSToolkit.setThreadForViewer(viewer);
 		this.jqevent = jqevent;
 		// Note that we do not derive the Java event id from the jQuery event. 
 		// This is because we may be creating a different type of Java event.
@@ -498,10 +495,13 @@ public class JSMouse {
 		}
 	}
 
+	@SuppressWarnings("null")
 	private boolean keyAction(int id, Object jqevent, long time) {
 		JComponent c = 	/** @j2sNative 
 		jqevent.target["data-shadowkeycomponent"] || jqevent.target["data-keycomponent"] ||
 				 */null; 
+		if (c.秘isContentPane)
+			c = (JComponent) c.getTopLevelAncestor();
 		return JSKeyEvent.dispatchKeyEvent(c, id, jqevent, time);
 	}
 	

@@ -18,6 +18,7 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 
 import javajs.api.js.J2SObjectInterface;
+import swingjs.JSUtil;
 import swingjs.api.JSUtilI;
 
 /**
@@ -138,15 +139,16 @@ public class AjaxURLConnection extends HttpURLConnection {
 		getBytesOut();
 		J2SObjectInterface J2S = /** @j2sNative self.J2S || */
 				null;
-		Object info = null; 
+		Object info = null;
 		/**
 		 * @j2sNative
 		 * 
 		 * 			info = this.ajax || {}; if (!info.dataType) { info.isBinary =
 		 *            !!isBinary; }
-		 *            
-		 *          whenDone && (info.fWhenDone = function(data){whenDone.apply$O(data)});
-		 *          
+		 * 
+		 *            whenDone && (info.fWhenDone =
+		 *            function(data){whenDone.apply$O(data)});
+		 * 
 		 */
 		this.info = info;
 		Map<String, List<String>> map = getRequestProperties();
@@ -196,7 +198,7 @@ public class AjaxURLConnection extends HttpURLConnection {
 		String myURL = url.toString();
 		boolean isEmpty = false;
 		if (myURL.startsWith("file:/TEMP/")) {
-			
+
 			result = jsutil.getCachedBytes(myURL);
 			isEmpty = (result == null);
 			if (whenDone != null) {
@@ -206,21 +208,36 @@ public class AjaxURLConnection extends HttpURLConnection {
 			responseCode = (isEmpty ? HTTP_NOT_FOUND : HTTP_ACCEPTED);
 		} else {
 			if (myURL.startsWith("file:")) {
-				String path = jsutil.getCodeBase().toString();
-				String base = jsutil.getDocumentBase().toString();
-				if (myURL.indexOf(path) >= 0)
-					myURL = path + myURL.split(path)[1];
-				else if (base != null && myURL.indexOf(base) == 0)
-					myURL = myURL.substring(base.length());
-				else
-					myURL = path + myURL.substring(5);
+				String j2s = /** @j2sNative Clazz._Loader.getJ2SLibBase() || */
+						null;
+				if (myURL.startsWith("file:/./")) {
+					// file:/./xxxx
+					myURL = j2s + myURL.substring(7);
+				} else if (myURL.startsWith("file:/" + j2s)) {
+					// from classLoader
+					myURL = myURL.substring(6);
+				} else {
+					String base = getFileDocumentDir();
+					if (base != null && myURL.indexOf(base) == 0) {
+						myURL = myURL.substring(base.length());
+					} else {
+						URL path = jsutil.getCodeBase();
+						if (path != null) {
+							j2s = path.toString();
+							if (myURL.indexOf(j2s) >= 0)
+								myURL = path + myURL.split(j2s)[1];
+							else
+								myURL = path + myURL.substring(5);
+						}
+					}
+				}
 			}
 			result = J2S.doAjax(myURL, postOut, bytesOut, info);
 			if (whenDone != null)
 				return null;
-		// the problem is that jsmol.php is still returning crlf even if output is 0
-		// bytes
-		// and it is not passing through the not-found state, just 200
+			// the problem is that jsmol.php is still returning crlf even if output is 0
+			// bytes
+			// and it is not passing through the not-found state, just 200
 			/**
 			 * @j2sNative
 			 * 
@@ -229,9 +246,15 @@ public class AjaxURLConnection extends HttpURLConnection {
 			 */
 
 			responseCode = isEmpty ? HTTP_NOT_FOUND : /** @j2sNative info.xhr.status || */
-				0;
+					0;
 		}
 		return result;
+	}
+
+	private String getFileDocumentDir() {
+		String base = jsutil.getDocumentBase().getPath();
+		int pt = base.lastIndexOf("/");
+		return "file:" + base.substring(0, pt + 1);
 	}
 
 	@Override
@@ -380,12 +403,21 @@ public class AjaxURLConnection extends HttpURLConnection {
 	private static BufferedInputStream getBIS(Object data, boolean isJSON) {
 		if (data == null)
 			return null;
+		@SuppressWarnings("unused")
+		Object jsonData = (isJSON ? data : null);
+		if (isJSON) {
+		/**
+		 * @j2sNative
+		 * 
+		 * data = JSON.stringify(data);
+		 */
+		}
 		BufferedInputStream bis = Rdr.toBIS(data);
 		if (isJSON) {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			bis._jsonData = data;
+		 * 			bis._jsonData = jsonData;
 		 */
 		}
 		return bis;
