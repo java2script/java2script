@@ -2808,9 +2808,9 @@ public class JSComponentUI extends ComponentUI
 		Object cssIcon = getJSObject();
 
 		addJSKeyVal(cssCtr, "position", "absolute", "top", null, "left", null, "transform", null, "width", (isHTML && isLabel ? "inherit" : wCtr + "px"),
-				"height", hCtr + "px", "display","inline-block");
+				"height", hCtr + "px", "display",(isLabel ? "inline-block" : null));
 		addJSKeyVal(cssIcon, "position", "absolute", "top", null, "left", null, "transform", null);
-		addJSKeyVal(cssTxt, "position", "absolute", "display","inline-block", "top", null, "left", null, "transform", null);
+		addJSKeyVal(cssTxt, "position", "absolute", "display",(isLabel ? "inline-block" : null), "top", null, "left", null, "transform", null);
 		// checkboxes and radiobuttons (i.e. with actionNodes) should not be fully centered unless in a table
 		isFullyCentered = (alignHCenter && alignVCenter && wIcon == 0 
 				|| wText == 0 && (actionNode == null || this.cellComponent != null || isSimpleButton) && margins.left == margins.right
