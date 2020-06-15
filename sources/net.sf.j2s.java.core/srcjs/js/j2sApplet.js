@@ -2751,7 +2751,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 					//cl.$static$ && cl.$static$();
 					if (clazz.indexOf("_.") == 0)
 						J2S.setWindowVar(clazz.substring(2), cl);
-					applet.__Info.headless = (J2S._headless || isApp && !!cl.j2sHeadless);
+					applet.__Info.headless = (J2S._headless || isApp && (cl.$j2sHeadless || cl.j2sHeadless));
 					if (applet.__Info.headless) {
 						Clazz._isHeadless = "true";
 						System.out.println("j2sApplet running headlessly");
