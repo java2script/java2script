@@ -139,6 +139,11 @@ public class ImageIcon implements Icon {
 
     int width = -1;
     int height = -1;
+	private boolean 秘video;
+	
+	public boolean 秘isVideo() {
+		return 秘video;
+	}
 
     /**
      * Creates an ImageIcon from the specified file. The image will
@@ -150,6 +155,7 @@ public class ImageIcon implements Icon {
      */
     public ImageIcon(String filename, String description) {
     	if (description != null && description.indexOf("jsvideo") >= 0) {
+    		秘video = true;
     		image = ((JSToolkit)Toolkit.getDefaultToolkit()).getVideo(filename);
     	} else {
     		image = Toolkit.getDefaultToolkit().getImage(filename);

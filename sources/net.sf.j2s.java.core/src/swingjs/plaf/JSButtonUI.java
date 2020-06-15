@@ -38,6 +38,7 @@ import java.awt.event.MouseMotionListener;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
@@ -421,6 +422,7 @@ public class JSButtonUI extends JSLightweightUI {
 		// }
 		LookAndFeel.installProperty(b, "iconTextGap", new Integer(4));
 	}
+
 	//
 	// protected void installListeners(AbstractButton b) {
 	// JSButtonListener listener = createButtonListener(b);
@@ -666,14 +668,7 @@ public class JSButtonUI extends JSLightweightUI {
 	// // ********************************
 	// // Layout Methods
 	// // ********************************
-	// public Dimension getMinimumSize(JComponent c) {
-	// Dimension d = getPreferredSize(c);
-	// View v = (View) c.getClientProperty(BasicHTML.propertyKey);
-	// if (v != null) {
-	// d.width -= v.getPreferredSpan(View.X_AXIS) - v.getMinimumSpan(View.X_AXIS);
-	// }
-	// return d;
-	// }
+	
 	//
 	// public Dimension getPreferredSize(JComponent c) {
 	// AbstractButton b = (AbstractButton)c;
@@ -815,8 +810,11 @@ public class JSButtonUI extends JSLightweightUI {
 	public Dimension getPreferredSize(JComponent jc) {
 		if (isAWT && isSimpleButton)
 			return JSLabelUI.getMinimumSizePeer(jc, button);
-		return super.getPreferredSize(jc);
-		
+		Icon ic;
+		if (!isSimpleButton || isAWT || button.getText() != null || (ic = button.getIcon()) == null)
+			return super.getPreferredSize(jc);
+		Insets in = button.getInsets();
+		return new Dimension(in.left + in.right + ic.getIconWidth(), in.top + in.bottom + ic.getIconHeight());
 	}
 	
 }
