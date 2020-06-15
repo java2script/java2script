@@ -497,7 +497,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 	}
 
 	/**
-	 * Implements Map.putAll and Map constructor
+	 * Implements clone, Map.putAll and Map constructor
 	 *
 	 * @param mOriginal     the map
 	 * @param evict false when initially constructing this map, else true (relayed
@@ -541,8 +541,11 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 			return;
 		} 
 		秘m = null;
+		
 		for (Map.Entry<? extends K, ? extends V> e : mOriginal.entrySet()) {
-			putVal(hash(key), e.getKey(), e.getValue(), false, evict, NOT_SIMPLE);
+	        key = e.getKey();
+	        value = e.getValue();
+			putVal(hash(key), key, value, false, evict, NOT_SIMPLE);
 		}
 	
 	}
