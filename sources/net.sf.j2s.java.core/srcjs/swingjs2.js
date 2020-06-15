@@ -13420,7 +13420,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 					//cl.$static$ && cl.$static$();
 					if (clazz.indexOf("_.") == 0)
 						J2S.setWindowVar(clazz.substring(2), cl);
-					applet.__Info.headless = (J2S._headless || isApp && !!cl.j2sHeadless);
+					applet.__Info.headless = (J2S._headless || isApp && (cl.$j2sHeadless || cl.j2sHeadless));
 					if (applet.__Info.headless) {
 						Clazz._isHeadless = "true";
 						System.out.println("j2sApplet running headlessly");
@@ -17677,7 +17677,7 @@ function(i){
 
 m$(Integer,"parseInt$S$I",
 function(s,radix){
- var v = (s.indexOf(".") >= 0 ? NaN : parseInt(s, radix));
+ var v = (s == null || s.indexOf(".") >= 0 ? NaN : parseInt(s, radix));
  if (!isNaN(v)) {
 	 // check for trailing garbage
 	 var v1 = parseInt(s + "1", radix);
@@ -17693,7 +17693,7 @@ return v;
 
 m$(Integer,"parseInt$S",
 function(s){
-	var v = +s;
+	var v = (s == null ? NaN : +s);
 	if (isNaN(v))
 		s= "?" + s; // just to ensure it gets trapped
 return Integer.parseInt$S$I(s, 10);
