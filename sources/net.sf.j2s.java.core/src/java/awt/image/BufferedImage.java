@@ -40,8 +40,6 @@ import java.awt.color.ColorSpace;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import javax.swing.SwingUtilities;
-
 import sun.awt.image.ByteComponentRaster;
 import sun.awt.image.BytePackedRaster;
 import sun.awt.image.IntegerComponentRaster;
@@ -151,38 +149,38 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 			if ((秘state & (1<< i)) != 0)
 				s += states[i] + ";";
 		}
-		return "rasterStolen=" + isDataStolen() + " " + (s == "" ? "UN" : s) 
+		return "rasterStolen=" + 秘isDataStolen() + " " + (s == "" ? "UN" : s) 
 				+ " unDisposedGraphicCount=" + gCount
 				+ " data[0]=" + (data == null ? null : Integer.toHexString(data[0]));
 	}
 	
 	@SuppressWarnings("unused")
-	private boolean havePixels() {
+	private boolean 秘havePixels() {
 		return ((秘state & STATE_HAVE_PIXELS) != 0);
 	}
 
 	@SuppressWarnings("unused")
-	private boolean havePixels8() {
+	private boolean 秘havePixels8() {
 		return ((秘state & STATE_HAVE_PIXELS8) != 0);
 	}
 
-	private boolean havePixels32() {
+	private boolean  秘havePixels32() {
 		return ((秘state & STATE_HAVE_PIXELS32) != 0);
 	}
 
-	private boolean haveImage() {
+	private boolean 秘haveImage() {
 		return ((秘state & STATE_IMAGENODE_AVAIL) != 0);
 	}
 
-	private boolean haveRaster() {
+	private boolean 秘haveRaster() {
 		return ((秘state & STATE_RASTER) != 0);
 	}
 
-	private boolean haveCanvas() {
+	private boolean 秘haveCanvas() {
 		return ((秘state & STATE_GRAPHICS) != 0);
 	}
 
-	private boolean isDataStolen() {
+	private boolean 秘isDataStolen() {
 		boolean b = raster.dataBuffer.theTrackable.getState() == sun.java2d.StateTrackable.State.UNTRACKABLE;
 		return b;
 	}
@@ -902,11 +900,16 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	}
 
 	void 秘ensureRasterUpToDate() {
-		if (isDataStolen() || !haveRaster() && 秘state != STATE_UNINITIALIZED) {
+		if (秘isDataStolen() || !秘haveRaster() && 秘state != STATE_UNINITIALIZED) {
 			秘updateStateFromHTML5Canvas(0, false);
-			秘state &= ~(STATE_GRAPHICS | STATE_IMAGENODE_AVAIL);
+			秘unsetGraphics();
 		}
 		秘state |= STATE_RASTER_AVAIL;
+	}
+
+	private void 秘unsetGraphics() {
+		秘state &= ~(STATE_GRAPHICS | STATE_IMAGENODE_AVAIL);
+		秘imgNode = null;
 	}
 
 	/**
@@ -919,10 +922,10 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		case TYPE_INT_RGB:
 		case TYPE_INT_ARGB_PRE:// #3
 		case TYPE_INT_ARGB:
-			if (havePixels32()) {
-			} else if (haveCanvas() || haveImage()) {// !秘haveFilePixels && (秘imgNode != null || 秘g != null)) {
+			if (秘havePixels32()) {
+			} else if (秘haveCanvas() || 秘haveImage()) {// !秘haveFilePixels && (秘imgNode != null || 秘g != null)) {
 				秘updateStateFromHTML5Canvas(32, false);
-			} else if (haveRaster() || 秘state == STATE_UNINITIALIZED) {
+			} else if (秘haveRaster() || 秘state == STATE_UNINITIALIZED) {
 				秘getPixelsFromRaster(32);
 			}
 			return true;
@@ -990,7 +993,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @see #setRGB(int, int, int, int, int[], int, int)
 	 */
 	public int getRGB(int x, int y) {
-		if (!isDataStolen() && (haveCanvas() 
+		if (!秘isDataStolen() && (秘haveCanvas() 
 				|| 秘state == STATE_UNINITIALIZED)
 				&& 	秘ensureCanGetRGBPixels()
 			) {
@@ -1030,8 +1033,8 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @see #setRGB(int, int, int, int, int[], int, int)
 	 */
 	public int[] getRGB(int startX, int startY, int w, int h, int[] rgbArray, int offset, int scansize) {
-		if (!isDataStolen()
-				&& (haveCanvas() || 秘state == STATE_IMAGENODE_AVAIL || 秘state == STATE_UNINITIALIZED)
+		if (!秘isDataStolen()
+				&& (秘haveCanvas() || 秘state == STATE_IMAGENODE_AVAIL || 秘state == STATE_UNINITIALIZED)
 				&& 	秘ensureCanGetRGBPixels()
 				) {
 			int[] pixels = (int[]) 秘pix;
@@ -1109,7 +1112,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @see #getRGB(int, int, int, int, int[], int, int)
 	 */
 	public synchronized void setRGB(int x, int y, int rgb) {
-		if (!isDataStolen() && (haveCanvas() 
+		if (!秘isDataStolen() && (秘haveCanvas() 
 				|| 秘state == STATE_IMAGENODE_AVAIL || 秘state == STATE_UNINITIALIZED)
 				&& 	秘ensureCanGetRGBPixels()
 				) {
@@ -1152,7 +1155,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @see #getRGB(int, int, int, int, int[], int, int)
 	 */
 	public void setRGB(int startX, int startY, int w, int h, int[] rgbArray, int offset, int scansize) {
-		if (!isDataStolen() && (haveCanvas() || 秘state == STATE_IMAGENODE_AVAIL || 秘state == STATE_UNINITIALIZED)
+		if (!秘isDataStolen() && (秘haveCanvas() || 秘state == STATE_IMAGENODE_AVAIL || 秘state == STATE_UNINITIALIZED)
 				&& 	秘ensureCanGetRGBPixels()
 				) {
 			int[] pixels = (int[]) 秘pix;
@@ -1172,7 +1175,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 				}
 			}
 		}
-		秘state &= ~(STATE_GRAPHICS | STATE_IMAGENODE_AVAIL);
+		秘unsetGraphics();
 		秘state |= STATE_RASTER_AVAIL;
 	}
 
@@ -1305,7 +1308,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @return a <code>Graphics2D</code>, used for drawing into this image.
 	 */
 	public Graphics2D createGraphics() {
-		if (haveRaster())
+		if (秘haveRaster())
 			flush();
 		return (Graphics2D) 秘getImageGraphic().create();
 // was:
@@ -1336,7 +1339,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 			秘g = new JSGraphics2D(秘canvas);
 		}
 
-		if (haveRaster()) {
+		if (秘haveRaster()) {
 			// we need to draw the image now, because it might
 			// have pixels. Note that Java actually does not
 			// allow creating a Graphics from MemoryImageSource
@@ -1371,9 +1374,9 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 
 	@Override
 	public void flush() {
-		if (isDataStolen())
+		if (秘isDataStolen())
 			秘state |= STATE_RASTER;
-		if (haveRaster() && 秘pix == null) {
+		if (秘haveRaster() && 秘pix == null) {
 			秘getPixelsFromRaster(0);
 		}
 		秘getImageGraphic();
@@ -1381,7 +1384,9 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 			秘g.dispose();
 	}
 
-	/** because we are using this in HTML5Canvas, which is a public interface
+	/** Called only in JavaScript, 
+	 * because we are using this in HTML5Canvas, which is a 
+	 * distributed public interface,
 	 * and the Mandarin char was causing problems.
 	 * 
 	 * @param node
@@ -1394,41 +1399,47 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	/**
 	 * Set the image from an external HTML5 IMG, CANVAS, or VIDEO source.
 	 * 
-	 * Do not change the signature of this method. (older) HTML5Canvas calls it as j2sNative
+	 * Do not change the signature of this method. (older) HTML5Canvas calls it as
+	 * j2sNative
 	 * 
 	 * 
 	 * @param node
-	 * @param async 
+	 * @param async
 	 */
 	public void 秘setImageNode(Object node, boolean async) {
-		Object pixels = 秘pix;
+//		Object pixels = 秘pix;
 		秘imgNode = (DOMNode) node;
-		if (秘state == STATE_VIDEO && DOMNode.getAttr(node, "tagName") == "VIDEO") {
-			
-			/**
-			 * @j2sNative
-			 * 
-			 * 			document.body.appendChild(node);
-			 * 
-			 */
-			return;
-		}
-		if (async) {
-		//秘canvas.getContext("2d").drawImage(秘imgNode = node, 0, 0, width, height);
-		// we need one clock tick to access the pixels.
-		// and we need this to happen BEFORE the rest of the EventQUeue gets loaded.
-		SwingUtilities.invokeLater(new Runnable() {
-
-			@Override
-			public void run() {
-				秘installImage((DOMNode)node, pixels);
+		if (秘state != STATE_VIDEO) {
+			if (DOMNode.getAttr(node, "tagName") == "VIDEO") {
+				// we are using a video to set the image of this object
+				秘pix = null;
+				if (秘canvas == null) {
+					// just get a canvas
+					秘getImageGraphic().dispose();
+				}
+				秘canvas.getContext("2d").drawImage(秘imgNode, 0, 0, width, height);
+			} else {
+				秘state = STATE_GRAPHICS | STATE_IMAGENODE_AVAIL;
 			}
-			
-		});
-		} else {
-			秘installImage((DOMNode)node, pixels);
 		}
-		
+
+// not nec since we have state 		
+//		if (async) {
+//		//秘canvas.getContext("2d").drawImage(秘imgNode = node, 0, 0, width, height);
+//			// we need one clock tick to access the pixels.
+//		// and we need this to happen BEFORE the rest of the EventQUeue gets loaded.
+//		JSToolkit.dispatch(new Runnable() {
+//
+//			@Override
+//			public void run() {
+//				秘installImage((DOMNode)node, pixels);
+//			}
+//			
+//		}, 1, 0);
+//		} else {
+//			秘installImage((DOMNode)node, pixels);
+//		}
+//		
 		// this did not work:
 //		
 //		/**
@@ -1439,20 +1450,20 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 //
 	}
 
-	protected void 秘installImage(DOMNode node, Object pixels) {
-		// just in case this is the first time we are doing this
-		// this does not work with a blob, however
-		秘pix = null;
-		if (秘canvas == null) {
-			Graphics g = 秘getImageGraphic(); // just get a canvas
-			g.dispose();
-		}
-		秘pix = pixels;
-		秘canvas.getContext("2d").drawImage(秘imgNode = node, 0, 0, width, height);
-		秘setImageFromHTML5Canvas(this.秘g);
-		raster.秘setStable(true);
- 		秘state |= STATE_IMAGENODE_AVAIL;
-	}
+//	protected void 秘installImage(DOMNode node, Object pixels) {
+//		// just in case this is the first time we are doing this
+//		// this does not work with a blob, however
+//		秘pix = null;
+//		if (秘canvas == null) {
+//			Graphics g = 秘getImageGraphic(); // just get a canvas
+//			g.dispose();
+//		}
+//		秘pix = pixels;
+//		秘canvas.getContext("2d").drawImage(秘imgNode = node, 0, 0, width, height);
+//		//秘setPixels((int[])pixels);
+//		raster.秘setStable(true);
+// 		秘state = STATE_GRAPHICS | STATE_IMAGENODE_AVAIL;
+//	}
 
 	/**
 	 * Get or create a DOM image node, as needed. Images could be from:
@@ -2154,7 +2165,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * 
 	 */
 	public Object get秘pixFromRaster() {
-		if (!haveRaster())
+		if (!秘haveRaster())
 			return null;		
 		SunWritableRaster r = (SunWritableRaster) raster;
 		switch (imageType) {
@@ -2296,7 +2307,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	public DOMNode 秘getImageNode(int mode) {
 		if (秘state == STATE_VIDEO)
 			return 秘imgNode;
-		if (isDataStolen())
+		if (秘isDataStolen())
 			秘state |= STATE_RASTER_AVAIL;
 		
 		// If we have raster data and are not forcing, return the canvas if it exists.
@@ -2306,10 +2317,10 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		switch (mode) {
 		default:
 		case GET_IMAGE_ALLOW_NULL:
-			return isDataStolen() ? null : (DOMNode) (haveRaster() || 秘canvas != null ? 秘canvas
-					: 秘imgNode != null ? 秘imgNode : createImageNode());
+			return 秘haveImage() ? 秘imgNode : 秘isDataStolen() ? null : (DOMNode) (秘haveRaster() || 秘canvas != null ? 秘canvas
+				 : createImageNode());
 		case GET_IMAGE_FOR_ICON:
-			if (!isDataStolen())
+			if (!秘isDataStolen())
 				return (DOMNode) (秘canvas != null ? 秘canvas : 秘imgNode != null ? 秘imgNode : createImageNode());
 			// $fall-through$
 		case GET_IMAGE_FROM_RASTER:
@@ -2318,7 +2329,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 			秘g = null;
 			秘getImageGraphic();
 			DOMNode canvas = 秘g.getCanvas();
-			秘state &= ~(STATE_GRAPHICS | STATE_IMAGENODE_AVAIL);
+			秘unsetGraphics();
 			// only a temporary creation, since we don't know if the raster will change
 			秘g = null;
 			return canvas;

@@ -11,8 +11,10 @@ import javax.swing.JComponent;
 import javax.swing.JList;
 
 import swingjs.api.js.JSFunction;
+import swingjs.JSEvent;
 import swingjs.JSKeyEvent;
 import swingjs.JSMouse;
+import swingjs.JSToolkit;
 import swingjs.api.js.DOMNode;
 import swingjs.api.js.JQueryObject;
 
@@ -100,6 +102,7 @@ class JSComboPopupList extends JList {
 			} catch (Throwable t) {
 				// ignore
 			}
+			JSPopupMenuUI.hideMenusAndToolTip();
 			return;
 		}
 		if (j2scb == null)
@@ -257,9 +260,22 @@ class JSComboPopupList extends JList {
 		case "mouseover":
 			return;
 		case "mouse":
-			Object jqEvent = /** @j2sNative event.originalEvent || */
+			JSEvent jqEvent = /** @j2sNative event.originalEvent || */
 					null;
-			JSMouse.retargetMouseEvent(jqEvent, null, cbui.comboBox, this, 0);
+			switch (/** @j2sNative jqEvent.type || */"") {
+			case "mousemove":
+				JSMouse.retargetMouseEvent(jqEvent, null, cbui.comboBox, JSComboPopupList.this, 0);
+				break;
+			case "mouseup":
+				JSToolkit.dispatch(new Runnable() {
+					@Override
+					public void run() {
+						JSMouse.retargetMouseEvent(jqEvent, null, cbui.comboBox, JSComboPopupList.this, 0);
+						setVisible(false, false);
+					}
+				}, 10, 0);
+				break;
+			}
 			return;
 		}
 	}

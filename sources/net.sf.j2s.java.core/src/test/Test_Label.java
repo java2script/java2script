@@ -194,9 +194,14 @@ public class Test_Label extends JPanel implements MenuListener, ItemListener {
 //		rb3.setHorizontalTextPosition(SwingConstants.RIGHT);
 
 		ImageIcon icon1 = new ImageIcon("test/zoom.gif");
-		JLabel l = new JLabel("TEST?", icon1, SwingConstants.LEADING);
+		// either <br> or <br/> is fine.
+		JLabel l = new JLabel("<html>this is<br/>a<br> test</html>", null, SwingConstants.LEADING);
 		l.setBounds(300,300,20,20);
 		add(l);
+//
+//		l = new JLabel("<html>this is<br>a test</html>", null, SwingConstants.LEADING);
+//		l.setBounds(300,400,20,20);
+//		add(l);
 
 		ImageIcon icon2 = new ImageIcon("test/zoom.gif");
 		JButton ib = new JButton(icon2);

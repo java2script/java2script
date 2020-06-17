@@ -1,9 +1,12 @@
 package swingjs.plaf;
 
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Insets;
 
 import javax.swing.JComponent;
 
+import swingjs.JSGraphics2D;
 import swingjs.api.js.DOMNode;
 
 public class JSPopupUI extends JSWindowUI {
@@ -16,20 +19,31 @@ public class JSPopupUI extends JSWindowUI {
 	@Override
 	public DOMNode updateDOMNode() {
 		if (domNode == null) {
-		  hasBeenVisible = false;	
+			hasBeenVisible = false;
 		}
-		return super.updateDOMNode();
+		super.updateDOMNode();
+		return domNode;
 	}
 	
 	private Boolean isToolTip;
 	
 	boolean hasBeenVisible;
 
+	private Component toolTip;
+
 	@Override
 	public void setVisible(boolean b) {
 		super.setVisible(b);
 		if (b && !hasBeenVisible && isToolTip()) {
-			$("body > .swingjs-tooltip").remove();			
+			Color col = toolTip.getBackground();
+			if (col != null) {
+				jc.setOpaque(true);
+				allowPaintedBackground = false;
+				jc.setBackground(col);
+				String cc = toCSSString(col);
+				DOMNode.setStyles(outerNode, "background", cc);
+			}
+			$("body > .swingjs-tooltip").remove();
 			$(outerNode).addClass("swingjs-tooltip");
 			jc.setOpaque(true);
 			setZ(Integer.MAX_VALUE);
@@ -46,16 +60,19 @@ public class JSPopupUI extends JSWindowUI {
 		}
 	}
 	
-	private boolean isToolTip() {
-		if (isToolTip == null)
-			isToolTip = (((JComponent) window).getRootPane().getContentPane()
-				.getComponent(0) instanceof javax.swing.JToolTip);
+	private Boolean isToolTip() {
+		if (isToolTip == null) {
+			Component c = ((JComponent) window).getRootPane().getContentPane().getComponent(0);
+			isToolTip = (c instanceof javax.swing.JToolTip);
+			if (isToolTip)
+				toolTip = c;
+		}
 		return isToolTip;
 	}
 
 	@Override
 	public Insets getInsets() {
-		return (isToolTip() ? new Insets(5, 5, 5, 5) : zeroInsets);
+		return (isToolTip() ? new Insets(2,2,2,2) : zeroInsets);
 	}
 
 }

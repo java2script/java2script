@@ -135,6 +135,7 @@ import org.eclipse.jdt.core.dom.WildcardType;
 
 // TODO: superclass inheritance for JAXB XmlAccessorType
 
+//BH 2020.06.17 -- 3.2.9-v1j fix for functional interface this::privateMethod
 //BH 2020.05.01 -- 3.2.9-v1i fix for nested lambda methods
 //BH 2020.04.26 -- 3.2.9-v1h fix for inner classes of interfaces duplicated; fix for api.js inner class method names unqualified
 //BH 2020.04.15 -- 3.2.9-v1g fix for qualified super() in inner classes using Class.super_ call (Tracker)
@@ -1614,7 +1615,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 						|| "java.lang.Class".equals(removeBracketsAndFixNullPackageName(declaringClassJavaClassName)) // String.class::cast
 				) // BH Added 2019.05.13
 						&& lambdaArity == mBinding.getParameterTypes().length));
-				String opening = (classIsTarget ? "$$." : "t.") + finalMethodNameWith$Params + ".apply("
+				String opening = (!classIsTarget ? "t." : isPrivate ? "" : "$$.") + finalMethodNameWith$Params + ".apply("
 						+ (isStatic ? "null" : classIsTarget ? "$$" : "t") + ",[";
 				buffer.append(opening);
 				buffer.append(getLambdaParamList(mBinding, lambdaArity));

@@ -7,6 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2020.06.03 sets user.home and user.dir to /TEMP/swingjs, and user.name to "swingjs"
 // BH 2020.04.01 2.2.0-v1e fixes missing C$.superclazz when class loaded from core
 // BH 2020.03.19 3.2.9-v1c fixes new String("xxx") !== "xxx"
 // BH 2020.03.11 3.2.9-v1b fixes numerous subtle issues with boxed primitives Integer, Float, etc.
@@ -3311,9 +3312,9 @@ var fixAgent = function(agent) {return "" + ((agent = agent.split(";")[0]),
 			"os.name" : fixAgent(navigator.userAgent).split("(")[0],
 			"os.version": fixAgent(navigator.appVersion).replace(fixAgent(navigator.userAgent), ""),
 			"path.separator" : ":",
-			"user.dir" : "https://.",
-			"user.home" : "https://.",
-			"user.name" : "user",
+			"user.dir" : "/TEMP/swingjs",
+			"user.home" : "/TEMP/swingjs",
+			"user.name" : "swingjs",
 			"javax.xml.datatype.DatatypeFactory" : "swingjs.xml.JSJAXBDatatypeFactory",
 			"javax.xml.bind.JAXBContextFactory" : "swingjs.xml.JSJAXBContextFactory"	
 	}
@@ -3687,7 +3688,7 @@ function(i){
 
 m$(Integer,"parseInt$S$I",
 function(s,radix){
- var v = (s.indexOf(".") >= 0 ? NaN : parseInt(s, radix));
+ var v = (s == null || s.indexOf(".") >= 0 ? NaN : parseInt(s, radix));
  if (!isNaN(v)) {
 	 // check for trailing garbage
 	 var v1 = parseInt(s + "1", radix);
@@ -3703,7 +3704,7 @@ return v;
 
 m$(Integer,"parseInt$S",
 function(s){
-	var v = +s;
+	var v = (s == null ? NaN : +s);
 	if (isNaN(v))
 		s= "?" + s; // just to ensure it gets trapped
 return Integer.parseInt$S$I(s, 10);

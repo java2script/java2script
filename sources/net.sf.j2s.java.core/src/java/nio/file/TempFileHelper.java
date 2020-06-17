@@ -33,8 +33,9 @@ import java.io.IOException;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
-import java.security.SecureRandom;
+//import java.security.SecureRandom;
 import java.util.EnumSet;
+import java.util.Random;
 import java.util.Set;
 
 
@@ -54,7 +55,7 @@ class TempFileHelper {
         FileSystems.getDefault().supportedFileAttributeViews().contains("posix");
 
     // file name generation, same as java.io.File for now
-    private static final SecureRandom random = new SecureRandom();
+    private static final Random random = new Random();
     private static Path generatePath(String prefix, String suffix, Path dir) {
         long n = random.nextInt();// was nextLong();
         n = (n == Long.MIN_VALUE) ? 0 : Math.abs(n);

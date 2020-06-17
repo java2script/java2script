@@ -2745,7 +2745,7 @@ public abstract class JComponent extends Container {
 		 * component twice.
 		 */
 		Container parent = this;
-		while (parent != null && !parent.isWindowOrJSApplet()) {
+		while (parent != null && (parent instanceof JInternalFrame || !parent.isWindowOrJSApplet())) {
 			if (parent instanceof JComponent) {
 				if (((JComponent) parent).processKeyBinding(ks, e,
 						WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, pressed))
@@ -2758,10 +2758,10 @@ public abstract class JComponent extends Container {
 			// JInternalFrame's children vs the
 			// WHEN_ANCESTOR_OF_FOCUSED_COMPONENT bindings of the parents.
 			// maybe generalize from JInternalFrame (like isFocusCycleRoot).
-			// if ((parent instanceof JInternalFrame) &&
-			// JComponent.processKeyBindingsForAllComponents(e,parent,pressed)){
-			// return true;
-			// }
+			 if ((parent instanceof JInternalFrame) &&
+			 JComponent.processKeyBindingsForAllComponents(e,parent,pressed)){
+				 return true;
+			 }
 			parent = parent.getParent();
 		}
 

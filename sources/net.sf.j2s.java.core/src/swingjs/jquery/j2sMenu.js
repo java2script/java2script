@@ -202,12 +202,17 @@ J2S.__makeMenu = function(){};
 		 n||(n = me.active || me.activeMenu);
 		 if (isDisabled(n))
 			 return;
+		 var item = n[0].firstElementChild;
+		 var li = n;
 		 n = e.extend({of:n},me.options.position);
-		 var ui = me.activeMenu && me.activeMenu[0] && me.activeMenu[0]["data-ui"];
-	 	 ui && ui.processJ2SMenuCmd$OA([trigger,me,null,t.parent(),n,why]);
 		 me._stopT("opening");
 		 clearMe(me.timer, trigger);
-		 me.refresh("_openSubmenu",n);
+		 var ui = me.activeMenu && me.activeMenu[0] && me.activeMenu[0]["data-ui"];
+	 	 ui && ui.processJ2SMenuCmd$OA([trigger,me,null,t.parent(),n,why]);
+		 // adds role=xxxx
+	 	 me.refresh("_openSubmenu",n);
+		 // adds mouse binding to role=menuitem
+	 	 ensureMouseSet(item._menu, li);
 		 var v = me.element.find(".ui-j2smenu").not(t.parents(".ui-j2smenu"));
 		 doCmd("_hide", me, v);
 		 try {
@@ -600,14 +605,22 @@ Swing.updateMenu = function(menu, andShow) {
     var m = menu.$ulTop.j2smenu({delay:100, jPopupMenu: menu});
     m.j2smenu('refresh');  
     // this next is critical for SwingJS
-    var v = menu.$ulTop.find("[role=menuitem]");
-    for (var i = v.length; --i >= 0;)
-    	setMouseMenuItem(menu, v[i]);
 	menu._tainted = false;
 }
 
 Swing.getInstance = function(menu) {
 	return menu.$ulTop.data("ui-j2smenu");
+}
+
+var ensureMouseSet = function(menu, node) {
+	// allow mouseup and other events to do their job
+	// for all JMenu and JMenuItem entries
+    var v = node.find("[role=menuitem]");
+    for (var i = v.length; --i >= 0;) {
+    	if (v[i]._menu != menu) {
+    		setMouseMenuItem(menu, v[i]);
+    	}
+    }
 }
 
 var setMouseMenuItem = function(menu, node) {
@@ -632,6 +645,7 @@ Swing.showMenu = function(menu, x, y) {
   
   if (menu._tainted)
 	  Swing.updateMenu(menu);
+  ensureMouseSet(menu, menu.$ulTop);
   menu.setPosition(x, y);
   menu.$ulTop.hide().j2smenu("setClickOut").show();  
   menu._visible = true;
@@ -658,6 +672,8 @@ Swing.disposeMenu = function(menu) {
     for (var i = v.length; --i >= 0;) {
         v[i].applet = menu.ui.applet;
         J2S.unsetMouse(v[i]);
+//??        v[i]._frameViewer = null;
+//??        v[i]._menu = null;
     }
 	delete menu._applet._menus[menu._j2sname];
 }
@@ -668,4 +684,4 @@ Swing.disposeMenu = function(menu) {
 })(J2S.Swing, J2S.__$);
 
 
-// end of j2sMenu.js 2020.05.15  2020.01.25
+// end of j2sMenu.js 2020.06.09 2020.05.15  2020.01.25

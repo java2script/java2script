@@ -441,7 +441,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		firstColumn.setBounds(100, 40, 200, 500);
 
 		JMenuItem cb3m = new JMenuItem("tooltiptest");// XXleading,left-to-rightXX");
-		cb3m.setToolTipText("testing");
+		cb3m.setToolTipText("THIS IS A TEST");
 		cb3m.setFont(font);
 		cb3m.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 		cb3m.setHorizontalTextPosition(SwingConstants.LEADING);

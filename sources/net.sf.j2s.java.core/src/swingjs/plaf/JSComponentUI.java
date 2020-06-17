@@ -52,8 +52,6 @@ import javax.swing.event.ChangeListener;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.UIResource;
 
-import swingjs.api.js.JSFunction;
-import javajs.util.PT;
 import sun.awt.CausedFocusEvent.Cause;
 import swingjs.JSFocusPeer;
 import swingjs.JSGraphics2D;
@@ -64,6 +62,7 @@ import swingjs.api.js.HTML5Applet;
 import swingjs.api.js.J2SInterface;
 import swingjs.api.js.JQuery;
 import swingjs.api.js.JQueryObject;
+import swingjs.api.js.JSFunction;
 
 /**
  * The JSComponentUI subclasses are where all the detailed HTML5 implementation
@@ -836,14 +835,19 @@ public class JSComponentUI extends ComponentUI
 		addClass(node, "swingjs-ui");
 	}
 
-	@SuppressWarnings("unused")
 	protected static void hideMenusAndToolTip() {
 		if (isMenuOpen)
 			JSPopupMenuUI.closeAllMenus();
+		hideTooltip();
+	}
+	
+	@SuppressWarnings("unused")
+	protected static void hideTooltip() {
 		if (/** @j2sNative javax.swing.ToolTipManager ||*/false)
 			ToolTipManager.j2sHideToolTip();
 	}
-	
+
+
 	protected void addClass(DOMNode node, String cl) {
 		$(node).addClass(cl);
 	}
@@ -888,7 +892,7 @@ public class JSComponentUI extends ComponentUI
 
 	/**
 	 * Set j2sApplet to capture jQuery mouse events and turn them into Java MouseEvents. 
-	 * Used by JSFrameUI and JTextArea to indicate that it is to be the "currentTarget" for mouse 
+	 * Used by JSWindowUI and JTextArea to indicate that it is to be the "currentTarget" for mouse 
 	 * clicks. 
 	 */
 	protected void setJ2sMouseHandler() {
@@ -1099,8 +1103,14 @@ public class JSComponentUI extends ComponentUI
 	 * @param focusGained 
 	 */
 	public void handleJSFocus(Object jco, Object related, boolean focusGained) {
+		setThread();
 		JSFocusPeer.handleJSFocus(jco, related, focusGained);
 	}
+
+	protected void setThread() {
+		JSToolkit.setThreadForViewer(jc.getFrameViewer());
+	}
+
 
 	/**
 	 * Internal: Directly fire KFM events for button press from JComponent.doClick() 
@@ -1201,9 +1211,13 @@ public class JSComponentUI extends ComponentUI
 		/**
 		 * @j2sNative
 		 * 
-		 * f = function(jqevent) { return me.handleJSEvent$O$I$O(node, eventID, jqevent) }
+		 * f = function(jqevent) {
+		 *   me.setThread$(); 
+		 *   return me.handleJSEvent$O$I$O(node, eventID, jqevent);
+		 *  }
 		 */
 		{
+			setThread();
 			me.handleJSEvent(null, 0, null); // Eclipse reference only; not in
 											// JavaScript
 		}
@@ -1838,6 +1852,7 @@ public class JSComponentUI extends ComponentUI
 	protected Rectangle getBoundingRect(DOMNode node) {
 		if (tempDiv == null) {
 			tempDiv = DOMNode.createElement("div", "_temp");
+			DOMNode.setStyles(tempDiv,  "display", "inline-block");
 			DOMNode.setTopLeftAbsolute(tempDiv, 0, -100000);
 			$(body).after(tempDiv);
 		}
@@ -2463,7 +2478,14 @@ public class JSComponentUI extends ComponentUI
 		// complement them
 		setMnemonic(-1);
 		actualWidth = actualHeight = 0;
-		text = fixText(currentText = text);
+		// need to know if HTML here
+		
+		currentText = text;		
+		isHTML = (text != null && (text.indexOf("<html>") == 0
+				|| jc.getClientProperty("html") != null
+				|| mnemonicIndex >= 0));
+		text = fixText(text);
+			
 		currentGap = gap;
 		currentIcon = null;
 		imageNode = null;
@@ -2531,18 +2553,14 @@ public class JSComponentUI extends ComponentUI
 				if (gap != 0 && text != null)
 					DOMNode.addHorizontalGap(iconNode, gap);
 			}
-			isHTML = false;
 			if (text.indexOf("<html>") == 0) {
-				isHTML = true;
 				// PhET uses <html> in labels and uses </br>
 				text = text.substring(6).replaceAll("</br>", "");
 				text = text.replaceAll("</html>", "");
 				text = text.replaceAll("href=", "target=_blank href=");
 			} else if (jc.getClientProperty("html") != null) {
-				isHTML = true;
 			} else if (mnemonicIndex >= 0) {
 				int i = mnemonicIndex;
-				isHTML = true;
 				if (i < text.length())
 					text = text.substring(0, i) + "<u>" + text.substring(i, i + 1) + "</u>" + text.substring(i + 1);
 			}
@@ -2790,9 +2808,9 @@ public class JSComponentUI extends ComponentUI
 		Object cssIcon = getJSObject();
 
 		addJSKeyVal(cssCtr, "position", "absolute", "top", null, "left", null, "transform", null, "width", (isHTML && isLabel ? "inherit" : wCtr + "px"),
-				"height", hCtr + "px");
+				"height", hCtr + "px", "display",(isLabel ? "inline-block" : null));
 		addJSKeyVal(cssIcon, "position", "absolute", "top", null, "left", null, "transform", null);
-		addJSKeyVal(cssTxt, "position", "absolute", "top", null, "left", null, "transform", null);
+		addJSKeyVal(cssTxt, "position", "absolute", "display",(isLabel ? "inline-block" : null), "top", null, "left", null, "transform", null);
 		// checkboxes and radiobuttons (i.e. with actionNodes) should not be fully centered unless in a table
 		isFullyCentered = (alignHCenter && alignVCenter && wIcon == 0 
 				|| wText == 0 && (actionNode == null || this.cellComponent != null || isSimpleButton) && margins.left == margins.right
@@ -2870,7 +2888,7 @@ public class JSComponentUI extends ComponentUI
 			h = c.getHeight();
 
 			if (h == 0) {
-				h = 16; // fallback -- actually, this is a real problem.
+				h = hCtr; // fallback -- tooltip
 			}
 
 			if (menuAnchorNode == null) {
@@ -3579,11 +3597,13 @@ public class JSComponentUI extends ComponentUI
 	}
 	
 	public void paintBackground(JSGraphics2D g) {
+		Color color = (this.backgroundColor == null ? getBackground() : this.backgroundColor);
+		if (color == null)
+			return;
 		boolean isOpaque = c.isOpaque();
 		boolean paintsSelf = jc.秘paintsSelf();
 		// System.out.println("paintback " + this.id + " " + (/** @j2sNative
 		// this.jc.text||*/"")+ " " + isOpaque + " " + paintsSelf + " " + g);
-		Color color = (this.backgroundColor == null ? getBackground() : this.backgroundColor);
 		if (g == null) {
 			if (!paintsSelf)
 				setBackgroundDOM(domNode, color);

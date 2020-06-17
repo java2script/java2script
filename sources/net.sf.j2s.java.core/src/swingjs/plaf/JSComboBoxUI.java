@@ -53,6 +53,7 @@ import swingjs.api.js.JSFunction;
 import sun.awt.AppContext;
 import sun.swing.DefaultLookup;
 import sun.swing.UIAction;
+import swingjs.JSFocusPeer;
 import swingjs.JSKeyEvent;
 import swingjs.JSMouse;
 import swingjs.JSUtil;
@@ -2085,4 +2086,11 @@ public class JSComboBoxUI extends JSLightweightUI {
 	}
 
 	
+	@Override
+	public void handleJSFocus(Object jco, Object related, boolean focusGained) {
+		// trouble is that moving focus to the dropdown 
+		if (focusGained)
+			super.handleJSFocus(jco, related, focusGained);
+	}
+
 }
