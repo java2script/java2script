@@ -1399,33 +1399,34 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	/**
 	 * Set the image from an external HTML5 IMG, CANVAS, or VIDEO source.
 	 * 
-	 * Do not change the signature of this method. (older) HTML5Canvas calls it as j2sNative
+	 * Do not change the signature of this method. (older) HTML5Canvas calls it as
+	 * j2sNative
 	 * 
 	 * 
 	 * @param node
-	 * @param async 
+	 * @param async
 	 */
 	public void 秘setImageNode(Object node, boolean async) {
 //		Object pixels = 秘pix;
 		秘imgNode = (DOMNode) node;
- 		秘state = STATE_GRAPHICS | STATE_IMAGENODE_AVAIL;
+		if (秘state != STATE_VIDEO) {
+			if (DOMNode.getAttr(node, "tagName") == "VIDEO") {
+				// we are using a video to set the image of this object
+				秘pix = null;
+				if (秘canvas == null) {
+					// just get a canvas
+					秘getImageGraphic().dispose();
+				}
+				秘canvas.getContext("2d").drawImage(秘imgNode, 0, 0, width, height);
+			} else {
+				秘state = STATE_GRAPHICS | STATE_IMAGENODE_AVAIL;
+			}
+		}
 
-// debugging only
-//		if (秘state == STATE_VIDEO && DOMNode.getAttr(node, "tagName") == "VIDEO") {
-//			
-//			/**
-//			 * @j2sNative
-//			 * 
-//			 * 			document.body.appendChild(node);
-//			 * 
-//			 */
-//			return;
-//		}
- 		
 // not nec since we have state 		
 //		if (async) {
 //		//秘canvas.getContext("2d").drawImage(秘imgNode = node, 0, 0, width, height);
-//		// we need one clock tick to access the pixels.
+//			// we need one clock tick to access the pixels.
 //		// and we need this to happen BEFORE the rest of the EventQUeue gets loaded.
 //		JSToolkit.dispatch(new Runnable() {
 //

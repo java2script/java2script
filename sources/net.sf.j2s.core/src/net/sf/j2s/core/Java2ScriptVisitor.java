@@ -1614,7 +1614,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 						|| "java.lang.Class".equals(removeBracketsAndFixNullPackageName(declaringClassJavaClassName)) // String.class::cast
 				) // BH Added 2019.05.13
 						&& lambdaArity == mBinding.getParameterTypes().length));
-				String opening = (classIsTarget ? "$$." : "t.") + finalMethodNameWith$Params + ".apply("
+				String opening = (!classIsTarget ? "t." : isPrivate ? "" : "$$.") + finalMethodNameWith$Params + ".apply("
 						+ (isStatic ? "null" : classIsTarget ? "$$" : "t") + ",[";
 				buffer.append(opening);
 				buffer.append(getLambdaParamList(mBinding, lambdaArity));

@@ -44,7 +44,18 @@ import swingjs.api.JSUtilI;
 		}
 
 	}
+	
  * </code>
+ * 
+ * In the Info object, these would be defined using objects:
+ * 
+ * <code>
+ * assets: [{name:"osp", zipPath:"osp-assets.zip", classPath:"org/opensourcephysics/resources"},
+ * 	        {name:"tracker",zipPath:"tracker-assets.zip",classPath:"org/opensourcephysics/cabrillo/tracker/resources"},
+ *          {name:"physlets", zipPath:"physlet-assets.zip", classPaths: ["opticsimages", "images"]}],
+ * </code>
+ * 
+ * Note the use of "classPaths" not "classPath" when an array is used to indicate multiple paths
  * 
  * It is not clear that Java is well-served by this zip-file loading, but
  * certainly JavaScript is. What could be 100 downloads is just one, and SwingJS
