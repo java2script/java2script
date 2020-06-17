@@ -336,17 +336,21 @@ public class JSToolkit extends SunToolkit
 		 */		
 	}
 
-	public static JSThread getCurrentThread(JSThread t) {
+	/**
+	 * Set Thread.秘thisThread to be associated with the appropriate
+	 * app before processing a system event. 
+	 * 
+	 * @param t
+	 * @return
+	 */
+	private static JSThread getCurrentThread(JSThread t) {
 		boolean setCurrent = (t != null);
 		if (t == null)
 			t = Thread.秘thisThread;
 		t = (/** @j2sNative !self.java || */
 		t.getThreadGroup().秘systemExited ? null : t);
-		
-		//System.out.println("JSToolkit current was " + Thread.秘thisThread);
 		if (setCurrent && t != null)
 			Thread.秘thisThread = t;
-		//System.out.println("JSToolkit current now " + Thread.秘thisThread);
 		return t;
 	}
 
@@ -1028,5 +1032,20 @@ public class JSToolkit extends SunToolkit
 	public int getMenuShortcutKeyMask()  {
         return (isMac ? Event.META_MASK : Event.CTRL_MASK);
     }
+
+    /**
+     * The appropriate thread for an applet is considered to be the first
+     * thread that it was created with. This thread is saved in the
+     * JSAppletViewer instance as myThread.
+     * 
+     * @param viewer
+     */
+	public static void setThreadForViewer(JSFrameViewer viewer) {
+		if (viewer != null && viewer.appletViewer != null 
+				&& viewer.appletViewer != Thread.currentThread().getThreadGroup().秘appletViewer) {
+			getCurrentThread(viewer.appletViewer.myThread);
+		}
+
+	}
 
 }

@@ -96,7 +96,7 @@ J2S.__makeComboBox = function() {
         // important to add popup after body so that it does not take on any body attributes 
         $('body').after(this.popup);
         this.updateCSS();    	
-        this.on( [this.head, this.btn, this.cont], { click: '_open' });
+        this.on( [this.head, this.btn, this.cont], { click: '_tog' });
         this.on( [this.popup, this.list], {mouseover: '_stopT' });
         this.on( [this.cont, this.head, this.btn, this.popup, this.list], {
         	mouseleave: '_close'//,
@@ -232,6 +232,15 @@ J2S.__makeComboBox = function() {
       	this._overOpt(i >= 0 ? this.list[0].children[i] : null);  
         },
       showPopup: function() { this._open(null);},
+      _tog: function(e) {
+    	  if (this.popup.css("display") == "block") {
+    		  this.hidePopup();
+    	  } else {
+    		  var me = this;
+    		setTimeout(function(){ me._open(e) },100);
+    	  }
+    	  return false;
+      },
   	  _open: function(e) {
   		this.cont.focus();
   		if (this.options.disabled)

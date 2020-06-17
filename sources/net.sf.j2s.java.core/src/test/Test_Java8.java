@@ -16,6 +16,8 @@ import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import javax.swing.JButton;
+
 import test.baeldung.doublecolon.Computer;
 import test.baeldung.doublecolon.MacbookPro;
 
@@ -41,6 +43,15 @@ public class Test_Java8 extends Test_ implements PropertyChangeListener {
 
 	public Test_Java8() {
 		System.out.println("null constructor");
+		
+		JButton fileButton = new JButton();
+		fileButton.addActionListener(this::openFileDialog);		
+
+	}
+
+
+private	 void openFileDialog(java.awt.event.ActionEvent event) {
+		System.out.println("OK");
 	}
 
 	public Test_Java8(String s) {

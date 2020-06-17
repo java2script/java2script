@@ -8,10 +8,12 @@ import java.awt.event.ActionListener;
 import java.util.function.Function;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.UIManager;
 
 import javajs.async.SwingJSUtils.StateHelper;
 import javajs.async.SwingJSUtils.StateMachine;
@@ -32,6 +34,7 @@ public class ProgressBarSimpleDemo {
 
 	private final State state;
 	protected long delaySynchronous = 1000;
+	private JCheckBox jcb;
 
 	ProgressBarSimpleDemo(int min, int max, boolean asynchronous) {
 
@@ -43,6 +46,8 @@ public class ProgressBarSimpleDemo {
 		progressBar = new JProgressBar(min, max);
 		progressBar.setString("Not running");
 		progressBar.setStringPainted(true);
+		progressBar.setBackground(Color.red);
+		progressBar.setForeground(Color.yellow);
 
 		JFrame frame = new JFrame("Progress Bar with Thread");
 		frame.setLayout(new BorderLayout());
@@ -54,7 +59,6 @@ public class ProgressBarSimpleDemo {
 
 		JButton button = new JButton();
 		button.setText("Count");
-
 		button.addActionListener(new ActionListener() {
 
 			@Override
@@ -66,6 +70,9 @@ public class ProgressBarSimpleDemo {
 		panel.add(label);
 		panel.add(button);
 
+		jcb = new JCheckBox("indet");
+		panel.add(jcb);
+		
 		JPanel sliderPanel = new JPanel();
 		sliderPanel.setBackground(Color.GREEN);
 		sliderPanel.setSize(300, 50);
@@ -81,6 +88,7 @@ public class ProgressBarSimpleDemo {
 
 	void count() {
 		count = 0;
+		progressBar.setIndeterminate(jcb.isSelected());
 		progressBar.setString("Running");
 		System.out.println("\nCounting");
 		longJob();

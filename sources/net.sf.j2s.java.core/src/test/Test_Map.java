@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Spliterator;
+import java.util.TreeMap;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -97,6 +98,9 @@ class Test_Map extends Test_ {
 		System.out.println(System.identityHashCode(new String("test")));
 		System.out.println(System.identityHashCode(new String("test")));
 		System.out.println(System.identityHashCode(new String("test")));
+
+		testMap();
+		
 		testSets(); 
 		
 		testIdentity();
@@ -105,6 +109,46 @@ class Test_Map extends Test_ {
 //		testPerformance();
 		
 		System.out.println("Test_Map OK");
+	}
+
+	private static void testMap() {
+		LinkedHashMap<String, String> hm = new LinkedHashMap<>();
+		hm.put("key1",  "v1");
+		hm.put("key3",  "v3");
+		hm.put("key2",  "v2");
+		
+		LinkedHashMap<String, String> hm1 = (LinkedHashMap<String, String>) hm.clone();
+		
+		assert(hm1.get("key1") == "v1");	
+		assert(hm1.get("key2") == "v2");
+		assert(hm1.get("key3") == "v3");
+		
+		for (String k : hm.keySet()) {
+			System.out.println(k);
+		}
+		
+		
+		LinkedHashMap<Object, String> hm2 = new LinkedHashMap<>();
+		hm2.put(new int[] {1,2,3}, "[123]");
+		hm2.put(new int[] {2, 3, 4}, "[234]");
+		System.out.println(hm2.get(new int[] {1,2,3}));
+
+		TreeMap<String, String> hm3 = new TreeMap<>();
+		hm3.put("key1",  "v1");
+		hm3.put("key3",  "v3");
+		hm3.put("key2",  "v2");
+		
+		assert(hm3.get("key1") == "v1");	
+		assert(hm3.get("key2") == "v2");
+		assert(hm3.get("key3") == "v3");
+
+		String k0 = "key0";
+		for (String k : hm3.keySet()) {
+			System.out.println(k);
+			assert (k0.compareTo(k) == -1);
+			k0 = k;
+		}
+		
 	}
 
 	class MySet {

@@ -16,10 +16,10 @@
    	</concat>
 
    	<echo>copying srcjs files into site</echo>
-    <copy todir="site/swingjs">
+    <copy todir="${site.path}">
       <fileset dir="srcjs"/>
     </copy>
-   		
+
    	<!-- make core files -->
  
    	<echo>creating and compressing core files - warnings are OK; "does not exist" is trouble</echo>
@@ -30,6 +30,9 @@
    	
    	<echo>copying _j2sclasslist.txt into dist/</echo>
     <copy todir="dist" file="_j2sclasslist.txt" />
+ 
+   	<echo>copying differences.txt into dist/</echo>
+    <copy todir="dist" file="doc/differences.txt" />
  
     <antcall target="call-core">
         <param name="call-core.name" value="swingjs" />

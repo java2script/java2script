@@ -1,5 +1,6 @@
 package javajs.async;
 
+import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,7 +44,18 @@ import swingjs.api.JSUtilI;
 		}
 
 	}
+	
  * </code>
+ * 
+ * In the Info object, these would be defined using objects:
+ * 
+ * <code>
+ * assets: [{name:"osp", zipPath:"osp-assets.zip", classPath:"org/opensourcephysics/resources"},
+ * 	        {name:"tracker",zipPath:"tracker-assets.zip",classPath:"org/opensourcephysics/cabrillo/tracker/resources"},
+ *          {name:"physlets", zipPath:"physlet-assets.zip", classPaths: ["opticsimages", "images"]}],
+ * </code>
+ * 
+ * Note the use of "classPaths" not "classPath" when an array is used to indicate multiple paths
  * 
  * It is not clear that Java is well-served by this zip-file loading, but
  * certainly JavaScript is. What could be 100 downloads is just one, and SwingJS
@@ -361,7 +373,7 @@ public class Assets {
 		try {
 			URL url = getInstance()._getURLFromPath(path, true);
 			if (url == null && !zipOnly) {
-				url = Assets.class.getResource(path);
+				url = Assets.class.getClassLoader().getResource(path);
 			}
 			if (url != null)
 				return url.openStream();

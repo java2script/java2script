@@ -24,6 +24,8 @@ import java.util.function.Function;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JComponent;
 import javax.swing.plaf.ComponentUI;
 
@@ -108,8 +110,12 @@ public class JSUtil implements JSUtilI {
 	 * @return
 	 */
 	public static Object removeCachedFileData(String path) {
-		return (getFileCache() != null ?
-					fileCache.put(fixCachePath(path), Boolean.FALSE) : null);
+		if (getFileCache() == null)
+			return null;
+		path = fixCachePath(path);
+		return (("/" + path).startsWith(File.temporaryDirectory)
+				? fileCache.remove(path) 
+				: fileCache.put(path, Boolean.FALSE));
 	}
 
 
@@ -887,6 +893,10 @@ public class JSUtil implements JSUtilI {
 	}
 
 	@Override
+	public void setAppClass(Object app) {
+		getApplet()._setAppClass(app);
+	}
+	@Override
 	public boolean setURLBytes(URL url, Object isOrBytes) {
 		return setFileBytesStatic((File)(Object) url, isOrBytes);
 	}
@@ -917,6 +927,7 @@ public class JSUtil implements JSUtilI {
 		if (f instanceof URL) {
 			((URL) f)._streamData = bytes;
 		} else {
+			// could also be a path
 			File outFile = (File) f;
 			outFile.秘bytes = bytes;
 			if (outFile.秘isTempFile) {
@@ -958,13 +969,24 @@ public class JSUtil implements JSUtilI {
 	public Object getAppletInfo(String infoKey) {
 		@SuppressWarnings("unused")
 		HTML5Applet applet = getApplet();
+		Object info = getAppletAttribute("__Info");
+		if (infoKey != null) {
 		/** @j2sNative
 		 * 
-		 * var val = applet.__Info[infoKey];
-		 * return (val == null ? null : val);
-		 */ {
-			 return null;
-		 	}
+		 * info = info[infoKey];
+		 * if (info == null) 
+		 *   info = null;
+		 */
+		}
+		 return info;
+	}
+
+	@Override
+	public Map<String, Object> getAppletInfoAsMap() {
+		@SuppressWarnings("unused")
+		HTML5Applet applet = getApplet();
+		JSApp app = (JSApp) getAppletAttribute("_appletPanel");
+		return app.params;
 	}
 
 	@Override
@@ -1114,6 +1136,11 @@ public class JSUtil implements JSUtilI {
 	@Override
 	public void setUIEnabled(JComponent jc, boolean enabled) {
 		((JSComponentUI) jc.getUI()).setUIDisabled(!enabled);
+	}
+
+	@Override
+	public void playAudio(byte[] buffer, Object format) throws Exception {
+		JSToolkit.playAudio(buffer, (AudioFormat) format);
 	}
 
 }

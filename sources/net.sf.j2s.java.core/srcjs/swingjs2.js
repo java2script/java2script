@@ -10739,8 +10739,8 @@ var getURIField = function(name, def) {
 		var ref = document.location.href.toLowerCase();
 		var i = ref.indexOf(name + "=");
 		if (i >= 0)
-			def = (document.location.href + "&").substring(
-					i + name.length + 1).split("&")[0];
+			def = decodeURI((document.location.href + "&").substring(
+					i + name.length + 1).split("&")[0]);
 	} catch (e) {
 	} finally {
 		return def;
@@ -12010,7 +12010,12 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 			// when leaving page, Java applet may be dead
 			applet._appletPanel = (javaAppletPanel || javaApplet);
 			applet._applet = javaApplet;
+			!applet.getApp && (applet.getApp = function(){ applet._setThread();return javaApplet });
 			J2S.$css(J2S.$(applet, 'appletdiv'), { 'background-image': '' });
+		} else {
+			applet.getApp = null;
+			applet._applet = null;
+			applet._appletPanel = null;
 		}
 		J2S._track(applet.readyCallback(appId, fullId, isReady));
 	}
@@ -12407,13 +12412,6 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 		if (J2S._mouseOwner)
 			who = J2S._mouseOwner;
-
-//		if (ev.target.getAttribute("role")) { // JSButtonUI adds
-//												// role=menucloser to icon
-//												// and text
-//			var m = (ev.target._menu || ev.target.parentElement._menu);
-//			m && m._hideJSMenu();
-//		}
 
 		J2S.setMouseOwner(null);
 
@@ -13269,6 +13267,9 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		proto._getHtml5Canvas = function() {
 			return this._canvas
 		};
+				
+		proto._setAppClass = function(app) { this.getApp = function() {this._setThread();return app}};
+		
 		proto._getWidth = function() {
 			return (this._canvas ? this._canvas.width : 0)
 		};
@@ -13283,6 +13284,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		};
 		// //////
 
+		proto._setThread = function() { swingjs.JSToolkit.getCurrentThread$javajs_util_JSThread(this._appletPanel.appletViewer.myThread)}
 		proto._createCanvas2d = function(doReplace) {
 			var container = J2S.$(this, "appletdiv");
 			// if (doReplace) {
@@ -13418,7 +13420,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 					//cl.$static$ && cl.$static$();
 					if (clazz.indexOf("_.") == 0)
 						J2S.setWindowVar(clazz.substring(2), cl);
-					applet.__Info.headless = (J2S._headless || isApp && !!cl.j2sHeadless);
+					applet.__Info.headless = (J2S._headless || isApp && (cl.$j2sHeadless || cl.j2sHeadless));
 					if (applet.__Info.headless) {
 						Clazz._isHeadless = "true";
 						System.out.println("j2sApplet running headlessly");
@@ -13994,6 +13996,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2020.06.03 sets user.home and user.dir to /TEMP/swingjs, and user.name to "swingjs"
 // BH 2020.04.01 2.2.0-v1e fixes missing C$.superclazz when class loaded from core
 // BH 2020.03.19 3.2.9-v1c fixes new String("xxx") !== "xxx"
 // BH 2020.03.11 3.2.9-v1b fixes numerous subtle issues with boxed primitives Integer, Float, etc.
@@ -17298,9 +17301,9 @@ var fixAgent = function(agent) {return "" + ((agent = agent.split(";")[0]),
 			"os.name" : fixAgent(navigator.userAgent).split("(")[0],
 			"os.version": fixAgent(navigator.appVersion).replace(fixAgent(navigator.userAgent), ""),
 			"path.separator" : ":",
-			"user.dir" : "https://.",
-			"user.home" : "https://.",
-			"user.name" : "user",
+			"user.dir" : "/TEMP/swingjs",
+			"user.home" : "/TEMP/swingjs",
+			"user.name" : "swingjs",
 			"javax.xml.datatype.DatatypeFactory" : "swingjs.xml.JSJAXBDatatypeFactory",
 			"javax.xml.bind.JAXBContextFactory" : "swingjs.xml.JSJAXBContextFactory"	
 	}
@@ -17674,7 +17677,7 @@ function(i){
 
 m$(Integer,"parseInt$S$I",
 function(s,radix){
- var v = (s.indexOf(".") >= 0 ? NaN : parseInt(s, radix));
+ var v = (s == null || s.indexOf(".") >= 0 ? NaN : parseInt(s, radix));
  if (!isNaN(v)) {
 	 // check for trailing garbage
 	 var v1 = parseInt(s + "1", radix);
@@ -17690,7 +17693,7 @@ return v;
 
 m$(Integer,"parseInt$S",
 function(s){
-	var v = +s;
+	var v = (s == null ? NaN : +s);
 	if (isNaN(v))
 		s= "?" + s; // just to ensure it gets trapped
 return Integer.parseInt$S$I(s, 10);

@@ -284,14 +284,17 @@ public class JSImagekit implements ImageConsumer {
 			img = (BufferedImage) imgIcon.getImage();
 			g = img.秘g;
 		} else {
-			g = createCanvasGraphics(width, height, id);
-			// A JSGraphics2D is not a real Graphics object - must coerce 
-			ColorModel cm = ColorModel.getRGBdefault();
-			img = new BufferedImage(cm, cm.createCompatibleWritableRaster(width, height), false, null);
+			img = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_HTML5); 
+			g = (JSGraphics2D) (Object) img.createGraphics();
+//			createCanvasGraphics(width, height, id);
+//			// A JSGraphics2D is not a real Graphics object - must coerce 
+//			ColorModel cm = ColorModel.getRGBdefault();
+//			img = new BufferedImage(cm, cm.createCompatibleWritableRaster(width, height), false, null);
 			imgIcon = new ImageIcon(img, "paintedIcon");
+//			img.getRaster().秘setStable(true);
 		}
 		icon.paintIcon(c, (Graphics)(Object) g, 0, 0);
-		img.秘setImageFromHTML5Canvas(g);
+	//	img.秘setImageFromHTML5Canvas(g);
 		g.dispose();
 		((ImageIcon) icon).秘tempIcon = imgIcon;
 		return imgIcon;

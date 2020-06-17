@@ -15,6 +15,8 @@ import java.util.function.IntConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import javax.swing.JButton;
+
 class J8_param<T> {
     T elem;
     public T get() {
@@ -34,6 +36,7 @@ class J8_param<T> {
 public class Test_J8_Stream extends Test_J8_Stream0 {
 	
 	public static void main(String[] args) {
+				
 		
 		Test_J8_Stream j8 = new Test_J8_Stream("s3");
 		List<Test_J8_Stream> myList1 = new ArrayList<>();
@@ -140,11 +143,12 @@ public class Test_J8_Stream extends Test_J8_Stream0 {
 	}
 	
 	public Test_J8_Stream() {
-		
 	}
+	
 	public Test_J8_Stream(String test, Integer index) {
 		
 	}
+	
 
 	public void test1(String msg) {
 		BiConsumer<String, Integer> ttsi = Test_J8_Stream::new;

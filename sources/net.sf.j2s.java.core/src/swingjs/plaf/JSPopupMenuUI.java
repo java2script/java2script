@@ -1252,6 +1252,7 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener, Mouse
 			eventID = MouseEvent.MOUSE_MOVED;
 			break;
 		case "unsetFocus":
+			hideTooltip();
 			//System.out.println("pm unfocus " + id);
 			eventID = MouseEvent.MOUSE_EXITED;
 			break;
@@ -1323,8 +1324,17 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener, Mouse
 		
 	}
 
+	@SuppressWarnings("unused")
 	@Override
 	public void mouseExited(MouseEvent e) {
+		try {
+			if (/**
+				 * @j2sNative e.bdata.jqevent.target.className.indexOf("j2smenu") >= 0 ||
+				 */
+			false)
+				return;
+		} catch (Throwable t) {
+		}
 		closeAllMenus();
 	}
 
