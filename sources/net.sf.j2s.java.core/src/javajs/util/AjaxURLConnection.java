@@ -10,6 +10,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -139,11 +140,11 @@ public class AjaxURLConnection extends HttpURLConnection {
 		getBytesOut();
 		J2SObjectInterface J2S = /** @j2sNative self.J2S || */
 				null;
-		Object info = null;
+		Object info = ajax;
 		/**
 		 * @j2sNative
 		 * 
-		 * 			info = this.ajax || {}; if (!info.dataType) { info.isBinary =
+		 * 			info = info || {}; if (!info.dataType) { info.isBinary =
 		 *            !!isBinary; }
 		 * 
 		 *            whenDone && (info.fWhenDone =
@@ -192,7 +193,7 @@ public class AjaxURLConnection extends HttpURLConnection {
 			 * 
 			 * 			info.contentType = false;
 			 */
-		}
+		} 
 
 		Object result;
 		String myURL = url.toString();
@@ -267,17 +268,112 @@ public class AjaxURLConnection extends HttpURLConnection {
 		bytesOut = bytes;
 	}
 	
+	private Object formData;
+	
+	public void setFormData(Map<String, Object> map) {
+		formData = map;
+	}
+
+	/**
+	 * @j2sAlias addFormData
+	 * 
+	 * @param name
+	 * @param value
+	 * @param contentType
+	 * @param fileName
+	 */
+	public void addFormData(String name, Object value, String contentType, String fileName) {
+		if (formData == null)
+			formData = new Object[0][];
+		/**
+		 * @j2sNative this.formData.push([name, value, contentType, fileName]);
+		 */
+	}
+
+
+	/**
+	 * a map of key/value pairs where values are either String or byte[].
+	 * 
+	 */
+	@SuppressWarnings("unused")
 	private byte[] getBytesOut() {
 		if (streamOut != null) {
-			bytesOut = streamOut.toByteArray();
+			if (formData == null)
+				formData = /** @j2sNative this.streamOut._form_data || */
+						null;
+			if (formData == null) {
+				bytesOut = streamOut.toByteArray();
+			}
 			streamOut = null;
+		}
+
+// JavaScript (use ptsv2.com to get a valid toilet)
+//
+//		fd = new FormData();
+//		fd.append("testing", "here");
+//		fd.append("andbytes", new Blob([new Int8Array([65,66,67])]));
+//
+//		                  $.ajax({
+//		                      url: 'https://ptsv2.com/t/j1gqe-1592433958/post',
+//		                      data: fd,
+//		                      processData: false,
+//		                      contentType: false,
+//		                      type: 'POST',
+//		                      success: function(data){
+//		                        console.log('upload success!');
+//		                      }
+//		                    }); 
+//
+
+		if (formData != null) {
+			Object map = ajax = (/**
+									 * @j2sNative 1 ? { data:new FormData(), processData:false, contentType:false,
+									 *            type:"POST", j2sNoProxy:true } :
+									 */
+			null);
+			if (formData instanceof Map<?, ?>) {
+				Map<String, Object> data = (Map<String, Object>) formData;
+				for (Entry<String, Object> e : data.entrySet()) {
+					String key = e.getKey();
+					Object val = e.getValue();
+					if (val instanceof byte[]) {
+						val = toBlob((byte[]) val, null);
+					}
+					/** @j2sNative map.data.append(key, val); */
+				}
+			} else {
+				Object[][] adata = (Object[][]) formData;
+				for (int i = 0; i < adata.length; i++) {
+					Object[] d = adata[i];
+					String name= (String) d[0];
+					Object value = d[1];
+					String contentType = (String) d[2];
+					String filename = (String) d[3];
+					if (value instanceof String && (contentType != null || filename != null)) {
+						value = ((String)value).getBytes();
+					}
+					if (value instanceof byte[]) {
+						value = toBlob((byte[]) value, contentType);
+					}
+					/**
+					 * @j2sNative (filename ? map.data.append(name, value, filename) : map.data.append(name, value));
+					 */
+				}
+			}
+			formData = null;
+			bytesOut = null;
+			useCaches = false;
 		}
 		return bytesOut;
 	}
 
+	private static Object toBlob(byte[] val, String contentType) {
+		return /** @j2sNative (contentType == null ?  new Blob([val])
+		: new Blob([val],{type: contentType})) || */null; 
+	}
+
 	public void outputString(String post) {
 		postOut = post;
-		// type = "application/x-www-form-urlencoded";
 	}
 
 	@Override

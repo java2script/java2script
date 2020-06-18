@@ -4,10 +4,14 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URI;
@@ -17,6 +21,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -24,8 +31,10 @@ import java.util.Map.Entry;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import javajs.util.AjaxURLConnection;
 import javajs.util.Rdr;
 import sun.misc.IOUtils;
+import swingjs.JSUtil;
 
 public class Test_URL extends Test_ {
 
@@ -45,6 +54,9 @@ public class Test_URL extends Test_ {
 	public static void main(String[] args) {
 
 		try {
+
+			testPost2();
+
 			// jar:file:C:/temp/car.trz!/Car in a loop with friction.trk
 			File fi = new File("src/test/test.xlsx").getAbsoluteFile();
 			System.out.println(fi.getAbsolutePath());
@@ -65,7 +77,7 @@ public class Test_URL extends Test_ {
 			System.out.println("length = " + (ret instanceof byte[]
 					? ((byte[]) ret).length + "\t" + new String((byte[]) ret).substring(0, 400) + "..."
 					: ret.toString()));
-		} catch (IOException e3) {
+		} catch (Exception e3) {
 			e3.printStackTrace();
 		}
 
@@ -155,7 +167,7 @@ public class Test_URL extends Test_ {
 
 			assert checkEnsembl();
 
-			testPost();
+			testPost1();
 
 			System.out.println("Test_URL OK");
 		} catch (Exception e) {
@@ -290,7 +302,7 @@ public class Test_URL extends Test_ {
 		return reader;
 	}
 
-	public static void testPost() {
+	public static void testPost1() {
 		String urlParameters = "format=sdf&get3d=True";
 		byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 		int postDataLength = postData.length;
@@ -315,6 +327,29 @@ public class Test_URL extends Test_ {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private static void testPost2() {
+
+		// new toilet needed if this is tested. Worked 2020.06.17
+		if (/** @j2sNative true || */
+				false) {
+			try {
+
+				Map<String, Object> formData = new HashMap<>();
+				formData.put("testingAgain", "here");
+				formData.put("andBytes", "ABCDE".getBytes());
+				URL url = new URL("https://ptsv2.com/t/j1gqe-1592433958/post");
+				AjaxURLConnection ajax = (AjaxURLConnection) url.openConnection();
+				ajax.setFormData(formData);
+				System.out
+						.println(new String(JSUtil.getSignedStreamBytes((BufferedInputStream) ajax.getInputStream())));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
 		}
 	}
 
@@ -345,10 +380,6 @@ public class Test_URL extends Test_ {
 			byte[] outputBytes = null;
 			String post = null;
 
-			// conn.setRequestProperty("Accept",
-			// "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-			// Map<String, List<String>> x = conn.getRequestProperties();
-			
 			if (bytesOrString instanceof byte[]) {
 				outputBytes = (byte[]) bytesOrString;
 				type = "application/octet-stream;";
@@ -374,5 +405,4 @@ public class Test_URL extends Test_ {
 			return e.toString();
 		}
 	}
-
 }
