@@ -14002,6 +14002,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2020.06.18 better test for instanceof Object[]
 // BH 2020.06.03 sets user.home and user.dir to /TEMP/swingjs, and user.name to "swingjs"
 // BH 2020.04.01 2.2.0-v1e fixes missing C$.superclazz when class loaded from core
 // BH 2020.03.19 3.2.9-v1c fixes new String("xxx") !== "xxx"
@@ -14375,10 +14376,16 @@ Clazz.instanceOf = function (obj, clazz) {
   clazz.$clazz$ && (clazz = clazz.$clazz$);
   if (obj == clazz)
     return true;
-  if (obj.__ARRAYTYPE || clazz.__ARRAYTYPE)
-    return (obj.__ARRAYTYPE == clazz.__ARRAYTYPE 
-            || obj.__ARRAYTYPE && clazz.__ARRAYTYPE && obj.__NDIM == clazz.__NDIM 
-               && isInstanceOf(obj.__BASECLASS, clazz.__BASECLASS)); 
+  if (obj.__ARRAYTYPE || clazz.__ARRAYTYPE) {
+	  if (obj.__ARRAYTYPE == clazz.__ARRAYTYPE)
+		  return true;
+	  if (clazz.__BASECLASS == Clazz._O) {
+		 return (!obj.__ARRAYTYPE ? Array.isArray(obj) && clazz.__NDIM == 1
+		   : obj.__NDIM >= clazz.__NDIM && !obj.__BASECLASS.__PRIMITIVE);
+	  }
+      return obj.__ARRAYTYPE && clazz.__ARRAYTYPE && obj.__NDIM == clazz.__NDIM 
+               && isInstanceOf(obj.__BASECLASS, clazz.__BASECLASS); 
+  }
   return (obj instanceof clazz || isInstanceOf(getClassName(obj, true), clazz, true));
 };
 
@@ -17642,8 +17649,8 @@ var maxValueOf = 127;
 
 var getCachedNumber = function(i, a, cl, c$) {
   if (i >= minValueOf && i <= maxValueOf) {
-	  var v = a[i + minValueOf];
-	  return (v ? v : a[i + minValueOf] = Clazz.new_(cl[c$], [i])); 
+	  var v = a[i - minValueOf];
+	  return (v ? v : a[i - minValueOf] = Clazz.new_(cl[c$], [i])); 
   }
 }
 
