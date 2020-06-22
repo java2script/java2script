@@ -4422,7 +4422,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 												.isAssignmentCompatible(paramType.getComponentType().getErasure()))
 				// or it is not compatible
 				) {
-					buffer.append("[");
+					buffer.append(clazzArray(paramType.getComponentType(), ARRAY_DIM_ONLY));
+					buffer.append(", -1, [");
 //					
 //					
 //					buffer Debug(paramType.getComponentType().getName() + " " 
@@ -4440,7 +4441,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 							buffer.append(", ");
 						}
 					}
-					buffer.append("]");
+					buffer.append("])");
 					break;
 				}
 				post = "";
