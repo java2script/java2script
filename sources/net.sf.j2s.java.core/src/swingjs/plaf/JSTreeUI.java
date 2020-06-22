@@ -827,12 +827,12 @@ public class JSTreeUI extends JSPanelUI {
 		Icon iexp = (Icon) UIManager.get("Tree.expandedIcon");
 		Icon icol = (Icon) UIManager.get("Tree.collapsedIcon");
 		if (iexp == null) {
-			label = new JLabel("\u2BC8");
-			label.setFont(new Font(Font.DIALOG, Font.PLAIN, 16));
-			iexp = new TextIcon(label, 0, 2);
-			label = new JLabel("\u2BC6");
-			label.setFont(new Font(Font.DIALOG, Font.PLAIN, 16));
-			icol = new TextIcon(label, 0, 0);
+			label = new JLabel("\u25bc");// some macs do not have 2BC8");
+			label.setFont(new Font(Font.DIALOG, Font.PLAIN, 12));
+			iexp = new TextIcon(label, -2, 2);
+			label = new JLabel("\u25b6");// some macs do not have 2BC6");
+			label.setFont(new Font(Font.DIALOG, Font.PLAIN, 12));
+			icol = new TextIcon(label, 0, 2);
 	    	UIManager.getDefaults().put("Tree.leftChildIndent", 10);
 	    	UIManager.getDefaults().put("Tree.rightChildIndent", 5);
 	    	UIManager.getDefaults().put("Tree.paintLines", false);
