@@ -23,31 +23,31 @@ class Test_URL_POST {
 	public static void main(String[] args) {
 
 //Dundee test (does not work in JavaScript because of CORS issue
-//
-//		String json = "{\"key1\":\"val1\", \"key2\":\"val2\"}";		
-//		url = new URL("https://www.compbio.dundee.ac.uk/slivka/api/services/example");
-//		SimplePoster multipart = new SimplePoster(url);
-//		multipart.addFormField("input-file", json, "application/json", "main.json");
-//		multipart.addFormField("content", "len:  13 long", null, null);
-		
-		
+
 		try {
 	
 			// toilet test works -- but may expire and need a new url.
 			
-			String toilet = "/t/louni-1592443011/post";
-			URL url = new URL("https://ptsv2.com" + toilet);
-			String json = "{\"key1\":\"val1\", \"key2\":\"val2\"}";
-			byte[] bytes = "This is a test".getBytes();
-			String date = "<date>" + new Date() + "</date>"
-					+ "<mandarin>Pǔtōnghuà (普通话/普通話, literally 'common speech')</mandarin>";
+			String json = "{\"key1\":\"val1\", \"key2\":\"val2\"}";		
+			URL url = new URL("https://www.compbio.dundee.ac.uk/slivka/api/services/example");
 			SimplePoster multipart = new SimplePoster(url);
-			multipart.addFormField("file", json, "application/json", "main.json");
-			multipart.addFormField("message", bytes, "application/octet-stream", null);
-			multipart.addFormField("date", date, null, null);
-			bytes = new byte[1000];
-			int n = multipart.finish().read(bytes);
-			System.out.println(new String(bytes, 0, n, "utf-8"));
+			multipart.addFormField("input-file", json, "application/octet-stream", "main.json");
+			multipart.addFormField("content", "len:11 long", null, null);
+			
+//			
+//			String toilet = "/t/ej940-1592930406/post";
+//			URL url = new URL("https://ptsv2.com" + toilet);
+//			String json = "{\"key1\":\"val1\", \"key2\":\"val2\"}";
+//			byte[] bytes = "This is a test".getBytes();
+//			String date = "<date>" + new Date() + "</date>"
+//					+ "<mandarin>Pǔtōnghuà (普通话/普通話, literally 'common speech')</mandarin>";
+//			SimplePoster multipart = new SimplePoster(url);
+//			multipart.addFormField("file", json, "application/json", "main.json");
+//			multipart.addFormField("message", bytes, "application/octet-stream", null);
+//			multipart.addFormField("date", date, null, null);
+			byte[] out = new byte[1000];
+			int n = multipart.finish().read(out);
+			System.out.println(new String(out, 0, n, "utf-8"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
