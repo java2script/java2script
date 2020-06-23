@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -17,27 +18,28 @@ import java.util.function.Consumer;
  */
 public interface HttpClient {
 
-	public interface HttpRequestBuilder {
+	public interface HttpRequest {
 
 		public String getMethod();
 
 		public URI getUri();
 
-		public HttpRequestBuilder addHeader(String name, String value);
+		public HttpRequest addHeader(String name, String value);
 
-		public HttpRequestBuilder addParameter(String name, String value);
+		public HttpRequest addParameter(String name, String value);
 
-		public HttpRequestBuilder addFile(String name, File file);
+		public HttpRequest addFile(String name, File file);
 
-		public HttpRequestBuilder addFile(String name, InputStream stream);
+		public HttpRequest addFile(String name, InputStream stream);
 
 		/**
 		 * Send the request to the server and return the response.
 		 */
 		public HttpResponse execute() throws IOException;
 
-		HttpResponse executeAsync(Consumer<? super HttpResponse> done, Consumer<? super HttpResponse> fail,
-				Consumer<? super HttpResponse> always);
+		HttpResponse executeAsync(Consumer<? super HttpResponse> success, 
+				BiConsumer<? super HttpResponse, Throwable> failure,
+				BiConsumer<? super HttpResponse, Throwable> always);
 	}
 
 	public interface HttpResponse extends Closeable {
@@ -80,32 +82,32 @@ public interface HttpClient {
 	 * Initialises the GET request builder. Usually they have no request body and
 	 * parameters are passed in the URL query.
 	 */
-	public HttpRequestBuilder get(URI uri);
+	public HttpRequest get(URI uri);
 
 	/**
 	 * Initialises the GET request builder. They have no request body and parameters
 	 * are passed in the URL query. They are identical to GET requests, the only
 	 * difference is that the returned response contains headers only.
 	 */
-	public HttpRequestBuilder head(URI uri);
+	public HttpRequest head(URI uri);
 
 	/**
 	 * Initialises the POST request builder. Usually they contain data in the
 	 * request body either as a urlencoded form, a multipart form or raw bytes.
 	 * Currently, we only care about the multipart form.
 	 */
-	public HttpRequestBuilder post(URI uri);
+	public HttpRequest post(URI uri);
 
 	/**
 	 * Initialises the PUT request builder which construct the same way as POST. The
 	 * only difference is the request method.
 	 */
-	public HttpRequestBuilder put(URI uri);
+	public HttpRequest put(URI uri);
 
 	/**
 	 * Initialises the DELETE request builder. The DELETE requests have no body and
 	 * parameters are passed in the URL query, just like GET.
 	 */
-	public HttpRequestBuilder delete(URI uri);
+	public HttpRequest delete(URI uri);
 
 }

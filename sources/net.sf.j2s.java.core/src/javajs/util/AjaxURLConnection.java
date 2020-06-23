@@ -37,6 +37,7 @@ public class AjaxURLConnection extends HttpURLConnection {
 			e.printStackTrace();
 		}
 	}
+
 	public static class AjaxHttpsURLConnection extends AjaxURLConnection {
 
 		static {
@@ -67,7 +68,7 @@ public class AjaxURLConnection extends HttpURLConnection {
 	ByteArrayOutputStream streamOut;
 
 	private Object ajax;
-    Object info;
+	Object info;
 
 	@Override
 	public String getHeaderField(String name) {
@@ -84,7 +85,6 @@ public class AjaxURLConnection extends HttpURLConnection {
 		return null;
 	}
 
-	
 	@SuppressWarnings("unused")
 	@Override
 	public Map<String, List<String>> getHeaderFields() {
@@ -193,7 +193,7 @@ public class AjaxURLConnection extends HttpURLConnection {
 			 * 
 			 * 			info.contentType = false;
 			 */
-		} 
+		}
 
 		Object result;
 		String myURL = url.toString();
@@ -267,9 +267,9 @@ public class AjaxURLConnection extends HttpURLConnection {
 		// type = "application/octet-stream;";
 		bytesOut = bytes;
 	}
-	
+
 	private Object formData;
-	
+
 	public void setFormData(Map<String, Object> map) {
 		formData = map;
 	}
@@ -289,7 +289,6 @@ public class AjaxURLConnection extends HttpURLConnection {
 		 * @j2sNative this.formData.push([name, value, contentType, fileName]);
 		 */
 	}
-
 
 	/**
 	 * a map of key/value pairs where values are either String or byte[].
@@ -345,18 +344,19 @@ public class AjaxURLConnection extends HttpURLConnection {
 				Object[][] adata = (Object[][]) formData;
 				for (int i = 0; i < adata.length; i++) {
 					Object[] d = adata[i];
-					String name= (String) d[0];
+					String name = (String) d[0];
 					Object value = d[1];
 					String contentType = (String) d[2];
 					String filename = (String) d[3];
 					if (value instanceof String && (contentType != null || filename != null)) {
-						value = ((String)value).getBytes();
+						value = ((String) value).getBytes();
 					}
 					if (value instanceof byte[]) {
 						value = toBlob((byte[]) value, contentType);
 					}
 					/**
-					 * @j2sNative (filename ? map.data.append(name, value, filename) : map.data.append(name, value));
+					 * @j2sNative (filename ? map.data.append(name, value, filename) :
+					 *            map.data.append(name, value));
 					 */
 				}
 			}
@@ -368,8 +368,11 @@ public class AjaxURLConnection extends HttpURLConnection {
 	}
 
 	private static Object toBlob(byte[] val, String contentType) {
-		return /** @j2sNative (contentType == null ?  new Blob([val])
-		: new Blob([val],{type: contentType})) || */null; 
+		return /**
+				 * @j2sNative (contentType == null ? new Blob([val]) : new Blob([val],{type:
+				 *            contentType})) ||
+				 */
+		null;
 	}
 
 	public void outputString(String post) {
@@ -391,7 +394,6 @@ public class AjaxURLConnection extends HttpURLConnection {
 			throw new FileNotFoundException("opening " + url);
 		return is;
 	}
-	
 
 	@Override
 	public void getBytesAsync(Function<byte[], Void> whenDone) {
@@ -409,9 +411,9 @@ public class AjaxURLConnection extends HttpURLConnection {
 				whenDone.apply(null);
 				return null;
 			}
-			
+
 		});
-		
+
 	}
 
 	private void getInputStreamAsync(Function<InputStream, Void> whenDone) {
@@ -425,8 +427,7 @@ public class AjaxURLConnection extends HttpURLConnection {
 
 	private void getInputStreamAndResponseAsync(Function<InputStream, Void> whenDone) {
 		BufferedInputStream is = getAttachedStreamData(url, false);
-		if (is != null || doCache() 
-				&& (is = getCachedStream(false)) != null) {
+		if (is != null || doCache() && (is = getCachedStream(false)) != null) {
 			whenDone.apply(is);
 			return;
 		}
@@ -448,14 +449,13 @@ public class AjaxURLConnection extends HttpURLConnection {
 				whenDone.apply(is);
 				return null;
 			}
-			
+
 		});
 	}
 
 	private InputStream getInputStreamAndResponse(boolean allowNWError) {
 		BufferedInputStream is = getAttachedStreamData(url, false);
-		if (is != null || doCache() 
-				&& (is = getCachedStream(allowNWError)) != null) {
+		if (is != null || doCache() && (is = getCachedStream(allowNWError)) != null) {
 			return is;
 		}
 		is = attachStreamData(url, doAjax(ajax == null, null));
@@ -470,7 +470,7 @@ public class AjaxURLConnection extends HttpURLConnection {
 	}
 
 	/**
-	 * We have to consider that POST is not 
+	 * We have to consider that POST is not
 	 */
 	private boolean doCache() {
 		if (!useCaches || !getRequestMethod().equals("POST")) {
@@ -480,7 +480,7 @@ public class AjaxURLConnection extends HttpURLConnection {
 		return cc == null || !cc.equals("no-cache");
 	}
 
-	 static Map<String, Object> urlCache = new Hashtable<String, Object>();
+	static Map<String, Object> urlCache = new Hashtable<String, Object>();
 
 	private BufferedInputStream getCachedStream(boolean allowNWError) {
 		Object data = urlCache.get(getCacheKey());
@@ -502,19 +502,19 @@ public class AjaxURLConnection extends HttpURLConnection {
 		@SuppressWarnings("unused")
 		Object jsonData = (isJSON ? data : null);
 		if (isJSON) {
-		/**
-		 * @j2sNative
-		 * 
-		 * data = JSON.stringify(data);
-		 */
+			/**
+			 * @j2sNative
+			 * 
+			 * 			data = JSON.stringify(data);
+			 */
 		}
 		BufferedInputStream bis = Rdr.toBIS(data);
 		if (isJSON) {
-		/**
-		 * @j2sNative
-		 * 
-		 * 			bis._jsonData = jsonData;
-		 */
+			/**
+			 * @j2sNative
+			 * 
+			 * 			bis._jsonData = jsonData;
+			 */
 		}
 		return bis;
 	}
@@ -535,8 +535,7 @@ public class AjaxURLConnection extends HttpURLConnection {
 	private String getCacheKey() {
 		String key = url.toString();
 		if (getRequestMethod().equals("POST")) {
-			key += (postOut != null ? postOut.hashCode() : 0)
-					| (getBytesOut() != null ? getBytesOut().hashCode() : 0);
+			key += (postOut != null ? postOut.hashCode() : 0) | (getBytesOut() != null ? getBytesOut().hashCode() : 0);
 		}
 		return key;
 	}
@@ -611,7 +610,7 @@ public class AjaxURLConnection extends HttpURLConnection {
 		return doAjax(false, null);
 	}
 
-	@Override	
+	@Override
 	public int getResponseCode() throws IOException {
 		/*
 		 * Check to see if have the response code already
