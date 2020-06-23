@@ -171,7 +171,8 @@ public class JSHttpClient implements HttpClient {
 
 		@Override
 		public HttpResponse executeAsync(Consumer<? super HttpResponse> succeed,
-				BiConsumer<? super HttpResponse, Throwable> fail, BiConsumer<? super HttpResponse, Throwable> always) {
+				BiConsumer<? super HttpResponse, Throwable> fail, 
+				BiConsumer<? super HttpResponse, Throwable> always) {
 			isAsync = (succeed != null || fail != null || always != null);
 			this.succeed = succeed;
 			this.fail = fail;
@@ -198,6 +199,7 @@ public class JSHttpClient implements HttpClient {
 				runner.run();
 			return r;
 		}
+
 
 		@SuppressWarnings("resource")
 		public Response fulfillGet() throws Exception {
@@ -280,7 +282,7 @@ public class JSHttpClient implements HttpClient {
 			private int state = 0;
 
 			ByteArrayInputStream inputStream;
-
+			
 			private Throwable exception;
 
 			/**
@@ -333,7 +335,6 @@ public class JSHttpClient implements HttpClient {
 
 			/**
 			 * Make the proper callback, depending upon response code and exception state.
-			 * 
 			 * @param ok
 			 */
 			protected void doCallback(boolean ok) {
