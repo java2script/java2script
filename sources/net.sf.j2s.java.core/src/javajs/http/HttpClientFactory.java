@@ -14,7 +14,7 @@ package javajs.http;
  */
 public class HttpClientFactory {
 	
-	private static String defaultClassName = "javajs.util.JSHttpClient";
+	private static String defaultClassName = "javajs.http.JSHttpClient";
 	
 	public static void setDefaultClassName(String className) {
 		if (className != null)

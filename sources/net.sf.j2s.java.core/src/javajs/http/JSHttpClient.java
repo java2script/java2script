@@ -231,9 +231,9 @@ public class JSHttpClient implements HttpClient {
 				public void run() {
 					try {
 						if (hasFormBody)
-							fulfillPost();
+							fulfillPost(r);
 						else
-							fulfillGet();
+							fulfillGet(r);
 					} catch (Exception e) {
 						r.handleError(e);
 					}
@@ -248,7 +248,7 @@ public class JSHttpClient implements HttpClient {
 		}
 
 		@SuppressWarnings("resource")
-		public Response fulfillGet() throws Exception {
+		public Response fulfillGet(Response r) throws Exception {
 			URI uri = getUri();
 			String data = "";
 			for (Entry<String, String> e : htGetParams.entrySet()) {
@@ -262,12 +262,11 @@ public class JSHttpClient implements HttpClient {
 				uri = new URI(uri.toString() + "?" + data);
 			}
 			getConnection(uri);
-			return new Response().getResponse();
+			return r.getResponse();
 		}
 
-		public Response fulfillPost() throws IOException {
+		public Response fulfillPost(Response r) throws IOException {
 			getConnection(uri);
-			Response r = new Response();
 			for (int i = 0; i < listPostFiles.size(); i++) {
 				Object[] name_data = listPostFiles.get(i);
 				String name = (String) name_data[0];
@@ -446,7 +445,7 @@ public class JSHttpClient implements HttpClient {
 			public String getText() throws IOException {
 				return new String(getContent().readAllBytes());
 			}
-
+			
 			/**
 			 * In SwingJS, this is always a ByteArrayInputStream.
 			 */
@@ -474,6 +473,11 @@ public class JSHttpClient implements HttpClient {
 						}
 					}
 				}
+			}
+
+			@Override
+			public String toString() {
+				return "JSHttpClient " + method + " state=" + state + " uri=" + uri;
 			}
 
 		}
