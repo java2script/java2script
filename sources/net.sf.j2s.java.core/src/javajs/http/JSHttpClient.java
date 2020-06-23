@@ -24,40 +24,26 @@ import java.util.function.Consumer;
  * Note that none of this code should ever be run in Java. Java implementations
  * should use their own implementations.
  * 
+ * Can be initialized either directly or via HttpClientFactory.getDefault().
  * 
  * For more details on HTTP methods see:
  * https://www.w3schools.com/tags/ref_httpmethods.asp
+ * 
+ * For more information about FormData, see:
+ * https://developer.mozilla.org/en-US/docs/Web/API/FormData/Using_FormData_Objects
+ * 
+ * The JSHttpClient is very light -- just a constructor and five methods,
+ * providing limited access to HttpRequest and HttpResponse implementations.
+ * 
+ * 
+ * @author Bob Hanson
+ * @author Mateusz Warowny
+ * 
  */
 public class JSHttpClient implements HttpClient {
 
-	/**
-	 * Template class implementing addFormData. Added here to allow this class to be
-	 * placed in Java projects without There is no need to maintain the actual
-	 * javajs.util.AjaxURLConnection class. Basically an interface with all the body
-	 * methods of an HttpURLConnection or HttpsURLConnection.
-	 * 
-	 * Can be initialized either directly or via HttpClientFactory.getDefault().
-	 * 
-	 * @author hansonr
-	 *
-	 */
-	public abstract class AjaxURLConnection extends HttpURLConnection {
-
-		protected AjaxURLConnection(URL u) {
-			super(u);
-		}
-
-		public abstract void addFormData(String name, Object value, String contentType, String fileName);
-
-		public abstract void getBytesAsync(Consumer<byte[]> whenDone);
-
-	}
-
-	public static HttpClient create() {
-		return new JSHttpClient();
-	}
-
 	public JSHttpClient() {
+		// for reflection
 	}
 
 	// no OPTIONS, no TRACE
@@ -88,28 +74,90 @@ public class JSHttpClient implements HttpClient {
 		return new Request(uri, "DELETE");
 	}
 
+	/**
+	 * Template class implementing just two abstract methods.
+	 * 
+	 * Added here to allow this class to be placed in Java projects without the need
+	 * to maintain the actual javajs.util.AjaxURLConnection class itself.
+	 * 
+	 * Basically an interface with all the body methods of an HttpURLConnection or
+	 * HttpsURLConnection.
+	 * 
+	 * The AjaxURLConnection class handles all the necessary work of creating blobs,
+	 * adding them to a FormData object, and firing off a synchronous or
+	 * asynchronous jQuery.ajax() call.
+	 * 
+	 * @author hansonr
+	 *
+	 */
+	public abstract class AjaxURLConnection extends HttpURLConnection {
+
+		protected AjaxURLConnection(URL u) {
+			super(u);
+		}
+
+		public abstract void addFormData(String name, Object value, String contentType, String fileName);
+
+		public abstract void getBytesAsync(Consumer<byte[]> whenDone);
+
+	}
+	
 	public class Request implements HttpRequest {
 
+		/**
+		 * the source URI
+		 */
 		private URI uri;
+
+		/**
+		 * the HTTP(S)URLConnection that will handle this request, actually
+		 * javajs.util.AjaxURLConnection
+		 */
+
+		AjaxURLConnection conn;
+
+		/**
+		 * GET, HEAD, POST, PUT, or DELETE
+		 */
 		private String method;
 
+		/**
+		 * headers, mostly ignored in SwingJS and AJAX
+		 * 
+		 */
 		private Map<String, String> htHeaders = new HashMap<>();
+
+		/**
+		 * GET and POST data
+		 */
 		private Map<String, String> htGetParams = new HashMap<>();
 		private List<Object[]> listPostFiles = new ArrayList<>();
 
+		/**
+		 * asynchronous callback functions
+		 * 
+		 */
 		private Consumer<? super HttpResponse> succeed;
 		private BiConsumer<? super HttpResponse, Throwable> fail;
 		private BiConsumer<? super HttpResponse, Throwable> always;
 
 		/**
-		 * When TRUE, all parameters and files are transmitted as binary data in
-		 * multipart/form-data format.
+		 * set TRUE whenever at least one of succeed, fail, or always, is non-null
 		 */
-		private boolean hasFormBody = false;
-		private boolean allowInputStream = true;
 		private boolean isAsync;
 
-		AjaxURLConnection conn;
+		/**
+		 * when TRUE, all parameters and files are transmitted as binary data in
+		 * multipart/form-data format
+		 */
+		private boolean hasFormBody = false;
+
+		/**
+		 * when FALSE (for HEAD only), no input stream may be opened. The only valid
+		 * call will be getResponseCode()
+		 */
+		private boolean allowInputStream = true;
+
 
 		public Request(URI uri, String method) {
 			this.uri = uri;
@@ -171,8 +219,7 @@ public class JSHttpClient implements HttpClient {
 
 		@Override
 		public HttpResponse executeAsync(Consumer<? super HttpResponse> succeed,
-				BiConsumer<? super HttpResponse, Throwable> fail, 
-				BiConsumer<? super HttpResponse, Throwable> always) {
+				BiConsumer<? super HttpResponse, Throwable> fail, BiConsumer<? super HttpResponse, Throwable> always) {
 			isAsync = (succeed != null || fail != null || always != null);
 			this.succeed = succeed;
 			this.fail = fail;
@@ -199,7 +246,6 @@ public class JSHttpClient implements HttpClient {
 				runner.run();
 			return r;
 		}
-
 
 		@SuppressWarnings("resource")
 		public Response fulfillGet() throws Exception {
@@ -282,7 +328,7 @@ public class JSHttpClient implements HttpClient {
 			private int state = 0;
 
 			ByteArrayInputStream inputStream;
-			
+
 			private Throwable exception;
 
 			/**
@@ -335,6 +381,7 @@ public class JSHttpClient implements HttpClient {
 
 			/**
 			 * Make the proper callback, depending upon response code and exception state.
+			 * 
 			 * @param ok
 			 */
 			protected void doCallback(boolean ok) {
