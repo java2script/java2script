@@ -171,8 +171,7 @@ public class JSHttpClient implements HttpClient {
 
 		@Override
 		public HttpResponse executeAsync(Consumer<? super HttpResponse> succeed,
-				BiConsumer<? super HttpResponse, Throwable> fail, 
-				BiConsumer<? super HttpResponse, Throwable> always) {
+				BiConsumer<? super HttpResponse, Throwable> fail, BiConsumer<? super HttpResponse, Throwable> always) {
 			isAsync = (succeed != null || fail != null || always != null);
 			this.succeed = succeed;
 			this.fail = fail;
@@ -199,7 +198,6 @@ public class JSHttpClient implements HttpClient {
 				runner.run();
 			return r;
 		}
-
 
 		@SuppressWarnings("resource")
 		public Response fulfillGet() throws Exception {
@@ -282,7 +280,7 @@ public class JSHttpClient implements HttpClient {
 			private int state = 0;
 
 			ByteArrayInputStream inputStream;
-			
+
 			private Throwable exception;
 
 			/**
@@ -333,6 +331,11 @@ public class JSHttpClient implements HttpClient {
 				return this;
 			}
 
+			/**
+			 * Make the proper callback, depending upon response code and exception state.
+			 * 
+			 * @param ok
+			 */
 			protected void doCallback(boolean ok) {
 				ok &= (exception == null);
 				if (ok && succeed != null)
@@ -343,22 +346,13 @@ public class JSHttpClient implements HttpClient {
 					always.accept(this, exception);
 			}
 
-			@Override
-			public int getStatusCode() {
-				try {
-					return (state != 0 ? state : conn.getResponseCode());
-				} catch (Throwable e) {
-					handleError(e);
-					return state;
-				}
-			}
-
 			/**
+			 * Handle any errors that arise in the process of processing this request.
 			 * 
 			 * @param e
 			 * @return true if aSynchronous and has been handled
 			 */
-			private boolean handleError(Throwable e) {
+			protected boolean handleError(Throwable e) {
 				exception = e;
 				// setting e = null to indicated handled.
 				if (isAsync) {
@@ -372,6 +366,16 @@ public class JSHttpClient implements HttpClient {
 					}
 				}
 				return e == null;
+			}
+
+			@Override
+			public int getStatusCode() {
+				try {
+					return (state != 0 ? state : conn.getResponseCode());
+				} catch (Throwable e) {
+					handleError(e);
+					return state;
+				}
 			}
 
 			@Override
