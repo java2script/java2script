@@ -41,24 +41,24 @@ public class Test_HTTP extends Test_ {
 			System.out.println(resp.getText());
 
 			
-//			req = client.put(new URI("https://www.compbio.dundee.ac.uk/slivka/api/services/example"));
-//			
-//			req.addFile("input-file",new ByteArrayInputStream(json.getBytes()));
-//			req.addParameter("content", "len:11 long");
-//
-//			resp = req.executeAsync(new Consumer<HttpResponse>() {
-//
-//				@Override
-//				public void accept(HttpResponse t) {
-//					try {
-//						System.out.println(t.getText());
-//					} catch (IOException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//				}
-//				
-//			}, null, null);
+			req = client.put(new URI("https://www.compbio.dundee.ac.uk/slivka/api/services/example"));
+			
+			req.addFile("input-file",new ByteArrayInputStream(json.getBytes()));
+			req.addParameter("content", "len:11 long");
+
+			resp = req.executeAsync(new Consumer<HttpResponse>() {
+
+				@Override
+				public void accept(HttpResponse t) {
+					try {
+						System.out.println(t.getText());
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
+			}, null, null);
 
 			
 		} catch (Exception e3) {

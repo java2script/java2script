@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * SwingJS implementation of javajs.http.HttpClient and associated classes.
@@ -98,7 +99,7 @@ public class JSHttpClient implements HttpClient {
 
 		public abstract void addFormData(String name, Object value, String contentType, String fileName);
 
-		public abstract void getBytesAsync(Consumer<byte[]> whenDone);
+		public abstract void getBytesAsync(Function<byte[], Void> whenDone);
 
 	}
 	
@@ -357,11 +358,12 @@ public class JSHttpClient implements HttpClient {
 					public void run() {
 						// asynchronous methods cannot throw an exception.
 						if (allowInputStream) {
-							conn.getBytesAsync(new Consumer<byte[]>() {
+							conn.getBytesAsync(new Function<byte[], Void>() {
 
 								@Override
-								public void accept(byte[] t) {
+								public Void apply(byte[] t) {
 									doCallback(t != null);
+									return null;
 								}
 
 							});
