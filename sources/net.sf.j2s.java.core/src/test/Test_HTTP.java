@@ -40,11 +40,8 @@ public class Test_HTTP extends Test_ {
 			System.out.println(resp);
 			System.out.println(resp.getText());
 
-			
-			req = client.put(new URI("https://www.compbio.dundee.ac.uk/slivka/api/services/example"));
-			
-			req.addFile("input-file",new ByteArrayInputStream(json.getBytes()));
-			req.addParameter("content", "len:11 long");
+			req.addParameter("testing", "here");
+
 
 			resp = req.executeAsync(new Consumer<HttpResponse>() {
 
