@@ -191,8 +191,8 @@ public class JSHttpClient implements HttpClient {
 		}
 
 		@Override
-		public void executeAsync(Consumer<? super HttpResponse> succeed,
-				BiConsumer<? super HttpResponse, Throwable> fail, BiConsumer<? super HttpResponse, Throwable> always) {
+		public void executeAsync(Consumer<HttpResponse> succeed,
+				BiConsumer<HttpResponse, ? super IOException> fail, BiConsumer<HttpResponse, ? super IOException> always) {
 			executeImpl(new Response(succeed, fail, always));
 		}
 
@@ -206,7 +206,7 @@ public class JSHttpClient implements HttpClient {
 							fulfillPost(r);
 						else
 							fulfillGet(r);
-					} catch (Exception e) {
+					} catch (Throwable e) {
 						r.handleError(e);
 					}
 				}
@@ -220,8 +220,8 @@ public class JSHttpClient implements HttpClient {
 		}
 
 		@SuppressWarnings("resource")
-		public Response fulfillGet(Response r) throws Exception {
-			URI uri = getUri();
+		public Response fulfillGet(Response r) throws IOException {
+			URL url;
 			String data = "";
 			for (Entry<String, String> e : htGetParams.entrySet()) {
 				String val = e.getValue();
@@ -231,13 +231,15 @@ public class JSHttpClient implements HttpClient {
 				data += e.getKey() + "=" + val;
 			}
 			if (data.length() > 0) {
-				uri = new URI(uri.toString() + "?" + data);
+				url = new URL(uri.toString() + "?" + data);	
+			} else {
+				url = uri.toURL();
 			}
-			return r.getResponse(getConnection(uri), this);
+			return r.getResponse(getConnection(url), this);
 		}
 
 		public Response fulfillPost(Response r) throws IOException {
-			AjaxURLConnection conn = getConnection(uri);
+			AjaxURLConnection conn = getConnection(uri.toURL());
 			for (int i = 0; i < listPostFiles.size(); i++) {
 				Object[] name_data = listPostFiles.get(i);
 				String name = (String) name_data[0];
@@ -276,9 +278,9 @@ public class JSHttpClient implements HttpClient {
 		 * @param uri
 		 * @throws IOException
 		 */
-		private AjaxURLConnection getConnection(URI uri) throws IOException {
+		private AjaxURLConnection getConnection(URL url) throws IOException {
 			try {
-				AjaxURLConnection conn = (AjaxURLConnection) uri.toURL().openConnection();
+				AjaxURLConnection conn = (AjaxURLConnection) url.openConnection();
 				conn.setUseCaches(false);
 				if (!method.equals("HEAD"))
 					conn.setDoInput(true);
@@ -308,7 +310,6 @@ public class JSHttpClient implements HttpClient {
 
 		ByteArrayInputStream inputStream;
 
-		private Throwable exception;
 
 		/**
 		 * the HTTP(S)URLConnection that will handle this request, actually
@@ -321,16 +322,17 @@ public class JSHttpClient implements HttpClient {
 		 * asynchronous callback functions
 		 * 
 		 */
-		private Consumer<? super HttpResponse> succeed;
-		private BiConsumer<? super HttpResponse, Throwable> fail;
-		private BiConsumer<? super HttpResponse, Throwable> always;
+		private Consumer<HttpResponse> succeed;
+		private BiConsumer<HttpResponse, ? super IOException> fail;
+		private BiConsumer<HttpResponse, ? super IOException> always;
+
 
 		private String method;
 
 		private URI uri;
 
-		public Response(Consumer<? super HttpResponse> succeed, BiConsumer<? super HttpResponse, Throwable> fail,
-				BiConsumer<? super HttpResponse, Throwable> always) {
+		public Response(Consumer<HttpResponse> succeed, BiConsumer<HttpResponse, ? super IOException> fail,
+				BiConsumer<HttpResponse, ? super IOException> always) {
 			this.succeed = succeed;
 			this.fail = fail;
 			this.always = always;
@@ -368,19 +370,20 @@ public class JSHttpClient implements HttpClient {
 				@Override
 				public void run() {
 					// asynchronous methods cannot throw an exception.
+					IOException exception = null;
 					if (method.equals("HEAD")) {
 						try {
 							state = conn.getResponseCode();
 						} catch (IOException e) {
 							exception = e;
 						}
-						doCallback(state == 0 || state >= 400);
+						doCallback(state == 0 || state >= 400, exception);
 					} else {
 						conn.getBytesAsync(new Function<byte[], Void>() {
 
 							@Override
 							public Void apply(byte[] t) {
-								doCallback(t != null);
+								doCallback(t != null, null);
 								return null;
 							}
 
@@ -396,14 +399,14 @@ public class JSHttpClient implements HttpClient {
 		 * 
 		 * @param ok
 		 */
-		protected void doCallback(boolean ok) {
-			ok &= (exception == null);
+		protected void doCallback(boolean ok, IOException e) {
+			ok &= (e == null);
 			if (ok && succeed != null)
 				succeed.accept(this);
 			else if (!ok && fail != null)
-				fail.accept(this, exception);
+				fail.accept(this, e);
 			if (always != null)
-				always.accept(this, exception);
+				always.accept(this, e);
 		}
 
 		/**
@@ -413,15 +416,19 @@ public class JSHttpClient implements HttpClient {
 		 * @return true if aSynchronous and has been handled
 		 */
 		protected boolean handleError(Throwable e) {
-			exception = e;
+						
+			if (!(e instanceof IOException)) {
+				e = new IOException(e);
+			}
+			IOException exception = (IOException) e;
 			// setting e = null to indicated handled.
 			if (isAsync) {
 				if (fail != null) {
-					fail.accept(this, e);
+					fail.accept(this, exception);
 					e = null;
 				}
 				if (always != null) {
-					always.accept(this, e);
+					always.accept(this, exception);
 					e = null;
 				}
 			}
@@ -470,11 +477,7 @@ public class JSHttpClient implements HttpClient {
 
 		@Override
 		public void close() {
-			try {
-				conn.disconnect();
-			} catch (Throwable t) {
-				// ignore
-			}
+			conn.disconnect();
 		}
 
 		@Override

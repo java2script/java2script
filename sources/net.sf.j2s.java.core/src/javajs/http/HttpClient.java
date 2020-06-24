@@ -37,9 +37,9 @@ public interface HttpClient {
 		 */
 		public HttpResponse execute() throws IOException;
 
-		public void executeAsync(Consumer<? super HttpResponse> success, 
-				BiConsumer<? super HttpResponse, Throwable> failure,
-				BiConsumer<? super HttpResponse, Throwable> always);
+		public void executeAsync(Consumer<HttpResponse> success, 
+				BiConsumer<HttpResponse, ? super IOException> failure,
+				BiConsumer<HttpResponse, ? super IOException> always);
 	}
 
 	public interface HttpResponse extends Closeable {
