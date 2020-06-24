@@ -37,7 +37,7 @@ public interface HttpClient {
 		 */
 		public HttpResponse execute() throws IOException;
 
-		HttpResponse executeAsync(Consumer<? super HttpResponse> success, 
+		public void executeAsync(Consumer<? super HttpResponse> success, 
 				BiConsumer<? super HttpResponse, Throwable> failure,
 				BiConsumer<? super HttpResponse, Throwable> always);
 	}

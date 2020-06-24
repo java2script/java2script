@@ -41,9 +41,7 @@ public class Test_HTTP extends Test_ {
 			System.out.println(resp.getText());
 
 			req.addParameter("testing", "here");
-
-
-			resp = req.executeAsync(new Consumer<HttpResponse>() {
+			req.executeAsync(new Consumer<HttpResponse>() {
 
 				@Override
 				public void accept(HttpResponse t) {

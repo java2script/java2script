@@ -187,13 +187,16 @@ public class JSHttpClient implements HttpClient {
 
 		@Override
 		public HttpResponse execute() throws IOException {
-			return executeAsync(null, null, null);
+			return executeImpl(new Response(null, null, null));
 		}
 
 		@Override
-		public HttpResponse executeAsync(Consumer<? super HttpResponse> succeed,
+		public void executeAsync(Consumer<? super HttpResponse> succeed,
 				BiConsumer<? super HttpResponse, Throwable> fail, BiConsumer<? super HttpResponse, Throwable> always) {
-			Response r = new Response(succeed, fail, always);
+			executeImpl(new Response(succeed, fail, always));
+		}
+
+		private HttpResponse executeImpl(Response r) {
 			Runnable runner = new Runnable() {
 
 				@Override
