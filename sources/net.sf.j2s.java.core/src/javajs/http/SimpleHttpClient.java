@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -308,7 +309,7 @@ class SimpleHttpClient implements HttpClient {
 					htGetParams.put(fd.getName(), fd.getData().toString());
 				}
 				for (Entry<String, String> e : htGetParams.entrySet()) {
-					data += e.getKey() + "=" + URLEncoder.encode(e.getValue(), "UTF-8");
+					data += e.getKey() + "=" + encodeURI(e.getValue());
 				}
 			}
 			if (data.length() > 0) {
@@ -317,6 +318,16 @@ class SimpleHttpClient implements HttpClient {
 				url = uri.toURL();
 			}
 			return r.getResponse(getConnection(url), this);
+		}
+
+		private String encodeURI(String value) {
+			try {
+				return URLEncoder.encode(value.replace(' ', '\0'), "UTF-8").replaceAll("%00", "%20");
+			} catch (UnsupportedEncodingException e) {
+				// impossible
+			}
+			
+			return null;
 		}
 
 		private Response fulfillPost(Response r) throws IOException {
