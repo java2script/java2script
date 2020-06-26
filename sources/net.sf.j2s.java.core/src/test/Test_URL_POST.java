@@ -2,11 +2,16 @@ package test;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Date;
+
+import javajs.http.HttpClient;
+import javajs.http.HttpClientFactory;
 
 class Test_URL_POST {
 
@@ -26,15 +31,18 @@ class Test_URL_POST {
 
 		try {
 	
+			
+			String json = "{\"key1\":\"val1\", \"key2\":\"val2\"}";
+			HttpClient client = HttpClientFactory.getClient(null);
+			String response = client
+					.get(new URI("https://www.compbio.dundee.ac.uk/slivka/api/services/example"))
+					.addFormField("input-file", json, "application/octet-stream", "main.json")
+					.addFormField("content", "len:11 long", null, null)
+					.execute()
+					.getText();
+			System.out.println(response);
+			
 			// toilet test works -- but may expire and need a new url.
-			
-			String json = "{\"key1\":\"val1\", \"key2\":\"val2\"}";		
-			URL url = new URL("https://www.compbio.dundee.ac.uk/slivka/api/services/example");
-			SimplePoster multipart = new SimplePoster(url);
-			multipart.addFormField("input-file", json, "application/octet-stream", "main.json");
-			multipart.addFormField("content", "len:11 long", null, null);
-			
-//			
 //			String toilet = "/t/ej940-1592930406/post";
 //			URL url = new URL("https://ptsv2.com" + toilet);
 //			String json = "{\"key1\":\"val1\", \"key2\":\"val2\"}";
@@ -45,88 +53,9 @@ class Test_URL_POST {
 //			multipart.addFormField("file", json, "application/json", "main.json");
 //			multipart.addFormField("message", bytes, "application/octet-stream", null);
 //			multipart.addFormField("date", date, null, null);
-			byte[] out = new byte[1000];
-			int n = multipart.finish().read(out);
-			System.out.println(new String(out, 0, n, "utf-8"));
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	/**
-	 * A java client that implements multipart form submit over https implemented
-	 * with only jdk classes and no external dependencies.
-	 * 
-	 * HTML5 does not allow setting content-type to multipart/form-data. Instead,
-	 * for JavaScript, we simply load up an array of information and turn that into
-	 * a FormData object in AjaxURLConnection.
-	 * 
-	 * adapted from https://github.com/atulsm/https-multipart-purejava
-	 * 
-	 * @author Atul Soman, atulsm@gmail.com
-	 *
-	 */
-
-	private static class SimplePoster {
-
-		private final String boundary;
-		private HttpURLConnection conn;
-		private OutputStream outputStream;
-		public SimplePoster(URL url) throws IOException {
-			boundary = "---" + System.currentTimeMillis() + "---";
-			conn = (HttpURLConnection) url.openConnection();
-			conn.setUseCaches(false);
-			conn.setDoOutput(true);
-			conn.setDoInput(true);
-			conn.setRequestMethod("POST");
-			// This has to be ignored in AjaxURLConnection:
-			conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
-			outputStream = conn.getOutputStream();
-		}
-
-		public void addFormField(String name, Object value, String contentType, String fileName) throws IOException {
-			/**
-			 * @j2sNative
-			 * 
-			 * 			return this.conn.addFormData(name, value, contentType, fileName);
-			 * 
-			 */
-			{
-				append("--" + boundary + "\r\n");
-				append("Content-Disposition: form-data; name=\"" + name
-						+ (fileName == null ? "" : "\"; filename=\"" + fileName) + "\"");
-				append("\r\nContent-Type: ");
-				append(contentType == null ? "application/octet-stream" : contentType);
-				append("\r\n\r\n");
-				append(value);
-				append("\r\n");
-			}
-		}
-
-		private void append(Object val) throws IOException {
-			/** @j2sIgnore */
-			{
-				if (val instanceof byte[]) {
-					outputStream.write((byte[]) val);
-				} else {
-					outputStream.write(val.toString().getBytes());
-				}
-			}
-		}
-
-		/**
-		 * Send the final boundary if Java, flush, and initiate transfer 
-		 * from the input stream.
-		 * 
-		 * @return
-		 * @throws IOException
-		 */
-		public BufferedInputStream finish() throws IOException {
-			append("\r\n--" + boundary + "--\r\n");
-			outputStream.flush();
-			return new BufferedInputStream(conn.getInputStream());
-		}
-
 	}
 
 }

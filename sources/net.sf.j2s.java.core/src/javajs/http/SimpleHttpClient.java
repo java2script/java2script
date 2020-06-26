@@ -1,6 +1,6 @@
 package javajs.http;
 
-import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -9,6 +9,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -22,18 +23,17 @@ import java.util.function.Function;
 /**
  * SwingJS implementation of javajs.http.HttpClient and associated classes.
  * 
- * Note that none of this code should ever be run in Java. Java implementations
- * should use their own implementations.
+ * Works in Java and JavaScript without any reference to org.apache.http classes.
  * 
  * Can be initialized either directly or via HttpClientFactory.getDefault().
  * 
  * For more details on HTTP methods see:
  * https://www.w3schools.com/tags/ref_httpmethods.asp
  * 
- * For more information about FormData, see:
+ * For more information about JavaScript FormData, see:
  * https://developer.mozilla.org/en-US/docs/Web/API/FormData/Using_FormData_Objects
  * 
- * The JSHttpClient is very light -- just a constructor and five methods,
+ * The SimpleHttpClient is very light -- just a constructor and five methods,
  * providing limited access to HttpRequest and HttpResponse implementations.
  * 
  * 
@@ -41,9 +41,9 @@ import java.util.function.Function;
  * @author Mateusz Warowny
  * 
  */
-public class JSHttpClient implements HttpClient {
+class SimpleHttpClient implements HttpClient {
 
-	public JSHttpClient() {
+	SimpleHttpClient() {
 		// for reflection
 	}
 
@@ -76,22 +76,24 @@ public class JSHttpClient implements HttpClient {
 	}
 
 	/**
+	 * JavaScript only.
+	 * 
 	 * Template class implementing just two abstract methods.
 	 * 
 	 * Added here to allow this class to be placed in Java projects without the need
 	 * to maintain the actual javajs.util.AjaxURLConnection class itself.
 	 * 
-	 * Basically an interface with all the body methods of an HttpURLConnection or
-	 * HttpsURLConnection.
+	 * AjaxURLConneciton is an interface with all the body methods necessary to
+	 * handle simple HTTP and HTTPS connectivity.
 	 * 
-	 * The AjaxURLConnection class handles all the necessary work of creating blobs,
-	 * adding them to a FormData object, and firing off a synchronous or
-	 * asynchronous jQuery.ajax() call.
+	 * The AjaxURLConnection class handles all the necessary work of creating
+	 * JavaScript blobs, adding them to a FormData object, and firing off a
+	 * synchronous or asynchronous jQuery.ajax() call via j2sApplet.js.
 	 * 
 	 * @author hansonr
 	 *
 	 */
-	public abstract class AjaxURLConnection extends HttpURLConnection {
+	abstract class AjaxURLConnection extends HttpURLConnection {
 
 		protected AjaxURLConnection(URL u) {
 			super(u);
@@ -99,11 +101,44 @@ public class JSHttpClient implements HttpClient {
 
 		public abstract void addFormData(String name, Object value, String contentType, String fileName);
 
+		// not @Override, because that method is only in SwingJS, and this class is portable
 		public abstract void getBytesAsync(Function<byte[], Void> whenDone);
 
 	}
 
-	public class Request implements HttpRequest {
+	class Request implements HttpRequest {
+
+		 class FormData {
+
+			private final String name;
+			private final Object data;
+			private final String contentType;
+			private final String fileName;
+
+			public FormData(String name, Object data, String contentType, String fileName) {
+				this.name = name;
+				this.data = data;
+				this.contentType = contentType;
+				this.fileName = fileName;
+			}
+
+			String getName() {
+				return name;
+			}
+
+			Object getData() {
+				return data;
+			}
+
+			String getContentType() {
+				return contentType;
+			}
+
+			String getFileName() {
+				return fileName;
+			}
+
+		}
 
 		/**
 		 * the source URI
@@ -124,8 +159,7 @@ public class JSHttpClient implements HttpClient {
 		/**
 		 * GET and POST data
 		 */
-		private Map<String, String> htGetParams = new HashMap<>();
-		private List<Object[]> listPostFiles = new ArrayList<>();
+		private List<FormData> formData;
 
 		/**
 		 * when TRUE, all parameters and files are transmitted as binary data in
@@ -133,7 +167,7 @@ public class JSHttpClient implements HttpClient {
 		 */
 		private boolean hasFormBody = false;
 
-		public Request(URI uri, String method) {
+		Request(URI uri, String method) {
 			this.uri = uri;
 			this.method = method.toUpperCase();
 			switch (method) {
@@ -169,20 +203,65 @@ public class JSHttpClient implements HttpClient {
 
 		@Override
 		public HttpRequest addParameter(String name, String value) {
-			htGetParams.put(name, value);
-			return this;
+			return addFormField(name, value, null, null);
 		}
 
 		@Override
 		public HttpRequest addFile(String name, File file) {
-			listPostFiles.add(new Object[] { name, file });
+			return addFormField(name, toBytes(file), "application/octet-stream", file.getName());
+		}
+
+
+		@Override
+		public HttpRequest addFile(String name, InputStream stream) {
+			return addFormField(name, toBytes(stream), "application/octet-stream", null);
+		}
+
+		/**
+		 * @param name
+		 * @param data can be String, byte[], File, or InputStream
+		 * @param contentType
+		 * @param fileName
+		 */
+		@Override
+		public HttpRequest addFormField(String name, Object data, String contentType, String fileName) {
+			if (data == null) {
+				removeFormField(name);
+				return this;
+			}
+			if (formData == null)
+				formData = new ArrayList<>();
+			formData.add(new FormData(name, data instanceof String ? data : toBytes(data), contentType, fileName));
 			return this;
 		}
 
 		@Override
-		public HttpRequest addFile(String name, InputStream stream) {
-			listPostFiles.add(new Object[] { name, stream });
-			return this;
+		public boolean removeFormField(String name) {
+			if (formData != null)
+				for (int i = 0; i < formData.size(); i++)
+					if (formData.get(i).getName().equals(name)) {
+						return (formData.remove(i) != null);
+					}
+			return false;
+		}
+		
+		private byte[] toBytes(Object data) {
+			try {
+				if (data == null || data instanceof byte[]) {
+				} else if (data instanceof File) {
+					FileInputStream fis = new FileInputStream((File) data);
+					data = getBytes(fis);
+					fis.close();
+				} else if (data instanceof InputStream) {
+					InputStream is = (InputStream) data;
+					data = getBytes(is);
+					is.close();
+				} else {
+					data = data.toString().getBytes();
+				}
+			} catch (IOException e) {
+			}
+			return (byte[]) data;
 		}
 
 		@Override
@@ -219,55 +298,49 @@ public class JSHttpClient implements HttpClient {
 			return r;
 		}
 
-		@SuppressWarnings("resource")
-		public Response fulfillGet(Response r) throws IOException {
+		private Response fulfillGet(Response r) throws IOException {
 			URL url;
 			String data = "";
-			for (Entry<String, String> e : htGetParams.entrySet()) {
-				String val = e.getValue();
-				/**
-				 * @j2sNative val = encodeURIComponent(val);
-				 */
-				data += e.getKey() + "=" + val;
+			if (formData != null) {
+				Map<String, String> htGetParams = new LinkedHashMap<>();
+				for (int i = 0; i < formData.size(); i++) {
+					FormData fd = formData.get(i);
+					htGetParams.put(fd.getName(), fd.getData().toString());
+				}
+				for (Entry<String, String> e : htGetParams.entrySet()) {
+					data += e.getKey() + "=" + URLEncoder.encode(e.getValue(), "UTF-8");
+				}
 			}
 			if (data.length() > 0) {
-				url = new URL(uri.toString() + "?" + data);	
+				url = new URL(uri.toString() + "?" + data);
 			} else {
 				url = uri.toURL();
 			}
 			return r.getResponse(getConnection(url), this);
 		}
 
-		public Response fulfillPost(Response r) throws IOException {
-			AjaxURLConnection conn = getConnection(uri.toURL());
-			for (int i = 0; i < listPostFiles.size(); i++) {
-				Object[] name_data = listPostFiles.get(i);
-				String name = (String) name_data[0];
-				byte[] data = null;
-				String fileName = null;
-				if (name_data[1] instanceof File) {
-					FileInputStream fis = new FileInputStream((File) name_data[1]);
-					fileName = ((File) name_data[1]).getName();
-					data = fis.readAllBytes();
-					fis.close();
-				} else if (name_data[1] instanceof byte[]) {
-					data = (byte[]) name_data[1];
-				} else if (name_data[1] instanceof InputStream) {
-					InputStream is = (InputStream) name_data[1];
-					data = is.readAllBytes();
-					is.close();
-				} else {
-					// unlikely, since we only allowed only File and InputStream formats!
-					if (!r.handleError(
-							new java.io.InvalidObjectException("JSHttpClient file data type error for: " + name)))
-						return r;
-				}
-				conn.addFormData(name, data, null, fileName);
-			}
-			for (Entry<String, String> e : htGetParams.entrySet()) {
-				conn.addFormData(e.getKey(), e.getValue(), null, null);
-			}
+		private Response fulfillPost(Response r) throws IOException {
+			HttpURLConnection conn = getConnection(uri.toURL());
+			sendFormData(conn, formData);
 			return r.getResponse(conn, this);
+		}
+		
+		@SuppressWarnings("unused")
+		private void sendFormData(HttpURLConnection conn, List<FormData> formData) throws IOException {
+			if (formData == null)
+				return;
+			/**
+			 * @j2sIgnore
+			 */
+			{
+				JavaHttpPoster.post(conn, formData);
+				if (true)
+					return;
+			}
+			for (int i = 0, n = formData.size(); i < n; i++) {
+				FormData data = formData.get(i);
+				((AjaxURLConnection) conn).addFormData(data.name, data.data, data.contentType, data.fileName);
+			}
 		}
 
 		/**
@@ -278,9 +351,9 @@ public class JSHttpClient implements HttpClient {
 		 * @param uri
 		 * @throws IOException
 		 */
-		private AjaxURLConnection getConnection(URL url) throws IOException {
+		private HttpURLConnection getConnection(URL url) throws IOException {
 			try {
-				AjaxURLConnection conn = (AjaxURLConnection) url.openConnection();
+				HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 				conn.setUseCaches(false);
 				if (!method.equals("HEAD"))
 					conn.setDoInput(true);
@@ -296,10 +369,9 @@ public class JSHttpClient implements HttpClient {
 			}
 		}
 
-
 	}
 
-	public class Response implements HttpResponse {
+	 class Response implements HttpResponse {
 
 		private int state = 0;
 
@@ -308,7 +380,7 @@ public class JSHttpClient implements HttpClient {
 		 */
 		private boolean isAsync;
 
-		ByteArrayInputStream inputStream;
+		private InputStream inputStream;
 
 
 		/**
@@ -316,7 +388,7 @@ public class JSHttpClient implements HttpClient {
 		 * javajs.util.AjaxURLConnection
 		 */
 
-		AjaxURLConnection conn;
+		private HttpURLConnection conn;
 
 		/**
 		 * asynchronous callback functions
@@ -331,7 +403,7 @@ public class JSHttpClient implements HttpClient {
 
 		private URI uri;
 
-		public Response(Consumer<HttpResponse> succeed, BiConsumer<HttpResponse, ? super IOException> fail,
+		Response(Consumer<HttpResponse> succeed, BiConsumer<HttpResponse, ? super IOException> fail,
 				BiConsumer<HttpResponse, ? super IOException> always) {
 			this.succeed = succeed;
 			this.fail = fail;
@@ -353,7 +425,7 @@ public class JSHttpClient implements HttpClient {
 		 * 
 		 * @throws IOException
 		 */
-		Response getResponse(AjaxURLConnection conn, Request request) throws IOException {
+		Response getResponse(HttpURLConnection conn, Request request) throws IOException {
 			this.conn = conn;
 			this.method = request.method;
 			this.uri = request.uri;
@@ -463,7 +535,7 @@ public class JSHttpClient implements HttpClient {
 
 		@Override
 		public String getText() throws IOException {
-			return new String(getContent().readAllBytes());
+			return new String( getBytes(getContent()));
 		}
 
 		/**
@@ -471,7 +543,7 @@ public class JSHttpClient implements HttpClient {
 		 */
 		@Override
 		public InputStream getContent() throws IOException {
-			return (inputStream == null ? (inputStream = (ByteArrayInputStream) conn.getInputStream())
+			return (inputStream == null ? (inputStream = (InputStream) conn.getInputStream())
 					: inputStream);
 		}
 
@@ -484,6 +556,23 @@ public class JSHttpClient implements HttpClient {
 		public String toString() {
 			return "JSHttpClient " + method + " state=" + state + " uri=" + uri;
 		}
+
+	}
+
+	public static String getBytes(InputStream is) throws IOException {
+	
+		// Java 9 version is better:
+		//		 return new String(is.readAllBytes());
+
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(0x4000);
+		byte[] buf = new byte[0x4000];
+		int n = 0, ntotal = 0;
+		while((n = is.read(buf)) >= 0) {
+			ntotal += n;
+			bos.write(buf, 0, n);
+		} 
+		is.close();
+		return new String(bos.toByteArray(), 0, ntotal);
 
 	}
 

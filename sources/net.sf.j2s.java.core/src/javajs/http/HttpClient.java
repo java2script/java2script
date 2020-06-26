@@ -32,6 +32,10 @@ public interface HttpClient {
 
 		public HttpRequest addFile(String name, InputStream stream);
 
+		public HttpRequest addFormField(String name, Object data, String contentType, String fileName);
+
+		boolean removeFormField(String name);
+
 		/**
 		 * Send the request to the server and return the response.
 		 */
