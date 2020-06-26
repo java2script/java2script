@@ -202,29 +202,22 @@ class SimpleHttpClient implements HttpClient {
 		}
 
 		@Override
-		public HttpRequest addParameter(String name, String value) {
+		public HttpRequest addFormParameter(String name, String value) {
 			return addFormField(name, value, null, null);
 		}
 
 		@Override
-		public HttpRequest addFile(String name, File file) {
-			return addFormField(name, toBytes(file), "application/octet-stream", file.getName());
+		public HttpRequest addFileParameter(String name, File file, String contentType, String fileName) {
+			return addFormField(name, toBytes(file), contentType, fileName);
 		}
 
 
 		@Override
-		public HttpRequest addFile(String name, InputStream stream) {
-			return addFormField(name, toBytes(stream), "application/octet-stream", null);
+		public HttpRequest addFileParameter(String name, InputStream stream, String contentType, String fileName) {
+			return addFormField(name, toBytes(stream), contentType, fileName);
 		}
 
-		/**
-		 * @param name
-		 * @param data can be String, byte[], File, or InputStream
-		 * @param contentType
-		 * @param fileName
-		 */
-		@Override
-		public HttpRequest addFormField(String name, Object data, String contentType, String fileName) {
+		private HttpRequest addFormField(String name, Object data, String contentType, String fileName) {
 			if (data == null) {
 				removeFormField(name);
 				return this;
@@ -236,7 +229,7 @@ class SimpleHttpClient implements HttpClient {
 		}
 
 		@Override
-		public boolean removeFormField(String name) {
+		public boolean clearParameter(String name) {
 			if (formData != null)
 				for (int i = 0; i < formData.size(); i++)
 					if (formData.get(i).getName().equals(name)) {
