@@ -135,6 +135,7 @@ import org.eclipse.jdt.core.dom.WildcardType;
 
 // TODO: superclass inheritance for JAXB XmlAccessorType
 
+//BH 2020.06.22 -- 3.2.9.v1k fix for varargs not proper qualified arrays
 //BH 2020.06.17 -- 3.2.9-v1j fix for functional interface this::privateMethod
 //BH 2020.05.01 -- 3.2.9-v1i fix for nested lambda methods
 //BH 2020.04.26 -- 3.2.9-v1h fix for inner classes of interfaces duplicated; fix for api.js inner class method names unqualified
@@ -2515,25 +2516,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 						// log("default method " + method.getKey());
 						defpt = buffer.length();
 					}
-//					boolean addUnqualifiedCurrent = temp_add$UnqualifiedMethod;
-//					if (unqualifiedMethods != null) {
-//						// check for all methods that override a functional interface abstract method,
-//						// as those methods are to be qualified only with $
-//
-//						for (int i = unqualifiedMethods.size(); --i >= 0;) {
-//							if (method.overrides(unqualifiedMethods.get(i))) {
-//								temp_add$UnqualifiedMethod = true;
-//								break;
-//							}
-//						}
-//					}
 					processMethodDeclaration(mnode, method, mnode.parameters(), mnode.getBody(), mnode.isConstructor(),
 							abstractMethodList, NOT_LAMBDA);
 					if (defpt >= 0) {
 						defaults.append(buffer.substring(defpt));
 						buffer.setLength(defpt);
 					}
-					// temp_add$UnqualifiedMethod = addUnqualifiedCurrent;
 				} else if (element instanceof AnnotationTypeMemberDeclaration) {
 					processAnnotationTypeMemberDeclaration((AnnotationTypeMemberDeclaration) element);
 				}
@@ -2688,35 +2676,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		trailingBuffer.append(buffer.substring(pt));
 		buffer.setLength(pt);
 	}
-
-//	/**
-//	 * Collect all names of all functional interface abstract methods that this
-//	 * class might refer to so that their unqualified. This is not perfect, as it is
-//	 * possible to have implementations of specific subtypes of parameterized
-//	 * methods. However, it will have to do for now.
-//	 * 
-//	 * @param type
-//	 * @param unqualifiedMethods
-//	 * @return List of methods that should have raw unparameterized alias
-//	 */
-//	private List<IMethodBinding> getUnqualifiedMethods(ITypeBinding type, List<IMethodBinding> unqualifiedMethods) {
-//		if (type.isArray() || type.isPrimitive()) {
-//			return unqualifiedMethods;
-//		}
-//		ITypeBinding superClass = type.getSuperclass();
-//		if (superClass != null)
-//			unqualifiedMethods = getUnqualifiedMethods(superClass, unqualifiedMethods);
-//		ITypeBinding[] superInterfaces = type.getInterfaces();
-//		for (int i = 0; i < superInterfaces.length; i++)
-//			unqualifiedMethods = getUnqualifiedMethods(superInterfaces[i], unqualifiedMethods);
-//		IMethodBinding functionalMethod = type.getFunctionalInterfaceMethod();
-//		if (functionalMethod != null) {
-//			if (unqualifiedMethods == null)
-//				unqualifiedMethods = new ArrayList<IMethodBinding>();
-//			unqualifiedMethods.add(functionalMethod);
-//		}
-//		return unqualifiedMethods;
-//	}
 
 	/**
 	 * If there is no Foo() or Foo(xxx... array), then we need to provide our own
@@ -2906,7 +2865,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				buffer.append(prefix);
 				prefix = null;
 			}
-			addMethodArguments(parameterTypes, methodIsVarArgs, arguments, flags);
+			addMethodArguments(methodDeclaration, parameterTypes, methodIsVarArgs, arguments, flags);
 		}
 		if (prefix == null && suffix != null)
 			buffer.append(suffix);
@@ -4388,13 +4347,14 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	/**
 	 * 
+	 * @param methodDeclaration 
 	 * @param parameterTypes
 	 * @param methodIsVarArgs
 	 * @param arguments
 	 * @param flags           METHOD_INDEXOF | 0
 	 */
 	@SuppressWarnings("null")
-	private void addMethodArguments(ITypeBinding[] parameterTypes, boolean methodIsVarArgs, List<?> arguments,
+	private void addMethodArguments(IMethodBinding methodDeclaration, ITypeBinding[] parameterTypes, boolean methodIsVarArgs, List<?> arguments,
 			int flags) {
 		String post = ", ";
 		int nparam = parameterTypes.length;
@@ -4422,6 +4382,17 @@ public class Java2ScriptVisitor extends ASTVisitor {
 												.isAssignmentCompatible(paramType.getComponentType().getErasure()))
 				// or it is not compatible
 				) {
+					String close;
+					if (NameMapper.isPackageOrClassNonqualified(methodDeclaration.getDeclaringClass().getQualifiedName())) {
+						// calls to DOMNode.setAttrs(DOMNode node, Object... attr) need not be wrapped by a Java array type
+						close = "";
+					} else {
+						buffer.append(clazzArray(paramType.getComponentType(), ARRAY_DIM_ONLY));
+						buffer.append(", -1, ");
+						close = ")";
+					}
+					
+					
 					buffer.append("[");
 //					
 //					
@@ -4440,7 +4411,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 							buffer.append(", ");
 						}
 					}
-					buffer.append("]");
+					buffer.append("]").append(close);
 					break;
 				}
 				post = "";
@@ -6659,7 +6630,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		 * @param className
 		 * @return
 		 */
-		private static boolean isPackageOrClassNonqualified(String className) {
+		static boolean isPackageOrClassNonqualified(String className) {
 			if (className.indexOf("$") >= 0)
 				return false; // inner class
 			className += ".";
@@ -6672,9 +6643,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			return false;
 		}
 
-		/**
-		 * @param methodName not used but could be
-		 */
 		static boolean isMethodNonqualified(String className, String methodName) {
 			if (className.equals("java.lang.Math")) {
 				switch (methodName) {

@@ -323,6 +323,7 @@ class Test_Class extends Test_Class2<Integer> {
 	
 	public static void main(String[] args) {
 		
+		System.out.println(Number.class.isAssignableFrom(Double.class));
 		System.out.println(System.getProperty("user.dir"));
 		System.out.println(System.getProperty("user.home"));
 		

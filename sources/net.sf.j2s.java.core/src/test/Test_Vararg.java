@@ -5,7 +5,6 @@ import java.util.List;
 
 @SuppressWarnings("unused")
 class Test_Vararg extends Test_ {
-
 	Test_Vararg(float... a) {
 		System.out.println("Test_Vararg float... " + (a.length > 0 ? a[0] : null));
 		assert((a.length > 0 ? a[0] : 1) == 2);
@@ -51,10 +50,58 @@ class Test_Vararg extends Test_ {
 		assert(s.equals("Double"));		
 	}
 
+	class Out implements InOut {
+		
+	}
+	
+	class In extends Out {
+		
+		public String toString() {
+			return "In";
+		}
+	}
+	
+	interface InOut {
+		
+	}
+	
+
+	public void testVarInOut( String s, InOut... inout) {
+		System.out.println("testVarInOut "+ s + " " + inout.getClass().getName() + " " + inout.length);
+		InOut[] x = Arrays.copyOf(inout, 4);
+		System.out.println("x[0]=" + x[0]);
+	}
+	
+	public void testVarOut( String s, Out... inout) {
+		System.out.println("testVarOut "+ s + " " + inout.getClass().getName() + " " + inout.length);
+	}
+	
+	private void testVarIn( String s, In... inout) {
+		System.out.println("testVarIn "+ s + " " + inout.getClass().getName() + " " + inout.length);
+	}
+	
 
 	public static void main(String[] args) {
-
 		Test_Vararg t = new Test_Vararg();
+		
+		In in = t.new In();
+
+		t.testVarIn("in", in);
+		t.testVarIn("in", in, in);
+		t.testVarIn("in", new In[] {in, in});
+
+		t.testVarIn("in", t.new In());
+		t.testVarIn("in", t.new In(), t.new In());
+		
+		t.testVarOut("out", t.new In());
+		t.testVarOut("out", t.new In(), t.new Out());
+		t.testVarOut("out", new In[] {in, in});
+		
+		t.testVarInOut("inout", t.new In());
+		t.testVarInOut("inout", t.new In(), t.new Out());
+		t.testVarInOut("inout", new In[] {in, in});
+
+	
 		Test_Vararg t1 = new Test_Vararg(1);
 		Test_Vararg t21 = new Test_Vararg(1, 1);
 		Test_Vararg t1f = new Test_Vararg(2f);
