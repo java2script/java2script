@@ -4613,32 +4613,32 @@ sp.replace$ = function(c1,c2){
   return this.replace(new RegExp(c1,"gm"),c2);
 };
 
-// experimental -- only marginally faster:
-var reCache = new Map();
-sp.replace2$ = function(c1,c2){
-	  if (c1 == c2 || this.indexOf(c1) < 0) return "" + this;
-	  var re;
-	  if (c1.length == 1) {
-		re = reCache.get(c1);
-		re || reCache.set(c1, re = new RegExp("\\$.*+|?^{}()[]".indexOf(c1) == 0 ? "\\" + c1 : c1, 'gm'));
-	  } else {    
-	    re = new RegExp(c1.replace(/([\\\$\.\*\+\|\?\^\{\}\(\)\[\]])/g,function($0,$1){return "\\"+$1;}), 'gm');
-	  }
-	  return this.replace(re,c2);
-};
+//// experimental -- only marginally faster:
+//var reCache = new Map();
+//sp.replace2$ = function(c1,c2){
+//	  if (c1 == c2 || this.indexOf(c1) < 0) return "" + this;
+//	  var re;
+//	  if (c1.length == 1) {
+//		re = reCache.get(c1);
+//		re || reCache.set(c1, re = new RegExp("\\$.*+|?^{}()[]".indexOf(c1) == 0 ? "\\" + c1 : c1, 'gm'));
+//	  } else {    
+//	    re = new RegExp(c1.replace(/([\\\$\.\*\+\|\?\^\{\}\(\)\[\]])/g,function($0,$1){return "\\"+$1;}), 'gm');
+//	  }
+//	  return this.replace(re,c2);
+//};
 
 // fastest:
 sp.replaceAll$=sp.replaceAll$S$S=sp.replaceAll$CharSequence$CharSequence=function(exp,str){
-return this.replace(new RegExp(exp,"gm"),str);
+return this.replace(newRegExp(exp,"gm"),str);
 };
 sp.replaceFirst$S$S=function(exp,str){
-return this.replace(new RegExp(exp,"m"),str);
+return this.replace(newRegExp(exp,"m"),str);
 };
 sp.matches$S=function(exp){
 if(exp!=null){
 exp="^("+exp+")$";
 }
-var regExp=new RegExp(exp,"gm");
+var regExp=newRegExp(exp,"gm");
 var m=this.match(regExp);
 return m!=null&&m.length!=0;
 };
@@ -4664,6 +4664,11 @@ s2=s2.toLowerCase();
 return s1==s2;
 };
 
+var newRegExp = function(regex, flags) {
+	if (regex.indexOf("\\Q") >= 0 || regex.indexOf("(?") == 0)
+		return Clazz.loadClass("java.util.regex.Pattern").getJSRegex$S$S(regex, flags);
+	return new RegExp(regex, flags);
+}
 sp.split$S=sp.split$S$I=function(regex,limit){
 var arr;
 if (!limit && regex == " ") {
@@ -4672,7 +4677,7 @@ if (!limit && regex == " ") {
 	if(limit == 1){
 	  arr = [this];
 	} else {
-		var regExp=new RegExp("("+regex+")","gm");
+		var regExp=newRegExp("("+regex+")","gm");
 		var count=1;
 		var s=this.replace(regExp,function($0,$1){
 			count++;
@@ -4693,8 +4698,7 @@ if (!limit && regex == " ") {
 		}
 	}
 }else{
-	var regExp=new RegExp(regex,"gm");
-	arr = this.split(regExp);
+	arr = this.split(newRegExp(regex,"gm"));
 }
 while (arr[arr.length - 1] === "")
 	arr.pop();
