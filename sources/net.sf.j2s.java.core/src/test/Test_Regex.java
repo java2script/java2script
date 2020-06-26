@@ -11,12 +11,12 @@ public class Test_Regex extends Test_ {
 	public static void main(String[] args) {
 
 		String s;
+		Pattern p;
 
 		System.out.println("testRE pattern def");
-		Pattern p = Pattern.compile("def");
-		s = p.matcher("abc\\ndef\\n ghi").replaceAll("X");
+		s = Pattern.compile("''").matcher("ab'cd''ef'''gh''''").replaceAll("X");
 		System.out.println(s);
-		assert (s.equals("abc\\nX\\n ghi"));
+		assert (s.equals("ab'cdXefX'ghXX"));
 
 		System.out.println("testRE DOTALL");
 		p = Pattern.compile(".*", Pattern.DOTALL);
