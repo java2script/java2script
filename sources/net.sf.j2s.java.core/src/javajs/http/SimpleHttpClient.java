@@ -322,12 +322,15 @@ class SimpleHttpClient implements HttpClient {
 
 		private String encodeURI(String value) {
 			try {
+				// convert " " to "%20", not "+"
+				// based on https://stackoverflow.com/questions/2678551/when-to-encode-space-to-plus-or-20
+				// Answer # 46. and "URI Generic Syntax " https://tools.ietf.org/html/rfc3986
+				// This will be consistent, then, with JavaScript encodeURIComponent().
 				return URLEncoder.encode(value.replace(' ', '\0'), "UTF-8").replaceAll("%00", "%20");
 			} catch (UnsupportedEncodingException e) {
 				// impossible
+				return null;
 			}
-			
-			return null;
 		}
 
 		private Response fulfillPost(Response r) throws IOException {
