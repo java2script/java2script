@@ -1392,7 +1392,9 @@ public class JSComponentUI extends ComponentUI
 			setTainted();
 			return;
 		case "border":
-			jc.秘setPaintsSelf(JSComponent.PAINTS_SELF_UNKNOWN);
+			// Simple Buttons have insets that don't overlap with the border.
+			if (!isSimpleButton)
+				jc.秘setPaintsSelf(JSComponent.PAINTS_SELF_UNKNOWN);
 			setTainted();
 			return;
 		case "preferredSize":
