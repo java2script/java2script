@@ -10,8 +10,25 @@ public class Test_Regex extends Test_ {
 
 	public static void main(String[] args) {
 
+		
+		
+		
 		String s;
 		Pattern p;
+		String formatSpecifier
+        = "%(\\d+\\$)?([-#+ 0,(\\<]*)?(\\d+)?(\\.\\d+)?([tT])?([a-zA-Z%])";
+		Pattern fsPattern = Pattern.compile(formatSpecifier);
+		Matcher fm = fsPattern.matcher("%d");
+		fm.find(0);
+		System.out.println(fm.groupCount());
+		for (int i = 0; i < fm.groupCount();i++) {
+			s = fm.group(i);
+			// note that in JavaScript ([-#+ 0,(\\<]*)? returns null, not (as in Java) ""
+			System.out.println(s);
+		}
+		s = String.format("val=%5.3f Completed %d%%.", new Object[] { new Float(3.5), Integer.valueOf(100)});
+		System.out.println(s);
+		assert(s.equals("val=3.500 Completed 100%."));
 
 		System.out.println("testRE pattern def");
 		s = Pattern.compile("''").matcher("ab'cd''ef'''gh''''").replaceAll("X");

@@ -195,7 +195,7 @@ public class Test_Label extends JPanel implements MenuListener, ItemListener {
 
 		ImageIcon icon1 = new ImageIcon("test/zoom.gif");
 		// either <br> or <br/> is fine.
-		JLabel l = new JLabel("<html>this is<br/>a<br> test</html>", null, SwingConstants.LEADING);
+		JLabel l = new JLabel("<html>this is<br/>a<br> t<sub>e</sub>st</html>", null, SwingConstants.LEADING);
 		l.setBounds(300,300,20,20);
 		add(l);
 //

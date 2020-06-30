@@ -93,6 +93,7 @@ public class JSButtonUI extends JSLightweightUI {
 			allowPaintedBackground = false;
 			setDoPropagate();
 			domNode = enableNode = buttonNode = newDOMObject("button", id + "_dom", "type", "button", "style", "padding:0");
+			//DOMNode.setStyles(domNode, "outline", "none");
 			//DOMNode.setStyles(domNode,"transform","translateY(0.5px)translateX(0.5px)");
 			addClass(domNode, "j2sbutton");
 			setFocusable();
