@@ -242,7 +242,15 @@ public abstract class JSComponent extends Component {
 		if (width == 0 || height == 0 || !isVisible())
 			return null;
 		Graphics g;
-		if (秘frameViewer != null) {
+		// this was 秘frameViewer != null, but that
+		// fails for paintImmediately, because all components
+		// have a reference to FrameViewer now, and so the 
+		// offset was not being applied. The special case for
+		// ContentPane adds its insets. parent == null is a 
+		// proxy for Applet or Window since only they can be
+		// here and not have a parent.
+		if (parent == null || 秘isContentPane) {
+			// this next call adds the necessary transform.
 			g = 秘frameViewer.getGraphics().create();
 			if (秘isContentPane) {
 				if (秘tempInsets == null)
