@@ -3786,7 +3786,8 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
         }
         @Override
 		public void focusLost(FocusEvent e) {
-           repaintTab(focusIndex);
+        	if (tabPane.getTabCount() > 1)
+        		repaintTab(focusIndex);
         }
 
 
