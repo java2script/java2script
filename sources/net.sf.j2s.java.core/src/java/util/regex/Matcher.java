@@ -953,7 +953,9 @@ public final class Matcher implements MatchResult {
 			throw new IllegalStateException("No match found");
 		if (group < 0 || group > groupCount())
 			throw new IndexOutOfBoundsException("No group " + group);
-		return results[group];
+		// this array is coming from JavaScript RegExp; some values may be "undefined"
+		// so we force them to be null. 
+		return results[group] == null ? null : results[group];
 //        if ((groups[group*2] == -1) || (groups[group*2+1] == -1))
 //            return null;
 //        return getSubSequence(groups[group * 2], groups[group * 2 + 1]).toString();
