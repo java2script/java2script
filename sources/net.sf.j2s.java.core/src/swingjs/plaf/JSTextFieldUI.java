@@ -33,7 +33,7 @@ public class JSTextFieldUI extends JSTextUI {
 			allowPaintedBackground = false;
 			// no textNode here, because in input does not have that.
 			focusNode = enableNode = valueNode = domNode = DOMNode.setStyles(
-					newDOMObject("input", id, "type", inputType),
+					newDOMObject("input", id, "type", inputType, "spellcheck", FALSE),
 					"lineHeight", "0.8", "box-sizing", "border-box");
 			bindJSKeyEvents(focusNode, true);
 		}

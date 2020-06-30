@@ -82,8 +82,9 @@ public class JSApplet extends JSPanel {
      * @since 1.4
      */
     public JSApplet()  {
+    	秘winOrApplet = true;
 
-//        if (GraphicsEnvironment.isHeadless()) {
+    	//        if (GraphicsEnvironment.isHeadless()) {
 //            throw new HeadlessException();
 //        }
     }

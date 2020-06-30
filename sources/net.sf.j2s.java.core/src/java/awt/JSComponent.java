@@ -112,6 +112,8 @@ public abstract class JSComponent extends Component {
 
 	public String 秘htmlName;
 
+	protected boolean 秘winOrApplet;
+
 	protected int 秘num;
 	private static int 秘incr;
 	private Insets 秘tempInsets;
@@ -249,7 +251,7 @@ public abstract class JSComponent extends Component {
 		// ContentPane adds its insets. parent == null is a 
 		// proxy for Applet or Window since only they can be
 		// here and not have a parent.
-		if (parent == null || 秘isContentPane) {
+		if (秘isRootPane || 秘winOrApplet || 秘isContentPane) {
 			// this next call adds the necessary transform.
 			g = 秘frameViewer.getGraphics().create();
 			if (秘isContentPane) {
@@ -831,5 +833,19 @@ public abstract class JSComponent extends Component {
 	     */
 	    TOOLKIT_EXCLUDE
 	}
+
+
+
+    public Insets getInsets() {
+    	// Panel, ScrollPane, and Window only
+    	return 秘getInsets();
+    }
+
+    public Insets 秘getInsets() {
+    	// in SwingJS, we do not clone. Everything is a ContainerPeer.
+    	// it is inconsistent with other classes that this would need cloning.
+    	Insets i =  (ui == null ? null :  秘getUI().getInsets());
+    	return (i == null ? Container.NULL_INSETS : i);
+    }
 
 }

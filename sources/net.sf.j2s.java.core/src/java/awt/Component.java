@@ -972,8 +972,6 @@ public abstract class Component implements ImageObserver/*
 
 	public GraphicsConfiguration graphicsConfig;
 
-	protected boolean isWindow;
-
 	/**
 	 * Gets the <code>GraphicsConfiguration</code> associated with this
 	 * <code>Component</code>. If the <code>Component</code> has not been assigned a
@@ -1546,7 +1544,7 @@ public abstract class Component implements ImageObserver/*
 			}
 		}
 		Container parent = this.parent;
-		if (!isWindow && parent != null) {
+		if (parent != null && !((JSComponent) this).秘winOrApplet) {
 			parent.invalidate();
 		}
 		// }
@@ -6704,8 +6702,9 @@ public abstract class Component implements ImageObserver/*
 	}
 
 	public boolean isWindowOrJSApplet() {
-		// SwingJS treating embedded applet as window here
-		return this instanceof Window || this instanceof JSApplet;
+		return ((JSComponent) this).秘winOrApplet;
+//		// SwingJS treating embedded applet as window here
+//		return this instanceof Window || this instanceof JSApplet;
 	}
 
 	public boolean isJ2SWindowButNotJInternalFrame() {

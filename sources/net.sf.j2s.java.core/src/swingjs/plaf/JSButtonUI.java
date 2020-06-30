@@ -93,7 +93,7 @@ public class JSButtonUI extends JSLightweightUI {
 			allowPaintedBackground = false;
 			setDoPropagate();
 			domNode = enableNode = buttonNode = newDOMObject("button", id + "_dom", "type", "button", "style", "padding:0");
-			//DOMNode.setStyles(domNode, "outline", "none");
+			DOMNode.setStyles(domNode, "outline", "none");
 			//DOMNode.setStyles(domNode,"transform","translateY(0.5px)translateX(0.5px)");
 			addClass(domNode, "j2sbutton");
 			setFocusable();
@@ -202,8 +202,10 @@ public class JSButtonUI extends JSLightweightUI {
 		// "emptyBorder" is not really empty.
 		if (button.getBorder() == null || button.getBorder() == BorderFactory.emptyBorder)
 			DOMNode.setStyles(buttonNode, "border", "none");
-		else if (button.getBorder() == BorderFactory.html5Border)
+		else if (button.getBorder() == BorderFactory.html5Border || button.getBorder() instanceof UIResource)
 			DOMNode.setStyles(buttonNode, "border", null);
+//
+//		System.out.println(button.getText() + " " + button.getBorder());
 		if (!isMenuSep) {
 			setMnemonic(-1);
 			setAlignments(button, false);
