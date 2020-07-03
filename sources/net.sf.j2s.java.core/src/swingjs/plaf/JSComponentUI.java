@@ -431,17 +431,6 @@ public class JSComponentUI extends ComponentUI
 	
  	public DOMNode menuAnchorNode;
 
-	/**
-	 * for SplitPaneDivider
-	 * 
-	 */
-	protected boolean draggable;
-
-	public void setDraggable(JSFunction f) {
-		// SplitPaneDivider
-		draggable = true; // never actually used
-		J2S.setDraggable(getDOMNode(), f);
-	}
 
    /**
 	 * a numerical reference for an ID
@@ -1393,7 +1382,7 @@ public class JSComponentUI extends ComponentUI
 			return;
 		case "border":
 			// Simple Buttons have insets that don't overlap with the border.
-			if (!isSimpleButton)
+			//if (!isSimpleButton)
 				jc.秘setPaintsSelf(JSComponent.PAINTS_SELF_UNKNOWN);
 			setTainted();
 			return;

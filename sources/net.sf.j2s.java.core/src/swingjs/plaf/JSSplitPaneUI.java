@@ -268,6 +268,19 @@ public class JSSplitPaneUI extends JSPanelUI {
 	}
 
 	/**
+	 * for SplitPaneDivider
+	 * 
+	 */
+	protected boolean draggable;
+
+	public void setDraggable(JSFunction f) {
+		// SplitPaneDivider
+		draggable = true; // never actually used
+		J2S.setDraggable(divider.秘getUI().getDOMNode(), f);
+	}
+
+	
+	/**
 	 * Installs the UI defaults.
 	 */
 	protected void installDefaults() {
