@@ -44,7 +44,9 @@ import javax.swing.Timer;
 
 public class Test_Event extends JFrame {
 
-	static boolean logging = false;
+	static boolean logging = true;
+
+	boolean asInternalFrame = false;
 	
 	static {
 		if(logging)System.out.println("os:" + System.getProperty("os.name"));
@@ -133,7 +135,7 @@ public class Test_Event extends JFrame {
 		full.setName("full");
 		ptop.setName("ptop");
 
-		boolean asInternalFrame = true;
+		
 
 		if (asInternalFrame) {
 			JDesktopPane d = new JDesktopPane();
