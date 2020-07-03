@@ -20,6 +20,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+
 /**
  * SwingJS implementation of javajs.http.HttpClient and associated classes.
  * 
@@ -202,18 +203,23 @@ class SimpleHttpClient implements HttpClient {
 		}
 
 		@Override
-		public HttpRequest addFormParameter(String name, String value) {
+		public HttpRequest addQueryParameter(String name, String value) {
+		  // TODO: implement adding parameters to url query
+		}
+		
+		@Override
+		public HttpRequest addFormPart(String name, String value) {
 			return addFormField(name, value, null, null);
 		}
 
 		@Override
-		public HttpRequest addFileParameter(String name, File file, String contentType, String fileName) {
+		public HttpRequest addFilePart(String name, File file, String contentType, String fileName) {
 			return addFormField(name, toBytes(file), contentType, fileName);
 		}
 
 
 		@Override
-		public HttpRequest addFileParameter(String name, InputStream stream, String contentType, String fileName) {
+		public HttpRequest addFilePart(String name, InputStream stream, String contentType, String fileName) {
 			return addFormField(name, toBytes(stream), contentType, fileName);
 		}
 

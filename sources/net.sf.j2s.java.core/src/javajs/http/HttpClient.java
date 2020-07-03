@@ -34,13 +34,13 @@ public interface HttpClient {
 		/**
 		 * Add parameter to the request form (either urlencoded or multipart).
 		 */
-		public HttpRequest addFormParameter(String name, String value);
+		public HttpRequest addFormPart(String name, String value);
 
 		/**
 		 * Add file form parameter with specified content type and file name to the
 		 * reqeust converting it into a multipart form .
 		 */
-		public HttpRequest addFileParameter(String name, File file,
+		public HttpRequest addFilePart(String name, File file,
 				String contentType, String fileName);
 
 		/**
@@ -48,7 +48,7 @@ public interface HttpClient {
 		 * form. Content type will be set to "application/octet-stream" and file
 		 * name to the name of the file.
 		 */
-		public default HttpRequest addFileParameter(String name, File file) {
+		public default HttpRequest addFilePart(String name, File file) {
 			return addFile(name, file, "application/octet-stream", file.getName());
 		}
 
@@ -56,21 +56,26 @@ public interface HttpClient {
 		 * Add file form parameter to the request converting it into a multipart
 		 * form.
 		 */
-		public HttpRequest addFileParameter(String name, InputStream stream,
+		public HttpRequest addFilePart(String name, InputStream stream,
 				String contentType, String fileName);
 
 		/**
 		 * Add file form parameter to the reqeust converting it into a multipart form.
 		 * The content type will be set to "application/octet-stream" and file name to "file".
 		 */
-		public default HttpRequest addFileParameter(String name, InputStream stream) {
+		public default HttpRequest addFilePart(String name, InputStream stream) {
 			return addFileParameter(name, stream, "application/octet-stream", "file")
 		}
 
 		/**
-		 * Remove all parameters having the specified name from the reuqest.
+		 * Remove all query parameters having the specified name from the request.
 		 */
-		public HttpRequest clearParameter(String name);
+		public HttpRequest clearQueryParameters(String name);
+		
+		/**
+		 * Remove all form parameters having the specified name.		
+		 */
+		public HttpRequest clearFormParts(String name);
 
 		/**
 		 * Send the request to the server and return the response.
@@ -125,33 +130,32 @@ public interface HttpClient {
 	}
 
 	/**
-	 * Initialises the GET request builder. Usually they have no request body and
+	 * Creates a new GET request. They usually have no body and
 	 * parameters are passed in the URL query.
 	 */
 	public HttpRequest get(URI uri);
 
 	/**
-	 * Initialises the GET request builder. They have no request body and
+	 * Creates a new HEAD request. They have no request body and
 	 * parameters are passed in the URL query. They are identical to GET requests,
-	 * the only difference is that the returned response contains headers only.
+	 * except they receive no response body.
 	 */
 	public HttpRequest head(URI uri);
 
 	/**
-	 * Initialises the POST request builder. Usually they contain data in the
+	 * Creates a new POST request. Usually they pass data in the
 	 * request body either as a urlencoded form, a multipart form or raw bytes.
-	 * Currently, we only care about the multipart form.
+	 * Currently, we only care about the multipart and urlencoded forms.
 	 */
 	public HttpRequest post(URI uri);
 
 	/**
-	 * Initialises the PUT request builder which construct the same way as POST.
-	 * The only difference is the request method.
+	 * Creates a new PUT request which is constructed the same way as POST.
 	 */
 	public HttpRequest put(URI uri);
 
 	/**
-	 * Initialises the DELETE request builder. The DELETE requests have no body
+	 * Creates a new DELETE request. THey have have no body
 	 * and parameters are passed in the URL query, just like GET.
 	 */
 	public HttpRequest delete(URI uri);
