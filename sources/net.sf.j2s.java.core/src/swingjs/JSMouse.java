@@ -495,11 +495,13 @@ public class JSMouse {
 		}
 	}
 
-	@SuppressWarnings("null")
+	@SuppressWarnings({ "null", "unused" })
 	private boolean keyAction(int id, Object jqevent, long time) {
 		JComponent c = 	/** @j2sNative 
 		jqevent.target["data-shadowkeycomponent"] || jqevent.target["data-keycomponent"] ||
 				 */null; 
+		if (c == null)
+			return false;
 		if (c.秘isContentPane)
 			c = (JComponent) c.getTopLevelAncestor();
 		return JSKeyEvent.dispatchKeyEvent(c, id, jqevent, time);

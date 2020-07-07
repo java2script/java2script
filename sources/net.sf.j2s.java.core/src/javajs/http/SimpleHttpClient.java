@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -307,7 +308,7 @@ class SimpleHttpClient implements HttpClient {
 					htGetParams.put(fd.getName(), fd.getData().toString());
 				}
 				for (Entry<String, String> e : htGetParams.entrySet()) {
-					data += e.getKey() + "=" + URLEncoder.encode(e.getValue(), "UTF-8");
+					data += e.getKey() + "=" + encodeURI(e.getValue());
 				}
 			}
 			if (data.length() > 0) {
@@ -316,6 +317,19 @@ class SimpleHttpClient implements HttpClient {
 				url = uri.toURL();
 			}
 			return r.getResponse(getConnection(url), this);
+		}
+
+		private String encodeURI(String value) {
+			try {
+				// convert " " to "%20", not "+"
+				// based on https://stackoverflow.com/questions/2678551/when-to-encode-space-to-plus-or-20
+				// Answer # 46. and "URI Generic Syntax " https://tools.ietf.org/html/rfc3986
+				// This will be consistent, then, with JavaScript encodeURIComponent().
+				return URLEncoder.encode(value.replace(' ', '\0'), "UTF-8").replaceAll("%00", "%20");
+			} catch (UnsupportedEncodingException e) {
+				// impossible
+				return null;
+			}
 		}
 
 		private Response fulfillPost(Response r) throws IOException {

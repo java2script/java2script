@@ -1012,7 +1012,7 @@ public class JSUtil implements JSUtilI {
 	public static String getAppletCodePath() {
 		try {
 			JSFrameViewer ap = (JSFrameViewer) DOMNode.getAttr(getApplet(), "_appletPanel");
-			return ap.appletCodeBase;
+			return new URL(ap.appletCodeBase).toString();
 		} catch (Throwable t) {
 			return null;
 		}

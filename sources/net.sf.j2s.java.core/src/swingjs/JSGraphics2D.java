@@ -68,6 +68,10 @@ public class JSGraphics2D implements
 	private HTML5Canvas canvas;
 
 	private HTML5CanvasContext2D ctx;
+	
+	public HTML5CanvasContext2D getContext2D() {
+		return ctx;
+	}
 	private GraphicsConfiguration gc;
 
 	private BasicStroke currentStroke;
