@@ -403,7 +403,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer, JSComponentUI.Em
 	@Override
 	public Insets getInsets() {
 		Insets i = (isDummyFrame ? null : frame.isUndecorated() ? ZERO_INSETS : jc.getFrameViewer().getInsets());
-		System.out.println("JSFrameUI.getInsets " + id + " "+frame.isUndecorated() + " " + i);
+		//System.out.println("JSFrameUI.getInsets " + id + " "+frame.isUndecorated() + " " + i);
 		return i;
 	}
 

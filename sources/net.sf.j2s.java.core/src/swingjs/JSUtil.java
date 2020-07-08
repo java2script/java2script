@@ -931,7 +931,7 @@ public class JSUtil implements JSUtilI {
 			File outFile = (File) f;
 			outFile.秘bytes = bytes;
 			if (outFile.秘isTempFile) {
-				cacheFileData(outFile.getAbsolutePath(), bytes);
+				cacheFileData(outFile instanceof File ? outFile.getAbsolutePath() : outFile.toString(), bytes);
 			}
 		}
 		return (bytes != null);

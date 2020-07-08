@@ -262,7 +262,7 @@ class JarFile extends ZipFile {
     private class JarEntryIterator implements Enumeration<JarEntry>,
             Iterator<JarEntry>
     {
-        final Enumeration<? extends ZipEntry> e = JarFile.super.entries();
+        final Enumeration<? extends ZipEntry> e = superEntries();
 
         public boolean hasNext() {
             return e.hasMoreElements();
@@ -289,7 +289,11 @@ class JarFile extends ZipFile {
         return new JarEntryIterator();
     }
 
-    @Override
+    public Enumeration<? extends ZipEntry> superEntries() {
+		return super.entries();
+	}
+
+	@Override
     public Stream<JarEntry> stream() {
         return StreamSupport.stream(Spliterators.spliterator(
                 new JarEntryIterator(), size(),

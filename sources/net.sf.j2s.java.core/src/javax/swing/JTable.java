@@ -2730,7 +2730,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 			return modelColumnIndex;
 		}
 		TableColumnModel cm = getColumnModel();
-		for (int column = 0; column < getColumnCount(); column++) {
+		for (int column = 0, n = getColumnCount(); column < n; column++) {
 			if (cm.getColumn(column).getModelIndex() == modelColumnIndex) {
 				return column;
 			}
@@ -3115,7 +3115,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 
 	private int viewIndexForColumn(TableColumn aColumn) {
 		TableColumnModel cm = getColumnModel();
-		for (int column = 0; column < cm.getColumnCount(); column++) {
+		for (int column = cm.getColumnCount(); --column >= 0;) {
 			if (cm.getColumn(column) == aColumn) {
 				return column;
 			}
@@ -3847,7 +3847,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		// Update the UIs of the cell renderers, cell editors and header
 		// renderers.
 		TableColumnModel cm = getColumnModel();
-		for (int column = 0; column < cm.getColumnCount(); column++) {
+		for (int column = cm.getColumnCount(); --column >= 0;) {
 			TableColumn aColumn = cm.getColumn(column);
 			SwingUtilities.updateRendererOrEditorUI(aColumn.getCellRenderer());
 			SwingUtilities.updateRendererOrEditorUI(aColumn.getCellEditor());
@@ -4786,8 +4786,8 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		resizeAnd秘repaint();
 	}
 
-	private int limit(int i, int a, int b) {
-		return Math.min(b, Math.max(i, a));
+	private static int limit(int i, int min, int max) {
+		return Math.min(Math.max(i, min), max);
 	}
 
 	/**
@@ -4813,13 +4813,14 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		}
 		columnSelectionAdjusting = isAdjusting;
 		// The getCellRect() call will fail unless there is at least one row.
-		if (getRowCount() <= 0 || getColumnCount() <= 0) {
+		int nr, nc;
+		if ((nr = getRowCount()) <= 0 || (nc = getColumnCount()) <= 0) {
 			return;
 		}
-		int firstIndex = limit(e.getFirstIndex(), 0, getColumnCount() - 1);
-		int lastIndex = limit(e.getLastIndex(), 0, getColumnCount() - 1);
+		int firstIndex = limit(e.getFirstIndex(), 0, nc - 1);
+		int lastIndex = limit(e.getLastIndex(), 0, nc - 1);
 		int minRow = 0;
-		int maxRow = getRowCount() - 1;
+		int maxRow = nr - 1;
 		if (getRowSelectionAllowed()) {
 			minRow = selectionModel.getMinSelectionIndex();
 			maxRow = selectionModel.getMaxSelectionIndex();
