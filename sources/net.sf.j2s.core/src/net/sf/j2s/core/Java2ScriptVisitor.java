@@ -135,6 +135,7 @@ import org.eclipse.jdt.core.dom.WildcardType;
 
 // TODO: superclass inheritance for JAXB XmlAccessorType
 
+//BH 2020.07.04 -- 3.2.9.v1m fix for X.super.y() in anonymous class
 //BH 2020.06.22 -- 3.2.9.v1k fix for varargs not proper qualified arrays
 //BH 2020.06.17 -- 3.2.9-v1j fix for functional interface this::privateMethod
 //BH 2020.05.01 -- 3.2.9-v1i fix for nested lambda methods
@@ -1754,12 +1755,17 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			buffer.append("Clazz.clone(this)");
 			return false;
 		}
+		String myThis = "this";
+		
 		if (isQualified) {
 			node.getQualifier().accept(this);
+			if (class_isAnonymousOrLocal) {
+				myThis = getSyntheticReference(mBinding.getDeclaringClass().getQualifiedName());
+			}
 		} else {
-			buffer.append("C$.superclazz");
+			buffer.append("C$");
 		}
-		buffer.append(".prototype." + finalMethodNameWith$Params + ".apply(this, [");
+		buffer.append(".superclazz.prototype." + finalMethodNameWith$Params + ".apply(" + myThis + ", [");
 		addMethodParameterList(node.arguments(), mBinding, null, null, METHOD_NOTSPECIAL);
 		buffer.append("])");
 
