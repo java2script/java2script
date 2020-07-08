@@ -96,8 +96,10 @@ public class JSImage extends BufferedImage {
 						 * 
 						 */
 						JSComponentUI ui = (JSComponentUI) DOMNode.getAttr(node, "data-ui");
-						System.out.println("JSImage w,h " + w + " " + h);
-						秘init(w, h, TYPE_INT_ARGB);
+						System.out.println("JSImage " + (ui == null ? "video" 
+								: ui.getId()) + " " + w + "x" + h);
+						秘init(w, h, TYPE_4BYTE_HTML5); 
+						// indicating that this video is ready for image capture
 						if (ui != null && ui.jc instanceof JLabel) {
 							JLabel label = (JLabel) ui.jc;
 							w = label.getWidth();

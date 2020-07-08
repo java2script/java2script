@@ -214,7 +214,7 @@ public interface HTML5Video extends DOMNode {
 	 * @param listener
 	 * @param events   array of events to listen to or null to listen on all video
 	 *                 element event types
-	 * @return an array of event/listener pairs that can be used for removal.
+	 * @return an array of event/listener pairs that can be used for removal. If null, all events.
 	 */
 	public static Object[] addActionListener(HTML5Video jsvideo, ActionListener listener, String... events) {
 		if (events == null || events.length == 0)
@@ -226,7 +226,7 @@ public interface HTML5Video extends DOMNode {
 			public Void apply(Object jsevent) {
 				String name = (/** @j2sNative jsevent.type || */
 				"?");
-				System.out.println("HTML5Video " + name);
+				System.out.println("HTML5Video " + (/** @j2sNative jsevent.target.id || */null) + " " + name);
 				ActionEvent e = new ActionEvent(new Object[] { jsvideo, jsevent }, 12345, name,
 						System.currentTimeMillis(), 0);
 				listener.actionPerformed(e);
