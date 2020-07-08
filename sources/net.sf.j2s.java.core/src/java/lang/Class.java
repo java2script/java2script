@@ -2431,6 +2431,7 @@ public final class Class<T> {
 	    name = name.replace('\\','/');
 	    String baseFolder = null;
 	    String fname= name;
+	    URL url = null;
 		if (name.startsWith(File.temporaryDirectory)) {
 			data = JSUtil.getCachedFileData(name,  true);
 			if (data == null)
@@ -2455,7 +2456,6 @@ public final class Class<T> {
 	      if (this.$_$base == null) {      
 	        // getClass().getResource() will be here
 	        var pkgs = clazzName.split(".");
-	        var fname = baseFolder;
 	        if (fname.charAt(fname.length - 1) != '/')
 	          fname += "/";
 	        var map = Clazz._allPackage;
@@ -2467,7 +2467,6 @@ public final class Class<T> {
 	      }
 	      fname += name;
 	    }
-	    var url = null;
 	    var javapath = fname;
 	    try {
 //	      if (fname.indexOf(":/") < 0) {
@@ -2483,7 +2482,7 @@ public final class Class<T> {
 	    var fileCache = J2S.getSetJavaFileCache(null);
 	    data = fileCache && fileCache.get$O(javapath); 
 	    */
-	}
+		}
 	    if (data == null)
 	      data = JSUtil.J2S.getFileData(fname.toString(),null,true,true);
 	    /**

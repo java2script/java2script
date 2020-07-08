@@ -479,19 +479,15 @@ public class JSUtil implements JSUtilI {
 	 * 
 	 */
 	public static void notImplemented(String msg) {
-		String s = null;
 		if (mapNotImpl == null)
 			mapNotImpl = new Hashtable<String, Boolean>();
+		JSFunction s = J2S.getCaller();
 		/**
 		 * @j2sNative
 		 * 
-		 *            s = arguments.callee.caller;
-		 *            var cl = s.claxxOwner || s.exClazz;
-		 *            s = (cl ? cl.__CLASS_NAME__ + "." : "") +
-		 *            arguments.callee.caller.exName;
+		 *            let cl = s.claxxOwner || s.exClazz;
+		 *            s = (cl ? cl.__CLASS_NAME__ + "." : "") + s.exName;
 		 */
-		{
-		}
 		if (mapNotImpl.containsKey(s + msg))
 			return;
 		mapNotImpl.put(s + msg, Boolean.TRUE);
@@ -752,7 +748,7 @@ public class JSUtil implements JSUtilI {
 		 * @j2sNative
 		 * 
 		 * 	if (C$.ctxTemp == null) { 
-		 *    var d = document.createElement("canvas"); 
+		 *    let d = document.createElement("canvas"); 
 		 *    d.height = d.width = 1;
 		 *    C$.ctxTemp = d.getContext("2d"); 
 		 *  } 
@@ -799,7 +795,7 @@ public class JSUtil implements JSUtilI {
 		
 		/** @j2sNative 
 		 * 
-		 * var t = typeof o;
+		 * let t = typeof o;
 		 *  return (t == "string" ? o : (o.__CLASS_NAME__ == "java.lang.Class" ? o.getName$() : o.__CLASS_NAME__ || t)+ "_" + (o.__JSID__ || (o.hashCode$ ? o.hashCode$() : o.toString())));
 		 */
 		 {
@@ -833,7 +829,7 @@ public class JSUtil implements JSUtilI {
 		String key = "";
 		String value = "";
 		/**
-		 * @j2sNative for (var key in info) { if (prefix == null || key.indexOf(prefix) == 0) { value = ""
+		 * @j2sNative for (key in info) { if (prefix == null || key.indexOf(prefix) == 0) { value = ""
 		 *            + info[key];
 		 */
 		System.out.println("Platform reading Info." + key + " = " + value);

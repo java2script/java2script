@@ -13996,6 +13996,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		return image;
 	}
 
+	J2S.getCaller = function() { return arguments.callee.caller.caller}
+
 })(self.J2S, self.jQuery, window, document);
 // j2sClazz.js 
 // NOTE: updates to this file should be copies to j2sjmol.js
