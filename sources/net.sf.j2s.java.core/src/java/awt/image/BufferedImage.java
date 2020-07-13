@@ -2313,7 +2313,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		case GET_IMAGE_FOR_ICON:
 			if (!秘isDataStolen())
 				return (DOMNode) (秘canvas != null && !秘haveVideo() ? 秘canvas
-						: 秘imgNode != null ? 秘imgNode : createImageNode());
+						: 秘imgNode != null ? 秘copyImageNode() : createImageNode());
 			// $fall-through$
 		case GET_IMAGE_FROM_RASTER:
 			// we are forcing
@@ -2326,6 +2326,16 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 			秘g = null;
 			return canvas;
 		}
+	}
+
+	private DOMNode 秘copyImageNode() {
+		if (秘haveVideo())
+			return 秘imgNode;
+		DOMNode node = DOMNode.createElement("img", null);
+		node.setAttribute("width",  秘imgNode.getAttribute("width"));
+		node.setAttribute("height",  秘imgNode.getAttribute("height"));
+		node.setAttribute("src",  秘imgNode.getAttribute("src"));
+		return node;
 	}
 
 	/**

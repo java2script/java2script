@@ -1303,8 +1303,7 @@ public class JSComponentUI extends ComponentUI
 		String prop = e.getPropertyName();
 		Object value = e.getNewValue();
 		if (prop == "jscanvas") {
-			jc.秘g = (JSGraphics2D)(Object) Boolean.TRUE;
-			setTainted();
+			addLocalCanvas();
 		}
 		if (domNode == null)
 			return;
@@ -1323,6 +1322,13 @@ public class JSComponentUI extends ComponentUI
 		propertyChangedCUI(e, prop);
 	}
 	
+	protected void addLocalCanvas() {
+		if (jc.秘g != null)
+			return;
+		jc.秘g = (JSGraphics2D)(Object) Boolean.TRUE;
+		setTainted();
+	}
+
 	private Container awttop;
 	protected Color awtPeerBG, awtPeerFG;
 	
@@ -1517,7 +1523,7 @@ public class JSComponentUI extends ComponentUI
 	 * 
 	 * (InternalFrame, Button, ComboBox, MenuBar, MenuItem, ScrollBar, TextField, TextArea, EditorPane)
 	 */
-	protected boolean allowPaintedBackground = true;
+	public boolean allowPaintedBackground = true;
 
 	/**
 	 * Label will render its image, drawing to the canvas; Button will not 
@@ -3599,7 +3605,7 @@ public class JSComponentUI extends ComponentUI
 			if (!paintsSelf)
 				setBackgroundDOM(domNode, color);
 			// preliminary -- DOM only, when the background is set
-		} else if (allowPaintedBackground && (isOpaque || jc.秘g != null)) {
+		} else if (allowPaintedBackground && (isOpaque && jc.getComponentCount() > 0 || jc.秘g != null)) {
 			// all opaque components must paint their background
 			// just in case they have painted CHILDREN
 			if (isOpaque == (color.getAlpha() == 255)) {

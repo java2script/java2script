@@ -2127,12 +2127,7 @@ public abstract class Component implements ImageObserver/*
 	}
 
 	private void repaintParentIfNeeded(int oldX, int oldY, int oldWidth, int oldHeight) {
-		if (parent != null && peer instanceof LightweightPeer && isShowing()) {
-			// Have the parent redraw the area this component occupied.
-			parent.repaint(oldX, oldY, oldWidth, oldHeight);
-			// Have the parent redraw the area this component *now* occupies.
-			((JSComponent)this).秘repaint();
-		}
+		((JSComponent)this).秘repaintParentIfNeeded(oldX, oldY, oldWidth, oldHeight);
 	}
 
 	/**

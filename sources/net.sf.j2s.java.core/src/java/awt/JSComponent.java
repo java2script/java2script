@@ -848,4 +848,15 @@ public abstract class JSComponent extends Component {
     	return (i == null ? Container.NULL_INSETS : i);
     }
 
+	public void 秘repaintParentIfNeeded(int oldX, int oldY, int oldWidth, int oldHeight) {
+		if (parent != null && peer instanceof LightweightPeer && isShowing()) {
+			// Have the parent redraw the area this component occupied.
+			// Have the parent redraw the area this component *now* occupies.
+			if (秘getUI().allowPaintedBackground && 秘paintsSelf()) {
+				parent.repaint(oldX, oldY, oldWidth, oldHeight);
+				秘repaint();
+			}
+		}
+	}
+
 }

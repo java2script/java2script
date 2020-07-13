@@ -446,11 +446,9 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 				int n = Integer.parseInt(key.toString());
 				JLabel label = labelTable.get(key);
 				JSComponentUI lui = label.秘getUI();
-				if (!lui.imagePersists) {
-					lui.imagePersists = true;
-					lui.setTainted();
-					lui.updateDOMNode();
-				}
+				lui.imagePersists = true;
+				lui.setTainted();
+				lui.updateDOMNode();
 				DOMNode labelNode = lui.getOuterNode();
 				// need calculation of pixels
 				float frac = (n - min) * 1f / (max - min);
@@ -466,6 +464,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 					left = (paintTicks ? 20 : 15);
 				}
 				DOMNode.setTopLeftAbsolute(labelNode, top, left);
+				DOMNode.setStyles(labelNode, "overflow", null);
 				addClass(labelNode, "jslider-label");
 				domNode.insertBefore(labelNode, sliderTrack);
 			}

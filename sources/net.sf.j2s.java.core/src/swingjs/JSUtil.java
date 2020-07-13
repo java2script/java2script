@@ -485,7 +485,7 @@ public class JSUtil implements JSUtilI {
 		/**
 		 * @j2sNative
 		 * 
-		 *            let cl = s.claxxOwner || s.exClazz;
+		 *            var cl = s.claxxOwner || s.exClazz;
 		 *            s = (cl ? cl.__CLASS_NAME__ + "." : "") + s.exName;
 		 */
 		if (mapNotImpl.containsKey(s + msg))
@@ -748,7 +748,7 @@ public class JSUtil implements JSUtilI {
 		 * @j2sNative
 		 * 
 		 * 	if (C$.ctxTemp == null) { 
-		 *    let d = document.createElement("canvas"); 
+		 *    var d = document.createElement("canvas"); 
 		 *    d.height = d.width = 1;
 		 *    C$.ctxTemp = d.getContext("2d"); 
 		 *  } 
@@ -795,7 +795,7 @@ public class JSUtil implements JSUtilI {
 		
 		/** @j2sNative 
 		 * 
-		 * let t = typeof o;
+		 * var t = typeof o;
 		 *  return (t == "string" ? o : (o.__CLASS_NAME__ == "java.lang.Class" ? o.getName$() : o.__CLASS_NAME__ || t)+ "_" + (o.__JSID__ || (o.hashCode$ ? o.hashCode$() : o.toString())));
 		 */
 		 {

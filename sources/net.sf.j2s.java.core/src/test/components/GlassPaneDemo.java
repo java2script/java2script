@@ -120,9 +120,13 @@ public class GlassPaneDemo {
 /**
  * We have to provide our own glass pane so that it can paint.
  */
-class MyGlassPane extends JComponent implements ItemListener {
+class MyGlassPane extends JPanel implements ItemListener {
 	Point point;
 
+	public MyGlassPane() {
+		super();
+		setName("MyGlassPane");
+	}
 	// React to change button clicks.
 	public void itemStateChanged(ItemEvent e) {
 		setVisible(e.getStateChange() == ItemEvent.SELECTED);
