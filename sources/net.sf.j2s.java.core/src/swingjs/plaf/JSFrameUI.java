@@ -1,6 +1,5 @@
 package swingjs.plaf;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.Rectangle;
@@ -15,11 +14,11 @@ import java.beans.PropertyChangeEvent;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.LookAndFeel;
-import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-import swingjs.api.js.JSFunction;
+import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
+import swingjs.api.js.JSFunction;
 
 /**
  * New! Frame, JFrame, and JInternalFrame embedding on a web page:
@@ -71,6 +70,8 @@ public class JSFrameUI extends JSWindowUI implements FramePeer, JSComponentUI.Em
 	protected boolean isInternalFrame;
 
 	boolean doEmbed, isHidden;
+
+	private String appletPrefix;
 
 	public JSFrameUI() {
 		frameZ += 1000;
@@ -185,7 +186,12 @@ public class JSFrameUI extends JSWindowUI implements FramePeer, JSComponentUI.Em
 			}
 			return node;
 		default:
-			return DOMNode.getEmbedded(name, type);
+			if (appletPrefix == null) {
+				appletPrefix = DOMNode.getAttr(JSUtil.getHTML5Applet(jc), "_id") + "-";
+				if (DOMNode.getEmbedded(appletPrefix + name, "node") == null)
+					appletPrefix = "";
+			}		
+			return DOMNode.getEmbedded(appletPrefix + name, type);
 		}
 	}
 
@@ -402,7 +408,9 @@ public class JSFrameUI extends JSWindowUI implements FramePeer, JSComponentUI.Em
 
 	@Override
 	public Insets getInsets() {
-		return (isDummyFrame ? null : frame.isUndecorated() ? ZERO_INSETS : jc.getFrameViewer().getInsets());
+		Insets i = (isDummyFrame ? null : frame.isUndecorated() ? ZERO_INSETS : jc.getFrameViewer().getInsets());
+		//System.out.println("JSFrameUI.getInsets " + id + " "+frame.isUndecorated() + " " + i);
+		return i;
 	}
 
 	@Override

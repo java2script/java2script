@@ -31,6 +31,7 @@ class Test_Array extends Test_ {
 	static Object iType3_ = Array.newInstance(int[].class, 3);
 	static Object iType3 = Array.newInstance(Integer.TYPE, 3);
 	static Object iType123_ = Array.newInstance(Integer.TYPE, 1, 2, 3);
+	static Object fType123_ = Array.newInstance(Float.TYPE, 1, 2, 3);
 	static Object i3def = new int[] { 3, 4, 5 };
 	static Object i3 = new int[3];
 	static Object i3_ = new int[3][];
@@ -51,6 +52,50 @@ class Test_Array extends Test_ {
 
 	public static void main(String[] args) {
 	
+		Object[][] oaa = new Object[2][];
+		
+
+		// Object[][] is Object[]
+		if (oaa instanceof Object[]) {
+			System.out.println("OK");
+		} else {
+			assert(false);
+		}
+
+		// Object[][] is not Object[][][]
+		if (oaa instanceof Object[][][]) {
+			assert(false);
+		} else {
+			System.out.println("OK");
+		}
+
+		// String[][] is Object[]
+		if (s3_ instanceof Object[]) {
+			System.out.println("OK");
+		} else {
+			assert(false);
+		}
+
+		// String[][] is Object[][]
+		if (s3_ instanceof Object[][]) {
+			System.out.println("OK");
+		} else {
+			assert(false);
+		}
+
+		// int[] is not Object[]
+		if (i3 instanceof Object[]) {
+			assert(false);
+		} else {
+			System.out.println("OK");
+		}
+
+		if (s3 instanceof Object[][]) {
+			assert(false);
+		} else {
+			System.out.println("OK");
+		}
+
     	try {
 			System.out.println(Class.forName("[C").getName());
 			System.out.println(((new test.Test_Array[0]).getClass().getName()));

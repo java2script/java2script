@@ -78,6 +78,8 @@ public interface J2SInterface {
 
 	void showStatus(String msg, boolean doFadeOut);
 
+	JSFunction getCaller();
+
 
 }
 

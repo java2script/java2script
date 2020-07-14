@@ -365,7 +365,7 @@ public class JSUtil implements JSUtilI {
 			BufferedInputStream bis = new BufferedInputStream(cl.getResourceAsStream(zipFileName));
 			String prefix = J2S.getResourcePath(null, true); // will end with /
 			fileList = getZipTools().cacheZipContentsStatic(bis, prefix, mapByteData, false);
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			System.out.println("JSUtil could not cache files from " + zipFileName);
 			return;
 		}
@@ -479,19 +479,15 @@ public class JSUtil implements JSUtilI {
 	 * 
 	 */
 	public static void notImplemented(String msg) {
-		String s = null;
 		if (mapNotImpl == null)
 			mapNotImpl = new Hashtable<String, Boolean>();
+		JSFunction s = J2S.getCaller();
 		/**
 		 * @j2sNative
 		 * 
-		 *            s = arguments.callee.caller;
 		 *            var cl = s.claxxOwner || s.exClazz;
-		 *            s = (cl ? cl.__CLASS_NAME__ + "." : "") +
-		 *            arguments.callee.caller.exName;
+		 *            s = (cl ? cl.__CLASS_NAME__ + "." : "") + s.exName;
 		 */
-		{
-		}
 		if (mapNotImpl.containsKey(s + msg))
 			return;
 		mapNotImpl.put(s + msg, Boolean.TRUE);
@@ -833,7 +829,7 @@ public class JSUtil implements JSUtilI {
 		String key = "";
 		String value = "";
 		/**
-		 * @j2sNative for (var key in info) { if (prefix == null || key.indexOf(prefix) == 0) { value = ""
+		 * @j2sNative for (key in info) { if (prefix == null || key.indexOf(prefix) == 0) { value = ""
 		 *            + info[key];
 		 */
 		System.out.println("Platform reading Info." + key + " = " + value);
@@ -931,7 +927,7 @@ public class JSUtil implements JSUtilI {
 			File outFile = (File) f;
 			outFile.秘bytes = bytes;
 			if (outFile.秘isTempFile) {
-				cacheFileData(outFile.getAbsolutePath(), bytes);
+				cacheFileData(outFile instanceof File ? outFile.getAbsolutePath() : outFile.toString(), bytes);
 			}
 		}
 		return (bytes != null);
@@ -1012,7 +1008,7 @@ public class JSUtil implements JSUtilI {
 	public static String getAppletCodePath() {
 		try {
 			JSFrameViewer ap = (JSFrameViewer) DOMNode.getAttr(getApplet(), "_appletPanel");
-			return ap.appletCodeBase;
+			return new URL(ap.appletCodeBase).toString();
 		} catch (Throwable t) {
 			return null;
 		}

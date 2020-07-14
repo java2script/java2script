@@ -263,8 +263,8 @@ public class ScheduledThreadPoolExecutor
             if (!canRunInCurrentRunState(periodic))
                 cancel(false);
             else if (!periodic)
-                ScheduledFutureTask.super.run();
-            else if (ScheduledFutureTask.super.runAndReset()) {
+            	super.run();
+            else if (super.runAndReset()) {
                 setNextRunTime();
                 reExecutePeriodic(outerTask);
             }

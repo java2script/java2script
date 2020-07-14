@@ -103,8 +103,8 @@ public class JSApp {
 		// if (platform != null && platform.length() > 0)
 		// apiPlatform = (GenericPlatform) Interface.getInterface(platform);
 		
-		o = params.get("assets");
-		if (o != null)
+		o = params.get("resourceZip");
+		if (o instanceof String)
 			JSUtil.loadJavaResourcesFromZip(getClass().getClassLoader(), (String) o, null);
 		System.out.println("JSApp initialized");
 	}

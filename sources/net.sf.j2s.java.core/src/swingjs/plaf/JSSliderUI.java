@@ -59,7 +59,6 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	protected boolean paintTicks;
 	protected boolean paintLabels;
 	private boolean snapToTicks;
-	private Dictionary<Integer, JLabel> labelTable;
 	
 	protected String orientation;
 	
@@ -96,7 +95,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 			minorSpacing = slider.getMinorTickSpacing();
 			majorSpacing = slider.getMajorTickSpacing();
 			paintTicks = (majorSpacing > 0 && slider.getPaintTicks());
-			paintLabels = (majorSpacing > 0 && slider.getPaintLabels());
+			paintLabels = slider.getPaintLabels();
 			paintTrack = slider.getPaintTrack();
 			snapToTicks = (majorSpacing > 0 && slider.getSnapToTicks());
 		}
@@ -391,7 +390,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		$(domNode).find("." + tickClass).remove();
 		$(domNode).find(".jslider-label").remove();
 		getHTMLSizePreferred(jqSlider, false);
-		if (majorSpacing == 0 && minorSpacing == 0 || !paintTicks && !paintLabels) {
+		if ((majorSpacing == 0 && minorSpacing == 0 || !paintTicks) && !paintLabels) {
 			if (myScrollPaneUI != null) {
 				DOMNode.setStyles(sliderHandle, "transform", null);
 				DOMNode.setStyles(sliderTrack, "transform", null);
@@ -438,15 +437,19 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 			if (!paintLabels)
 				getHTMLSizePreferred(domNode, false);
 		}
-		if (paintLabels) {
+		Dictionary<Integer, JLabel> labelTable = slider.getLabelTable();
+		if (paintLabels && labelTable != null) {
 			myHeight += 20;
-			labelTable = slider.getLabelTable();
 			Enumeration keys = labelTable.keys();
 			while (keys.hasMoreElements()) {
 				Object key = keys.nextElement();
 				int n = Integer.parseInt(key.toString());
 				JLabel label = labelTable.get(key);
-				DOMNode labelNode = ((JSComponentUI) label.getUI()).getOuterNode();
+				JSComponentUI lui = label.秘getUI();
+				lui.imagePersists = true;
+				lui.setTainted();
+				lui.updateDOMNode();
+				DOMNode labelNode = lui.getOuterNode();
 				// need calculation of pixels
 				float frac = (n - min) * 1f / (max - min);
 				if (isHoriz == isInverted)
@@ -454,13 +457,14 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 				float px = (frac * length + margin);
 				int left, top;
 				if (isHoriz) {
-					top = 20;
+					top = (paintTicks ? 20 : 15);
 					left = (int) (px - label.getWidth() / 2);
 				} else {
 					top = (int) (px - label.getHeight() / 2);
-					left = 20;
+					left = (paintTicks ? 20 : 15);
 				}
 				DOMNode.setTopLeftAbsolute(labelNode, top, left);
+				DOMNode.setStyles(labelNode, "overflow", null);
 				addClass(labelNode, "jslider-label");
 				domNode.insertBefore(labelNode, sliderTrack);
 			}
@@ -798,6 +802,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
             while ( keys.hasMoreElements() ) {
                 JComponent label = (JComponent) dictionary.get(keys.nextElement());
                 widest = Math.max( label.getPreferredSize().width, widest );
+                label.秘getUI().imagePersists = true;
             }
         }
         return widest;

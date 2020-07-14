@@ -2262,9 +2262,10 @@ public final class Formatter implements Flushable {
                 }
 
                 // Expect 6 groups in regular expression
-                // %[argument_index$][flags][width][.precision][t]conversion
-                //      0               1      2          3     4      5
-                int n = m.groupCount() - 1;
+                //  (expr) %[argument_index$][flags][width][.precision][t]conversion
+                //    $0             $1        $2     $3        $4     $5    $6
+                //     sa[]           0         1      2         3      4     5
+                int n = m.groupCount();
                 String[] sa = new String[n];
                 for (int j = 0; j < n; j++) {
                     sa[j] = m.group(j + 1);
@@ -3898,7 +3899,7 @@ public final class Formatter implements Flushable {
 
 		public static Flags parse(String s) {
 			Flags f = new Flags(0);
-			if (s == null)
+			if (s == null || s.length() == 0)
 				return f;
 			char[] ca = s.toCharArray();
 			for (int i = 0; i < ca.length; i++) {

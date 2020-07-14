@@ -7,6 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2020.06.18 better test for instanceof Object[]
 // BH 2020.06.03 sets user.home and user.dir to /TEMP/swingjs, and user.name to "swingjs"
 // BH 2020.04.01 2.2.0-v1e fixes missing C$.superclazz when class loaded from core
 // BH 2020.03.19 3.2.9-v1c fixes new String("xxx") !== "xxx"
@@ -199,7 +200,12 @@ var _array = function(baseClass, paramType, ndims, params, isClone) {
         break;
       }
     }
-    params.push(initValue);
+    var p = params; // an Int32Array
+    var n = p.length;
+    params = new Array(n + 1);
+    for (var i = 0; i < n; i++)
+    	params[i] = p[i];
+    params[n] = initValue;
   }
   params.push(paramType);
   var nbits = 0;
@@ -380,10 +386,16 @@ Clazz.instanceOf = function (obj, clazz) {
   clazz.$clazz$ && (clazz = clazz.$clazz$);
   if (obj == clazz)
     return true;
-  if (obj.__ARRAYTYPE || clazz.__ARRAYTYPE)
-    return (obj.__ARRAYTYPE == clazz.__ARRAYTYPE 
-            || obj.__ARRAYTYPE && clazz.__ARRAYTYPE && obj.__NDIM == clazz.__NDIM 
-               && isInstanceOf(obj.__BASECLASS, clazz.__BASECLASS)); 
+  if (obj.__ARRAYTYPE || clazz.__ARRAYTYPE) {
+	  if (obj.__ARRAYTYPE == clazz.__ARRAYTYPE)
+		  return true;
+	  if (clazz.__BASECLASS == Clazz._O) {
+		 return (!obj.__ARRAYTYPE ? Array.isArray(obj) && clazz.__NDIM == 1
+		   : obj.__NDIM >= clazz.__NDIM && !obj.__BASECLASS.__PRIMITIVE);
+	  }
+      return obj.__ARRAYTYPE && clazz.__ARRAYTYPE && obj.__NDIM == clazz.__NDIM 
+               && isInstanceOf(obj.__BASECLASS, clazz.__BASECLASS); 
+  }
   return (obj instanceof clazz || isInstanceOf(getClassName(obj, true), clazz, true));
 };
 
@@ -3647,8 +3659,8 @@ var maxValueOf = 127;
 
 var getCachedNumber = function(i, a, cl, c$) {
   if (i >= minValueOf && i <= maxValueOf) {
-	  var v = a[i + minValueOf];
-	  return (v ? v : a[i + minValueOf] = Clazz.new_(cl[c$], [i])); 
+	  var v = a[i - minValueOf];
+	  return (v ? v : a[i - minValueOf] = Clazz.new_(cl[c$], [i])); 
   }
 }
 
@@ -4606,32 +4618,32 @@ sp.replace$ = function(c1,c2){
   return this.replace(new RegExp(c1,"gm"),c2);
 };
 
-// experimental -- only marginally faster:
-var reCache = new Map();
-sp.replace2$ = function(c1,c2){
-	  if (c1 == c2 || this.indexOf(c1) < 0) return "" + this;
-	  var re;
-	  if (c1.length == 1) {
-		re = reCache.get(c1);
-		re || reCache.set(c1, re = new RegExp("\\$.*+|?^{}()[]".indexOf(c1) == 0 ? "\\" + c1 : c1, 'gm'));
-	  } else {    
-	    re = new RegExp(c1.replace(/([\\\$\.\*\+\|\?\^\{\}\(\)\[\]])/g,function($0,$1){return "\\"+$1;}), 'gm');
-	  }
-	  return this.replace(re,c2);
-};
+//// experimental -- only marginally faster:
+//var reCache = new Map();
+//sp.replace2$ = function(c1,c2){
+//	  if (c1 == c2 || this.indexOf(c1) < 0) return "" + this;
+//	  var re;
+//	  if (c1.length == 1) {
+//		re = reCache.get(c1);
+//		re || reCache.set(c1, re = new RegExp("\\$.*+|?^{}()[]".indexOf(c1) == 0 ? "\\" + c1 : c1, 'gm'));
+//	  } else {    
+//	    re = new RegExp(c1.replace(/([\\\$\.\*\+\|\?\^\{\}\(\)\[\]])/g,function($0,$1){return "\\"+$1;}), 'gm');
+//	  }
+//	  return this.replace(re,c2);
+//};
 
 // fastest:
 sp.replaceAll$=sp.replaceAll$S$S=sp.replaceAll$CharSequence$CharSequence=function(exp,str){
-return this.replace(new RegExp(exp,"gm"),str);
+return this.replace(newRegExp(exp,"gm"),str);
 };
 sp.replaceFirst$S$S=function(exp,str){
-return this.replace(new RegExp(exp,"m"),str);
+return this.replace(newRegExp(exp,"m"),str);
 };
 sp.matches$S=function(exp){
 if(exp!=null){
 exp="^("+exp+")$";
 }
-var regExp=new RegExp(exp,"gm");
+var regExp=newRegExp(exp,"gm");
 var m=this.match(regExp);
 return m!=null&&m.length!=0;
 };
@@ -4657,6 +4669,11 @@ s2=s2.toLowerCase();
 return s1==s2;
 };
 
+var newRegExp = function(regex, flags) {
+	if (regex.indexOf("\\Q") >= 0 || regex.indexOf("(?") == 0)
+		return Clazz.loadClass("java.util.regex.Pattern").getJSRegex$S$S(regex, flags);
+	return new RegExp(regex, flags);
+}
 sp.split$S=sp.split$S$I=function(regex,limit){
 var arr;
 if (!limit && regex == " ") {
@@ -4665,7 +4682,7 @@ if (!limit && regex == " ") {
 	if(limit == 1){
 	  arr = [this];
 	} else {
-		var regExp=new RegExp("("+regex+")","gm");
+		var regExp=newRegExp("("+regex+")","gm");
 		var count=1;
 		var s=this.replace(regExp,function($0,$1){
 			count++;
@@ -4686,8 +4703,7 @@ if (!limit && regex == " ") {
 		}
 	}
 }else{
-	var regExp=new RegExp(regex,"gm");
-	arr = this.split(regExp);
+	arr = this.split(newRegExp(regex,"gm"));
 }
 while (arr[arr.length - 1] === "")
 	arr.pop();

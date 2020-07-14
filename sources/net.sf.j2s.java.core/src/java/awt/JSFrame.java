@@ -383,7 +383,7 @@ public class JSFrame extends Window {
      * 
      */
     public JSFrame() {
-    	initTitleGC(null, null);
+    	this(null, null);
     }
 
     /**
@@ -404,7 +404,7 @@ public class JSFrame extends Window {
      * 
      */
     public JSFrame(GraphicsConfiguration gc) {
-    	initTitleGC(null, gc);
+    	this(null, gc);
     }
 
     /**
@@ -420,7 +420,7 @@ public class JSFrame extends Window {
      * 
      */
     public JSFrame(String title) {
-    	initTitleGC(title, null);
+    	this(title, null);
     }
 
     /**
@@ -449,13 +449,9 @@ public class JSFrame extends Window {
      * 
      */
     public JSFrame(String title, GraphicsConfiguration gc) {
-    	initTitleGC(title, gc);
+    	super(gc);
+        this.title = (title == null  ? "" : title);
     }
-
-    protected void initTitleGC(String title, GraphicsConfiguration gc) {
-      this.title = (title == null  ? "" : title);
-  	  initWinGC(null, gc);   // Window
-		}
 
 		/**
      * Construct a name for this component.  Called by getName() when the

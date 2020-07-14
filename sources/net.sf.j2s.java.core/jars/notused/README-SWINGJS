@@ -1,0 +1,24 @@
+We are using the 2015 closure compiler because it does not completely mangle 
+FOR loops and does not have the 10K $jscomp header. For example:
+
+for (; start < hi; start++) {
+let pivot=a[start];
+let left=lo;
+let right=start;
+...
+
+in the newer compiler is converted to:
+
+for(var n={};a<b;
+n={$jscomp$loop$prop$left$287:n.$jscomp$loop$prop$left$287,
+$jscomp$loop$prop$right$288:n.$jscomp$loop$prop$right$288},a++){
+ var e=c[a];
+ n.$jscomp$loop$prop$left$287=d;
+ n.$jscomp$loop$prop$right$288=a;
+...
+
+so every time through the loop n is recreated? 
+
+I don't get it. 
+
+

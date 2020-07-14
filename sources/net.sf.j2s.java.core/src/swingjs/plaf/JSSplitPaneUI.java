@@ -53,6 +53,7 @@ import javax.swing.JSplitPane;
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 
+import swingjs.api.js.DOMNode;
 import swingjs.api.js.JSFunction;
 import swingjs.JSToolkit;
 import swingjs.api.js.JSInterface;
@@ -66,32 +67,12 @@ import swingjs.api.js.JSInterface;
  */
 public class JSSplitPaneUI extends JSPanelUI {
 
-	private class SplitPaneDivider extends JLabel {
 
-	    private JSSplitPaneUI paneui;
-
-		/**
-	     * Returns dividerSize x dividerSize
-	     */
-	    @Override
-		public Dimension getPreferredSize() {
-	        // Ideally this would return the size from the layout manager,
-	        // but that could result in the layed out size being different from
-	        // the dividerSize, which may break developers as well as
-	        // BasicSplitPaneUI.
-	        if (orientation == JSplitPane.HORIZONTAL_SPLIT) {
-	            return new Dimension(paneui.splitPane.getDividerSize(), 1);
-	        }
-	        return new Dimension(1, paneui.splitPane.getDividerSize());
-	    }
-
-	    SplitPaneDivider(JSSplitPaneUI ui) {
-			super(" ");
-	    	paneui = ui;
-			setOpaque(true);
-		}
-
+	@Override
+	public DOMNode updateDOMNode() {
+		return super.updateDOMNode();
 	}
+
 
 	/**
 	 * The divider used for non-continuous layout is added to the split pane with
@@ -267,7 +248,11 @@ public class JSSplitPaneUI extends JSPanelUI {
 	}
 
 	private void setupDivider() {
-		divider = new SplitPaneDivider(this); 
+		divider = new SplitPaneDivider(this);
+		enableDragging();
+	}
+	
+	private void enableDragging() {
 		JSFunction fDrag = null;
 		@SuppressWarnings("unused")
 		JSSplitPaneUI me = this;
@@ -279,8 +264,22 @@ public class JSSplitPaneUI extends JSPanelUI {
 		 * 
 		 */
 		// note that this "JSFunction" is actually an array
-		((JSComponentUI) divider.getUI()).setDraggable(fDrag);
+		setDraggable(fDrag);
 	}
+
+	/**
+	 * for SplitPaneDivider
+	 * 
+	 */
+	protected boolean draggable;
+
+	public void setDraggable(JSFunction f) {
+		// SplitPaneDivider
+		draggable = true; // never actually used
+		J2S.setDraggable(divider.秘getUI().getDOMNode(), f);
+	}
+
+	
 	/**
 	 * Installs the UI defaults.
 	 */
@@ -1260,10 +1259,8 @@ public class JSSplitPaneUI extends JSPanelUI {
 				minSecondary += getSizeForSecondaryAxis(insets, true)
 						+ getSizeForSecondaryAxis(insets, false);
 			}
-			if (axis == 0) {
-				return new Dimension(minPrimary, minSecondary);
-			}
-			return new Dimension(minSecondary, minPrimary);
+			return (axis == JSplitPane.VERTICAL_SPLIT ? new Dimension(minPrimary, minSecondary)
+					: new Dimension(minSecondary, minPrimary));
 		}
 
 		/**
@@ -1293,10 +1290,9 @@ public class JSSplitPaneUI extends JSPanelUI {
 				preSecondary += getSizeForSecondaryAxis(insets, true)
 						+ getSizeForSecondaryAxis(insets, false);
 			}
-			if (axis == 0) {
-				return new Dimension(prePrimary, preSecondary);
-			}
-			return new Dimension(preSecondary, prePrimary);
+			return (axis == JSplitPane.VERTICAL_SPLIT ? 
+					new Dimension(prePrimary, preSecondary)
+					: new Dimension(preSecondary, prePrimary));
 		}
 
 		/**
@@ -1463,7 +1459,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 		protected void setComponentToSize(Component c, int size, int location,
 				Insets insets, Dimension containerSize) {
 			if (insets != null) {
-				if (axis == 0) {
+				if (axis == JSplitPane.VERTICAL_SPLIT) {
 					c.setBounds(location, insets.top, size, containerSize.height
 							- (insets.top + insets.bottom));
 				} else {
@@ -1471,7 +1467,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 							- (insets.left + insets.right), size);
 				}
 			} else {
-				if (axis == 0) {
+				if (axis == JSplitPane.VERTICAL_SPLIT) {
 					c.setBounds(location, 0, size, containerSize.height);
 				} else {
 					c.setBounds(0, location, containerSize.width, size);
@@ -1483,20 +1479,14 @@ public class JSSplitPaneUI extends JSPanelUI {
 		 * If the axis == 0, the width is returned, otherwise the height.
 		 */
 		int getSizeForPrimaryAxis(Dimension size) {
-			if (axis == 0) {
-				return size.width;
-			}
-			return size.height;
+			return (axis == JSplitPane.VERTICAL_SPLIT ? size.width : size.height);
 		}
 
 		/**
 		 * If the axis == 0, the width is returned, otherwise the height.
 		 */
 		int getSizeForSecondaryAxis(Dimension size) {
-			if (axis == 0) {
-				return size.height;
-			}
-			return size.width;
+			return (axis == JSplitPane.HORIZONTAL_SPLIT ? size.width : size.height);
 		}
 
 		/**
@@ -1506,16 +1496,9 @@ public class JSSplitPaneUI extends JSPanelUI {
 		 * axis isTop 0 true - left 0 false - right 1 true - top 1 false - bottom
 		 */
 		int getSizeForPrimaryAxis(Insets insets, boolean isTop) {
-			if (axis == 0) {
-				if (isTop) {
-					return insets.left;
-				}
-				return insets.right;
-			}
-			if (isTop) {
-				return insets.top;
-			}
-			return insets.bottom;
+			return (axis == JSplitPane.VERTICAL_SPLIT ?
+					(isTop ?  insets.left : insets.right)
+					: isTop ? insets.top : insets.bottom);
 		}
 
 		/**
@@ -1525,16 +1508,8 @@ public class JSSplitPaneUI extends JSPanelUI {
 		 * axis isTop 0 true - left 0 false - right 1 true - top 1 false - bottom
 		 */
 		int getSizeForSecondaryAxis(Insets insets, boolean isTop) {
-			if (axis == 0) {
-				if (isTop) {
-					return insets.top;
-				}
-				return insets.bottom;
-			}
-			if (isTop) {
-				return insets.left;
-			}
-			return insets.right;
+			return (axis == JSplitPane.VERTICAL_SPLIT ? (isTop ? insets.top : insets.bottom)
+					: isTop ? insets.left : insets.right);
 		}
 
 		/**
@@ -2216,6 +2191,41 @@ public class JSSplitPaneUI extends JSPanelUI {
 	public void setEnabled(boolean b) {
 		super.setEnabled(b);
 		splitPane.setCursor(b ? getCursor() : null);
+	}
+
+	@Override
+	protected void undisposeUI(DOMNode node) {
+		if (!isDisposed)
+			return;
+		super.undisposeUI(node);
+		enableDragging();
+	}
+	
+	private class SplitPaneDivider extends JLabel {
+
+	    private JSSplitPaneUI paneui;
+
+		/**
+	     * Returns dividerSize x dividerSize
+	     */
+	    @Override
+		public Dimension getPreferredSize() {
+	        // Ideally this would return the size from the layout manager,
+	        // but that could result in the layed out size being different from
+	        // the dividerSize, which may break developers as well as
+	        // BasicSplitPaneUI.
+	        if (orientation == JSplitPane.HORIZONTAL_SPLIT) {
+	            return new Dimension(paneui.splitPane.getDividerSize(), 1);
+	        }
+	        return new Dimension(1, paneui.splitPane.getDividerSize());
+	    }
+
+	    SplitPaneDivider(JSSplitPaneUI ui) {
+			super(" ");
+	    	paneui = ui;
+			setOpaque(true);
+		}
+
 	}
 
 }

@@ -11531,10 +11531,36 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 		J2S._ajax(info);
 	}
 
+	J2S.doAjax = function(url, postOut, dataOut, info) {
+		//from AjaxURLConnection
+		if (info === true)
+			info = {isBinary: true};
+		info || (info = {});
+		// called by org.J2S.awtjs2d.JmolURLConnection.doAjax()
+		url = url.toString();
+		if (dataOut) {
+			if (url.indexOf("http://") != 0 && url.indexOf("https://") != 0)
+				return J2S.saveFile(url, dataOut);
+			info.async = false;
+			info.url = url;
+			info.type = "POST";
+			info.processData = false;
+			info.data = dataOut;//(typeof data == "string" ? dataOut : ";base64," + Clazz.load("javajs.util.Base64").getBase64$BA(dataOut).toString());
+			info.xhr = J2S.$ajax(info);
+			return info.xhr.responseText;
+		}
+		if (postOut)
+			url += "?POST?" + postOut;
+		return J2S.getFileData(url, info.fWhenDone, true, info);
+	}
+
 	J2S.getFileData = function(fileName, fWhenDone, doProcess, info) {
 		if (info === true)
 			info = {isBinary: true};
 		info || (info = {});
+		var noProxy = !!info.j2sNoProxy;
+		if (noProxy)
+			delete info.j2sNoProxy;
 		var isTyped = !!info.dataType;
 		var isBinary = info.isBinary;
 		// swingjs.api.J2SInterface
@@ -11547,12 +11573,14 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 		else if (fileName.indexOf("http://./") == 0)
 			fileName = fileName.substring(9);
 		else if (fileName.indexOf("file:/") >= 0 
-				&& fileName.indexOf(J2S.thisApplet.__Info.j2sPath) != 0)
+				&& Clazz.loadClass("swingjs.JSUtil") != null
+				&& fileName.indexOf(swingjs.JSUtil.getAppletDocumentPath$()) != 0
+				&& fileName.indexOf(swingjs.JSUtil.getAppletCodePath$()) != 0)
 			fileName = "./" + fileName.substring(5);
 		isBinary = (isBinary || J2S.isBinaryUrl(fileName));
-		var isPDB = (fileName.indexOf("pdb.gz") >= 0 && fileName
+		var isPDB = !noProxy && (fileName.indexOf("pdb.gz") >= 0 && fileName
 				.indexOf("//www.rcsb.org/pdb/files/") >= 0);
-		var asBase64 = (isBinary && !J2S._canSyncBinary(isPDB));
+		var asBase64 = !noProxy && (isBinary && !J2S._canSyncBinary(isPDB));
 		if (asBase64 && isPDB) {
 			// avoid unnecessary binary transfer
 			fileName = fileName.replace(/pdb\.gz/, "pdb");
@@ -11569,9 +11597,9 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 				&& fileName.indexOf(document.location.host) >= 0);
 		var isHttps2Http = (J2S._httpProto == "https://" && fileName.indexOf("http://") == 0);
 		var cantDoSynchronousLoad = (!isMyHost && J2S.$supportsIECrossDomainScripting());
-		var mustCallHome = !isFile && (isHttps2Http || asBase64 || !fWhenDone && cantDoSynchronousLoad);
+		var mustCallHome = !noProxy && !isFile && (isHttps2Http || asBase64 || !fWhenDone && cantDoSynchronousLoad);
 		var url;
-		var isNotDirectCall = !mustCallHome && !isFile && !isMyHost && !(url = J2S._isDirectCall(fileName));
+		var isNotDirectCall = !noProxy && !mustCallHome && !isFile && !isMyHost && !(url = J2S._isDirectCall(fileName));
 		fileName = url || fileName;
 		var data = null;
 		var error = null;
@@ -11585,9 +11613,11 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 					asBase64, true, info);
 		} else {
 			fileName = fileName.replace(/file:\/\/\/\//, "file://"); // opera
-			if (!isTyped)info.dataType = (isBinary ? "binary" : "text");
 			info.async = !!fWhenDone;
-			if (isPost) {
+			if (!isTyped)info.dataType = (isBinary ? "binary" : "text");
+			if (noProxy) {
+				info.url = fileName;
+			} else if (isPost) {
 				info.type = "POST";
 				info.url = fileName.split("?POST?")[0]
 				info.data = fileName.split("?POST?")[1]
@@ -11863,28 +11893,6 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 				display : "block"
 			});
 		}
-	}
-
-	J2S.doAjax = function(url, postOut, dataOut, info) {
-		if (info === true)
-			info = {isBinary: true};
-		info || (info = {});
-		// called by org.J2S.awtjs2d.JmolURLConnection.doAjax()
-		url = url.toString();
-		if (dataOut) {
-			if (url.indexOf("http://") != 0 && url.indexOf("https://") != 0)
-				return J2S.saveFile(url, dataOut);
-			info.async = false;
-			info.url = url;
-			info.type = "POST";
-			info.processData = false;
-			info.data = dataOut;//(typeof data == "string" ? dataOut : ";base64," + Clazz.load("javajs.util.Base64").getBase64$BA(dataOut).toString());
-			info.xhr = J2S.$ajax(info);
-			return info.xhr.responseText;
-		}
-		if (postOut)
-			url += "?POST?" + postOut;
-		return J2S.getFileData(url, info.fWhenDone, true, info);
 	}
 
 	// J2S._localFileSaveFunction -- // do something local here; Maybe try the
@@ -13802,6 +13810,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			if (!J2S._dmouseOwner || tag.isDragging && J2S._dmouseOwner == tag) {
 				x = pageX0 + (dx = ev.pageX - pageX);
 				y = pageY0 + (dy = ev.pageY - pageY);
+				if (isNaN(x))return;
 				if (fDrag) {
 					fDrag({
 						x : x,
@@ -13821,6 +13830,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			if (J2S._dmouseOwner == tag) {
 				tag.isDragging = false;
 				J2S._dmouseOwner = null
+				if (isNaN(x))return;
 				fUp && fUp({
 					x : x,
 					y : y,
@@ -13986,6 +13996,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		return image;
 	}
 
+	J2S.getCaller = function() { return arguments.callee.caller.caller}
+
 })(self.J2S, self.jQuery, window, document);
 // j2sClazz.js 
 // NOTE: updates to this file should be copies to j2sjmol.js
@@ -13996,6 +14008,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2020.06.18 better test for instanceof Object[]
 // BH 2020.06.03 sets user.home and user.dir to /TEMP/swingjs, and user.name to "swingjs"
 // BH 2020.04.01 2.2.0-v1e fixes missing C$.superclazz when class loaded from core
 // BH 2020.03.19 3.2.9-v1c fixes new String("xxx") !== "xxx"
@@ -14188,7 +14201,12 @@ var _array = function(baseClass, paramType, ndims, params, isClone) {
         break;
       }
     }
-    params.push(initValue);
+    var p = params; // an Int32Array
+    var n = p.length;
+    params = new Array(n + 1);
+    for (var i = 0; i < n; i++)
+    	params[i] = p[i];
+    params[n] = initValue;
   }
   params.push(paramType);
   var nbits = 0;
@@ -14369,10 +14387,16 @@ Clazz.instanceOf = function (obj, clazz) {
   clazz.$clazz$ && (clazz = clazz.$clazz$);
   if (obj == clazz)
     return true;
-  if (obj.__ARRAYTYPE || clazz.__ARRAYTYPE)
-    return (obj.__ARRAYTYPE == clazz.__ARRAYTYPE 
-            || obj.__ARRAYTYPE && clazz.__ARRAYTYPE && obj.__NDIM == clazz.__NDIM 
-               && isInstanceOf(obj.__BASECLASS, clazz.__BASECLASS)); 
+  if (obj.__ARRAYTYPE || clazz.__ARRAYTYPE) {
+	  if (obj.__ARRAYTYPE == clazz.__ARRAYTYPE)
+		  return true;
+	  if (clazz.__BASECLASS == Clazz._O) {
+		 return (!obj.__ARRAYTYPE ? Array.isArray(obj) && clazz.__NDIM == 1
+		   : obj.__NDIM >= clazz.__NDIM && !obj.__BASECLASS.__PRIMITIVE);
+	  }
+      return obj.__ARRAYTYPE && clazz.__ARRAYTYPE && obj.__NDIM == clazz.__NDIM 
+               && isInstanceOf(obj.__BASECLASS, clazz.__BASECLASS); 
+  }
   return (obj instanceof clazz || isInstanceOf(getClassName(obj, true), clazz, true));
 };
 
@@ -17636,8 +17660,8 @@ var maxValueOf = 127;
 
 var getCachedNumber = function(i, a, cl, c$) {
   if (i >= minValueOf && i <= maxValueOf) {
-	  var v = a[i + minValueOf];
-	  return (v ? v : a[i + minValueOf] = Clazz.new_(cl[c$], [i])); 
+	  var v = a[i - minValueOf];
+	  return (v ? v : a[i - minValueOf] = Clazz.new_(cl[c$], [i])); 
   }
 }
 
@@ -18595,32 +18619,32 @@ sp.replace$ = function(c1,c2){
   return this.replace(new RegExp(c1,"gm"),c2);
 };
 
-// experimental -- only marginally faster:
-var reCache = new Map();
-sp.replace2$ = function(c1,c2){
-	  if (c1 == c2 || this.indexOf(c1) < 0) return "" + this;
-	  var re;
-	  if (c1.length == 1) {
-		re = reCache.get(c1);
-		re || reCache.set(c1, re = new RegExp("\\$.*+|?^{}()[]".indexOf(c1) == 0 ? "\\" + c1 : c1, 'gm'));
-	  } else {    
-	    re = new RegExp(c1.replace(/([\\\$\.\*\+\|\?\^\{\}\(\)\[\]])/g,function($0,$1){return "\\"+$1;}), 'gm');
-	  }
-	  return this.replace(re,c2);
-};
+//// experimental -- only marginally faster:
+//var reCache = new Map();
+//sp.replace2$ = function(c1,c2){
+//	  if (c1 == c2 || this.indexOf(c1) < 0) return "" + this;
+//	  var re;
+//	  if (c1.length == 1) {
+//		re = reCache.get(c1);
+//		re || reCache.set(c1, re = new RegExp("\\$.*+|?^{}()[]".indexOf(c1) == 0 ? "\\" + c1 : c1, 'gm'));
+//	  } else {    
+//	    re = new RegExp(c1.replace(/([\\\$\.\*\+\|\?\^\{\}\(\)\[\]])/g,function($0,$1){return "\\"+$1;}), 'gm');
+//	  }
+//	  return this.replace(re,c2);
+//};
 
 // fastest:
 sp.replaceAll$=sp.replaceAll$S$S=sp.replaceAll$CharSequence$CharSequence=function(exp,str){
-return this.replace(new RegExp(exp,"gm"),str);
+return this.replace(newRegExp(exp,"gm"),str);
 };
 sp.replaceFirst$S$S=function(exp,str){
-return this.replace(new RegExp(exp,"m"),str);
+return this.replace(newRegExp(exp,"m"),str);
 };
 sp.matches$S=function(exp){
 if(exp!=null){
 exp="^("+exp+")$";
 }
-var regExp=new RegExp(exp,"gm");
+var regExp=newRegExp(exp,"gm");
 var m=this.match(regExp);
 return m!=null&&m.length!=0;
 };
@@ -18646,6 +18670,11 @@ s2=s2.toLowerCase();
 return s1==s2;
 };
 
+var newRegExp = function(regex, flags) {
+	if (regex.indexOf("\\Q") >= 0 || regex.indexOf("(?") == 0)
+		return Clazz.loadClass("java.util.regex.Pattern").getJSRegex$S$S(regex, flags);
+	return new RegExp(regex, flags);
+}
 sp.split$S=sp.split$S$I=function(regex,limit){
 var arr;
 if (!limit && regex == " ") {
@@ -18654,7 +18683,7 @@ if (!limit && regex == " ") {
 	if(limit == 1){
 	  arr = [this];
 	} else {
-		var regExp=new RegExp("("+regex+")","gm");
+		var regExp=newRegExp("("+regex+")","gm");
 		var count=1;
 		var s=this.replace(regExp,function($0,$1){
 			count++;
@@ -18675,8 +18704,7 @@ if (!limit && regex == " ") {
 		}
 	}
 }else{
-	var regExp=new RegExp(regex,"gm");
-	arr = this.split(regExp);
+	arr = this.split(newRegExp(regex,"gm"));
 }
 while (arr[arr.length - 1] === "")
 	arr.pop();

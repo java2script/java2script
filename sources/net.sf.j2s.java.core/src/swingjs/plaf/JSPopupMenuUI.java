@@ -1239,8 +1239,8 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener, Mouse
 				((JMenu) invoker).setSelected(false);
 				invoker = invoker.getRootPane();
 			}
-			invoker.requestFocus();
-			
+			if (invoker != null)
+				invoker.requestFocus();
 	        MenuSelectionManager.defaultManager().setSelectedPath(null);
 			break;
 		case "setFocus":

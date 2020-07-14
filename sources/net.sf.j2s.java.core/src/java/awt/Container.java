@@ -51,7 +51,6 @@ import sun.awt.AppContext;
 import sun.awt.SunGraphicsCallback;
 import swingjs.JSFrameViewer;
 import swingjs.JSMouse;
-import swingjs.plaf.JSComponentUI;
 
 
 /**
@@ -364,16 +363,9 @@ public class Container extends JSComponent {
      * @see       LayoutManager
      * @since     JDK1.1
      */
-    public Insets getInsets() {
-    	// Panel, ScrollPane, and Window only
-    	return (peer instanceof ContainerPeer ? this.秘getInsetsC() : NULL_INSETS);
-    }
-
-    public Insets 秘getInsetsC() {
-    	// in SwingJS, we do not clone. Everything is a ContainerPeer.
-    	// it is inconsistent with other classes that this would need cloning.
-    	Insets i = (peer == null ? null : ((ContainerPeer) peer).getInsets());
-    	return  (i == null ? NULL_INSETS : i);
+    @Override
+	public Insets getInsets() {
+    	return super.getInsets();
     }
 
     @Deprecated
@@ -765,15 +757,15 @@ public class Container extends JSComponent {
          }
     }
 
-	/**
-     * Traverses the tree of components and reparents children heavyweight component
-     * to new heavyweight parent.
-     * @since 1.5
-     */
-    @SuppressWarnings("deprecation")
-	private void reparentTraverse(ContainerPeer parentPeer, Container child) {
-    	// JSComponentUI.reparent is not implemented. It just gets tainted.
-    }
+//	/**
+//     * Traverses the tree of components and reparents children heavyweight component
+//     * to new heavyweight parent.
+//     * @since 1.5
+//     */
+//    @SuppressWarnings("deprecation")
+//	private void reparentTraverse(ContainerPeer parentPeer, Container child) {
+//    	// JSComponentUI.reparent is not implemented. It just gets tainted.
+//    }
 //        checkTreeLock();
 //
 //        for (int i = 0; i < child.getComponentCount(); i++) {
