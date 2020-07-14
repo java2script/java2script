@@ -2992,13 +2992,14 @@ public class JSComponentUI extends ComponentUI
 
 		if (allowPaintedBackground || isMenu && !isMenuItem)
 			DOMNode.setStyles(domNode, "background", "transparent");
-		if (cellComponent instanceof BooleanRenderer || cellComponent.getClientProperty("_jsBooleanEditor") != null) {
+		if (cellComponent instanceof BooleanRenderer 
+				|| cellComponent.getClientProperty("_jsBooleanEditor") != null) {
 
 			DOMNode.setStyles(centeringNode, "width", "100%", "height", "100%");
 			DOMNode.setStyles(buttonNode, "width", "100%", "height", "100%");
 			DOMNode.setStyles(actionNode, "position", "absolute", "width", "14px", "height", "14px", "top",
 					(cellHeight / 2) + "px");
-			int textAlign = ((BooleanRenderer) cellComponent).getHorizontalAlignment();
+			int textAlign = ((AbstractButton) cellComponent).getHorizontalAlignment();
 			int width = cellWidth;
 			switch (textAlign) {
 			case SwingConstants.RIGHT:
