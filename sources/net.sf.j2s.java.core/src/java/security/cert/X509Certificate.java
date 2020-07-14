@@ -670,9 +670,9 @@ implements X509Extension {
      * @exception UnsupportedOperationException if the method is not supported
      * @since 1.8
      */
-    public void verify(PublicKey key, Provider sigProvider)
-        throws CertificateException, NoSuchAlgorithmException,
-        InvalidKeyException, SignatureException {
-        X509CertImpl.verify(this, key, sigProvider);
+    public void verify(PublicKey key, Provider sigProvider) {
+//        throws CertificateException, NoSuchAlgorithmException,
+//        InvalidKeyException, SignatureException {
+//        X509CertImpl.verify(this, key, sigProvider);
     }
 }
