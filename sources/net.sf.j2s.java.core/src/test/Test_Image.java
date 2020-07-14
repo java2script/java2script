@@ -2,6 +2,7 @@ package test;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.color.ColorSpace;
@@ -178,65 +179,65 @@ public class Test_Image extends Test_ {
 	}
 
 	private static void testGray() {
-	    BufferedImage image = new BufferedImage(100,100, BufferedImage.TYPE_USHORT_GRAY);
-	    ColorModel cm = image.getColorModel();
-	    
-	    // Tests stolen buffer, though it is not used.
-	    
-	    short[] bwData = ((DataBufferUShort) image.getRaster().getDataBuffer()).getData();
-	    ColorSpace x = image.getColorModel().getColorSpace();
-	    System.out.println(cm instanceof PackedColorModel);
-	    System.out.println(cm instanceof ColorModel);
-	    System.out.println(cm instanceof ComponentColorModel);
-	    
-	    PixelConverter pc = PixelConverter.UshortGray.instance;
-	    int rgb, p;
+		BufferedImage image = new BufferedImage(100, 100, BufferedImage.TYPE_USHORT_GRAY);
+		ColorModel cm = image.getColorModel();
 
-	    rgb = 0xFFFFFF00;
-	    image.setRGB(0, 0, rgb);
-	    p = image.getRGB(0, 0);
-	    System.out.println(p + " " + Integer.toHexString(rgb));
-	    rgb = pc.pixelToRgb(p, null);
-	    System.out.println(p + " " + Integer.toHexString(rgb));
+		// Tests stolen buffer, though it is not used.
 
-	    rgb = 0xFFFF0000;
-	    p = pc.rgbToPixel(rgb, null);
-	    System.out.println(p + " " + Integer.toHexString(rgb));
-	    rgb = pc.pixelToRgb(p, null);
-	    System.out.println(p + " " + Integer.toHexString(rgb));
+		short[] bwData = ((DataBufferUShort) image.getRaster().getDataBuffer()).getData();
+		ColorSpace x = image.getColorModel().getColorSpace();
+		System.out.println(cm instanceof PackedColorModel);
+		System.out.println(cm instanceof ColorModel);
+		System.out.println(cm instanceof ComponentColorModel);
 
-	    rgb = 0xFF00FF00;
-	    p = pc.rgbToPixel(rgb, null);
-	    System.out.println(p + " " + Integer.toHexString(rgb));
-	    rgb = pc.pixelToRgb(p, null);
-	    System.out.println(p + " " + Integer.toHexString(rgb));
+		PixelConverter pc = PixelConverter.UshortGray.instance;
+		int rgb, p;
 
-	    rgb = 0xFF0000FF;
-	    p = pc.rgbToPixel(rgb, null);
-	    System.out.println(p + " " + Integer.toHexString(rgb));
-	    rgb = pc.pixelToRgb(p, null);
-	    System.out.println(p + " " + Integer.toHexString(rgb));
+		rgb = 0xFFFFFF00;
+		image.setRGB(0, 0, rgb);
+		p = image.getRGB(0, 0);
+		System.out.println(p + " " + Integer.toHexString(rgb));
+		rgb = pc.pixelToRgb(p, null);
+		System.out.println(p + " " + Integer.toHexString(rgb));
 
-	    rgb = 0xFFFF0000;
-	    p = pc.rgbToPixel(rgb, null);
-	    System.out.println(p + " " + Integer.toHexString(rgb));
-	    rgb = pc.pixelToRgb(p, null);
-	    System.out.println(p + " " + Integer.toHexString(rgb));
-	    
+		rgb = 0xFFFF0000;
+		p = pc.rgbToPixel(rgb, null);
+		System.out.println(p + " " + Integer.toHexString(rgb));
+		rgb = pc.pixelToRgb(p, null);
+		System.out.println(p + " " + Integer.toHexString(rgb));
 
-	    rgb = 0xFF4c4c4c;
-	    p = pc.rgbToPixel(rgb, null);
-	    System.out.println(p + " " + Integer.toHexString(rgb));
-	    rgb = pc.pixelToRgb(p, null);
-	    System.out.println(p + " " + Integer.toHexString(rgb));
+		rgb = 0xFF00FF00;
+		p = pc.rgbToPixel(rgb, null);
+		System.out.println(p + " " + Integer.toHexString(rgb));
+		rgb = pc.pixelToRgb(p, null);
+		System.out.println(p + " " + Integer.toHexString(rgb));
 
+		rgb = 0xFF0000FF;
+		p = pc.rgbToPixel(rgb, null);
+		System.out.println(p + " " + Integer.toHexString(rgb));
+		rgb = pc.pixelToRgb(p, null);
+		System.out.println(p + " " + Integer.toHexString(rgb));
+
+		rgb = 0xFFFF0000;
+		p = pc.rgbToPixel(rgb, null);
+		System.out.println(p + " " + Integer.toHexString(rgb));
+		rgb = pc.pixelToRgb(p, null);
+		System.out.println(p + " " + Integer.toHexString(rgb));
+
+		rgb = 0xFF4c4c4c;
+		p = pc.rgbToPixel(rgb, null);
+		System.out.println(p + " " + Integer.toHexString(rgb));
+		rgb = pc.pixelToRgb(p, null);
+		System.out.println(p + " " + Integer.toHexString(rgb));
 
 		int[] pixels = new int[10000];
-		for (int i = 0; i < 10000; i++)  {
-			int pixel = (int) ((i % 100)* 2.55);
-			pixels[i] =  ((((((0xff << 8) | pixel) << 8) | pixel) << 8) | pixel); // ((i % 100)*0xFFFFFF/100) | 0xFF000000;//Math.random() * 0xFFFFFF);
+		for (int i = 0; i < 10000; i++) {
+			int pixel = (int) ((i % 100) * 2.55);
+			pixels[i] = ((((((0xff << 8) | pixel) << 8) | pixel) << 8) | pixel); // ((i % 100)*0xFFFFFF/100) |
+																					// 0xFF000000;//Math.random() *
+																					// 0xFFFFFF);
 		}
-		image.setRGB(0,  0,  100, 100, pixels, 0, 100);
+		image.setRGB(0, 0, 100, 100, pixels, 0, 100);
 
 		// test to send color to a gray-scale image
 		Graphics g = image.getGraphics();
@@ -244,12 +245,13 @@ public class Test_Image extends Test_ {
 		System.out.println(Integer.toHexString(g.getColor().getRGB()));
 		g.fillRect(25, 25, 50, 50);
 		showImage(image);
-
-		JFrame f = new JFrame();
-		f.add(new JLabel(new ImageIcon(image)));
-		f.pack();
-		f.show();
-}
+		if (!GraphicsEnvironment.isHeadless()) {
+			JFrame f = new JFrame();
+			f.add(new JLabel(new ImageIcon(image)));
+			f.pack();
+			f.show();
+		}
+	}
 
 	private static void testPacked() {
 		

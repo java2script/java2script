@@ -30,6 +30,7 @@ import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Insets;
 import java.awt.JSComponent;
 import java.awt.Rectangle;
 import java.beans.PropertyChangeEvent;
@@ -1364,6 +1365,16 @@ public class JInternalFrame extends JFrame implements
 		validate();
 	}
 
+    @Override
+		public Dimension getPreferredSize() {
+        	return preferredSize();
+    }
+    
+	@Override
+	public Insets getInsets() {
+		return 秘getInsets();
+	}
+
 	/**
 	 * If the internal frame is not visible, brings the internal frame to the front,
 	 * makes it visible, and attempts to select it. The first time the internal
@@ -1576,62 +1587,20 @@ public class JInternalFrame extends JFrame implements
 //      }
 //    }
 //
-//    /**
-//     * Returns a string representation of this <code>JInternalFrame</code>.
-//     * This method
-//     * is intended to be used only for debugging purposes, and the
-//     * content and format of the returned string may vary between
-//     * implementations. The returned string may be empty but may not
-//     * be <code>null</code>.
-//     *
-//     * @return  a string representation of this <code>JInternalFrame</code>
-//     */
-//    protected String paramString() {
-//        String rootPaneString = (rootPane != null ?
-//                                 rootPane.toString() : "");
-//        String rootPaneCheckingEnabledString = (rootPaneCheckingEnabled ?
-//                                                "true" : "false");
-//        String closableString = (closable ? "true" : "false");
-//        String isClosedString = (isClosed ? "true" : "false");
-//        String maximizableString = (maximizable ? "true" : "false");
-//        String isMaximumString = (isMaximum ? "true" : "false");
-//        String iconableString = (iconable ? "true" : "false");
-//        String isIconString = (isIcon ? "true" : "false");
-//        String resizableString = (resizable ? "true" : "false");
-//        String isSelectedString = (isSelected ? "true" : "false");
-//        String frameIconString = (frameIcon != null ?
-//                                  frameIcon.toString() : "");
-//        String titleString = (title != null ?
-//                              title : "");
-//        String desktopIconString = (desktopIcon != null ?
-//                                    desktopIcon.toString() : "");
-//        String openedString = (opened ? "true" : "false");
-//        String defaultCloseOperationString;
-//        if (defaultCloseOperation == HIDE_ON_CLOSE) {
-//            defaultCloseOperationString = "HIDE_ON_CLOSE";
-//        } else if (defaultCloseOperation == DISPOSE_ON_CLOSE) {
-//            defaultCloseOperationString = "DISPOSE_ON_CLOSE";
-//        } else if (defaultCloseOperation == DO_NOTHING_ON_CLOSE) {
-//            defaultCloseOperationString = "DO_NOTHING_ON_CLOSE";
-//        } else defaultCloseOperationString = "";
-//
-//        return super.paramString() +
-//        ",closable=" + closableString +
-//        ",defaultCloseOperation=" + defaultCloseOperationString +
-//        ",desktopIcon=" + desktopIconString +
-//        ",frameIcon=" + frameIconString +
-//        ",iconable=" + iconableString +
-//        ",isClosed=" + isClosedString +
-//        ",isIcon=" + isIconString +
-//        ",isMaximum=" + isMaximumString +
-//        ",isSelected=" + isSelectedString +
-//        ",maximizable=" + maximizableString +
-//        ",opened=" + openedString +
-//        ",resizable=" + resizableString +
-//        ",rootPane=" + rootPaneString +
-//        ",rootPaneCheckingEnabled=" + rootPaneCheckingEnabledString +
-//        ",title=" + titleString;
-//    }
+    /**
+     * Returns a string representation of this <code>JInternalFrame</code>.
+     * This method
+     * is intended to be used only for debugging purposes, and the
+     * content and format of the returned string may vary between
+     * implementations. The returned string may be empty but may not
+     * be <code>null</code>.
+     *
+     * @return  a string representation of this <code>JInternalFrame</code>
+     */
+    @Override
+	protected String paramString() {
+        return "[JInternalFrame " + getTitle() + "]";
+    }
 //
 	// ======= begin optimized frame dragging defence code ==============
 

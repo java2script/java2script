@@ -4,9 +4,12 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.util.Dictionary;
+import java.util.Hashtable;
 
 import javax.swing.JApplet;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
@@ -24,15 +27,30 @@ public class Test_Applet_Slider extends JApplet {
 		 */
 	}
 
+	private boolean paintTicks;
+
 	@Override
 	public void init() {
 
+		paintTicks = false;
 		JPanel p = new JPanel();
         JSlider redSlider = new JSlider(JSlider.HORIZONTAL, 0, 200, 80);
         redSlider.setFont(new Font("Helvetica", Font.PLAIN, 10));
-        redSlider.setMajorTickSpacing( 25 );
-        redSlider.setMinorTickSpacing( 5 );
-        redSlider.setPaintTicks( true );
+        if (paintTicks) { 
+            redSlider.setMajorTickSpacing( 25 );
+            redSlider.setMinorTickSpacing( 5 );
+            redSlider.setPaintTicks( true );
+        	
+        } else {
+        	Hashtable<Integer, JLabel> sliderLabels = new Hashtable<>();
+        	sliderLabels.put(Integer.valueOf(0),  new JLabel("0"));
+        	sliderLabels.put(Integer.valueOf(200),  new JLabel("200"));
+        	
+            redSlider.setMajorTickSpacing( 0 );
+            redSlider.setMinorTickSpacing( 0 );
+            redSlider.setPaintTicks( false );
+            redSlider.setLabelTable(sliderLabels);
+        }
         redSlider.setPaintLabels( true );
         redSlider.addChangeListener(new ChangeListener() {
 

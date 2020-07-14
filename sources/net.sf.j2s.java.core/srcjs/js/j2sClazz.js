@@ -200,7 +200,12 @@ var _array = function(baseClass, paramType, ndims, params, isClone) {
         break;
       }
     }
-    params.push(initValue);
+    var p = params; // an Int32Array
+    var n = p.length;
+    params = new Array(n + 1);
+    for (var i = 0; i < n; i++)
+    	params[i] = p[i];
+    params[n] = initValue;
   }
   params.push(paramType);
   var nbits = 0;

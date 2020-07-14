@@ -238,10 +238,10 @@ public abstract class X509CRL extends CRL implements X509Extension {
      * @exception CRLException on encoding errors.
      * @since 1.8
      */
-    public void verify(PublicKey key, Provider sigProvider)
-        throws CRLException, NoSuchAlgorithmException,
-        InvalidKeyException, SignatureException {
-        X509CRLImpl.verify(this, key, sigProvider);
+    public void verify(PublicKey key, Provider sigProvider) {
+//        throws CRLException, NoSuchAlgorithmException,
+//        InvalidKeyException, SignatureException {
+//        X509CRLImpl.verify(this, key, sigProvider);
     }
 
     /**

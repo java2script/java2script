@@ -904,7 +904,9 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 		else if (fileName.indexOf("http://./") == 0)
 			fileName = fileName.substring(9);
 		else if (fileName.indexOf("file:/") >= 0 
-				&& fileName.indexOf(J2S.thisApplet.__Info.j2sPath) != 0)
+				&& Clazz.loadClass("swingjs.JSUtil") != null
+				&& fileName.indexOf(swingjs.JSUtil.getAppletDocumentPath$()) != 0
+				&& fileName.indexOf(swingjs.JSUtil.getAppletCodePath$()) != 0)
 			fileName = "./" + fileName.substring(5);
 		isBinary = (isBinary || J2S.isBinaryUrl(fileName));
 		var isPDB = !noProxy && (fileName.indexOf("pdb.gz") >= 0 && fileName
@@ -3139,6 +3141,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			if (!J2S._dmouseOwner || tag.isDragging && J2S._dmouseOwner == tag) {
 				x = pageX0 + (dx = ev.pageX - pageX);
 				y = pageY0 + (dy = ev.pageY - pageY);
+				if (isNaN(x))return;
 				if (fDrag) {
 					fDrag({
 						x : x,
@@ -3158,6 +3161,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			if (J2S._dmouseOwner == tag) {
 				tag.isDragging = false;
 				J2S._dmouseOwner = null
+				if (isNaN(x))return;
 				fUp && fUp({
 					x : x,
 					y : y,
@@ -3322,5 +3326,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		image.canvas.toBlob(function(blob){image.src = URL.createObjectURL(blob)});
 		return image;
 	}
+
+	J2S.getCaller = function() { return arguments.callee.caller.caller}
 
 })(self.J2S, self.jQuery, window, document);

@@ -1001,6 +1001,7 @@ public class JLabel extends JComponent implements SwingConstants/*, Accessible*/
 	public Object getClientProperty(Object key) {
     	if (key == "jsvideo") {
     		getOrCreatePeer();
+    		秘getUI().updateDOMNode();
     		return 秘getUI().imageNode;
     	}
     	return super.getClientProperty(key);

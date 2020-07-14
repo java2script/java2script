@@ -261,9 +261,9 @@ RootPaneContainer// TransferHandler.HasGetTransferHandler
 	 * 
 	 */
 	public JFrame(String title, GraphicsConfiguration gc) {
+		super(title, gc);
 		秘paintClass = 秘updateClass = /** @j2sNative C$ || */
 				null;
-		initTitleGC(title, gc);
 		enableEvents(AWTEvent.KEY_EVENT_MASK | AWTEvent.WINDOW_EVENT_MASK);
 		setLocale(JComponent.getDefaultLocale());
 		setRootPane(createRootPane());

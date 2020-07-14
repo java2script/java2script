@@ -31,6 +31,7 @@ class Test_Array extends Test_ {
 	static Object iType3_ = Array.newInstance(int[].class, 3);
 	static Object iType3 = Array.newInstance(Integer.TYPE, 3);
 	static Object iType123_ = Array.newInstance(Integer.TYPE, 1, 2, 3);
+	static Object fType123_ = Array.newInstance(Float.TYPE, 1, 2, 3);
 	static Object i3def = new int[] { 3, 4, 5 };
 	static Object i3 = new int[3];
 	static Object i3_ = new int[3][];

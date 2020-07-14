@@ -431,17 +431,6 @@ public class JSComponentUI extends ComponentUI
 	
  	public DOMNode menuAnchorNode;
 
-	/**
-	 * for SplitPaneDivider
-	 * 
-	 */
-	protected boolean draggable;
-
-	public void setDraggable(JSFunction f) {
-		// SplitPaneDivider
-		draggable = true; // never actually used
-		J2S.setDraggable(getDOMNode(), f);
-	}
 
    /**
 	 * a numerical reference for an ID
@@ -1314,8 +1303,7 @@ public class JSComponentUI extends ComponentUI
 		String prop = e.getPropertyName();
 		Object value = e.getNewValue();
 		if (prop == "jscanvas") {
-			jc.秘g = (JSGraphics2D)(Object) Boolean.TRUE;
-			setTainted();
+			addLocalCanvas();
 		}
 		if (domNode == null)
 			return;
@@ -1334,6 +1322,13 @@ public class JSComponentUI extends ComponentUI
 		propertyChangedCUI(e, prop);
 	}
 	
+	protected void addLocalCanvas() {
+		if (jc.秘g != null)
+			return;
+		jc.秘g = (JSGraphics2D)(Object) Boolean.TRUE;
+		setTainted();
+	}
+
 	private Container awttop;
 	protected Color awtPeerBG, awtPeerFG;
 	
@@ -1392,7 +1387,9 @@ public class JSComponentUI extends ComponentUI
 			setTainted();
 			return;
 		case "border":
-			jc.秘setPaintsSelf(JSComponent.PAINTS_SELF_UNKNOWN);
+			// Simple Buttons have insets that don't overlap with the border.
+			//if (!isSimpleButton)
+				jc.秘setPaintsSelf(JSComponent.PAINTS_SELF_UNKNOWN);
 			setTainted();
 			return;
 		case "preferredSize":
@@ -1526,7 +1523,7 @@ public class JSComponentUI extends ComponentUI
 	 * 
 	 * (InternalFrame, Button, ComboBox, MenuBar, MenuItem, ScrollBar, TextField, TextArea, EditorPane)
 	 */
-	protected boolean allowPaintedBackground = true;
+	public boolean allowPaintedBackground = true;
 
 	/**
 	 * Label will render its image, drawing to the canvas; Button will not 
@@ -2995,13 +2992,14 @@ public class JSComponentUI extends ComponentUI
 
 		if (allowPaintedBackground || isMenu && !isMenuItem)
 			DOMNode.setStyles(domNode, "background", "transparent");
-		if (cellComponent instanceof BooleanRenderer || cellComponent.getClientProperty("_jsBooleanEditor") != null) {
+		if (cellComponent instanceof BooleanRenderer 
+				|| cellComponent.getClientProperty("_jsBooleanEditor") != null) {
 
 			DOMNode.setStyles(centeringNode, "width", "100%", "height", "100%");
 			DOMNode.setStyles(buttonNode, "width", "100%", "height", "100%");
 			DOMNode.setStyles(actionNode, "position", "absolute", "width", "14px", "height", "14px", "top",
 					(cellHeight / 2) + "px");
-			int textAlign = ((BooleanRenderer) cellComponent).getHorizontalAlignment();
+			int textAlign = ((AbstractButton) cellComponent).getHorizontalAlignment();
 			int width = cellWidth;
 			switch (textAlign) {
 			case SwingConstants.RIGHT:
@@ -3608,7 +3606,7 @@ public class JSComponentUI extends ComponentUI
 			if (!paintsSelf)
 				setBackgroundDOM(domNode, color);
 			// preliminary -- DOM only, when the background is set
-		} else if (allowPaintedBackground && (isOpaque || jc.秘g != null)) {
+		} else if (allowPaintedBackground && (isOpaque && jc.getComponentCount() > 0 || jc.秘g != null)) {
 			// all opaque components must paint their background
 			// just in case they have painted CHILDREN
 			if (isOpaque == (color.getAlpha() == 255)) {

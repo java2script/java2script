@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.peer.ContainerPeer;
 
 import javax.swing.JComponent;
+import javax.swing.JLayeredPane;
 import javax.swing.JRootPane;
 import javax.swing.LookAndFeel;
 
@@ -21,10 +22,17 @@ public class JSPanelUI extends JSLightweightUI implements ContainerPeer {
 	@Override
 	public DOMNode updateDOMNode() {
 		JRootPane root = jc.getRootPane();
+		boolean isGlassPane = (root != null && root.getGlassPane() == c);
 		if (domNode == null) {
 			containerNode = domNode = newDOMObject("div", id);
-			if (root != null && root.getGlassPane() == c)
+			DOMNode.setStyles(domNode,  "outline", "none");
+			if (isGlassPane) {
 				DOMNode.setVisible(domNode,  false);
+			}
+		}
+		if (isGlassPane) {
+			addLocalCanvas();
+			DOMNode.setZ(domNode, 1);
 		}
 		isContentPane = (root != null && jc == root.getContentPane());
 		if (isContentPane)

@@ -3,9 +3,12 @@ package test;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.datatransfer.DataFlavor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -29,8 +32,10 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.Timer;
+import javax.swing.TransferHandler;
 import javax.swing.WindowConstants;
 
 import swingjs.api.JSUtilI;
@@ -47,7 +52,7 @@ public class Test_Video {
 	public static void main(String[] args) {
 		new Test_Video();
 	}
-	
+
 	private HTML5Video jsvideo;
 	private JLabel imageLabel;
 	private BufferedImage image;
@@ -56,17 +61,35 @@ public class Test_Video {
 	private int vw;
 	private int vh;
 
+	boolean isJS = /** @j2sNative true || */
+			false;
+
+	JDialog dialog;
+	
 	@SuppressWarnings("unused")
 	public Test_Video() {
 		JFrame main = new JFrame();
 		main.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		ImageIcon icon;
 
+		main.setTransferHandler(new TransferHandler() {
+			@Override
+			public boolean canImport(TransferHandler.TransferSupport support) {
+				return true;
+			}
+
+			@Override
+			public boolean importData(TransferHandler.TransferSupport support) {
+				try {
+					loadVideo(((List<File>) support.getTransferable().getTransferData(DataFlavor.javaFileListFlavor))
+							.get(0));
+				} catch (Exception e) {
+					return false;
+				}
+				return true;
+			}
+
+		});
 		boolean testRemote = false;// setting this true requires Java 9
-		boolean isJS = /** @j2sNative true || */
-				false;
-		boolean asBytes = true;
-
 		isDiscrete = true;
 
 		String video = (
@@ -75,13 +98,78 @@ public class Test_Video {
 		// "test/jmoljana.mp4",
 		"test/duet.mp4");
 
-		URL videoURL;
-		try {
-			videoURL = new URL("https://chemapps.stolaf.edu/test/duet.mp4");
-		} catch (MalformedURLException e1) {
-			videoURL = null;
-		}
+		URL videoURL = null;
+		if (testRemote)
+			try {
+				videoURL = new URL("https://chemapps.stolaf.edu/test/duet.mp4");
+			} catch (MalformedURLException e1) {
+			}
+		vw = 1920;
+		vh = vw * 9 / 16;
+		w = 1920 / 4;
+		h = w * 9 / 16;
+		Dimension dim = new Dimension(w, w * 9 / 16);
 
+		
+
+		imageLabel = new JLabel();
+		imageLabel.setAlignmentX(0.5f);
+		int type = (isJS ? JSUtilI.TYPE_4BYTE_HTML5 : BufferedImage.TYPE_4BYTE_ABGR);
+		image = new BufferedImage(w, h, type);
+		ImageIcon imageicon = new ImageIcon(image);
+		imageLabel.setIcon(imageicon);
+		File file = new File(video);
+
+		createVideoLabel(file, videoURL, video);
+		// A little trick to allow "final" self reference in a Runnable parameter
+		
+		createDialog();
+		
+		// dialog[0].setOpaque(true);
+
+		
+		Container cp = main.getContentPane();
+		cp.setLayout(new BoxLayout(cp, BoxLayout.Y_AXIS));
+		JPanel videoPanel = getLayerPane(dim);
+		cp.add(videoPanel);
+		videoPanel.setAlignmentX(0.5f);
+		JPanel controls = getControls();
+		controls.setAlignmentX(0.5f);
+		cp.add(controls);
+		cp.add(imageLabel);
+		main.pack();
+		main.setVisible(true);
+		
+
+		// main.setBackground(Color.orange);
+		// main.getRootPane().setOpaque(true);
+		System.out.println(main.isOpaque() + " " + Integer.toHexString(main.getBackground().getRGB()));
+//		cp.setBackground(Color.red);
+		HTML5Video.setProperty(jsvideo, "currentTime", 0);
+
+		showAllProperties();
+	}
+
+	private void createDialog() {
+		if (dialog != null) {
+			dialog.dispose();
+		}
+		dialog = HTML5Video.createDialog(null, label, 500, new Function<HTML5Video, Void>() {
+
+			@Override
+			public Void apply(HTML5Video video) {
+				dialog.setVisible(true);
+				return null;
+			}
+
+		});
+	}
+
+	JLabel label = new JLabel((String) null);
+	
+	private void createVideoLabel(File file, URL videoURL, String video) {
+		boolean asBytes = (file != null);
+		ImageIcon icon;
 		if (!isJS) {
 			icon = new ImageIcon("src/test/video_image.png");
 		} else if (asBytes) {
@@ -90,45 +178,18 @@ public class Test_Video {
 //				if (testRemote) {
 //					bytes = videoURL.openStream().readAllBytes();// Argh! Java 9!
 //				} else {
-				bytes = Files.readAllBytes(new File(video).toPath());
+				bytes = Files.readAllBytes(file.toPath());
 //				}
 				icon = new ImageIcon(bytes, "jsvideo");
 			} catch (IOException e1) {
 				icon = null;
 			}
-		} else if (testRemote) {
+		} else if (videoURL != null) {
 			icon = new ImageIcon(videoURL, "jsvideo");
 		} else {
 			icon = new ImageIcon(video, "jsvideo");
 		}
-		JLabel label = new JLabel(icon);
-		
-		// A little trick to allow "final" self reference in a Runnable parameter
-		JDialog[] dialog = new JDialog[1];
-		dialog[0] = HTML5Video.createDialog(null, label, 500, new Function<HTML5Video, Void>() {
-
-			@Override
-			public Void apply(HTML5Video video) {
-				dialog[0].setVisible(true);
-				return null;
-			}
-			
-		});
-		//dialog[0].setOpaque(true);
-		vw = 1920;
-		vh = vw * 9/16;
-		w = 1920 / 4;
-		h = w * 9 / 16;
-		Dimension dim = new Dimension(w, w * 9 / 16);
-
-		JPanel videoPanel = getLayerPane(label, dim);
-		imageLabel = new JLabel();
-		imageLabel.setAlignmentX(0.5f);
-		int type = (isJS? JSUtilI.TYPE_4BYTE_HTML5 : BufferedImage.TYPE_4BYTE_ABGR);
-		image = new BufferedImage(w, h,type);
-		ImageIcon imageicon = new ImageIcon(image);
-		imageLabel.setIcon(imageicon);
-
+		label.setIcon(icon);
 		jsvideo = (HTML5Video) label.getClientProperty("jsvideo");
 		HTML5Video.addActionListener(jsvideo, new ActionListener() {
 
@@ -150,80 +211,71 @@ public class Test_Video {
 //		}
 //
 
-		Container cp = main.getContentPane();
-		cp.setLayout(new BoxLayout(cp, BoxLayout.Y_AXIS));
-		cp.add(videoPanel);
-		videoPanel.setAlignmentX(0.5f);
-		JPanel controls = getControls(label);
-		controls.setAlignmentX(0.5f);
-		cp.add(controls);
-		cp.add(imageLabel);
-		main.pack();
-		main.setVisible(true);
-		//main.setBackground(Color.orange);
-		//main.getRootPane().setOpaque(true);
-		System.out.println(main.isOpaque() + " " + Integer.toHexString(main.getBackground().getRGB()));
-//		cp.setBackground(Color.red);
-		HTML5Video.setProperty(jsvideo, "currentTime", 0);
+	}
 
-		showAllProperties();
+	protected void loadVideo(File file) {
+		Rectangle bounds = label.getBounds();
+		layerPane.remove(label);
+		createVideoLabel(file, null, null);
+		createDialog();
+		layerPane.add(label, JLayeredPane.DEFAULT_LAYER);
+		label.setBounds(bounds);
+		label.setVisible(true);
+
 	}
-	
+
 	private void showProperty(String key) {
-		System.out.println(key +"=" + HTML5Video.getProperty(jsvideo, key));
+		System.out.println(key + "=" + HTML5Video.getProperty(jsvideo, key));
 	}
-	
-	
+
 	private void showAllProperties() {
 		for (int i = 0; i < allprops.length; i++)
-			showProperty(allprops[i]);		
+			showProperty(allprops[i]);
 	}
-	
-	private static String[] allprops = {
-			"audioTracks",//
-			"autoplay",//
-			"buffered",//
-			"controller",//
-			"controls",//
-			"controlsList",//
-			"crossOrigin",//
-			"currentSrc",//
-			"currentTime",//
-			"defaultMuted",//
-			"defaultPlaybackRate",//
-			"disableRemotePlayback",//
-			"duration",//
-			"ended",//
-			"error",//
-			"loop",//
-			"mediaGroup",//
-			"mediaKeys",//
-			"mozAudioCaptured",//
-			"mozFragmentEnd",//
-			"mozFrameBufferLength",//
-			"mozSampleRate",//
-			"muted",//
-			"networkState",//
-			"paused",//
-			"playbackRate",//
-			"played",//
-			"preload",//
-			"preservesPitch",//
-			"readyState",//
-			"seekable",//
-			"seeking",//
-			"sinkId",//
-			"src",//
-			"srcObject",//
-			"textTracks",//
-			"videoTracks",//
-			"volume",//
-			"initialTime",//
+
+	private static String[] allprops = { "audioTracks", //
+			"autoplay", //
+			"buffered", //
+			"controller", //
+			"controls", //
+			"controlsList", //
+			"crossOrigin", //
+			"currentSrc", //
+			"currentTime", //
+			"defaultMuted", //
+			"defaultPlaybackRate", //
+			"disableRemotePlayback", //
+			"duration", //
+			"ended", //
+			"error", //
+			"loop", //
+			"mediaGroup", //
+			"mediaKeys", //
+			"mozAudioCaptured", //
+			"mozFragmentEnd", //
+			"mozFrameBufferLength", //
+			"mozSampleRate", //
+			"muted", //
+			"networkState", //
+			"paused", //
+			"playbackRate", //
+			"played", //
+			"preload", //
+			"preservesPitch", //
+			"readyState", //
+			"seekable", //
+			"seeking", //
+			"sinkId", //
+			"src", //
+			"srcObject", //
+			"textTracks", //
+			"videoTracks", //
+			"volume", //
+			"initialTime", //
 			"mozChannels",//
 
 	};
-	
-	
+
 	double vt, vt0, vt1;
 	long t0 = 0;
 	double duration;
@@ -231,7 +283,7 @@ public class Test_Video {
 	int delay = 33334;
 	Timer timer;
 	Object[] playListener;
-	
+
 	private void playVideoDiscretely(HTML5Video v) {
 		vt0 = vt = HTML5Video.getCurrentTime(v);
 		t0 = System.currentTimeMillis() - (int) (vt * 1000);
@@ -240,7 +292,7 @@ public class Test_Video {
 			vt = 0;
 			playing = false;
 		}
-		
+
 		ActionListener listener = new ActionListener() {
 
 			@Override
@@ -261,13 +313,13 @@ public class Test_Video {
 					removePlayListener(v);
 				}
 			}
-			
+
 		};
 		playListener = HTML5Video.addActionListener(v, listener, "canplaythrough");
 		t0 = System.currentTimeMillis();
 		listener.actionPerformed(null);
 	}
-	
+
 	protected void grabImage() {
 		BufferedImage img = HTML5Video.getImage(jsvideo, Integer.MIN_VALUE);
 		Graphics g = image.getGraphics();
@@ -281,30 +333,24 @@ public class Test_Video {
 			HTML5Video.removeActionListener(v, playListener);
 		playListener = null;
 	}
-	
+
 	private JLayeredPane layerPane;
 	private JPanel drawLayer;
 
 	private List<Point> points = new ArrayList<Point>();
 
-
 	protected boolean isDiscrete;
-
 
 	protected boolean playing;
 
-
 	private JCheckBox cbCapture;
-
 
 	private JCheckBox cbDiscrete;
 
-	
-	private JPanel getLayerPane(JLabel label, Dimension dim) {
+	private JPanel getLayerPane(Dimension dim) {
 		lockDim(label, dim);
-		label.setBounds(0,0, dim.width, dim.height);
+		label.setBounds(0, 0, dim.width, dim.height);
 
-		
 		drawLayer = new JPanel() {
 			@Override
 			public void paintComponent(Graphics g) {
@@ -312,22 +358,24 @@ public class Test_Video {
 				g.setColor(Color.red);
 				for (int i = 0, n = points.size(); i < n; i++) {
 					Point p = points.get(i);
-					g.drawLine(p.x-5, p.y, p.x+5, p.y);
-					g.drawLine(p.x, p.y-5, p.x, p.y+5);
+					g.drawLine(p.x - 5, p.y, p.x + 5, p.y);
+					g.drawLine(p.x, p.y - 5, p.x, p.y + 5);
 				}
 			}
 		};
-		drawLayer.setBounds(0,0, dim.width, dim.height);
+		drawLayer.setBounds(0, 0, dim.width, dim.height);
 		drawLayer.setOpaque(false);
-		//drawLayer.setBackground(new Color(255,255,255,0));
-		// note -- setting this to opaque/{255 255 255 0} does not quite work as expected. 
+		// drawLayer.setBackground(new Color(255,255,255,0));
+		// note -- setting this to opaque/{255 255 255 0} does not quite work as
+		// expected.
 		// rather than paint a white background over the image in Java, Java paints
-		// the default background color. This of course makes no sense; I consider it a Java bug.
-		// 
+		// the default background color. This of course makes no sense; I consider it a
+		// Java bug.
+		//
 		drawLayer.putClientProperty("jscanvas", "true");
 
 		drawLayer.addMouseListener(new MouseAdapter() {
-			
+
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				System.out.println("Draw layer mouse click " + e.getX() + " " + e.getY());
@@ -344,7 +392,7 @@ public class Test_Video {
 		JPanel p = new JPanel();
 		p.add(layerPane, BorderLayout.CENTER);
 		lockDim(p, dim);
-		
+
 		return p;
 	}
 
@@ -354,7 +402,7 @@ public class Test_Video {
 		c.setMaximumSize(dim);
 	}
 
-	private JPanel getControls(JLabel label) {
+	private JPanel getControls() {
 
 		cbCapture = new JCheckBox("capture");
 		cbCapture.addActionListener(new ActionListener() {
@@ -363,7 +411,7 @@ public class Test_Video {
 			public void actionPerformed(ActionEvent e) {
 				grabImage();
 			}
-			
+
 		});
 		cbDiscrete = new JCheckBox("discrete");
 
@@ -398,7 +446,7 @@ public class Test_Video {
 					return;
 				try {
 					playing = false;
-					duration = 0; // turns off timer 
+					duration = 0; // turns off timer
 					jsvideo.pause();
 					removePlayListener(jsvideo);
 				} catch (Throwable e1) {
@@ -408,11 +456,10 @@ public class Test_Video {
 			}
 
 		});
-		
+
 		boolean canSeek = HTML5Video.getProperty(jsvideo, "seekToNextFrame") != null;
 		System.out.println("canSeek = " + canSeek);
-		
-		
+
 		JButton next = new JButton("next");
 		next.addActionListener(new ActionListener() {
 
@@ -421,7 +468,7 @@ public class Test_Video {
 				if (playing || jsvideo == null)
 					return;
 				double t = HTML5Video.getCurrentTime(jsvideo);
-				System.out.println(t + "  "+ (t - vt0));
+				System.out.println(t + "  " + (t - vt0));
 				vt0 = t;
 				HTML5Video.nextFrame(jsvideo, 0.03334);
 			}
@@ -437,7 +484,7 @@ public class Test_Video {
 					return;
 				vt0 = 0;
 				try {
-					HTML5Video.setCurrentTime(jsvideo,  0);
+					HTML5Video.setCurrentTime(jsvideo, 0);
 				} catch (Throwable e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -445,7 +492,7 @@ public class Test_Video {
 			}
 
 		});
-		
+
 		JButton clear = new JButton("clear");
 		clear.addActionListener(new ActionListener() {
 
@@ -456,7 +503,7 @@ public class Test_Video {
 			}
 
 		});
-	
+
 		JButton undo = new JButton("undo");
 		undo.addActionListener(new ActionListener() {
 
@@ -468,7 +515,7 @@ public class Test_Video {
 			}
 
 		});
-	
+
 		JButton show = new JButton("show");
 		show.addActionListener(new ActionListener() {
 
@@ -478,7 +525,6 @@ public class Test_Video {
 			}
 
 		});
-	
 
 		JPanel controls = new JPanel();
 		controls.add(new JLabel("click to mark     "));
@@ -493,7 +539,7 @@ public class Test_Video {
 		controls.add(show);
 		return controls;
 	}
-	
+
 //	Event Name 	Fired When
 //	audioprocess 	The input buffer of a ScriptProcessorNode is ready to be processed.
 //	canplay 	The browser can play the media, but estimates that not enough data has been loaded to play the media up to its end without having to stop for further buffering of content.
@@ -516,6 +562,5 @@ public class Test_Video {
 //	timeupdate 	The time indicated by the currentTimeattribute has been updated.
 //	volumechange 	The volume has changed.
 //	waiting 	Playback has stopped because of a temporary lack of data
-
 
 }

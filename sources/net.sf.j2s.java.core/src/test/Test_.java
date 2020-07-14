@@ -107,24 +107,40 @@ public class Test_ {
 		int val = new Test_().test3();
 		assert (val == 13 || val == 4);
 		isBatch = true;
+		
+		// get all files loaded
+		_test1(args);
+		
+		long t0 = System.currentTimeMillis();
+		
+		_test1(args);
+		
+		System.out.println(System.currentTimeMillis() - t0);
+		
+		//Test_Zipin.main(args);
+		//Test_Zipout.main(args);
+		System.out.println("Test_ all tests completed successfully.");
+	}
+
+	private static void _test1(String[] args) {
 		Test_Anon.main(args);
 		Test_Appendable.main(args);
 		Test_Array.main(args);
 		Test_Assert.main(args);
 		Test_Boolean.main(args);
-		Test_Bugs.main(args);
-		Test_Byte.main(args);
-		Test_Bytecode.main(args);
-		Test_Bytecode1.main(args);
-		Test_Bytecode2.main(args);
-		Test_Call.main(args);
-		Test_Cast.main(args);
-		Test_Char.main(args);
-		Test_Cinit.main(args);
-		Test_Cinit2.main(args);
-		Test_Class.main(args);
-		Test_Class_1.main(args);
-		Test_ClassBase.main(args);
+//		Test_Bugs.main(args);
+//		Test_Byte.main(args);
+//		Test_Bytecode.main(args);
+//		Test_Bytecode1.main(args);
+//		Test_Bytecode2.main(args);
+//		Test_Call.main(args);
+//		Test_Cast.main(args);
+//		Test_Char.main(args);
+//		Test_Cinit.main(args);
+//		Test_Cinit2.main(args);
+//		Test_Class.main(args);
+//		Test_Class_1.main(args);
+//		Test_ClassBase.main(args);
 		Test_Clone.main(args);
 		Test_DivEqual.main(args);
 		Test_Double.main(args);
@@ -138,7 +154,7 @@ public class Test_ {
 		Test_Field_fails.main(args);
 		Test_Field_ok.main(args);
 		//Test_File.main(args);
-		Test_Final.main(args);
+//		Test_Final.main(args);
 		Test_Format.main(args);
 		Test_Generic_Java8.main(args);
 		Test_Generic_Method.main(args);
@@ -146,7 +162,7 @@ public class Test_ {
 		Test_GenericEABIXY2.main(args);
 		Test_GenericExt2.main(args);
 		Test_Image.main(args);
-		Test_Init.main(args);
+//		Test_Init.main(args);
 		Test_Inner.main(args);
 		Test_Instance.main(args);
 		Test_Interface.main(args);
@@ -161,7 +177,7 @@ public class Test_ {
 		Test_JAXB_NONE.main(args);
 		Test_JAXB_Obj.main(args);
 		//failing on unicode char in "somewhatComplex" Test_JAXB_ORDERED.main(args);
-		Test_Map.main(args);
+//		Test_Map.main(args);
 		Test_Math.main(args);
 		Test_Native.main(args);
 		Test_NoAssert.main(args);
@@ -180,9 +196,7 @@ public class Test_ {
 		Test_Var.main(args);
 		Test_Vararg.main(args);
 		Test_Void.main(args);
-		Test_Zipin.main(args);
-		Test_Zipout.main(args);
-		System.out.println("Test_ all tests completed successfully.");
+		
 	}
 
 	public String toString() {

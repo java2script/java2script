@@ -12,11 +12,13 @@ class Test_Anon extends Test_ {
 	private static boolean b = !(true);
 	private static int x = -(3);
 	public static final Enumeration<?> EMPTY_ENUMERATION = new Enumeration<Object>() {
-        public boolean hasMoreElements() {
+        @Override
+		public boolean hasMoreElements() {
             return isAnonymous(); 
         }
         
-        public Object nextElement() {
+        @Override
+		public Object nextElement() {
             throw new NoSuchElementException();
         }
         
@@ -29,8 +31,36 @@ class Test_Anon extends Test_ {
 
   public Test_Anon() {}
   
+  int myInt = 33;
+  
+  private void privTest(int testInt) {
+	  System.out.println(this.myInt);
+  }
+  
+  @Override
+public int showt() {
+	  System.out.println("OHOH");
+	  assert(false);
+	  return 0;
+  }
+  private void testThis() {
+	  int testInt = 44;
+	  Runnable r = new Runnable() {
+
+		@Override
+		public void run() {
+			privTest(testInt);
+			Test_Anon.super.showt();
+		}
+	  };
+
+	  r.run();  
+	  
+  }
   public static void main(String[] args) { 
 	  int z = x;
+	  new Test_Anon().testThis();
+	  
 	  boolean a = !(Test_Class.Test_Class_Inner.i == 3);
 	  new Test_Class.Test_Class_Inner();
 	  new Test_Class.Test_Class_Inner().newInstance();

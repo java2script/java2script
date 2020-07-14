@@ -112,7 +112,7 @@ public class ScrollPane extends JScrollPane {
 
     @Override
 	public Insets getInsets() {
-       return 秘getInsetsC();
+       return 秘getInsets();
     }
 
 }

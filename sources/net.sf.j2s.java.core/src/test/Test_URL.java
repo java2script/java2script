@@ -17,6 +17,7 @@ import java.net.ProtocolException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -54,7 +55,10 @@ public class Test_URL extends Test_ {
 	public static void main(String[] args) {
 
 		try {
-
+			String value = "this is a test+this";
+			String s = URLEncoder.encode(value.replace(' ', '\0'), "UTF-8").replaceAll("%00", "%20");
+			System.out.println(s);
+			
 			testPost2();
 
 			// jar:file:C:/temp/car.trz!/Car in a loop with friction.trk

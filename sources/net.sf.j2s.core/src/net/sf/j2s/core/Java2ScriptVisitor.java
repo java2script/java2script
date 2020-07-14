@@ -135,7 +135,9 @@ import org.eclipse.jdt.core.dom.WildcardType;
 
 // TODO: superclass inheritance for JAXB XmlAccessorType
 
-//BH 2020.06.22 -- 3.2.9.v1k fix for varargs not proper qualified arrays
+//BH 2020.07.08 -- 3.2.9-v1n fix for try with resources and adds option varOrLet
+//BH 2020.07.04 -- 3.2.9-v1m fix for X.super.y() in anonymous class
+//BH 2020.06.22 -- 3.2.9-v1k fix for varargs not proper qualified arrays
 //BH 2020.06.17 -- 3.2.9-v1j fix for functional interface this::privateMethod
 //BH 2020.05.01 -- 3.2.9-v1i fix for nested lambda methods
 //BH 2020.04.26 -- 3.2.9-v1h fix for inner classes of interfaces duplicated; fix for api.js inner class method names unqualified
@@ -590,12 +592,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 
 		@SuppressWarnings("null")
-		void addField(boolean isStatic, String name, IVariableBinding var, int tpt) {
+		void addField(boolean isStatic, String name, IVariableBinding v, int tpt) {
 			int fpt = (isStatic ? FIELD_INFO_STATIC : FIELD_INFO_OBJECT);
 			List<String>[] fieldData = fields[fpt];
 			String typeName = null;
 			if (tpt < 0) {
-				typeName = j2sNonPrimitiveName(var.getType(), false);
+				typeName = j2sNonPrimitiveName(v.getType(), false);
 				tpt = (typeName.equals("String") ? FIELD_STRING : FIELD_OTHER);
 			}
 			List<String> lst = fieldData[tpt];
@@ -1226,7 +1228,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// for (Integer v : ...)
 		SimpleName name = node.getParameter().getName();
 		ITypeBinding vtype = name.resolveTypeBinding();
-		buffer.append("for (var ");
+		buffer.append("for (" + varOrLet);
 		String varName = acceptPossiblyFinalVar(name);
 		appendReplaceV(", $V = ", "V", varName, null, null);
 		Expression exp = node.getExpression();
@@ -1368,6 +1370,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private final static int METHOD_FULLY_QUALIFIED = 4;
 	private final static int METHOD_FULLY_QUALIFIED_JUST_ONE = 8 + 4;
 	private static final int METHOD_ADD_GENERIC = 16;
+
+	private static final String varOrLet = "var ";
 
 	/**
 	 * Called by visit(MethodDeclaration) as well as addLambdaMethod().
@@ -1754,12 +1758,17 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			buffer.append("Clazz.clone(this)");
 			return false;
 		}
+		String myThis = "this";
+		
 		if (isQualified) {
 			node.getQualifier().accept(this);
+			if (class_isAnonymousOrLocal) {
+				myThis = getSyntheticReference(mBinding.getDeclaringClass().getQualifiedName());
+			}
 		} else {
-			buffer.append("C$.superclazz");
+			buffer.append("C$");
 		}
-		buffer.append(".prototype." + finalMethodNameWith$Params + ".apply(this, [");
+		buffer.append(".superclazz.prototype." + finalMethodNameWith$Params + ".apply(" + myThis + ", [");
 		addMethodParameterList(node.arguments(), mBinding, null, null, METHOD_NOTSPECIAL);
 		buffer.append("])");
 
@@ -1822,23 +1831,51 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	@SuppressWarnings({ "unchecked", "null" })
 	public boolean visit(TryStatement node) {
 		List<CatchClause> catchClauses = node.catchClauses();
-		int size = catchClauses.size();
+		int nCatch = catchClauses.size();
 		Block finallyBlock = node.getFinally();
 		List<ASTNode> resources = node.resources();
+		
+		// try(resourceDefs) {
+		//   block code
+		// } optional catch/finally{}
+		// same as 
+		// 
+		// try {  resourceDefs;
+		//  try {
+		//    block code
+		//  } finally {resourceDefs.close();}
+		// } nonOptional catch/finally{}
+
+		// same rules apply in terms of catch
+		
 		// Returns the live ordered list of resources for this try statement (added in
 		// JLS4 API).
 		// [ooh...JSL9 change...]
 		// A resource is either a VariableDeclarationExpression or (since JLS9) a Name.
 		int pt = -1;
-		if (resources != null && resources.size() > 0) {
+		boolean haveResources = (resources != null && resources.size() > 0);
+		boolean haveCatchOrFinal = (nCatch > 0 || finallyBlock != null);
+		String closing = "";
+		if (haveResources) {
 			buffer.append("try {\n");
-			pt = buffer.length();
+			for (int i = 0; i < resources.size(); i++) {
+				ASTNode resource = resources.get(i);
+				pt = buffer.length();
+				resource.accept(this);
+				buffer.append(";\n");
+				closing = getResourceClosing(pt) + closing;
+			}
 		}
-		buffer.append(size > 0 || finallyBlock != null ? "try " : "/*try*/ ");
+		buffer.append("try ");
 		node.getBody().accept(this);
-		if (size > 0) {
+		if (haveResources) {
+			pt = buffer.lastIndexOf("}");
+			buffer.setLength(pt);
+			buffer.append("\n}finally{/*res*/").append(closing).append("}\n}");
+		}		
+		if (nCatch > 0) {
 			String catchEName = "e$$";
-			if (size == 1) {
+			if (nCatch == 1) {
 				CatchClause element = catchClauses.get(0);
 				SimpleName exName = element.getException().getName();
 				catchEName = exName.getIdentifier();
@@ -1899,22 +1936,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if (finallyBlock != null) {
 			buffer.append(" finally ");
 			finallyBlock.accept(this);
-		}
-		if (pt >= 0) {
-			// just after first "{"
-			String buf = buffer.substring(pt);
-			buffer.setLength(pt);
-			String closing = "";
-			for (int i = 0; i < resources.size(); i++) {
-				ASTNode resource = resources.get(i);
-				pt = buffer.length();
-				resource.accept(this);
-				buffer.append(";\n");
-				closing = getResourceClosing(pt) + closing;
-			}
-			buffer.append(buf);
-			buffer.append("\n}finally{/*res*/").append(closing).append("}");
-		}
+		}  else if (!haveCatchOrFinal) {
+			buffer.append("finally{}");
+		}		
 		buffer.append("\n");
 		return false;
 	}
@@ -1925,9 +1949,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if ((pt = name.indexOf("=")) >= 0 || (pt = name.indexOf(";")) >= 0) {
 			name = name.substring(0, pt);
 		}
-		if (name.startsWith("var "))
+		if (name.startsWith(varOrLet))
 			name = name.substring(4);
-		return "\ntry{" + name + "&&" + name + ".close$&&" + name + ".close$()}catch(_){}";
+		return name + "&&" + name + ".close$&&" + name + ".close$();";
 	}
 
 	/**
@@ -1958,7 +1982,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		@SuppressWarnings("unchecked")
 		List<ASTNode> fragments = node.fragments();
 		for (Iterator<ASTNode> iter = fragments.iterator(); iter.hasNext();) {
-			buffer.append("var ");
+			buffer.append(varOrLet);
 			ASTNode next = iter.next();
 			next.accept(this);
 			buffer.append(";\n");
@@ -2496,7 +2520,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		} else {
 			if (isAnnotation) {
 				buffer.append("C$.prototype.annotationType = function() { return this.getClass$() };\n");
-				trailingBuffer.append("C$.$getMembers$ = function() { var a=[];\n");
+				trailingBuffer.append("C$.$getMembers$ = function() {" + varOrLet + "a=[];\n");
 			}
 			for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
 				ASTNode element = (ASTNode) iter.next();
@@ -2583,11 +2607,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			if (!isInterface)
 				addDefaultConstructor();
 			if (isEnum) {
-				buffer.append("var $vals=[];\n");
+				buffer.append(varOrLet + "$vals=[];\n");
 				// implicit Enum methods added as trailer
 				buffer.append("Clazz.newMeth(C$, 'values$', function() { return $vals }, 1);\n");
 				buffer.append(
-						"Clazz.newMeth(C$, 'valueOf$S', function(name) { for (var val in $vals){ if ($vals[val].name == name) return $vals[val]} return null }, 1);\n");
+						"Clazz.newMeth(C$, 'valueOf$S', function(name) { for ("+varOrLet+"val in $vals){ if ($vals[val].name == name) return $vals[val]} return null }, 1);\n");
 			}
 		}
 
@@ -2740,14 +2764,14 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 		List<?> fragments = field.fragments();
 		VariableDeclarationFragment identifier = (VariableDeclarationFragment) fragments.get(0);
-		IVariableBinding var = identifier.resolveBinding();
-		Type nodeType = (var != null && var.getType().isArray() ? null : field.getType());
+		IVariableBinding v = identifier.resolveBinding();
+		Type nodeType = (v != null && v.getType().isArray() ? null : field.getType());
 		boolean isPrimitive = (nodeType != null && nodeType.isPrimitiveType());
 		// have to check here for final Object = "foo", as that must not be ignored.
 		boolean checkFinalConstant = ((isPrimitive
-				|| var != null && var.getType().getQualifiedName().equals("java.lang.String")) && isStatic
+				|| v != null && v.getType().getQualifiedName().equals("java.lang.String")) && isStatic
 				&& Modifier.isFinal(field.getModifiers()));
-		boolean haveAnnotations = (!isStatic && var != null && var.getAnnotations().length > 0);
+		boolean haveAnnotations = (!isStatic && v != null && v.getAnnotations().length > 0);
 
 		addJ2SDoc(field);
 		int len0 = buffer.length();
@@ -2770,7 +2794,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				addExpressionAsTargetType(initializer, field.getType(), "v", null);
 				buffer.append(";\n");
 			}
-			fieldInfo.addField(isStatic, name, var, tpt);
+			fieldInfo.addField(isStatic, name, v, tpt);
 			haveFields = true;
 		}
 		boolean wasAdded = (buffer.length() > len0);
@@ -3058,7 +3082,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			// note that this character may not be in the phrase "new Int Array"
 			if (added.indexOf(a) >= 0)
 				return;
-			added += "var $" + a + "$";
+			added += varOrLet + "$" + a + "$";
 			switch (a) {
 			case 'b': // $b$
 				added += " = new Int8Array(1)";
@@ -4013,7 +4037,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	@SuppressWarnings("unchecked")
 	public boolean visit(VariableDeclarationExpression node) {
-		buffer.append("var ");
+		buffer.append(varOrLet);
 		visitList(node.fragments(), ", ");
 		return false;
 	}
@@ -6724,7 +6748,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				"in", "return", "function", "var", "class", "public", "private", "new", "delete", "static", "package",
 				"import", "extends", "implements", "instanceof", "typeof", "void", "if", "this", "super", "prototype",
 				"else", "break", "true", "false", "try", "catch", "throw", "throws", "continue", "switch", "default",
-				"case", "export", "import", "const", /* "label", */"with",
+				"case", "export", "import", "let", "const", /* "label", */"with",
 				// BH and a few of our own, based on checking developer console:
 				"c$", "apply", "arguments", "bind", "call", "caller", "watch", "unwatch", "valueOf", "isPrototypeOf",
 				"isGenerator", "prototype" };
@@ -6882,9 +6906,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 							fields.remove(field);
 						fragments = field.fragments();
 						VariableDeclarationFragment identifier = (VariableDeclarationFragment) fragments.get(0);
-						IVariableBinding var = identifier.resolveBinding();
-						varName = getFinalFieldName(var);
-						type = var.getType();
+						IVariableBinding v = identifier.resolveBinding();
+						varName = getFinalFieldName(v);
+						type = v.getType();
 					} else if (a.node instanceof MethodDeclaration) {
 						MethodDeclaration method = (MethodDeclaration) a.node;
 						IMethodBinding mBinding = method.resolveBinding();
@@ -6901,23 +6925,23 @@ public class Java2ScriptVisitor extends ASTVisitor {
 						type = mBinding.getReturnType();
 					} else if (a.node instanceof AnnotationTypeMemberDeclaration) {
 						MethodDeclaration method = (MethodDeclaration) a.node;
-						IMethodBinding var = method.resolveBinding();
+						IMethodBinding m = method.resolveBinding();
 						if (methods != null)
-							if (methods.contains(var))
-								methods.remove(var);
+							if (methods.contains(m))
+								methods.remove(m);
 //						if (accessType != NOT_JAXB)
 //							var = getJAXBGetMethod(var, methods, false);
 //						if (var == null)
 //							continue;
-						varName = "M:" + var.getName();
-						type = var.getReturnType();
+						varName = "M:" + m.getName();
+						type = m.getReturnType();
 					} else if (a.node instanceof EnumConstantDeclaration) {
 						EnumConstantDeclaration con = (EnumConstantDeclaration) a.node;
 						if (enums != null)
 							enums.remove(con);
-						IVariableBinding var = con.resolveVariable();
-						varName = var.getName();
-						type = var.getType();
+						IVariableBinding v = con.resolveVariable();
+						varName = v.getName();
+						type = v.getType();
 					}
 					// for XML we need <String, Object>
 					String className = (type == null ? null
@@ -6975,19 +6999,19 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			return str;
 		}
 
-		private static IMethodBinding getJAXBGetMethod(IMethodBinding var, List<IMethodBinding> methods,
+		private static IMethodBinding getJAXBGetMethod(IMethodBinding v, List<IMethodBinding> methods,
 				boolean returnVar2) {
-			String varName = var.getName();
+			String varName = v.getName();
 			// check for matching get/is and set
 			if (varName.startsWith("create")) {
-				return var;
+				return v;
 			}
 			if (varName.startsWith("set")) {
 				return getMethodBinding(methods, "g" + varName.substring(1));
 			}
-			IMethodBinding var2 = getMethodBinding(methods,
+			IMethodBinding v2 = getMethodBinding(methods,
 					"set" + varName.substring(varName.startsWith("get") ? 3 : 2));
-			return (var2 == null ? null : returnVar2 ? var2 : var);
+			return (v2 == null ? null : returnVar2 ? v2 : v);
 		}
 
 		/**
@@ -7018,9 +7042,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			case JAXB_TYPE_ENUM:
 				for (int j = 0; j < enums.size(); j++) {
 					EnumConstantDeclaration con = enums.get(j);
-					IVariableBinding var = con.resolveVariable();
-					String varName = var.getName();
-					ITypeBinding type = var.getType();
+					IVariableBinding v = con.resolveVariable();
+					String varName = v.getName();
+					ITypeBinding type = v.getType();
 					addJAXBAnnotation(varName, type, "@XmlEnumValue", buf);
 				}
 				return;
@@ -7036,13 +7060,13 @@ public class Java2ScriptVisitor extends ASTVisitor {
 						List<?> fragments = field.fragments();
 						for (int i = 0; i < fragments.size(); i++) {
 							VariableDeclarationFragment identifier = (VariableDeclarationFragment) fragments.get(i);
-							IVariableBinding var = identifier.resolveBinding();
-							String varName = var.getName();
+							IVariableBinding v = identifier.resolveBinding();
+							String varName = v.getName();
 							// If propOrder is defined, then we are only allowed to
 							// add implicit fields that are in that propOrder
 							if (propOrder != null && propOrder.indexOf("\"" + varName + "\"") < 0)
 								continue;
-							ITypeBinding type = var.getType();
+							ITypeBinding type = v.getType();
 							addJAXBAnnotation(varName, type, "@XmlElement", buf);
 							if (isUnspecified)
 								addJAXBAnnotation(varName, type, "!XmlPublic(" + isPublic + ")", buf);
@@ -7051,18 +7075,18 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				}
 				if (accessType != JAXB_TYPE_FIELD) {
 					for (int i = 0; i < methods.size(); i++) {
-						IMethodBinding var = methods.get(i);
-						IMethodBinding var2 = getJAXBGetMethod(var, methods, true);
-						if (var2 == null)
+						IMethodBinding m = methods.get(i);
+						IMethodBinding m2 = getJAXBGetMethod(m, methods, true);
+						if (m2 == null)
 							continue;
-						boolean isPublic = (Modifier.isPublic(var.getModifiers())
-								|| Modifier.isPublic(var2.getModifiers()));
+						boolean isPublic = (Modifier.isPublic(m.getModifiers())
+								|| Modifier.isPublic(m2.getModifiers()));
 						if (publicOnly && !isPublic)
 							continue;
-						String varName = var.getName();
+						String varName = m.getName();
 						if (varName.startsWith("set"))
-							varName = (var = var2).getName();
-						ITypeBinding type = var.getReturnType();
+							varName = (m = m2).getName();
+						ITypeBinding type = m.getReturnType();
 						addJAXBAnnotation("M:" + varName, type, "@XmlElement", buf);
 						if (isUnspecified)
 							addJAXBAnnotation("M:" + varName, type, "!XmlPublic(" + isPublic + ")", buf);
@@ -7094,8 +7118,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			String line = buf.substring(ptBuf);
 			for (int f = 1; f < fragments.size(); f++) {
 				VariableDeclarationFragment identifier = (VariableDeclarationFragment) fragments.get(f);
-				IVariableBinding var = identifier.resolveBinding();
-				buf.append("]],\n  [['" + var.getName() + "'");
+				buf.append("]],\n  [['" + identifier.resolveBinding().getName() + "'");
 				buf.append(line);
 			}
 		}
