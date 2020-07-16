@@ -521,9 +521,9 @@ public class JFileChooser extends JComponent {
             if (file.isAbsolute() && !isParent(getCurrentDirectory(), selectedFile)) {
                 setCurrentDirectory(selectedFile.getParentFile());
             }
-            if (!isMultiSelectionEnabled() || selectedFiles == null || selectedFiles.length == 1) {
-                ensureFileIsVisible(selectedFile);
-            }
+//            if (!isMultiSelectionEnabled() || selectedFiles == null || selectedFiles.length == 1) {
+//                ensureFileIsVisible(selectedFile);
+//            }
         }
         firePropertyChange(SELECTED_FILE_CHANGED_PROPERTY, oldValue, selectedFile);
     }
@@ -789,14 +789,18 @@ public class JFileChooser extends JComponent {
 
 						@Override
 						public void run() {
+							File[] files = null;
+							File file = null;
 							/**
 							 * @j2sNative
 							 * 
-							 * this.b$['javax.swing.JFileChooser'].selectedFiles = arguments[0] || null;
-							 * this.b$['javax.swing.JFileChooser'].selectedFile = arguments[0][0] || null;
+							 * files = arguments[0] || null;
+							 * file = arguments[0][0] || null;
 							 * 
 							 * 
 							 */
+							selectedFiles = files;
+							selectedFile = file;
 							firePropertyChange("SelectedFiles", null, selectedFiles);
 						}
 						
@@ -808,13 +812,15 @@ public class JFileChooser extends JComponent {
 
 				@Override
 				public void run() {
+					File file = null;
 					/**
 					 * @j2sNative
 					 * 
-					 * this.b$['javax.swing.JFileChooser'].selectedFile = arguments[0] || null;
+					 * file = arguments[0] || null;
 					 * 
 					 * 
 					 */
+					selectedFile = file;
 					firePropertyChange("SelectedFile", null, selectedFile);
 				}
 				
