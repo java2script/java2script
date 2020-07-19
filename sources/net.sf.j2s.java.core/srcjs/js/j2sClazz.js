@@ -5365,6 +5365,11 @@ if(radix >= 2 && radix <= 36){
 }
 return -1;
 }, 1);
+
+m$(C$,"toString$C", function(c) {
+	 return c;
+}, 1);
+
 m$(C$,"toString",
 function(c){
 if (arguments.length == 0) {

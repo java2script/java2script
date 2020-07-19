@@ -1331,7 +1331,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 			秘g = new JSGraphics2D(秘canvas);
 		}
 
-		if (秘haveRaster()) {
+		if (秘haveRaster() && 秘isDataStolen()) {
 			// we need to draw the image now, because it might
 			// have pixels. Note that Java actually does not
 			// allow creating a Graphics from MemoryImageSource
@@ -1341,7 +1341,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		}
 		Object pix = 秘pix;
 		/**
-		 * @j2sNative if (pix) pix.img = this;
+		 * @j2sNative pix && (pix.img = this);
 		 * 
 		 */
 
