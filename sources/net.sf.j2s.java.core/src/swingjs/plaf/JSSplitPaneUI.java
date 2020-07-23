@@ -177,6 +177,8 @@ public class JSSplitPaneUI extends JSPanelUI {
 
 	private boolean isHorizontal;
 
+	private Color dividerColor;
+
 	// /**
 	// * Creates a new BasicSplitPaneUI instance
 	// */
@@ -212,31 +214,36 @@ public class JSSplitPaneUI extends JSPanelUI {
 	}
 
 	protected void fHandleDrag(Object xyev, int type) {
-		getCursor();
-		if (splitPane.isEnabled())
-			switch (type) {
-			case MouseEvent.MOUSE_MOVED:
-				divider.setCursor(cursor);
-				return;
-			case MouseEvent.MOUSE_PRESSED:
-				this.xyev = xyev;
-				this.pressedLocation = splitPane.getDividerLocation();
-				divider.setCursor(cursor);
-				JSInterface.setCursor(JSToolkit.getCursorName(cursor));
-				return;
-			case MouseEvent.MOUSE_DRAGGED:
-				int d = this.pressedLocation + /** @j2sNative (this.isHorizontal ? xyev.dx : xyev.dy) || */
-						0;
-				int max = getMaximumDividerLocation(splitPane);
-				int min = getMinimumDividerLocation(splitPane);
-				d = Math.max(min, Math.min(max, d));
-				splitPane.setDividerLocation(d);
-				return;
-			case MouseEvent.MOUSE_RELEASED:
-				break;
-			}
-		JSInterface.setCursor(null);
-		divider.setCursor(null);
+		if (!splitPane.isEnabled()) {
+			JSInterface.setCursor(null);
+			divider.setCursor(null);
+			return;
+		}
+		divider.setCursor(getCursor());
+		switch (type) {
+		case MouseEvent.MOUSE_MOVED:
+//			divider.setBackground(dividerColor);
+			return;
+		case MouseEvent.MOUSE_PRESSED:
+			this.xyev = xyev;
+			this.pressedLocation = splitPane.getDividerLocation();
+			JSInterface.setCursor(JSToolkit.getCursorName(cursor));
+//			divider.setBackground(Color.DARK_GRAY);
+			return;
+		case MouseEvent.MOUSE_DRAGGED:
+			int d = this.pressedLocation + /** @j2sNative (this.isHorizontal ? xyev.dx : xyev.dy) || */
+					0;
+			int max = getMaximumDividerLocation(splitPane);
+			int min = getMinimumDividerLocation(splitPane);
+			d = Math.max(min, Math.min(max, d));
+			splitPane.setDividerLocation(d);
+			return;
+		case MouseEvent.MOUSE_RELEASED:
+			JSInterface.setCursor(null);
+			// unfortunately, this can be lost
+//			divider.setBackground(dividerColor);
+			return;
+		}
 	}	
 	
 	private Cursor getCursor() {
@@ -249,7 +256,9 @@ public class JSSplitPaneUI extends JSPanelUI {
 
 	private void setupDivider() {
 		divider = new SplitPaneDivider(this);
+		dividerColor = divider.getBackground();
 		enableDragging();
+		divider.setCursor(getCursor());
 	}
 	
 	private void enableDragging() {
@@ -2191,6 +2200,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 	public void setEnabled(boolean b) {
 		super.setEnabled(b);
 		splitPane.setCursor(b ? getCursor() : null);
+		divider.setCursor(b ? getCursor() : null);
 	}
 
 	@Override
