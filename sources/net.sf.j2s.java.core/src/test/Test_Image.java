@@ -2,6 +2,7 @@ package test;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -39,8 +40,8 @@ public class Test_Image extends Test_ {
 	public static void main(String[] args) {
 		
 //		testSource();
-//		testPacked();
-		testGray();
+		testPacked();
+//		testGray();
 //		testRead();
 //		testWrite();
 
@@ -264,15 +265,40 @@ public class Test_Image extends Test_ {
 	    DataBuffer databuffer = new DataBufferByte(packedData, len);
 	    WritableRaster raster = Raster.createPackedRaster(databuffer, nx, ny, 1, null);
 	    // default colors are red and blue
-	    ColorModel colorModel = new IndexColorModel(1, 2, new byte[] {(byte) 255, (byte) 0}, new byte[] {(byte) 0, (byte) 0}, new byte[] {(byte) 0, (byte) 255});
+	    ColorModel colorModel = new IndexColorModel(1, 2, 
+	    		new byte[] {(byte) 255, (byte) 0}, 
+	    		new byte[] {(byte) 0, (byte) 0}, 
+	    		new byte[] {(byte) 0, (byte) 255});
 	    BufferedImage image = new BufferedImage(colorModel, raster, false, null);
-	    
+	
+	    dumpImage(image, nx, ny);
+	    DataBuffer buf = image.getRaster().getDataBuffer();
+	    byte[] data = ((DataBufferByte) buf).getData();
+	    System.out.println(Arrays.toString(data));
+	    Graphics2D g = image.createGraphics();
+	    g.setColor(new Color(0,0,255));
+	    g.fillRect(0, 0, 100, 100);
+	    g.dispose();
+	    image.flush();
+	    System.out.println(Arrays.toString(data));	    
+	    dumpImage(image, nx, ny);
+	}
+
+	private static void dumpImage(BufferedImage image, int nx, int ny) {
+		System.out.println("----------------");
 		int n = nx * ny;
 		int[] pixels = new int[n * 4];
 	    for (int i = 0, pt = 0; i < n; i++, pt+=4) {
+	    	
 	    	image.getColorModel().getComponents(i, pixels, pt);
-	    	System.out.println(pixels[pt] + " " + pixels[pt+1] + " " + pixels[pt+2] + " " + pixels[pt+3]);
+	    	System.out.println(i + " " + nx + " " + ny + ": " + pixels[pt] + " " + pixels[pt+1] + " " + pixels[pt+2] + " " + pixels[pt+3]);
 	    }
+		System.out.println("===========");
+		for (int i = 0; i < nx; i++) {
+			for (int j = 0; j < ny; j++) {
+				System.out.println(Integer.toHexString(image.getRGB(i, j)));
+			}
+		}
 	}
 
 }
