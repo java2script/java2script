@@ -66,14 +66,4 @@ public class JSPanelUI extends JSLightweightUI implements ContainerPeer {
 		return null;
   }
 	
-	@Override
-	public Dimension getMinimumSize(JComponent jc) {
-		return null;
-//		// in our capacity as peer here, not UI.
-//		LayoutManager man = jc.getLayout();
-//		Dimension d = (man == null ? super.getMinimumSize(jc) : jc.getLayout().minimumLayoutSize(jc));
-//		return d;
-	}
-
-
 }
