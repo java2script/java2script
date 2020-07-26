@@ -4236,13 +4236,17 @@ public abstract class JComponent extends Container {
 		// internal structural change.
 		if (ui != null)
 			((JSComponentUI)ui).setTainted();
-		if (getParent() == null && !isValidateRoot() || !秘isTopLevelVisible()) {
+		if (getParent() == null && !isValidateRoot()) {
 			// Note: We don't bother invalidating here as once added
 			// to a valid parent invalidate will be invoked (addImpl
 			// invokes addNotify which will invoke invalidate on the
 			// new Component). Also, if we do add a check to isValid
 			// here it can potentially be called before the constructor
 			// which was causing some people grief.
+			return;
+		}
+		if (!秘isTopLevelVisible()) {
+			invalidate();
 			return;
 		}
 		if (SwingUtilities.isEventDispatchThread()) {
