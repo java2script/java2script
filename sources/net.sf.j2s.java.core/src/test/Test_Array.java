@@ -1,6 +1,7 @@
 package test;
 
 import java.lang.reflect.Array;
+import java.util.Arrays;
 
 class Test_Array extends Test_ {
 
@@ -52,6 +53,14 @@ class Test_Array extends Test_ {
 
 	public static void main(String[] args) {
 	
+
+			int[] a = new int[] {1,2,3};
+			int i = 2, jj;
+			a[--i] *= a[i + 1];
+//			a[--i] = a[jj = i] + a[i + 1];
+			System.out.println(Arrays.toString(a));
+			a[i--] = a[i] + a[i + 1];
+			System.out.println(Arrays.toString(a));
 		Object[][] oaa = new Object[2][];
 		
 
