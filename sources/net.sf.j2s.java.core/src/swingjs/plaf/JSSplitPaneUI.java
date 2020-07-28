@@ -668,13 +668,13 @@ public class JSSplitPaneUI extends JSPanelUI {
 		}
 	}
 
-	// /**
-	// * Returns the divider between the top Components.
-	// */
-	// public BasicSplitPaneDivider getDivider() {
-	// return divider;
-	// }
-
+	 /**
+	 * Returns the divider between the top Components.
+	 */
+	 public SplitPaneDivider getDivider() {
+		 return divider;
+	 }
+	
 	/**
 	 * Returns the default non continuous layout divider, which is an instanceof
 	 * Canvas that fills the background in dark gray.
