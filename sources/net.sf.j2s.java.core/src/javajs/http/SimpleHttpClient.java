@@ -21,6 +21,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import javajs.http.HttpClient.HttpRequest;
+
 
 /**
  * SwingJS implementation of javajs.http.HttpClient and associated classes.
@@ -53,28 +55,28 @@ class SimpleHttpClient implements HttpClient {
 
 	@Override
 	public HttpRequest get(URI uri) {
-		return new Request(uri, "GET");
+		return new Request(uri, HttpRequest.METHOD_GET);
 	}
 
 	@Override
 	public HttpRequest head(URI uri) {
-		return new Request(uri, "HEAD");
+		return new Request(uri, HttpRequest.METHOD_HEAD);
 	}
 
 	@Override
 	public HttpRequest post(URI uri) {
-		return new Request(uri, "POST");
+		return new Request(uri, HttpRequest.METHOD_POST);
 
 	}
 
 	@Override
 	public HttpRequest put(URI uri) {
-		return new Request(uri, "PUT");
+		return new Request(uri, HttpRequest.METHOD_PUT);
 	}
 
 	@Override
 	public HttpRequest delete(URI uri) {
-		return new Request(uri, "DELETE");
+		return new Request(uri, HttpRequest.METHOD_DELETE);
 	}
 
 	/**
@@ -101,11 +103,20 @@ class SimpleHttpClient implements HttpClient {
 			super(u);
 		}
 
+		/**
+		 * Generic method of adding form data.
+		 * @param name  form field name
+		 * @param value  String or byte[]
+		 * @param contentType recognized media type
+		 * @param fileName server-side-specific file name
+		 */
 		public abstract void addFormData(String name, Object value, String contentType, String fileName);
 
+		/**
+		 * JavaScript SwingJS-only method, not available in Java, only JavaScript
+		 */
 		// not @Override, because that method is only in SwingJS, and this class is portable
 		public abstract void getBytesAsync(Function<byte[], Void> whenDone);
-
 	}
 
 	class Request implements HttpRequest {
@@ -159,7 +170,12 @@ class SimpleHttpClient implements HttpClient {
 		private Map<String, String> htHeaders = new HashMap<>();
 
 		/**
-		 * GET and POST data
+		 * GET data
+		 */
+		private List<FormData> queryData;
+
+		/**
+		 * POST data
 		 */
 		private List<FormData> formData;
 
@@ -173,15 +189,15 @@ class SimpleHttpClient implements HttpClient {
 			this.uri = uri;
 			this.method = method.toUpperCase();
 			switch (method) {
-			case "GET":
-			case "DELETE":
+			case METHOD_GET:
+			case METHOD_DELETE:
 				hasFormBody = false;
 				break;
-			case "HEAD":
+			case METHOD_HEAD:
 				hasFormBody = false;
 				break;
-			case "PUT":
-			case "POST":
+			case METHOD_PUT:
+			case METHOD_POST:
 				hasFormBody = true;
 				break;
 			}
@@ -205,12 +221,24 @@ class SimpleHttpClient implements HttpClient {
 
 		@Override
 		public HttpRequest addQueryParameter(String name, String value) {
-		  // TODO: implement adding parameters to url query
+			if (name == null) {
+				clearFormParts(name);
+				return this;
+			}
+			if (queryData == null)
+				queryData = new ArrayList<>();
+			queryData.add(new FormData(name, value, null, null));
+			return this;
 		}
 		
 		@Override
 		public HttpRequest addFormPart(String name, String value) {
 			return addFormField(name, value, null, null);
+		}
+
+		@Override
+		public HttpRequest addFilePart(String name, String fileData, String contentType, String fileName) {
+			return addFormField(name, fileData.getBytes(), contentType, fileName);
 		}
 
 		@Override
@@ -226,7 +254,7 @@ class SimpleHttpClient implements HttpClient {
 
 		private HttpRequest addFormField(String name, Object data, String contentType, String fileName) {
 			if (data == null) {
-				removeFormField(name);
+				clearFormParts(name);
 				return this;
 			}
 			if (formData == null)
@@ -236,15 +264,27 @@ class SimpleHttpClient implements HttpClient {
 		}
 
 		@Override
-		public boolean clearParameter(String name) {
-			if (formData != null)
-				for (int i = 0; i < formData.size(); i++)
-					if (formData.get(i).getName().equals(name)) {
-						return (formData.remove(i) != null);
+		public HttpRequest clearQueryParameters(String name) {
+			if (queryData != null) {
+				for (int i = 0; i < queryData.size(); i++)
+					if (name == null || queryData.get(i).getName().equals(name)) {
+						queryData.remove(i);
 					}
-			return false;
+			}
+			return this;
 		}
 		
+		@Override
+		public HttpRequest clearFormParts(String name) {
+			if (formData != null) {
+				for (int i = 0; i < formData.size(); i++)
+					if (name == null || formData.get(i).getName().equals(name)) {
+						formData.remove(i);
+					}
+			}
+			return this;
+		}
+
 		private byte[] toBytes(Object data) {
 			try {
 				if (data == null || data instanceof byte[]) {
@@ -299,24 +339,22 @@ class SimpleHttpClient implements HttpClient {
 		}
 
 		private Response fulfillGet(Response r) throws IOException {
-			URL url;
+			return r.getResponse(getConnection(createURL()), this);
+		}
+
+		private URL createURL() throws MalformedURLException {
 			String data = "";
-			if (formData != null) {
+			if (queryData != null) {
 				Map<String, String> htGetParams = new LinkedHashMap<>();
-				for (int i = 0; i < formData.size(); i++) {
-					FormData fd = formData.get(i);
+				for (int i = 0; i < queryData.size(); i++) {
+					FormData fd = queryData.get(i);
 					htGetParams.put(fd.getName(), fd.getData().toString());
 				}
 				for (Entry<String, String> e : htGetParams.entrySet()) {
 					data += e.getKey() + "=" + encodeURI(e.getValue());
 				}
 			}
-			if (data.length() > 0) {
-				url = new URL(uri.toString() + "?" + data);
-			} else {
-				url = uri.toURL();
-			}
-			return r.getResponse(getConnection(url), this);
+			return (data.length() > 0 ? new URL(uri.toString() + "?" + data) : uri.toURL());
 		}
 
 		private String encodeURI(String value) {
@@ -333,7 +371,7 @@ class SimpleHttpClient implements HttpClient {
 		}
 
 		private Response fulfillPost(Response r) throws IOException {
-			HttpURLConnection conn = getConnection(uri.toURL());
+			HttpURLConnection conn = getConnection(createURL());
 			sendFormData(conn, formData);
 			return r.getResponse(conn, this);
 		}
@@ -368,7 +406,7 @@ class SimpleHttpClient implements HttpClient {
 			try {
 				HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 				conn.setUseCaches(false);
-				if (!method.equals("HEAD"))
+				if (!method.equals(METHOD_HEAD))
 					conn.setDoInput(true);
 				if (hasFormBody)
 					conn.setDoOutput(true);
@@ -456,7 +494,7 @@ class SimpleHttpClient implements HttpClient {
 				public void run() {
 					// asynchronous methods cannot throw an exception.
 					IOException exception = null;
-					if (method.equals("HEAD")) {
+					if (method.equals(HttpRequest.METHOD_HEAD)) {
 						try {
 							state = conn.getResponseCode();
 						} catch (IOException e) {

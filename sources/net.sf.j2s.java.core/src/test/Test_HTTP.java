@@ -33,15 +33,15 @@ public class Test_HTTP extends Test_ {
 			req = client.put(new URI("https://www.compbio.dundee.ac.uk/slivka/api/services/example"));
 			
 			String json = "{\"key1\":\"val1\", \"key2\":\"val2\"}";		
-			req.addFile("input-file",new ByteArrayInputStream(json.getBytes()));
-			req.addParameter("content", "len:11 long");
+			req.addFilePart("input-file",new ByteArrayInputStream(json.getBytes()));
+			req.addFormPart("content", "len:11 long");
 
 			resp = req.execute();
 			
 			System.out.println(resp);
 			System.out.println(resp.getText());
 
-			req.addParameter("testing", "here");
+			req.addFormPart("testing", "here");
 			req.executeAsync(new Consumer<HttpResponse>() {
 
 				@Override
