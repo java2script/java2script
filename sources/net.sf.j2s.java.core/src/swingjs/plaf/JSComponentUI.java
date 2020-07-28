@@ -680,10 +680,7 @@ public class JSComponentUI extends ComponentUI
 	protected JQueryObject $(Object node) {
 		return jquery.$(node);
 	}
-	protected Object $data(DOMNode node, String attr) {
-		return (node == null ? null : jquery.data(node,attr));
-	}
-
+	
 	/**
 	 * Set the associated JComponent. Setting comp null will disable this UI from
 	 * getting any events.

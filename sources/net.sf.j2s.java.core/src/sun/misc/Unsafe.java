@@ -33,6 +33,12 @@ import sun.reflect.Reflection;
 
 
 /**
+ * 
+ * SwingJS note:
+ * 
+ * all offsets in SwingJS will be the String name of the field. All we are doing
+ * is getting or putting those values. Nothing truly atomic about it.
+ * 
  * A collection of methods for performing low-level, unsafe operations.
  * Although the class and all methods are public, use of this class is
  * limited because only trusted code can obtain instances of it.
@@ -732,7 +738,8 @@ public final class Unsafe {
      * @see #getInt(Object, long)
      */
     public long staticFieldOffset(Field f) {
-    	return 0;
+    	String name = f.getName();
+    	return /** @j2sNative 1 ? name : */0;
     }
 
     /**
@@ -753,7 +760,8 @@ public final class Unsafe {
      * @see #getInt(Object, long)
      */
     public long objectFieldOffset(Field f) {
-    	return 0;
+    	String name = f.getName();
+    	return /** @j2sNative 1 ? name : */0;
     }
 
     /**

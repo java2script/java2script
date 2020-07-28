@@ -781,7 +781,7 @@ public class File
      *          method denies read access to the file or directory
      */
     public boolean exists() {
-        return this.path.indexOf("!/") < 0 && fs._exists(this);
+        return path.indexOf("!/") < 0 && (fs._exists(this) || fs._isDir(this));
     }
 
     /**
@@ -832,55 +832,29 @@ public class File
 //        }
 //        return ((fs.getBooleanAttributes(this) & FileSystem.BA_REGULAR) != 0);
     }
-//
-//    /**
-//     * Tests whether the file named by this abstract pathname is a hidden
-//     * file.  The exact definition of <em>hidden</em> is system-dependent.  On
-//     * UNIX systems, a file is considered to be hidden if its name begins with
-//     * a period character (<code>'.'</code>).  On Microsoft Windows systems, a file is
-//     * considered to be hidden if it has been marked as such in the filesystem.
-//     *
-//     * @return  <code>true</code> if and only if the file denoted by this
-//     *          abstract pathname is hidden according to the conventions of the
-//     *          underlying platform
-//     *
-//     * @throws  SecurityException
-//     *          If a security manager exists and its <code>{@link
-//     *          java.lang.SecurityManager#checkRead(java.lang.String)}</code>
-//     *          method denies read access to the file
-//     *
-//     * @since 1.2
-//     */
-//    public boolean isHidden() {
-//        SecurityManager security = System.getSecurityManager();
-//        if (security != null) {
-//            security.checkRead(path);
-//        }
-//        return ((fs.getBooleanAttributes(this) & FileSystem.BA_HIDDEN) != 0);
-//    }
-//
-//    /**
-//     * Returns the time that the file denoted by this abstract pathname was
-//     * last modified.
-//     *
-//     * @return  A <code>long</code> value representing the time the file was
-//     *          last modified, measured in milliseconds since the epoch
-//     *          (00:00:00 GMT, January 1, 1970), or <code>0L</code> if the
-//     *          file does not exist or if an I/O error occurs
-//     *
-//     * @throws  SecurityException
-//     *          If a security manager exists and its <code>{@link
-//     *          java.lang.SecurityManager#checkRead(java.lang.String)}</code>
-//     *          method denies read access to the file
-//     */
-//    public long lastModified() {
-//        SecurityManager security = System.getSecurityManager();
-//        if (security != null) {
-//            security.checkRead(path);
-//        }
-//        return fs.getLastModifiedTime(this);
-//    }
-//
+
+    /**
+     * Tests whether the file named by this abstract pathname is a hidden
+     * file.  The exact definition of <em>hidden</em> is system-dependent.  On
+     * UNIX systems, a file is considered to be hidden if its name begins with
+     * a period character (<code>'.'</code>).  On Microsoft Windows systems, a file is
+     * considered to be hidden if it has been marked as such in the filesystem.
+     *
+     * @return  <code>true</code> if and only if the file denoted by this
+     *          abstract pathname is hidden according to the conventions of the
+     *          underlying platform
+     *
+     * @throws  SecurityException
+     *          If a security manager exists and its <code>{@link
+     *          java.lang.SecurityManager#checkRead(java.lang.String)}</code>
+     *          method denies read access to the file
+     *
+     * @since 1.2
+     */
+    public boolean isHidden() {
+    	return false;// getName().startsWith(".");
+    }
+
     /**
      * Returns the length of the file denoted by this abstract pathname.
      * The return value is unspecified if this pathname denotes a directory.

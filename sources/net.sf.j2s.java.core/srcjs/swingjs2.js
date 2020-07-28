@@ -14008,6 +14008,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2020.07.27 fix for inner class array names
 // BH 2020.06.18 better test for instanceof Object[]
 // BH 2020.06.03 sets user.home and user.dir to /TEMP/swingjs, and user.name to "swingjs"
 // BH 2020.04.01 2.2.0-v1e fixes missing C$.superclazz when class loaded from core
@@ -15092,7 +15093,7 @@ var arrayClass = function(baseClass, ndim) {
       break;
     default:
       if (stub.length > 1)
-        stub = baseClass.__CLASS_NAME__;
+        stub = baseClass.__CLASS_NAME$__ || baseClass.__CLASS_NAME__;
       break;
     }
     if (stub.indexOf(".") >= 0)
@@ -15255,7 +15256,7 @@ var shiftArray = function(a, i0, k) {
 
 var getParamCode = Clazz._getParamCode = function(cl) {
   cl.$clazz$ && (cl = cl.$clazz$);
-  return cl.__PARAMCODE || (cl.__PARAMCODE = stripJavaLang(cl.__CLASS_NAME__).replace(/\./g, '_'));
+  return cl.__PARAMCODE || (cl.__PARAMCODE = stripJavaLang(cl.__CLASS_NAME$__ || cl.__CLASS_NAME__).replace(/\./g, '_'));
 }
 
 var newTypedA = function(baseClass, args, nBits, ndims, isClone) {
@@ -19366,6 +19367,11 @@ if(radix >= 2 && radix <= 36){
 }
 return -1;
 }, 1);
+
+m$(C$,"toString$C", function(c) {
+	 return c;
+}, 1);
+
 m$(C$,"toString",
 function(c){
 if (arguments.length == 0) {

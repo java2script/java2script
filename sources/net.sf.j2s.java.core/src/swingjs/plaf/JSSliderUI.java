@@ -31,6 +31,7 @@ import swingjs.JSGraphics2D;
 import swingjs.JSToolkit;
 import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
+import swingjs.api.js.JQueryObject;
 import swingjs.jquery.JQueryUI;
 
 /**
@@ -349,30 +350,33 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 
 	/**
 	 * Call jquery-ui-j2sslider.js _setOption
+	 * 
 	 * @param key
 	 * @param val
 	 */
 	protected void setSliderAttr(String key, float val) {
-		if (!sliderInitialized())
-		noSnapping = true;
-		String id = null;
-		try {
-		Object jsslider = $(jqSlider);
-		/**
-		 * @j2sNative
-		 * 
-		 *  id = this.jqSlider.id;
-		 *  jsslider.j2sslider("option",key,val);
-		 */
-		} catch (Throwable t) {
-			// System.out.println(key + ":" + val + " could not be set for " + id);
-			// ignore -- disposal problem?
+		if (sliderInitialized()) {
+			try {
+				String id = null;
+				JQueryObject jsslider = $(jqSlider);
+				/**
+				 * @j2sNative
+				 * 
+				 * 
+				 * 			id = this.jqSlider.id; jsslider.j2sslider("option",key,val);
+				 */
+			} catch (Throwable t) {
+				// System.out.println(key + ":" + val + " could not be set for " + id);
+				// ignore -- disposal problem?
+			}
+			noSnapping = isScrollBar;
+		} else {
+			noSnapping = true;
 		}
-		noSnapping = isScrollBar;
 	}
 
 	private boolean sliderInitialized() {
-		return ($data(jqSlider, "ui-j2sslider") != null);
+			return (jqSlider != null && jquery.data(jqSlider, "ui-j2sslider") != null);
 	}
 
 	public void setSlider() {

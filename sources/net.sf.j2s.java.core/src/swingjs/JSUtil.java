@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.function.Function;
 import java.util.zip.ZipEntry;
@@ -77,7 +78,7 @@ public class JSUtil implements JSUtilI {
 	private static boolean useCache = true;
 
 	
-	private static Map<String, Object> getFileCache() {
+	public static Map<String, Object> getFileCache() {
 		return (fileCache == null ?
 			fileCache = J2S.getSetJavaFileCache(null) : fileCache);
 	}
@@ -102,6 +103,37 @@ public class JSUtil implements JSUtilI {
 	public static Object getCachedFileData(String path, boolean asBytes) {
 		Object o = (getFileCache() != null ? fileCache.get(fixCachePath(path)) : null);
 		return (o instanceof byte[] ? (byte[]) o : null);
+	}
+
+	public static String[] getCachedFileList(File dir) {
+		String path = fixCachePath(dir.getAbsolutePath());
+		if (!path.endsWith("/"))
+			path += "/";
+		int len = path.length();
+		Map<String, Object> map = getFileCache();
+		String[] a = new String[0];
+		String dirs = "/";
+		for (Entry<String, Object> e : map.entrySet()) {
+			if (e.getValue() == Boolean.FALSE)
+				continue;
+			String fs = e.getKey();
+			if (fs.startsWith(path)) {
+				String name = fs.substring(len);
+				int pt = name.indexOf("/");
+				if (pt >= 0) {
+					String fdir = "/" + name.substring(0, pt + 1);
+					if (dirs.indexOf(fdir) >= 0)
+						continue;
+					dirs += fdir;
+					name = name.substring(0, pt);
+				}
+				/**
+				 * @j2sNative
+				 * name && a.push(name);
+				 */					
+			}
+		}
+		return a;
 	}
 
 	/**

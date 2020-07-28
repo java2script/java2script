@@ -2475,12 +2475,10 @@ public abstract class Component implements ImageObserver/*
 		 * Avoid grabbing the lock if a reasonable cached size value is available.
 		 */
 		Dimension dim = minSize;
-		if (dim == null || !(isMinimumSizeSet() || isValid())) {
+		if (dim == null || !isMinimumSizeSet() && !isValid()) {
 			// synchronized (getTreeLock()) {
-			minSize =
-					// (peer != null) ?
-					// peer.minimumSize() :
-					size();
+			// SwingJS: NullComponentPeer would have returned (1,1)
+			minSize = (peer == null ? size() : new Dimension(1,1));
 			dim = minSize;
 			// }
 		}
@@ -2538,10 +2536,7 @@ public abstract class Component implements ImageObserver/*
 	}
 
 	protected Dimension getMaxSizeComp() {
-		if (isMaximumSizeSet()) {
-			return new Dimension(maxSize);
-		}
-		return new Dimension(Short.MAX_VALUE, Short.MAX_VALUE);
+		return (isMaximumSizeSet() ? maxSize : new Dimension(Short.MAX_VALUE, Short.MAX_VALUE));
 	}
 
 	/**
