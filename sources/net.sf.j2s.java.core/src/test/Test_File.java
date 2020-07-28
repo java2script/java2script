@@ -1,6 +1,9 @@
 package test;
 
+import java.awt.Toolkit;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
@@ -9,8 +12,14 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.spi.FileSystemProvider;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
 
 import javax.management.openmbean.OpenMBeanOperationInfoSupport;
+import javax.swing.filechooser.FileSystemView;
 
 import javajs.util.OC;
 
@@ -19,6 +28,8 @@ public class Test_File extends Test_ {
 	@SuppressWarnings("unused")
 	public static void main(String[] args) {
 
+		testTempDir();
+		
 		System.out.println(System.getProperty("jnlp.codebase"));
 		String tmpdir = System.getProperty("java.io.tmpdir");
 		System.out.println(tmpdir);
@@ -71,5 +82,37 @@ public class Test_File extends Test_ {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	private static void testTempDir() {
+		try {
+			File dir = new File(System.getProperty("java.io.tmpdir"), "tracker" + new Random().nextInt());
+			dir.mkdir();			
+
+			toFile(dir, "test2", "\testing2");
+			toFile(dir, "test3", "testing3");
+			toFile(dir, "test1", "testing1");
+			if (dir.isDirectory()) {
+				String[] list = dir.list();
+				System.out.println(Arrays.toString(list));
+				System.out.println(Arrays.toString(dir.listFiles()));
+				File files[] = FileSystemView.getFileSystemView().getFiles(dir, false);	
+				System.out.println(Arrays.toString(files));
+			}
+			dir = new File(System.getProperty("java.io.tmpdir"));
+			System.out.println(Arrays.toString(dir.list()));
+
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+
+
+	private static void toFile(File dir, String fname, String data) throws IOException {
+		FileOutputStream fos = new FileOutputStream(new File(dir, fname));
+		fos.write(data.getBytes());
+		fos.close();		
 	}
 }

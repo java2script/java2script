@@ -48,7 +48,6 @@ import java.util.ArrayList;
 import javax.swing.event.EventListenerList;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileSystemView;
-//import javax.swing.filechooser.FileSystemView;
 import javax.swing.filechooser.FileView;
 
 import swingjs.JSUtil;
