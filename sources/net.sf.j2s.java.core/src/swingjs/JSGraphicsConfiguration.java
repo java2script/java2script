@@ -1,8 +1,5 @@
 package swingjs;
 
-import swingjs.api.Interface;
-import swingjs.api.js.DOMNode;
-import swingjs.api.js.JQueryObject;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
@@ -11,7 +8,10 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
-import java.util.Hashtable;
+
+import swingjs.api.Interface;
+import swingjs.api.js.DOMNode;
+import swingjs.api.js.JQueryObject;
 
 
 /**

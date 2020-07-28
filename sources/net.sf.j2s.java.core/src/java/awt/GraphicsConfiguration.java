@@ -186,9 +186,11 @@ public abstract class GraphicsConfiguration {
     }
 
 
-	protected BufferedImage newBufferedImage(ColorModel cm, WritableRaster wr,
-			boolean alphaPremultiplied, Hashtable<?, ?> properties) {
-		return new BufferedImage(cm, wr, alphaPremultiplied, properties);
+	protected BufferedImage newBufferedImage(ColorModel cm, WritableRaster wr, boolean alphaPremultiplied,
+			Hashtable<?, ?> properties) {
+		BufferedImage bi = new BufferedImage(cm, wr, alphaPremultiplied, properties);
+	    bi.getRaster().秘setStable(true);
+		return bi;
 	}
 
 		/**

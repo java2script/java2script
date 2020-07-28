@@ -80,6 +80,7 @@ public abstract class Test_Inner extends Test_ {
 		System.out.println(inner.t_test);
 		System.out.println("new Test_Inner(){}.t_test=" + new Test_Inner(7) {}.t_test);
 		Test_Abstract_a abs = inner.new Test_Abstract_a();
+		System.out.println(new Test_Abstract_a[] {abs}.getClass().getName());
 		abs.testing();
 		new Test_Inner(8) {}.new Test_Abstract_a().testing();
 

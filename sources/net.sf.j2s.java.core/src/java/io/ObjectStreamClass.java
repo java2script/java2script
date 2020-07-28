@@ -1887,9 +1887,9 @@ public class ObjectStreamClass implements Serializable {
         FieldReflector(ObjectStreamField[] fields) {
             this.fields = fields;
             int nfields = fields.length;
-            readKeys = new long[nfields];
-            writeKeys = new long[nfields];
-            offsets = new int[nfields];
+            readKeys = /** @j2sNative [] || */new long[nfields];
+            writeKeys = /** @j2sNative [] || */ new long[nfields];
+            offsets = /** @j2sNative [] || */new int[nfields];
             typeCodes = new char[nfields];
             ArrayList<Class<?>> typeList = new ArrayList<>();
             Set<Long> usedKeys = new HashSet<>();

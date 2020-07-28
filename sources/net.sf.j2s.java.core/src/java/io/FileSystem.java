@@ -25,6 +25,10 @@
 
 package java.io;
 
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
 import swingjs.JSUtil;
 
 /**
@@ -93,7 +97,7 @@ class FileSystem {
 	 * successful; otherwise, return <code>null</code>.
 	 */
 	public String[] list(File f) {
-		return null;
+		return JSUtil.getCachedFileList(f);
 	}
 
 	/**
