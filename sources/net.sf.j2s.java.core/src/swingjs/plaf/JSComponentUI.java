@@ -1977,7 +1977,8 @@ public class JSComponentUI extends ComponentUI
 		outerNode = wrap("div", id, domNode);
 		@SuppressWarnings("unused")
 		JComponent c = jc;
-		String s = (/** @j2sNative c.__CLASS_NAME__|| */"");
+		String name = jc.getName();
+		String s = (/** @j2sNative name || c.__CLASS_NAME__|| */"");
 		outerNode.setAttribute("name", s);
 	}
 

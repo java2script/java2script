@@ -134,7 +134,7 @@ class FileSystem {
 
 	boolean _isDir(File file) {
 		// only an approximation. avoiding xxxx:  here completely
-		return (file.秘bytes == null && _isValid(file) && (file.getPrefixLength() == file.path.length() || !_exists(file)));
+		return (file.秘bytes == null && _isValid(file) && file.getPrefixLength() == file.path.length());
 	}
 
 	/**
