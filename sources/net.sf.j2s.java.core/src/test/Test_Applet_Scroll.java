@@ -545,6 +545,7 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener, Mouse
 		p.add(button2);
 		p.add(button3);
 	    JComboBox formatChoice = new JComboBox();
+	    formatChoice.setName("formatChoice");
 	    formatChoice.insertItemAt("bin\u00e4r", 0);
 	    formatChoice.insertItemAt("hex", 1);
 	    p.add(formatChoice);
