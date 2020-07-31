@@ -867,9 +867,10 @@ function Sizzle( selector, context, results, seed ) {
 			if ( newSelector ) {
 				try {
 					 // SwingJS addition
-					var mode = (newSelector.indexOf(":") >= 0 ? ":" 
-							: newSelector.indexOf(".not(") >= 0 ? ".not" 
-							: newSelector.indexOf("!=") >= 0 ? "!=" : 0);
+					var mode = (newSelector.indexOf(":has(") >= 0 ? "has" 
+							: newSelector.indexOf("!=") >= 0 ? "!=" : 0
+							: newSelector.indexOf(":") >= 0 ? ":" 
+					);
 					 if (mode && j2sInvalidSelectors.indexOf(mode) < 0) {			
 						push.apply( results,
 							newContext.querySelectorAll( newSelector )
