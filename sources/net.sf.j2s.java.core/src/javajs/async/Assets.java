@@ -1,6 +1,5 @@
 package javajs.async;
 
-import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -164,7 +163,6 @@ public class Assets {
 	 * @param path
 	 * @return
 	 */
-	@SuppressWarnings("deprecation")
 	public static URL getAbsoluteURL(String path) {
 		URL url = null;
 		try {
@@ -407,22 +405,24 @@ public class Assets {
 	private URL _getURLFromPath(String fullPath, boolean zipOnly) {
 		URL url = null;
 		try {
-			if (fullPath.startsWith("/"))
-				fullPath = fullPath.substring(1);
-			for (int i = sortedList.length; --i >= 0;) {
-				if (fullPath.startsWith(sortedList[i])) {
-					url = assetsByPath.get(sortedList[i]).getURL(fullPath);
-					ZipEntry ze = findZipEntry(url);
-					if (ze == null)
-						break;
-					if (isJS) {
-						jsutil.setURLBytes(url, jsutil.getZipBytes(ze));
+			if (!fullPath.startsWith("/TEMP/")) {
+				if (fullPath.startsWith("/"))
+					fullPath = fullPath.substring(1);
+				for (int i = sortedList.length; --i >= 0;) {
+					if (fullPath.startsWith(sortedList[i])) {
+						url = assetsByPath.get(sortedList[i]).getURL(fullPath);
+						ZipEntry ze = findZipEntry(url);
+						if (ze == null)
+							break;
+						if (isJS) {
+							jsutil.setURLBytes(url, jsutil.getZipBytes(ze));
+						}
+						return url;
 					}
-					return url;
 				}
 			}
 			if (!zipOnly)
-				return getAbsoluteURL(fullPath);
+				return getAbsoluteURL((fullPath.startsWith("TEMP/") ? "/" + fullPath : fullPath));
 		} catch (MalformedURLException e) {
 		}
 		return null;
