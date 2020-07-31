@@ -1719,6 +1719,7 @@ public class JSComponentUI extends ComponentUI
 		if (isAWT && t == "")
 			t = "\u00A0"; // AWT labels do not hide if ""
 		return (t == null || t == "" ? null : getHTMLSize(textNode));
+		
 	}
 
 	/**
@@ -1796,8 +1797,8 @@ public class JSComponentUI extends ComponentUI
 
 					// can't have these for getBoundingClientRect to work
 					DOMNode.setStyles(node, "position", null);
-					DOMNode.setStyles(this.textNode, "position", null);
-					DOMNode.setStyles(this.iconNode, "position", null);
+					DOMNode.setStyles(textNode, "position", null);
+					DOMNode.setStyles(iconNode, "position", null);
 				}
 			}
 			
@@ -2748,7 +2749,10 @@ public class JSComponentUI extends ComponentUI
 			alignRight = !ltr;
 			alignHCenter = false;
 			textRight = ltr;
-			if (!isMenu) {
+			if (isMenu) {
+				// Correct for dimText calc losing position:absolute
+				DOMNode.setPositionAbsolute(textNode);
+			} else {
 				String accel = getAccelStr((JMenuItem) b);
 				DOMNode accelNode = menuAnchorNode;
 				accelNode = /** @j2sNative accelNode.children[1] || */null;
