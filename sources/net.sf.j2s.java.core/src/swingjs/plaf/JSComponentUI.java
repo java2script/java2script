@@ -3608,9 +3608,9 @@ public class JSComponentUI extends ComponentUI
 			if (!paintsSelf)
 				setBackgroundDOM(domNode, color);
 			// preliminary -- DOM only, when the background is set
-		} else if (allowPaintedBackground && (isOpaque && jc.getComponentCount() > 0 || jc.秘g != null)) {
+		} else if (allowPaintedBackground && (isOpaque && (cellComponent != null || jc.getComponentCount() > 0) || jc.秘g != null)) {
 			// all opaque components must paint their background
-			// just in case they have painted CHILDREN
+			// just in case they have painted CHILDREN or if they are table cell components
 			if (isOpaque == (color.getAlpha() == 255)) {
 				g.setBackground(color);
 			} else {
