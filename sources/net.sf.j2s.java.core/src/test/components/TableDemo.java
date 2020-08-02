@@ -115,8 +115,9 @@ public class TableDemo extends JPanel {
 		});
 
 
-		table.setRowHeight(16);
-		table.setRowMargin(1);
+		table.setRowHeight(40);
+		//table.setRowHeight(16);
+		//table.setRowMargin(1);
 		table.setPreferredScrollableViewportSize(new Dimension(500, 300));
 		table.setFillsViewportHeight(true);
 

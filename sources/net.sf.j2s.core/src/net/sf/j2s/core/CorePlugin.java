@@ -31,6 +31,8 @@ public class CorePlugin extends Plugin {
 	// j2sApplet.js and also (Bob only) update.bat, update-clean.bat
 
 
+	// BH 2020.08.01 -- 3.2.9-v1o fix for lambda expressions too static
+	// BH 2020.07.08 -- 3.2.9-v1n fix for try with resources and adds option varOrLet
 	// BH 2020.07.04 -- 3.2.9.v1m fix for X.super.y() in anonymous class
 	// BH 2020.06.22 -- 3.2.9.v1k fix for varargs not proper qualified arrays
 	// BH 2020.06.17 -- 3.2.9-v1j fix for functional interface this::privateMethod

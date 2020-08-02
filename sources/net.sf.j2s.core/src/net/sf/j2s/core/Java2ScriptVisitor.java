@@ -135,6 +135,7 @@ import org.eclipse.jdt.core.dom.WildcardType;
 
 // TODO: superclass inheritance for JAXB XmlAccessorType
 
+//BH 2020.08.01 -- 3.2.9-v1o fix for lambda expressions too static
 //BH 2020.07.08 -- 3.2.9-v1n fix for try with resources and adds option varOrLet
 //BH 2020.07.04 -- 3.2.9-v1m fix for X.super.y() in anonymous class
 //BH 2020.06.22 -- 3.2.9-v1k fix for varargs not proper qualified arrays
@@ -654,6 +655,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 */
 	private boolean[] package_haveStaticArgsReversal = new boolean[] {false};
 
+	private int b$count;
+
 	private void addApplication() {
 		if (apps == null)
 			apps = new ArrayList<String>();
@@ -1054,6 +1057,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// instantiation, so we need to cache the final string "{m:m,b:b,...}" at
 		// creation time and recover it here.
 
+		int b$count0 = b$count;
+		
 		// String finals;
 		boolean isStatic = true;
 		if (localType != REALLY_LOCAL_CLASS) {
@@ -1092,7 +1097,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 		String key = binding.getKey();
 		Set<IVariableBinding> set = package_htClassKeyToVisitedFinalVars.get(key);
-		return (set == null || set.isEmpty() ? anonName : null);
+		boolean canBeReused = (set == null || set.isEmpty()
+				&& b$count == b$count0);		
+		return (canBeReused ? anonName : null);
 	}
 
 	/**
@@ -4804,6 +4811,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @return "this" + .qualifier
 	 */
 	private String getSyntheticReference(String className) {
+		b$count++;
 		return "this" + (className.equals("java.lang.Object") || className.equals("Object") ? ""
 				//: className.equals(this$0Name) ? ".this$0"
 						: ".b$['" + getFinalJ2SClassName(className, FINAL_RAW) + "']");
