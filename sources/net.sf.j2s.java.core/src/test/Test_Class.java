@@ -16,6 +16,7 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -323,6 +324,8 @@ class Test_Class extends Test_Class2<Integer> {
 	
 	public static void main(String[] args) {
 		
+//		System.out.println(new Date() + " " + Date.parse("3/4/2020"));
+
 		System.out.println(Number.class.isAssignableFrom(Double.class));
 		System.out.println(System.getProperty("user.dir"));
 		System.out.println(System.getProperty("user.home"));
