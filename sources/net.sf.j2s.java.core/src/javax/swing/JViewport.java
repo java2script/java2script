@@ -700,7 +700,7 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
 
         秘myClip.width = width;
         秘myClip.height = height;
-    	((JSViewportUI) ui).setClip(秘myClip);
+//    	((JSViewportUI) ui).setClip(秘myClip); no longer necessary (test!)
         if (inBlitPaint) {
             // We invoked paint as part of copyArea cleanup, let it through.
             super.paint(g);

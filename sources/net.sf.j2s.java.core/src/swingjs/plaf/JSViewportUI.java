@@ -51,7 +51,7 @@ ChangeListener {
 	public DOMNode updateDOMNode() {
 		if (domNode == null) {
 			domNode = newDOMObject("div", id);
-			DOMNode.setStyles(domNode,  "margin", "1px");
+			DOMNode.setStyle(domNode,  "margin", "1px");
 			ignoreAllMouseEvents(domNode);
 		}
 		return updateDOMNodeCUI();
@@ -77,10 +77,10 @@ ChangeListener {
 		,"width", (width - 2) + "px", "height", (height-2) + "px");
 	}
 
-	Rectangle myClip;
-	
-	public void setClip(Rectangle clip) {
-		myClip = clip;
-	}
-
+//	Rectangle myClip;
+//	
+//	public void setClip(Rectangle clip) {
+//		myClip = clip;
+//	}
+//
 }
