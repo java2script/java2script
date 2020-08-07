@@ -135,6 +135,7 @@ import org.eclipse.jdt.core.dom.WildcardType;
 
 // TODO: superclass inheritance for JAXB XmlAccessorType
 
+//BH 2020.08.03 -- 3.2.9-v1p fix for boxing boolean should be Boolean.valueOf$, not new Boolean
 //BH 2020.08.01 -- 3.2.9-v1o fix for lambda expressions too static
 //BH 2020.07.08 -- 3.2.9-v1n fix for try with resources and adds option varOrLet
 //BH 2020.07.04 -- 3.2.9-v1m fix for X.super.y() in anonymous class
@@ -4835,10 +4836,17 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				ITypeBinding typeBinding = exp.resolveTypeBinding();
 				if (typeBinding.isPrimitive()) {
 					String name = typeBinding.getName();
-					name = (name.equals("char") ? "Character"
-							: name.equals("int") ? "Integer"
-									: Character.toUpperCase(name.charAt(0)) + name.substring(1));
-					buffer.append("new " + name + "(");
+					String t = getJSTypeCode(name);
+					switch (name) {
+					case "char":
+						name = "Character";break;
+					case "int":
+						name = "Integer";break;
+					default:
+						 name = Character.toUpperCase(name.charAt(0)) + name.substring(1);
+						 break;
+					}
+					buffer.append(name + ".valueOf$" + t + "(");
 					element.accept(this);
 					buffer.append(")");
 					return true;
@@ -5681,48 +5689,40 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// as well.
 		// NOTE: These are the same as standard Java Spec, with the exception of
 		// Short, which is "H" instead of "S"
-
-		switch (name) {
-		case "boolean":
-			name = "Z";
-			break;
-		case "byte":
-			name = "B";
-			break;
-		case "char":
-			name = "C";
-			break;
-		case "double":
-			name = "D";
-			break;
-		case "float":
-			name = "F";
-			break;
-		case "int":
-			name = "I";
-			break;
-		case "long":
-			name = "J";
-			break;
-		case "short":
-			name = "H"; // differs from Java Spec so we can use S for String
-			break;
-		case "java.lang.Object":
-		case "Object":
-			name = "O";
-			break;
-		case "java.lang.String":
-			name = "S";
-			break;
-		default:
-			name = stripJavaLang(NameMapper.checkClassReplacement(name)).replace('.', '_');
-			break;
-		}
+		name = getJSTypeCode(name);
 		if (arrays != null) {
 			arrays = arrays.replaceAll("\\[\\]", "A");
 			name += arrays;
 		}
 		return name;
+	}
+
+	private String getJSTypeCode(String className) {
+		switch (className) {
+		case "boolean":
+			return "Z";
+		case "byte":
+			return "B";
+		case "char":
+			return "C";
+		case "double":
+			return "D";
+		case "float":
+			return "F";
+		case "int":
+			return "I";
+		case "long":
+			return "J";
+		case "short":
+			return "H"; // differs from Java Spec so we can use S for String
+		case "java.lang.Object":
+		case "Object":
+			return "O";
+		case "java.lang.String":
+			return "S";
+		default:
+			return stripJavaLang(NameMapper.checkClassReplacement(className)).replace('.', '_');
+		}
 	}
 
 	/**
