@@ -49,6 +49,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.BitSet;
 import java.util.Enumeration;
 
 import javax.swing.Action;
@@ -107,7 +108,7 @@ public class JSTableUI extends JSPanelUI {
 	private int oldWidth;
 	private int oldHeight;
 	private Object oldFont;
-
+		
 	private boolean isScrolling, justLaidOut;
 
 	public void setScrolling() {
@@ -134,7 +135,7 @@ public class JSTableUI extends JSPanelUI {
 		if (domNode == null) {
 			domNode = newDOMObject("div", id);
 			enableJSKeys(true);
-			DOMNode.setStyles(domNode,  "outline", "none");
+			DOMNode.setStyle(domNode,  "outline", "none");
 			// bindJSKeyEvents(domNode, true);
 		}
 		if (rebuild) {
@@ -319,7 +320,7 @@ public class JSTableUI extends JSPanelUI {
 			havePainted = false;
 			int ncols = table.getColumnCount();
 			int rowCount = table.getRowCount();
-			int[] cw = getColumnWidths();
+			getColumnWidths(true);
 			int rminy, rmaxy, rminx, rmaxx;
 			table.computeVisibleRect(tmpRect);
 			rminx = tmpRect.x;
@@ -340,24 +341,37 @@ public class JSTableUI extends JSPanelUI {
 			rmaxy = tmpRect.y + tmpRect.height;
 			if (tmpRect.height != 0) {
 				currentRowMin = 0;
-				addElements(rminx, rminy, rmaxx, rmaxy, cw, h, 0, rowCount, 0, ncols);
+				addElements(rminx, rminy, rmaxx, rmaxy, h, 0, rowCount, 0, ncols);
 			}
 		}
 	}
 
 	private void setHidden(boolean b) {
-		DOMNode.setStyles(domNode, "visibility", b ? "hidden" : "visible");
+		DOMNode.setStyle(domNode, "visibility", b ? "hidden" : "visible");
 	}
 
 	private int[] cw = new int[10];
-
-	private int[] getColumnWidths() {
+	private int[] cwOld = new int[10];
+    
+	private void getColumnWidths(boolean isNew) {
 		int ncols = table.getColumnCount();
-		if (ncols > cw.length)
+		if (ncols > cw.length) {
 			cw = new int[ncols];
-		for (int col = 0; col < ncols; col++)
-			cw[col] = table.getColumnModel().getColumn(col).getWidth();
-		return cw;
+			cwOld = new int[ncols];
+		}
+		if (isNew)
+			bsRowTainted.clear();
+		boolean colTainted = false;
+		TableColumnModel cm = table.getColumnModel();
+		for (int col = 0; col < ncols; col++) {
+			int w = cw[col] = cm.getColumn(col).getWidth();
+			if (!isNew && cwOld[col] != w) {
+				colTainted = true;
+			}
+			cwOld[col] = w;
+		}
+		if (colTainted)
+			bsRowTainted.set(0, table.getRowCount());
 	}
 
 	/**
@@ -375,7 +389,7 @@ public class JSTableUI extends JSPanelUI {
 	 * @param col1
 	 * @param col2
 	 */
-	private DOMNode addElements(int rminx, int rminy, int rmaxx, int rmaxy, int[] cw, int h, int row1, int row2,
+	private DOMNode addElements(int rminx, int rminy, int rmaxx, int rmaxy, int h, int row1, int row2,
 			int col1, int col2) {
 		int col, tx0;
 		for (col = 0, tx0 = 0; col < col1; tx0 += cw[col++]) {
@@ -385,13 +399,15 @@ public class JSTableUI extends JSPanelUI {
 			if (ty + h < rminy)
 				continue;
 			String rid = id + "_tab_row" + row;
+			// Note that rows will end up in unpredictable order, but that does not matter.
+			// All that matters is that they have the right y and height value.
 			DOMNode tr = DOMNode.getElement(rid);
 			boolean rowExists = (tr != null);
 			if (!rowExists) {
 				tr = DOMNode.createElement("div", rid);
 				domNode.appendChild(tr);
 			}
-			DOMNode.setStyles(tr, "height", h + "px");
+			DOMNode.setStyle(tr, "height", h + "px");
 			col = col1;
 			for (int w, tx = tx0; col < col2 && tx < rmaxx; col++, tx += w) {
 				w = cw[col];
@@ -402,7 +418,7 @@ public class JSTableUI extends JSPanelUI {
 					td = CellHolder.createCellOuterNode(this, row, col);
 					tr.appendChild(td);
 				}
-				DOMNode.setStyles(td, "width", w + "px", "height", h + "px", "left", tx + "px", "top", ty + "px");
+				DOMNode.setStyles(td, "left", tx + "px", "width", w + "px", "height", "inherit", "top", ty + "px");
 				updateCellNode(td, row, col, w, h);
 				if (rminx < 0)
 					return td;
@@ -2114,15 +2130,18 @@ public class JSTableUI extends JSPanelUI {
 		// or from JComponent.paintComponent (initially, or from resize, for instance)
 
 		//table.getFillsViewportHeight();
-		Rectangle clip = getClip();
 		int rc = table.getRowCount();
+		int cc = table.getColumnCount();
+		checkRemoveCells(rc, cc);
+		// 2020.08.04 g.getClipBounds works now, no need for the hack.
+		Rectangle clip = g.getClipBounds(myClip);
 		int rh = table.getRowHeight();
 		if (getScrollPane() != null) {
 			DOMNode.setStyles(outerNode, "overflow", "hidden", "height", (rc * rh) + "px");
 		}
 		table.computeVisibleRect(tmpRect);
 
-		if (rc <= 0 || table.getColumnCount() <= 0 ||
+		if (rc <= 0 || cc <= 0 ||
 		// this check prevents us from painting the entire table
 		// when the clip doesn't intersect our bounds at all
 				!tmpRect.intersects(clip)) {
@@ -2226,67 +2245,108 @@ public class JSTableUI extends JSPanelUI {
 		setHidden(false);
 	}
 
-	private Rectangle myClip = new Rectangle();
-	private Rectangle getClip() {
-		if (table.parent instanceof JViewport) {
-			JSViewportUI ui = ((JSViewportUI)table.parent.getUI());
-			if (isNewModel) {
-				ui.myClip.x = ui.myClip.y = 0;
-				isNewModel = false;
+	private int lastRowCount, lastColCount;
+	
+	private void checkRemoveCells(int nrows, int ncols) {
+		if (nrows < lastRowCount) {
+			// remove all missing rows
+			for (int r = nrows; r < lastRowCount; r++) {
+				DOMNode node = CellHolder.findCellNode(this, null, r, -1);
+				if (node != null) {
+					DOMNode.remove(node);
+				}
 			}
-			return ui.myClip; 
 		}
-		myClip.width = table.getWidth();
-		myClip.height = table.getHeight();
-		return myClip;
+		if (ncols < lastColCount) {
+			// remove all extra columns for visible rows only
+			for (int r = 0; r < nrows; r++) {
+				for (int c = ncols; c < lastColCount; c++) {
+					DOMNode node = CellHolder.findCellNode(this, null, r, c);
+					if (node != null) {
+						DOMNode.remove(node);
+//						if (j == 0)
+//							bsRowTainted.set(i);
+//						DOMNode.setVisible(node, false);
+					}
+				}
+			}
+		}
+		lastColCount = ncols;
+		lastRowCount = nrows;
 	}
+
+	private Rectangle myClip = new Rectangle();
+//	private Rectangle getClip(Graphics g) {
+//		if (table.parent instanceof JViewport) {
+//// abandoned -- not necessary 
+//			JSViewportUI ui = ((JSViewportUI)table.parent.getUI());
+//			if (isNewModel) {
+//				ui.myClip.x = ui.myClip.y = 0;
+//				isNewModel = false;
+//			}
+//			return ui.myClip; 
+//		} else {
+//			myClip.width = table.getWidth();
+//			myClip.height = table.getHeight();
+//		}
+//		return myClip;
+//	}
+
+	/**
+	 * In SwingJS, track when columns have been resized so that we can ensure that, when cells
+	 * are painted, their TD elements are correctly positioned and sized.
+	 */
+	private BitSet bsRowTainted = new BitSet();
 
 	private void paintCells(Graphics g, int rMin0, int rMax0, int rMin, int rMax, int cMin, int cMax) {
 		TableColumnModel cm = table.getColumnModel();
 		int columnMargin = cm.getColumnMargin();
 
 		int h = table.getRowHeight();
-		int[] cw = getColumnWidths();
+		
+		boolean forceNew = (dragging || justLaidOut);
 
-		TableColumn aColumn;
+		getColumnWidths(false);
 		int columnWidth;
-
-		boolean forceNew = (dragging || justLaidOut);// || rMin == rMax && cMin == cMax);
 
 		if (table.getComponentOrientation().isLeftToRight()) {
 			for (int row = rMin0; row <= rMax0; row++) {
 				table._getCellRect(row, cMin, false, cellRect);
+				boolean colTainted = bsRowTainted.get(row);
 				DOMNode tr = DOMNode.getElement(id + "_tab_row" + row);
 				for (int column = cMin; column <= cMax; column++) {
-					aColumn = cm.getColumn(column);
-					columnWidth = aColumn.getWidth();
+					columnWidth = cw[column];
 					cellRect.width = columnWidth - columnMargin;
 //					if (aColumn != draggedColumn) {
-					paintCell(g, cellRect, row, column, cw, h, tr, forceNew);
+					paintCell(g, cellRect, row, column, h, tr, forceNew, colTainted);
 //					}
 					cellRect.x += columnWidth;
 				}
+				if (colTainted)
+					bsRowTainted.clear(row);
 			}
 		} else {
 			for (int row = rMin0; row <= rMax0; row++) {
 				table._getCellRect(row, cMin, false, cellRect);
-				aColumn = cm.getColumn(cMin);
+//				aColumn = cm.getColumn(cMin);
 //				if (aColumn != draggedColumn) {
 //					columnWidth = aColumn.getWidth();
 //					cellRect.width = columnWidth - columnMargin;
 //					paintCell(g, cellRect, row, cMin, cw, h);
 //				}
 				DOMNode tr = DOMNode.getElement(id + "_tab_row" + row);
+				boolean colTainted = bsRowTainted.get(row);
 				for (int column = cMin; column <= cMax; column++) {
-					aColumn = cm.getColumn(column);
-					columnWidth = aColumn.getWidth();
+					columnWidth = cw[column];
 					cellRect.width = columnWidth - columnMargin;
 					if (column != cMin)
 						cellRect.x -= columnWidth;
 //					if (aColumn != draggedColumn) {
-					paintCell(g, cellRect, row, column, cw, h, tr, forceNew);
+					paintCell(g, cellRect, row, column, h, tr, forceNew, colTainted);
 //					}
 				}
+				if (colTainted)
+					bsRowTainted.clear(row);
 			}
 		}
 
@@ -2304,8 +2364,8 @@ public class JSTableUI extends JSPanelUI {
 		havePainted = true;
 	}
 
-	private void paintCell(Graphics g, Rectangle cellRect, int row, int col, int[] cw, int h, DOMNode tr,
-			boolean forceNew) {
+	private void paintCell(Graphics g, Rectangle cellRect, int row, int col, int h, DOMNode tr,
+			boolean forceNew, boolean colTainted) {
 
 		if (table.isEditing() && table.getEditingRow() == row && table.getEditingColumn() == col) {
 			Component component = table.getEditorComponent();
@@ -2319,8 +2379,12 @@ public class JSTableUI extends JSPanelUI {
 			DOMNode td = (forceNew || tr == null ? null : CellHolder.findCellNode(this, null, row, col));
 			boolean newtd = (td == null);
 			if (newtd) {
-				td = addElements(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, cw, h, row,
+				td = addElements(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, h, row,
 						row + 1, col, col + 1);
+			} else if (colTainted) {
+				DOMNode.setStyles(td, "left", cellRect.x + "px", "width", cw[col] + "px", "display", null);
+			} else {
+				DOMNode.setStyle(td, "display", null);
 			}
 			boolean fullPaint = (newtd || !havePainted || !isScrolling || table.getSelectedRowCount() > 0);
 			TableCellRenderer renderer = (fullPaint ? table.getCellRenderer(row, col)

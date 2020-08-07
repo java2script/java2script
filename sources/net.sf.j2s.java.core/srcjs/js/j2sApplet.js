@@ -1153,7 +1153,7 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 					case "java.util.Array":
 						var e = Clazz.new_(Clazz.load("java.io.File").c$$S,
 								[ file.name ]);
-						swingjs.JSUtil.setFileBytesStatic$$O$O(e, J2S._toBytes(data))
+						swingjs.JSUtil.setFileBytesStatic$O$O(e, J2S._toBytes(data))
 						arr.push(e);
 						data = arr;
 						break;

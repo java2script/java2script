@@ -25,7 +25,7 @@ public class JSPanelUI extends JSLightweightUI implements ContainerPeer {
 		boolean isGlassPane = (root != null && root.getGlassPane() == c);
 		if (domNode == null) {
 			containerNode = domNode = newDOMObject("div", id);
-			DOMNode.setStyles(domNode,  "outline", "none");
+			DOMNode.setStyle(domNode,  "outline", "none");
 			if (isGlassPane) {
 				DOMNode.setVisible(domNode,  false);
 			}

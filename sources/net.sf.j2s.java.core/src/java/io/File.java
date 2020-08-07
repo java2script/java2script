@@ -769,6 +769,9 @@ public class File
     	}
 
     /**
+     * 
+     * SwingJS note: All directories are considered to exist.
+     * 
      * Tests whether the file or directory denoted by this abstract pathname
      * exists.
      *
@@ -785,6 +788,9 @@ public class File
     }
 
     /**
+     * 	SwingJS note: The only way we can check if something is a directory is if
+     *  its path is the same as its prefix length. That is, if it ends with "/".
+     *  
      * Tests whether the file denoted by this abstract pathname is a
      * directory.
      *
@@ -1085,85 +1091,85 @@ public class File
         }
         return fs;
     }
-//
-//    /**
-//     * Returns an array of abstract pathnames denoting the files and
-//     * directories in the directory denoted by this abstract pathname that
-//     * satisfy the specified filter.  The behavior of this method is the same
-//     * as that of the {@link #listFiles()} method, except that the pathnames in
-//     * the returned array must satisfy the filter.  If the given {@code filter}
-//     * is {@code null} then all pathnames are accepted.  Otherwise, a pathname
-//     * satisfies the filter if and only if the value {@code true} results when
-//     * the {@link FilenameFilter#accept
-//     * FilenameFilter.accept(File,&nbsp;String)} method of the filter is
-//     * invoked on this abstract pathname and the name of a file or directory in
-//     * the directory that it denotes.
-//     *
-//     * @param  filter
-//     *         A filename filter
-//     *
-//     * @return  An array of abstract pathnames denoting the files and
-//     *          directories in the directory denoted by this abstract pathname.
-//     *          The array will be empty if the directory is empty.  Returns
-//     *          {@code null} if this abstract pathname does not denote a
-//     *          directory, or if an I/O error occurs.
-//     *
-//     * @throws  SecurityException
-//     *          If a security manager exists and its {@link
-//     *          SecurityManager#checkRead(String)} method denies read access to
-//     *          the directory
-//     *
-//     * @since  1.2
-//     */
-//    public File[] listFiles(FilenameFilter filter) {
-//        String ss[] = list();
-//        if (ss == null) return null;
-//        ArrayList<File> files = new ArrayList<File>();
-//        for (String s : ss)
-//            if ((filter == null) || filter.accept(this, s))
-//                files.add(new File(s, this));
-//        return files.toArray(new File[files.size()]);
-//    }
-//
-//    /**
-//     * Returns an array of abstract pathnames denoting the files and
-//     * directories in the directory denoted by this abstract pathname that
-//     * satisfy the specified filter.  The behavior of this method is the same
-//     * as that of the {@link #listFiles()} method, except that the pathnames in
-//     * the returned array must satisfy the filter.  If the given {@code filter}
-//     * is {@code null} then all pathnames are accepted.  Otherwise, a pathname
-//     * satisfies the filter if and only if the value {@code true} results when
-//     * the {@link FileFilter#accept FileFilter.accept(File)} method of the
-//     * filter is invoked on the pathname.
-//     *
-//     * @param  filter
-//     *         A file filter
-//     *
-//     * @return  An array of abstract pathnames denoting the files and
-//     *          directories in the directory denoted by this abstract pathname.
-//     *          The array will be empty if the directory is empty.  Returns
-//     *          {@code null} if this abstract pathname does not denote a
-//     *          directory, or if an I/O error occurs.
-//     *
-//     * @throws  SecurityException
-//     *          If a security manager exists and its {@link
-//     *          SecurityManager#checkRead(String)} method denies read access to
-//     *          the directory
-//     *
-//     * @since  1.2
-//     */
-//    public File[] listFiles(FileFilter filter) {
-//        String ss[] = list();
-//        if (ss == null) return null;
-//        ArrayList<File> files = new ArrayList<File>();
-//        for (String s : ss) {
-//            File f = new File(s, this);
-//            if ((filter == null) || filter.accept(f))
-//                files.add(f);
-//        }
-//        return files.toArray(new File[files.size()]);
-//    }
-//
+
+    /**
+     * Returns an array of abstract pathnames denoting the files and
+     * directories in the directory denoted by this abstract pathname that
+     * satisfy the specified filter.  The behavior of this method is the same
+     * as that of the {@link #listFiles()} method, except that the pathnames in
+     * the returned array must satisfy the filter.  If the given {@code filter}
+     * is {@code null} then all pathnames are accepted.  Otherwise, a pathname
+     * satisfies the filter if and only if the value {@code true} results when
+     * the {@link FilenameFilter#accept
+     * FilenameFilter.accept(File,&nbsp;String)} method of the filter is
+     * invoked on this abstract pathname and the name of a file or directory in
+     * the directory that it denotes.
+     *
+     * @param  filter
+     *         A filename filter
+     *
+     * @return  An array of abstract pathnames denoting the files and
+     *          directories in the directory denoted by this abstract pathname.
+     *          The array will be empty if the directory is empty.  Returns
+     *          {@code null} if this abstract pathname does not denote a
+     *          directory, or if an I/O error occurs.
+     *
+     * @throws  SecurityException
+     *          If a security manager exists and its {@link
+     *          SecurityManager#checkRead(String)} method denies read access to
+     *          the directory
+     *
+     * @since  1.2
+     */
+    public File[] listFiles(FilenameFilter filter) {
+        String ss[] = list();
+        if (ss == null) return null;
+        ArrayList<File> files = new ArrayList<File>();
+        for (String s : ss)
+            if ((filter == null) || filter.accept(this, s))
+                files.add(new File(s, this));
+        return files.toArray(new File[files.size()]);
+    }
+
+    /**
+     * Returns an array of abstract pathnames denoting the files and
+     * directories in the directory denoted by this abstract pathname that
+     * satisfy the specified filter.  The behavior of this method is the same
+     * as that of the {@link #listFiles()} method, except that the pathnames in
+     * the returned array must satisfy the filter.  If the given {@code filter}
+     * is {@code null} then all pathnames are accepted.  Otherwise, a pathname
+     * satisfies the filter if and only if the value {@code true} results when
+     * the {@link FileFilter#accept FileFilter.accept(File)} method of the
+     * filter is invoked on the pathname.
+     *
+     * @param  filter
+     *         A file filter
+     *
+     * @return  An array of abstract pathnames denoting the files and
+     *          directories in the directory denoted by this abstract pathname.
+     *          The array will be empty if the directory is empty.  Returns
+     *          {@code null} if this abstract pathname does not denote a
+     *          directory, or if an I/O error occurs.
+     *
+     * @throws  SecurityException
+     *          If a security manager exists and its {@link
+     *          SecurityManager#checkRead(String)} method denies read access to
+     *          the directory
+     *
+     * @since  1.2
+     */
+    public File[] listFiles(FileFilter filter) {
+        String ss[] = list();
+        if (ss == null) return null;
+        ArrayList<File> files = new ArrayList<File>();
+        for (String s : ss) {
+            File f = new File(s, this);
+            if ((filter == null) || filter.accept(f))
+                files.add(f);
+        }
+        return files.toArray(new File[files.size()]);
+    }
+
     /**
      * Creates the directory named by this abstract pathname.
      *

@@ -208,8 +208,7 @@ public class JSEditorPaneUI extends JSTextUI {
 			$(domNode).addClass("swingjs-doc");
 			allowPaintedBackground = false;
 			focusNode = enableNode = textNode = domNode;
-			DOMNode.setStyles(domNode, "resize", "none", "margin", "0px", "padding", "1px");//,"scrollbar-width", "thin"); // otherwise it overflows
-			DOMNode.setStyles(domNode, "box-sizing", "border-box");
+			DOMNode.setStyles(domNode, "resize", "none", "margin", "0px", "padding", "1px", "box-sizing", "border-box");
 			bindJSKeyEvents(focusNode, true);
 		}
 		textListener.checkDocument();

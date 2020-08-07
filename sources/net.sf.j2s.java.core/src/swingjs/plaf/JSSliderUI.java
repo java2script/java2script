@@ -10,6 +10,7 @@ import javax.swing.SwingUtilities;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.beans.PropertyChangeEvent;
@@ -37,6 +38,8 @@ import swingjs.jquery.JQueryUI;
 /**
  * A jQuery-based slider with lots of additional functionality.
  * See swingjs/jquery/j2sSlider.js for jQuery widget and css.
+ * 
+ * Subclassed by JSScrollBar.
  * 
  * @author hansonr
  */
@@ -137,6 +140,8 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	private String foreColor = null;
 	private boolean sliderDisposed;
 	private int lastValue;
+	private int margin;
+	private int length;
 	@Override
 	public void setForeground(Color c) {
 		if (!paintTicks && !paintLabels)
@@ -155,7 +160,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 			
 			// but this is not persisting
 			
-			DOMNode.setStyles(jqSlider, "background-color",s);
+			DOMNode.setStyle(jqSlider, "background-color",s);
 			String tickClass = "ui-j2sslider-tick-mark-" + (isHoriz ? "vert" : "horiz");
 			
 			$(domNode).find("." + tickClass).css(/** @j2sNative 1?{backgroundColor:s} :*/"","");
@@ -179,9 +184,9 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 			} else {
 				DOMNode node = (myScrollPaneUI == null && !paintTicks ? jqSlider : sliderTrack);
 				if (isScrollBar)
-					DOMNode.setStyles(node, "background-color", JSToolkit.getCSSColor(c));
+					DOMNode.setStyle(node, "background-color", JSToolkit.getCSSColor(c));
 				if (isScrollBar&& (Color.WHITE.equals(c) || c.getRGB() == (0xFFEEEEEE & -1)))
-					DOMNode.setStyles(sliderHandle, "background", "#ccc");
+					DOMNode.setStyle(sliderHandle, "background", "#ccc");
 			}
 
 		}
@@ -396,8 +401,8 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		getHTMLSizePreferred(jqSlider, false);
 		if ((majorSpacing == 0 && minorSpacing == 0 || !paintTicks) && !paintLabels) {
 			if (myScrollPaneUI != null) {
-				DOMNode.setStyles(sliderHandle, "transform", null);
-				DOMNode.setStyles(sliderTrack, "transform", null);
+				DOMNode.setStyle(sliderHandle, "transform", null);
+				DOMNode.setStyle(sliderTrack, "transform", null);
 			} else if( isHoriz) {
 				DOMNode.setStyles(sliderHandle, "top", "50%", "transform", "translateY(-50%)");
 				DOMNode.setStyles(sliderTrack, "top", "50%", "transform", "translateY(-50%)");
@@ -407,9 +412,8 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 			}
 			return;
 		}
-		int margin = 10;
-
-		int length = (isHoriz ? slider.getWidth() : slider.getHeight());
+		margin = 10;
+		length = (isHoriz ? slider.getWidth() : slider.getHeight());
 		if (length <= 0)
 			length = (isHoriz ? getPreferredHorizontalSize().width : getPreferredVerticalSize().height);
 		if (isHoriz)
@@ -444,35 +448,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		Dictionary<Integer, JLabel> labelTable = slider.getLabelTable();
 		if (paintLabels && labelTable != null) {
 			myHeight += 20;
-			Enumeration keys = labelTable.keys();
-			while (keys.hasMoreElements()) {
-				Object key = keys.nextElement();
-				int n = Integer.parseInt(key.toString());
-				JLabel label = labelTable.get(key);
-				JSComponentUI lui = label.秘getUI();
-				lui.imagePersists = true;
-				lui.setTainted();
-				lui.updateDOMNode();
-				DOMNode labelNode = lui.getOuterNode();
-				// need calculation of pixels
-				float frac = (n - min) * 1f / (max - min);
-				if (isHoriz == isInverted)
-					frac = 1 - frac;
-				float px = (frac * length + margin);
-				int left, top;
-				if (isHoriz) {
-					top = (paintTicks ? 20 : 15);
-					left = (int) (px - label.getWidth() / 2);
-				} else {
-					top = (int) (px - label.getHeight() / 2);
-					left = (paintTicks ? 20 : 15);
-				}
-				DOMNode.setTopLeftAbsolute(labelNode, top, left);
-				DOMNode.setStyles(labelNode, "overflow", null);
-				addClass(labelNode, "jslider-label");
-				domNode.insertBefore(labelNode, sliderTrack);
-			}
-
+			paintLabels(labelTable, true);
 		}
 		if (paintTicks) {
 			if (isHoriz) {
@@ -493,7 +469,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 			setScrollBarExtentAndCSS();
 		} else {
 			if (!isHoriz)
-				DOMNode.setStyles(sliderTrack, "height", length + "px");
+				DOMNode.setStyle(sliderTrack, "height", length + "px");
 		}
 		getHTMLSizePreferred(domNode, false);
 	}
@@ -515,9 +491,13 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	public void propertyChange(PropertyChangeEvent e) {
 		String propertyName = e.getPropertyName();
 		switch (propertyName) {
+		case "labelTable":
+			// checkedLabelBaselines = false;
+			calculateGeometry();
+			setTainted();// slider.repaint();
+			break;
 		case "orientation":
 		case "inverted":
-		case "labelTable":
 		case "majorTickSpacing":
 		case "minorTickSpacing":
 		case "paintTicks":
@@ -1121,9 +1101,9 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		if (!paintTicks && !paintLabels) {
 			int margin = (isScrollBar ? 6 : 10);
 			if (orientation == "vertical") {
-				DOMNode.setStyles(sliderTrack, "height", (height - margin * 2) + "px");
+				DOMNode.setStyle(sliderTrack, "height", (height - margin * 2) + "px");
 			} else if (isScrollBar) {
-				DOMNode.setStyles(sliderTrack, "width", (width - margin * 2) + "px");
+				DOMNode.setStyle(sliderTrack, "width", (width - margin * 2) + "px");
 			}
 			setScrollBarExtentAndCSS();
 		}
@@ -1160,6 +1140,48 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		if (!isScrollBar)
 			setBackgroundDOM(outerNode, null);
 		super.clearPaintPath();
+	}
+
+	@Override
+	public void paint(Graphics g, JComponent c) {
+		Dictionary<Integer, JLabel> labelTable;
+		if (!isScrollBar && paintLabels && (labelTable = slider.getLabelTable()) != null) {
+			paintLabels(labelTable, false);			
+		}
+		super.paint(g,  c);
+	}
+
+	private void paintLabels(Dictionary<Integer, JLabel> labelTable, boolean isNew) {
+		Enumeration keys = labelTable.keys();
+		while (keys.hasMoreElements()) {
+			Object key = keys.nextElement();
+			int n = Integer.parseInt(key.toString());
+			JLabel label = labelTable.get(key);
+			JSComponentUI lui = label.秘getUI();
+			lui.imagePersists = true;
+			lui.setTainted();
+			lui.updateDOMNode();
+			DOMNode labelNode = lui.getOuterNode();
+			// need calculation of pixels
+			float frac = (n - min) * 1f / (max - min);
+			if (isHoriz == isInverted)
+				frac = 1 - frac;
+			float px = (frac * length + margin);
+			int left, top;
+			if (isHoriz) {
+				top = (paintTicks ? 20 : 15);
+				left = (int) (px - label.getWidth() / 2);
+			} else {
+				top = (int) (px - label.getHeight() / 2);
+				left = (paintTicks ? 20 : 15);
+			}
+			DOMNode.setTopLeftAbsolute(labelNode, top, left);
+			if (isNew) {
+				DOMNode.setStyle(labelNode, "overflow", null);
+				addClass(labelNode, "jslider-label");
+				domNode.insertBefore(labelNode, sliderTrack);
+			}
+		}
 	}
 
 }

@@ -40,6 +40,7 @@ class JSComboPopupList extends JList {
 
 	private final JSComboBoxUI cbui;
 	private api.js j2scb;
+	DOMNode popupNode;
 
 	JSComboPopupList(JSComboBoxUI ui) {
 		super(ui.comboBox.getModel());
@@ -66,7 +67,8 @@ class JSComboPopupList extends JList {
 	private int getJ2SCBInt(String name) {
 		if (j2scb == null)
 			return Integer.MIN_VALUE;
-		return /** @j2sNative $(this.j2scb).data("j2sCB").options[name] || */0;
+		Object widget = getWidget();
+		return /** @j2sNative widget.options[name] || */0;
 	}
 
 	@SuppressWarnings("unused")
@@ -78,12 +80,21 @@ class JSComboPopupList extends JList {
 		Object me = this;
 		JSFunction fChange = /** @j2sNative function(){p$1.fChange$O$O$S$O.apply(me,arguments)} || */
 				null;
-		j2scb.j2sCB(/** @j2sNative {change:fChange} || */
+		String name = cbui.jc.getName();
+		j2scb.j2sCB(/** @j2sNative {change:fChange, name:name} || */
 				"");
 		updateCSS();
 		updateList();
 		updateSelectedIndex();
+		Object widget = getWidget();
+		popupNode = /** @j2sNative widget.popup[0] || */null;
+	}
 
+	private Object getWidget() {
+		if (j2scb == null)
+			return null;
+		JQueryObject obj = cbui.$(j2scb);
+		return /** @j2sNative obj.data("j2sCB") || */null;
 	}
 
 	public void setComboVisible(boolean b) {

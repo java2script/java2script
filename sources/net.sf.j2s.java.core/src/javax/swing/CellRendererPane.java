@@ -175,7 +175,7 @@ public class CellRendererPane extends JPanel
       if (p instanceof JTable)
     	  DOMNode.setTopLeftAbsolute(ui.domNode, ((JTable) p).getRowMargin() / 2, ((JTable) p).getColumnModel().getColumnMargin() / 2);
       if (c instanceof JLabel)
-    	  DOMNode.setStyles(ui.domNode, "overflow", "hidden");
+    	  DOMNode.setStyle(ui.domNode, "overflow", "hidden");
 //          if (!ui.doPaintBackground())
 //        	  return;
 //	  ui.setTainted(false);

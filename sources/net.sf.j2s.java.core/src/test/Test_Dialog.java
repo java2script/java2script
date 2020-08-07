@@ -76,7 +76,8 @@ public class Test_Dialog extends JFrame implements PropertyChangeListener {
 				File file = (File) val;
 				byte[] array = (val == null ? null : /** @j2sNative file.秘bytes || */
 						null);
-				onDialogReturn("fileName is '" + file.getName() + " size=" + array.length);
+				lastFile = file.getName();
+				onDialogReturn("fileName is '" + lastFile + " size=" + array.length);
 				return;
 			}
 			break;
@@ -109,6 +110,8 @@ public class Test_Dialog extends JFrame implements PropertyChangeListener {
 
 	private JButton colorButton;
 
+	private String lastFile = "";
+	
 	public Test_Dialog() {
 		super();
 		this.setTitle("testing dialogs");
@@ -188,6 +191,7 @@ public class Test_Dialog extends JFrame implements PropertyChangeListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser fc = new JFileChooser();
+				fc.setSelectedFile(new File(lastFile));
 				onDialogReturn(fc.showOpenDialog(Test_Dialog.this));
 			}
 

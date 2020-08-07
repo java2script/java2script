@@ -116,7 +116,7 @@ private DOMNode barNode;
 			domNode = newDOMObject("div", id);
 				barNode = newDOMObject("span", id + "_bar");
 				domNode.appendChild(barNode);
-				DOMNode.setStyles(barNode, "display", "none");
+				DOMNode.setStyle(barNode, "display", "none");
 				DOMNode barspan = newDOMObject("span", id + "_barspan");
 				DOMNode.setStyles(barspan, "width","100%","height","100%");
 				barNode.appendChild(barspan);
@@ -741,7 +741,7 @@ private DOMNode barNode;
 		g2.setColor(progressBar.getForeground());
 
 		if (progressBar.isIndeterminate()) {
-	   		DOMNode.setStyles(barNode, "display", "block");
+	   		DOMNode.setStyle(barNode, "display", "block");
 	   	 			if (progressBar.getOrientation() == JProgressBar.HORIZONTAL) {
     		DOMNode.setSize(barNode, barRectWidth, barRectHeight);
     		DOMNode.setTopLeftAbsolute(barNode, b.top, b.left);
@@ -750,7 +750,7 @@ private DOMNode barNode;
 	    		DOMNode.setTopLeftAbsolute(barNode, b.left, b.top);
 			}
 		} else {
-	   		DOMNode.setStyles(barNode, "display", "none");
+	   		DOMNode.setStyle(barNode, "display", "none");
 			if (progressBar.getOrientation() == JProgressBar.HORIZONTAL) {
 				// draw the cells
 				if (cellSpacing == 0 && amountFull > 0) {

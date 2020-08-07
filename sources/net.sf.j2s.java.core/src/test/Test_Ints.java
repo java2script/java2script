@@ -59,6 +59,17 @@ public class Test_Ints extends Test_ {
 	}
 
 	public static void main(String[] args) {
+		
+
+		assert(1 == new Integer(1));
+		assert(new Integer(1) == 1);
+		assert(Integer.valueOf(1) == 1);
+		assert(1 == Integer.valueOf(1));
+		assert(new Integer(1) != Integer.valueOf(1));
+		
+		
+
+
 		int[] stack = new int[] { 0, 1, 2, 3, 4, 5 };
 		int stack_pointer = 3;
 

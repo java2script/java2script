@@ -36,6 +36,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridLayout;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -102,46 +103,55 @@ public class TableDemo extends JPanel {
 
 	public TableDemo() {
 		table = new JTable();
-		if (/** @j2sNative false &&*/true)
-		table.setUI(new BasicTableUI() {
-			@Override
-			public void paint(Graphics g, JComponent c) {
+		if (/** @j2sNative false && */
+		true)
+			table.setUI(new BasicTableUI() {
+				@Override
+				public void paint(Graphics g, JComponent c) {
 //				try { throw new NullPointerException();}catch (Exception e) {e.printStackTrace();}
 //				System.err.println("TableDemoUI g.clip=" +  g.getClipBounds());
-				super.paint(g,  c);
-				
-			}
-			
-		});
+					super.paint(g, c);
 
+				}
 
-		table.setRowHeight(16);
-		table.setRowMargin(1);
+			});
+
+		table.setRowHeight(40);
+		// table.setRowHeight(16);
+		// table.setRowMargin(1);
 		table.setPreferredScrollableViewportSize(new Dimension(500, 300));
 		table.setFillsViewportHeight(true);
 
-	    table.setDefaultRenderer(DemoColor.class, new ColorRenderer());
+		table.setDefaultRenderer(DemoColor.class, new ColorRenderer());
 
-	    table.setSize(600,200);
-	    setTableModel(0);
-	    
+		table.setSize(600, 200);
+		setTableModel(0);
+
 		// Create the scroll pane and add the table to it.
 		JScrollPane scrollPane = new JScrollPane(table);
 
 		// Add the scroll pane to this panel.
 		add(scrollPane);
-		
-	    JButton btn = new JButton("New Model");
-	    btn.addActionListener(new ActionListener() {
 
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				setTableModel(pt = (pt+1)%3);				
-			}
-	    	
-	    });
-	    btn.setMaximumSize(new Dimension(80,20));
-	    add(btn);
+		JButton btn = new JButton("New Model");
+		btn.addActionListener((e) -> {
+			setTableModel(pt = (pt + 1) % 3);
+		});
+		btn.setMaximumSize(new Dimension(80, 20));
+		add(btn);
+		btn = new JButton("Scroll to top");
+		btn.addActionListener((e) -> {
+			table.scrollRectToVisible(new Rectangle(0, 0, 10, 10));
+		});
+		btn.setMaximumSize(new Dimension(80, 20));
+		add(btn);
+		btn = new JButton("Scroll to bottom");
+		btn.addActionListener((e) -> {
+			table.scrollRectToVisible(new Rectangle(0, 10600, 10, 10));
+		});
+		btn.setMaximumSize(new Dimension(80, 20));
+		add(btn);
+
 	}
 
 	int pt = 0;

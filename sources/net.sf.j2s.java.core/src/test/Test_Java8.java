@@ -1,5 +1,7 @@
 package test;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -17,7 +19,10 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import javax.swing.JButton;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
+import javajs.async.SwingJSUtils.Timeout;
 import test.baeldung.doublecolon.Computer;
 import test.baeldung.doublecolon.MacbookPro;
 
@@ -42,8 +47,8 @@ public class Test_Java8 extends Test_ implements PropertyChangeListener {
 	}
 
 	public Test_Java8() {
-		System.out.println("null constructor");
-		
+		SwingUtilities.invokeLater(() -> System.out.println("null constructor " + t_test));
+
 		JButton fileButton = new JButton();
 		fileButton.addActionListener(this::openFileDialog);		
 
@@ -67,6 +72,8 @@ private	 void openFileDialog(java.awt.event.ActionEvent event) {
 	}
 
 	int test1 = 1;
+
+	private Timer timer;
 
 	void testP1() {
 		class MyPredicate implements Predicate<String> {
@@ -170,8 +177,71 @@ private	 void openFileDialog(java.awt.event.ActionEvent event) {
 		return x;
 	}
 
-	public static void main(String[] args) {
+	
+	private int timerState = 1;
 
+	private void startTimer(int type) {
+//		System.out.println("Timeout starting " + " " + this.t_test + " " + type);
+//		switch (type) {
+//		case 0:
+//			timer = new Timer(100, (e) -> {
+//				if (timerState == 1)
+//					System.out.println(this.t_test + " " + timer.isRunning());
+//				timerState = 0;
+//			});
+//			break;
+//		case 1:
+//			Test_Java8 me = this;
+//			me.timer = new Timer(100, (e) -> {
+//				if (me.timerState == 1)
+//					System.out.println(me.t_test + " " + me.timer.isRunning());
+//				me.timerState = 0;
+//			});
+//		case 2:
+			ActionListener a = new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					if (timerState == 1)
+						System.out.println(Test_Java8.this.t_test + " running");
+					else 
+						System.out.println(Test_Java8.this.t_test + " was stopped");
+
+					timerState = 0;
+				}
+
+			};
+			timer = new Timer(100, a);
+//			break;
+//		}
+
+		timer.setRepeats(false);
+		timer.setCoalesce(false);
+		SwingUtilities.invokeLater(() -> {
+			timer.start();
+		});
+	}
+
+	public static void main(String[] args) {
+		
+		Test_Java8 t8b = new Test_Java8();
+		t8b.t_test = "test0";
+		t8b.startTimer(0);
+		System.out.println("stopping");
+		t8b.timerState = 0;
+		Test_Java8 t8a = new Test_Java8();
+		t8a.t_test = "test1";
+		t8a.startTimer(1);
+		Test_Java8 t8c = new Test_Java8();
+		t8c.t_test = "test2";
+		t8c.startTimer(2);
+		
+		
+		
+		
+		
+		if (true)
+			return;
 		double[] dd = new Test_Java8().values().toArray();
 		int[] data = new int[] {1,2,3,4};
 		checkData(data);

@@ -38,8 +38,8 @@ public class JSTextAreaUI extends JSTextUI {
 			valueNode = domNode = newDOMObject("textarea", id, "spellcheck", FALSE, "autocomplete", "off");
 			allowPaintedBackground = false;
 			focusNode = enableNode = textNode = domNode;
-			DOMNode.setStyles(domNode, "resize", "none", "border", "none", "margin", "0px", "padding", "0px","scrollbar-width", "thin"); // otherwise it overflows
-			DOMNode.setStyles(domNode, "box-sizing", "border-box");
+			DOMNode.setStyles(domNode, "box-sizing", "border-box", "resize", "none", "border", "none", "margin", "0px", "padding", "0px","scrollbar-width", "thin"); 
+			// otherwise it overflows
 			bindJSKeyEvents(focusNode, true);
 		}
 		JTextArea area = (JTextArea) jc;
@@ -48,9 +48,9 @@ public class JSTextAreaUI extends JSTextUI {
 //			area.setBackground(Color.white);
 		DOMNode.setStyles(domNode, "white-space", null, "overflow-wrap", null);
 		if (area.getLineWrap()) {
-			DOMNode.setStyles(domNode, "overflow-wrap", area.getWrapStyleWord() ? null : "anywhere");
+			DOMNode.setStyle(domNode, "overflow-wrap", area.getWrapStyleWord() ? null : "anywhere");
 		} else {
-			DOMNode.setStyles(domNode, "white-space", "pre");
+			DOMNode.setStyle(domNode, "white-space", "pre");
 		}
 		textListener.checkDocument();
 		setCssFont(DOMNode.setAttr(domNode, "value", setCurrentText()), c.getFont());

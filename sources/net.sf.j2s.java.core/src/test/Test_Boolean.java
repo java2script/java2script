@@ -8,12 +8,14 @@ class Test_Boolean extends Test_ {
   
   public static void main(String[] args) {
 	  
-	  System.out.println(new Date() + " " + Date.parse("3/4/2020"));
 	  Boolean b = Boolean.FALSE;
 	  Boolean b1 = new Boolean(false);
 	  System.out.println(Integer.valueOf(3));
 	  assert(new Boolean(false).equals(Boolean.FALSE));
-
+	  assert(new Boolean(false) != Boolean.FALSE);
+	  boolean boo = false;
+	  assert(new Boolean(boo) != Boolean.FALSE);
+	  assert(testBool(false) == Boolean.FALSE);
 	  assert(b ? false : true);
 	  assert(b1 ? false : true);
 	  assert(Boolean.FALSE ? false : true);
@@ -59,5 +61,9 @@ class Test_Boolean extends Test_ {
 	  
 	  System.out.println("Test_Boolean OK");
   }
+
+private static Boolean testBool(Object b) {
+	return (Boolean) b;
+}
 	
 }
