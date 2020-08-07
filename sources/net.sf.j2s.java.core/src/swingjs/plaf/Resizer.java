@@ -116,7 +116,7 @@ public class Resizer {
 		case MouseEvent.MOUSE_MOVED:
 			break; // TODO - change cursor? Entry/Exit?
 		case MouseEvent.MOUSE_PRESSED:
-			DOMNode.setStyles(resizer, "background-color", "green");
+			DOMNode.setStyle(resizer, "background-color", "green");
 			DOMNode.setVisible(rubberBand, true);
 			JSInterface.setCursor("nwse-resize");
 			// set cursor to dragging
@@ -125,7 +125,7 @@ public class Resizer {
 			setPosition(dx, dy);
 			break;
 		case MouseEvent.MOUSE_RELEASED:
-			DOMNode.setStyles(resizer, "background-color", "red");
+			DOMNode.setStyle(resizer, "background-color", "red");
 			DOMNode.setVisible(rubberBand, false);
 			JSInterface.setCursor("auto");
 			fHandleDOMResize(null, dx, dy);
