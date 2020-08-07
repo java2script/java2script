@@ -149,7 +149,7 @@ public class JSButtonUI extends JSLightweightUI {
 		itemNode = newDOMObject("li", id);
 		if (text == null && icon == null)
 			return itemNode;
-		DOMNode.setStyles(itemNode, "outline", "none");
+		DOMNode.setStyle(itemNode, "outline", "none");
 		menuAnchorNode = newDOMObject("div", id + "_a");// this needed? , "tabindex", "8");
 		if (type != "_bar") {
 			addClass(menuAnchorNode, "a");
@@ -201,9 +201,9 @@ public class JSButtonUI extends JSLightweightUI {
 		setIconAndText("button", (ImageIcon) button.getIcon(), button.getIconTextGap(), button.getText());
 		// "emptyBorder" is not really empty.
 		if (button.getBorder() == null || button.getBorder() == BorderFactory.emptyBorder)
-			DOMNode.setStyles(buttonNode, "border", "none");
+			DOMNode.setStyle(buttonNode, "border", "none");
 		else if (button.getBorder() == BorderFactory.html5Border)
-			DOMNode.setStyles(buttonNode, "border", null);
+			DOMNode.setStyle(buttonNode, "border", null);
 //
 //		System.out.println(button.getText() + " " + button.getBorder());
 		if (!isMenuSep) {
@@ -784,7 +784,7 @@ public class JSButtonUI extends JSLightweightUI {
 			if (!(button.getBorder() instanceof UIResource)) {
 				DOMNode.setTopLeftAbsolute(domNode, i.left, i.top);
 				DOMNode.setSize(domNode, width-i.left - i.right, height-i.top - i.bottom);
-				DOMNode.setStyles(domNode, "border", 
+				DOMNode.setStyle(domNode, "border", 
 					i.left + i.right + i.top + i.bottom > 0 ? "none" : null);
 			}
 		}
@@ -800,7 +800,7 @@ public class JSButtonUI extends JSLightweightUI {
 	@Override
 	public void paint(Graphics g, JComponent c) {
 		if (jc.秘paintsSelfEntirely())
-			DOMNode.setStyles(centeringNode, "visibility", "visible");
+			DOMNode.setStyle(centeringNode, "visibility", "visible");
 		super.paint(g, c);
 	}
 

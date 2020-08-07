@@ -41,7 +41,7 @@ public class JSPopupUI extends JSWindowUI {
 				allowPaintedBackground = false;
 				jc.setBackground(col);
 				String cc = toCSSString(col);
-				DOMNode.setStyles(outerNode, "background", cc);
+				DOMNode.setStyle(outerNode, "background", cc);
 			}
 			$("body > .swingjs-tooltip").remove();
 			$(outerNode).addClass("swingjs-tooltip");

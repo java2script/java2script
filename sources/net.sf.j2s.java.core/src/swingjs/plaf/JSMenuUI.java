@@ -52,7 +52,7 @@ public class JSMenuUI extends JSMenuItemUI implements MenuListener {
 		setAlignments(jm, false);
 		updateCenteringNode();
 		if (isMenuBarMenu)
-			DOMNode.setStyles(textNode, "left", "0px");
+			DOMNode.setStyle(textNode, "left", "0px");
 		return domNode;
 	}
 

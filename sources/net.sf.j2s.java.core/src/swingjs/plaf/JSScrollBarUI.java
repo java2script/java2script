@@ -210,7 +210,7 @@ public class JSScrollBarUI extends JSSliderUI {
     @Override
 	protected void setOverflow() {
 		if (myScrollPaneUI != null && myScrollPaneUI.scrollBarUIDisabled)
-			DOMNode.setStyles(domNode, "display", "none");
+			DOMNode.setStyle(domNode, "display", "none");
 	}
 
 

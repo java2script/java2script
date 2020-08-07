@@ -48,7 +48,7 @@ public class JSInternalFrameUI extends JSFrameUI {
 			return false;
 		isSticky = true;
 		body.insertBefore(outerNode, DOMNode.firstChild(body));
-		DOMNode.setStyles(outerNode, "position", "sticky");
+		DOMNode.setStyle(outerNode, "position", "sticky");
 		return true;
 	}
 

@@ -1624,8 +1624,8 @@ public class JSComponentUI extends ComponentUI
 	protected void setCursor() {
 		myCursor = getCursor();
 		String curs = JSToolkit.getCursorName(myCursor);
-		DOMNode.setStyles(outerNode, "cursor", curs);
-		DOMNode.setStyles(domNode, "cursor", curs);
+		DOMNode.setStyle(outerNode, "cursor", curs);
+		DOMNode.setStyle(domNode, "cursor", curs);
 		setWaitImage(curs == "wait");
 	}
 
@@ -1714,7 +1714,7 @@ public class JSComponentUI extends ComponentUI
 	private Dimension getTextSize(AbstractButton b) {
 		if (textNode == null)
 			return null;
-		DOMNode.setStyles(textNode,  "padding", "0");
+		DOMNode.setStyle(textNode,  "padding", "0");
 		String t = b.getText();
 		if (isAWT && t == "")
 			t = "\u00A0"; // AWT labels do not hide if ""
@@ -1796,9 +1796,9 @@ public class JSComponentUI extends ComponentUI
 				if (!isHTML) {
 
 					// can't have these for getBoundingClientRect to work
-					DOMNode.setStyles(node, "position", null);
-					DOMNode.setStyles(textNode, "position", null);
-					DOMNode.setStyles(iconNode, "position", null);
+					DOMNode.setStyle(node, "position", null);
+					DOMNode.setStyle(textNode, "position", null);
+					DOMNode.setStyle(iconNode, "position", null);
 				}
 			}
 			
@@ -1823,13 +1823,13 @@ public class JSComponentUI extends ComponentUI
 		Dimension dim = getCSSAdjustment(addCSS, true);
 		dim.width += w;
 		dim.height += h;
-		DOMNode.setStyles(node, "position", null);
+		DOMNode.setStyle(node, "position", null);
 		if (w0 != null) {
 			DOMNode.setStyles(node, "width", 
 					 (isHTML && isLabel ? "inherit" : w0), "height", h0);
 		}
 		if (position != null) {
-			DOMNode.setStyles(node, "position", position);
+			DOMNode.setStyle(node, "position", position);
 		}
 		if (w0i != null) {
 			DOMNode.setStyles(domNode, "width", w0i, "height", h0i);
@@ -1847,7 +1847,7 @@ public class JSComponentUI extends ComponentUI
 	protected Rectangle getBoundingRect(DOMNode node) {
 		if (tempDiv == null) {
 			tempDiv = DOMNode.createElement("div", "_temp");
-			DOMNode.setStyles(tempDiv,  "display", "inline-block");
+			DOMNode.setStyle(tempDiv,  "display", "inline-block");
 			DOMNode.setTopLeftAbsolute(tempDiv, 0, -100000);
 			$(body).after(tempDiv);
 		}
@@ -1935,7 +1935,7 @@ public class JSComponentUI extends ComponentUI
 				DOMNode.setSize(outerNode, w, h);				
 
 				if (isPanel || isContentPane || isRootPane) {
-					DOMNode.setStyles(outerNode, "overflow",
+					DOMNode.setStyle(outerNode, "overflow",
 							 allowDivOverflow ? "visible" : "hidden");
 					if (isRootPane) {
 						if (jc.getFrameViewer().isApplet) {
@@ -1956,10 +1956,10 @@ public class JSComponentUI extends ComponentUI
 			  // that is where it is set. (All independent JInternalFrames are sticky when they are independent, 
 			  // because in that case, their parent JDesktopPane is hidden.)
 				DOMNode.transferTo(outerNode, body);
-				DOMNode.setStyles(outerNode,  "position", "absolute");
+				DOMNode.setStyle(outerNode,  "position", "absolute");
 			}
 		} else {
-			DOMNode.setStyles(outerNode, "overflow", "hidden");
+			DOMNode.setStyle(outerNode, "overflow", "hidden");
 		}
 		isTainted = false;
 		
@@ -2071,14 +2071,14 @@ public class JSComponentUI extends ComponentUI
 		setOverflow();
 		if (imageNode != null && !imagePersists) {
 			// the icon must paint itself; imageNode is just a placeholder
-			DOMNode.setStyles(imageNode, "visibility", "hidden");
+			DOMNode.setStyle(imageNode, "visibility", "hidden");
 		}
 
 	}
 
 	protected void setOverflow() {
 		if (textNode != null)
-			DOMNode.setStyles(textNode, "overflow", "hidden");
+			DOMNode.setStyle(textNode, "overflow", "hidden");
 	}
 
 	@Override
@@ -2520,7 +2520,7 @@ public class JSComponentUI extends ComponentUI
 					h = icon.getIconHeight();
 					DOMNode.setStyles(iconNode, "height", h + "px", "width", w  + "px");
 					if (!imagePersists)
-						DOMNode.setStyles(imageNode, "visibility", "hidden");
+						DOMNode.setStyle(imageNode, "visibility", "hidden");
 				}
 			}
 		}
@@ -2535,7 +2535,7 @@ public class JSComponentUI extends ComponentUI
 				isPaintedOnly = true; // this cannot be undone
 			}
 			if (!isHTML || !isLabel)
-				DOMNode.setStyles(textNode, "white-space", "nowrap");
+				DOMNode.setStyle(textNode, "white-space", "nowrap");
 			if (icon == null) {
 				// tool tip does not allow text alignment
 				if (iconNode != null && allowTextAlignment && isMenuItem && actionNode == null && text != null) {
@@ -2660,9 +2660,9 @@ public class JSComponentUI extends ComponentUI
 	protected void updateCenteringNode() {
 		if (jc.秘paintsSelfEntirely()) {
 			// component will be responsible for border, background, and text
-			DOMNode.setStyles(centeringNode, "visibility", "hidden");
-			DOMNode.setStyles(domNode, "border", "none");
-			DOMNode.setStyles(domNode, "background", "none");
+			DOMNode.setStyle(centeringNode, "visibility", "hidden");
+			DOMNode.setStyle(domNode, "border", "none");
+			DOMNode.setStyle(domNode, "background", "none");
 		}
 
 	}
@@ -2763,12 +2763,12 @@ public class JSComponentUI extends ComponentUI
 						menuAnchorNode.appendChild(accelNode = DOMNode.createElement("span", id + "_acc"));
 						addClass(accelNode, "ui-j2smenu-accel");
 						DOMNode.setAttr(accelNode, "role", "menuitem");
-						DOMNode.setStyles(accelNode, "font-size", "0.8em");
+						DOMNode.setStyle(accelNode, "font-size", "0.8em");
 						setMenuItem(accelNode);
 					}
 				}
 				if (accel != null) {
-					DOMNode.setStyles(accelNode, "float", null);
+					DOMNode.setStyle(accelNode, "float", null);
 					DOMNode.setAttr(accelNode, "innerHTML", accel);// = accel + "\u00A0\u00A0");
 					wAccel = getHTMLSize(accelNode).width;
 					DOMNode.setStyles(accelNode, "float", ltr ? "right" : "left", "text-align", ltr ? "right" : "left",
@@ -2776,7 +2776,7 @@ public class JSComponentUI extends ComponentUI
 				}
 			}
 			if (!isMenu || isMenuItem)
-				DOMNode.setStyles(menuAnchorNode, //"width", "90%", 
+				DOMNode.setStyle(menuAnchorNode, //"width", "90%", 
 						"min-width",
 					Math.max(75, (23 + 15 + wCtr + wAccel + margins.left + margins.right)) + "px"); // was 95%, but then the blue background extends past right end of menu item
 		}
@@ -2870,12 +2870,12 @@ public class JSComponentUI extends ComponentUI
 				addJSKeyVal(cssCtr, "left", left + "px");
 			} else {
 				if (alignRight) {
-					DOMNode.setStyles(itemNode, "text-align", "right");
+					DOMNode.setStyle(itemNode, "text-align", "right");
 					addJSKeyVal(cssCtr, "right", "0px");
 					addJSKeyVal(cssTxt, "right", "23px");
 					addJSKeyVal(cssIcon, "right", "0px"); // was 3
 				} else {
-					DOMNode.setStyles(itemNode, "text-align", "left");
+					DOMNode.setStyle(itemNode, "text-align", "left");
 					addJSKeyVal(cssCtr, "left", "0px");
 					addJSKeyVal(cssIcon, "left", "0px"); // was 3
 					addJSKeyVal(cssTxt, "left", "23px");
@@ -2936,7 +2936,7 @@ public class JSComponentUI extends ComponentUI
 				addJSKeyVal(cssIcon, "top", top + "%", "transform",
 						"translateY(-" + itop + "%)" + (iscale == null ? "" : iscale));
 			} else {
-				DOMNode.setStyles(menuAnchorNode, "height", "1em");
+				DOMNode.setStyle(menuAnchorNode, "height", "1em");
 //				if (wIcon > 0)
 	//				addJSKeyVal(cssTxt, "top", "50%", "transform", "translateY(-50%)");
 				addJSKeyVal(cssIcon, "top", "50%", "transform", "translateY(-80%) scale(0.6,0.6)");
@@ -3167,7 +3167,7 @@ public class JSComponentUI extends ComponentUI
 
 	protected void setForegroundFor(DOMNode node, Color color) {
 		if (node != null)
-			DOMNode.setStyles(node, "color",
+			DOMNode.setStyle(node, "color",
 					(color == null ? "rgba(0,0,0,0)" : JSToolkit.getCSSColor(color == null ? Color.black : color)));
 	}
 
@@ -3593,7 +3593,7 @@ public class JSComponentUI extends ComponentUI
 
 	private void setTransparent() {
 		if (allowPaintedBackground)
-			DOMNode.setStyles(domNode, "background", "transparent");
+			DOMNode.setStyle(domNode, "background", "transparent");
 	}
 	
 	public void paintBackground(JSGraphics2D g) {
@@ -3633,7 +3633,7 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	protected void setBackgroundDOM(DOMNode node, Color color) {
-		DOMNode.setStyles(node, "background-color",
+		DOMNode.setStyle(node, "background-color",
 				color == null ? null : JSToolkit.getCSSColor(color));
 	}
 
