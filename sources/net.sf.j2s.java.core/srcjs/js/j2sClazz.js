@@ -3654,11 +3654,15 @@ Integer.SIZE=Integer.prototype.SIZE=32;
 var ints = [];
 var longs = [];
 var shorts = [];
+var chars = {};
 
 var minValueOf = -128;
 var maxValueOf = 127;
 
 var getCachedNumber = function(i, a, cl, c$) {
+  if (a == chars) {
+	  return a[i] ? a[i] : (a[i] = Clazz.new_(cl[c$], [i]));
+  }
   if (i >= minValueOf && i <= maxValueOf) {
 	  var v = a[i - minValueOf];
 	  return (v ? v : a[i - minValueOf] = Clazz.new_(cl[c$], [i])); 
@@ -5170,7 +5174,10 @@ function(codePoint){
 	return (pt1 < 0 ? "??" : unicode_txt.substring(pt + 6, pt1));
 }, 1);
 
-m$(C$,"valueOf$C",function(c){return Clazz.new_(Character.c$, [c]);},1);
+m$(C$,"valueOf$C",function(c){
+        return (c <= '\u007F' ? getCachedNumber(c, chars, Character, "c$$C")
+        		: Clazz.new_(Character.c$$C, [c]));
+},1);
 
 C$.prototype.$c = function(){return this.value.charCodeAt(0)};
 

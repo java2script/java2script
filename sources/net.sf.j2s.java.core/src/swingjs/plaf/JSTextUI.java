@@ -3628,9 +3628,9 @@ public abstract class JSTextUI extends JSLightweightUI {
 			return;
 		} 
 		JScrollPane sp = (JScrollPane) scroller;
-		DOMNode.setStyles(domNode, "overflow", null);
-		DOMNode.setStyles(domNode, "overflow-x", overflows[sp.getHorizontalScrollBarPolicy() % 10]);
-		DOMNode.setStyles(domNode, "overflow-y", overflows[sp.getVerticalScrollBarPolicy() % 10]);
+		DOMNode.setStyle(domNode, "overflow", null);
+		DOMNode.setStyle(domNode, "overflow-x", overflows[sp.getHorizontalScrollBarPolicy() % 10]);
+		DOMNode.setStyle(domNode, "overflow-y", overflows[sp.getVerticalScrollBarPolicy() % 10]);
 	}
 	
 

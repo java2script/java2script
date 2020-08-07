@@ -36,8 +36,8 @@ class Test_URL_POST {
 			HttpClient client = HttpClientFactory.getClient(null);
 			String response = client
 					.get(new URI("https://www.compbio.dundee.ac.uk/slivka/api/services/example"))
-					.addFormField("input-file", json, "application/octet-stream", "main.json")
-					.addFormField("content", "len:11 long", null, null)
+					.addFilePart("input-file", json, "application/octet-stream", "main.json")
+					.addFormPart("content", "len:11 long")
 					.execute()
 					.getText();
 			System.out.println(response);

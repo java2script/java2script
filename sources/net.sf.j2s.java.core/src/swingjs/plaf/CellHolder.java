@@ -16,7 +16,7 @@ import swingjs.api.js.DOMNode;
 public abstract class CellHolder {
 	
 	static String getRowColumnID(JSComponentUI holder, int row, int col) {
-    	return holder.id + "_tab" + (row >= 0 ? "_row" + row : "") + "_col" + col;
+    	return holder.id + "_tab" + (row >= 0 ? "_row" + row : "") + (col >= 0 ? "_col" + col : "");
     }
 
 	static DOMNode createCellOuterNode(JSComponentUI tableOrHeader, int row, int col) {

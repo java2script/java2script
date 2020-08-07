@@ -81,7 +81,7 @@ public class JSLabelUI extends JSLightweightUI {
 	@Override
 	public void paint(Graphics g, JComponent c) {
 		if (jc.秘paintsSelfEntirely())
-			DOMNode.setStyles(centeringNode, "visibility", "visible");
+			DOMNode.setStyle(centeringNode, "visibility", "visible");
 		super.paint(g, c);
 		// TODO: implement this for buttons?
 		if (isHTML)
@@ -93,7 +93,7 @@ public class JSLabelUI extends JSLightweightUI {
 			// not the image, at this point. In order to get
 			// a clientRectangle, the node must be visible, even for just
 			// an instant.
-			DOMNode.setStyles(imageNode, "visibility", null);
+			DOMNode.setStyle(imageNode, "visibility", null);
 			Rectangle r = imageNode.getBoundingClientRect();
 			DOMNode parent = null;
 			boolean isHidden = (r.width == 0);
@@ -105,7 +105,7 @@ public class JSLabelUI extends JSLightweightUI {
 			Rectangle r0 = domNode.getBoundingClientRect();
 			if (isHidden)
 				DOMNode.transferTo(domNode, parent);
-			DOMNode.setStyles(imageNode, "visibility", "hidden");
+			DOMNode.setStyle(imageNode, "visibility", "hidden");
 			icon.paintIcon(c, g, (int) (r.x - r0.x), (int) (r.y - r0.y));
 		}
 	}

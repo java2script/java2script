@@ -10,6 +10,7 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.Label;
 import java.awt.MediaTracker;
+import java.awt.MenuItem;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -580,9 +581,10 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 
 		menu2.add(cb5m);
 
-		JMenuItem btn = new JMenuItem("-");
-		btn.setFont(font);
-		menu.add(btn);
+		JMenuItem sep = new JMenuItem("-");
+		JMenuItem btn;
+		sep.setFont(font);
+		menu.addSeparator();
 		testbtn = new JMenuItem("testingbtn");
 		testbtn.setFont(font);
 		testbtn.addActionListener(new ActionListener() {

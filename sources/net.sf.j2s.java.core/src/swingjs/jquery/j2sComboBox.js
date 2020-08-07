@@ -43,6 +43,7 @@ J2S.__makeComboBox = function() {
  		backgroundColor: "white",
  		// z-index
  		zIndex:999999,
+ 		name:null,
         // Callbacks
         change: null
       },
@@ -85,7 +86,7 @@ J2S.__makeComboBox = function() {
         this.cont.append(this.head = $( '<button>', {'class': 'j2scbhead', 'id':id+'_head' }));
         this.cont.append(this.btn = $( '<button>', {'class': 'j2scbbtn', 'id':id+'_btn' , text:'\u25bc'}));
         this.btn.addClass("swingjs-ui");
-        this.popup = $( '<div>', {'class': 'j2scbpopup', 'id':id+'_popup' });
+        this.popup = $( '<div>', {'class': 'j2scbpopup', 'name':this.options.name, 'id':id+'_popup' });
         this.popup.css({
         	display:'none'
         });

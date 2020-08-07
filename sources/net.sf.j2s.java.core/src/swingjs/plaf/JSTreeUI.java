@@ -371,7 +371,7 @@ public class JSTreeUI extends JSPanelUI {
 		if (domNode == null) {
 			
 			domNode = focusNode = enableNode = newDOMObject("div", id);
-			DOMNode.setStyles(domNode, "outline","none"); // removes blue focus line
+			DOMNode.setStyle(domNode, "outline","none"); // removes blue focus line
 			// maybe DOMNode.setAttrInt(domNode, "tabIndex", 1);
 			//innerNode = newDOMObject("div", id + "_inner");
 			addFocusHandler();
@@ -1677,7 +1677,7 @@ public class JSTreeUI extends JSPanelUI {
 		// Rectangle r = getCellBounds1(list, index);
 		DOMNode.setSize(node, width, height);
 		DOMNode.setTopLeftAbsolute(node, top, left);
-		DOMNode.setStyles(node, "display", null);
+		DOMNode.setStyle(node, "display", null);
 		$("#" + DOMNode.getAttrInt(node,"id") + "_txt").css("background", tree.isPathSelected(path) ? selectionBackground : null);		
 	}
 

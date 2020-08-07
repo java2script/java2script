@@ -867,9 +867,11 @@ function Sizzle( selector, context, results, seed ) {
 			if ( newSelector ) {
 				try {
 					 // SwingJS addition
-					var mode = (newSelector.indexOf(":") >= 0 ? ":" 
-							: newSelector.indexOf(".not(") >= 0 ? ".not" 
-							: newSelector.indexOf("!=") >= 0 ? "!=" : 0);
+					var mode = (newSelector.indexOf(":has(") >= 0 ? ":has(" 
+							: newSelector.indexOf("!=") >= 0 ? "!="
+							: newSelector.indexOf(":") >= 0 ? ":" 
+							: 0
+					);
 					 if (mode && j2sInvalidSelectors.indexOf(mode) < 0) {			
 						push.apply( results,
 							newContext.querySelectorAll( newSelector )
@@ -11822,7 +11824,7 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 					case "java.util.Array":
 						var e = Clazz.new_(Clazz.load("java.io.File").c$$S,
 								[ file.name ]);
-						swingjs.JSUtil.setFileBytesStatic$$O$O(e, J2S._toBytes(data))
+						swingjs.JSUtil.setFileBytesStatic$O$O(e, J2S._toBytes(data))
 						arr.push(e);
 						data = arr;
 						break;
@@ -17655,11 +17657,15 @@ Integer.SIZE=Integer.prototype.SIZE=32;
 var ints = [];
 var longs = [];
 var shorts = [];
+var chars = {};
 
 var minValueOf = -128;
 var maxValueOf = 127;
 
 var getCachedNumber = function(i, a, cl, c$) {
+  if (a == chars) {
+	  return a[i] ? a[i] : (a[i] = Clazz.new_(cl[c$], [i]));
+  }
   if (i >= minValueOf && i <= maxValueOf) {
 	  var v = a[i - minValueOf];
 	  return (v ? v : a[i - minValueOf] = Clazz.new_(cl[c$], [i])); 
@@ -19171,7 +19177,10 @@ function(codePoint){
 	return (pt1 < 0 ? "??" : unicode_txt.substring(pt + 6, pt1));
 }, 1);
 
-m$(C$,"valueOf$C",function(c){return Clazz.new_(Character.c$, [c]);},1);
+m$(C$,"valueOf$C",function(c){
+        return (c <= '\u007F' ? getCachedNumber(c, chars, Character, "c$$C")
+        		: Clazz.new_(Character.c$$C, [c]));
+},1);
 
 C$.prototype.$c = function(){return this.value.charCodeAt(0)};
 

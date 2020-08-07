@@ -126,7 +126,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer, JSComponentUI.Em
 
 				closerWrap = newDOMObject("div", id + "_closerwrap");
 				DOMNode.setTopLeftAbsolute(closerWrap, 0, 0);
-				DOMNode.setStyles(closerWrap, "text-align", "right");
+				DOMNode.setStyle(closerWrap, "text-align", "right");
 
 				closerNode = newDOMObject("label", id + "_closer", "innerHTML", "X");
 				DOMNode.setStyles(closerNode, "width", "20px", "height", "20px", "position", "absolute", "text-align",
@@ -135,7 +135,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer, JSComponentUI.Em
 				titleBarNode.appendChild(titleNode);
 				titleBarNode.appendChild(closerWrap);
 				closerWrap.appendChild(closerNode);
-				DOMNode.setStyles(closerNode, "background-color", "#DDD");// strColor);
+				DOMNode.setStyle(closerNode, "background-color", "#DDD");// strColor);
 			}
 			bindWindowEvents();
 			Insets s = getInsets();
@@ -146,10 +146,10 @@ public class JSFrameUI extends JSWindowUI implements FramePeer, JSComponentUI.Em
 			addFocusHandler();
 		}
 		String strColor = toCSSString(c.getBackground());
-		DOMNode.setStyles(domNode, "background-color", strColor);
-		DOMNode.setStyles(frameNode, "background", strColor);
+		DOMNode.setStyle(domNode, "background-color", strColor);
+		DOMNode.setStyle(frameNode, "background", strColor);
 		// Why did I set background to DDD? 2019-03-15 12:25:57 commit ca0130f819e926a987a1010569a2fcb5c36ced7c
-		DOMNode.setStyles(frameNode, "color", toCSSString(c.getForeground()));
+		DOMNode.setStyle(frameNode, "color", toCSSString(c.getForeground()));
 		setInnerComponentBounds(width, height);
 		setTitle(frame.getTitle());
 		if (!isDummyFrame) {
@@ -283,10 +283,10 @@ public class JSFrameUI extends JSWindowUI implements FramePeer, JSComponentUI.Em
 				frameCloserAction();
 				return HANDLED;
 			case "mouseout":
-				DOMNode.setStyles(closerNode, "background-color", "#DDD");// toCSSString(c.getBackground()));
+				DOMNode.setStyle(closerNode, "background-color", "#DDD");// toCSSString(c.getBackground()));
 				return HANDLED;
 			case "mouseenter":
-				DOMNode.setStyles(closerNode, "background-color", "red");
+				DOMNode.setStyle(closerNode, "background-color", "red");
 				return HANDLED;
 			}
 		}
