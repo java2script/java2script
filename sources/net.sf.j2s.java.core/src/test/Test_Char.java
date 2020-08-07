@@ -21,7 +21,12 @@ class Test_Char extends Test_ {
     public static final char separatorChar = '/';
 
 	public static void main(String[] args) {
-
+		assert('c' == new Character('c'));
+		assert(new Character('c') == 'c');
+		assert(Character.valueOf('c') == 'c');
+		assert('c' == Character.valueOf('c'));
+		assert(new Character('c') != Character.valueOf('c'));
+		
 		String octal = "\1 \02 \003 \0004 \00045";
 		assert(octal.length() == 12);
 		String octal1 = "\1\12\123\1234\12345";
