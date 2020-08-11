@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Date;
@@ -157,6 +158,17 @@ public class Test_Clipboard extends JFrame {
 
 		});
 
+		m.add(btn, null);
+		btn = new JButton("paste");
+		btn.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Object data = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
+				System.out.println(data);
+			}
+
+		});
 		m.add(btn, null);
 		add(m, BorderLayout.SOUTH);
 

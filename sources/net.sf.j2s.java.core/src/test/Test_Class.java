@@ -1,5 +1,6 @@
 package test;
 
+
 import static java.awt.Color.getColor;
 import static java.awt.Toolkit.getDefaultToolkit;
 
@@ -25,6 +26,15 @@ import static java.lang.String.format
 ;
 class Test_Class extends Test_Class2<Integer> {
 
+	static class TestStatic {
+		
+		static String sayHello() { return "Hello there"; }
+	}
+
+	
+	
+	
+	
 	public int test_int = 3; // shadows Test_
 
 
@@ -323,6 +333,10 @@ class Test_Class extends Test_Class2<Integer> {
 	}
 	
 	public static void main(String[] args) {
+		
+		TestStatic ts = null;
+		
+		System.out.println(ts.sayHello());
 		
 //		System.out.println(new Date() + " " + Date.parse("3/4/2020"));
 
