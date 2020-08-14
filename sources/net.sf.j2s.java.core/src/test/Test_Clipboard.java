@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Date;
@@ -25,6 +26,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import javax.swing.table.DefaultTableModel;
 
+import swingjs.JSUtil;
 import swingjs.plaf.JSTableUI;
 
 public class Test_Clipboard extends JFrame {
@@ -157,6 +159,18 @@ public class Test_Clipboard extends JFrame {
 
 		});
 
+		m.add(btn, null);
+		btn = new JButton("paste");
+		btn.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {				
+				new JSUtil().getClipboardText((text) -> {
+					System.out.println(text);
+				});
+			}
+
+		});
 		m.add(btn, null);
 		add(m, BorderLayout.SOUTH);
 

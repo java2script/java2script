@@ -9,6 +9,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -357,5 +358,12 @@ public interface JSUtilI {
 	 * @param app
 	 */
 	void setAppClass(Object app);
+
+	/** As of v. 73, not available in Firefox -- will alert the user and return null
+	 * 
+	 * @param whenDone  method to capture return asynchronously, returning null only if the 
+	 * browser does not allow reading the clipboard.
+	 */
+	void getClipboardText(Consumer<String> whenDone);
 
 }
