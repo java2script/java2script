@@ -5,7 +5,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.JSComponent;
 import java.awt.Toolkit;
-import java.awt.image.BufferedImage;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -21,19 +22,17 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JComponent;
 import javax.swing.plaf.ComponentUI;
 
-import swingjs.api.js.JSFunction;
 import javajs.util.AU;
 import javajs.util.AjaxURLConnection;
-import javajs.util.PT;
 import javajs.util.Rdr;
 import javajs.util.SB;
 import javajs.util.ZipTools;
@@ -44,6 +43,7 @@ import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Applet;
 import swingjs.api.js.J2SInterface;
 import swingjs.api.js.JQuery;
+import swingjs.api.js.JSFunction;
 import swingjs.json.JSON;
 import swingjs.plaf.JSComponentUI;
 import swingjs.plaf.JSFrameUI;
@@ -1100,6 +1100,35 @@ public class JSUtil implements JSUtilI {
 		} catch (Throwable t) {
 			alert(data);
 		}
+	}
+
+	@Override
+	public void getClipboardText(Consumer<String> whenDone) {
+      getClipboardContentsStatic(whenDone);
+	}
+	
+	public static String getClipboardContentsStatic(Consumer<String> whenDone) {
+		
+		String s = null;
+		
+		try { 
+			/**
+			 * @j2sNative
+			 * 
+			 * navigator.clipboard.readText().then(function(text) {whenDone.accept$O(text)});
+			 * return null;
+			 * 
+			 */ {
+					Transferable data = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
+					s = (data.isDataFlavorSupported(DataFlavor.stringFlavor) ? (String) data.getTransferData(DataFlavor.stringFlavor) : "");				 
+			 }				
+
+		} catch (Throwable t) {
+			// browser does not support this function
+		}
+		if (whenDone != null)
+			whenDone.accept(s);
+		return s;
 	}
 
 	@Override
