@@ -153,7 +153,7 @@ public class TApp2 extends Applet {
 
 			@Override
 			public void keyPressed(KeyEvent e) {
-				System.out.println("keypressed");
+				System.out.println("keypressed " + e);
 			}
 
 			@Override

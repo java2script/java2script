@@ -26,6 +26,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import javax.swing.table.DefaultTableModel;
 
+import swingjs.JSUtil;
 import swingjs.plaf.JSTableUI;
 
 public class Test_Clipboard extends JFrame {
@@ -163,9 +164,10 @@ public class Test_Clipboard extends JFrame {
 		btn.addActionListener(new ActionListener() {
 
 			@Override
-			public void actionPerformed(ActionEvent e) {
-				Object data = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
-				System.out.println(data);
+			public void actionPerformed(ActionEvent e) {				
+				new JSUtil().getClipboardText((text) -> {
+					System.out.println(text);
+				});
 			}
 
 		});
