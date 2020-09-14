@@ -38,7 +38,7 @@ public class JSTextAreaUI extends JSTextUI {
 			valueNode = domNode = newDOMObject("textarea", id, "spellcheck", FALSE, "autocomplete", "off");
 			allowPaintedBackground = false;
 			focusNode = enableNode = textNode = domNode;
-			DOMNode.setStyles(domNode, "box-sizing", "border-box", "resize", "none", "border", "none", "margin", "0px", "padding", "0px","scrollbar-width", "thin"); 
+			DOMNode.setStyles(domNode, "box-sizing", "border-box", "resize", "none", "border", "none", "margin", "0px", "padding", "1px","scrollbar-width", "thin"); 
 			// otherwise it overflows
 			bindJSKeyEvents(focusNode, true);
 		}
