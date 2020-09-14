@@ -2297,7 +2297,7 @@ public abstract class JComponent extends Container {
 	 *              if <code>condition</code> is not one of the legal values
 	 *              listed above
 	 */
-	final InputMap getInputMap(int condition, boolean create) {
+	public InputMap getInputMap(int condition, boolean create) {
 		switch (condition) {
 		case WHEN_FOCUSED:
 			if (getFlag(FOCUS_INPUTMAP_CREATED)) {
