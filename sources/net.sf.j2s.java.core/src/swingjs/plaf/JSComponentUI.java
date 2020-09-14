@@ -1425,14 +1425,7 @@ public class JSComponentUI extends ComponentUI
 			}
 			return;
 		case "icon":
-			if (centeringNode != null) {
-				// note that we use AbstractButton cast here just because
-				// it has a getIcon() method. JavaScript will not care if
-				// it is really a JLabel or JOptionPane, which also have icons
-				ImageIcon icon = getIcon(c, null);
-				if (icon == null ? currentIcon != null : !icon.equals(currentIcon))
-					setIconAndText(prop, icon, currentGap, currentText);
-			}
+			updateIcon();
 			return;
 		case "mnemonic":
 			int newValue = ((Integer) e.getNewValue()).intValue();
@@ -1449,6 +1442,18 @@ public class JSComponentUI extends ComponentUI
 		}
 	}	
 	
+	protected void updateIcon() {
+		if (centeringNode != null) {
+			// note that we use AbstractButton cast here just because
+			// it has a getIcon() method. JavaScript will not care if
+			// it is really a JLabel or JOptionPane, which also have icons
+			ImageIcon icon = getIcon(c, null);
+			if (icon == null ? currentIcon != null : !icon.equals(currentIcon))
+				setIconAndText("icon", icon, currentGap, currentText);
+		}
+	}
+
+
 	protected boolean allowPropertyUpdate() {
 		return true;
 	}
@@ -2308,7 +2313,7 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	protected void enableNode(DOMNode node, boolean b) {
-		if (node == null)
+		if (node == null || isUIDisabled)
 			return;
 		
 		DOMNode.setAttr(node, "disabled", (b ? FALSE : TRUE));
@@ -2518,6 +2523,11 @@ public class JSComponentUI extends ComponentUI
 				} else {
 					w = icon.getIconWidth();
 					h = icon.getIconHeight();
+					boolean hasItemIconAndAction = (!isSimpleButton && isMenuItem && iconNode != null && actionNode != null && iconNode != actionNode);
+					if (hasItemIconAndAction && h > 20) {
+						w = (int)(w * 20.0 / h);
+						h = 20;
+					}
 					DOMNode.setStyles(iconNode, "height", h + "px", "width", w  + "px");
 					if (!imagePersists)
 						DOMNode.setStyle(imageNode, "visibility", "hidden");
@@ -2538,7 +2548,11 @@ public class JSComponentUI extends ComponentUI
 				DOMNode.setStyle(textNode, "white-space", "nowrap");
 			if (icon == null) {
 				// tool tip does not allow text alignment
-				if (iconNode != null && allowTextAlignment && isMenuItem && actionNode == null && text != null) {
+				// TODO menuitem checkboxes DO appear with iconNodes.
+				if (iconNode != null && allowTextAlignment 
+						&& isMenuItem 
+						&& actionNode == null 
+						&& text != null) {
 					DOMNode.addHorizontalGap(iconNode, gap + MENUITEM_OFFSET);
 				}
 			} else {
@@ -2637,7 +2651,7 @@ public class JSComponentUI extends ComponentUI
 			viewR.height = height - insets.bottom - insets.top;		
 		}
 		iconR.width = -1;
-		if (isMenuItem && actionNode != null) {
+		if (isMenuItem && actionNode != null && actionNode == iconNode) {
 			iconR.width = iconR.height = 15;
 		} else if (icon == null && iconNode != null) {
 			Dimension d = getHTMLSize(iconNode);
@@ -2653,6 +2667,8 @@ public class JSComponentUI extends ComponentUI
 		textNode = newDOMObject("span", id + "_txt");
 		centeringNode = newDOMObject("span", id + "_ctr");
 		centeringNode.appendChild(iconNode);
+		if (actionNode != null && actionNode != iconNode)
+			centeringNode.appendChild(actionNode);
 		centeringNode.appendChild(textNode);
 		node.appendChild(centeringNode);
 	}
@@ -2670,6 +2686,8 @@ public class JSComponentUI extends ComponentUI
 	protected void setAlignments(AbstractButton b, boolean justGetPreferred) {
 		if (alignmentDisabled)
 			return;
+		boolean hasItemIconAndAction = (!isSimpleButton && isMenuItem && iconNode != null && actionNode != null && iconNode != actionNode);
+
 		int hTextPos = b.getHorizontalTextPosition();
 		int hAlign = b.getHorizontalAlignment();
 		int vAlign = b.getVerticalAlignment();
@@ -2678,14 +2696,15 @@ public class JSComponentUI extends ComponentUI
 		getJSInsets();
 		Dimension dimIcon = getIconSize(b);
 		Dimension dimText = getTextSize(b);
-		int wIcon = (actionNode != null ? (isMenuItem ? 15 : 20) : dimIcon == null ? 0 : Math.max(0, dimIcon.width));
+		int wAction = (hasItemIconAndAction ? 15 : 0);
+		int wIcon = (actionNode != null ? (isMenuItem && !hasItemIconAndAction ? 15 : 20) : dimIcon == null ? 0 : Math.max(0, dimIcon.width));
 		int wText = (dimText == null ? 0 : dimText.width);
 		int gap = (wText == 0 || wIcon == 0 ? 0 : b.getIconTextGap());
 		int w0 = cellComponent != null ? cellWidth : $(domNode).width();
 		int w = w0;
-		if (w < wIcon + wText) {
+		if (w < wIcon + wText + wAction) {
 			// jQuery method can fail that may not have worked.
-			w = wIcon + wText;
+			w = wIcon + wText + wAction;
 		}
 		boolean alignVCenter = (vAlign == SwingConstants.CENTER);
 		Insets margins = (isLabel ? (isAWT ? b.getInsets() : insets) : getButtonMargins(b, justGetPreferred));
@@ -2693,9 +2712,10 @@ public class JSComponentUI extends ComponentUI
 			margins = zeroInsets;
 		Insets myInsets = (isLabel || !isSimpleButton || justGetPreferred ? zeroInsets : getButtonOuterInsets(b));
 		int h = (dimText == null ? 0 : dimText.height);
-		int ih = (this.actionNode != null  ? 15 : dimIcon == null ? 0 : dimIcon.height);
+		int ah = (wAction == 0 ? 0 : 15);
+		int ih = (wAction == 0 && actionNode != null  ? 15 : dimIcon == null ? 0 : dimIcon.height);
 		int hCtr = Math.max(h, ih);
-		int wCtr = wIcon + gap + wText;
+		int wCtr = wIcon + gap + wAction + wText;
 		int wAccel = 0;
 		// But we need to slightly underestimate it so that the
 		// width of label + button does not go over the total calculated width
@@ -2805,11 +2825,15 @@ public class JSComponentUI extends ComponentUI
 		Object cssCtr = getJSObject(); // {...}
 		Object cssTxt = getJSObject();
 		Object cssIcon = getJSObject();
+		Object cssAction = (hasItemIconAndAction ? getJSObject() : null);
 
 		addJSKeyVal(cssCtr, "position", "absolute", "top", null, "left", null, "transform", null, "width", (isHTML && isLabel ? "inherit" : wCtr + "px"),
 				"height", hCtr + "px", "display",(isLabel ? "inline-block" : null));
 		addJSKeyVal(cssIcon, "position", "absolute", "top", null, "left", null, "transform", null);
 		addJSKeyVal(cssTxt, "position", "absolute", "display",(isLabel ? "inline-block" : null), "top", null, "left", null, "transform", null);
+		if (hasItemIconAndAction)
+			addJSKeyVal(cssAction, "position", "absolute", "top", null, "left", null, "transform", null);
+			
 		// checkboxes and radiobuttons (i.e. with actionNodes) should not be fully centered unless in a table
 		isFullyCentered = (alignHCenter && alignVCenter && wIcon == 0 
 				|| wText == 0 && (actionNode == null || this.cellComponent != null || isSimpleButton) && margins.left == margins.right
@@ -2868,15 +2892,24 @@ public class JSComponentUI extends ComponentUI
 					}
 				}
 				addJSKeyVal(cssCtr, "left", left + "px");
-			} else {
-				if (alignRight) {
-					DOMNode.setStyle(itemNode, "text-align", "right");
-					addJSKeyVal(cssCtr, "right", "0px");
-					addJSKeyVal(cssTxt, "right", "23px");
-					addJSKeyVal(cssIcon, "right", "0px"); // was 3
+			} else if (alignRight) {
+				DOMNode.setStyle(itemNode, "text-align", "right");
+				addJSKeyVal(cssCtr, "right", "0px");
+				addJSKeyVal(cssTxt, "right", "23px");
+				if (hasItemIconAndAction) {
+					addJSKeyVal(cssAction, "right", "0px"); // was 3						
+					addJSKeyVal(cssIcon, "right", (wText + gap + wAction) + "px"); // was 3
 				} else {
-					DOMNode.setStyle(itemNode, "text-align", "left");
-					addJSKeyVal(cssCtr, "left", "0px");
+					addJSKeyVal(cssIcon, "right", "0px"); // was 3
+				}
+			} else {
+				DOMNode.setStyle(itemNode, "text-align", "left");
+				addJSKeyVal(cssCtr, "left", "0px");
+				if (hasItemIconAndAction) {
+					addJSKeyVal(cssAction, "left", "0px"); // was 3						
+					addJSKeyVal(cssIcon, "left", (wAction + gap) + "px"); // was 3
+					addJSKeyVal(cssTxt, "left", (wAction + wIcon + gap) + "px");
+				} else {
 					addJSKeyVal(cssIcon, "left", "0px"); // was 3
 					addJSKeyVal(cssTxt, "left", "23px");
 				}
@@ -2939,12 +2972,19 @@ public class JSComponentUI extends ComponentUI
 				DOMNode.setStyle(menuAnchorNode, "height", "1em");
 //				if (wIcon > 0)
 	//				addJSKeyVal(cssTxt, "top", "50%", "transform", "translateY(-50%)");
-				addJSKeyVal(cssIcon, "top", "50%", "transform", "translateY(-80%) scale(0.6,0.6)");
+				if (hasItemIconAndAction) {
+					addJSKeyVal(cssAction, "top", "50%", "transform", "translateY(-100%) scale(0.6,0.6)");
+					addJSKeyVal(cssIcon, "top", "50%", "transform", "translateY(-80%)");					
+				} else {
+					addJSKeyVal(cssIcon, "top", "50%", "transform", "translateY(-80%) scale(0.6,0.6)");
+				}
 			}
 
 		}
 		setCSS(cssCtr, centeringNode);
 		setCSS(cssIcon, iconNode);
+		if (hasItemIconAndAction)
+			setCSS(cssAction, actionNode);
 		setCSS(cssTxt, textNode);
 
 		if (cellComponent != null)

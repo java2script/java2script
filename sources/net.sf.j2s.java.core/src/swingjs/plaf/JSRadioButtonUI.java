@@ -1,6 +1,7 @@
 package swingjs.plaf;
 
 import javax.swing.AbstractButton;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JToggleButton;
@@ -17,6 +18,7 @@ public class JSRadioButtonUI extends JSButtonUI {
 		JToggleButton b = (JToggleButton) jc;
 		boolean doAll = false;
 		if (domNode == null) {
+			imagePersists = true;
 			//System.out.println("JSRadioButton new dom node for " + id + " " + tableID);
 			doAll = true;
 			buttonNode = newDOMObject("label", id + "btn");
@@ -29,21 +31,37 @@ public class JSRadioButtonUI extends JSButtonUI {
 				focusNode = buttonNode;
 			}
 			iconNode = null;
-			if (b.getIcon() == null) {
-				iconNode = actionNode = newDOMObject("input", id + "_inp", "type", (getPropertyPrefix() == "RadioButton" ? "radio" : "checkbox"), "name", id);
+			if (b.getIcon() == null || isMenuItem) {
+				actionNode = newDOMObject("input", id + "_inp", "type", (getPropertyPrefix() == "RadioButton" ? "radio" : "checkbox"), "name", id);
+				if (!isMenuItem)
+					iconNode = actionNode;
 				DOMNode.setAttr(buttonNode, "htmlFor", id);
 			} else {
 				// don't we need an icon node here??
 				if (actionNode != null)
 					DOMNode.dispose(actionNode);
+				actionNode = null;
 			}
-			enableNodes = new DOMNode[] { actionNode, buttonNode, null };
+			enableNodes = new DOMNode[] { actionNode, buttonNode, (iconNode == actionNode ? null : iconNode) };
 			createButton();
 			if (isMenuItem)
 				setMenuItem();
 		}
 		setupButton(b, doAll);
 		return updateDOMNodeCUI();
+	}
+
+	@Override
+	protected void updateIcon() {
+		if (!isMenuItem) {
+			setTainted();
+			if (domNode != null) {
+				domNode = null;
+				getDOMNode();
+			}
+		} else {
+			super.updateIcon();
+		}
 	}
 
 	@Override
@@ -77,7 +95,8 @@ public class JSRadioButtonUI extends JSButtonUI {
 
 	protected void setupButton(JToggleButton b, boolean doAll) {
 		// actionNode, iconNode, textNode, centeringNode, buttonNode
-		DOMNode.setAttr(actionNode, "checked", b.isSelected() ? TRUE : FALSE);
+		if (actionNode != null)
+			DOMNode.setAttr(actionNode, "checked", b.isSelected() ? TRUE : FALSE);
 		setCssFont(textNode, c.getFont());
 		// TODO: not allowing radio/checkbox icons (custom buttons)
 		setIconAndText("radio", (ImageIcon) null/* button.getIcon() */, button.getIconTextGap(), button.getText());
