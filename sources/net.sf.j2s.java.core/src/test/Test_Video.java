@@ -14,12 +14,15 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
@@ -38,6 +41,8 @@ import javax.swing.Timer;
 import javax.swing.TransferHandler;
 import javax.swing.WindowConstants;
 
+import javajs.async.SwingJSUtils.StateHelper;
+import javajs.async.SwingJSUtils.StateMachine;
 import swingjs.api.JSUtilI;
 import swingjs.api.js.HTML5Video;
 
@@ -65,7 +70,7 @@ public class Test_Video {
 			false;
 
 	JDialog dialog;
-	
+
 	@SuppressWarnings("unused")
 	public Test_Video() {
 		JFrame main = new JFrame();
@@ -110,8 +115,6 @@ public class Test_Video {
 		h = w * 9 / 16;
 		Dimension dim = new Dimension(w, w * 9 / 16);
 
-		
-
 		imageLabel = new JLabel();
 		imageLabel.setAlignmentX(0.5f);
 		int type = (isJS ? JSUtilI.TYPE_4BYTE_HTML5 : BufferedImage.TYPE_4BYTE_ABGR);
@@ -122,12 +125,11 @@ public class Test_Video {
 
 		createVideoLabel(file, videoURL, video);
 		// A little trick to allow "final" self reference in a Runnable parameter
-		
+
 		createDialog();
-		
+
 		// dialog[0].setOpaque(true);
 
-		
 		Container cp = main.getContentPane();
 		cp.setLayout(new BoxLayout(cp, BoxLayout.Y_AXIS));
 		JPanel videoPanel = getLayerPane(dim);
@@ -139,7 +141,6 @@ public class Test_Video {
 		cp.add(imageLabel);
 		main.pack();
 		main.setVisible(true);
-		
 
 		// main.setBackground(Color.orange);
 		// main.getRootPane().setOpaque(true);
@@ -166,7 +167,7 @@ public class Test_Video {
 	}
 
 	JLabel label = new JLabel((String) null);
-	
+
 	private void createVideoLabel(File file, URL videoURL, String video) {
 		boolean asBytes = (file != null);
 		ImageIcon icon;
@@ -199,7 +200,12 @@ public class Test_Video {
 				Object[] sources = (Object[]) e.getSource();
 				HTML5Video target = (HTML5Video) sources[0];
 				Object jsevent = sources[1];
-				System.out.println(event + " " + target + " " + jsevent);
+				System.out.println(event + " " + HTML5Video.getCurrentTime(jsvideo));
+				if (cbCapture.isSelected() && event.equals("canplaythrough")) {
+						grabImage();
+					}
+
+
 			}
 
 		});
@@ -302,7 +308,7 @@ public class Test_Video {
 				}
 				System.out.print("\0");
 				vt += delay / 1000000.0;
-				System.out.println("setting time to " + vt);
+				System.out.println("setting time to " + vt + " duration=" + delay);
 				HTML5Video.setCurrentTime(v, vt);
 				long dt = System.currentTimeMillis() - t0;
 				double dtv = vt - vt0;
@@ -346,6 +352,7 @@ public class Test_Video {
 	private JCheckBox cbCapture;
 
 	private JCheckBox cbDiscrete;
+	private StateHelper helper;
 
 	private JPanel getLayerPane(Dimension dim) {
 		lockDim(label, dim);
@@ -526,6 +533,19 @@ public class Test_Video {
 
 		});
 
+		JButton getRate = new JButton("rate");
+		getRate.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (rc != null || playing || jsvideo == null)
+					return;
+				rc = new RateCalc();
+				rc.getRate(5);
+			}
+
+		});
+
 		JPanel controls = new JPanel();
 		controls.add(new JLabel("click to mark     "));
 		controls.add(cbDiscrete);
@@ -537,9 +557,82 @@ public class Test_Video {
 		controls.add(undo);
 		controls.add(clear);
 		controls.add(show);
+		controls.add(getRate);
 		return controls;
 	}
 
+	RateCalc rc;
+	
+	class RateCalc implements ActionListener {
+
+		double curTime0 = 0, curTime = 0, ds = 0.01, tolerance = 0.00001, frameDur = 0;
+
+		boolean expanding = true;
+
+		private double[] results;
+
+		private int pt;
+		
+		protected void getRate(int n) {
+			results = new double[n];
+			pt = 0;
+			buffer = null;
+			expanding = true;
+			curTime0 = curTime = HTML5Video.getCurrentTime(jsvideo);
+			ds = frameDur / 2 + 0.001;
+			frameDur = 0;
+			listener = HTML5Video.addActionListener(jsvideo, this, "canplaythrough");
+			HTML5Video.setCurrentTime(jsvideo, curTime);
+		}
+
+		byte[] buffer, buffer0;
+		
+		Object[] listener;
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			BufferedImage img = HTML5Video.getImage(jsvideo, Integer.MIN_VALUE);
+			byte[] b = ((DataBufferByte) img.getRaster().getDataBuffer()).getData();
+			if (buffer == null) {
+				buffer = new byte[img.getWidth() * img.getHeight() * 4];
+			}
+			System.arraycopy(b, 0, buffer, 0, b.length);
+			if (buffer0 == null) {
+				buffer0 = new byte[img.getWidth() * img.getHeight() * 4];
+				System.arraycopy(buffer, 0, buffer0, 0, buffer.length);
+			} else {
+				if (Arrays.equals(buffer, buffer0)) {
+					// time 0 0.1 0.24 0.44
+					// ds 0.1 0.14 0.2
+					if (expanding) {
+						ds *= 1.4;
+					}
+				} else if (ds < 0 || Math.abs(ds) >= tolerance) {
+					expanding = false;
+					ds /= -2;
+					buffer0 = buffer;
+					buffer = null;
+				} else {
+					buffer = buffer0 = null;
+					frameDur = curTime - curTime0;
+					curTime0 = curTime;
+					results[pt++] = frameDur;
+					if (pt < results.length) {
+						ds = frameDur / 2;
+					} else {
+						HTML5Video.removeActionListener(jsvideo, listener);
+						JOptionPane.showMessageDialog(null, "frame Duration is " + Arrays.toString(results));
+						rc = null;
+						return;
+					}
+				}
+			}
+			curTime += ds;
+			HTML5Video.setCurrentTime(jsvideo, curTime);
+
+		}
+
+	}
 //	Event Name 	Fired When
 //	audioprocess 	The input buffer of a ScriptProcessorNode is ready to be processed.
 //	canplay 	The browser can play the media, but estimates that not enough data has been loaded to play the media up to its end without having to stop for further buffering of content.
