@@ -140,7 +140,7 @@ public abstract class DataBuffer {
 	 * Check only if NOT within an inner loop
 	 */
 	public void 秘checkImage() {
-		if (checkImageDepth == 0 & 秘image != null)
+		if (checkImageDepth == 0 && 秘image != null)
 			秘image.秘ensureRasterUpToDate();
 	}
 	
