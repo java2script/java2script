@@ -128,7 +128,7 @@ public class Raster {
     BufferedImage 秘image; // SwingJS -- necessary!
 
 	void 秘setImage(BufferedImage image) {
-		秘image = image;
+		秘image = dataBuffer.秘image = image;
 	}
 
     /**
