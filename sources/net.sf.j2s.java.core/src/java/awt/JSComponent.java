@@ -44,6 +44,7 @@ import javax.swing.RootPaneContainer;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.border.AbstractBorder;
+import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.BorderUIResource;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.FontUIResource;
@@ -691,7 +692,8 @@ public abstract class JSComponent extends Component {
 	protected boolean 秘paintsBorder() {
 		// default ButtonBorders are not painted by default; this happens to also include internal frames
 		return (秘border != null
-				&& !(秘border instanceof BorderUIResource.CompoundBorderUIResource));
+				&& !(秘border instanceof BorderUIResource.CompoundBorderUIResource)
+				&& !(秘border instanceof EmptyBorder));
 	}
 
 	/**
