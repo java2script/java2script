@@ -1509,6 +1509,7 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 		getSwingJSListActualSize(fixedCellWidth, fixedCellHeight);
 		if (layoutOrientation != JList.VERTICAL) {
 			updateHorizontalLayoutState(fixedCellWidth, fixedCellHeight);
+			cellHeights = null;
 		}
 	}
 
@@ -1564,7 +1565,6 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 				}
 			}
 			height = cellHeight = maxHeight;
-			cellHeights = null;
 		}
 		// The number of rows is either determined by the visible row
 		// count, or by the height of the list.
