@@ -858,7 +858,6 @@ public class JSTreeUI extends JSPanelUI {
 			width = dim.width;
 			height = dim.height;
 			scale = height / 19.;
-			System.out.println(dim + " " + scale);
 			this.xoff = xoff;
 			this.yoff = yoff;
 		}
@@ -1674,6 +1673,8 @@ public class JSTreeUI extends JSPanelUI {
 			if (node != null)
 				jnode.append(node);
 		}
+		if (node == null)
+			return;
 		// Rectangle r = getCellBounds1(list, index);
 		DOMNode.setSize(node, width, height);
 		DOMNode.setTopLeftAbsolute(node, top, left);
@@ -3750,16 +3751,18 @@ public class JSTreeUI extends JSPanelUI {
 		//
 		@Override
 		public void focusGained(FocusEvent e) {
-			if (tree != null) {
-				Rectangle pBounds;
-
-				pBounds = getPathBounds(tree, tree.getLeadSelectionPath());
-				if (pBounds != null)
-					tree.repaint(getRepaintPathBounds(pBounds));
-				pBounds = getPathBounds(tree, getLeadSelectionPath());
-				if (pBounds != null)
-					tree.repaint(getRepaintPathBounds(pBounds));
-			}
+			// SwingJS TODO  painting of individual rows is a problem -- the parent node is cleared.
+			
+//			if (tree != null) {
+//				Rectangle pBounds;
+//
+//				pBounds = getPathBounds(tree, tree.getLeadSelectionPath());
+//				if (pBounds != null)
+//					tree.repaint(getRepaintPathBounds(pBounds));
+//				pBounds = getPathBounds(tree, getLeadSelectionPath());
+//				if (pBounds != null)
+//					tree.repaint(getRepaintPathBounds(pBounds));
+//			}
 		}
 
 		@Override
