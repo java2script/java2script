@@ -3,7 +3,6 @@ package swingjs.api.js;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Frame;
-import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
@@ -49,10 +48,6 @@ import swingjs.api.JSUtilI;
  *
  */
 public interface HTML5Video extends DOMNode {
-
-	public interface Promise {
-
-	}
 
 	final static String[] eventTypes = new String[] { "audioprocess", // The input buffer of a ScriptProcessorNode is
 																		// ready to be processed.
@@ -303,14 +298,16 @@ public interface HTML5Video extends DOMNode {
 	}
 
 	/**
-	 * Create a dialog that includes rudimentary controls. Optional maxWidth allows image downscaling by factors of two.
+	 * Create a dialog that includes rudimentary controls. Optional maxWidth allows
+	 * image downscaling by factors of two.
 	 * 
 	 * @param parent
-	 * @param source 
+	 * @param source
 	 * @param maxWidth
 	 * @return
 	 */
-	public static JDialog createDialog(Frame parent, Object source, int maxWidth, Function<HTML5Video, Void> whenReady) {
+	public static JDialog createDialog(Frame parent, Object source, int maxWidth,
+			Function<HTML5Video, Void> whenReady) {
 		JDialog dialog = new JDialog(parent);
 		Container p = dialog.getContentPane();
 		p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
@@ -325,7 +322,7 @@ public interface HTML5Video extends DOMNode {
 		dialog.setVisible(true);
 		dialog.setVisible(false);
 		HTML5Video jsvideo = (HTML5Video) label.getClientProperty("jsvideo");
-		HTML5Video.addActionListener(jsvideo, new ActionListener() {
+		Object[] j2sListener = HTML5Video.addActionListener(jsvideo, new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -344,10 +341,12 @@ public interface HTML5Video extends DOMNode {
 //				dialog.setVisible(false);
 				if (whenReady != null)
 					whenReady.apply(jsvideo);
+				HTML5Video.removeActionListener(jsvideo, (Object[]) HTML5Video.getProperty(jsvideo, "j2sListener"));
 			}
-			
+
 		}, "canplaythrough");
-		HTML5Video.setCurrentTime(jsvideo,  0);
+		HTML5Video.setProperty(jsvideo, "j2sListener", j2sListener);
+		HTML5Video.setCurrentTime(jsvideo, 0);
 		return dialog;
 	}
 
