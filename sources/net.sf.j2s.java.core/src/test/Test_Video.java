@@ -3,7 +3,6 @@ package test;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
@@ -14,9 +13,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -24,6 +24,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 import javax.swing.BoxLayout;
@@ -42,12 +43,14 @@ import javax.swing.TransferHandler;
 import javax.swing.WindowConstants;
 
 import javajs.async.SwingJSUtils.StateHelper;
-import javajs.async.SwingJSUtils.StateMachine;
+import javajs.util.VideoReader;
 import swingjs.api.JSUtilI;
 import swingjs.api.js.HTML5Video;
 
 /**
  * Test of <video> tag.
+ * 
+ * See https://www.cimarronsystems.com/wp-content/uploads/2017/04/Elements-of-the-H.264-VideoAAC-Audio-MP4-Movie-v2_0.pdf
  * 
  * @author RM
  *
@@ -55,7 +58,23 @@ import swingjs.api.js.HTML5Video;
 public class Test_Video {
 
 	public static void main(String[] args) {
-		new Test_Video();
+		if (args.length > 0) {
+			System.out.println(getMP4Codec(args[0], null));
+		} else {
+			new Test_Video();
+		}
+	}
+
+	private static String getMP4Codec(String fname, String name) {
+		try {
+			VideoReader vr = new VideoReader(fname);
+			vr.getContents(true);
+			String info = vr.getFileType() + "|" + vr.getCodec();
+			return (name == null ? fname : name) + ": " + info;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return fname + "?";
+		}
 	}
 
 	private HTML5Video jsvideo;
@@ -70,10 +89,11 @@ public class Test_Video {
 			false;
 
 	JDialog dialog;
+	private JFrame main;
 
 	@SuppressWarnings("unused")
 	public Test_Video() {
-		JFrame main = new JFrame();
+		main = new JFrame();
 		main.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
 		main.setTransferHandler(new TransferHandler() {
@@ -144,7 +164,7 @@ public class Test_Video {
 
 		// main.setBackground(Color.orange);
 		// main.getRootPane().setOpaque(true);
-		System.out.println(main.isOpaque() + " " + Integer.toHexString(main.getBackground().getRGB()));
+//		System.out.println(main.isOpaque() + " " + Integer.toHexString(main.getBackground().getRGB()));
 //		cp.setBackground(Color.red);
 		HTML5Video.setProperty(jsvideo, "currentTime", 0);
 
@@ -172,7 +192,13 @@ public class Test_Video {
 		boolean asBytes = (file != null);
 		ImageIcon icon;
 		if (!isJS) {
-			icon = new ImageIcon("src/test/video_image.png");
+			icon = new ImageIcon("test/video_image.png");
+			if (!(file.toString().equals(file.getAbsolutePath()))) {
+				file = new File("site/swingjs/j2s/" + file.toString());
+			}
+			System.out.println(file.getAbsolutePath());
+			System.out.println(getMP4Codec(file.getAbsolutePath(), file.getName()));
+			return;
 		} else if (asBytes) {
 			try {
 				byte[] bytes;
@@ -202,9 +228,8 @@ public class Test_Video {
 				Object jsevent = sources[1];
 				System.out.println(event + " " + HTML5Video.getCurrentTime(jsvideo));
 				if (cbCapture.isSelected() && event.equals("canplaythrough")) {
-						grabImage();
-					}
-
+					grabImage();
+				}
 
 			}
 
@@ -223,6 +248,9 @@ public class Test_Video {
 		Rectangle bounds = label.getBounds();
 		layerPane.remove(label);
 		createVideoLabel(file, null, null);
+		if (!isJS) {
+			return;
+		}
 		createDialog();
 		layerPane.add(label, JLayeredPane.DEFAULT_LAYER);
 		label.setBounds(bounds);
@@ -230,11 +258,20 @@ public class Test_Video {
 
 	}
 
+	private void describeVideo(String resource, String name) throws IOException {
+		VideoReader vr = new VideoReader(resource);
+		List<Map<String, Object>> contents = vr.getContents(true);
+		System.out.println("codec = " + vr.getCodec());
+		main.setTitle(name + " " + vr.getFileType() + "|" + vr.getCodec());
+	}
+
 	private void showProperty(String key) {
 		System.out.println(key + "=" + HTML5Video.getProperty(jsvideo, key));
 	}
 
 	private void showAllProperties() {
+		if (!isJS)
+			return;
 		for (int i = 0; i < allprops.length; i++)
 			showProperty(allprops[i]);
 	}
@@ -464,9 +501,10 @@ public class Test_Video {
 
 		});
 
-		boolean canSeek = HTML5Video.getProperty(jsvideo, "seekToNextFrame") != null;
-		System.out.println("canSeek = " + canSeek);
-
+		if (isJS) {
+			boolean canSeek = HTML5Video.getProperty(jsvideo, "seekToNextFrame") != null;
+			System.out.println("canSeek = " + canSeek);
+		}
 		JButton next = new JButton("next");
 		next.addActionListener(new ActionListener() {
 
