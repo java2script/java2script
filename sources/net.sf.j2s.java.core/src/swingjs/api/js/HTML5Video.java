@@ -125,6 +125,10 @@ public interface HTML5Video extends DOMNode {
 		0;
 	}
 
+	public static String getErrorMessage(HTML5Video v) {
+		return /** @j2sNative v.error && v.error.message || */null;
+	}
+
 	public static Dimension getSize(HTML5Video v) {
 		return new Dimension(/** @j2sNative v.videoWidth || */
 				0, /** @j2sNative v.videoHeight|| */
@@ -139,12 +143,14 @@ public interface HTML5Video extends DOMNode {
 	 * 
 	 * @param v
 	 * @param imageType  if Integer.MIN_VALUE, swingjs.api.JSUtilI.TYPE_4BYTE_HTML5
-	 * @return
+	 * @return an image, or null if width or height == 0 
 	 */
 	public static BufferedImage getImage(HTML5Video v, int imageType) {
 		Dimension d = HTML5Video.getSize(v);
 		BufferedImage image = (BufferedImage) HTML5Video.getProperty(v, "_image");
 		if (image == null || image.getWidth() != d.width || image.getHeight() != d.height) {
+			if (d.width == 0 || d.height == 0)
+				return null;
 			image = new BufferedImage(d.width, d.height, imageType == Integer.MIN_VALUE ? JSUtilI.TYPE_4BYTE_HTML5 : imageType);
 			HTML5Video.setProperty(v, "_image", image);
 		}
@@ -349,7 +355,7 @@ public interface HTML5Video extends DOMNode {
 		HTML5Video.setCurrentTime(jsvideo, 0);
 		return dialog;
 	}
-
+	
 	static JPanel getControls(JLabel label) {
 
 		JPanel controls = new JPanel();

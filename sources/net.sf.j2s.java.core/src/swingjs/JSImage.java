@@ -118,7 +118,7 @@ public class JSImage extends BufferedImage {
 					src = JSImagekit.getDataBlob(b, null);
 				/**
 				 * @j2sNative
-				 * 
+				 *          img.onerror = function(e) {img.err = e}; 
 				 * 			img.src = src;
 				 * 			img.onloadedmetadata = function(){ r.run$()};
 				 *          img.load();
