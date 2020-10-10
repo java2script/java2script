@@ -2031,7 +2031,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		case TYPE_INT_ARGB_PRE:// #3
 		case TYPE_INT_ARGB:
 			// convert canvas [r g b a r g b a ...] into [argb argb argb ...]
-			toIntARGB(data, (int[]) (秘pix = ((DataBufferInt) buf).data));
+			toIntARGB(data, (int[]) (秘pix = ((DataBufferInt) buf).data), imageType == TYPE_INT_RGB ? 0 : 0xFF000000);
 			// Jmol, for instance, uses a 4 * w * h buffer for antialiasing
 			if (((int[]) 秘pix).length != 秘wxh)
 				秘pix = null;
@@ -2071,7 +2071,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 			break;
 		}
 		if (秘pix == null) {
-			toIntARGB(data, (int[]) (秘pix = new int[data.length >> 2]));
+			toIntARGB(data, (int[]) (秘pix = new int[data.length >> 2]), 0xFF000000);
 		}
 		秘state = STATE_GRAPHICS | STATE_RASTER;
 		秘state |= (haveHTML5Pixels ? STATE_HAVE_PIXELS8 : STATE_HAVE_PIXELS32);
@@ -2088,10 +2088,12 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * 0000
 	 * 
 	 * @param ctxData HTML5 canvas.context.imageData.data
+	 * @param iData int[] data buffer
+	 * @param alpha  alpha mask
 	 * @return array of ARGB values
 	 * 
 	 */
-	private static void toIntARGB(byte[] ctxData, int[] iData) {
+	private static void toIntARGB(byte[] ctxData, int[] iData, int alpha) {
 		// red=imgData.data[0];
 		// green=imgData.data[1];
 		// blue=imgData.data[2];
@@ -2100,7 +2102,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		// convert canvas [r g b a r g b a ...] into [argb argb argb ...]
 		int n = ctxData.length >> 2;
 		for (int i = 0, j = 0; i < n;) {
-			int argb = (ctxData[j++] << 16) | (ctxData[j++] << 8) | ctxData[j++] | 0xFF000000;
+			int argb = (ctxData[j++] << 16) | (ctxData[j++] << 8) | ctxData[j++] | alpha;
 			iData[i++] = (ctxData[j++] == 0 ? 0 : argb);
 		}
 	}
@@ -2237,7 +2239,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 			b = ((DataBufferByte) raster.getDataBuffer()).getData();
 			if (nbits == 32) {
 				int[] data = new int[n];
-				toIntARGB(b, data);
+				toIntARGB(b, data, 0xFF000000);
 				秘state |= STATE_HAVE_PIXELS32;
 			} else {
 				秘state |= STATE_HAVE_PIXELS8;
@@ -2306,7 +2308,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		}
 		if (nbits == 32) {
 			int[] data = new int[n];
-			toIntARGB((byte[]) (Object) p, data);
+			toIntARGB((byte[]) (Object) p, data, 0xFF000000);
 			秘state |= STATE_HAVE_PIXELS32;
 		} else {
 			秘state |= STATE_HAVE_PIXELS8;

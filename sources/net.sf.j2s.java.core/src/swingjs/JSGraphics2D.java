@@ -727,7 +727,7 @@ public class JSGraphics2D implements
 						buf8[pt++] = (argb >> 16) & 0xFF;
 						buf8[pt++] = (argb >> 8) & 0xFF;
 						buf8[pt++] = argb & 0xFF;
-						buf8[pt++] = (argb >> 24) & 0xFF;
+						buf8[pt++] = (isOpaque ? 0xFF : (argb >> 24) & 0xFF);
 					}
 				}
 			} else if (isOpaque) {
