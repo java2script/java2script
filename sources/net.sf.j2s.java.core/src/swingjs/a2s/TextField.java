@@ -39,7 +39,7 @@ public class TextField extends JTextField {
 	}
 
 	public void addTextListener(final TextListener textListener) {
-		getDocument().addDocumentListener(new DocumentListener() {
+		super.getDocument().addDocumentListener(new DocumentListener() {
 
 			
 			@Override
@@ -81,7 +81,7 @@ public class TextField extends JTextField {
 
     @Deprecated
     public Dimension preferredSize(int columns) {
-    	return getPrefSizeJTF(columns);
+    	return super.getPrefSizeJTF(columns);
     }
 
     /**
@@ -101,7 +101,7 @@ public class TextField extends JTextField {
      */
     @Deprecated
     public Dimension minimumSize(int columns) {
-    	return getMinimumSizeJTF(columns);
+    	return super.getMinimumSizeJTF(columns);
     }
 
 
@@ -123,7 +123,7 @@ public class TextField extends JTextField {
     @Override
 	@Deprecated
     public Dimension minimumSize() {
-        synchronized (getTreeLock()) {
+        synchronized (super.getTreeLock()) {
             return (columns > 0) ?
                        minimumSize(columns) :
                        super.minimumSize();
@@ -134,7 +134,7 @@ public class TextField extends JTextField {
 	protected int getColumnWidth() {
     	// _ not m here (empirical testing -- this is from the peer, which is native OS code)
         if (columnWidth == 0) {
-            FontMetrics metrics = getFontMetrics(getFont());
+            FontMetrics metrics = getFontMetrics(super.getFont());
             columnWidth = metrics.charWidth('_');
         }
         return columnWidth;

@@ -29,13 +29,13 @@ public class Canvas extends Panel {
 	@Override
 	public Dimension preferredSize() {
 		// must bypass JComponent here because we subclass Panel
-		return prefSizeComp();
+		return super.prefSizeComp();
 	}
 
 	@Override
 	public void setBackground(Color c) {
 		super.setBackground(c);
-		setOpaque(c != null);
+		super.setOpaque(c != null);
 	}
 
 	@Override

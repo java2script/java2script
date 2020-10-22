@@ -34,22 +34,22 @@ public class Menu extends JMenu implements AWTMenu, MenuContainer {
 
     @Override
 	public java.awt.MenuItem getItem(int index) {
-    	return (java.awt.MenuItem) getComponent(index);
+    	return (java.awt.MenuItem) super.getComponent(index);
     }
     
 	@Override
 	public java.awt.MenuItem add(java.awt.MenuItem mi) {
-		return (java.awt.MenuItem) this.add((JComponent) mi);
+		return (java.awt.MenuItem) super.add((JComponent) mi);
 	}
 
 	@Override
 	public void insert(java.awt.MenuItem menuitem, int index) {
-		insert((JMenuItem) menuitem, index);
+		super.insert((JMenuItem) menuitem, index);
 	}
 
 	@Override
 	public void remove(MenuComponent comp) {
-		remove((JComponent) comp);
+		super.remove((JComponent) comp);
 	}
 
 	@Override
@@ -60,13 +60,13 @@ public class Menu extends JMenu implements AWTMenu, MenuContainer {
 
 	@Override
 	public void setShortcut(MenuShortcut s) {
-		setAccelerator(KeyStroke.getKeyStroke(s.getKey(), 
+		super.setAccelerator(KeyStroke.getKeyStroke(s.getKey(), 
 				  ActionEvent.CTRL_MASK | (s.usesShiftModifier() ? ActionEvent.SHIFT_MASK : 0)));
 	}
 
 	@Override
 	public void deleteShortcut() {
-		setAccelerator(null);
+		super.setAccelerator(null);
 	}
 
 	public Enumeration<MenuShortcut> shortcuts() {

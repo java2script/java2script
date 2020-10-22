@@ -22,7 +22,7 @@ public class CheckboxMenuItem extends JCheckBoxMenuItem {
 
 	@Override
 	public boolean getState() {
-		return isSelected();
+		return super.isSelected();
 	}
 	
 	

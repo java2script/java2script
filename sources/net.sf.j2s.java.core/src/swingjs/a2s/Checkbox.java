@@ -41,7 +41,7 @@ public class Checkbox extends JCheckBox {
 		if (group != null)
 			group.add(this);
 		if (state && (group != null)) {
-			setSelected(state);
+			super.setSelected(state);
 		}
 	}
     
@@ -71,7 +71,7 @@ public class Checkbox extends JCheckBox {
 	}
 
 	public boolean getState() {
-		return isSelected();
+		return super.isSelected();
 	}
 
 	public void setState(boolean b) {

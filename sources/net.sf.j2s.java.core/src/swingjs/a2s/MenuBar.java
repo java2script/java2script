@@ -19,7 +19,7 @@ public class MenuBar extends JMenuBar implements MenuContainer {
 
 	public MenuBar() throws HeadlessException {
 		super();
-		setBackground(new Color(0xEEEEEE));
+		super.setBackground(new Color(0xEEEEEE));
 	}
 
 	private static Insets awtInsets = new Insets(6, 10, 6, 10);
@@ -38,17 +38,17 @@ public class MenuBar extends JMenuBar implements MenuContainer {
 	}
 
 	public void deleteShortcut(MenuShortcut s) {
-		int nmenus = getMenuCount();
+		int nmenus = super.getMenuCount();
 		for (int i = 0; i < nmenus; i++) {
-			((Menu) getMenu(i)).deleteShortcut(s);
+			((Menu) super.getMenu(i)).deleteShortcut(s);
 		}
 	}
 
 	public synchronized Enumeration<MenuShortcut> shortcuts() {
 		Vector<MenuShortcut> shortcuts = new Vector<>();
-		int nmenus = getMenuCount();
+		int nmenus = super.getMenuCount();
 		for (int i = 0; i < nmenus; i++) {
-			Enumeration<MenuShortcut> e = ((Menu) getMenu(i)).shortcuts();
+			Enumeration<MenuShortcut> e = ((Menu) super.getMenu(i)).shortcuts();
 			while (e.hasMoreElements()) {
 				shortcuts.addElement(e.nextElement());
 			}
@@ -93,7 +93,7 @@ public class MenuBar extends JMenuBar implements MenuContainer {
 	}
 
 	public int countMenus() {
-		return getMenuCount();
+		return super.getMenuCount();
 	}
 
 }

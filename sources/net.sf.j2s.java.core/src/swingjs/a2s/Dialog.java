@@ -15,8 +15,8 @@ public class Dialog extends JDialog implements A2SContainer {
 
 	private void setListener() {
 		listener = new A2SListener();
-		addMouseListener(listener);
-		addMouseMotionListener(listener);
+		super.addMouseListener(listener);
+		super.addMouseMotionListener(listener);
 		Util.setAWTWindowDefaults(this);
 	}
 

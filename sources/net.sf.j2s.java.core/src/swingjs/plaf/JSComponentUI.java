@@ -2032,7 +2032,9 @@ public class JSComponentUI extends ComponentUI
 			} else {
 				if (ui.domNode != ui.outerNode && DOMNode.getParent(ui.domNode) == null)				
 					ui.outerNode.appendChild(ui.domNode);
-				if (ui.embeddingNode == null && (!ui.isWindow || !ui.isFrameIndependent()))
+				if (ui.embeddingNode == null
+						&& (!ui.isRootPane || !ui.jc.getFrameViewer().isApplet)
+						&& (!ui.isWindow || !ui.isFrameIndependent()))
 					DOMNode.appendChildSafely(getContainerNode(i), ui.outerNode);
 			}
 		}

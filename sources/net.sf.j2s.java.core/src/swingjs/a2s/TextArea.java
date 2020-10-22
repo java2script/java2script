@@ -82,8 +82,8 @@ public class TextArea extends JTextArea {
 			setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 			break;
 		case SCROLLBARS_VERTICAL_ONLY:
-			setLineWrap(true);
-			setWrapStyleWord(true);
+			super.setLineWrap(true);
+			super.setWrapStyleWord(true);
 			setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 			setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 			break;
@@ -92,8 +92,8 @@ public class TextArea extends JTextArea {
 			setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 			break;
 		case SCROLLBARS_NONE:
-			setLineWrap(true);
-			setWrapStyleWord(true);
+			super.setLineWrap(true);
+			super.setWrapStyleWord(true);
 			setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
 			setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 			break;
@@ -107,9 +107,9 @@ public class TextArea extends JTextArea {
 	private void setVerticalScrollBarPolicy(int policy) {
 		int old = verticalScrollBarPolicy;
 		verticalScrollBarPolicy = policy;
-		firePropertyChange("verticalScrollBarPolicy", old, policy);
-		revalidate();
-		秘repaint();
+		super.firePropertyChange("verticalScrollBarPolicy", old, policy);
+		super.revalidate();
+		super.秘repaint();
 	}
 
     public int getHorizontalScrollBarPolicy() {
@@ -119,9 +119,9 @@ public class TextArea extends JTextArea {
 	private void setHorizontalScrollBarPolicy(int policy) {
 		int old = horizontalScrollBarPolicy;
 		horizontalScrollBarPolicy = policy;
-		firePropertyChange("horizontalScrollBarPolicy", old, policy);
-		revalidate();
-		秘repaint();
+		super.firePropertyChange("horizontalScrollBarPolicy", old, policy);
+		super.revalidate();
+		super.秘repaint();
 	}
 
     public int getScrollbarVisibility() {
@@ -147,7 +147,7 @@ public class TextArea extends JTextArea {
 	}
 
 	public synchronized TextListener[] getTextListeners() {
-		return getListeners(TextListener.class);
+		return super.getListeners(TextListener.class);
 	}
 
 	public Dimension getPreferredSize(int rows, int columns) {
@@ -184,7 +184,7 @@ public class TextArea extends JTextArea {
     	// We will call that "n" -- it is pretty close
     	// 
         if (columnWidth == 0) {
-            FontMetrics metrics = getFontMetrics(getFont());
+            FontMetrics metrics = getFontMetrics(super.getFont());
             columnWidth = metrics.charWidth('n');
         }
         return columnWidth;
@@ -242,7 +242,7 @@ public class TextArea extends JTextArea {
 	@Override
 	@Deprecated
 	public Dimension minimumSize() {
-		synchronized (getTreeLock()) {
+		synchronized (super.getTreeLock()) {
 			return ((super.rows > 0) && (super.columns > 0)) ? minimumSize(super.rows, super.columns) : super.minimumSize();
 		}
 	}
@@ -367,7 +367,7 @@ public class TextArea extends JTextArea {
 	private void toEnd() {
 		super.setCaretPosition(super.getText().length());
 		super.requestFocusInWindow();
-		firePropertyChange("JSToEnd", null, "JSToEnd");
+		super.firePropertyChange("JSToEnd", null, "JSToEnd");
 	}
 
 //	@Override

@@ -21,7 +21,7 @@ public class Panel extends JPanel {
 		super(layout);
 		subclassSetup();
 		setBackground(null);
-		setOpaque(false);
+		super.setOpaque(false);
 		// next two lines are in case a panel is painted
 		// in a way that bypasses its paint() method, as for Canvas
 		// See _mpQuaZ_Applets_ResistorApplet_bastel.htm
@@ -38,7 +38,7 @@ public class Panel extends JPanel {
 	@Override
 	public void setBackground(Color c) {
 		super.setBackground(c);
-		setOpaque(c != null);
+		super.setOpaque(c != null);
 	}
 
 

@@ -64,7 +64,7 @@ public class VideoReader {
 	public List<Map<String, Object>> getContents(boolean verbose) {
 		contents = new ArrayList<>();
 		this.verbose = verbose;
-		while (pt != -1) {
+		while (isAvail()) {
 			try {
 				readBlock(contents);
 			} catch (IOException e) {
@@ -251,6 +251,14 @@ public class VideoReader {
 		return is.readInt() & 0xFFFFFFFFL;
 	}
 
+	@SuppressWarnings("unused")
+	protected boolean isAvail() {
+		try {
+			return (pt != -1 && is.available() > 0);
+		} catch (IOException e) {
+			return false;
+		}
+	}
 
 	protected int readInt() throws IOException {
 		pt += 4;
