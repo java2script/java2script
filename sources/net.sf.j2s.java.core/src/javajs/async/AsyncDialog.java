@@ -105,6 +105,14 @@ public class AsyncDialog implements PropertyChangeListener {
 			process("" + message);
 	}
 
+	public void showMessageDialog(Component frame, Object message, String title, ActionListener a) {
+		setListener(a);
+		JOptionPane.showMessageDialog(frame, message, title, JOptionPane.INFORMATION_MESSAGE);
+		unsetListener();
+		if (/** @j2sNative false || */true)
+			process("" + message);
+	}
+
 	public void showOptionDialog(Component frame, Object message, String title, int optionType, int messageType,
 			Icon icon, Object[] options, Object initialValue, ActionListener a) {
 		actionListener = a;
