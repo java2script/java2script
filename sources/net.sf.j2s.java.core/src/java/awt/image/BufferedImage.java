@@ -2018,8 +2018,10 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 
 		HTML5Canvas canvas = (g == null ? null : /** @j2sNative g.canvas || */
 				null);
-		if (canvas == null)
+		if (canvas == null) {
 			canvas = (HTML5Canvas) DOMNode.createElement("canvas", null);
+			/** @j2sNative canvas.crossOrigin = "Anonymous"; */
+		}
 		int w = width;
 		int h = height;
 		byte[] data = HTML5Canvas.getDataBufferBytes(canvas, node, w, h);
