@@ -63,7 +63,7 @@ public class Frame extends JFrame implements A2SContainer {
 	}
 	
 	public void setMenuBar(MenuBar m) {
-		setJMenuBar(m);
+		super.setJMenuBar(m);
 	}
 
 	public void remove(MenuComponent m) {
@@ -73,18 +73,18 @@ public class Frame extends JFrame implements A2SContainer {
 	}
 	
     public void unsetMenuBar() {
-    	setJMenuBar(null);
+    	super.setJMenuBar(null);
 	}
 
 
 	public MenuBar getMenubar() {
-		return (MenuBar) getJMenuBar();
+		return (MenuBar) super.getJMenuBar();
 	}
 
     @Override
 	public void addNotify() {
-        synchronized (getTreeLock()) {
-        	getOrCreatePeer();
+        synchronized (super.getTreeLock()) {
+        	super.getOrCreatePeer();
 //            FramePeer p = (FramePeer)peer;
             if (getMenubar() != null) {
             	getMenubar().addNotify();

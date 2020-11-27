@@ -116,9 +116,11 @@ public class JSImage extends BufferedImage {
 				};
 				if (b != null)
 					src = JSImagekit.getDataBlob(b, null);
+				// see https://developer.mozilla.org/en-US/docs/Web/HTML/CORS_enabled_image
 				/**
 				 * @j2sNative
-				 * 
+				 *          img.crossOrigin = "Anonymous";
+				 *          img.onerror = function(e) {img.err = e}; 
 				 * 			img.src = src;
 				 * 			img.onloadedmetadata = function(){ r.run$()};
 				 *          img.load();

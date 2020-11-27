@@ -39,32 +39,32 @@ public class PopupMenu extends JPopupMenu implements AWTPopupMenu {
 	}
 	@Override
 	public int countItems() {
-		return getComponentCount();
+		return super.getComponentCount();
 	}
 
 	@Override
 	public java.awt.MenuItem add(java.awt.MenuItem mi) {
-		return (MenuItem) this.add((JComponent) mi);
+		return (MenuItem) super.add((JComponent) mi);
 	}
 
 	@Override
 	public int getItemCount() {
-		return getComponentCount();
+		return super.getComponentCount();
 	}
 
 	@Override
 	public java.awt.MenuItem getItem(int index) {
-		return (MenuItem) getComponent(index);
+		return (MenuItem) super.getComponent(index);
 	}
 
 	@Override
 	public void insert(java.awt.MenuItem menuitem, int index) {
-		insert((Component) menuitem, index);		
+		super.insert((Component) menuitem, index);		
 	}
 
 	@Override
 	public void insert(String label, int index) {
-		insert(new JLabel(label), index);
+		super.insert(new JLabel(label), index);
 	}
 
 	@Override
@@ -76,7 +76,7 @@ public class PopupMenu extends JPopupMenu implements AWTPopupMenu {
 
 	@Override
 	public void remove(MenuComponent comp) {
-		remove((Component) comp);		
+		super.remove((Component) comp);		
 	}
 
 	@Override

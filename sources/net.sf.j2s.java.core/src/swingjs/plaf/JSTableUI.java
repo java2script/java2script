@@ -62,6 +62,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.JViewport;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
@@ -459,8 +460,13 @@ public class JSTableUI extends JSPanelUI {
 				editorComp.setVisible(true);
 				notifyEntry(false);
 			}
-		} else {
-			DOMNode td = CellHolder.findCellNode(this, null, table.getEditingRow(), table.getEditingColumn());
+		} else { 
+			row = table.getEditingRow();
+			col = table.getEditingColumn();
+			DOMNode td = CellHolder.findCellNode(this, null, row, col);
+			if (td == null) {
+				td = addElement(row, col, table.getRowHeight());
+			}
 			updateCellNode(td, row, col, 0, 0);
 			repaintCell(row, col);
 			notifyEntry(true);
@@ -493,6 +499,11 @@ public class JSTableUI extends JSPanelUI {
 	 * 95054 USA or visit www.sun.com if you need additional information or have any
 	 * questions.
 	 */
+
+	private DOMNode addElement(int row, int col, int h) {
+		return 	addElements(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, h, row,
+		row + 1, col, col + 1);
+	}
 
 	private void notifyEntry(boolean isEntry) {
 		table.dispatchEvent(new MouseEvent(table, (isEntry ? MouseEvent.MOUSE_ENTERED : MouseEvent.MOUSE_EXITED),
@@ -2369,7 +2380,11 @@ public class JSTableUI extends JSPanelUI {
 
 		if (table.isEditing() && table.getEditingRow() == row && table.getEditingColumn() == col) {
 			Component component = table.getEditorComponent();
-			component.setBounds(cellRect);
+			if (component instanceof JTextField) {
+				component.setBounds(new Rectangle(cellRect.x - 2, cellRect.y - 2, cellRect.width, cellRect.height));		
+			} else {
+				component.setBounds(cellRect);
+			}
 			component.validate();
 		} else {
 			// Get the appropriate rendering component
@@ -2379,8 +2394,7 @@ public class JSTableUI extends JSPanelUI {
 			DOMNode td = (forceNew || tr == null ? null : CellHolder.findCellNode(this, null, row, col));
 			boolean newtd = (td == null);
 			if (newtd) {
-				td = addElements(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, h, row,
-						row + 1, col, col + 1);
+				td = addElement(row, col, h);
 			} else if (colTainted) {
 				DOMNode.setStyles(td, "left", cellRect.x + "px", "width", cw[col] + "px", "display", null);
 			} else {

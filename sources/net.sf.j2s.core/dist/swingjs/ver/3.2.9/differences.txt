@@ -1432,6 +1432,10 @@ and so are not implmented. javax.swing.text.View and its subclasses are not impl
 
 The JS document model does not allow two text fields to address the same underlying document. 
 
+JavaScript is slightly different from Java in that the field value is changed asynchronously after
+the keypressed event, so Java actions that are keyed to KEY_PRESSED may not pick up the new 
+key value even after SwingUtilities.invokeLater() is called. Thus, key pressed actions may need
+to be recorded after a key released event instead. 
 
 Formatter/Regex limitations
 ---------------------------

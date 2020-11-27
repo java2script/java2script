@@ -46,43 +46,43 @@ public class ScrollPane extends JScrollPane {
 		super();
 		switch (scrollbars) {
 		case SCROLLBARS_NEVER:
-			setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER);
-			setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
+			super.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER);
+			super.setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
 			break;
 		case SCROLLBARS_ALWAYS:
-			setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_ALWAYS);
-			setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_ALWAYS);
+			super.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_ALWAYS);
+			super.setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_ALWAYS);
 			break;
 		case SCROLLBARS_AS_NEEDED:
 			break;
 		}
 //        setBackground(Color.LIGHT_GRAY); // fills in around the scrollbars
-        setOpaque(true);
+		super.setOpaque(true);
 	}
 
 	@Override
 	public Component add(Component c) {
-		getViewport().add(c);
-		if (!isBackgroundSet() && c.isBackgroundSet())
-			setBackground(c.getBackground());
+		super.getViewport().add(c);
+		if (!super.isBackgroundSet() && c.isBackgroundSet())
+			super.setBackground(c.getBackground());
 		return c;
 	}
 
 	public Adjustable getVAdjustable() {
-		return getVerticalScrollBar();// vAdjustable;
+		return super.getVerticalScrollBar();// vAdjustable;
 	}
 
 	public Adjustable getHAdjustable() {
-		return getHorizontalScrollBar();// hAdjustable;
+		return super.getHorizontalScrollBar();// hAdjustable;
 	}
 
 	public void setScrollPosition(int x, int y) {
-		synchronized (getTreeLock()) {
-			if (getComponentCount() == 0) {
+		synchronized (super.getTreeLock()) {
+			if (super.getComponentCount() == 0) {
 				throw new NullPointerException("child is null");
 			}
-			getHorizontalScrollBar().setValue(x);
-			getVerticalScrollBar().setValue(y);
+			super.getHorizontalScrollBar().setValue(x);
+			super.getVerticalScrollBar().setValue(y);
 		}
 	}
 
@@ -91,12 +91,12 @@ public class ScrollPane extends JScrollPane {
 	}
 
 	public Point getScrollPosition() {
-		synchronized (getTreeLock()) {
-			if (getComponentCount() == 0) {
+		synchronized (super.getTreeLock()) {
+			if (super.getComponentCount() == 0) {
 				throw new NullPointerException("child is null");
 			}
-			return new Point(getHorizontalScrollBar().getValue(), 
-					getVerticalScrollBar().getValue());
+			return new Point(super.getHorizontalScrollBar().getValue(), 
+					super.getVerticalScrollBar().getValue());
 		}
 	}
 

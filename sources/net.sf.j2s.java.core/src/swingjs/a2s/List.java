@@ -48,13 +48,13 @@ public class List extends JList implements ItemSelectable, JSComponent.A2SWrappe
 	public List(int rows, boolean multipleMode) {
 		this();
 		setMultipleMode(multipleMode);
-        setVisibleRowCount(rows == 0 ?  DEFAULT_VISIBLE_ROWS : rows);
+		super.setVisibleRowCount(rows == 0 ?  DEFAULT_VISIBLE_ROWS : rows);
 	}
 
 	public List() {
 		super(new DefaultListModel<String>());
 		awtmodel = (DefaultListModel<String>) getModel();
-		setBorder(LineBorder.createBlackLineBorder());
+		super.setBorder(LineBorder.createBlackLineBorder());
 	}
 
     @Override
@@ -106,7 +106,7 @@ public class List extends JList implements ItemSelectable, JSComponent.A2SWrappe
      */
     @Deprecated
     public int countItems() {
-    	return getModel().getSize();
+    	return super.getModel().getSize();
     }
 
     /**
@@ -336,7 +336,7 @@ public class List extends JList implements ItemSelectable, JSComponent.A2SWrappe
      */
     @Override
 	public Object[] getSelectedObjects() {
-        return getSelectedItems();
+    	return super.getSelectedValues();
     }
 
 	/**
@@ -614,8 +614,8 @@ public class List extends JList implements ItemSelectable, JSComponent.A2SWrappe
         }
         itemListener = AWTEventMulticaster.add(itemListener, l);
         newEventsOnly = true;
-        removeListSelectionListener(this);
-        addListSelectionListener(this);
+        super.removeListSelectionListener(this);
+        super.addListSelectionListener(this);
     }
 
     /**
@@ -640,7 +640,7 @@ public class List extends JList implements ItemSelectable, JSComponent.A2SWrappe
         }
         itemListener = AWTEventMulticaster.remove(itemListener, l);
         if (itemListener == null)
-        	removeListSelectionListener(this);
+        	super.removeListSelectionListener(this);
     }
 
     /**
@@ -858,7 +858,7 @@ public class List extends JList implements ItemSelectable, JSComponent.A2SWrappe
 
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
-		if (itemListener != null && !getSelectionModel().getValueIsAdjusting()) {
+		if (itemListener != null && !super.getSelectionModel().getValueIsAdjusting()) {
 			processItemEvent(new ItemEvent(this, ItemEvent.ITEM_STATE_CHANGED, getSelectedItem(), ItemEvent.SELECTED));
 		}
 	}

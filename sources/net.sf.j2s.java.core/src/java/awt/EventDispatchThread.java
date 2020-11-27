@@ -89,16 +89,8 @@ class EventDispatchThread extends JSThread {
 	@Override
 	protected boolean myLoop() {
 		final int myid = id;
-		Runnable r = new Runnable() {
-			@Override
-			public void run() {
-				pumpOneEventForFilters(myid);
-			}
-		};
 		JSThread me = this;
-		int mode = LOOP;
-		JSFunction f = /** @j2sNative  function() {r.run$();me.run1$I(mode)} || */ null;
-		JSToolkit.dispatch(f, 0, 0);
+		dispatchAndReturn(()->{pumpOneEventForFilters(myid);}, LOOP);
 		// handling sleepAndReturn myself
 		// and once through only
 		return (doDispatch = false);

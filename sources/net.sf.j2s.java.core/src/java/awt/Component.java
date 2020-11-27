@@ -1881,7 +1881,7 @@ public abstract class Component implements ImageObserver/*
 				}
 				return pt;
 			} else {
-				if (peer == null)
+				if (getOrCreatePeer() == null)
 					return null;
 				Point pt = peer.getLocationOnScreen();
 				return pt;

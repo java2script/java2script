@@ -13,6 +13,10 @@ import java.awt.Rectangle;
  */
 public interface DOMNode {
 
+	public interface Promise {
+		public void then(JSFunction success, JSFunction fail);
+	}
+
 	public static JQuery jQuery = /** @j2sNative jQuery.$ || (jQuery.$ = jQuery) || */null;
 
 	// "abstract" in the sense that these are the exact calls to JavaScript

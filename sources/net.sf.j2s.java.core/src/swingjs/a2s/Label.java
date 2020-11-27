@@ -36,7 +36,7 @@ public class Label extends JLabel {
 	@Override
 	public void setBackground(Color c) {
 		super.setBackground(c);
-		setOpaque(c != null);
+		super.setOpaque(c != null);
 	}
 	
 	
@@ -77,12 +77,12 @@ public class Label extends JLabel {
 			xAlignment = 0.5f;
 			break;
 		}
-		setAlignmentX(xAlignment);
-		setAlignmentY(yAlignment);
-		setHorizontalAlignment(alignment);
+		super.setAlignmentX(xAlignment);
+		super.setAlignmentY(yAlignment);
+		super.setHorizontalAlignment(alignment);
 //		setHorizontalTextPosition(alignment);
-		setVerticalAlignment(SwingConstants.CENTER);
-		setVerticalTextPosition(SwingConstants.CENTER);
+		super.setVerticalAlignment(SwingConstants.CENTER);
+		super.setVerticalTextPosition(SwingConstants.CENTER);
 	}
 
 

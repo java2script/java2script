@@ -31,6 +31,7 @@ public class CorePlugin extends Plugin {
 	// j2sApplet.js and also (Bob only) update.bat, update-clean.bat
 
 
+	// BH 2020.11.20 -- 3.2.9-v1q fix for  new ImmutableCollections.ListN<>(E...) should use Object[] 
 	// BH 2020.08.03 -- 3.2.9-v1p fix for boxing boolean should be Boolean.valueOf$, not new Boolean
 	// BH 2020.08.01 -- 3.2.9-v1o fix for lambda expressions too static
 	// BH 2020.07.08 -- 3.2.9-v1n fix for try with resources and adds option varOrLet

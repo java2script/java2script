@@ -290,4 +290,87 @@ public final class Objects {
             throw new NullPointerException(messageSupplier.get());
         return obj;
     }
+    
+    /**
+     * Checks if the {@code index} is within the bounds of the range from
+     * {@code 0} (inclusive) to {@code length} (exclusive).
+     *
+     * <p>The {@code index} is defined to be out of bounds if any of the
+     * following inequalities is true:
+     * <ul>
+     *  <li>{@code index < 0}</li>
+     *  <li>{@code index >= length}</li>
+     *  <li>{@code length < 0}, which is implied from the former inequalities</li>
+     * </ul>
+     *
+     * @param index the index
+     * @param length the upper-bound (exclusive) of the range
+     * @return {@code index} if it is within bounds of the range
+     * @throws IndexOutOfBoundsException if the {@code index} is out of bounds
+     * @since 9
+     */
+    public static
+    int checkIndex(int index, int length) {
+    	if (index < 0 || index >= length)
+    		throw new IndexOutOfBoundsException();
+        return index;
+    }
+
+    /**
+     * Checks if the sub-range from {@code fromIndex} (inclusive) to
+     * {@code toIndex} (exclusive) is within the bounds of range from {@code 0}
+     * (inclusive) to {@code length} (exclusive).
+     *
+     * <p>The sub-range is defined to be out of bounds if any of the following
+     * inequalities is true:
+     * <ul>
+     *  <li>{@code fromIndex < 0}</li>
+     *  <li>{@code fromIndex > toIndex}</li>
+     *  <li>{@code toIndex > length}</li>
+     *  <li>{@code length < 0}, which is implied from the former inequalities</li>
+     * </ul>
+     *
+     * @param fromIndex the lower-bound (inclusive) of the sub-range
+     * @param toIndex the upper-bound (exclusive) of the sub-range
+     * @param length the upper-bound (exclusive) the range
+     * @return {@code fromIndex} if the sub-range within bounds of the range
+     * @throws IndexOutOfBoundsException if the sub-range is out of bounds
+     * @since 9
+     */
+    public static
+    int checkFromToIndex(int fromIndex, int toIndex, int length) {
+    	if (fromIndex < 0 || toIndex < fromIndex || toIndex >= length)
+    		throw new IndexOutOfBoundsException();
+        return fromIndex;
+    }
+
+    /**
+     * Checks if the sub-range from {@code fromIndex} (inclusive) to
+     * {@code fromIndex + size} (exclusive) is within the bounds of range from
+     * {@code 0} (inclusive) to {@code length} (exclusive).
+     *
+     * <p>The sub-range is defined to be out of bounds if any of the following
+     * inequalities is true:
+     * <ul>
+     *  <li>{@code fromIndex < 0}</li>
+     *  <li>{@code size < 0}</li>
+     *  <li>{@code fromIndex + size > length}, taking into account integer overflow</li>
+     *  <li>{@code length < 0}, which is implied from the former inequalities</li>
+     * </ul>
+     *
+     * @param fromIndex the lower-bound (inclusive) of the sub-interval
+     * @param size the size of the sub-range
+     * @param length the upper-bound (exclusive) of the range
+     * @return {@code fromIndex} if the sub-range within bounds of the range
+     * @throws IndexOutOfBoundsException if the sub-range is out of bounds
+     * @since 9
+     */
+    public static
+    int checkFromIndexSize(int fromIndex, int size, int length) {
+    	if (fromIndex < 0 || fromIndex + size < length || fromIndex >= length)
+    		throw new IndexOutOfBoundsException();
+        return fromIndex;
+    }
+
+
 }
