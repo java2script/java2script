@@ -3,7 +3,6 @@ package swingjs.api.js;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Frame;
-import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
@@ -49,10 +48,6 @@ import swingjs.api.JSUtilI;
  *
  */
 public interface HTML5Video extends DOMNode {
-
-	public interface Promise {
-
-	}
 
 	final static String[] eventTypes = new String[] { "audioprocess", // The input buffer of a ScriptProcessorNode is
 																		// ready to be processed.
@@ -130,6 +125,10 @@ public interface HTML5Video extends DOMNode {
 		0;
 	}
 
+	public static String getErrorMessage(HTML5Video v) {
+		return /** @j2sNative v.error && v.error.message || */null;
+	}
+
 	public static Dimension getSize(HTML5Video v) {
 		return new Dimension(/** @j2sNative v.videoWidth || */
 				0, /** @j2sNative v.videoHeight|| */
@@ -144,12 +143,14 @@ public interface HTML5Video extends DOMNode {
 	 * 
 	 * @param v
 	 * @param imageType  if Integer.MIN_VALUE, swingjs.api.JSUtilI.TYPE_4BYTE_HTML5
-	 * @return
+	 * @return an image, or null if width or height == 0 
 	 */
 	public static BufferedImage getImage(HTML5Video v, int imageType) {
 		Dimension d = HTML5Video.getSize(v);
 		BufferedImage image = (BufferedImage) HTML5Video.getProperty(v, "_image");
 		if (image == null || image.getWidth() != d.width || image.getHeight() != d.height) {
+			if (d.width == 0 || d.height == 0)
+				return null;
 			image = new BufferedImage(d.width, d.height, imageType == Integer.MIN_VALUE ? JSUtilI.TYPE_4BYTE_HTML5 : imageType);
 			HTML5Video.setProperty(v, "_image", image);
 		}
@@ -303,14 +304,16 @@ public interface HTML5Video extends DOMNode {
 	}
 
 	/**
-	 * Create a dialog that includes rudimentary controls. Optional maxWidth allows image downscaling by factors of two.
+	 * Create a dialog that includes rudimentary controls. Optional maxWidth allows
+	 * image downscaling by factors of two.
 	 * 
 	 * @param parent
-	 * @param source 
+	 * @param source
 	 * @param maxWidth
 	 * @return
 	 */
-	public static JDialog createDialog(Frame parent, Object source, int maxWidth, Function<HTML5Video, Void> whenReady) {
+	public static JDialog createDialog(Frame parent, Object source, int maxWidth,
+			Function<HTML5Video, Void> whenReady) {
 		JDialog dialog = new JDialog(parent);
 		Container p = dialog.getContentPane();
 		p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
@@ -325,7 +328,7 @@ public interface HTML5Video extends DOMNode {
 		dialog.setVisible(true);
 		dialog.setVisible(false);
 		HTML5Video jsvideo = (HTML5Video) label.getClientProperty("jsvideo");
-		HTML5Video.addActionListener(jsvideo, new ActionListener() {
+		Object[] j2sListener = HTML5Video.addActionListener(jsvideo, new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -344,13 +347,15 @@ public interface HTML5Video extends DOMNode {
 //				dialog.setVisible(false);
 				if (whenReady != null)
 					whenReady.apply(jsvideo);
+				HTML5Video.removeActionListener(jsvideo, (Object[]) HTML5Video.getProperty(jsvideo, "j2sListener"));
 			}
-			
+
 		}, "canplaythrough");
-		HTML5Video.setCurrentTime(jsvideo,  0);
+		HTML5Video.setProperty(jsvideo, "j2sListener", j2sListener);
+		HTML5Video.setCurrentTime(jsvideo, 0);
 		return dialog;
 	}
-
+	
 	static JPanel getControls(JLabel label) {
 
 		JPanel controls = new JPanel();

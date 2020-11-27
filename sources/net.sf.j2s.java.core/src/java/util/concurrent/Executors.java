@@ -635,12 +635,6 @@ public class Executors {
             return e.awaitTermination(timeout, unit);
         }
         public Future<?> submit(Runnable task) {
-        	/**
-        	 * @j2sNative
-        	 * 
-        	 * task.run();
-        	 * return true;
-        	 */
             return e.submit(task);
         }
         public <T> Future<T> submit(Callable<T> task) {

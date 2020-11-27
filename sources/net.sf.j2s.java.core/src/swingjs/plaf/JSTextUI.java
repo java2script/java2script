@@ -155,6 +155,10 @@ public abstract class JSTextUI extends JSLightweightUI {
 		if (editor.isOpaque() && editor.isEnabled())
 			setBackgroundImpl(getBackground());
 		setEditable(editable);
+		Color cc = editor.getCaretColor();
+		if (cc != null)
+			DOMNode.setStyle(domNode, "caret-color", JSToolkit.getCSSColor(cc));
+		setPadding(editor.getMargin());
 		return updateDOMNodeCUI();
 	}
 	
@@ -448,7 +452,8 @@ public abstract class JSTextUI extends JSLightweightUI {
 		// backward compatibility support... keymaps for the UI
 		// are now installed in the more friendly input map.
 		
-		
+//        editor.setKeymap(createKeymap());
+
 		InputMap km = getInputMap();
 		if (km != null) {
 			SwingUtilities.replaceUIInputMap(editor, JComponent.WHEN_FOCUSED, km);
@@ -464,13 +469,13 @@ public abstract class JSTextUI extends JSLightweightUI {
 
 	/**
 	 * Get the InputMap to use for the UI.
+	 * 
+	 * Overridden in JSTextFieldUI
 	 */
 	InputMap getInputMap() {
 		InputMap map = new InputMapUIResource();
-//
 //        InputMap shared =
-//            (InputMap)DefaultLookup.get(editor, this,
-//            getPropertyPrefix() + ".focusInputMap");
+//                (InputMap) UIManager.get(getPropertyPrefix() + ".focusInputMap", Locale.US);
 //        if (shared != null) {
 //            map.setParent(shared);
 //        }
@@ -3212,26 +3217,23 @@ public abstract class JSTextUI extends JSLightweightUI {
 	// return new BasicHighlighter();
 	// }
 	//
+
+	/**
+	 * Fetches the name of the keymap that will be installed/used by default for
+	 * this UI. This is implemented to create a name based upon the classname. The
+	 * name is the the name of the class with the package prefix removed.
+	 *
+	 * @return the name
+	 */
+	protected String getKeymapName() {
+		String nm = getClass().getName();
+		int index = nm.lastIndexOf('.');
+		if (index >= 0) {
+			nm = nm.substring(index + 1, nm.length());
+		}
+		return nm;
+	}
 	
-	
-	
-//	 /**
-//	 * Fetches the name of the keymap that will be installed/used
-//	 * by default for this UI. This is implemented to create a
-//	 * name based upon the classname. The name is the the name
-//	 * of the class with the package prefix removed.
-//	 *
-//	 * @return the name
-//	 */
-//	 protected String getKeymapName() {
-//	 String nm = getClass().getName(); 
-//	 int index = nm.lastIndexOf('.');
-//	 if (index >= 0) {
-//	 nm = nm.substring(index+1, nm.length());
-//	 }
-//	 return nm;
-//	 }
-//	
 //	 /**
 //	 * Creates the keymap to use for the text component, and installs
 //	 * any necessary bindings into it. By default, the keymap is

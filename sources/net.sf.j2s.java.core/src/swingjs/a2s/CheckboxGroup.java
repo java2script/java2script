@@ -13,7 +13,7 @@ public class CheckboxGroup extends ButtonGroup {
 	}
 
 	public JRadioButton getSelectedCheckbox() {
-	    for (Enumeration<AbstractButton> e = getElements(); e.hasMoreElements(); ) {
+	    for (Enumeration<AbstractButton> e = super.getElements(); e.hasMoreElements(); ) {
 		JRadioButton ab = (JRadioButton) e.nextElement();
 		if (ab.isSelected())
 		    return ab;

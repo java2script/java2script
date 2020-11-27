@@ -3411,6 +3411,70 @@ Math.rint || (Math.rint = function(a) {
  return Math.round(a) + ((b = a % 1) != 0.5 && b != -0.5 ? 0 : (b = Math.round(a % 2)) > 0 ? b - 2 : b);
 });
 
+// Java 1.8
+
+Math.addExact = function(x, y) {
+    var r = x + y;
+    // HD 2-12 Overflow iff both arguments have the opposite sign of the result
+    if (((x ^ r) & (y ^ r)) < 0) {
+        throw new ArithmeticException("integer overflow");
+    }
+    return r;
+}
+
+
+Math.subtractExact = function(x, y) {
+    var r = x - y;
+    // HD 2-12 Overflow iff the arguments have different signs and
+    // the sign of the result is different than the sign of x
+    if (((x ^ y) & (x ^ r)) < 0) {
+        throw new ArithmeticException("integer overflow");
+    }
+    return r;
+}
+
+Math.multiplyExact = function(x, y) {
+	var r = x * y;
+    if ((r | 0) != r) {
+        throw new ArithmeticException("integer overflow");
+    }
+    return r;
+}
+Math.incrementExact = function(a) {
+    if (a == Integer.MAX_VALUE) {
+        throw new ArithmeticException("integer overflow");
+    }
+    return a + 1;
+}
+
+Math.decrementExact = function(a) {
+    if (a == Integer.MIN_VALUE) {
+        throw new ArithmeticException("integer overflow");
+    }
+    return a - 1;
+}
+
+Math.negateExact = function(a) {return -a}
+
+Math.toIntExact = function(value) {
+    if ((value | 0) != value) {
+        throw new ArithmeticException("integer overflow");
+    }
+    return value;
+}
+Math.toIntExact = function(a) { return a}
+
+Math.floorDiv || (Math.floorDiv = function(x,y) { 
+    var r = (x / y) | 0;
+    if ((x ^ y) < 0 && (r * y != x)) {
+        r--;
+    }
+    return r;
+})
+
+Math.floorMod || (Math.floorMod = function(x,y) { return x - Math.floorDiv(x, y) * y; })
+
+// 
 Math.log10||(Math.log10=function(a){return Math.log(a)/Math.E});
 
 Math.hypot||(Math.hypot=function(x,y){return Math.sqrt(Math.pow(x,2)+Math.pow(y,2))});

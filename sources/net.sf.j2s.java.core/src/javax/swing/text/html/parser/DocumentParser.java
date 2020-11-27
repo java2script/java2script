@@ -187,6 +187,9 @@ public class DocumentParser extends javax.swing.text.html.parser.Parser {
             if (atts != null) {
                 String content = (String)atts.getAttribute(HTML.Attribute.CONTENT);
                 if (content != null) {
+                	// SwingJS can be "text/html; charset=utf-8"
+                    if (content.indexOf(";") >= 0)
+    					content = content.substring(0, content.indexOf(";")).trim();
                     if ("content-type".equalsIgnoreCase((String)atts.getAttribute(HTML.Attribute.HTTPEQUIV))) {
                         if (!content.equalsIgnoreCase("text/html") &&
                                 !content.equalsIgnoreCase("text/plain")) {

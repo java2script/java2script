@@ -283,30 +283,38 @@ public class ScheduledThreadPoolExecutor
                                    executeExistingDelayedTasksAfterShutdown);
     }
 
-    /**
-     * Main execution method for delayed or periodic tasks.  If pool
-     * is shut down, rejects the task. Otherwise adds task to queue
-     * and starts a thread, if necessary, to run it.  (We cannot
-     * prestart the thread to run the task because the task (probably)
-     * shouldn't be run yet,) If the pool is shut down while the task
-     * is being added, cancel and remove it if required by state and
-     * run-after-shutdown parameters.
-     *
-     * @param task the task
-     */
-    private void delayedExecute(RunnableScheduledFuture<?> task) {
-        if (isShutdown())
-            reject(task);
-        else {
-            super.getQueue().add(task);
-            if (isShutdown() &&
-                !canRunInCurrentRunState(task.isPeriodic()) &&
-                remove(task))
-                task.cancel(false);
-            else
-                prestartCoreThread();
-        }
-    }
+	/**
+	 * Main execution method for delayed or periodic tasks. If pool is shut down,
+	 * rejects the task. Otherwise adds task to queue and starts a thread, if
+	 * necessary, to run it. (We cannot prestart the thread to run the task because
+	 * the task (probably) shouldn't be run yet,) If the pool is shut down while the
+	 * task is being added, cancel and remove it if required by state and
+	 * run-after-shutdown parameters.
+	 *
+	 * @param task the task
+	 */
+	@SuppressWarnings("unused")
+	private void delayedExecute(RunnableScheduledFuture<?> task) {
+		if (isShutdown())
+			reject(task);
+		else {
+			if (task.isPeriodic()) {
+				swingjs.JSUtil.notImplemented("Periodic tasks");
+			}
+
+			if (/** @j2sNative true || */
+			false) {
+				new Thread(task).start();
+			} else /** @j2sIgnore */
+			{
+				super.getQueue().add(task);
+				if (isShutdown() && !canRunInCurrentRunState(task.isPeriodic()) && remove(task))
+					task.cancel(false);
+				else
+					prestartCoreThread();
+			}
+		}
+	}
 
     /**
      * Requeues a periodic task unless current run state precludes it.

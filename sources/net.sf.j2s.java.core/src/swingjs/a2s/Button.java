@@ -17,8 +17,8 @@ public class Button extends JButton {
 
 	public Button(String text) {
 		super(text);
-		if (!isBackgroundSet())
-			setBackground(bgcolor);
+		if (!super.isBackgroundSet())
+			super.setBackground(bgcolor);
 		
 	}
 	

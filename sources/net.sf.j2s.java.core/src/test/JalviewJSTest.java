@@ -398,8 +398,15 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 				i + "\n" + ii + "\n" + b1.getInsets() + "\n" + b1.getMargin());
 
 		System.out.println(b1.getPreferredSize());
-		JCheckBox cb3 = new JCheckBox("leading,left-to-right,rt");
+		JCheckBox cb3 = new JCheckBox("leading,left-to-right,rt"
+				//, getImage("test2.png"));
+// TODO -- this did not update the button properly
+		);cb3.setIcon(getImage("test2.png"));
 		cb3.setFont(font);
+		cb3.addActionListener((e)->{
+			System.out.println("cb3 checked " + cb3.isSelected());
+			
+		});
 		cb3.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 		cb3.setHorizontalTextPosition(SwingConstants.LEADING);
 		cb3.setHorizontalAlignment(SwingConstants.TRAILING);
@@ -448,7 +455,10 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		cb3m.setHorizontalTextPosition(SwingConstants.LEADING);
 		cb3m.addActionListener(listener);
 
-		cb4m = new JCheckBoxMenuItem("CB4XXleading,right-to-leftXX") {
+		cb4m = new JCheckBoxMenuItem("CB4XXleading,right-to-leftXX"
+			, getImage("test2.png")
+			) {
+		
 			@Override
 			public void doClick() {
 				super.doClick();
@@ -462,7 +472,9 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		cb4m.setHorizontalTextPosition(SwingConstants.LEADING);
 		cb4m.addActionListener(listener);
 
-		JCheckBoxMenuItem cb5m = new JCheckBoxMenuItem("XXCb5mtrailing,left-to-rightXX") {
+		JCheckBoxMenuItem cb5m = new JCheckBoxMenuItem("XXCb5mtrailing,left-to-rightXX"
+				//) {
+			, getImage("test2.png")) {
 			@Override
 			public void processKeyEvent(KeyEvent e, MenuElement[] path, MenuSelectionManager m) {
 				System.out.println("CB5M JMenu path length=" + path.length + " key=" + e.getKeyCode());

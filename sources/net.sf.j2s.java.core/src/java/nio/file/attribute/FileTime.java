@@ -388,6 +388,8 @@ public final class FileTime
      * href="http://www.w3.org/TR/NOTE-datetime">ISO&nbsp;8601</a> format:
      * <pre>
      *     YYYY-MM-DDThh:mm:ss[.s+]Z
+     *     
+     *     
      * </pre>
      * where "{@code [.s+]}" represents a dot followed by one of more digits
      * for the decimal fraction of a second. It is only present when the decimal
@@ -418,57 +420,61 @@ public final class FileTime
                 secs = toInstant().getEpochSecond();
                 nanos = toInstant().getNano();
             }
-            LocalDateTime ldt;
-            int year = 0;
-            if (secs >= -SECONDS_0000_TO_1970) {
-                // current era
-                long zeroSecs = secs - SECONDS_PER_10000_YEARS + SECONDS_0000_TO_1970;
-                long hi = Math.floorDiv(zeroSecs, SECONDS_PER_10000_YEARS) + 1;
-                long lo = Math.floorMod(zeroSecs, SECONDS_PER_10000_YEARS);
-                ldt = LocalDateTime.ofEpochSecond(lo - SECONDS_0000_TO_1970, nanos, ZoneOffset.UTC);
-                year = ldt.getYear() +  (int)hi * 10000;
-            } else {
-                // before current era
-                long zeroSecs = secs + SECONDS_0000_TO_1970;
-                long hi = zeroSecs / SECONDS_PER_10000_YEARS;
-                long lo = zeroSecs % SECONDS_PER_10000_YEARS;
-                ldt = LocalDateTime.ofEpochSecond(lo - SECONDS_0000_TO_1970, nanos, ZoneOffset.UTC);
-                year = ldt.getYear() + (int)hi * 10000;
-            }
-            if (year <= 0) {
-                year = year - 1;
-            }
-            int fraction = ldt.getNano();
-            StringBuilder sb = new StringBuilder(64);
-            sb.append(year < 0 ? "-" : "");
-            year = Math.abs(year);
-            if (year < 10000) {
-                append(sb, 1000, Math.abs(year));
-            } else {
-                sb.append(String.valueOf(year));
-            }
-            sb.append('-');
-            append(sb, 10, ldt.getMonthValue());
-            sb.append('-');
-            append(sb, 10, ldt.getDayOfMonth());
-            sb.append('T');
-            append(sb, 10, ldt.getHour());
-            sb.append(':');
-            append(sb, 10, ldt.getMinute());
-            sb.append(':');
-            append(sb, 10, ldt.getSecond());
-            if (fraction != 0) {
-                sb.append('.');
-                // adding leading zeros and stripping any trailing zeros
-                int w = 100_000_000;
-                while (fraction % 10 == 0) {
-                    fraction /= 10;
-                    w /= 10;
-                }
-                append(sb, w, fraction);
-            }
-            sb.append('Z');
-            valueAsString = sb.toString();
+            valueAsString = /** @j2sNative ? new Date(secs * 1000).toISOString() || */""; 
+//            
+//            
+//            
+//            LocalDateTime ldt;
+//            int year = 0;
+//            if (secs >= -SECONDS_0000_TO_1970) {
+//                // current era
+//                long zeroSecs = secs - SECONDS_PER_10000_YEARS + SECONDS_0000_TO_1970;
+//                long hi = Math.floorDiv(zeroSecs, SECONDS_PER_10000_YEARS) + 1;
+//                long lo = Math.floorMod(zeroSecs, SECONDS_PER_10000_YEARS);
+//                ldt = LocalDateTime.ofEpochSecond(lo - SECONDS_0000_TO_1970, nanos, ZoneOffset.UTC);
+//                year = ldt.getYear() +  (int)hi * 10000;
+//            } else {
+//                // before current era
+//                long zeroSecs = secs + SECONDS_0000_TO_1970;
+//                long hi = zeroSecs / SECONDS_PER_10000_YEARS;
+//                long lo = zeroSecs % SECONDS_PER_10000_YEARS;
+//                ldt = LocalDateTime.ofEpochSecond(lo - SECONDS_0000_TO_1970, nanos, ZoneOffset.UTC);
+//                year = ldt.getYear() + (int)hi * 10000;
+//            }
+//            if (year <= 0) {
+//                year = year - 1;
+//            }
+//            int fraction = ldt.getNano();
+//            StringBuilder sb = new StringBuilder(64);
+//            sb.append(year < 0 ? "-" : "");
+//            year = Math.abs(year);
+//            if (year < 10000) {
+//                append(sb, 1000, Math.abs(year));
+//            } else {
+//                sb.append(String.valueOf(year));
+//            }
+//            sb.append('-');
+//            append(sb, 10, ldt.getMonthValue());
+//            sb.append('-');
+//            append(sb, 10, ldt.getDayOfMonth());
+//            sb.append('T');
+//            append(sb, 10, ldt.getHour());
+//            sb.append(':');
+//            append(sb, 10, ldt.getMinute());
+//            sb.append(':');
+//            append(sb, 10, ldt.getSecond());
+//            if (fraction != 0) {
+//                sb.append('.');
+//                // adding leading zeros and stripping any trailing zeros
+//                int w = 100_000_000;
+//                while (fraction % 10 == 0) {
+//                    fraction /= 10;
+//                    w /= 10;
+//                }
+//                append(sb, w, fraction);
+//            }
+//            sb.append('Z');
+//            valueAsString = sb.toString();
         }
         return valueAsString;
     }

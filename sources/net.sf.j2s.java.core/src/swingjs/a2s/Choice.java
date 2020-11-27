@@ -11,17 +11,17 @@ public class Choice extends JComboBox {
 	
 	public Choice() {
 		super();
-		setBackground(Color.white);
+		super.setBackground(Color.white);
 	}
 	
 	public void isAWT() {}
 	
 	public void select(int index) {
-		setSelectedIndex(index);
+		super.setSelectedIndex(index);
 	}
 
 	public void select(String key) {
-		setSelectedItem(key);
+		super.setSelectedItem(key);
 	}
 
 	public void add(String label) {
@@ -29,7 +29,7 @@ public class Choice extends JComboBox {
 	}
 
     public int countItems() {
-    	return getItemCount();
+    	return super.getItemCount();
     }
     
     public void addItem(String item) {
@@ -41,16 +41,16 @@ public class Choice extends JComboBox {
     }
 
     public void remove(String item) {
-    	removeItem(item);    	
+    	super.removeItem(item);    	
     }
 
 	public String getItem(int n) {
-		return (String)getItemAt(n);
+		return (String)super.getItemAt(n);
 	}
 	
 	@Override
 	public void removeAll() {
-		removeAllItems();
+		super.removeAllItems();
 	}
 
 //	A2SListener listener = null;
@@ -79,7 +79,7 @@ public class Choice extends JComboBox {
     
     @Override
     public String getActionCommand() {
-    	return (String) getSelectedItem();
+    	return (String) super.getSelectedItem();
     }
 
 

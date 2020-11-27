@@ -6,11 +6,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.Action;
+import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JTextField;
-import javax.swing.text.View;
+import javax.swing.KeyStroke;
 
-import swingjs.JSKeyEvent;
 import swingjs.JSToolkit;
 import swingjs.api.js.DOMNode;
 
@@ -33,12 +33,10 @@ public class JSTextFieldUI extends JSTextUI {
 			allowPaintedBackground = false;
 			// no textNode here, because in input does not have that.
 			focusNode = enableNode = valueNode = domNode = DOMNode.setStyles(
-					newDOMObject("input", id, "type", inputType, "spellcheck", FALSE),
+					newDOMObject("input", id, "size", "1", "type", inputType, "spellcheck", FALSE),
 					"lineHeight", "0.8", "box-sizing", "border-box");
 			bindJSKeyEvents(focusNode, true);
 		}
-		Insets insets = editor.getMargin();
-		setPadding(insets);
 		textListener.checkDocument();
 		setCssFont(setJSText(focusNode, "value", setCurrentText()), getFont());
 		// setTextAlignment();
@@ -68,6 +66,29 @@ public class JSTextFieldUI extends JSTextUI {
 		return true;
 	}
 
+	/**
+	 * ENTER :: JtextField.notifyAction
+	 */
+	private InputMap jsmap;
+
+	/**
+	 * Get the InputMap to use for the UI.
+	 */
+	@Override
+	InputMap getInputMap() {
+		InputMap map = super.getInputMap();
+		if (!isAWT) {
+			if (jsmap == null) {
+				// we need ENTER to fire the action listener for JTextField upon PRESSED, just
+				// after the KeyEvent is processed
+				jsmap = new InputMap();
+				jsmap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0, false), JTextField.notifyAction);
+			}
+			map.setParent(jsmap);
+		}
+		return map;
+	}
+
 	@Override
 	protected String getPropertyPrefix() {
 		return "TextField";
@@ -83,6 +104,14 @@ public class JSTextFieldUI extends JSTextUI {
 	@Override
 	public Dimension getMinimumSize(JComponent jc) {
 		return (isAWT ? JSLabelUI.getMinimumSizePeer(jc, editor) : super.getMinimumSize(jc));
+	}
+
+	@Override
+	public Dimension getMaximumSize(JComponent jc) {
+		Dimension d = super.getMaximumSize(jc);
+		if (!isAWT)
+			d.width = Integer.MAX_VALUE;
+		return d; 
 	}
 
 }

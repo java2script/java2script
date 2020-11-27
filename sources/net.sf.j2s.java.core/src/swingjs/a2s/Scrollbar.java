@@ -19,8 +19,8 @@ public class Scrollbar extends JScrollBar {
 	}
 	public Scrollbar(int orientation, int value, int extent, int min, int max) {
 		super(orientation, Math.max(Math.min(value,  max), min), extent, min, max);
-		setOpaque(true);
-		setBlockIncrement(10);
+		super.setOpaque(true);
+		super.setBlockIncrement(10);
 //		A2SEvent.addListener(this);
 	}
 
@@ -55,7 +55,7 @@ public class Scrollbar extends JScrollBar {
 
 	public void setValueFromUI(int val) {
 		fromUI = true;
-		setValue(val);
+		super.setValue(val);
 		fromUI = false;
 	}
 
@@ -70,7 +70,7 @@ public class Scrollbar extends JScrollBar {
 
 	public void setValueIsAdjustingFromUI(boolean b) {
 		fromUI = true;
-		setValueIsAdjusting(b);
+		super.setValueIsAdjusting(b);
 		fromUI = false;
 	}
 

@@ -22,6 +22,9 @@ import java.awt.event.ActionEvent;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.function.Supplier;
 
 import javax.swing.JButton;
@@ -51,7 +54,21 @@ public class Test_Future extends JFrame {
 		future.thenAccept((value) -> {
 			System.out.format("returned with %s%n", value);
 		});
+		 ExecutorService dialogExecutor = Executors.newSingleThreadExecutor();
+		 Future<?> f = dialogExecutor.submit(() -> {
+			System.out.println("dialog runnable 1");
+		});
+		 dialogExecutor.submit(() -> {
+			System.out.println("dialog runnable 2");
+		});
+		 dialogExecutor.submit(() -> {
+			System.out.println("dialog runnable 3");
+			System.out.println(f.toString() + f.isDone());
+		});
 		System.out.println("CompletionStage started");
+		System.out.println(f.toString() + f.isDone());
+		
+		
 	}
 
 	CompletableFuture<String> longJob() {

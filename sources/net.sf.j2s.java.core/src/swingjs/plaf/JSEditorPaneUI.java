@@ -496,8 +496,9 @@ public class JSEditorPaneUI extends JSTextUI {
 			}
 		} else {
 			String t = text.substring(start, isDiv ? end - 1 : end);
-			if (t.indexOf(' ') >= 0)
-				t = t.replaceAll(" ", "\u00A0");
+			// but this is nbsp; -- no breaks?? Why did I do this?
+			if (t.indexOf("  ") >= 0)
+				t = t.replace("  ", "\u00A0 ");
 			if (t.indexOf('\t') >= 0) {
 				t = t.replaceAll("\t", JSTAB);
 			}

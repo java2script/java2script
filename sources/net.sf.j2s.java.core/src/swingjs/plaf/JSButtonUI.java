@@ -108,6 +108,8 @@ public class JSButtonUI extends JSLightweightUI {
 	protected void createButton() {
 		addCentering(buttonNode);
 		setDataComponent(buttonNode);
+		if (actionNode != null && iconNode != actionNode)
+			setDataComponent(actionNode);
 		setDataComponent(iconNode); // needed for mac safari/chrome
 		setDataComponent(textNode); // needed for mac safari/chrome
 		setEnabled(c.isEnabled());
@@ -180,6 +182,8 @@ public class JSButtonUI extends JSLightweightUI {
 	protected void setMenuItem() {
 		setMenuItem(itemNode);
 		setMenuItem(iconNode);
+		if (actionNode != null && actionNode != iconNode)
+			setMenuItem(actionNode);
 		setMenuItem(textNode);
 		setMenuItem(centeringNode);
 	}
@@ -225,9 +229,9 @@ public class JSButtonUI extends JSLightweightUI {
 		// other controls use a ButtonListener
 		// checkbox or radio menuitem handle themselves
 		if (eventType == KeyEvent.KEY_PRESSED) {
-			
+
 		}
-		if (actionNode == null)
+		if (actionNode == null) {
 			if (menuItem == null) {
 				switch (eventType) {
 				case KeyEvent.KEY_RELEASED:
@@ -245,6 +249,7 @@ public class JSButtonUI extends JSLightweightUI {
 					return HANDLED;
 				}
 			}
+		}
 		return NOT_HANDLED;
 	}
 
@@ -782,7 +787,7 @@ public class JSButtonUI extends JSLightweightUI {
 		if (isSimpleButton) {// && (imageNode == null || button.getText() == null)) {
 			Insets i = getButtonOuterInsets(button);
 			if (!(button.getBorder() instanceof UIResource)) {
-				DOMNode.setTopLeftAbsolute(domNode, i.left, i.top);
+				DOMNode.setTopLeftAbsolute(domNode, i.top, i.left);
 				DOMNode.setSize(domNode, width-i.left - i.right, height-i.top - i.bottom);
 				DOMNode.setStyle(domNode, "border", 
 					i.left + i.right + i.top + i.bottom > 0 ? "none" : null);

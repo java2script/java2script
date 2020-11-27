@@ -41,6 +41,8 @@ public class PropertyChangeSupport {
     private PropertyChangeListenerMap map = new PropertyChangeListenerMap();
 
     boolean doDebug = false;
+    String debugTarget = null;
+    
     /**
      * Constructs a <code>PropertyChangeSupport</code> object.
      *
@@ -55,7 +57,7 @@ public class PropertyChangeSupport {
         source = sourceBean;
 
     
-//    doDebug = source.getClass().getName().indexOf("org.open") >= 0;
+        doDebug = (debugTarget != null && source.getClass().getName().indexOf(debugTarget) >= 0);
     
     
     }
@@ -167,7 +169,7 @@ public class PropertyChangeSupport {
 		
 		if (doDebug) {
 			String target = listener.getClass().getName();
-			if (target.indexOf("org.")>=0)
+			if (target.indexOf(debugTarget)>=0)
 			System.out.println("PropChangeSupport adding " + this.source.getClass().getSimpleName() 
 					+ " " + propertyName + " for " + listener.getClass().getSimpleName());
 			
@@ -315,7 +317,7 @@ public class PropertyChangeSupport {
         		
   if (doDebug) {
 		String target = listeners[i].getClass().getName();
-		if (target.indexOf("org.")>=0)
+		if (target.indexOf(debugTarget)>=0)
 		System.out.println("PChS firing " + this.source.getClass().getSimpleName() 
 				+ " " + event.getPropertyName() + " to " + listeners[i].getClass().getSimpleName());
 
