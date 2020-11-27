@@ -63,10 +63,10 @@ public class Test_Future extends JFrame {
 		});
 		 dialogExecutor.submit(() -> {
 			System.out.println("dialog runnable 3");
-			System.out.println(future.toString());
+			System.out.println(f.toString() + f.isDone());
 		});
 		System.out.println("CompletionStage started");
-		System.out.println(future.toString());
+		System.out.println(f.toString() + f.isDone());
 		
 		
 	}
