@@ -17,6 +17,13 @@
 
 package java.util;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.IntBuffer;
+import java.nio.LongBuffer;
+import java.util.stream.IntStream;
+import java.util.stream.StreamSupport;
+
 import javajs.api.JSONEncodable;
 import javajs.util.SB;
 
@@ -148,7 +155,12 @@ public class BitSet implements Cloneable, JSONEncodable {
     init(nbits);
   }
 
-  protected void init(int nbits) {
+  private BitSet(int[] words) {
+      this.words = words;
+      this.wordsInUse = words.length;
+  }
+
+protected void init(int nbits) {
     // nbits can't be negative; size 0 is OK
     if (nbits < 0)
       throw new NegativeArraySizeException("nbits < 0: " + nbits);
@@ -1010,5 +1022,282 @@ public class BitSet implements Cloneable, JSONEncodable {
            return result;
        }
 
+       /**
+        * Java 1.7
+        * 
+        * @return
+        */
+       public long[] toLongArray() {
+    	   long[] a = new long[words.length];
+    	   for (int i = a.length; --i >= 0;)
+    		   a[i] = words[i];
+    	   return a;
+       }
+       
+       /**
+        * Returns a new bit set containing all the bits in the given long array.
+        *
+        * <p>More precisely,
+        * <br>{@code BitSet.valueOf(longs).get(n) == ((longs[n/64] & (1L<<(n%64))) != 0)}
+        * <br>for all {@code n < 64 * longs.length}.
+        *
+        * <p>This method is equivalent to
+        * {@code BitSet.valueOf(LongBuffer.wrap(longs))}.
+        *
+        * @param longs a long array containing a little-endian representation
+        *        of a sequence of bits to be used as the initial bits of the
+        *        new bit set
+        * @return a {@code BitSet} containing all the bits in the long array
+        * @since 1.7
+        */
+       public static BitSet valueOf(int[] longs) {
+           int n;
+           for (n = longs.length; n > 0 && longs[n - 1] == 0; n--)
+               ;
+           return new BitSet(Arrays.copyOf(longs, n));
+       }
+
+       /**
+        * Returns the index of the nearest bit that is set to {@code true}
+        * that occurs on or before the specified starting index.
+        * If no such bit exists, or if {@code -1} is given as the
+        * starting index, then {@code -1} is returned.
+        *
+        * <p>To iterate over the {@code true} bits in a {@code BitSet},
+        * use the following loop:
+        *
+        *  <pre> {@code
+        * for (int i = bs.length(); (i = bs.previousSetBit(i-1)) >= 0; ) {
+        *     // operate on index i here
+        * }}</pre>
+        *
+        * @param  fromIndex the index to start checking from (inclusive)
+        * @return the index of the previous set bit, or {@code -1} if there
+        *         is no such bit
+        * @throws IndexOutOfBoundsException if the specified index is less
+        *         than {@code -1}
+        * @since  1.7
+        */
+       public int previousSetBit(int fromIndex) {
+           if (fromIndex < 0) {
+               if (fromIndex == -1)
+                   return -1;
+               throw new IndexOutOfBoundsException(
+                   "fromIndex < -1: " + fromIndex);
+           }
+
+           //checkInvariants();
+
+           int u = wordIndex(fromIndex);
+           if (u >= wordsInUse)
+               return length() - 1;
+
+           int word = words[u] & (WORD_MASK >>> -(fromIndex+1));
+
+           while (true) {
+               if (word != 0)
+                   return (u+1) * BITS_PER_WORD - 1 - Integer.numberOfLeadingZeros(word);
+               if (u-- == 0)
+                   return -1;
+               word = words[u];
+           }
+       }
+
+       
+       /**
+        * Returns the index of the nearest bit that is set to {@code false}
+        * that occurs on or before the specified starting index.
+        * If no such bit exists, or if {@code -1} is given as the
+        * starting index, then {@code -1} is returned.
+        *
+        * @param  fromIndex the index to start checking from (inclusive)
+        * @return the index of the previous clear bit, or {@code -1} if there
+        *         is no such bit
+        * @throws IndexOutOfBoundsException if the specified index is less
+        *         than {@code -1}
+        * @since  1.7
+        */
+       public int previousClearBit(int fromIndex) {
+           if (fromIndex < 0) {
+               if (fromIndex == -1)
+                   return -1;
+               throw new IndexOutOfBoundsException(
+                   "fromIndex < -1: " + fromIndex);
+           }
+
+           //checkInvariants();
+
+           int u = wordIndex(fromIndex);
+           if (u >= wordsInUse)
+               return fromIndex;
+
+           int word = ~words[u] & (WORD_MASK >>> -(fromIndex+1));
+
+           while (true) {
+               if (word != 0)
+                   return (u+1) * BITS_PER_WORD -1 - Integer.numberOfLeadingZeros(word);
+               if (u-- == 0)
+                   return -1;
+               word = ~words[u];
+           }
+       }
+
+       /**
+        * Returns a stream of indices for which this {@code BitSet}
+        * contains a bit in the set state. The indices are returned
+        * in order, from lowest to highest. The size of the stream
+        * is the number of bits in the set state, equal to the value
+        * returned by the {@link #cardinality()} method.
+        *
+        * <p>The bit set must remain constant during the execution of the
+        * terminal stream operation.  Otherwise, the result of the terminal
+        * stream operation is undefined.
+        *
+        * @return a stream of integers representing set indices
+        * @since 1.8
+        */
+       public IntStream stream() {
+           class BitSetIterator implements PrimitiveIterator.OfInt {
+               int next = nextSetBit(0);
+
+               @Override
+               public boolean hasNext() {
+                   return next != -1;
+               }
+
+               @Override
+               public int nextInt() {
+                   if (next != -1) {
+                       int ret = next;
+                       next = nextSetBit(next+1);
+                       return ret;
+                   } else {
+                       throw new NoSuchElementException();
+                   }
+               }
+           }
+
+           return StreamSupport.intStream(
+                   () -> Spliterators.spliterator(
+                           new BitSetIterator(), cardinality(),
+                           Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.SORTED),
+                   Spliterator.SIZED | Spliterator.SUBSIZED |
+                           Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.SORTED,
+                   false);
+       }
+
+       public int[] toIntArray() {
+           return Arrays.copyOf(words, wordsInUse);
+       }
+       
+       /**
+        * Returns a new bit set containing all the bits in the given long
+        * buffer between its position and limit.
+        *
+        * <p>More precisely,
+        * <br>{@code BitSet.valueOf(lb).get(n) == ((lb.get(lb.position()+n/64) & (1L<<(n%64))) != 0)}
+        * <br>for all {@code n < 64 * lb.remaining()}.
+        *
+        * <p>The long buffer is not modified by this method, and no
+        * reference to the buffer is retained by the bit set.
+        *
+        * @param lb a long buffer containing a little-endian representation
+        *        of a sequence of bits between its position and limit, to be
+        *        used as the initial bits of the new bit set
+        * @return a {@code BitSet} containing all the bits in the buffer in the
+        *         specified range
+        * @since 1.7
+        */
+       public static BitSet valueOf(IntBuffer lb) {
+           lb = lb.slice();
+           int n;
+           for (n = lb.remaining(); n > 0 && lb.get(n - 1) == 0; n--)
+               ;
+           int[] words = new int[n];
+           lb.get(words);
+           return new BitSet(words);
+       }
+
+       /**
+        * Returns a new bit set containing all the bits in the given byte array.
+        *
+        * <p>More precisely,
+        * <br>{@code BitSet.valueOf(bytes).get(n) == ((bytes[n/8] & (1<<(n%8))) != 0)}
+        * <br>for all {@code n <  8 * bytes.length}.
+        *
+        * <p>This method is equivalent to
+        * {@code BitSet.valueOf(ByteBuffer.wrap(bytes))}.
+        *
+        * @param bytes a byte array containing a little-endian
+        *        representation of a sequence of bits to be used as the
+        *        initial bits of the new bit set
+        * @return a {@code BitSet} containing all the bits in the byte array
+        * @since 1.7
+        */
+       public static BitSet valueOf(byte[] bytes) {
+           return BitSet.valueOf(ByteBuffer.wrap(bytes));
+       }
+
+       /**
+        * Returns a new bit set containing all the bits in the given byte
+        * buffer between its position and limit.
+        *
+        * <p>More precisely,
+        * <br>{@code BitSet.valueOf(bb).get(n) == ((bb.get(bb.position()+n/8) & (1<<(n%8))) != 0)}
+        * <br>for all {@code n < 8 * bb.remaining()}.
+        *
+        * <p>The byte buffer is not modified by this method, and no
+        * reference to the buffer is retained by the bit set.
+        *
+        * @param bb a byte buffer containing a little-endian representation
+        *        of a sequence of bits between its position and limit, to be
+        *        used as the initial bits of the new bit set
+        * @return a {@code BitSet} containing all the bits in the buffer in the
+        *         specified range
+        * @since 1.7
+        */
+       public static BitSet valueOf(ByteBuffer bb) {
+           bb = bb.slice().order(ByteOrder.LITTLE_ENDIAN);
+           int n;
+           for (n = bb.remaining(); n > 0 && bb.get(n - 1) == 0; n--)
+               ;
+           int[] words = new int[(n + 7) / 4];
+           bb.limit(n);
+           int i = 0;
+           while (bb.remaining() >= 4)
+               words[i++] = bb.getInt();
+           for (int remaining = bb.remaining(), j = 0; j < remaining; j++)
+               words[i] |= (bb.get() & 0xffL) << (j << 3);
+           return new BitSet(words);
+       }
+
+       /**
+        * Returns a new byte array containing all the bits in this bit set.
+        *
+        * <p>More precisely, if
+        * <br>{@code byte[] bytes = s.toByteArray();}
+        * <br>then {@code bytes.length == (s.length()+7)/8} and
+        * <br>{@code s.get(n) == ((bytes[n/8] & (1<<(n%8))) != 0)}
+        * <br>for all {@code n < 8 * bytes.length}.
+        *
+        * @return a byte array containing a little-endian representation
+        *         of all the bits in this bit set
+        * @since 1.7
+       */
+       public byte[] toByteArray() {
+           int n = wordsInUse;
+           if (n == 0)
+               return new byte[0];
+           int len = 4 * (n-1);
+           for (int x = words[n - 1]; x != 0; x >>>= 8)
+               len++;
+           byte[] bytes = new byte[len];
+           ByteBuffer bb = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN);
+           for (int i = 0; i < n - 1; i++)
+               bb.putInt(words[i]);
+           for (int x = words[n - 1]; x != 0; x >>>= 8)
+               bb.put((byte) (x & 0xff));
+           return bytes;
+       }
 
 }
