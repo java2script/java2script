@@ -396,7 +396,7 @@ public class JSUtil implements JSUtilI {
 		try {
 			BufferedInputStream bis = new BufferedInputStream(cl.getResourceAsStream(zipFileName));
 			String prefix = J2S.getResourcePath(null, true); // will end with /
-			fileList = getZipTools().cacheZipContentsStatic(bis, prefix, mapByteData, false);
+			fileList = getZipTools().cacheZipContents(bis, prefix, mapByteData, false);
 		} catch (Throwable e) {
 			System.out.println("JSUtil could not cache files from " + zipFileName);
 			return;

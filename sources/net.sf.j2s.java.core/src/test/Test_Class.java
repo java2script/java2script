@@ -26,6 +26,22 @@ import static java.lang.String.format
 ;
 class Test_Class extends Test_Class2<Integer> {
 
+	public static String $(String a) {
+		System.out.println("$ " + a);
+		return "$" + a;
+	}
+
+	public static String S(String a) {
+		System.out.println("S " + a);
+		return "S" + a;
+	}
+
+	static {
+		
+		System.out.println(new NullPointerException($("test")));
+		System.out.println(new NullPointerException(S("test")));
+		
+	}
 	static class TestStatic {
 		
 		static String sayHello() { return "Hello there"; }

@@ -19,7 +19,6 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 
 import javajs.api.js.J2SObjectInterface;
-import swingjs.JSUtil;
 import swingjs.api.JSUtilI;
 
 /**
@@ -384,8 +383,10 @@ public class AjaxURLConnection extends HttpURLConnection {
 		return streamOut = new ByteArrayOutputStream();
 	}
 
-	@Override
+	@SuppressWarnings({ "null", "unused" })
+  @Override
 	public InputStream getInputStream() throws FileNotFoundException {
+	  InputStream is = /** @j2sNative this.is || */null;
 		if (is != null)
 			return is;
 		responseCode = -1;
@@ -395,7 +396,7 @@ public class AjaxURLConnection extends HttpURLConnection {
 		return is;
 	}
 
-	@Override
+	// dont @Override
 	public void getBytesAsync(Function<byte[], Void> whenDone) {
 		getInputStreamAsync(new Function<InputStream, Void>() {
 
@@ -403,10 +404,11 @@ public class AjaxURLConnection extends HttpURLConnection {
 			public Void apply(InputStream is) {
 				try {
 					if (is != null) {
-						whenDone.apply(is.readAllBytes());
+					  byte[] bytes = /** @j2sNative is.readAllBytes$() || */null;
+						whenDone.apply(bytes);
 						return null;
 					}
-				} catch (IOException e) {
+				} catch (Exception e) {
 				}
 				whenDone.apply(null);
 				return null;
@@ -416,7 +418,9 @@ public class AjaxURLConnection extends HttpURLConnection {
 
 	}
 
-	private void getInputStreamAsync(Function<InputStream, Void> whenDone) {
+	@SuppressWarnings({ "null", "unused" })
+  private void getInputStreamAsync(Function<InputStream, Void> whenDone) {
+	  InputStream is = /** @j2sNative is = this.is || */null;
 		if (is != null) {
 			whenDone.apply(is);
 			return;
@@ -488,8 +492,9 @@ public class AjaxURLConnection extends HttpURLConnection {
 			return null;
 		@SuppressWarnings("unused")
 		URL url = this.url;
-		if (data instanceof byte[])
-			url._streamData = data;
+		if (data instanceof byte[]) {
+			/** @j2sNative url._streamData = data */;
+		}
 		boolean isAjax = /** @j2sNative url.ajax || */
 				false;
 		BufferedInputStream bis = getBIS(data, isAjax);
