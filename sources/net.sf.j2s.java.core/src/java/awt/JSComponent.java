@@ -27,6 +27,7 @@
  */
 package java.awt;
 
+import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.awt.peer.ComponentPeer;
@@ -35,7 +36,6 @@ import java.beans.PropertyChangeListener;
 import java.util.Arrays;
 
 import javax.swing.Action;
-import javax.swing.JApplet;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -53,6 +53,9 @@ import javax.swing.plaf.UIResource;
 import swingjs.JSAppletViewer;
 import swingjs.JSFrameViewer;
 import swingjs.JSGraphics2D;
+import swingjs.JSKeyEvent;
+import swingjs.JSMouse;
+import swingjs.JSToolkit;
 import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Canvas;
@@ -859,6 +862,72 @@ public abstract class JSComponent extends Component {
 				秘repaint();
 			}
 		}
+	}
+
+	public Object 秘getLastKeyListener() {
+		AWTEventMulticaster k = (AWTEventMulticaster) keyListener;
+		return (k == null ? null : /** @j2sNative k.b || k.a || */k);
+	}
+
+	public void 秘setProxy(Container parent) {
+		if (parent != null) {
+			long mask = 0;
+			if ((mouseListener != null) || ((eventMask & AWTEvent.MOUSE_EVENT_MASK) != 0)) {
+				mask |= AWTEvent.MOUSE_EVENT_MASK;
+			}
+			if ((mouseMotionListener != null) || ((eventMask & AWTEvent.MOUSE_MOTION_EVENT_MASK) != 0)) {
+				mask |= AWTEvent.MOUSE_MOTION_EVENT_MASK;
+			}
+			if ((mouseWheelListener != null) || ((eventMask & AWTEvent.MOUSE_WHEEL_EVENT_MASK) != 0)) {
+				mask |= AWTEvent.MOUSE_WHEEL_EVENT_MASK;
+			}
+			if (focusListener != null || (eventMask & AWTEvent.FOCUS_EVENT_MASK) != 0) {
+				mask |= AWTEvent.FOCUS_EVENT_MASK;
+			}
+			if (keyListener != null || (eventMask & AWTEvent.KEY_EVENT_MASK) != 0) {
+				mask |= AWTEvent.KEY_EVENT_MASK;
+			}
+			if (mask != 0) {
+				parent.proxyEnableEvents(mask);
+			}
+		}
+	}
+
+	/**
+	 * From j2sApplet vis JSMouse
+	 * @param c 
+	 * 
+	 * @param id
+	 * @param modifiers
+	 * @param jqevent
+	 * @param time
+	 * @return
+	 */
+	public static boolean 秘dispatchKeyEvent(JComponent c, int id, Object jqevent, long time) {
+		if (id == 0)
+			id = JSMouse.fixEventType(jqevent, 0);
+		if (id == KeyEvent.KEY_TYPED) {
+			// HTML5 keypress is no longer reliable
+			JSToolkit.consumeEvent(jqevent);
+			return false;
+		}
+		if (c != null) {
+			JSComponentUI ui = c.秘getUI();
+			KeyEvent e = JSKeyEvent.newJSKeyEvent(c, jqevent, id, false);
+			// create our own KEY_PRESSED event
+			c.dispatchEvent(e);
+			if (!ui.j2sDoPropagate)
+				JSToolkit.consumeEvent(e);
+			if (!e.isConsumed() && id == KeyEvent.KEY_PRESSED && e.getKeyChar() != KeyEvent.CHAR_UNDEFINED) {
+				e = JSKeyEvent.newJSKeyEvent(c, jqevent, KeyEvent.KEY_TYPED, false);
+				// yield to keyboard focus manager
+				c.dispatchEvent(e);
+	
+				if (!ui.j2sDoPropagate)
+					JSToolkit.consumeEvent(e);
+			}
+		}
+		return true;
 	}
 
 }

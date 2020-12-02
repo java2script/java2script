@@ -96,6 +96,7 @@ public class Test_Applet_2 extends JApplet {
 
 		
 		JPopupMenu pmenu = new JPopupMenu();
+		pmenu.setInvoker(canvas);
 		JMenuItem b = new JMenuItem("testing1");
 		b.addActionListener(listener);
 		pmenu.add(b);
@@ -125,7 +126,8 @@ public class Test_Applet_2 extends JApplet {
 				int n = pmenu.getComponentCount();
 				if (n > 1)
 					pmenu.remove(n - 1);
-				pmenu.show(Test_Applet_2.this, e.getX(), e.getY() - 10);
+				System.out.println(canvas.getBounds());
+				pmenu.show(Test_Applet_2.this, e.getX() + canvas.getX(), e.getY() + canvas.getY());
 			}
 
 			@Override
@@ -188,17 +190,17 @@ public class Test_Applet_2 extends JApplet {
 		}
 	}
 
-	public static void main(String args[]) {
-		JFrame f = new JFrame("Tanabe-Sugano");
-		Test_Applet_2 tanabe = new Test_Applet_2();
-		tanabe.init();
-		tanabe.start();
-		f.add("Center", tanabe);
-		f.setBackground(Color.white);
-		f.pack();
-		f.setVisible(true);
-    f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	}
+//	public static void main(String args[]) {
+//		JFrame f = new JFrame("Tanabe-Sugano");
+//		Test_Applet_2 tanabe = new Test_Applet_2();
+//		tanabe.init();
+//		tanabe.start();
+//		f.add("Center", tanabe);
+//		f.setBackground(Color.white);
+//		f.pack();
+//		f.setVisible(true);
+//    f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//	}
 
 	@Override
 	public String getAppletInfo() {

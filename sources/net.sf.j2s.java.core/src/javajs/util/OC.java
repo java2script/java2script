@@ -79,7 +79,7 @@ public class OC extends OutputStream implements GenericOutputChannel {
 	 *                   function name for fileName
 	 * @param asWriter   string-based
 	 * @param os         the desired target OutputStream - not the calling stream!
-	 * @return
+	 * @return OC
 	 */
 	public OC setParams(BytePoster bytePoster, String fileName, boolean asWriter, OutputStream os) {
 		this.bytePoster = bytePoster;
@@ -293,81 +293,79 @@ public class OC extends OutputStream implements GenericOutputChannel {
 		closeChannel();
 	}
 
-	@Override
-	@SuppressWarnings({ "unused" })
-	public String closeChannel() {
-		if (closed)
-			return null;
-		// can't cancel file writers
-		try {
-			if (bw != null) {
-				bw.flush();
-				bw.close();
-			} else if (os != null) {
-				os.flush();
-				os.close();
-			}
-			if (os0 != null && isCanceled) {
-				os0.flush();
-				os0.close();
-			}
-		} catch (Exception e) {
-			// ignore closing issues
-		}
-		if (isCanceled) {
-			closed = true;
-			return null;
-		}
-		if (fileName == null) {
-			if (isBase64) {
-				String s = getBase64();
-				if (os0 != null) {
-					os = os0;
-					append(s);
-				}
-				sb = new SB();
-				sb.append(s);
-				isBase64 = false;
-				return closeChannel();
-			}
-			return (sb == null ? null : sb.toString());
-		}
-		closed = true;
-		if (!isLocalFile) {
-			String ret = postByteArray(); // unsigned applet could do this
-			if (ret.startsWith("java.net"))
-				byteCount = -1;
-			return ret;
-		}
-		J2SObjectInterface J2S = null;
-		Object _function = null;
-		/**
-		 * @j2sNative
-		 * 
-		 * 			J2S = self.J2S || self.Jmol; _function = (typeof this.fileName ==
-		 *            "function" ? this.fileName : null);
-		 * 
-		 */
-		if (J2S != null && !isTemp) {
+  @Override
+  @SuppressWarnings({ "unused", "null" })
+  public String closeChannel() {
+    if (closed)
+      return null;
+    // can't cancel file writers
+    try {
+      if (bw != null) {
+        bw.flush();
+        bw.close();
+      } else if (os != null) {
+        os.flush();
+        os.close();
+      }
+      if (os0 != null && isCanceled) {
+        os0.flush();
+        os0.close();
+      }
+    } catch (Exception e) {
+      // ignore closing issues
+    }
+    if (isCanceled) {
+      closed = true;
+      return null;
+    }
+    if (fileName == null) {
+      if (isBase64) {
+        String s = getBase64();
+        if (os0 != null) {
+          os = os0;
+          append(s);
+        }
+        sb = new SB();
+        sb.append(s);
+        isBase64 = false;
+        return closeChannel();
+      }
+      return (sb == null ? null : sb.toString());
+    }
+    closed = true;
+    if (!isLocalFile) {
+      String ret = postByteArray(); // unsigned applet could do this
+      if (ret.startsWith("java.net"))
+        byteCount = -1;
+      return ret;
+    }
+    J2SObjectInterface J2S = null;
+    Object _function = null;
+    boolean isSwingJS = false;
+    /**
+     * @j2sNative isSwingJS = !!self.J2S; J2S = self.J2S || self.Jmol; _function
+     *            = (typeof this.fileName == "function" ? this.fileName : null);
+     * 
+     */
+    if (J2S != null && !isTemp) {
 
-			// action here generally will be for the browser to display a download message
-			// temp files will not be sent this way.
-			Object data = (sb == null ? toByteArray() : sb.toString());
-			if (_function == null) {
-				Object info = /** @j2sNative { isBinary : (this.sb == null) } || */
-						null;
-				String mimetype = null;
-				if (bytes != null && Rdr.isZipB(bytes)) {
-					mimetype = "application/zip";
-				}
-
-				J2S.doAjax(fileName, mimetype, data, info);
-			} else {
-				J2S.applyFunc(_function, data);
-			}
-		}
-		return null;
-	}
+      // action here generally will be for the browser to display a download message
+      // temp files will not be sent this way.
+      Object data = (sb == null ? toByteArray() : sb.toString());
+      if (_function != null) {
+        J2S.applyFunc(_function, data);
+      } else if (!isSwingJS) {
+          Object info = /** @j2sNative { isBinary : (this.sb == null) } || */
+              null;
+          String mimetype = null;
+          if (bytes != null && Rdr.isZipB(bytes)) {
+            mimetype = "application/zip";
+          }
+          J2S.doAjax(fileName, mimetype, data, info);
+      }
+    }
+    return null;
+  }
 
 	public boolean isBase64() {
 		return isBase64;

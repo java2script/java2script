@@ -52,7 +52,7 @@ public abstract class JSThread extends Thread {
 		
 		/**
 		 * @j2sNative
-		 * 
+		 *            this.started = true;
 		 * 			  Clazz.load("swingjs.JSToolkit").dispatch$O$I$I(this, 1, 0);
 		 * 
 		 */
@@ -157,8 +157,10 @@ public abstract class JSThread extends Thread {
 			onException(e);
 			state = DONE;
 		} finally {
-			if (executeFinally)
+			if (executeFinally) {
+				executeFinally = false;
 				doFinally();
+			}
 		}
 		// normal exit
 	}

@@ -10,13 +10,13 @@ import java.util.EventObject;
 import javax.swing.JComponent;
 import javax.swing.JList;
 
-import swingjs.api.js.JSFunction;
 import swingjs.JSEvent;
 import swingjs.JSKeyEvent;
 import swingjs.JSMouse;
 import swingjs.JSToolkit;
 import swingjs.api.js.DOMNode;
 import swingjs.api.js.JQueryObject;
+import swingjs.api.js.JSFunction;
 
 class JSComboPopupList extends JList {
 
