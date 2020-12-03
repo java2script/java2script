@@ -541,6 +541,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * bounded by CAPACITY.
      */
     private volatile int maximumPoolSize;
+	private boolean stopped;
 
     /**
      * The default rejected execution handler
@@ -689,34 +690,35 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * allow access from ScheduledThreadPoolExecutor.
      */
     final void tryTerminate() {
-        for (;;) {
-            int c = ctl.get();
-            if (isRunning(c) ||
-                runStateAtLeast(c, TIDYING) ||
-                (runStateOf(c) == SHUTDOWN && ! workQueue.isEmpty()))
-                return;
-            if (workerCountOf(c) != 0) { // Eligible to terminate
-                interruptIdleWorkers(ONLY_ONE);
-                return;
-            }
-
-            final ReentrantLock mainLock = this.mainLock;
-            mainLock.lock();
-            try {
-                if (ctl.compareAndSet(c, ctlOf(TIDYING, 0))) {
-                    try {
-                        terminated();
-                    } finally {
-                        ctl.set(ctlOf(TERMINATED, 0));
-                        termination.signalAll();
-                    }
-                    return;
-                }
-            } finally {
-                mainLock.unlock();
-            }
-            // else retry on failed CAS
-        }
+    	terminated();
+//        for (;;) {
+//            int c = ctl.get();
+//            if (isRunning(c) ||
+//                runStateAtLeast(c, TIDYING) ||
+//                (runStateOf(c) == SHUTDOWN && ! workQueue.isEmpty()))
+//                return;
+//            if (workerCountOf(c) != 0) { // Eligible to terminate
+//                interruptIdleWorkers(ONLY_ONE);
+//                return;
+//            }
+//
+//            final ReentrantLock mainLock = this.mainLock;
+//            mainLock.lock();
+//            try {
+//                if (ctl.compareAndSet(c, ctlOf(TIDYING, 0))) {
+//                    try {
+//                        terminated();
+//                    } finally {
+//                        ctl.set(ctlOf(TERMINATED, 0));
+//                        termination.signalAll();
+//                    }
+//                    return;
+//                }
+//            } finally {
+//                mainLock.unlock();
+//            }
+//            // else retry on failed CAS
+//        }
     }
 
     /*
@@ -841,8 +843,9 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * @param shutdownOK true if should return true if SHUTDOWN
      */
     final boolean isRunningOrShutdown(boolean shutdownOK) {
-        int rs = runStateOf(ctl.get());
-        return rs == RUNNING || (rs == SHUTDOWN && shutdownOK);
+    	return (shutdownOK || !stopped);
+//        int rs = runStateOf(ctl.get());
+//        return rs == RUNNING || (rs == SHUTDOWN && shutdownOK);
     }
 
     /**
@@ -1394,16 +1397,17 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * @throws SecurityException {@inheritDoc}
      */
     public void shutdown() {
-        final ReentrantLock mainLock = this.mainLock;
-        mainLock.lock();
-        try {
-            checkShutdownAccess();
-            advanceRunState(SHUTDOWN);
+//        final ReentrantLock mainLock = this.mainLock;
+//        mainLock.lock();
+//        try {
+//            checkShutdownAccess();
+//            advanceRunState(SHUTDOWN);
+    	stopped = true;
             interruptIdleWorkers();
             onShutdown(); // hook for ScheduledThreadPoolExecutor
-        } finally {
-            mainLock.unlock();
-        }
+//        } finally {
+//            mainLock.unlock();
+//        }
         tryTerminate();
     }
 
@@ -1437,7 +1441,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
     }
 
     public boolean isShutdown() {
-        return ! isRunning(ctl.get());
+        return stopped;//! isRunning(ctl.get());
     }
 
     /**
