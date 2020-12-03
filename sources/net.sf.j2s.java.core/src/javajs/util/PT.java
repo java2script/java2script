@@ -1144,7 +1144,7 @@ public class PT {
         if (strFormat.charAt(ich) == '.') {
           ++ich;
           if ((ch = strFormat.charAt(ich)) == '-') {
-            isExponential = (strT == null);
+            isExponential = true;//(strT == null);
             ++ich;
           } 
           if ((ch = strFormat.charAt(ich)) >= '0' && ch <= '9') {
@@ -1165,7 +1165,7 @@ public class PT {
           strLabel += formatF(floatT, width, precision, alignLeft,
               zeroPad);
         else if (strT != null)  // 'd' 'i' or 's'
-          strLabel += formatS(strT, width, precision, alignLeft,
+          strLabel += formatS(strT, width, precision < 0 ? precision - 1 : precision, alignLeft,
               zeroPad);
         else if (!Double.isNaN(doubleT)) // 'e'
           strLabel += formatD(doubleT, width, precision - 1, alignLeft,

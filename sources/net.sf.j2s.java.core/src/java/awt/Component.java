@@ -3797,7 +3797,7 @@ public abstract class Component implements ImageObserver/*
 			 return;
 		 }
 
-		if (!e.focusManagerIsDispatching) {
+		 if (!e.focusManagerIsDispatching) {
 			// Invoke the private focus retargeting method which provides
 			// lightweight Component support
 			if (e.isPosted) {
@@ -5921,27 +5921,7 @@ public abstract class Component implements ImageObserver/*
 			// able to get window-related events by itself. If any
 			// have been enabled, then the nearest native container must
 			// be enabled.
-			if (parent != null) {
-				long mask = 0;
-				if ((mouseListener != null) || ((eventMask & AWTEvent.MOUSE_EVENT_MASK) != 0)) {
-					mask |= AWTEvent.MOUSE_EVENT_MASK;
-				}
-				if ((mouseMotionListener != null) || ((eventMask & AWTEvent.MOUSE_MOTION_EVENT_MASK) != 0)) {
-					mask |= AWTEvent.MOUSE_MOTION_EVENT_MASK;
-				}
-				if ((mouseWheelListener != null) || ((eventMask & AWTEvent.MOUSE_WHEEL_EVENT_MASK) != 0)) {
-					mask |= AWTEvent.MOUSE_WHEEL_EVENT_MASK;
-				}
-				if (focusListener != null || (eventMask & AWTEvent.FOCUS_EVENT_MASK) != 0) {
-					mask |= AWTEvent.FOCUS_EVENT_MASK;
-				}
-				if (keyListener != null || (eventMask & AWTEvent.KEY_EVENT_MASK) != 0) {
-					mask |= AWTEvent.KEY_EVENT_MASK;
-				}
-				if (mask != 0) {
-					parent.proxyEnableEvents(mask);
-				}
-			}
+			((JSComponent) this).秘setProxy(parent);
 			// } else {
 			// // It's native. If the parent is lightweight it
 			// // will need some help.

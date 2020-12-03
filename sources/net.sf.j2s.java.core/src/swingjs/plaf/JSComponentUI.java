@@ -127,14 +127,11 @@ import swingjs.api.js.JSFunction;
  * to point to themselves. This allows the control an option to handle the raw jQuery
  * event directly, bypassing the Java dispatch system entirely, if desired.
  * 
- * TODO: We should not use this method. It bypasses the normal Java LightWeightDispatcher,
- * which has a protected processEvent(AWTEvent) method that 
- * users can use to do custom processing. Maybe think about this more?
- * 
  * This method is used for specific operations, including JFrame closing,
  * JComboBox selection, and JSText key action handling. This connection is set up in
  * JSComponentUI.setDataUI() and handled by overriding
- * JSComponentUI.handleJSEvent().
+ * JSComponentUI.handleJSEvent().  The handleJSEvent will pass on to
+ * the standard Java key event processing mechanism.  
  * 
  * Finally, some UIs (JSSliderUI and JSPopupMenuUI) set up jQueryEvents that
  * call back to themselves or handle some internal event processing themselves.
@@ -891,12 +888,6 @@ public class JSComponentUI extends ComponentUI
 		J2S.setMouse(domNode, true);
 	}
 
-//	protected boolean handleTab(Object jqevent) {
-//		JSKeyEvent.dispatchKeyEvent(jc, KeyEvent.KEY_PRESSED, 0, jqevent, System.currentTimeMillis());
-//		return CONSUMED;
-//	}
-//
-
 	/**
 	 * Fired by JSComponent when key listeners are registered.
 	 * Will NOT be created from ui.installUI() since component.ui 
@@ -1168,11 +1159,21 @@ public class JSComponentUI extends ComponentUI
 	 * 
 	 * @param jqevent
 	 */
-	void setIgnoreEvent(Object jqevent) {
+	public static void setIgnoreEvent(Object jqevent) {
 		/**
 		 * @j2sNative jqevent.originalEvent.xhandled = true;
 		 */
 	}
+	
+	public static boolean isIgnoreEvent(Object jqevent) {
+		/**
+		 * @j2sNative return jqevent.originalEvent.xhandled;
+		 */ 
+		{
+			 return false;
+		 }
+	}
+
 	/**
 	 * Allows mouse and keyboard handling via an overridden method
 	 * 
@@ -1354,7 +1355,7 @@ public class JSComponentUI extends ComponentUI
 	/**
 	 * plaf ButtonListener and TextListener will call this to update common
 	 * properties such as "text".
-	 * @param e TODO
+	 * @param e 
 	 * @param prop
 	 */
 	void propertyChangedFromListener(PropertyChangeEvent e, String prop) {
@@ -1481,7 +1482,6 @@ public class JSComponentUI extends ComponentUI
 	 * FALSE when that is complete.
 	 * 
 	 */
-	@SuppressWarnings("unused")
 	protected boolean layingOut;
 
 	/**
@@ -1868,7 +1868,7 @@ public class JSComponentUI extends ComponentUI
 	 * must be mutable
 	 * 
 	 * @param addingCSS see subclasses
-	 * @param mutable TODO
+	 * @param mutable 
 	 * 
 	 * @return
 	 */
@@ -1983,6 +1983,7 @@ public class JSComponentUI extends ComponentUI
 		outerNode = wrap("div", id, domNode);
 		@SuppressWarnings("unused")
 		JComponent c = jc;
+		@SuppressWarnings("unused")
 		String name = jc.getName();
 		String s = (/** @j2sNative name || c.__CLASS_NAME__|| */"");
 		outerNode.setAttribute("name", s);
@@ -2477,8 +2478,8 @@ public class JSComponentUI extends ComponentUI
 		if (iconNode == null && textNode == null)
 			return;
 
-		// TODO so, actually, icons replace the checkbox or radio button, they do not
-		// complement them
+		// icons replace the checkbox or radio button
+		// (they do not complement them) only on menu items
 		setMnemonic(-1);
 		actualWidth = actualHeight = 0;
 		// need to know if HTML here
@@ -2550,7 +2551,7 @@ public class JSComponentUI extends ComponentUI
 				DOMNode.setStyle(textNode, "white-space", "nowrap");
 			if (icon == null) {
 				// tool tip does not allow text alignment
-				// TODO menuitem checkboxes DO appear with iconNodes.
+				// menuitem checkboxes DO appear with iconNodes.
 				if (iconNode != null && allowTextAlignment 
 						&& isMenuItem 
 						&& actionNode == null 
@@ -2714,7 +2715,7 @@ public class JSComponentUI extends ComponentUI
 			margins = zeroInsets;
 		Insets myInsets = (isLabel || !isSimpleButton || justGetPreferred ? zeroInsets : getButtonOuterInsets(b));
 		int h = (dimText == null ? 0 : dimText.height);
-		int ah = (wAction == 0 ? 0 : 15);
+		//int ah = (wAction == 0 ? 0 : 15);
 		int ih = (wAction == 0 && actionNode != null  ? 15 : dimIcon == null ? 0 : dimIcon.height);
 		int hCtr = Math.max(h, ih);
 		int wCtr = wIcon + gap + wAction + wText;

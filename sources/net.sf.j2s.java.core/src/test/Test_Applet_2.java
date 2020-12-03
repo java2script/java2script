@@ -37,6 +37,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -82,6 +83,81 @@ public class Test_Applet_2 extends JApplet {
 //		System.out.println( controls.bg0.getForeground()); 
 //				+ " "+ controls.bg0.getBackground() 
 	//			+ " \n cb " + controls.getForeground() + " cf " + controls.getBackground());z
+		
+		
+		ActionListener listener = new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.err.println("actionPerformed: "  + " " + e);
+			}
+
+		};
+
+		
+		JPopupMenu pmenu = new JPopupMenu();
+		pmenu.setInvoker(canvas);
+		JMenuItem b = new JMenuItem("testing1");
+		b.addActionListener(listener);
+		pmenu.add(b);
+		b = new JMenuItem("testing2");
+		b.addActionListener(listener);
+		pmenu.add(b);
+		b = new JMenuItem("testing3");
+		b.addActionListener(listener);
+		pmenu.add(b);
+		final JMenuItem bb = b;
+
+		canvas.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+
+//				frame.dispose();
+//				System.out.println("frame after dispose " + frame.isValid());
+//				frame.show();
+//				
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if (e.getButton() != MouseEvent.BUTTON3)
+					return;
+				int n = pmenu.getComponentCount();
+				if (n > 1)
+					pmenu.remove(n - 1);
+				System.out.println(canvas.getBounds());
+				pmenu.show(Test_Applet_2.this, e.getX() + canvas.getX(), e.getY() + canvas.getY());
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+//				//System.out.println(e.getButton());
+//				if (e.getButton() != MouseEvent.BUTTON3)
+//					return;
+//				int n = pmenu.getComponentCount();
+//				if (n > 1)
+//					pmenu.remove(n - 1);
+//				pmenu.show(frame, e.getX(), e.getY() - 10);
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+		});
+
+
+		
+		
 	}
 
 	@Override
@@ -114,17 +190,17 @@ public class Test_Applet_2 extends JApplet {
 		}
 	}
 
-	public static void main(String args[]) {
-		JFrame f = new JFrame("Tanabe-Sugano");
-		Test_Applet_2 tanabe = new Test_Applet_2();
-		tanabe.init();
-		tanabe.start();
-		f.add("Center", tanabe);
-		f.setBackground(Color.white);
-		f.pack();
-		f.setVisible(true);
-    f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	}
+//	public static void main(String args[]) {
+//		JFrame f = new JFrame("Tanabe-Sugano");
+//		Test_Applet_2 tanabe = new Test_Applet_2();
+//		tanabe.init();
+//		tanabe.start();
+//		f.add("Center", tanabe);
+//		f.setBackground(Color.white);
+//		f.pack();
+//		f.setVisible(true);
+//    f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//	}
 
 	@Override
 	public String getAppletInfo() {

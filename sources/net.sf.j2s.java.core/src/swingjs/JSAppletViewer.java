@@ -477,6 +477,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 				// added 7/13/17; applet background was not painting
 				// if setContentPane() was used
 				applet.setVisible(true);
+				applet.秘setProxy(applet);
 				applet.validate(); // one last validation necessary for PolyhedronApplet
 				showAppletStatus("ready");
 				JSUtil.readyCallback(appletName, fullName, applet, this);

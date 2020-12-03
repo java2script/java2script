@@ -228,7 +228,7 @@ class EventDispatchThread extends JSThread {
 		this.filter = filter;
 		this.cond = cond;
 		this.id = id;
-		run1(INIT);
+		super.run1(INIT);
 	}
 
 //	@Override
@@ -272,8 +272,11 @@ class EventDispatchThread extends JSThread {
 	@SuppressWarnings("unused")
 	protected void dispatchAndReturn(Runnable r, int mode) {
 		JSThread me = this;
-		JSFunction f = /** @j2sNative function() {r.run$();me.run1$I(mode)}|| */ null;
-		JSToolkit.dispatch(f, 0, 0);
+		JSFunction f = /** @j2sNative function() {
+		  r.run$();
+		  me.run1$I(mode);
+		 }|| */ null;
+		JSToolkit.dispatch(f, 1, 0);
 	}
 
 	private void finish() {

@@ -21,8 +21,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import javajs.http.HttpClient.HttpRequest;
-
 
 /**
  * SwingJS implementation of javajs.http.HttpClient and associated classes.
@@ -114,6 +112,7 @@ class SimpleHttpClient implements HttpClient {
 
 		/**
 		 * JavaScript SwingJS-only method, not available in Java, only JavaScript
+		 * @param whenDone 
 		 */
 		// not @Override, because that method is only in SwingJS, and this class is portable
 		public abstract void getBytesAsync(Function<byte[], Void> whenDone);
@@ -156,12 +155,12 @@ class SimpleHttpClient implements HttpClient {
 		/**
 		 * the source URI
 		 */
-		private URI uri;
+		URI uri;
 
 		/**
 		 * GET, HEAD, POST, PUT, or DELETE
 		 */
-		private String method;
+		String method;
 
 		/**
 		 * headers, mostly ignored in SwingJS and AJAX
@@ -183,7 +182,7 @@ class SimpleHttpClient implements HttpClient {
 		 * when TRUE, all parameters and files are transmitted as binary data in
 		 * multipart/form-data format
 		 */
-		private boolean hasFormBody = false;
+		boolean hasFormBody = false;
 
 		Request(URI uri, String method) {
 			this.uri = uri;
@@ -338,7 +337,7 @@ class SimpleHttpClient implements HttpClient {
 			return r;
 		}
 
-		private Response fulfillGet(Response r) throws IOException {
+		Response fulfillGet(Response r) throws IOException {
 			return r.getResponse(getConnection(createURL()), this);
 		}
 
@@ -370,7 +369,7 @@ class SimpleHttpClient implements HttpClient {
 			}
 		}
 
-		private Response fulfillPost(Response r) throws IOException {
+		Response fulfillPost(Response r) throws IOException {
 			HttpURLConnection conn = getConnection(createURL());
 			sendFormData(conn, formData);
 			return r.getResponse(conn, this);
@@ -399,7 +398,8 @@ class SimpleHttpClient implements HttpClient {
 		 * 
 		 * Create a connection that will be a javajs.util.AjaxURLConnection.
 		 * 
-		 * @param uri
+		 * @param url
+		 * @return connection
 		 * @throws IOException
 		 */
 		private HttpURLConnection getConnection(URL url) throws IOException {
@@ -424,12 +424,12 @@ class SimpleHttpClient implements HttpClient {
 
 	 class Response implements HttpResponse {
 
-		private int state = 0;
+		int state = 0;
 
 		/**
 		 * set TRUE whenever at least one of succeed, fail, or always, is non-null
 		 */
-		private boolean isAsync;
+		boolean isAsync;
 
 		private InputStream inputStream;
 
@@ -450,7 +450,7 @@ class SimpleHttpClient implements HttpClient {
 		private BiConsumer<HttpResponse, ? super IOException> always;
 
 
-		private String method;
+		String method;
 
 		private URI uri;
 
@@ -473,6 +473,8 @@ class SimpleHttpClient implements HttpClient {
 		 * getResponseCode() is called.)
 		 * 
 		 * @param conn
+		 * @param request 
+		 * @return  Response
 		 * 
 		 * @throws IOException
 		 */
@@ -488,10 +490,7 @@ class SimpleHttpClient implements HttpClient {
 				return this;
 			}
 
-			new Thread(new Runnable() {
-
-				@Override
-				public void run() {
+			new Thread(() -> {
 					// asynchronous methods cannot throw an exception.
 					IOException exception = null;
 					if (method.equals(HttpRequest.METHOD_HEAD)) {
@@ -500,19 +499,26 @@ class SimpleHttpClient implements HttpClient {
 						} catch (IOException e) {
 							exception = e;
 						}
-						doCallback(state == 0 || state >= 400, exception);
+						doCallback(exception);
 					} else {
-						conn.getBytesAsync(new Function<byte[], Void>() {
-
-							@Override
-							public Void apply(byte[] t) {
-								doCallback(t != null, null);
-								return null;
-							}
-
-						});
+					    @SuppressWarnings("unused")
+			            Function<byte[], Void> f = new Function<byte[], Void>() {
+			
+									@Override
+									public Void apply(byte[] t) {
+										state = 400; // Bad Request?
+										try {
+											state = SimpleHttpClient.Response.this.conn.getResponseCode();
+										} catch (IOException e) {
+										}
+										doCallback(null);
+										return null;
+									}
+			
+			            };
+			            /** @j2sNative conn.getBytesAsync$java_util_function_Function(f) */
 					}
-				}
+				
 			}).start();
 			return this;
 		}
@@ -521,9 +527,10 @@ class SimpleHttpClient implements HttpClient {
 		 * Make the proper callback, depending upon response code and exception state.
 		 * 
 		 * @param ok
+		 * @param e 
 		 */
-		protected void doCallback(boolean ok, IOException e) {
-			ok &= (e == null);
+		protected void doCallback(IOException e) {
+			boolean ok = (e == null && state < 400);
 			if (ok && succeed != null)
 				succeed.accept(this);
 			else if (!ok && fail != null)
@@ -594,7 +601,7 @@ class SimpleHttpClient implements HttpClient {
 		 */
 		@Override
 		public InputStream getContent() throws IOException {
-			return (inputStream == null ? (inputStream = (InputStream) conn.getInputStream())
+			return (inputStream == null ? (inputStream = conn.getInputStream())
 					: inputStream);
 		}
 

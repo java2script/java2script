@@ -45,7 +45,7 @@ public class Test_Editor0 extends JApplet {
 		JEditorPane area = getEditor();
 		System.out.println(area.getDocument());
 		area.setPreferredSize(new Dimension(300,300));
-		//area.addKeyListener(ka);
+		//area.addKeyListener(ka);s
 		JScrollPane js2 = new JScrollPane(area);
 		js2.setPreferredSize(new Dimension(300, 300));
 		js2.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -155,15 +155,38 @@ public class Test_Editor0 extends JApplet {
 		area.setEditorKit(new StyledEditorKit());
 		area.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 16));
 		area.setText(test);
+		area.addKeyListener(ka);
+		area.addKeyListener(kb);
+		area.addKeyListener(kc);
+		area.removeKeyListener(ka);
+		area.addKeyListener(ka);
 		//area.setBackground(new Color(200, 200, 180));
 	return area;
 	}
+	
+	
+	static KeyListener kc = new KeyAdapter() {
+		public void keyPressed(KeyEvent e) {
+			System.out.println("kc");
+		}
+		
+	};
+
+	static KeyListener kb = new KeyAdapter() {
+		public void keyPressed(KeyEvent e) {
+			System.out.println("kb");
+		}
+	};
+	
 
 	static KeyListener ka = new KeyAdapter() {
 		@Override
 		public void keyPressed(KeyEvent e) {
 			//e.consume();
-			showKeyEvent(e);
+			showKeyEvent("PRESSED",e);
+			// Tab only consumed on press
+			if (e.getKeyCode() == KeyEvent.VK_TAB)
+				e.consume();
 //			System.out.println(area.getFont());
 //			if (e.getKeyChar() == 'X')
 //				setFontTo(new Font(Font.MONOSPACED, Font.PLAIN, area.getFont().getSize() * 2));
@@ -172,13 +195,16 @@ public class Test_Editor0 extends JApplet {
 		@Override
 		public void keyTyped(KeyEvent e) {
 			//e.consume();
-			showKeyEvent(e);
+			showKeyEvent("TYPED", e);
+			// regular keys only consumed on typed
+			if (e.getKeyChar() == '6')
+				e.consume();
 		}
 
 		@Override
 		public void keyReleased(KeyEvent e) {
 			//e.consume();
-			showKeyEvent(e);
+			showKeyEvent("RELEASED", e);
 		}
 	};
 
@@ -277,11 +303,11 @@ public class Test_Editor0 extends JApplet {
 //		
 	}
 
-	protected static void showKeyEvent(KeyEvent e) {
+	protected static void showKeyEvent(String msg, KeyEvent e) {
 		String source = /** @j2sNative (xxx = e).bdata.jqevent.originalEvent.target.id || */
 				"";
 		System.out.println(
-				"Test_Editor keyEvent id=" + e.getID() + " " + ((JComponent) e.getSource()).getClass().getName() + " "
+				"Test_Editor keyEvent " + msg + " id=" + e.getID() + " " + ((JComponent) e.getSource()).getClass().getName() + " "
 						+ source + " char=" + e.getKeyChar() + " code=" + e.getKeyCode() + " loc=" + e.getKeyLocation()
 						+ "\n mod=" + e.getModifiers() + " " + KeyEvent.getKeyModifiersText(e.getModifiers()) + " modx="
 						+ e.getModifiersEx() + " " + KeyEvent.getKeyModifiersText(e.getModifiersEx()));
