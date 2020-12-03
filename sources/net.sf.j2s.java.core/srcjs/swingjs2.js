@@ -10881,8 +10881,12 @@ window.J2S = J2S = (function() {
 				mimeType : "text/plain"
 			});
 		j._ajaxTestSite = j._httpProto + "google.com";
-		var isLocal = (j._isFile || ref.indexOf("http://localhost") == 0 || ref
-				.indexOf("http://127.") == 0);
+		var isLocal = (j._isFile 
+				|| ref.indexOf("http://localhost") == 0 
+				|| ref.indexOf("http://127.") == 0
+				|| ref.indexOf("https://localhost") == 0 
+				|| ref.indexOf("https://127.") == 0)
+				;
 		// this url is used to Google Analytics tracking of Jmol use. You may
 		// remove it or modify it if you wish.
 		j._tracker = (!isLocal && 'https://chemapps.stolaf.edu/jmol/JmolTracker.php?id=UA-45940799-1');

@@ -262,7 +262,7 @@ public class AjaxURLConnection extends HttpURLConnection {
 		@SuppressWarnings("unused")
 		Object info = this.info;
 		// AJAX cannot distinguish among a network connection error, a method (PUT) error, or a file not found
-		return /** @j2sNative !info.xhr.statusText || (info.xhr.statusText+"").indexOf("NetworkError:") == 0 ? 400 : */HTTP_NOT_FOUND;
+		return /** @j2sNative info.xhr.status > 0 ? info.xhr.status : !info.xhr.statusText || (info.xhr.statusText+"").indexOf("NetworkError:") == 0 ? 400 : */HTTP_NOT_FOUND;
 	}
 
 	private String getFileDocumentDir() {

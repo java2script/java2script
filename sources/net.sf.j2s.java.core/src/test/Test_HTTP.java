@@ -36,6 +36,21 @@ public class Test_HTTP extends Test_ {
 		HttpClient client = HttpClientFactory.getClient(null);
 		HttpRequest req = null;
 
+		System.out.println("Testing httpstat 405");
+		
+		try {
+			URL url = new URL("http://httpstat.us/405");
+			HttpURLConnection c = (HttpURLConnection) url.openConnection();
+			int code = c.getResponseCode();
+			System.out.println("httpstat.us reports " + code);
+			InputStream oi = url.openStream();
+			String s = new String(oi.readAllBytes());
+			System.out.println("httpstat.us reports " + s);
+		} catch (IOException e) {
+			System.out.println(e);
+		}
+
+
 		System.out.println("Testing httpstat 201");
 		
 		try {
