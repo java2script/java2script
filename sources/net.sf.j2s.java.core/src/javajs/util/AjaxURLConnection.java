@@ -196,59 +196,63 @@ public class AjaxURLConnection extends HttpURLConnection {
 
 		Object result;
 		String myURL = url.toString();
-		boolean isEmpty = false;
 		if (myURL.startsWith("file:/TEMP/")) {
-
 			result = jsutil.getCachedBytes(myURL);
-			isEmpty = (result == null);
+			boolean isEmpty = (result == null);
 			if (whenDone != null) {
 				whenDone.apply(isEmpty ? null : result);
 				return null;
 			}
 			responseCode = (isEmpty ? HTTP_NOT_FOUND : HTTP_ACCEPTED);
-		} else {
-			if (myURL.startsWith("file:")) {
-				String j2s = /** @j2sNative Clazz._Loader.getJ2SLibBase() || */
-						null;
-				if (myURL.startsWith("file:/./")) {
-					// file:/./xxxx
-					myURL = j2s + myURL.substring(7);
-				} else if (myURL.startsWith("file:/" + j2s)) {
-					// from classLoader
-					myURL = myURL.substring(6);
+			return result;
+		}
+		if (myURL.startsWith("file:")) {
+			String j2s = /** @j2sNative Clazz._Loader.getJ2SLibBase() || */
+					null;
+			if (myURL.startsWith("file:/./")) {
+				// file:/./xxxx
+				myURL = j2s + myURL.substring(7);
+			} else if (myURL.startsWith("file:/" + j2s)) {
+				// from classLoader
+				myURL = myURL.substring(6);
+			} else {
+				String base = getFileDocumentDir();
+				if (base != null && myURL.indexOf(base) == 0) {
+					myURL = myURL.substring(base.length());
 				} else {
-					String base = getFileDocumentDir();
-					if (base != null && myURL.indexOf(base) == 0) {
-						myURL = myURL.substring(base.length());
-					} else {
-						URL path = jsutil.getCodeBase();
-						if (path != null) {
-							j2s = path.toString();
-							if (myURL.indexOf(j2s) >= 0)
-								myURL = path + myURL.split(j2s)[1];
-							else
-								myURL = path + myURL.substring(5);
-						}
+					URL path = jsutil.getCodeBase();
+					if (path != null) {
+						j2s = path.toString();
+						if (myURL.indexOf(j2s) >= 0)
+							myURL = path + myURL.split(j2s)[1];
+						else
+							myURL = path + myURL.substring(5);
 					}
 				}
 			}
-			result = J2S.doAjax(myURL, postOut, bytesOut, info);
-			if (whenDone != null)
-				return null;
-			// the problem is that jsmol.php is still returning crlf even if output is 0
-			// bytes
-			// and it is not passing through the not-found state, just 200
-			/**
-			 * @j2sNative
-			 * 
-			 * 			isEmpty = (!result || result.length == 2 && result[0] == 13 &&
-			 *            result[1] == 10); if (isEmpty) result = new Int8Array;
-			 */
-
-			responseCode = isEmpty ? HTTP_NOT_FOUND : /** @j2sNative info.xhr.status || */
-					0;
 		}
+		result = J2S.doAjax(myURL, postOut, bytesOut, info);
+		if (whenDone != null)
+			return null;
+		setJQueryResponseCodeFromJQuery(result);
 		return result;
+	}
+
+	private void setJQueryResponseCodeFromJQuery(Object result) {
+		// the problem is that jsmol.php is still returning crlf even if output is 0
+		// bytes
+		// and it is not passing through the not-found state, just 200
+		Object info = this.info;
+		boolean isEmpty = false;
+		/**
+		 * @j2sNative
+		 * 
+		 * 			isEmpty = (!result || result.length == 2 && result[0] == 13 &&
+		 *            result[1] == 10); if (isEmpty) result = new Int8Array;
+		 */
+
+		responseCode = isEmpty ? HTTP_NOT_FOUND : /** @j2sNative info.xhr.status || */
+				0;
 	}
 
 	private String getFileDocumentDir() {
@@ -386,7 +390,7 @@ public class AjaxURLConnection extends HttpURLConnection {
 	@SuppressWarnings({ "null", "unused" })
   @Override
 	public InputStream getInputStream() throws FileNotFoundException {
-	  InputStream is = /** @j2sNative this.is || */null;
+	  BufferedInputStream is = /** @j2sNative this.is || */null;
 		if (is != null)
 			return is;
 		responseCode = -1;
@@ -404,8 +408,7 @@ public class AjaxURLConnection extends HttpURLConnection {
 			public Void apply(InputStream is) {
 				try {
 					if (is != null) {
-					  byte[] bytes = /** @j2sNative is.readAllBytes$() || */null;
-						whenDone.apply(bytes);
+						whenDone.apply(/** @j2sNative is.readAllBytes$() || */null);
 						return null;
 					}
 				} catch (Exception e) {
@@ -420,8 +423,9 @@ public class AjaxURLConnection extends HttpURLConnection {
 
 	@SuppressWarnings({ "null", "unused" })
   private void getInputStreamAsync(Function<InputStream, Void> whenDone) {
-	  InputStream is = /** @j2sNative is = this.is || */null;
+	  BufferedInputStream is = /** @j2sNative is = this.is || */null;
 		if (is != null) {
+			isNetworkError(is);
 			whenDone.apply(is);
 			return;
 		}
@@ -438,12 +442,13 @@ public class AjaxURLConnection extends HttpURLConnection {
 		doAjax(true, new Function<Object, Void>() {
 
 			@Override
-			public Void apply(Object data) {
-				if (data instanceof String) {
+			public Void apply(Object response) {
+				if (response instanceof String) {
 					whenDone.apply(null);
 					return null;
 				}
-				BufferedInputStream is = attachStreamData(url, data);
+				setJQueryResponseCodeFromJQuery(response);
+				BufferedInputStream is = attachStreamData(url, response);
 				if (doCache() && is != null) {
 					isNetworkError(is);
 					setCachedStream();
@@ -457,7 +462,7 @@ public class AjaxURLConnection extends HttpURLConnection {
 		});
 	}
 
-	private InputStream getInputStreamAndResponse(boolean allowNWError) {
+	private BufferedInputStream getInputStreamAndResponse(boolean allowNWError) {
 		BufferedInputStream is = getAttachedStreamData(url, false);
 		if (is != null || doCache() && (is = getCachedStream(allowNWError)) != null) {
 			return is;
@@ -468,8 +473,7 @@ public class AjaxURLConnection extends HttpURLConnection {
 			setCachedStream();
 			return is;
 		}
-		if (!isNetworkError(is)) {
-		}
+		isNetworkError(is);
 		return is;
 	}
 
@@ -548,6 +552,9 @@ public class AjaxURLConnection extends HttpURLConnection {
 	@SuppressWarnings("unused")
 	private boolean isNetworkError(BufferedInputStream is) {
 		if (is != null) {
+			if (responseCode > 0) {
+				return (responseCode >= 400);
+			}
 			responseCode = HTTP_OK;
 			if (/** @j2sNative is._jsonData || */
 			false)

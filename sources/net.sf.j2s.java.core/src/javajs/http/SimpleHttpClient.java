@@ -490,10 +490,7 @@ class SimpleHttpClient implements HttpClient {
 				return this;
 			}
 
-			new Thread(new Runnable() {
-
-				@Override
-				public void run() {
+			new Thread(() -> {
 					// asynchronous methods cannot throw an exception.
 					IOException exception = null;
 					if (method.equals(HttpRequest.METHOD_HEAD)) {
@@ -502,21 +499,26 @@ class SimpleHttpClient implements HttpClient {
 						} catch (IOException e) {
 							exception = e;
 						}
-						doCallback(state == 0 || state >= 400, exception);
+						doCallback(exception);
 					} else {
-					  @SuppressWarnings("unused")
-            Function<byte[], Void> f = new Function<byte[], Void>() {
-
-              @Override
-              public Void apply(byte[] t) {
-                doCallback(t != null, null);
-                return null;
-              }
-
-            };
-            /** @j2sNative conn.getBytesAsync$(); */
+					    @SuppressWarnings("unused")
+			            Function<byte[], Void> f = new Function<byte[], Void>() {
+			
+									@Override
+									public Void apply(byte[] t) {
+										state = 400; // Bad Request?
+										try {
+											state = SimpleHttpClient.Response.this.conn.getResponseCode();
+										} catch (IOException e) {
+										}
+										doCallback(null);
+										return null;
+									}
+			
+			            };
+			            /** @j2sNative conn.getBytesAsync$java_util_function_Function(f) */
 					}
-				}
+				
 			}).start();
 			return this;
 		}
@@ -527,8 +529,8 @@ class SimpleHttpClient implements HttpClient {
 		 * @param ok
 		 * @param e 
 		 */
-		protected void doCallback(boolean ok, IOException e) {
-			ok &= (e == null);
+		protected void doCallback(IOException e) {
+			boolean ok = (e == null && state < 400);
 			if (ok && succeed != null)
 				succeed.accept(this);
 			else if (!ok && fail != null)

@@ -465,7 +465,7 @@ abstract public class HttpURLConnection extends URLConnection {
      */
     public int getResponseCode() throws IOException {
         /*
-         * We're got the response code already
+         * We've got the response code already
          */
         if (responseCode != -1) {
             return responseCode;
