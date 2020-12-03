@@ -11268,7 +11268,7 @@ window.J2S = J2S = (function() {
 	}
 	J2S._ajaxDone = function() {
 		var info = J2S._ajaxQueue.shift();
-		info && J2S.$ajax(info);
+		info && (info.xhr = J2S.$ajax(info));
 	}
 
 	J2S._loadSuccess = function(a, fSuccess) {
@@ -11624,7 +11624,7 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 				info.url = fileName.split("?POST?")[0]
 				info.data = fileName.split("?POST?")[1]
 			} else {
-				info.type = "GET";
+				!info.type && (info.type = "GET");
 				info.url = fileName;
 			}
 			if (fWhenDone) {
