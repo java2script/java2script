@@ -9,8 +9,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -43,7 +45,7 @@ import java.util.function.Function;
  * @author Mateusz Warowny
  * 
  */
-class SimpleHttpClient implements HttpClient {
+public class SimpleHttpClient implements HttpClient {
 
 	SimpleHttpClient() {
 		// for reflection
@@ -315,6 +317,7 @@ class SimpleHttpClient implements HttpClient {
 		}
 
 		private HttpResponse executeImpl(Response r) {
+			
 			Runnable runner = new Runnable() {
 
 				@Override
@@ -424,6 +427,8 @@ class SimpleHttpClient implements HttpClient {
 
 	 class Response implements HttpResponse {
 
+		private final static int BAD_REQUEST = 400;
+		
 		int state = 0;
 
 		/**
@@ -473,8 +478,8 @@ class SimpleHttpClient implements HttpClient {
 		 * getResponseCode() is called.)
 		 * 
 		 * @param conn
-		 * @param request 
-		 * @return  Response
+		 * @param request
+		 * @return Response
 		 * 
 		 * @throws IOException
 		 */
@@ -491,34 +496,39 @@ class SimpleHttpClient implements HttpClient {
 			}
 
 			new Thread(() -> {
-					// asynchronous methods cannot throw an exception.
-					IOException exception = null;
+				// asynchronous methods cannot throw an exception.
+				IOException exception = null;
+				try {
 					if (method.equals(HttpRequest.METHOD_HEAD)) {
-						try {
-							state = conn.getResponseCode();
-						} catch (IOException e) {
-							exception = e;
-						}
-						doCallback(exception);
+						state = conn.getResponseCode();
 					} else {
-					    @SuppressWarnings("unused")
-			            Function<byte[], Void> f = new Function<byte[], Void>() {
-			
-									@Override
-									public Void apply(byte[] t) {
-										state = 400; // Bad Request?
-										try {
-											state = SimpleHttpClient.Response.this.conn.getResponseCode();
-										} catch (IOException e) {
-										}
-										doCallback(null);
-										return null;
-									}
-			
-			            };
-			            /** @j2sNative conn.getBytesAsync$java_util_function_Function(f) */
+						@SuppressWarnings("unused")
+						Function<byte[], Void> f = new Function<byte[], Void>() {
+
+							@Override
+							public Void apply(byte[] t) {
+								state = 400; // Bad Request?
+								try {
+									state = SimpleHttpClient.Response.this.conn.getResponseCode();
+									doCallback(null);
+								} catch (IOException e) {
+									doCallback(e);
+								}
+								return null;
+							}
+
+						};
+						/** @j2sNative return conn.getBytesAsync$java_util_function_Function(f); */
+						{
+							f.apply(null);
+							return;
+						}
 					}
-				
+				} catch (IOException e) {
+					exception = e;
+				}
+				doCallback(exception);
+
 			}).start();
 			return this;
 		}
@@ -550,6 +560,8 @@ class SimpleHttpClient implements HttpClient {
 			if (!(e instanceof IOException)) {
 				e = new IOException(e);
 			}
+			if (e instanceof UnknownHostException)
+				state = BAD_REQUEST;
 			IOException exception = (IOException) e;
 			// setting e = null to indicated handled.
 			if (isAsync) {
@@ -593,16 +605,33 @@ class SimpleHttpClient implements HttpClient {
 
 		@Override
 		public String getText() throws IOException {
-			return new String( getBytes(getContent()));
+			return new String(getBytes(getContent()));
 		}
 
 		/**
 		 * In SwingJS, this is always a ByteArrayInputStream.
+		 * @throws IOException 
 		 */
 		@Override
 		public InputStream getContent() throws IOException {
-			return (inputStream == null ? (inputStream = conn.getInputStream())
-					: inputStream);
+			if (conn == null)
+				throw new IOException("Connection could not be opened");
+			try {
+				return (inputStream == null ? (inputStream = conn.getInputStream())
+						: inputStream);
+			} catch (IOException e) {
+				if (state < 400)
+					state = decodeServerException(e.toString());
+				throw new IOException(e);
+			}
+		}
+
+		private int decodeServerException(String msg) {
+			try {
+				return Integer.parseInt(msg.substring(msg.indexOf("code:") + 5));
+			} catch (Exception e) {
+			}
+			return 404;
 		}
 
 		@Override
@@ -612,26 +641,49 @@ class SimpleHttpClient implements HttpClient {
 
 		@Override
 		public String toString() {
-			return "JSHttpClient " + method + " state=" + state + " uri=" + uri;
+			return "SimpleHttpClient " + method + " state=" + state + " uri=" + uri;
 		}
 
 	}
 
-	public static String getBytes(InputStream is) throws IOException {
+	public static byte[] getBytes(InputStream is) throws IOException {
 	
 		// Java 9 version is better:
-		//		 return new String(is.readAllBytes());
+		//		 return is.readAllBytes();
 
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(0x4000);
 		byte[] buf = new byte[0x4000];
-		int n = 0, ntotal = 0;
+		int n = 0;
 		while((n = is.read(buf)) >= 0) {
-			ntotal += n;
 			bos.write(buf, 0, n);
 		} 
 		is.close();
-		return new String(bos.toByteArray(), 0, ntotal);
+		return bos.toByteArray();
 
+	}
+
+	public static HttpRequest createRequest(HttpClient client, String method, String url) throws IOException {
+		
+		URI uri = null;
+		try {
+			uri = new URI(url);
+		} catch (URISyntaxException e) {
+			throw new IOException(e);
+		}
+		switch (method.toUpperCase()) {
+		case "HEAD":
+			return client.head(uri);
+		case "GET":
+			return client.get(uri);
+		case "POST":
+			return client.post(uri);
+		case "PUT":
+			return client.put(uri);
+		case "DELETE":
+			return client.delete(uri);
+		default:
+			throw new IOException("Unknown method:" + method);
+		}
 	}
 
 }

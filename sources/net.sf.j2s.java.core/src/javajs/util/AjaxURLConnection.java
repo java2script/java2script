@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -146,6 +147,8 @@ public class AjaxURLConnection extends HttpURLConnection {
 		 * 			info = info || {}; if (!info.dataType) { info.isBinary =
 		 *            !!isBinary; }
 		 * 
+		 *            info.type = this.method;
+		 * 
 		 *            whenDone && (info.fWhenDone =
 		 *            function(data){whenDone.apply$O(data)});
 		 * 
@@ -251,8 +254,15 @@ public class AjaxURLConnection extends HttpURLConnection {
 		 *            result[1] == 10); if (isEmpty) result = new Int8Array;
 		 */
 
-		responseCode = isEmpty ? HTTP_NOT_FOUND : /** @j2sNative info.xhr.status || */
-				0;
+		responseCode = (!isEmpty ? /** @j2sNative info.xhr.status || */
+				0 : getAJAXStatusError());
+	}
+
+	private int getAJAXStatusError() {
+		@SuppressWarnings("unused")
+		Object info = this.info;
+		// AJAX cannot distinguish among a network connection error, a method (PUT) error, or a file not found
+		return /** @j2sNative !info.xhr.statusText || (info.xhr.statusText+"").indexOf("NetworkError:") == 0 ? 400 : */HTTP_NOT_FOUND;
 	}
 
 	private String getFileDocumentDir() {
@@ -328,9 +338,10 @@ public class AjaxURLConnection extends HttpURLConnection {
 //
 
 		if (formData != null) {
+			String method = ("GET".equals(this.method) ? "POST" : this.method);
 			Object map = ajax = (/**
 									 * @j2sNative 1 ? { data:new FormData(), processData:false, contentType:false,
-									 *            type:"POST", j2sNoProxy:true } :
+									 *            type:method, j2sNoProxy:true } :
 									 */
 			null);
 			if (formData instanceof Map<?, ?>) {
@@ -389,12 +400,15 @@ public class AjaxURLConnection extends HttpURLConnection {
 
 	@SuppressWarnings({ "null", "unused" })
   @Override
-	public InputStream getInputStream() throws FileNotFoundException {
+	public InputStream getInputStream() throws IOException {
 	  BufferedInputStream is = /** @j2sNative this.is || */null;
 		if (is != null)
 			return is;
 		responseCode = -1;
 		is = getInputStreamAndResponse(false);
+		if (responseCode == HTTP_BAD_REQUEST) {
+			throw new UnknownHostException(url.toString());
+		}
 		if (is == null)
 			throw new FileNotFoundException("opening " + url);
 		return is;
@@ -551,10 +565,14 @@ public class AjaxURLConnection extends HttpURLConnection {
 
 	@SuppressWarnings("unused")
 	private boolean isNetworkError(BufferedInputStream is) {
-		if (is != null) {
-			if (responseCode > 0) {
-				return (responseCode >= 400);
+		if (responseCode > 0) {
+			return (responseCode >= HTTP_BAD_REQUEST);
+		}
+		if (is == null) {
+			if (ajax != null) {
+				responseCode = getAJAXStatusError();
 			}
+		} else {
 			responseCode = HTTP_OK;
 			if (/** @j2sNative is._jsonData || */
 			false)
@@ -635,7 +653,11 @@ public class AjaxURLConnection extends HttpURLConnection {
 			try {
 				getInputStreamAndResponse(true);
 			} catch (Exception e) {
+				responseCode = HTTP_BAD_REQUEST;
 			}
+		} 
+		if (responseCode == HTTP_BAD_REQUEST) {
+			throw new UnknownHostException(url.toString());
 		}
 		return responseCode;
 	}
