@@ -1002,6 +1002,8 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 	}
 
 	J2S._isDirectCall = function(url) {
+		if (url.indexOf("://localhost") >= 0)
+			return true;
 		for ( var key in J2S.db._DirectDatabaseCalls) {
 			if (key.indexOf(".") >= 0 && url.indexOf(key) >= 0) {
 				// hack because ebi is not returning ajax calls
