@@ -1,5 +1,6 @@
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// BH 2020.12.03 note that relay is disabled using J2S.addDirectDatabaseCall(".")
 // BH 2020.04.24 Info.width includes "px" allowed and implies Info.isResizable:false; 
 //               fixes early hidden 100x100 size issue due to node.offsetWidth == 0 in that case
 // BH 2019.11.06 adds JFileChooser.setMultipleMode(true) and multiple-file DnD
@@ -210,8 +211,12 @@ window.J2S = J2S = (function() {
 				mimeType : "text/plain"
 			});
 		j._ajaxTestSite = j._httpProto + "google.com";
-		var isLocal = (j._isFile || ref.indexOf("http://localhost") == 0 || ref
-				.indexOf("http://127.") == 0);
+		var isLocal = (j._isFile 
+				|| ref.indexOf("http://localhost") == 0 
+				|| ref.indexOf("http://127.") == 0
+				|| ref.indexOf("https://localhost") == 0 
+				|| ref.indexOf("https://127.") == 0)
+				;
 		// this url is used to Google Analytics tracking of Jmol use. You may
 		// remove it or modify it if you wish.
 		j._tracker = (!isLocal && 'https://chemapps.stolaf.edu/jmol/JmolTracker.php?id=UA-45940799-1');
@@ -997,6 +1002,8 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 	}
 
 	J2S._isDirectCall = function(url) {
+		if (url.indexOf("://localhost") >= 0)
+			return true;
 		for ( var key in J2S.db._DirectDatabaseCalls) {
 			if (key.indexOf(".") >= 0 && url.indexOf(key) >= 0) {
 				// hack because ebi is not returning ajax calls

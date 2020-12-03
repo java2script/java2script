@@ -1,16 +1,12 @@
 package test;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.net.UnknownHostException;
-
-import javax.net.ssl.HttpsURLConnection;
 
 import javajs.http.HttpClient;
 import javajs.http.HttpClient.HttpRequest;
@@ -23,7 +19,11 @@ public class Test_HTTP extends Test_ {
 
 	static {
 		/** @j2sNative 
-		J2S.addDirectDatabaseCall("www.compbio.dundee.ac.uk/slivka");
+
+// turn off the relay service
+
+		J2S.addDirectDatabaseCall(".");
+
 		 */
 
 	}
@@ -33,20 +33,67 @@ public class Test_HTTP extends Test_ {
 		HttpClient client = HttpClientFactory.getClient(null);
 		HttpRequest req = null;
 
+		System.out.println("Testing localhost:5000 from 8000");
+		
+//		try {
+//			URL url = new URL("http://localhost:5000/t.txt");
+//			HttpURLConnection c = (HttpURLConnection) url.openConnection();
+//			int code = c.getResponseCode();
+//			System.out.println("localhost reports " + code);
+//			InputStream oi = url.openStream();
+//			String s = new String(getBytes(oi));
+//			System.out.println("localhost nbytes=" + s.length());
+//		} catch (IOException e) {
+//			System.out.println(e);
+//		}
+
+
+
+		System.out.println("Testing httpstat 405");
+		
+		try {
+			URL url = new URL("http://httpstat.us/405");
+			HttpURLConnection c = (HttpURLConnection) url.openConnection();
+			int code = c.getResponseCode();
+			System.out.println("httpstat.us reports " + code);
+			InputStream oi = url.openStream();
+			String s = new String(getBytes(oi));
+			System.out.println("httpstat.us reports " + s);
+		} catch (IOException e) {
+			System.out.println(e);
+		}
+
+
+		System.out.println("Testing httpstat 201");
+		
+		try {
+			URL url = new URL("http://httpstat.us/201");
+			HttpURLConnection c = (HttpURLConnection) url.openConnection();
+			int code = c.getResponseCode();
+			System.out.println("httpstat.us reports " + code);
+			InputStream oi = url.openStream();
+			String s = new String(getBytes(oi));
+			System.out.println("httpstat.us reports " + s);
+		} catch (IOException e) {
+			System.out.println(e);
+		}
+
+
+		System.out.println("Testing unknown host");
+
+		try {
+			URL url = new URL("https://www.compbiolivka/api/services");
+			HttpURLConnection c = (HttpURLConnection) url.openConnection();
+			int code = c.getResponseCode();
+			InputStream oi = url.openStream();
+		} catch (IOException e) {
+			assert(e instanceof UnknownHostException);
+		}
+		
+
 		System.out.println("Testing sync GET");
 		
 		try {
-			
-			try {
-				URL url = new URL("https://www.compbiolivka/api/services");
-				HttpURLConnection c = (HttpURLConnection) url.openConnection();
-				int code = c.getResponseCode();
-				InputStream oi = url.openStream();
-			} catch (IOException e) {
-				assert(e instanceof UnknownHostException);
-			}
-			
-			
 			req = javajs.http.SimpleHttpClient.createRequest(client, "get",
 					"https://www.compbio.dundee.ac.uk/slivka/api/services");
 			System.out.println(req.getUri());
@@ -116,6 +163,22 @@ public class Test_HTTP extends Test_ {
 				System.err.println(e);
 			}
 		}
+	}
+
+	public static byte[] getBytes(InputStream is) throws IOException {
+		
+		// Java 9 version is better:
+		//		 return is.readAllBytes();
+
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(0x4000);
+		byte[] buf = new byte[0x4000];
+		int n = 0;
+		while((n = is.read(buf)) >= 0) {
+			bos.write(buf, 0, n);
+		} 
+		is.close();
+		return bos.toByteArray();
+
 	}
 
 }
