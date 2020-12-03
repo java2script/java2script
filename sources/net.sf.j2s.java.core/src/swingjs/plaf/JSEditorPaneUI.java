@@ -2,9 +2,12 @@ package swingjs.plaf;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Insets;
+import java.awt.JSComponent;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 
@@ -29,10 +32,8 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledEditorKit;
 import javax.swing.text.View;
 
-import javajs.util.PT;
 import javajs.util.SB;
 import sun.swing.DefaultLookup;
-import swingjs.JSKeyEvent;
 import swingjs.JSToolkit;
 import swingjs.api.js.DOMNode;
 
@@ -54,7 +55,7 @@ import swingjs.api.js.DOMNode;
  * @author hansonr
  *
  */
-public class JSEditorPaneUI extends JSTextUI {
+public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 
 	
 	// For the most part, this is working fine.  CTRL-C works, but CTRL-V does not.
@@ -82,6 +83,7 @@ public class JSEditorPaneUI extends JSTextUI {
 		super.installUI(jc);
 		if (getPropertyPrefix() == "TextPane")
 			return;
+		editor.addKeyListener(this);
         Document doc = editor.getDocument();
         if (doc == null) {
             // no model, create a default one.  This will
@@ -145,6 +147,7 @@ public class JSEditorPaneUI extends JSTextUI {
 	 *
 	 * @return the name
 	 */
+	@Override
 	protected String getKeymapName() {
 		String nm = getClass().getName();
 		int index = nm.lastIndexOf('.');
@@ -188,7 +191,8 @@ public class JSEditorPaneUI extends JSTextUI {
 //		return map;
 //	}
 	
-	
+
+	Font myfont;
 	// https://stackoverflow.com/questions/2237497/how-to-make-the-tab-key-insert-a-tab-character-in-a-contenteditable-div	
 //		$(document).on('keyup', '.editor', function(e){
 //			  //detect 'tab' key
@@ -212,10 +216,14 @@ public class JSEditorPaneUI extends JSTextUI {
 			bindJSKeyEvents(focusNode, true);
 		}
 		textListener.checkDocument();
-		setCssFont(domNode, c.getFont());// will check enabled and also set background
+		Font font = c.getFont();
+		boolean fontChanged = !font.equals(myfont);
+		if (fontChanged)
+			setCssFont(domNode, font);// will check enabled and also set background
 		DOMNode.setAttrs(domNode, "contentEditable", isHtmlKit || editor.isEditable() ? TRUE : FALSE, "spellcheck", FALSE);
 		if (jc.getTopLevelAncestor() != null) {
-			if (editor.getText() != mytext) {
+			if (fontChanged || editor.getText() != mytext) {
+				myfont = font;
 				setText(null);
 				// should be OK here
 //			} else {
@@ -382,7 +390,7 @@ public class JSEditorPaneUI extends JSTextUI {
 				// This added 5 px is necessary for the last line when scrolled to appear in
 				// full.
 				// Don't know why. Maybe the scrollbar just needs one last div?
-				html = sb.toString() + "<div style='height:5px'><br></div>";
+				html = sb.toString();//	 + "<div style='height:5px'><br></div>";
 			}
 		}
 		if (isHTML) {
@@ -404,6 +412,7 @@ public class JSEditorPaneUI extends JSTextUI {
 		@Override
 		public void run() {
 			updateJSCursor("editortext");
+			scrollAsNeeded(null);
 		}
 		
 	};
@@ -499,12 +508,14 @@ public class JSEditorPaneUI extends JSTextUI {
 			// but this is nbsp; -- no breaks?? Why did I do this?
 			if (t.indexOf("  ") >= 0)
 				t = t.replace("  ", "\u00A0 ");
-			if (t.indexOf('\t') >= 0) {
-				t = t.replaceAll("\t", JSTAB);
-			}
 			if (t.indexOf('<') >= 0) {
 				t = t.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 			}
+			if (t.indexOf('\t') >= 0) {
+				t = t.replaceAll("\t", JSTAB);
+			}
+			if (t.endsWith(" "))
+				t = t.substring(0, t.length() - 1) + '\u00A0';
 			sb.append(t);
 		}
 		if (isSup)
@@ -801,6 +812,8 @@ public class JSEditorPaneUI extends JSTextUI {
 		 *   return;
 		 * }
 		 * 
+		 * if (node == null)return;
+		 * 
 		 * 			var h = 0; node.getBoundingClientRect || 
 		 * 
 		 * (node =  node.parentElement);
@@ -996,12 +1009,6 @@ public class JSEditorPaneUI extends JSTextUI {
 		}
 	}
 
-	@Override
-	protected boolean handleTab(Object jqEvent) {
-		replaceText("\t", -1);
-		return CONSUMED;
-	}
-
 	private void replaceText(String s, int x) {
 		try {
 			if (x < 0) {
@@ -1143,7 +1150,7 @@ public class JSEditorPaneUI extends JSTextUI {
 				DOMNode.setAttrs(domNode, "contentEditable", TRUE);				
 				return DO_KEY_DEFAULT;
 			}
-			JSKeyEvent.dispatchKeyEvent(jc, 0, jQueryEvent, System.currentTimeMillis());
+			JSComponent.秘dispatchKeyEvent(jc, 0, jQueryEvent, System.currentTimeMillis());
 			return STOP_KEY_DEFAULT_AND_PREVENT_PROPAGATION;
 		}
 	}
@@ -1172,6 +1179,39 @@ public class JSEditorPaneUI extends JSTextUI {
 //            }
 //        }
         return d;
+	}
+
+	@Override
+	protected Boolean handleTab(Object jqEvent, String type) {
+		if (type == "keydown")
+			checkKeyListeners();
+		editor.setFocusTraversalKeysEnabled(false);
+		return null;
+	}
+
+	private void checkKeyListeners() {
+		if (editor.秘getLastKeyListener() != this) {
+			editor.removeKeyListener(this);
+			editor.addKeyListener(this);
+		}
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		if (e.getKeyCode() == KeyEvent.VK_TAB) {
+			if (!e.isConsumed()) {
+				replaceText("\t", -1);
+				e.consume();
+			}
+		}
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
 	}
 
 }

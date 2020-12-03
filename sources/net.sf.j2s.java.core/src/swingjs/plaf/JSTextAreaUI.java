@@ -177,7 +177,9 @@ public class JSTextAreaUI extends JSTextUI {
 	}
 	
 	@Override
-	protected boolean handleTab(Object jqEvent) {
+	protected Boolean handleTab(Object jqEvent, String type) {
+		if (type != "keydown")
+			return CONSUMED;
 		String val = getJSTextValue();
 		Point pt = new Point();
 		getJSMarkAndDot(pt, 0);

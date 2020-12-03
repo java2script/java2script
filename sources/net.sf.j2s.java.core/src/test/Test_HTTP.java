@@ -28,7 +28,9 @@ public class Test_HTTP extends Test_ {
 			HttpResponse resp = req.execute();
 			
 			System.out.println(resp);
-			System.out.println(resp.getText());
+			String res = resp.getText();
+			System.out.println(res);
+			System.out.println(resp.getStatusCode());
 			
 			req = client.put(new URI("https://www.compbio.dundee.ac.uk/slivka/api/services/example"));
 			
@@ -39,15 +41,21 @@ public class Test_HTTP extends Test_ {
 			resp = req.execute();
 			
 			System.out.println(resp);
-			System.out.println(resp.getText());
+			res = resp.getText();
+			System.out.println(res);
+			System.out.println(resp.getStatusCode());
 
+			System.out.println("Testing async");
 			req.addFormPart("testing", "here");
 			req.executeAsync(new Consumer<HttpResponse>() {
 
 				@Override
 				public void accept(HttpResponse t) {
 					try {
-						System.out.println(t.getText());
+						String res = t.getText();
+						System.out.println("Testing async...returned:");
+						System.out.println(res);
+						System.out.println(t.getStatusCode());
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -55,6 +63,7 @@ public class Test_HTTP extends Test_ {
 				}
 				
 			}, null, null);
+			System.out.println("Testing async...submitted...");
 
 			
 		} catch (Exception e3) {

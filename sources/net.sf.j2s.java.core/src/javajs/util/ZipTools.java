@@ -66,74 +66,6 @@ public class ZipTools {//implements GenericZipTools {
   }
 
   /**
-   * reads a ZIP file and saves all data in a Hashtable so that the files may be
-   * organized later in a different order. Also adds a #Directory_Listing entry.
-   * 
-   * Files are bracketed by BEGIN Directory Entry and END Directory Entry lines,
-   * similar to CompoundDocument.getAllData.
-   * 
-   * @param is
-   * @param subfileList
-   * @param name0
-   *        prefix for entry listing
-   * @param binaryFileList
-   *        |-separated list of files that should be saved as xx xx xx hex byte
-   *        strings. The directory listing is appended with ":asBinaryString"
-   * @param exclude 
-   * @param fileData
-   */
-//  @Override
-  public static void getAllZipData(InputStream is, String[] subfileList,
-                                          String name0, String binaryFileList, String exclude,
-                                          Map<String, String> fileData) {
-    ZipInputStream zis = (ZipInputStream) newZIS(is);
-    ZipEntry ze;
-    SB listing = new SB();
-    binaryFileList = "|" + binaryFileList + "|";
-    String prefix = PT.join(subfileList, '/', 1);
-    String prefixd = null;
-    if (prefix != null) {
-      prefixd = prefix.substring(0, prefix.indexOf("/") + 1);
-      if (prefixd.length() == 0)
-        prefixd = null;
-    }
-    try {
-      while ((ze = zis.getNextEntry()) != null) {
-        String name = ze.getName();
-        if (prefix != null && prefixd != null
-            && !(name.equals(prefix) || name.startsWith(prefixd))
-            || exclude != null && name.contains(exclude))
-          continue;
-        //System.out.println("ziputil: " + name);
-        listing.append(name).appendC('\n');
-        String sname = "|" + name.substring(name.lastIndexOf("/") + 1) + "|";
-        boolean asBinaryString = (binaryFileList.indexOf(sname) >= 0);
-        byte[] bytes = Rdr.getLimitedStreamBytes(zis, ze.getSize());
-        String str;
-        if (asBinaryString) {
-          str = getBinaryStringForBytes(bytes);
-          name += ":asBinaryString";
-        } else {
-          str = Rdr.fixUTF(bytes);
-        }
-        str = "BEGIN Directory Entry " + name + "\n" + str
-            + "\nEND Directory Entry " + name + "\n";
-        String key = name0 + "|" + name;
-        fileData.put(key, str);
-      }
-    } catch (Exception e) {
-    }
-    fileData.put("#Directory_Listing", listing.toString());
-  }
-
-  private static String getBinaryStringForBytes(byte[] bytes) {
-    SB ret = new SB();
-    for (int i = 0; i < bytes.length; i++)
-      ret.append(Integer.toHexString(bytes[i] & 0xFF)).appendC(' ');
-    return ret.toString();
-  }
-
-  /**
    * iteratively drills into zip files of zip files to extract file content or
    * zip file directory. Also works with JAR files.
    * 
@@ -147,13 +79,20 @@ public class ZipTools {//implements GenericZipTools {
    * @return directory listing or subfile contents
    */
 //  @Override
-  public static Object getZipFileDirectory(BufferedInputStream bis, String[] list,
+  public static Object getZipFileDirectory(BufferedInputStream bis, 
+                                           String[] list,
                                     int listPtr, boolean asBufferedInputStream) {
     SB ret;
-    if (list == null || listPtr >= list.length)
+    boolean justDir = (list == null || listPtr >= list.length);
+    String fileName = (justDir ? "." : list[listPtr]);
+    boolean isTar = Rdr.isTar(bis);
+    if (isTar)
+      return getTarFileDirectory(bis, fileName, asBufferedInputStream);
+    if (justDir)
       return getZipDirectoryAsStringAndClose(bis);
     bis = getPngZipStream(bis, true);
-    String fileName = list[listPtr];
+    
+    
     ZipInputStream zis = new ZipInputStream(bis);
     ZipEntry ze;
     //System.out.println("fname=" + fileName);
@@ -202,6 +141,27 @@ public class ZipTools {//implements GenericZipTools {
     }
   }
 
+  private static Object getTarFileDirectory(BufferedInputStream bis,
+                                            String fileName,
+                                            boolean asBufferedInputStream) {
+    SB ret;
+    try {
+      boolean isAll = (fileName.equals("."));
+      if (isAll || fileName.lastIndexOf("/") == fileName.length() - 1) {
+        ret = new SB();
+        getTarContents(bis, fileName, ret);
+        String str = ret.toString();
+        return (asBufferedInputStream ? Rdr.getBIS(str.getBytes()) : str);
+      }
+      fileName = fileName.replace('\\', '/');
+      byte[] bytes = getTarContents(bis, fileName, null);
+      bis.close();
+      return (bytes == null ? "" : asBufferedInputStream ? Rdr.getBIS(bytes) : Rdr.fixUTF(bytes));
+    } catch (Exception e) {
+      return "";
+    }
+  }
+
 //  @Override
   public static byte[] getZipFileContentsAsBytes(BufferedInputStream bis,
                                           String[] list, int listPtr) {
@@ -210,6 +170,8 @@ public class ZipTools {//implements GenericZipTools {
     if (fileName.lastIndexOf("/") == fileName.length() - 1)
       return ret;
     try {
+      if (Rdr.isTar(bis))
+        return getTarContents(bis, fileName, null);
       bis = getPngZipStream(bis, true);
       ZipInputStream zis = new ZipInputStream(bis);
       ZipEntry ze;
@@ -225,6 +187,65 @@ public class ZipTools {//implements GenericZipTools {
     return ret;
   }
   
+  private static byte[] b512;
+  
+  private static byte[] getTarContents(BufferedInputStream bis, String fileName, SB sb)
+      throws IOException {
+    if (b512 == null)
+      b512 = new byte[512];
+    int len = fileName.length();
+    while (bis.read(b512, 0, 512) > 0) {
+      byte[] bytes = getTarFile(bis, fileName, len, sb, null, false);
+      if (bytes != null)
+        return bytes;
+    }
+    return null;
+  }
+
+  private static byte[] getTarFile(BufferedInputStream bis, String fileName,
+                                   int len, SB sb, Map<String, Object> cache,
+                                   boolean oneFile)
+      throws IOException {
+    int j = 124;
+    while (b512[j] == 48)
+      j++;
+    boolean isAll = (sb != null && fileName.equals("."));
+    int nbytes = 0;
+    while (j < 135)
+      nbytes = (nbytes << 3) + (b512[j++] - 48);
+    if (nbytes == 0)
+      return null;
+    String fname = new String(b512, 0, 100).trim();
+    String prefix = new String(b512, 345, 155).trim();
+
+    String name = prefix + fname;
+    boolean found = false;
+    if (sb != null) {
+      if (name.length() == 0)
+        return null;
+      if (isAll || (oneFile ? name.equalsIgnoreCase(fileName)
+          : name.startsWith(fileName))) {
+        found = (cache != null);
+        sb.append(name).appendC('\n');
+      }
+      len = -1;
+    }
+    int nul = (512 - (nbytes % 512)) % 512;
+    if (!found && (len != name.length() || !fileName.equals(name))) {
+      // skip tar entry
+      int nBlocks = (nbytes + nul) >> 9;
+      for (int i = nBlocks; --i >= 0;)
+        bis.read(b512, 0, 512);
+      return null;
+    }
+    byte[] bytes = Rdr.getLimitedStreamBytes(bis, nbytes);
+    if (cache != null) {
+      cache.put(name, new BArray(bytes));
+      bis.read(b512, 0, nul);
+    }
+    return bytes;
+  }
+
 //  @Override
   public static String getZipDirectoryAsStringAndClose(BufferedInputStream bis) {
     SB sb = new SB();
@@ -429,24 +450,28 @@ public class ZipTools {//implements GenericZipTools {
   	readFileAsMapStatic(bis, bdata, name);
   }
 
-  public static void readFileAsMapStatic(BufferedInputStream bis,
+  private static void readFileAsMapStatic(BufferedInputStream bis,
 			Map<String, Object> bdata, String name) {
     int pt = (name == null ? -1 : name.indexOf("|"));
     name = (pt >= 0 ? name.substring(pt + 1) : null);
     try {
+      boolean isZip = false;
       if (Rdr.isPngZipStream(bis)) {
         boolean isImage = "_IMAGE_".equals(name);
         if (name == null || isImage)
           bdata.put((isImage ? "_DATA_" : "_IMAGE_"), new BArray(getPngImageBytes(bis)));
-        if (!isImage)
-          cacheZipContentsStatic(bis, name, bdata, true);
+        isZip = !isImage;
       } else if (Rdr.isZipS(bis)) {
-        cacheZipContentsStatic(bis, name, bdata, true);
+        isZip = true;
+      } else if (Rdr.isTar(bis)) {
+        cacheTarContentsStatic(bis, name, bdata);
       } else if (name == null){
         bdata.put("_DATA_", new BArray(Rdr.getLimitedStreamBytes(bis, -1)));
       } else {
         throw new IOException("ZIP file " + name + " not found");
       }
+      if (isZip)
+        cacheZipContentsStatic(bis, name, bdata, true);
       bdata.put("$_BINARY_$", Boolean.TRUE);
     } catch (IOException e) {
       bdata.clear();
@@ -465,39 +490,47 @@ public class ZipTools {//implements GenericZipTools {
 	/**
 	 * 
 	 * @param bis
-	 * @param fileName may end with "/" for a prefix or contain "|xxxx.xxx" for a specific file or be null
+	 * @param fileName may be a case-insensitive file name 
+	 *    or end with "/" to add a prefix 
+	 *    or contain "|xxxx.xxx" for a specific file or be null
 	 * @param cache
 	 * @param asByteArray
 	 * @return contents as a String
 	 */
-  public static String cacheZipContentsStatic(BufferedInputStream bis,
+  private static String cacheZipContentsStatic(BufferedInputStream bis,
 			String fileName, Map<String, Object> cache, boolean asByteArray) {
     ZipInputStream zis = (ZipInputStream) newZIS(bis);
     ZipEntry ze;
     SB listing = new SB();
     long n = 0;
+    if (fileName != null && fileName.endsWith("/."))
+      fileName = fileName.substring(0, fileName.length() - 1);
     boolean isPath = (fileName != null && fileName.endsWith("/"));
-    boolean oneFile = (asByteArray && !isPath && fileName != null);
+    boolean oneFile = (fileName != null && !isPath && asByteArray);
     int pt = (oneFile ? fileName.indexOf("|") : -1);
-    String file0 = (pt >= 0 ? fileName : null);
+    String zipEntryRoot = (pt >= 0 ? fileName : null);
     if (pt >= 0)
       fileName = fileName.substring(0,  pt);
-    String prefix = (fileName == null ? "" : isPath ? fileName : fileName + "|");
+    String prefix = (fileName == null || isPath ? "" : fileName + "|");
     try {
       while ((ze = zis.getNextEntry()) != null) {
+        if (ze.isDirectory())
+          continue;
         String name = ze.getName();
         if (fileName != null) {
           if (oneFile) {
             if (!name.equalsIgnoreCase(fileName))
               continue;
           } else {
+            if (isPath && !name.startsWith(fileName))
+              continue;
             listing.append(name).appendC('\n');
           }
         }
         long nBytes = ze.getSize();
         byte[] bytes = Rdr.getLimitedStreamBytes(zis, nBytes);
-        if (file0 != null) {
-          readFileAsMapStatic(Rdr.getBIS(bytes), cache, file0);
+        if (zipEntryRoot != null) {
+          readFileAsMapStatic(Rdr.getBIS(bytes), cache, zipEntryRoot);
           return null;
         }
         n += bytes.length;
@@ -510,6 +543,46 @@ public class ZipTools {//implements GenericZipTools {
     } catch (Exception e) {
       try {
         zis.close();
+      } catch (IOException e1) {
+      }
+      return null;
+    }
+    if (n == 0 || fileName == null)
+      return null;
+    System.out.println("ZipTools cached " + n + " bytes from " + fileName);
+    return listing.toString();
+  }
+
+  /**
+   * 
+   * @param bis
+   * @param fileName may end with "/" for a prefix or contain "|xxxx.xxx" for a specific file or be null
+   * @param cache map to store data
+   * @return contents as a String
+   */
+  private static String cacheTarContentsStatic(BufferedInputStream bis,
+      String fileName, Map<String, Object> cache) {
+    SB listing = new SB();
+    long n = 0;
+    if (fileName != null && fileName.endsWith("/."))
+      fileName = fileName.substring(0, fileName.length() - 1);
+    boolean isPath = (fileName != null && fileName.endsWith("/"));
+    boolean oneFile = (fileName != null && !isPath);
+    try {
+      if (b512 == null)
+        b512 = new byte[512];
+      while (bis.read(b512, 0, 512) > 0) {
+        byte[] bytes = getTarFile(bis, fileName == null ? "." : fileName, -1, listing, cache, oneFile);
+        if (bytes != null) {
+          n += bytes.length;
+          if (oneFile)
+            break;
+        }
+      }
+      bis.close();
+    } catch (Exception e) {
+      try {
+        bis.close();
       } catch (IOException e1) {
       }
       return null;

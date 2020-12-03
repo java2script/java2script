@@ -162,7 +162,7 @@ public class TextListener implements KeyListener, FocusListener, ChangeListener,
 		lastKeyEvent = eventType;
 		if (setCaret)
 			ui.setJavaMarkAndDot(markDot);
-		ui.setIgnoreEvent(jqevent);
+		JSComponentUI.setIgnoreEvent(jqevent);
 	}
 
 	@SuppressWarnings("unused")

@@ -237,7 +237,7 @@ public class EventQueue {
 	final void postEventPrivate(AWTEvent theEvent) {
 		theEvent.isPosted = true;
 		synchronized (this) {
-			if (dispatchThread == null && nextQueue == null) {
+			if ((dispatchThread == null || !dispatchThread.isAlive()) && nextQueue == null) {
 				if (theEvent.getSource() == AWTAutoShutdown.getInstance()) {
 					return;
 				} else {
@@ -910,7 +910,7 @@ public class EventQueue {
 
 	final void initDispatchThread() {
 		synchronized (this) {
-			if (dispatchThread == null
+			if (dispatchThread == null || !dispatchThread.isAlive()
 					//&& !threadGroup.isDestroyed()
 					) {
 //						(EventDispatchThread) AccessController

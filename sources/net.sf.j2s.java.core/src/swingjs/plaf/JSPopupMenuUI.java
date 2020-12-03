@@ -130,6 +130,8 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener, Mouse
 	private JPopupMenu popupMenu;
 
 	private JSMenuKeyListener menuKeyListener;
+
+	private static long showTime;
 	
 
 	public JSPopupMenuUI() {
@@ -243,6 +245,7 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener, Mouse
 			int y = /** @j2sNative this.menu.desiredLocationY || */0;
 			setZ(getInheritedZ((JComponent) menu.getInvoker()) + 2);
 			j2sSwingMenu.showMenu(menu, x, y);
+			showTime = System.currentTimeMillis();
 //		} else {
 //			hideMenu();
 		}
@@ -1290,6 +1293,8 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener, Mouse
     }
     
 	public static void closeAllMenus() {
+		if (System.currentTimeMillis() - showTime < 100)
+			return;
 		// top-level or submenu:
 		if (lastInvoker != null) {
 			lastInvoker.requestFocus();

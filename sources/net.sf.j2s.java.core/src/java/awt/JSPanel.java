@@ -102,10 +102,10 @@ public class JSPanel extends Container {
 		// }
 	}
     
-  	@Override
-  	public ComponentPeer getOrCreatePeer() {
-  		return (ui == null ? null : peer == null ? (peer = getToolkit().createPanel((Panel) (Object) this)) : peer);
-  	}
+//  	@Override
+//  	public ComponentPeer getOrCreatePeer() {
+//  		return (ui == null ? null : peer == null ? (peer = getToolkit().createPanel((Panel) (Object) this)) : peer);
+//  	}
 
   	/**
   	 * SwingJS added for focus management

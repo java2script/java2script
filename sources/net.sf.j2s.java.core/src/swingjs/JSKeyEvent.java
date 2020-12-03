@@ -25,44 +25,6 @@ public class JSKeyEvent extends KeyEvent {
 	public static final int KEY_UNKNOWN = 403;
 
 	/**
-	 * From j2sApplet vis JSMouse
-	 * @param c 
-	 * 
-	 * @param id
-	 * @param modifiers
-	 * @param jqevent
-	 * @param time
-	 * @return
-	 */
-	public static boolean dispatchKeyEvent(JComponent c, int id, Object jqevent, long time) {
-		if (id == 0)
-			id = JSMouse.fixEventType(jqevent, 0);
-		if (id == KeyEvent.KEY_TYPED) {
-			// HTML5 keypress is no longer reliable
-			JSToolkit.consumeEvent(jqevent);
-			return false;
-		}
-		if (c != null) {
-			JSComponentUI ui = c.秘getUI();
-			KeyEvent e = newJSKeyEvent(c, jqevent, id, false);
-			// create our own KEY_PRESSED event
-			c.dispatchEvent(e);
-			if (!ui.j2sDoPropagate)
-				JSToolkit.consumeEvent(e);
-			if (!e.isConsumed() && id == KeyEvent.KEY_PRESSED && e.getKeyChar() != KeyEvent.CHAR_UNDEFINED) {
-				e = newJSKeyEvent(c, jqevent, KeyEvent.KEY_TYPED, false);
-				
-				// yield to keyboard focus manager
-				c.dispatchEvent(e);
-
-				if (!ui.j2sDoPropagate)
-					JSToolkit.consumeEvent(e);
-			}
-		}
-		return true;
-	}
-
-	/**
 	 * Create a value-added KeyEvent that can trace back to the original system event.
 	 * 
 	 * @param source

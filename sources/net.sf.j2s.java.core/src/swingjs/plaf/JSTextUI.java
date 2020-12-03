@@ -1322,8 +1322,9 @@ public abstract class JSTextUI extends JSLightweightUI {
 					return null;
 				allowKeyEvent(jQueryEvent);
 				return NOT_CONSUMED; // allow standard browser CTRL-C, with no Java-Event processing
+			
 			case KeyEvent.VK_TAB:
-				return (type == "keydown" && handleTab(jQueryEvent) == NOT_CONSUMED ? null : Boolean.valueOf(CONSUMED));
+				return handleTab(jQueryEvent, type);
 			case KeyEvent.VK_UP:
 			case KeyEvent.VK_DOWN:
 			case KeyEvent.VK_LEFT:
@@ -1379,8 +1380,8 @@ public abstract class JSTextUI extends JSLightweightUI {
 		return true;
 	}
 
-	protected boolean handleTab(Object jQueryEvent) {
-		return NOT_CONSUMED;
+	protected Boolean handleTab(Object jQueryEvent, String type) {
+		return (type == "keydown" ? null : Boolean.valueOf(CONSUMED));
 	}
 
 

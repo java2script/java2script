@@ -38,7 +38,6 @@ import java.awt.event.MouseWheelEvent;
 
 import javax.swing.JComponent;
 
-import javajs.util.JSThread;
 import swingjs.api.js.DOMNode;
 import swingjs.api.js.JQueryObject;
 import swingjs.api.js.JQueryObject.JQEvent;
@@ -147,8 +146,7 @@ public class JSMouse {
 	public final static int BUTTON_MASK = MOUSE_LEFT | MOUSE_MIDDLE | MOUSE_RIGHT;
 	
 	void translateXYBy(int deltaX, int deltaY) {
-		// TODO Auto-generated method stub
-
+		// Called by JSMouse2
 	}
 
 	public void mouseClicked(MouseEvent e) {
@@ -392,7 +390,6 @@ public class JSMouse {
 	 * @param modifiers
 	 * @param dy
 	 */
-	@SuppressWarnings("unused")
 	private void mouseAction(int id, long time, int x, int y, int xcount, int modifiers, int dy) {
 		Component source = viewer.getTopComponent(); // may be a JFrame
 		int count = (xcount > 1 && id == MouseEvent.MOUSE_CLICKED ? xcount : updateClickCount(id, time, x, y));
@@ -495,7 +492,7 @@ public class JSMouse {
 		}
 	}
 
-	@SuppressWarnings({ "null", "unused" })
+	@SuppressWarnings({ "unused" })
 	private boolean keyAction(int id, Object jqevent, long time) {
 		JComponent c = 	/** @j2sNative 
 		jqevent.target["data-shadowkeycomponent"] || jqevent.target["data-keycomponent"] ||
@@ -504,7 +501,7 @@ public class JSMouse {
 			return false;
 		if (c.秘isContentPane)
 			c = (JComponent) c.getTopLevelAncestor();
-		return JSKeyEvent.dispatchKeyEvent(c, id, jqevent, time);
+		return JSComponent.秘dispatchKeyEvent(c, id, jqevent, time);
 	}
 	
 	public static int getScroll(Object ev) {
@@ -576,7 +573,7 @@ public class JSMouse {
 		return def;			
 	}
 	
-	@SuppressWarnings({ "unused", "null" })
+	@SuppressWarnings({ "null" })
 	public static void retargetMouseEvent(Object jqevent, DOMNode base, JComponent from, JComponent to, int id) {
 		if (id == 0)
 			id = fixEventType(jqevent, 0);
@@ -590,8 +587,8 @@ public class JSMouse {
 		}
 		int[] xym = null;
 		/**
-		 * @j2sNative jqevent.j2sretarget = to; xym = J2S._getEventXY(jqevent,
-		 *            J2S.$(base).offset());
+		 * @j2sNative jqevent.j2sretarget = to; 
+		 *            xym = J2S._getEventXY(jqevent, J2S.$(base).offset());
 		 */
 		int modifiers = getModifiers(jqevent);
 		long time = System.currentTimeMillis();
