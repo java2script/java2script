@@ -34,14 +34,17 @@
  */
 
 package java.util.concurrent;
+import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.AbstractQueuedSynchronizer;
-import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javajs.async.SwingJSUtils;
-
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.*;
+import swingjs.JSUtil;
 
 // BH SwingJS removed primary securityManager checks
 /**
@@ -466,10 +469,10 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      */
     private final HashSet<Worker> workers = new HashSet<Worker>();
 
-    /**
-     * Wait condition to support awaitTermination
-     */
-    private final Condition termination = mainLock.newCondition();
+//    /**
+//     * Wait condition to support awaitTermination
+//     */
+//    private final Condition termination = mainLock.newCondition();
 
     /**
      * Tracks largest attained pool size. Accessed only under
@@ -616,7 +619,8 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
         }
 
         /** Delegates main run loop to outer runWorker  */
-        public void run() {
+        @Override
+		public void run() {
             runWorker(this);
         }
 
@@ -625,11 +629,13 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
         // The value 0 represents the unlocked state.
         // The value 1 represents the locked state.
 
-        protected boolean isHeldExclusively() {
+        @Override
+		protected boolean isHeldExclusively() {
             return getState() != 0;
         }
 
-        protected boolean tryAcquire(int unused) {
+        @Override
+		protected boolean tryAcquire(int unused) {
             if (compareAndSetState(0, 1)) {
                 setExclusiveOwnerThread(Thread.currentThread());
                 return true;
@@ -637,7 +643,8 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
             return false;
         }
 
-        protected boolean tryRelease(int unused) {
+        @Override
+		protected boolean tryRelease(int unused) {
             setExclusiveOwnerThread(null);
             setState(0);
             return true;
@@ -1150,7 +1157,8 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
                     wt.interrupt();
                 	// run on event queue
                 	SwingJSUtils.StateHelper.delayedRun(100, new Runnable() {
-                		public void run() {
+                		@Override
+						public void run() {
                             try {
                             beforeExecute(wt, task);
                             Throwable thrown = null;
@@ -1349,7 +1357,8 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      *         cannot be accepted for execution
      * @throws NullPointerException if {@code command} is null
      */
-    public void execute(Runnable command) {
+    @Override
+	public void execute(Runnable command) {
         if (command == null)
             throw new NullPointerException();
         /*
@@ -1396,7 +1405,8 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      *
      * @throws SecurityException {@inheritDoc}
      */
-    public void shutdown() {
+    @Override
+	public void shutdown() {
 //        final ReentrantLock mainLock = this.mainLock;
 //        mainLock.lock();
 //        try {
@@ -1424,7 +1434,8 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      *
      * @throws SecurityException {@inheritDoc}
      */
-    public List<Runnable> shutdownNow() {
+    @Override
+	public List<Runnable> shutdownNow() {
         List<Runnable> tasks;
         final ReentrantLock mainLock = this.mainLock;
         mainLock.lock();
@@ -1440,7 +1451,8 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
         return tasks;
     }
 
-    public boolean isShutdown() {
+    @Override
+	public boolean isShutdown() {
         return stopped;//! isRunning(ctl.get());
     }
 
@@ -1456,37 +1468,44 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * @return true if terminating but not yet terminated
      */
     public boolean isTerminating() {
-        int c = ctl.get();
-        return ! isRunning(c) && runStateLessThan(c, TERMINATED);
+    	return false;
+//        int c = ctl.get();
+//        return ! isRunning(c) && runStateLessThan(c, TERMINATED);
     }
 
-    public boolean isTerminated() {
-        return runStateAtLeast(ctl.get(), TERMINATED);
+    @Override
+	public boolean isTerminated() {
+    	return stopped;
+//        return runStateAtLeast(ctl.get(), TERMINATED);
     }
 
-    public boolean awaitTermination(long timeout, TimeUnit unit)
+    @Override
+	public boolean awaitTermination(long timeout, TimeUnit unit)
         throws InterruptedException {
-        long nanos = unit.toNanos(timeout);
-        final ReentrantLock mainLock = this.mainLock;
-        mainLock.lock();
-        try {
-            for (;;) {
-                if (runStateAtLeast(ctl.get(), TERMINATED))
-                    return true;
-                if (nanos <= 0)
-                    return false;
-                nanos = termination.awaitNanos(nanos);
-            }
-        } finally {
-            mainLock.unlock();
-        }
+    	JSUtil.notImplemented("ThreadPoolExecutor.awaitTermination -- Sorry, can't wait in JavaScript");
+    	return false;
+//        long nanos = unit.toNanos(timeout);
+//        final ReentrantLock mainLock = this.mainLock;
+//        mainLock.lock();
+//        try {
+//            for (;;) {
+//                if (runStateAtLeast(ctl.get(), TERMINATED))
+//                    return true;
+//                if (nanos <= 0)
+//                    return false;
+//                nanos = termination.awaitNanos(nanos);
+//            }
+//        } finally {
+//            mainLock.unlock();
+//        }
     }
 
     /**
      * Invokes {@code shutdown} when this executor is no longer
      * referenced and it has no threads.
      */
-    protected void finalize() {
+    @Override
+	protected void finalize() {
         shutdown();
     }
 
@@ -1981,7 +2000,8 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
          * @param r the runnable task requested to be executed
          * @param e the executor attempting to execute this task
          */
-        public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
+        @Override
+		public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
             if (!e.isShutdown()) {
                 r.run();
             }
@@ -2005,7 +2025,8 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
          * @param e the executor attempting to execute this task
          * @throws RejectedExecutionException always.
          */
-        public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
+        @Override
+		public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
             throw new RejectedExecutionException();
         }
     }
@@ -2026,7 +2047,8 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
          * @param r the runnable task requested to be executed
          * @param e the executor attempting to execute this task
          */
-        public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
+        @Override
+		public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
         }
     }
 
@@ -2050,7 +2072,8 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
          * @param r the runnable task requested to be executed
          * @param e the executor attempting to execute this task
          */
-        public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
+        @Override
+		public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
             if (!e.isShutdown()) {
                 e.getQueue().poll();
                 e.execute(r);
