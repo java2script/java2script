@@ -18,6 +18,8 @@ import java.util.stream.Stream;
 
 import test.baeldung.doublecolon.Computer;
 import test.baeldung.doublecolon.MacbookPro;
+
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -25,6 +27,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import javax.swing.JButton;
@@ -36,39 +40,48 @@ public class Test_Future extends JFrame {
 	Executor executor = (Runnable r) -> {
 		new Thread(r).start();
 	};
+	private JButton button;
 
 	public Test_Future() {
 		setVisible(true);
 		setBounds(500, 300, 400, 300);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		JButton button = new JButton("PRESS ME");
+		button = new JButton("PRESS ME");
 		button.addActionListener((ActionEvent e) -> {
 			btnAction();
 		});
 		add(button);
 	}
 
+	Color lastColor = null;
+
 	private void btnAction() {
 		System.out.println("button pressed");
+
+		Executors.newSingleThreadScheduledExecutor().schedule(() -> {
+			button.setForeground(lastColor = (lastColor == Color.red ? Color.blue : Color.red));
+			System.out.println("task complete");
+		}, 3000, TimeUnit.MILLISECONDS);
+
 		CompletionStage<String> future = longJob();
 		future.thenAccept((value) -> {
 			System.out.format("returned with %s%n", value);
 		});
-		 ExecutorService dialogExecutor = Executors.newSingleThreadExecutor();
-		 Future<?> f = dialogExecutor.submit(() -> {
+
+		ExecutorService dialogExecutor = Executors.newSingleThreadExecutor();
+		Future<?> f = dialogExecutor.submit(() -> {
 			System.out.println("dialog runnable 1");
 		});
-		 dialogExecutor.submit(() -> {
+		dialogExecutor.submit(() -> {
 			System.out.println("dialog runnable 2");
 		});
-		 dialogExecutor.submit(() -> {
+		dialogExecutor.submit(() -> {
 			System.out.println("dialog runnable 3");
 			System.out.println(f.toString() + f.isDone());
 		});
 		System.out.println("CompletionStage started");
 		System.out.println(f.toString() + f.isDone());
-		
-		
+
 	}
 
 	CompletableFuture<String> longJob() {
