@@ -69,14 +69,17 @@ public class AjaxURLConnection extends HttpURLConnection {
 
 	private Object ajax;
 	Object info;
+	private String statusText;
 
 	@Override
 	public String getHeaderField(String name) {
 		try {
 			if (getResponseCode() != -1) {
+				@SuppressWarnings("unused")
+				Object info = this.info;
 				return /**
-						 * @j2sNative this.info && this.info.xhr &&
-						 *            this.info.xhr.getResponseHeader(name) ||
+						 * @j2sNative info && info.xhr &&
+						 *            info.xhr.getResponseHeader(name) ||
 						 */
 				null;
 			}
@@ -92,9 +95,10 @@ public class AjaxURLConnection extends HttpURLConnection {
 		try {
 			if (getResponseCode() != -1) {
 				String[] data = null;
+				Object info = this.info;
 				/**
-				 * @j2sNative data = this.info && this.info.xhr &&
-				 *            this.info.xhr.getAllResponseHeaders(); data && (data =
+				 * @j2sNative data = info && info.xhr &&
+				 *            info.xhr.getAllResponseHeaders(); data && (data =
 				 *            data.trim().split("\n"));
 				 */
 				// ["content-length: 996"
@@ -254,6 +258,7 @@ public class AjaxURLConnection extends HttpURLConnection {
 		 *            result[1] == 10); if (isEmpty) result = new Int8Array;
 		 */
 
+		statusText = /** @j2sNative info.xhr.statusText || */"";
 		responseCode = (!isEmpty ? /** @j2sNative info.xhr.status || */
 				0 : getAJAXStatusError());
 	}
@@ -406,8 +411,13 @@ public class AjaxURLConnection extends HttpURLConnection {
 			return is;
 		responseCode = -1;
 		is = getInputStreamAndResponse(false);
+		switch (responseCode) {
+		
+		}
 		if (responseCode == HTTP_BAD_REQUEST) {
-			throw new UnknownHostException(url.toString());
+			throw new java.net.UnknownHostException(url.toString());
+		} else if (responseCode > HTTP_BAD_REQUEST && responseCode != 404) {
+			throw new IOException("Server returned HTTP response code: " + responseCode + " for URL: " + url); 
 		}
 		if (is == null)
 			throw new FileNotFoundException("opening " + url);
