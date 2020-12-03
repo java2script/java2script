@@ -35,6 +35,9 @@
 
 package java.util.concurrent;
 import java.util.concurrent.atomic.*;
+
+import swingjs.JSToolkit;
+
 import java.util.*;
 
 /**
@@ -156,10 +159,11 @@ public class ScheduledThreadPoolExecutor
     private static final AtomicLong sequencer = new AtomicLong(0);
 
     /**
-     * Returns current nanosecond time.
+     * Returns current millisecond time.
      */
-    final long now() {
-        return System.nanoTime();
+    final long nowms() {
+    	return System.currentTimeMillis();
+//        return System.nanoTime();
     }
 
     private class ScheduledFutureTask<V>
@@ -167,51 +171,51 @@ public class ScheduledThreadPoolExecutor
 
         /** Sequence number to break ties FIFO */
         private final long sequenceNumber;
-        /** The time the task is enabled to execute in nanoTime units */
-        private long time;
+        /** The time the task is enabled to execute in MilliTime units */
+        private long timems;
         /**
-         * Period in nanoseconds for repeating tasks.  A positive
+         * Period in milliseconds for repeating tasks.  A positive
          * value indicates fixed-rate execution.  A negative value
          * indicates fixed-delay execution.  A value of 0 indicates a
          * non-repeating task.
          */
-        private final long period;
+        private final long periodms;
 
         /** The actual task to be re-enqueued by reExecutePeriodic */
         RunnableScheduledFuture<V> outerTask = this;
 
         /**
-         * Creates a one-shot action with given nanoTime-based trigger time.
+         * Creates a one-shot action with given milliTime-based trigger time.
          */
-        ScheduledFutureTask(Runnable r, V result, long ns) {
+        ScheduledFutureTask(Runnable r, V result, long ms) {
             super(r, result);
-            this.time = ns;
-            this.period = 0;
+            this.timems = ms;
+            this.periodms = 0;
             this.sequenceNumber = sequencer.getAndIncrement();
         }
 
         /**
-         * Creates a periodic action with given nano time and period.
+         * Creates a periodic action with given milli time and period.
          */
-        ScheduledFutureTask(Runnable r, V result, long ns, long period) {
+        ScheduledFutureTask(Runnable r, V result, long ms, long period) {
             super(r, result);
-            this.time = ns;
-            this.period = period;
+            this.timems = ms;
+            this.periodms = period;
             this.sequenceNumber = sequencer.getAndIncrement();
         }
 
         /**
-         * Creates a one-shot action with given nanoTime-based trigger.
+         * Creates a one-shot action with given milliTime-based trigger.
          */
         ScheduledFutureTask(Callable<V> callable, long ns) {
             super(callable);
-            this.time = ns;
-            this.period = 0;
+            this.timems = ns;
+            this.periodms = 0;
             this.sequenceNumber = sequencer.getAndIncrement();
         }
 
         public long getDelay(TimeUnit unit) {
-            long d = unit.convert(time - now(), TimeUnit.NANOSECONDS);
+            long d = unit.convert(timems - nowms(), TimeUnit.MILLISECONDS);
             return d;
         }
 
@@ -220,7 +224,7 @@ public class ScheduledThreadPoolExecutor
                 return 0;
             if (other instanceof ScheduledFutureTask) {
                 ScheduledFutureTask<?> x = (ScheduledFutureTask<?>)other;
-                long diff = time - x.time;
+                long diff = timems - x.timems;
                 if (diff < 0)
                     return -1;
                 else if (diff > 0)
@@ -230,8 +234,8 @@ public class ScheduledThreadPoolExecutor
                 else
                     return 1;
             }
-            long d = (getDelay(TimeUnit.NANOSECONDS) -
-                      other.getDelay(TimeUnit.NANOSECONDS));
+            long d = (getDelay(TimeUnit.MILLISECONDS) -
+                      other.getDelay(TimeUnit.MILLISECONDS));
             return (d == 0) ? 0 : ((d < 0) ? -1 : 1);
         }
 
@@ -241,18 +245,18 @@ public class ScheduledThreadPoolExecutor
          * @return true if periodic
          */
         public boolean isPeriodic() {
-            return period != 0;
+            return periodms != 0;
         }
 
         /**
          * Sets the next time to run for a periodic task.
          */
         private void setNextRunTime() {
-            long p = period;
+            long p = periodms;
             if (p > 0)
-                time += p;
+                timems += p;
             else
-                time = now() - p;
+                timems = nowms() - p;
         }
 
         /**
@@ -283,6 +287,7 @@ public class ScheduledThreadPoolExecutor
                                    executeExistingDelayedTasksAfterShutdown);
     }
 
+    Map<Integer, RunnableScheduledFuture<?>> todo = new HashMap<>();
 	/**
 	 * Main execution method for delayed or periodic tasks. If pool is shut down,
 	 * rejects the task. Otherwise adds task to queue and starts a thread, if
@@ -304,7 +309,13 @@ public class ScheduledThreadPoolExecutor
 
 			if (/** @j2sNative true || */
 			false) {
-				new Thread(task).start();
+				int[] id = new int[1];
+				todo.put(id[0] = JSToolkit.dispatch(new Thread(() -> {
+					RunnableScheduledFuture<?> me = todo.remove(id[0]);
+					if (me != null)
+						task.run();
+				}), Math.max(-1, (int) task.getDelay(TimeUnit.MILLISECONDS)), 0), task);
+
 			} else /** @j2sIgnore */
 			{
 				super.getQueue().add(task);
@@ -402,7 +413,7 @@ public class ScheduledThreadPoolExecutor
      * @throws IllegalArgumentException if {@code corePoolSize < 0}
      */
     public ScheduledThreadPoolExecutor(int corePoolSize) {
-        super(corePoolSize, Integer.MAX_VALUE, 0, TimeUnit.NANOSECONDS,
+        super(corePoolSize, Integer.MAX_VALUE, 0, TimeUnit.MILLISECONDS,
               new DelayedWorkQueue());
     }
 
@@ -419,7 +430,7 @@ public class ScheduledThreadPoolExecutor
      */
     public ScheduledThreadPoolExecutor(int corePoolSize,
                              ThreadFactory threadFactory) {
-        super(corePoolSize, Integer.MAX_VALUE, 0, TimeUnit.NANOSECONDS,
+        super(corePoolSize, Integer.MAX_VALUE, 0, TimeUnit.MILLISECONDS,
               new DelayedWorkQueue(), threadFactory);
     }
 
@@ -436,7 +447,7 @@ public class ScheduledThreadPoolExecutor
      */
     public ScheduledThreadPoolExecutor(int corePoolSize,
                               RejectedExecutionHandler handler) {
-        super(corePoolSize, Integer.MAX_VALUE, 0, TimeUnit.NANOSECONDS,
+        super(corePoolSize, Integer.MAX_VALUE, 0, TimeUnit.MILLISECONDS,
               new DelayedWorkQueue(), handler);
     }
 
@@ -457,7 +468,7 @@ public class ScheduledThreadPoolExecutor
     public ScheduledThreadPoolExecutor(int corePoolSize,
                               ThreadFactory threadFactory,
                               RejectedExecutionHandler handler) {
-        super(corePoolSize, Integer.MAX_VALUE, 0, TimeUnit.NANOSECONDS,
+        super(corePoolSize, Integer.MAX_VALUE, 0, TimeUnit.MILLISECONDS,
               new DelayedWorkQueue(), threadFactory, handler);
     }
 
@@ -467,7 +478,7 @@ public class ScheduledThreadPoolExecutor
         if (command == null || unit == null)
             throw new NullPointerException();
         if (delay < 0) delay = 0;
-        long triggerTime = now() + unit.toNanos(delay);
+        long triggerTime = nowms() + unit.toMillis(delay);
         RunnableScheduledFuture<?> t = decorateTask(command,
             new ScheduledFutureTask<Void>(command, null, triggerTime));
         delayedExecute(t);
@@ -480,7 +491,7 @@ public class ScheduledThreadPoolExecutor
         if (callable == null || unit == null)
             throw new NullPointerException();
         if (delay < 0) delay = 0;
-        long triggerTime = now() + unit.toNanos(delay);
+        long triggerTime = nowms() + unit.toMillis(delay);
         RunnableScheduledFuture<V> t = decorateTask(callable,
             new ScheduledFutureTask<V>(callable, triggerTime));
         delayedExecute(t);
@@ -496,12 +507,12 @@ public class ScheduledThreadPoolExecutor
         if (period <= 0)
             throw new IllegalArgumentException();
         if (initialDelay < 0) initialDelay = 0;
-        long triggerTime = now() + unit.toNanos(initialDelay);
+        long triggerTime = nowms() + unit.toMillis(initialDelay);
         ScheduledFutureTask<Void> sft =
             new ScheduledFutureTask<Void>(command,
                                           null,
                                           triggerTime,
-                                          unit.toNanos(period));
+                                          unit.toMillis(period));
         RunnableScheduledFuture<Void> t = decorateTask(command, sft);
         sft.outerTask = t;
         delayedExecute(t);
@@ -517,12 +528,12 @@ public class ScheduledThreadPoolExecutor
         if (delay <= 0)
             throw new IllegalArgumentException();
         if (initialDelay < 0) initialDelay = 0;
-        long triggerTime = now() + unit.toNanos(initialDelay);
+        long triggerTime = nowms() + unit.toMillis(initialDelay);
         ScheduledFutureTask<Void> sft =
             new ScheduledFutureTask<Void>(command,
                                           null,
                                           triggerTime,
-                                          unit.toNanos(-delay));
+                                          unit.toMillis(-delay));
         RunnableScheduledFuture<Void> t = decorateTask(command, sft);
         sft.outerTask = t;
         delayedExecute(t);
@@ -550,22 +561,22 @@ public class ScheduledThreadPoolExecutor
      * @throws NullPointerException {@inheritDoc}
      */
     public void execute(Runnable command) {
-        schedule(command, 0, TimeUnit.NANOSECONDS);
+        schedule(command, 0, TimeUnit.MILLISECONDS);
     }
 
     // Override AbstractExecutorService methods
 
     public Future<?> submit(Runnable task) {
-        return schedule(task, 0, TimeUnit.NANOSECONDS);
+        return schedule(task, 0, TimeUnit.MILLISECONDS);
     }
 
     public <T> Future<T> submit(Runnable task, T result) {
         return schedule(Executors.callable(task, result),
-                        0, TimeUnit.NANOSECONDS);
+                        0, TimeUnit.MILLISECONDS);
     }
 
     public <T> Future<T> submit(Callable<T> task) {
-        return schedule(task, 0, TimeUnit.NANOSECONDS);
+        return schedule(task, 0, TimeUnit.MILLISECONDS);
     }
 
     /**
