@@ -172,14 +172,14 @@ public class ScheduledThreadPoolExecutor
         /** Sequence number to break ties FIFO */
         private final long sequenceNumber;
         /** The time the task is enabled to execute in MilliTime units */
-        private long timems;
+        long timems;
         /**
          * Period in milliseconds for repeating tasks.  A positive
          * value indicates fixed-rate execution.  A negative value
          * indicates fixed-delay execution.  A value of 0 indicates a
          * non-repeating task.
          */
-        private final long periodms;
+        final long periodms;
 
         /** The actual task to be re-enqueued by reExecutePeriodic */
         RunnableScheduledFuture<V> outerTask = this;
@@ -303,17 +303,15 @@ public class ScheduledThreadPoolExecutor
 		if (isShutdown())
 			reject(task);
 		else {
-			if (task.isPeriodic()) {
-				swingjs.JSUtil.notImplemented("Periodic tasks");
-			}
-
 			if (/** @j2sNative true || */
 			false) {
 				int[] id = new int[1];
 				todo.put(id[0] = JSToolkit.dispatch(new Thread(() -> {
-					RunnableScheduledFuture<?> me = todo.remove(id[0]);
-					if (me != null)
+					RunnableScheduledFuture<?> t = todo.remove(id[0]);
+					if (t != null) {
 						task.run();
+					}
+					
 				}), Math.max(-1, (int) task.getDelay(TimeUnit.MILLISECONDS)), 0), task);
 
 			} else /** @j2sIgnore */
@@ -335,11 +333,12 @@ public class ScheduledThreadPoolExecutor
      */
     void reExecutePeriodic(RunnableScheduledFuture<?> task) {
         if (canRunInCurrentRunState(true)) {
-            super.getQueue().add(task);
-            if (!canRunInCurrentRunState(true) && remove(task))
-                task.cancel(false);
-            else
-                prestartCoreThread();
+        	delayedExecute(task);
+//            super.getQueue().add(task);
+//            if (!canRunInCurrentRunState(true) && remove(task))
+//                task.cancel(false);
+//            else
+//                prestartCoreThread();
         }
     }
 
@@ -348,25 +347,23 @@ public class ScheduledThreadPoolExecutor
      * due to shutdown policy.  Invoked within super.shutdown.
      */
     @Override void onShutdown() {
-        BlockingQueue<Runnable> q = super.getQueue();
+ //       BlockingQueue<Runnable> q = super.getQueue();
         boolean keepDelayed =
             getExecuteExistingDelayedTasksAfterShutdownPolicy();
         boolean keepPeriodic =
             getContinueExistingPeriodicTasksAfterShutdownPolicy();
-        if (!keepDelayed && !keepPeriodic)
-            q.clear();
-        else {
+        if (!keepDelayed && !keepPeriodic) {
+        	todo.clear();
+//            q.clear();
+        } else {
             // Traverse snapshot to avoid iterator exceptions
-            for (Object e : q.toArray()) {
-                if (e instanceof RunnableScheduledFuture) {
-                    RunnableScheduledFuture<?> t =
-                        (RunnableScheduledFuture<?>)e;
+			for (Map.Entry<Integer, RunnableScheduledFuture<?>> e: todo.entrySet()) {
+                    RunnableScheduledFuture<?> t = e.getValue();
                     if ((t.isPeriodic() ? !keepPeriodic : !keepDelayed) ||
                         t.isCancelled()) { // also remove if already cancelled
-                        if (q.remove(t))
+                        todo.remove(t);
                             t.cancel(false);
                     }
-                }
             }
         }
         tryTerminate();
