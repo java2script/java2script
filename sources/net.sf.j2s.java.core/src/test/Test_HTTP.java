@@ -23,9 +23,10 @@ public class Test_HTTP extends Test_ {
 
 	static {
 		/** @j2sNative 
-		J2S.addDirectDatabaseCall("www.compbio.dundee.ac.uk/slivka");
-		
-		J2S.addDirectDatabaseCall("httpstat.us");
+
+// turn off the relay service
+
+		J2S.addDirectDatabaseCall(".");
 
 		 */
 

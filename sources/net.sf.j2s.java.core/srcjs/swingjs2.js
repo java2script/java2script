@@ -10671,6 +10671,7 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// BH 2020.12.03 note that relay is disabled using J2S.addDirectDatabaseCall(".")
 // BH 2020.04.24 Info.width includes "px" allowed and implies Info.isResizable:false; 
 //               fixes early hidden 100x100 size issue due to node.offsetWidth == 0 in that case
 // BH 2019.11.06 adds JFileChooser.setMultipleMode(true) and multiple-file DnD
