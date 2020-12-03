@@ -2,74 +2,120 @@ package test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URI;
-import java.util.function.Consumer;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.UnknownHostException;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import javajs.http.HttpClient;
 import javajs.http.HttpClient.HttpRequest;
 import javajs.http.HttpClient.HttpResponse;
 import javajs.http.HttpClientFactory;
 
-
 /** A JavaScript-only class */
 
 public class Test_HTTP extends Test_ {
 
+	static {
+		/** @j2sNative 
+		J2S.addDirectDatabaseCall("www.compbio.dundee.ac.uk/slivka");
+		 */
+
+	}
 	@SuppressWarnings("unused")
 	public static void main(String[] args) {
 
-		if (/** @j2sNative false && */ true)
-			return;
+		HttpClient client = HttpClientFactory.getClient(null);
+		HttpRequest req = null;
+
+		System.out.println("Testing sync GET");
+		
 		try {
+			
+			try {
+				URL url = new URL("https://www.compbiolivka/api/services");
+				HttpURLConnection c = (HttpURLConnection) url.openConnection();
+				int code = c.getResponseCode();
+				InputStream oi = url.openStream();
+			} catch (IOException e) {
+				assert(e instanceof UnknownHostException);
+			}
+			
+			
+			req = javajs.http.SimpleHttpClient.createRequest(client, "get",
+					"https://www.compbio.dundee.ac.uk/slivka/api/services");
+			System.out.println(req.getUri());
+			showResponse(req.execute());
 
-			HttpClient client = HttpClientFactory.getClient(null);
-			
-			HttpRequest req = client.get(new URI("https://www.compbio.dundee.ac.uk/slivka/api/services"));
-			HttpResponse resp = req.execute();
-			
-			System.out.println(resp);
-			String res = resp.getText();
-			System.out.println(res);
-			System.out.println(resp.getStatusCode());
-			
-			req = client.put(new URI("https://www.compbio.dundee.ac.uk/slivka/api/services/example"));
-			
-			String json = "{\"key1\":\"val1\", \"key2\":\"val2\"}";		
-			req.addFilePart("input-file",new ByteArrayInputStream(json.getBytes()));
-			req.addFormPart("content", "len:11 long");
-
-			resp = req.execute();
-			
-			System.out.println(resp);
-			res = resp.getText();
-			System.out.println(res);
-			System.out.println(resp.getStatusCode());
-
-			System.out.println("Testing async");
-			req.addFormPart("testing", "here");
-			req.executeAsync(new Consumer<HttpResponse>() {
-
-				@Override
-				public void accept(HttpResponse t) {
-					try {
-						String res = t.getText();
-						System.out.println("Testing async...returned:");
-						System.out.println(res);
-						System.out.println(t.getStatusCode());
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-				
-			}, null, null);
-			System.out.println("Testing async...submitted...");
-
-			
-		} catch (Exception e3) {
-			e3.printStackTrace();
+		} catch (IOException e) {
+			System.err.println(e);
 		}
 
+		System.out.println("Testing async GET");
+		doAsync("async GET", req);
+
+		
+		System.out.println("Testing sync POST");
+		
+		try {
+			req = javajs.http.SimpleHttpClient.createRequest(client, "post",
+					"https://www.compbio.dundee.ac.uk/slivka/api/services/example");
+			String json = "{\"key1\":\"val1\", \"key2\":\"val2\"}";
+			req.addFilePart("input-file", new ByteArrayInputStream(json.getBytes()));
+			req.addFormPart("content", "len:11 long");
+			System.out.println(req.getUri());
+			showResponse(req.execute());
+		} catch (IOException e) {
+			System.err.println(e);
+		}
+		
+		
+		System.out.println("Testing sync PUT");
+		
+		try {
+			req = javajs.http.SimpleHttpClient.createRequest(client, "put",
+					"https://www.compbio.dundee.ac.uk/slivka/api/services/example");
+			String json = "{\"key1\":\"val1\", \"key2\":\"val2\"}";
+			req.addFilePart("input-file", new ByteArrayInputStream(json.getBytes()));
+			req.addFormPart("content", "len:11 long");
+			System.out.println(req.getUri());
+			showResponse(req.execute());
+		} catch (IOException e) {
+			System.err.println(e);
+		}
+		
+		
+		System.out.println("Testing async PUT, reuse of req");
+		
+		req.addFormPart("testing", "here");
+		doAsync("async PUT", req);
 	}
-	
+
+	private static void doAsync(String msg, HttpRequest req) {
+		req.executeAsync((resp) -> {
+			System.out.println(msg + " returned SUCCESS:");
+		}, (resp, e) -> {
+			System.out.println(msg + " returned FAILED: " + e);
+		}, (resp, e) -> {
+			showResponse(resp);
+		});
+		System.out.println(msg + " submitted...");
+	}
+
+	private static void showResponse(HttpResponse resp) {
+		System.out.println(resp);
+		if (resp.getStatusCode() < 400) {
+			try {
+				System.out.println(resp.getText().replace('\n', ' '));
+			} catch (IOException e) {
+				System.err.println(e);
+			}
+		}
+	}
+
 }
