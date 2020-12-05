@@ -390,16 +390,28 @@ public final class Scanner implements Iterator<String>, Closeable {
     private IOException lastException;
 
     // A pattern for java whitespace
-    private static Pattern WHITESPACE_PATTERN = Pattern.compile(
-                                                "\\p{javaWhitespace}+");
+    private static Pattern WHITESPACE_PATTERN = Pattern.compile("\\s+");
+//                                                "\\p{javaWhitespace}+");
 
     // A pattern for any token
     private static Pattern FIND_ANY_PATTERN = Pattern.compile("(?s).*");
 
-    // A pattern for non-ASCII digits
-    private static Pattern NON_ASCII_DIGIT = Pattern.compile(
-        "[\\p{javaDigit}&&[^0-9]]");
+//    Some Unicode character ranges that contain digits:
+//
+//        '\u0030' through '\u0039', ISO-LATIN-1 digits ('0' through '9')
+//        '\u0660' through '\u0669', Arabic-Indic digits
+//        '\u06F0' through '\u06F9', Extended Arabic-Indic digits
+//        '\u0966' through '\u096F', Devanagari digits
+//        '\uFF10' through '\uFF19', Fullwidth digits 
 
+//    Many other character ranges contain digits as well. 
+
+    // A pattern for non-ASCII digits
+    // SwingJS not supported
+//    private static Pattern NON_ASCII_DIGIT = Pattern.compile(
+//        //"[\\p{javaDigit}&&[^0-9]]");
+//		"[\\p{javaDigit}&&[^0-9]]");
+    // A pattern for java whitespace
     // Fields and methods to support scanning primitive types
 
     /**
@@ -432,26 +444,32 @@ public final class Scanner implements Iterator<String>, Closeable {
      */
     private Pattern integerPattern;
     private String digits = "0123456789abcdefghijklmnopqrstuvwxyz";
-    private String non0Digit = "[\\p{javaDigit}&&[^0]]";
-    private int SIMPLE_GROUP_INDEX = 5;
+    private String non0Digit = "[1-9]";//"[\\p{javaDigit}&&[^0]]";
+    private int SIMPLE_GROUP_INDEX = 12; // SwingJS - moved simple to later
     private String buildIntegerPatternString() {
-        String radixDigits = digits.substring(0, radix);
+        String radixDigits = (radix == 10 ? "0-9" : digits.substring(0, radix) + digits.substring(10, radix).toUpperCase());
         // \\p{javaDigit} is not guaranteed to be appropriate
         // here but what can we do? The final authority will be
         // whatever parse method is invoked, so ultimately the
         // Scanner will do the right thing
-        String digit = "((?i)["+radixDigits+"]|\\p{javaDigit})";
+        String digit = "(["+radixDigits+"])";//\\p{javaDigit})";
         String groupedNumeral = "("+non0Digit+digit+"?"+digit+"?("+
                                 groupSeparator+digit+digit+digit+")+)";
         // digit++ is the possessive form which is necessary for reducing
         // backtracking that would otherwise cause unacceptable performance
-        String numeral = "(("+ digit+"++)|"+groupedNumeral+")";
+        // JavaScript requires reversal of these two
+        String numeral = "("
+        		+groupedNumeral
+				+ "|"
+        		+ "("+ digit+"+)"
+        		+")";
         String javaStyleInteger = "([-+]?(" + numeral + "))";
         String negativeInteger = negativePrefix + numeral + negativeSuffix;
         String positiveInteger = positivePrefix + numeral + positiveSuffix;
-        return "("+ javaStyleInteger + ")|(" +
-            positiveInteger + ")|(" +
-            negativeInteger + ")";
+        return "("+ javaStyleInteger + ")"
+        		+ "|(" + positiveInteger + ")"
+            		+ "|(" + negativeInteger + ")"
+            ;
     }
     private Pattern integerPattern() {
         if (integerPattern == null) {
@@ -490,23 +508,31 @@ public final class Scanner implements Iterator<String>, Closeable {
     private Pattern decimalPattern;
     private void buildFloatAndDecimalPattern() {
         // \\p{javaDigit} may not be perfect, see above
-        String digit = "([0-9]|(\\p{javaDigit}))";
+        String digit = "([0-9])";//|(\\p{javaDigit}))";
         String exponent = "([eE][+-]?"+digit+"+)?";
-        String groupedNumeral = "("+non0Digit+digit+"?"+digit+"?("+
+        String groupedNumeral = "("+non0Digit+digit+"?"+digit+"?"
+        		+ "("+
                                 groupSeparator+digit+digit+digit+")+)";
         // Once again digit++ is used for performance, as above
-        String numeral = "(("+digit+"++)|"+groupedNumeral+")";
-        String decimalNumeral = "("+numeral+"|"+numeral +
-            decimalSeparator + digit + "*+|"+ decimalSeparator +
-            digit + "++)";
+        String numeral = "("
+        		+ "("+digit+"+)"
+        		+ "|"+groupedNumeral
+        		+")";
+        // SwingJS had to move numeral to the end here
+        String decimalNumeral = "("
+        		+numeral + decimalSeparator + digit + "*"
+            	+ "|"+ decimalSeparator + digit + "+"
+            	+ "|"+numeral
+            			+ ")";
         String nonNumber = "(NaN|"+nanString+"|Infinity|"+
                                infinityString+")";
         String positiveFloat = "(" + positivePrefix + decimalNumeral +
                             positiveSuffix + exponent + ")";
         String negativeFloat = "(" + negativePrefix + decimalNumeral +
                             negativeSuffix + exponent + ")";
-        String decimal = "(([-+]?" + decimalNumeral + exponent + ")|"+
-            positiveFloat + "|" + negativeFloat + ")";
+        String decimal = "(([-+]?" + decimalNumeral + exponent + ")"
+        		+ "|"+ positiveFloat + "|" + negativeFloat
+            + ")";
         String hexFloat =
             "[-+]?0[xX][0-9a-fA-F]*\\.[0-9a-fA-F]+([pP][-+]?[0-9]+)?";
         String positiveNonNumber = "(" + positivePrefix + nonNumber +
@@ -516,8 +542,9 @@ public final class Scanner implements Iterator<String>, Closeable {
         String signedNonNumber = "(([-+]?"+nonNumber+")|" +
                                  positiveNonNumber + "|" +
                                  negativeNonNumber + ")";
-        floatPattern = Pattern.compile(decimal + "|" + hexFloat + "|" +
-                                       signedNonNumber);
+        floatPattern = Pattern.compile(decimal
+        		+ "|" + hexFloat + "|" +  signedNonNumber
+        		);
         decimalPattern = Pattern.compile(decimal);
     }
     private Pattern floatPattern() {
@@ -1032,7 +1059,7 @@ public final class Scanner implements Iterator<String>, Closeable {
                     return null;
                 }
                 // The match could go away depending on what is next
-                if ((searchLimit == horizonLimit) && matcher.requireEnd()) {
+                if (matcher.requireEnd()) {
                     // Rare case: we hit the end of input and it happens
                     // that it is at the horizon and the end of input is
                     // required for the match.
@@ -2275,24 +2302,25 @@ public final class Scanner implements Iterator<String>, Closeable {
         if (isNegative)
             result = "-" + result;
 
-        // Translate non-ASCII digits
-        Matcher m = NON_ASCII_DIGIT.matcher(result);
-        if (m.find()) {
-            StringBuilder inASCII = new StringBuilder();
-            for (int i=0; i<result.length(); i++) {
-                char nextChar = result.charAt(i);
-                if (Character.isDigit(nextChar)) {
-                    int d = Character.digit(nextChar, 10);
-                    if (d != -1)
-                        inASCII.append(d);
-                    else
-                        inASCII.append(nextChar);
-                } else {
-                    inASCII.append(nextChar);
-                }
-            }
-            result = inASCII.toString();
-        }
+// swingjs NOT IMPLEMENTED        
+//        // Translate non-ASCII digits
+//        Matcher m = NON_ASCII_DIGIT.matcher(result);
+//        if (m.find()) {
+//            StringBuilder inASCII = new StringBuilder();
+//            for (int i=0; i<result.length(); i++) {
+//                char nextChar = result.charAt(i);
+//                if (Character.isDigit(nextChar)) {
+//                    int d = Character.digit(nextChar, 10);
+//                    if (d != -1)
+//                        inASCII.append(d);
+//                    else
+//                        inASCII.append(nextChar);
+//                } else {
+//                    inASCII.append(nextChar);
+//                }
+//            }
+//            result = inASCII.toString();
+//        }
 
         return result;
     }
@@ -2629,4 +2657,5 @@ public final class Scanner implements Iterator<String>, Closeable {
         clearCaches();
         return this;
     }
+       
 }

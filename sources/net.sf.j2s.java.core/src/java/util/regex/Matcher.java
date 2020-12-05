@@ -171,6 +171,7 @@ public final class Matcher implements MatchResult {
 	 * have to consume all of the input. ENDANCHOR is the mode used for matching all
 	 * the input.
 	 */
+	static final int STARTANCHOR = 2; // SwingJS
 	static final int ENDANCHOR = 1;
 	static final int NOANCHOR = 0;
 
@@ -269,10 +270,11 @@ public final class Matcher implements MatchResult {
 	 * @since 1.5
 	 */
 	public MatchResult toMatchResult() {
-		Matcher result = new Matcher(this.pat, cs.toString());
-		result.first = this.first;
-		result.last = this.last;
-		// TODO result.groups = this.groups.clone();
+		Matcher result = new Matcher(pat, cs.toString());
+		result.first = first;
+		result.last = last;
+		result.groupCount = groupCount;
+		result.results = results.clone();
 		return result;
 	}
 
@@ -438,7 +440,7 @@ public final class Matcher implements MatchResult {
 		if (strString == null)
 			strString = cs.toString();
 		hitEnd = false;
-		requireEnd = false;
+		requireEnd = pat.pattern().endsWith("$");
 		from = (from < 0 ? 0 : from);
 		first = from;
 		oldLast = (oldLast < 0 ? from : oldLast);
@@ -446,9 +448,9 @@ public final class Matcher implements MatchResult {
 		String s = (rightBound == strString.length() ? strString : strString.substring(0, rightBound));
 		RegExp rg = getRE();
 		rg.lastIndex = from;
-		acceptMode = (anchor != UNSPECIFIED ? anchor : NOANCHOR);
+		acceptMode = (anchor == UNSPECIFIED ? NOANCHOR : anchor);
 		results = execRE(rg, s);
-		boolean result = checkRE(results);
+		boolean result = checkRE(results, s);
 		this.oldLast = last;
 		return result;
 	}
@@ -505,7 +507,7 @@ public final class Matcher implements MatchResult {
 	 *         this matcher's pattern
 	 */
 	public boolean lookingAt() {
-		return match(leftBound, UNSPECIFIED);
+		return match(leftBound, STARTANCHOR);
 	}
 
 	/**
@@ -1039,7 +1041,6 @@ public final class Matcher implements MatchResult {
 	@SuppressWarnings("null")
 	boolean match(int from, int anchor) {
 		hitEnd = false;
-		requireEnd = false;
 		from = Math.max(0, from);
 		first = from;
 		oldLast = (oldLast < 0 ? from : oldLast);
@@ -1060,18 +1061,35 @@ public final class Matcher implements MatchResult {
 		null;
 	}
 
-	private boolean checkRE(String[] r) {
+	private boolean checkRE(String[] r, String s) {
 		hitEnd = (r == null);
 		if (hitEnd) {
+			requireEnd = false;
 			first = -1;
-		} else {
-			groupCount = r.length - 1;
-			first = indexRE(r);
-			last = first + r[0].length();
+			return false;
 		}
-		return (!hitEnd && r.length > 0 && (acceptMode != ENDANCHOR || r[0].length() ==
-		/** @j2sNative r.input.length || */
-		0));
+		groupCount = r.length - 1;
+		int f0 = this.first;
+		first = indexRE(r);
+		last = first + r[0].length();
+		hitEnd = (last == s.length());
+		if (hitEnd && requireEnd() && last != strString.length()) {
+			// scanner may be checking for a bound in 
+			// a longer string
+			return false;
+		}
+		if (groupCount < 0)
+			return false;
+		switch (acceptMode) {
+		case STARTANCHOR:
+			return first == f0;
+		case ENDANCHOR:
+			return first == f0 && last ==
+			/** @j2sNative r.input.length || */
+			0;
+		default:
+			return true;
+		}
 	}
 
 	private RegExp getRE() {
