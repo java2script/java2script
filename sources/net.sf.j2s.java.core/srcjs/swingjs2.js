@@ -18174,20 +18174,30 @@ function(i){
 }, 1);
 
 
+Byte.toString=Byte.toString$B=Byte.toString$B$I=Byte.prototype.toString=function(i,radix){
+	switch(arguments.length) {
+	case 2:
+		return i.toString(radix);
+	case 1:
+		return "" +i;
+	case 0:
+		return (this===Byte ? "class java.lang.Byte" : ""+this.valueOf());
+	}
+};
+
 m$(Byte,"parseByte$S",
-function(s){
- return Byte.parseByte$S$I(s, 10);
-}, 1);
+		function(s){
+		 return Byte.parseByte$S$I(s, 10);
+		}, 1);
 
 m$(Byte,"parseByte$S$I",
-function(s,radix){
- var v = parseInt(s, radix);
- if (isNaN(v) || v < minByte || v > maxByte) {
-	throw Clazz.new_(NumberFormatException.c$$S, ["parsing " + s + " radix " + radix]);
- }
- return v;
+	function(s,radix){
+	 var v = parseInt(s, radix);
+	 if (isNaN(v) || v < minByte || v > maxByte) {
+		throw Clazz.new_(NumberFormatException.c$$S, ["parsing " + s + " radix " + radix]);
+	 }
+	 return v;
 }, 1);
-
 
 Byte.toString=Byte.toString$B=Byte.toString$B$I=Byte.prototype.toString=function(i,radix){
 	switch(arguments.length) {
@@ -18200,10 +18210,6 @@ Byte.toString=Byte.toString$B=Byte.toString$B$I=Byte.prototype.toString=function
 	}
 };
 
-m$(Byte,["parseByte$S", "parseByte$S$I"],
-function(s,radix){
- return Integer.parseInt$S$I(s, radix || 10).byteValue$();
-}, 1);
 
 m$(Byte, ["valueOf$S","valueOf$B","valueOf$S$I"],
 function (s,radix) {
@@ -18409,7 +18415,7 @@ function(s){
 if(s==null){
   throw Clazz.new_(NumberFormatException.c$$S, ["null"]);
 }
-if (s == "NaN")
+if (s.indexOf("NaN") >= 0)
 	return NaN;
 var v=Number(s);
 if(isNaN(v)){

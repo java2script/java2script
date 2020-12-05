@@ -1793,6 +1793,29 @@ public final class Pattern {
 		}
 	}
 
+	private final static String[] posixes = { 
+		"\\p{javaWhitespace}","\\W",
+		"\\p{javaDigit}","[0-9]",
+		"\\p{Lower}", "[a-z]",
+		"\\p{Upper}", "[A-Z]",
+		"\\p{ASCII}", "[\u0000-\u007F]",
+		"\\p{Alpha}", "[A-Za-z]",
+		"\\p{Digit}", "[0-9]",
+		"\\p{Alnum}", "[A-Za-z0-9]",
+		"\\p{Punct}", "[!\"#$%&'\\(\\)\\*\\+,-./:;<=>?@\\[\\\\\\]^_`{\\|}~]",
+		"\\p{Graph}", "[A-Za-z0-9]!\"#$%&'\\(\\)\\*\\+,-./:;<=>?@\\[\\\\\\]^_`{\\|}~]",
+		"\\p{Print}", "[A-Za-z0-9]!\"#$%&'\\(\\)\\*\\+,-./:;<=>?@\\[\\\\\\]^_`{\\|}~]",
+		"\\p{Blank}", "[ \t]",
+		"\\p{Cntrl}", "[\u0000-\u001F\u007F]",
+		"\\p{XDigit}", "[0-9a-fA-F]",
+		"\\p{Space}", "[ \t\n\u000B\f\r]",
+		"\\p{javaLowerCase}", "[a-z]",
+		"\\p{javaUpperCase}", "[A-Z]",
+		"\\p{javaWhitespace}", "\\W",
+		"\\p{Sc}", "[\u0024\u00A2\u00A3\u00A4\u00A5\u058F\u060B\u07FE\u07FF\u09F2\u09F3\u09FB\u0AF1\u0BF9\u0E3F\u20A0\u20A1\u20A2\u20A3\u20A4\u20A5\u20A6\u20A7\u20A8\u20A9\u20AA\u20AB\u20AC\u20AD\u20AE\u20AF\u20B0\u20B1\u20B2\u20B3\u20B4\u20B5\u20B6\u20B7\u20B8\u20B9\u20BA\u20BB\u20BC\u20BD\u20BE\u20BF\uA838\uFDFC\uFE69\uFF04\uFFE0\uFFE1\uFFE5\uFFE6]"
+
+		// more currency: \u11FDD\u11FDE\u11FDF\u11FE0\u17DB\u1E2FF\u1ECB0
+	};
 	public static String removeQEQuoting(String pattern) {
 		int pt;
 		while ((pt = pattern.indexOf("\\Q")) >= 0) {
@@ -1802,6 +1825,14 @@ public final class Pattern {
 				pt1 = pattern.length();
 			ret += javaQuote(pattern.substring(pt + 2, pt1));
 			pattern = ret + pattern.substring(pt1 + 2);
+		}
+		if (pattern.indexOf("\\p{") >= 0) {
+			for (int i = 0, n = posixes.length; i < n; i += 2) {
+				pattern = pattern.replace(posixes[i], posixes[i+1]);
+			}
+			if (pattern.indexOf("\\p{") >= 0) {
+				JSUtil.notImplemented("POSIX " + pattern);
+			}
 		}
 		return pattern;
 	}
