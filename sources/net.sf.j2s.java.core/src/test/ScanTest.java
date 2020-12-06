@@ -75,7 +75,7 @@ public class ScanTest {
 		closeTest();
 		cacheTest();
 		cacheTest2();
-		System.err.println("Skipping Tibetan number test nonASCIITest()");
+		System.err.println("!!!!!!!!!Skipping Tibetan number test nonASCIITest()");
 		resetTest();
 
 		for (int j = 0; j < NUM_SOURCE_TYPES; j++) {
@@ -87,8 +87,8 @@ public class ScanTest {
 			byteTest(j);
 			shortTest(j);
 			intTest(j);
-			System.err.println("Skipping longTest(j)");
-			//SwingJS does not support high-bit long numbers  longTest(j);
+			System.err.println("!!!!!!!!!!56-bit longTest(j)");
+			longTest(j);
 			floatTest(j);
 			doubleTest(j);
 			integerPatternTest(j);
@@ -1292,7 +1292,7 @@ public class ScanTest {
 	}
 
 	private static void intTest(int sourceType) throws Exception {
-		Scanner s = scannerFor("22 022 C -34 0x80000000 -2147483649 dog ", sourceType);
+		Scanner s = scannerFor("22 022 C -34 80 0x80 -2147483649 dog ", sourceType);
 		if (!s.hasNextInt())
 			failed();
 		if (s.nextInt() != 22)
@@ -1308,6 +1308,10 @@ public class ScanTest {
 		if (!s.hasNextInt())
 			failed();
 		if (s.nextInt() != -34)
+			failed();
+		if (!s.hasNextInt(16))
+			failed();
+		if (s.nextInt(16) != 0x80)
 			failed();
 		for (int i = 0; i < 3; i++) {
 			if (s.hasNextInt())
@@ -1331,17 +1335,51 @@ public class ScanTest {
 		report("Scan ints");
 	}
 
+	@SuppressWarnings("unused")
 	private static void longTest(int sourceType) throws Exception {
-		Scanner s = scannerFor("022 9223372036854775807 0x8000000000000000 9223372036854775808 dog ", sourceType);
+//		Scanner s = scannerFor("022 9223372036854775807 0x8000000000000000 9223372036854775808 dog ", sourceType);
+		Scanner s = scannerFor(
+				"022 9007199254740991 -9007199254740991 1FFFFFFFFFFFFF -1FFFFFFFFFFFFF 9007199254740992 9223372036854775808  dog ",
+				sourceType);
 		if (!s.hasNextLong())
 			failed();
 		if (s.nextLong() != (long) 22)
 			failed();
 		if (!s.hasNextLong())
 			failed();
-		if (s.nextLong() != 9223372036854775807L)
+
+		if (s.nextLong() != 0x1FFFFFFFFFFFFFL)
 			failed();
-		for (int i = 0; i < 3; i++) {
+		if (!s.hasNextLong())
+			failed();
+		if (s.nextLong() != -0x1FFFFFFFFFFFFFL)
+			failed();
+
+		if (!s.hasNextLong(16))
+			failed();
+		if (s.nextLong(16) != 0x1FFFFFFFFFFFFFL)
+			failed();
+		if (!s.hasNextLong(16))
+			failed();
+		if (s.nextLong(16) != -0x1FFFFFFFFFFFFFL)
+			failed();
+
+		try {
+			// SwingJS will fail here because the long value is too large for JavaScript.
+			if (!s.hasNextLong()) {
+				if (/** @j2sNative false && */
+				true)
+					failed();
+			}
+			long l = s.nextLong();
+			if (l != 0x20000000000000L)
+				failed();
+		} catch (InputMismatchException e) {
+			// SwingJS will throw this, because the number is too large
+			System.err.println("!!!!!!!!!! SwingJS cannot read 0x20000000000000 as a long: " + s.next());
+		}
+
+		for (int i = 0; i < 2; i++) {
 			if (s.hasNextLong())
 				failed();
 			try {
@@ -1351,6 +1389,7 @@ public class ScanTest {
 				// Correct result
 			}
 			s.next();
+			System.err.flush();
 		}
 		try {
 			s.next();
