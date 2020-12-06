@@ -447,12 +447,12 @@ public final class Scanner implements Iterator<String>, Closeable {
     private String non0Digit = "[1-9]";//"[\\p{javaDigit}&&[^0]]";
     private int SIMPLE_GROUP_INDEX = 12; // SwingJS - moved simple to later
     private String buildIntegerPatternString() {
-        String radixDigits = (radix == 10 ? "0-9" : digits.substring(0, radix) + digits.substring(10, radix).toUpperCase());
+        String radixDigits = (radix == 10 ? "\\d" : radix < 10 ? "[" + digits.substring(0, radix) + "]" : "[0-9a-" + digits.charAt(radix - 1) + "A-" + digits.substring(radix-1, radix).toUpperCase() + "]");
         // \\p{javaDigit} is not guaranteed to be appropriate
         // here but what can we do? The final authority will be
         // whatever parse method is invoked, so ultimately the
         // Scanner will do the right thing
-        String digit = "(["+radixDigits+"])";//\\p{javaDigit})";
+        String digit = "("+radixDigits+")";//\\p{javaDigit})";
         String groupedNumeral = "("+non0Digit+digit+"?"+digit+"?("+
                                 groupSeparator+digit+digit+digit+")+)";
         // digit++ is the possessive form which is necessary for reducing
