@@ -75,7 +75,7 @@ public class ScanTest {
 		closeTest();
 		cacheTest();
 		cacheTest2();
-		System.err.println("Skipping Tibetan number test nonASCIITest()");
+		System.err.println("!!!!!!!!!Skipping Tibetan number test nonASCIITest()");
 		resetTest();
 
 		for (int j = 0; j < NUM_SOURCE_TYPES; j++) {
@@ -87,8 +87,8 @@ public class ScanTest {
 			byteTest(j);
 			shortTest(j);
 			intTest(j);
-			System.err.println("Skipping longTest(j)");
-			//SwingJS does not support high-bit long numbers  longTest(j);
+			System.err.println("!!!!!!!!!!56-bit longTest(j)");
+			longTest(j);
 			floatTest(j);
 			doubleTest(j);
 			integerPatternTest(j);
@@ -1332,16 +1332,22 @@ public class ScanTest {
 	}
 
 	private static void longTest(int sourceType) throws Exception {
-		Scanner s = scannerFor("022 9223372036854775807 0x8000000000000000 9223372036854775808 dog ", sourceType);
+//		Scanner s = scannerFor("022 9223372036854775807 0x8000000000000000 9223372036854775808 dog ", sourceType);
+		Scanner s = scannerFor("022 9007199254740992 -9007199254740992  9223372036854775808  dog ", sourceType);
 		if (!s.hasNextLong())
 			failed();
 		if (s.nextLong() != (long) 22)
 			failed();
 		if (!s.hasNextLong())
 			failed();
-		if (s.nextLong() != 9223372036854775807L)
+		
+		if (s.nextLong() != 0x20000000000000L)
 			failed();
-		for (int i = 0; i < 3; i++) {
+		if (!s.hasNextLong())
+			failed();
+		if (s.nextLong() != -0x20000000000000L)
+			failed();
+		for (int i = 0; i < 2; i++) {
 			if (s.hasNextLong())
 				failed();
 			try {
@@ -1351,6 +1357,7 @@ public class ScanTest {
 				// Correct result
 			}
 			s.next();
+			System.err.flush();
 		}
 		try {
 			s.next();

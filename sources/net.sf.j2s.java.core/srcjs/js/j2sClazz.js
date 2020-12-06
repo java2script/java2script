@@ -3937,6 +3937,8 @@ Long.toHexString$J=Integer.toHexString$I;
 Long.toOctalString$J=Integer.toOctalString$I;
 Long.toBinaryString$J=Integer.toBinaryString$I;
 
+m$(Long,["longValue","longValue$"],function(){return this.valueOf();});
+
 m$(Long,"c$",
 function(v){
 v || v == null || (v = 0);
@@ -4315,6 +4317,9 @@ function(s){
 return Clazz.new_(Float.c$$S, [s]);
 }, 1);
 
+
+m$(Float,["longValue$","longValue"],function(){return Math.floor(this.valueOf());});
+
 m$(Float,"valueOf$D",
 function(i){
 return Clazz.new_(Float.c$$F, [i < minFloat ? -Infinity : i > maxFloat ? Infinity : i]);
@@ -4411,6 +4416,9 @@ throw Clazz.new_(NumberFormatException.c$$S, ["Not a Number : "+s]);
 }
 return v;
 }, 1);
+
+m$(Double,["longValue","longValue$"],function(){return Math.floor(this.valueOf());});
+
 
 m$(Double,"valueOf$S",
 function(v){
