@@ -17711,11 +17711,7 @@ var decorateAsNumber = function (clazz, qClazzName, type, PARAMCODE, hcOffset) {
 };
 
 Clazz.toLong = function(v) {
-	 v = parseInt(v);
-	 if (isNaN(v) || v < minLong || v > maxLong){
-		 return 0;
-	 }
-	 return v;
+	 return (isNaN(v = parseInt(v)) || v < minLong || v > maxLong ? 0 : v);
 }
 
 var parseIntLimit = function(s,radix, min, max) {
