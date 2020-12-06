@@ -1292,7 +1292,7 @@ public class ScanTest {
 	}
 
 	private static void intTest(int sourceType) throws Exception {
-		Scanner s = scannerFor("22 022 C -34 0x80000000 -2147483649 dog ", sourceType);
+		Scanner s = scannerFor("22 022 C -34 80 0x80 -2147483649 dog ", sourceType);
 		if (!s.hasNextInt())
 			failed();
 		if (s.nextInt() != 22)
@@ -1308,6 +1308,10 @@ public class ScanTest {
 		if (!s.hasNextInt())
 			failed();
 		if (s.nextInt() != -34)
+			failed();
+		if (!s.hasNextInt(16))
+			failed();
+		if (s.nextInt(16) != 0x80)
 			failed();
 		for (int i = 0; i < 3; i++) {
 			if (s.hasNextInt())
@@ -1333,7 +1337,7 @@ public class ScanTest {
 
 	private static void longTest(int sourceType) throws Exception {
 //		Scanner s = scannerFor("022 9223372036854775807 0x8000000000000000 9223372036854775808 dog ", sourceType);
-		Scanner s = scannerFor("022 9007199254740992 -9007199254740992  9223372036854775808  dog ", sourceType);
+		Scanner s = scannerFor("022 9007199254740991 -9007199254740991 1FFFFFFFFFFFFF -1FFFFFFFFFFFFF 9223372036854775808  dog ", sourceType);
 		if (!s.hasNextLong())
 			failed();
 		if (s.nextLong() != (long) 22)
@@ -1341,11 +1345,20 @@ public class ScanTest {
 		if (!s.hasNextLong())
 			failed();
 		
-		if (s.nextLong() != 0x20000000000000L)
+		if (s.nextLong() != 0x1FFFFFFFFFFFFFL)
 			failed();
 		if (!s.hasNextLong())
 			failed();
-		if (s.nextLong() != -0x20000000000000L)
+		if (s.nextLong() != -0x1FFFFFFFFFFFFFL)
+			failed();
+
+		if (!s.hasNextLong(16))
+			failed();
+		if (s.nextLong(16) != 0x1FFFFFFFFFFFFFL)
+			failed();
+		if (!s.hasNextLong(16))
+			failed();
+		if (s.nextLong(16) != -0x1FFFFFFFFFFFFFL)
 			failed();
 		for (int i = 0; i < 2; i++) {
 			if (s.hasNextLong())
