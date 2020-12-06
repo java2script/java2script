@@ -31,6 +31,7 @@ ever be shadowed or overridden by subclasses. For example, we see in java.lang.T
 ----------------------------------
 
 
+updated 12/6/2020 -- note about restrictions on long, including BitSet and Scanner
 updated 3/21/2020 -- adds note about HashMap, Hashtable, and HashSet iterator ordering
 updated 3/20/2020 -- adds note about interning, new String("xxx"), and "xxx"
 updated 2/26/2020 -- adds Graphics.setClip issue
@@ -480,6 +481,8 @@ MINOR ISSUES--requiring some rewriting/refactoring outside of SwingJS
 
 See below for a full discussion.
 
+Restrictions on long
+Restriction on BitSet and Scanner
 HashMap, Hashtable, and HashSet iterator ordering
 interning, new String("xxx") vs "xxx"
 Names with "$" and "_"
@@ -585,6 +588,60 @@ changed to JSToolkit.isDispatchThread()
 
 MINOR ISSUES--requiring some rewriting/refactoring outside of SwingJS  
 =====================================================================
+
+restrictions on long
+--------------------
+
+Java's 64-bit long type is not supported in JavaScript. There is no Int64Array in JavaScript,
+and 0x20000000000000 + 1 evaluates to 0x20000000000000, not 0x20000000000001. 
+(Likewise, -0x20000000000000 - 1 is left unchanged.) 
+
+The largest "integer" value in JavaScript is 9007199254740991 (9.007199254740991E13, or 0x1FFFFFFFFFFFFFF).
+Effectively, you get to use only 53 bits of the long, not 64. Trying to set a long larger than
+0x1FFFFFFFFFFFFFF or smaller than -0x1FFFFFFFFFFFFFF will result in a NumberFormatException.
+
+The transpiler handles conversion to long the same as Java for all cases other than from double. 
+
+For small double values, there is no problem, and, in fact, this is a known trick used to round 
+doubles and floats toward zero:
+
+double d;
+d = (long) 3.8;
+assert(d == 3);
+d = (long) -3.8;
+assert(d == -3);
+
+SwingJS will evaluate (long) d as 0 for d > 9007199254740991 
+or d < -9007199254740991, same as Java returns for Double.NaN.
+So, in Java we have:
+
+		assert(((long) Double.NaN) == 0);
+		assert(((int) Double.NaN) == 0);
+		assert(((long) Float.NaN) == 0);
+		assert(((int) Float.NaN) == 0);
+
+and also, in JavaScript only, we also have:
+
+		double d = 0x2000000000000L;
+		assert(((long) d) == 0);
+
+
+restrictions on BitSet and Scanner
+----------------------------------
+
+Because of the issue of long being only 53 bits, any time a method returns a long value, considerations must
+be made as to whether this will work in JavaScript. In particular, BitSet and Scanner have issues. 
+
+In SwingJS, java.util.BitSet has been implemented as a 32-bit integer-based bitset. This was no problem in
+Java 6, but starting with Java 7, a method was added to BitSet that allows for the extraction of the 
+underlying long[] word data. This is not work in JavaScript. Instead, SwingJS java.util.Bitset.toLongArray() will deliver 
+32-bit int[] data.
+
+SwingJS Scanner has hasNextLong() and nextLong(), and although it will scan through long numbers,
+Scanner will choke on long numbers greater than the JavaScript 53-bit limit. hasNextLong() will 
+return false, and nextLong() will throw an InputMismatchException triggered by the NumberFormatException
+thrown by Long.parseLong(). 
+
 
 HashMap, Hashtable, and HashSet iterator ordering
 -------------------------------------------------

@@ -14019,6 +14019,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2020.12.06 changing Long maxval to 0x1FFFFFFFFFFFFF from 0x20000000000000
+// BH 2020.12.06 better error checking for TYPE.parseTYPE(string)
 // BH 2020.07.27 fix for inner class array names
 // BH 2020.06.18 better test for instanceof Object[]
 // BH 2020.06.03 sets user.home and user.dir to /TEMP/swingjs, and user.name to "swingjs"
@@ -17708,6 +17710,24 @@ var decorateAsNumber = function (clazz, qClazzName, type, PARAMCODE, hcOffset) {
   return clazz;
 };
 
+Clazz.toLong = function(v) {
+	 return (isNaN(v = parseInt(v)) || v < minLong || v > maxLong ? 0 : v);
+}
+
+var parseIntLimit = function(s,radix, min, max) {
+	 var v = (s == null || s.indexOf(".") >= 0 || s.startsWith("0x") ? NaN : radix === false ? parseInt(s) : parseInt(s, radix));
+	 if (!isNaN(v)) {
+		 // check for trailing garbage
+		 var v1 = parseInt(s + "1", radix);
+		 if (v1 == v)
+			 v = NaN;
+	 }
+	 if (isNaN(v) || v < min || v > max){
+		throw Clazz.new_(NumberFormatException.c$$S, ["parsing " + s + " radix " + radix]);
+	 }
+	 return v;
+}
+
 decorateAsNumber(Integer, "Integer", "int", "I", iHCOffset);
 
 Integer.toString=Integer.toString$I=Integer.toString$I$I=Integer.prototype.toString=function(i,radix){
@@ -17778,29 +17798,14 @@ function(i){
   return (v ? v : Clazz.new_(Integer.c$$I, [i]));
 }, 1);
 
+m$(Integer,"parseInt$S",
+function(s){
+	return parseIntLimit(s, false, minInt, maxInt);
+}, 1);
 
 m$(Integer,"parseInt$S$I",
 function(s,radix){
- var v = (s == null || s.indexOf(".") >= 0 ? NaN : parseInt(s, radix));
- if (!isNaN(v)) {
-	 // check for trailing garbage
-	 var v1 = parseInt(s + "1", radix);
-	 if (v1 == v)
-		 v = NaN;
- }
-
- if (isNaN(v) || v < minInt || v > maxInt){
-	throw Clazz.new_(NumberFormatException.c$$S, ["parsing " + s + " radix " + radix]);
- }
-return v;
-}, 1);
-
-m$(Integer,"parseInt$S",
-function(s){
-	var v = (s == null ? NaN : +s);
-	if (isNaN(v))
-		s= "?" + s; // just to ensure it gets trapped
-return Integer.parseInt$S$I(s, 10);
+	return parseIntLimit(s, radix, minInt, maxInt);
 }, 1);
 
 m$(Integer,"highestOneBit$I",
@@ -17935,19 +17940,22 @@ Long.toString=Long.toString$J=Long.toString$J$I = Long.prototype.toString=functi
 };
 
 
-//Long.MIN_VALUE=Long.prototype.MIN_VALUE=-0x8000000000000000;
-//Long.MAX_VALUE=Long.prototype.MAX_VALUE=0x7fffffffffffffff;
 //Long.TYPE=Long.prototype.TYPE=Long;
 //Note that the largest usable "Long" in JavaScript is 53 digits:
 
-var maxLong =  0x20000000000000; // 53 digits, plus 1
-var minLong = -0x20000000000000;
-Long.SIZE=Long.prototype.SIZE=64;
+Long.MIN_VALUE=Long.prototype.MIN_VALUE=-0x1fffffffffffff;
+Long.MAX_VALUE=Long.prototype.MAX_VALUE=0x1fffffffffffff;
+
+var maxLong =  Long.MAX_VALUE;
+var minLong = -maxLong;
+Long.SIZE=Long.prototype.SIZE=64;// REALLY 53
 
 Long.sum$J$J = Integer.sum$I$I;
 Long.toHexString$J=Integer.toHexString$I;
 Long.toOctalString$J=Integer.toOctalString$I;
 Long.toBinaryString$J=Integer.toBinaryString$I;
+
+m$(Long,["longValue","longValue$"],function(){return this.valueOf();});
 
 m$(Long,"c$",
 function(v){
@@ -17987,16 +17995,12 @@ function(i){
 
 m$(Long,"parseLong$S",
 function(s){
- return Long.parseLong$S$I(s, 10);
+	 return parseIntLimit(s, false, minLong, maxLong);
 }, 1);
 
 m$(Long,"parseLong$S$I",
 function(s,radix){
- var v = parseInt(s, radix);
- if (isNaN(v) || v < minLong || v > maxLong) {
-	throw Clazz.new_(NumberFormatException.c$$S, ["parsing " + s + " radix " + radix]);
- }
- return v;
+ return parseIntLimit(s, radix, minLong, maxLong);
 }, 1);
 
 m$(Long,"equals$O",
@@ -18093,16 +18097,12 @@ function(i){
 
 m$(Short,"parseShort$S",
 function(s){
- return Short.parseShort$S$I(s, 10);
+	return parseIntLimit(s, false, minShort, maxShort);
 }, 1);
 
 m$(Short,"parseShort$S$I",
 function(s,radix){
- var v = parseInt(s, radix);
- if (isNaN(v) || v < minShort || v > maxShort) {
-	throw Clazz.new_(NumberFormatException.c$$S, ["parsing " + s + " radix " + radix]);
- }
- return v;
+	return parseIntLimit(s, radix, minShort, maxShort);
 }, 1);
 
 
@@ -18186,18 +18186,14 @@ Byte.toString=Byte.toString$B=Byte.toString$B$I=Byte.prototype.toString=function
 };
 
 m$(Byte,"parseByte$S",
-		function(s){
-		 return Byte.parseByte$S$I(s, 10);
-		}, 1);
+	function(s){
+		return parseIntLimit(s, false, minByte, maxByte);
+	}, 1);
 
 m$(Byte,"parseByte$S$I",
 	function(s,radix){
-	 var v = parseInt(s, radix);
-	 if (isNaN(v) || v < minByte || v > maxByte) {
-		throw Clazz.new_(NumberFormatException.c$$S, ["parsing " + s + " radix " + radix]);
-	 }
-	 return v;
-}, 1);
+		return parseIntLimit(s, radix, minByte, maxByte);
+	}, 1);
 
 Byte.toString=Byte.toString$B=Byte.toString$B$I=Byte.prototype.toString=function(i,radix){
 	switch(arguments.length) {
@@ -18327,6 +18323,9 @@ function(s){
 return Clazz.new_(Float.c$$S, [s]);
 }, 1);
 
+
+m$(Float,["longValue$","longValue"],function(){return Math.floor(this.valueOf());});
+
 m$(Float,"valueOf$D",
 function(i){
 return Clazz.new_(Float.c$$F, [i < minFloat ? -Infinity : i > maxFloat ? Infinity : i]);
@@ -18423,6 +18422,9 @@ throw Clazz.new_(NumberFormatException.c$$S, ["Not a Number : "+s]);
 }
 return v;
 }, 1);
+
+m$(Double,["longValue","longValue$"],function(){return Math.floor(this.valueOf());});
+
 
 m$(Double,"valueOf$S",
 function(v){

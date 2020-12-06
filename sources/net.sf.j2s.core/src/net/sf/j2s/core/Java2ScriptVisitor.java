@@ -135,6 +135,7 @@ import org.eclipse.jdt.core.dom.WildcardType;
 
 // TODO: superclass inheritance for JAXB XmlAccessorType
 
+//BH 2020.12.06 -- 3.2.9-v1r fix for (long) double using |0 
 //BH 2020.11.20 -- 3.2.9-v1q fix for  new ImmutableCollections.ListN<>(E...) should use Object[] 
 //BH 2020.08.03 -- 3.2.9-v1p fix for boxing boolean should be Boolean.valueOf$, not new Boolean
 //BH 2020.08.01 -- 3.2.9-v1o fix for lambda expressions too static
@@ -4589,7 +4590,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// a = ($b$[0] = a | right, $b$[0])
 
 		String classIntArray = null;
-		String more = null;
+		String more = null, less = null;
 
 		String prefix = (isAssignment ? "=" : "");
 		boolean fromChar = ("char".equals(rightName));
@@ -4611,7 +4612,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			break;
 		case "long":
 			if (isDiv || !fromIntType) {
-				more = "|0)";
+				less = "Clazz.toLong(";
+				more = ")";
 				addParens = true;
 			} else {
 				left = null;
@@ -4662,6 +4664,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				buffer.append("(");
 			buffer.append(classIntArray).append(" = ");
 			temp_processingArrayIndex = true;
+		} else if (less != null) {
+			buffer.append(less);
 		} else if (more == "|0)") {
 			buffer.append("(");
 		}

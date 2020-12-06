@@ -178,6 +178,7 @@ public class Test_ {
 		Test_JAXB_Obj.main(args);
 		//failing on unicode char in "somewhatComplex" Test_JAXB_ORDERED.main(args);
 //		Test_Map.main(args);
+		// this is just a test for long += huge decimal Test_Long.main(args), which does fail;
 		Test_Math.main(args);
 		Test_Native.main(args);
 		Test_NoAssert.main(args);
