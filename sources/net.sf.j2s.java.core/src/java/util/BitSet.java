@@ -20,12 +20,12 @@ package java.util;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
-import java.nio.LongBuffer;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
 import javajs.api.JSONEncodable;
 import javajs.util.SB;
+import swingjs.JSUtil;
 
 
 /**
@@ -1028,6 +1028,7 @@ protected void init(int nbits) {
         * @return
         */
        public long[] toLongArray() {
+    	   JSUtil.notImplemented("BitSet.toLongArray returns a 32-bit array");
     	   long[] a = new long[words.length];
     	   for (int i = a.length; --i >= 0;)
     		   a[i] = words[i];

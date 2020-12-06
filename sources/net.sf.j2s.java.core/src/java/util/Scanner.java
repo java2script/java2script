@@ -52,6 +52,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import sun.misc.LRUCache;
+import swingjs.JSUtil;
 
 /**
  * A simple text scanner which can parse primitive types and strings using
@@ -2194,12 +2195,22 @@ public final class Scanner implements Iterator<String>, Closeable {
         boolean result = hasNext(integerPattern());
         if (result) { // Cache it
             try {
-                String s = (matcher.group(SIMPLE_GROUP_INDEX) == null) ?
-                    processIntegerToken(hasNextResult) :
-                    hasNextResult;
+                String s = (matcher.group(SIMPLE_GROUP_INDEX) == null ?
+                    processIntegerToken(hasNextResult) : hasNextResult);
+                // SwingJS may choke here
                 typeCache = Long.parseLong(s, radix);
             } catch (NumberFormatException nfe) {
-                result = false;
+            	/** @j2sNative 
+            	var l = parseInt(s, radix);
+            	result = (l < -0x1FFFFFFFFFFFFF || l > 0x1FFFFFFFFFFFFF);
+            	*/
+    			{
+    				result = false;
+    			}
+    			if (result) {
+    				JSUtil.notImplemented("Scanner found long value with > 53 bits");
+    				result = false;
+    			}
             }
         }
         return result;
