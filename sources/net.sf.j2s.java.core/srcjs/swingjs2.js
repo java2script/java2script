@@ -10671,6 +10671,7 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// BH 2020.12.09 touch fixes for fdown and fdrag (j2sSlider)
 // BH 2020.12.03 note that relay is disabled using J2S.addDirectDatabaseCall(".")
 // BH 2020.04.24 Info.width includes "px" allowed and implies Info.isResizable:false; 
 //               fixes early hidden 100x100 size issue due to node.offsetWidth == 0 in that case
@@ -12829,21 +12830,12 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		var x, y;
 		var oe = ev.originalEvent;
 		// drag-drop jQuery event is missing pageX
-		ev.pageX || (ev.pageX = oe.pageX);
-		ev.pageY || (ev.pageY = oe.pageY);
-		J2S._mousePageX = ev.pageX;
-		J2S._mousePageY = ev.pageY;
-		if (oe.targetTouches && oe.targetTouches[0]) {
-			x = oe.targetTouches[0].pageX - offsets.left;
-			y = oe.targetTouches[0].pageY - offsets.top;
-		} else if (oe.changedTouches) {
-			x = oe.changedTouches[0].pageX - offsets.left;
-			y = oe.changedTouches[0].pageY - offsets.top;
-		} else {
-			x = ev.pageX - offsets.left;
-			y = ev.pageY - offsets.top;
-		}
-		return (x == undefined ? null : [ Math.round(x), Math.round(y), mods]);
+		oe.targetTouches && (oe = oe.targetTouches[0]);
+		ev.pageX || (ev.pageX = oe ? oe.pageX : J2S._mousePageX);
+		ev.pageY || (ev.pageY = oe ? oe.pageY : J2S._mousePageY);
+		x = J2S._mousePageX = ev.pageX;
+		y = J2S._mousePageY = ev.pageY;
+		return [ Math.round(x - offsets.left), Math.round(y - offsets.top), mods];
 	}
 	
 	J2S._gestureUpdate = function(who, ev) {
@@ -13856,15 +13848,24 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			}
 		};
 
+		var fixTouch = function(ev) {
+			if (ev.originalEvent.targetTouches) {
+				ev.pageX = ev.originalEvent.targetTouches[0].pageX;
+				ev.pageY = ev.originalEvent.targetTouches[0].pageY;
+			}
+			return ev;
+		}
+
 		$tag.bind('mousedown touchstart', function(ev) {
-			return down && down(ev);
+			return down && down(fixTouch(ev));
 		});
 
 		$tag.bind('mousemove touchmove', function(ev) {
-			return drag && drag(ev);
+			return drag && drag(fixTouch(ev));
 		});
 
 		$tag.bind('mouseup touchend', function(ev) {
+			// touchend does not express a position, and we don't use it anyway
 			return up && up(ev);
 		});
 
