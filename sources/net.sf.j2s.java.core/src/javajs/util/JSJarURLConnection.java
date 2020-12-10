@@ -52,7 +52,7 @@ public class JSJarURLConnection extends JarURLConnection {
       } catch (IOException e) {
         return null;
       }
-    return new ByteArrayInputStream(/** j2sNative this.url._streamData || */null);
+    return new ByteArrayInputStream(/** @j2sNative this.url._streamData || */null);
   }
 
     public Manifest getManifest() throws IOException {
