@@ -7,6 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2020.12.11 fixing interface extended override of interface default
 // BH 2020.12.06 changing Long maxval to 0x1FFFFFFFFFFFFF from 0x20000000000000
 // BH 2020.12.06 better error checking for TYPE.parseTYPE(string)
 // BH 2020.07.27 fix for inner class array names
@@ -1577,6 +1578,7 @@ var excludeSuper = function(o) {
       || o == "$init$"
       || o == "$init0$"
       || o == "$static$"
+      || o == "$defaults$"
       || o == "$clinit$"
       || o == "$classes$"
       || o == "$fields$"
@@ -1607,10 +1609,12 @@ var copyStatics = function(clazzFrom, clazzThis, isInterface) {
 	        clazzThis.prototype[o] = clazzFrom.prototype[o];
 	    }
 	  }
-	  __allowOverwriteClass = false;
-	  if (clazzFrom.$defaults$)
+	  if (clazzFrom.$defaults$) {
+		  __allowOverwriteClass = false;
+		  clazzThis.$defaults$ && clazzThis.$defaults$(clazzThis);
 		  clazzFrom.$defaults$(clazzThis);
-	  __allowOverwriteClass = true;
+		  __allowOverwriteClass = true;
+	  }
   }
 }
 
@@ -5687,7 +5691,7 @@ var caller = arguments.callee.caller;
 var i = 0;
 while (caller.caller) {
 	caller = caller.caller;
-	if (++i > 3 && caller.exClazz)
+	if (++i > 3 && caller.exClazz || caller == Clazz.load)
 		break;
 }
 var superCaller = null;

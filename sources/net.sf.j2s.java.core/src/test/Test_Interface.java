@@ -54,4 +54,7 @@ public interface Test_Interface {
 
 	}
 
+	public default int isTestInterface() {
+		return 0;
+	}
 }
