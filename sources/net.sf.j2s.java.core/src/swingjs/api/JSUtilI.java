@@ -16,6 +16,7 @@ import java.util.zip.ZipInputStream;
 
 import javax.swing.JComponent;
 
+import swingjs.api.js.DOMNode.Promise;
 import swingjs.api.js.HTML5Applet;
 
 public interface JSUtilI {
@@ -165,6 +166,8 @@ public interface JSUtilI {
 	 * @param className
 	 */
 	void loadResourceIfClassUnknown(String resource, String className);
+
+	Promise importModule(String resource, Consumer<Object> resolve, Consumer<Object> reject);
 
 	/**
 	 * Read all applet.__Info properties  for the applet found using

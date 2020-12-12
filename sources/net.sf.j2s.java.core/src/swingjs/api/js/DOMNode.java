@@ -2,6 +2,7 @@ package swingjs.api.js;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
+import java.util.function.Consumer;
 
 /**
  * A mix of direct DOM calls on DOM nodes and convenience methods to do that.
@@ -12,9 +13,39 @@ import java.awt.Rectangle;
  *
  */
 public interface DOMNode {
+	
+	
+	public default void x(){
+	  Consumer<String> x = new Consumer<String>(){
 
+		@Override
+		public void accept(String t) {
+			// TODO Auto-generated method stub
+			
+		}
+		  
+	  };
+	}
+	
+	/**
+	 * @j2sNative
+	 * 
+	 * 			Promise.prototype.$then = function(resolve,reject)
+	 *            {this.then(function(value) {resolve &&
+	 *            resolve.accept$O(value)},function(reason){reject &&
+	 *            reject.apply$O(reason)})};
+	 * 
+	 *          Promise.prototype.$finally = function(r)
+	 *            {this.finally(function(){r.run$()})};
+	 * 
+	 *          Promise.prototype.$catch = function(err)
+	 *            {this.catch(function(){err.accept$S("" + err)})};
+	 */
 	public interface Promise {
-		public void then(JSFunction success, JSFunction fail);
+		public Promise then(JSFunction resolve, JSFunction reject);
+		public Promise $then(Consumer<Object> resolve, Consumer<Object> reject);
+		public Promise $finally(Runnable whenDone);
+		public Promise $catch(Consumer<String> onRejected);
 	}
 
 	public static JQuery jQuery = /** @j2sNative jQuery.$ || (jQuery.$ = jQuery) || */null;

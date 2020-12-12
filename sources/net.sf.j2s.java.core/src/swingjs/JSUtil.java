@@ -40,6 +40,7 @@ import sun.awt.AppContext;
 import swingjs.api.Interface;
 import swingjs.api.JSUtilI;
 import swingjs.api.js.DOMNode;
+import swingjs.api.js.DOMNode.Promise;
 import swingjs.api.js.HTML5Applet;
 import swingjs.api.js.J2SInterface;
 import swingjs.api.js.JQuery;
@@ -1199,6 +1200,17 @@ public class JSUtil implements JSUtilI {
 	public void playAudio(byte[] buffer, Object format) throws Exception {
 		JSToolkit.playAudio(buffer, (AudioFormat) format);
 	}
+
+	// ES6 module code
+	
+	@Override
+	public Promise importModule(String resource, Consumer<Object> resolve, Consumer<Object> reject) {
+		return /** @j2sNative import(resource, 
+		  function(value) {resolve && resolve.accept$O(value)},  
+		  function(reason) {reject && reject.accept$O(reason)}) || */null;
+	}
+
+
 
 }
 
