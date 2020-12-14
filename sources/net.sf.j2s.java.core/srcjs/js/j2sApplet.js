@@ -2760,7 +2760,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 					//cl.$static$ && cl.$static$();
 					if (clazz.indexOf("_.") == 0)
 						J2S.setWindowVar(clazz.substring(2), cl);
-					applet.__Info.headless = (J2S._headless || isApp && (cl.$j2sHeadless || cl.j2sHeadless));
+					applet.__Info.headless = (J2S._headless || isApp && (cl.$j2sHeadless || cl.j2sHeadless
+							|| cl.superclazz && cl.superclazz.j2sHeadless));
 					if (applet.__Info.headless) {
 						Clazz._isHeadless = "true";
 						System.out.println("j2sApplet running headlessly");
@@ -2769,7 +2770,22 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 					alert("Java class " + clazz + " was not found.");
 					return;
 				}
+				var codePath = applet._j2sPath + "/";
+				if (codePath.indexOf("://") < 0) {
+					var base = document.location.href.split("#")[0]
+							.split("?")[0].split("/");
+					if (codePath.indexOf("/") == 0)
+						base = [ base[0], codePath.substring(1) ];
+					else
+						base[base.length - 1] = codePath;
+					codePath = base.join("/");
+				}
+				if (applet.__Info.code)
+					codePath += applet.__Info.code.replace(/\./g, "/");
+				codePath = codePath.substring(0,
+						codePath.lastIndexOf("/") + 1);
 				if (isApp && applet.__Info.headless) {
+					applet._codePath = codePath;
 					Clazz.loadClass("java.lang.Thread").currentThread$().group.html5Applet = applet;
 					cl.main$SA(applet.__Info.args || []);
 					System.exit$(0);
@@ -2788,20 +2804,6 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 						viewerOptions.put("script", applet._startupScript)
 					viewerOptions.put("platform", applet._platform);
 					viewerOptions.put("documentBase", document.location.href);
-					var codePath = applet._j2sPath + "/";
-					if (codePath.indexOf("://") < 0) {
-						var base = document.location.href.split("#")[0]
-								.split("?")[0].split("/");
-						if (codePath.indexOf("/") == 0)
-							base = [ base[0], codePath.substring(1) ];
-						else
-							base[base.length - 1] = codePath;
-						codePath = base.join("/");
-					}
-					if (applet.__Info.code)
-						codePath += applet.__Info.code.replace(/\./g, "/");
-					codePath = codePath.substring(0,
-							codePath.lastIndexOf("/") + 1);
 					viewerOptions.put("codePath", codePath);
 					viewerOptions.put("appletReadyCallback",
 							"J2S.readyCallback");

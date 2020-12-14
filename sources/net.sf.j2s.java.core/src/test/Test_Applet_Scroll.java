@@ -14,7 +14,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
@@ -59,6 +58,8 @@ import javax.swing.text.Element;
 import javax.swing.text.PlainDocument;
 import javax.swing.text.Position;
 import javax.swing.text.Segment;
+
+import swingjs.plaf.JSPanelUI;
 
 public class Test_Applet_Scroll extends JApplet implements ChangeListener, MouseListener, MouseMotionListener {
 
@@ -413,6 +414,8 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener, Mouse
 //			
 //		}, "12.5", 8);
 		
+		JPanel p = new JPanel();
+
 //
 //		tf.setBackground(Color.orange);
 //		tf.setForeground(Color.yellow);
@@ -432,6 +435,7 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener, Mouse
 			@Override
 			public void focusGained(FocusEvent e) {
 				tf.setBackground(Color.BLUE);
+				System.out.println(p.isFocusable());
 			}
 
 			@Override
@@ -511,24 +515,55 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener, Mouse
 		});
 
 		
-		JPanel p = new JPanel();
 
 		// p.setLayout(new GridLayout(2, 2, 2, 2));
 		sp = new JScrollPane();
 		sp.setBorder(new LineBorder(Color.GREEN,5));
-//		sp.setViewportBorder(new EmptyBorder(5,5,5,5));
+		sp.setViewportBorder(new EmptyBorder(5,5,5,5));
 		sp.addMouseMotionListener(this);
 		sp.addMouseListener(this);
 		panel2 = new JPanel();
-		JTextArea area = new JTextArea(10,10);
-		area.setMargin(new Insets(2,2,2,2));
-		area.setCaretColor(Color.red);
-		panel2.add(area);
-		panel2.setBorder(null);
+		panel2.add(new JTextArea(10,10));
 		panel2.setSize(100,100);
 		p.add(panel2);
+		p.addMouseListener(new MouseListener() {
 
-		sp.getViewport().add(panel2);
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				p.requestFocus();
+				System.out.println("mp" + p.hasFocus());
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
+
+		if (/** @j2sNative 1? true : */false) {
+			((JSPanelUI) p.getUI()).setPasteHandler(/** @j2sNative (function(e) { xxa = e; e.preventDefault();alert("Testing" + e.clipboardData.getData('text/plain'));}) || */null);
+		}
+		sp.getViewport().add(p);
 		add(sp);
 		sp.getViewport().addChangeListener(this);
 //		hsb = sp.getHorizontalScrollBar();
@@ -683,14 +718,14 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener, Mouse
 
 	@Override
 	public void mouseEntered(MouseEvent e) {
-		System.out.println("Test_AppletScroll sp size " + sp.getSize());
-		System.out.println("Test_Applet_Scroll mouseEntered " + e);
-		
+//		System.out.println("Test_AppletScroll sp size " + sp.getSize());
+//		System.out.println("Test_Applet_Scroll mouseEntered " + e);
+//		
 	}
 
 	@Override
 	public void mouseExited(MouseEvent e) {
-		System.out.println("Test_Applet_Scroll mouseExited " + e);
+	//	System.out.println("Test_Applet_Scroll mouseExited " + e);
 		
 	}
 

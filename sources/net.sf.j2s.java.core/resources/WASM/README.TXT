@@ -1,0 +1,1 @@
+The WASM directory can contain Web Assembly code.

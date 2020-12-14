@@ -29,6 +29,7 @@ import java.util.zip.ZipInputStream;
 
 import javax.sound.sampled.AudioFormat;
 import javax.swing.JComponent;
+import javax.swing.TransferHandler;
 import javax.swing.plaf.ComponentUI;
 
 import javajs.util.AU;
@@ -52,6 +53,15 @@ import swingjs.plaf.JSFrameUI;
 public class JSUtil implements JSUtilI {
 
 	public JSUtil() {}
+
+	/**
+	 * @j2sAlias newJSUtil
+	 * 
+	 * @return instance of this class
+	 */
+	static JSUtil newJSUtil() {
+		return new JSUtil();
+	}
 	
 	static {
 		boolean j2sdebug = false;
@@ -1202,14 +1212,49 @@ public class JSUtil implements JSUtilI {
 	}
 
 	// ES6 module code
-	
+
+
 	@Override
-	public Promise importModule(String resource, Consumer<Object> resolve, Consumer<Object> reject) {
-		return /** @j2sNative import(resource, 
-		  function(value) {resolve && resolve.accept$O(value)},  
-		  function(reason) {reject && reject.accept$O(reason)}) || */null;
+	public Promise importModule(String resource, Function<Object, Object> resolve, Function<Object,Object> reject) {
+		Object o = DOMNode.class;
+		loadStaticResource("/_ES6/jsutil.js");
+		if (resource.startsWith("$J2S$/"))
+			resource = getJ2SPath() + resource.substring(6);
+		return /** @j2sNative J2S._ES6.jsutil.importModule(resource, resolve, reject) ||*/null;
 	}
 
+	@Override
+	public void setPasteListener(Component c, TransferHandler handler) {
+		JSComponentUI ui = ((JSComponent) c).秘getUI();
+		if (handler == null) {
+			ui.setPasteHandler(null);
+			return;
+		}
+		@SuppressWarnings("unused")
+		Consumer<Object> co = new Consumer<Object>() {
+
+			@Override
+			public void accept(Object o) {
+				try {
+					handler.importData((JComponent) c, new JSDnD.JSTransferable().set(o));
+				} catch (Exception e) {
+					return;
+				}
+			}
+			
+		};
+
+		JSFunction f = /** (function(e) {e.preventDefault();co.accept$O(e.clipboardData);}) ||*/ null;
+		ui.setPasteHandler(f);
+		
+	}
+
+	@Override
+	public String getJ2SPath() {
+		return (String) getAppletAttribute("_codePath");
+	}
+
+	
 
 
 }

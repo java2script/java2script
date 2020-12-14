@@ -890,8 +890,10 @@ var setB$key = function(key, b, outerObj) {
 		// arg6 is the type:  anonymous(1), local(2), or absent
 */
 
-Clazz.newInterface = function (prefix, name, _null1, _null2, interfacez, _0) {
-  return Clazz.newClass(prefix, name, function(){}, null, interfacez, 0);
+Clazz.newInterface = function (prefix, name, f, _null2, interfacez, _0) {
+  var c = Clazz.newClass(prefix, name, function(){}, null, interfacez, 0);
+  f && f(c); // allow for j2sNative block
+  return c;
 };
 
 // An interesting idea, but too complicated, and probably not that effective anyway.
