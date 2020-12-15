@@ -12027,8 +12027,9 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 		// necessary for MSIE in strict mode -- apparently, we can't call
 		// J2S.readyCallback, but we can call J2S.readyCallback. Go figure...
 		if (isReady) {
-			// when leaving page, Java applet may be dead
+			// applet._appletPanel is set in SwingJSApplet upon creation
 			applet._appletPanel || (applet._appletPanel = (javaAppletPanel || javaApplet));
+			// when leaving page, Java applet may be dead
 			applet._applet = javaApplet;
 			!applet.getApp && (applet.getApp = function(){ applet._setThread();return javaApplet });
 			J2S.$css(J2S.$(applet, 'appletdiv'), { 'background-image': '' });
@@ -12619,9 +12620,6 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		if (ev.target.getAttribute("role")) {
 			return true;
 		}
-
-		if (who.applet._appletPanel)
-			who.applet._appletPanel.startHoverWatcher$Z(true);
 		if (J2S._mouseOwner && !J2S._mouseOwner.isDragging)
 			J2S.setMouseOwner(null);
 		var xym = getXY(who, ev, 0);
