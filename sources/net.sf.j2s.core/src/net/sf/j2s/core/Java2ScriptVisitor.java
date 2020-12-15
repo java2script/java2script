@@ -3189,6 +3189,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		IVariableBinding toBinding = getLeftVariableBinding(left, leftTypeBinding);
 		String op = node.getOperator().toString();
 		String opType = (op.length() == 1 ? null : op.substring(0, op.length() - 1));
+		
 		boolean needNewStaticParenthesis = false;
 		boolean isParenthesized = (right instanceof ParenthesizedExpression);
 //		boolean haveDocRight = (getJ2sJavadoc(right, DOC_CHECK_ONLY) != null);
@@ -3206,12 +3207,14 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if ("boolean".equals(leftName) && "boolean".equals(rightName)) {
 			if (("^=".equals(op))) {
 				opType = "!=";
-			} else {
+			} else if (opType == null) {
 				// all boolean should be OK -- no automatic here
 				left.accept(this);
-				buffer.append((opType == null ? "=" : op));
+				buffer.append("=");
 				right.accept(this);
 				leftName = null;
+			} else {
+				// a&=b -> !!(a&(b)) because both must execute
 			}
 		} else if (opType == null) {
 			// = operator is no problem
@@ -3234,11 +3237,13 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		else
 			left.accept(this);
 		int ptArray2 = (temp_processingArrayIndex ? buffer.length() : -1);
+		boolean leftIsString = leftName.equals("String");
+		boolean mustBoxAll = !(leftIsString || leftTypeBinding != null && leftTypeBinding.isPrimitive());
 		if (!"char".equals(leftName)) {
-			if (isIntegerType(leftName) || "boolean".equals(leftName)) {
+			if (isIntegerType(leftName) || "boolean".equals(leftName) || mustBoxAll) {
 				// can't just use a |= b because that ends up as 1 or 0, not true or false.
 				// byte|short|int|long += ...
-				if (!addPrimitiveTypedExpression(left, toBinding, leftName, opType, right, rightName, null, true))
+				if (!addPrimitiveTypedExpression(left, toBinding, leftName, opType, right, rightName, null, true, mustBoxAll ? leftTypeBinding : null))
 					ptArray = -1;
 			} else {
 				ptArray = -1;
@@ -3249,7 +3254,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				buffer.append(' ');
 				buffer.append(op);
 				buffer.append(' ');
-				boolean leftIsString = leftName.equals("String");
 				if ("char".equals(rightName)) {
 					if (right instanceof CharacterLiteral) {
 						// ... = 'c'
@@ -3443,7 +3447,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			String nameFROM = expBinding.getName();
 			String nameTO = ((PrimitiveType) typeTO).getPrimitiveTypeCode().toString();
 			if (!nameTO.equals(nameFROM)) {
-				addPrimitiveTypedExpression(null, null, nameTO, null, expression, nameFROM, null, false);
+				addPrimitiveTypedExpression(null, null, nameTO, null, expression, nameFROM, null, false, null);
 				return false;
 			}
 		}
@@ -3600,7 +3604,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if ("/".equals(operator) && leftIsInt && rightIsInt) {
 			// left and right are one of byte, short, int, or long
 			// division must take care of this.
-			addPrimitiveTypedExpression(left, null, leftName, operator, right, rightName, extendedOperands, false);
+			addPrimitiveTypedExpression(left, null, leftName, operator, right, rightName, extendedOperands, false, null);
 			return false;
 		}
 
@@ -4329,7 +4333,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if ((isNumeric || paramName.equals("char")) && !isBoxTyped(exp)) {
 			// using operator "m" to limit int application of $i$
 
-			addPrimitiveTypedExpression(null, null, paramName, op, exp, rightName, extendedOperands, false);
+			addPrimitiveTypedExpression(null, null, paramName, op, exp, rightName, extendedOperands, false, null);
 		} else {
 			// char f() { return Character }
 			// Character f() { return char }
@@ -4575,11 +4579,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @param rightName
 	 * @param extendedOperands
 	 * @param isAssignment      (+=, &=, etc)
-	 * @param                   return true if is an assignment and a = (a op b) was
-	 *                          used
+	 * @param mustBoxAll Integer != b
+	 * @return true if is an assignment and a = (a op b) was used
 	 */
 	private boolean addPrimitiveTypedExpression(Expression left, IVariableBinding assignmentBinding, String leftName,
-			String op, Expression right, String rightName, List<?> extendedOperands, boolean isAssignment) {
+			String op, Expression right, String rightName, List<?> extendedOperands, boolean isAssignment, ITypeBinding allBinding) {
 		// byte|short|int|long /= ...
 		// convert to proper number of bits
 
@@ -4589,6 +4593,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 		// a = ($b$[0] = a | right, $b$[0])
 
+		
+		
+		// also boolean |= boolean  op will be !!|
 		String classIntArray = null;
 		String more = null, less = null;
 
@@ -4598,7 +4605,16 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		boolean addParens = (op != "r" || fromChar || right instanceof ParenthesizedExpression);
 		boolean isDiv = "/".equals(op);
 		boolean toChar = false;
+		boolean isBoolean = false;
 		switch (leftName) {
+		case "Boolean":
+			isBoolean = true;
+			break;
+		case "boolean":
+			less = "!!(";
+			more = ")";
+			addParens = true;
+			break;
 		case "char":
 			if (!fromChar) {
 				prefix += "String.fromCharCode(";
@@ -4608,7 +4624,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			toChar = true;
 			break;
 		default:
-			// double, float
+			// double, float, boxed
 			break;
 		case "long":
 			if (isDiv || !fromIntType) {
@@ -4655,6 +4671,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 		boolean wasArray = temp_processingArrayIndex;
 
+
+		
 		if (isAssignment && left == null) {
 			buffer.append(op);
 		}
@@ -4670,11 +4688,23 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			buffer.append("(");
 		}
 		if (left != null) {
+			
 			// a += b
+		
+			
+			if (allBinding != null) {
+				// Boolean.from(!!(a | (b))
+				buffer.append(leftName + ".valueOf$" + getJSTypeCode(leftName.toLowerCase()))
+				.append(isBoolean ? "(!!(" : "(");
+			}
+
 			addFieldName(left, assignmentBinding);
 			buffer.append(op);
-			if (isAssignment)
+			
+		    if (isAssignment) {
 				buffer.append("(");
+			}
+			
 		}
 		if (!appendBoxingNode(right, fromChar) && fromChar && !toChar) {
 			buffer.append(CHARCODEAT0);
@@ -4685,6 +4715,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if (left != null && isAssignment) {
 			buffer.append(")");
 		}
+		
+		if (allBinding != null)
+			buffer.append(isBoolean ? "))" : ")");
+		
 		if (classIntArray != null) {
 			// this is necessary because in JavaScript, 
 			// a = new Int8Array(1)
@@ -5719,13 +5753,15 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			return "Z";
 		case "byte":
 			return "B";
+		case "character":
 		case "char":
 			return "C";
 		case "double":
 			return "D";
 		case "float":
 			return "F";
-		case "int":
+		case "integer":
+			case "int":
 			return "I";
 		case "long":
 			return "J";
