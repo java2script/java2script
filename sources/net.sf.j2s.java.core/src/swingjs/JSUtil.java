@@ -1219,7 +1219,8 @@ public class JSUtil implements JSUtilI {
 		Object o = DOMNode.class;
 		loadStaticResource("/_ES6/jsutil.js");
 		if (resource.startsWith("$J2S$/"))
-			resource = getJ2SPath() + resource.substring(6);
+			resource = getJ2SPath() + resource.substring(5);
+		System.out.println("JSUtil.importModule " + resource);
 		return /** @j2sNative J2S._ES6.jsutil.importModule(resource, resolve, reject) ||*/null;
 	}
 
@@ -1249,9 +1250,12 @@ public class JSUtil implements JSUtilI {
 		
 	}
 
+	/**
+	 * this path does not end in /
+	 */
 	@Override
 	public String getJ2SPath() {
-		return (String) getAppletAttribute("_codePath");
+		return (String) getAppletAttribute("_j2sFullPath");
 	}
 
 	

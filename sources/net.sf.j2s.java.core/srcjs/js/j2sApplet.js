@@ -2780,6 +2780,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 						base[base.length - 1] = codePath;
 					codePath = base.join("/");
 				}
+				applet._j2sFullPath = codePath.substring(0, codePath.length);
 				if (applet.__Info.code)
 					codePath += applet.__Info.code.replace(/\./g, "/");
 				codePath = codePath.substring(0,
