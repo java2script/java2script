@@ -1356,8 +1356,9 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 		// necessary for MSIE in strict mode -- apparently, we can't call
 		// J2S.readyCallback, but we can call J2S.readyCallback. Go figure...
 		if (isReady) {
-			// when leaving page, Java applet may be dead
+			// applet._appletPanel is set in SwingJSApplet upon creation
 			applet._appletPanel || (applet._appletPanel = (javaAppletPanel || javaApplet));
+			// when leaving page, Java applet may be dead
 			applet._applet = javaApplet;
 			!applet.getApp && (applet.getApp = function(){ applet._setThread();return javaApplet });
 			J2S.$css(J2S.$(applet, 'appletdiv'), { 'background-image': '' });

@@ -12028,7 +12028,7 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 		// J2S.readyCallback, but we can call J2S.readyCallback. Go figure...
 		if (isReady) {
 			// when leaving page, Java applet may be dead
-			applet._appletPanel = (javaAppletPanel || javaApplet);
+			applet._appletPanel || (applet._appletPanel = (javaAppletPanel || javaApplet));
 			applet._applet = javaApplet;
 			!applet.getApp && (applet.getApp = function(){ applet._setThread();return javaApplet });
 			J2S.$css(J2S.$(applet, 'appletdiv'), { 'background-image': '' });
@@ -13451,7 +13451,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 						base[base.length - 1] = codePath;
 					codePath = base.join("/");
 				}
-				applet._j2sFullPath = codePath.substring(0, codePath.length);
+				applet._j2sFullPath = codePath.substring(0, codePath.length - 1);
 				if (applet.__Info.code)
 					codePath += applet.__Info.code.replace(/\./g, "/");
 				codePath = codePath.substring(0,
