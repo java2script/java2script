@@ -1949,9 +1949,6 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		if (ev.target.getAttribute("role")) {
 			return true;
 		}
-
-		if (who.applet._appletPanel)
-			who.applet._appletPanel.startHoverWatcher$Z(true);
 		if (J2S._mouseOwner && !J2S._mouseOwner.isDragging)
 			J2S.setMouseOwner(null);
 		var xym = getXY(who, ev, 0);

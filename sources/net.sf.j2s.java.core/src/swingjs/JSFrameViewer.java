@@ -161,12 +161,6 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 		return false;
 	}
 
-	@Override
-	public void startHoverWatcher(boolean enable) {
-		// TODO Auto-generated method stub
-
-	}
-
 	public Graphics getGraphics() {
 		return getGraphics(0, 0, top);
 	}
