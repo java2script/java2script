@@ -1189,8 +1189,8 @@ public abstract class JSTextUI extends JSLightweightUI {
 	protected void setJSSelection(int mark, int dot, boolean andScroll) {
 		// overridden by JSEditorPaneUI
 	  //System.out.println(id + " seJSSelection  " + mark + " " + dot + " " +andScroll);
-		Object[] r1 = getJSNodePt(focusNode, mark, true);
-		Object[] r2 = (r1 == null || dot == mark ? r1 : getJSNodePt(focusNode, dot, true));
+		Object[] r1 = getJSNodePt(focusNode, mark, null, 0);
+		Object[] r2 = (r1 == null || dot == mark ? r1 : getJSNodePt(focusNode, dot, null, 0));
 		
 		//System.out.println(id + " setJSSelection " + r1 + " " + r2);
 		
@@ -1209,7 +1209,7 @@ public abstract class JSTextUI extends JSLightweightUI {
 	 * @param pt
 	 * @return
 	 */
-	protected Object[] getJSNodePt(DOMNode node, int pt, boolean isRoot) {
+	protected Object[] getJSNodePt(DOMNode node, int pt, Object[] lastRange, int level) {
 		/**
 		 * @j2sNative return [null, pt];
 		 */

@@ -631,88 +631,116 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 	 */
 	private Object[] lastRange;
 
+	class Node {
+		Node[] childNodes;
+		String tagName;
+		Node parentNode;
+		String innerText;
+		int length;
+		String textContent;
+	}
+
 	/**
 	 * Find the HTML node and offset for this Java caret position.
 	 * 
 	 * @param node domNode or one of its descendants
 	 * @param off  document offset to start of this node
 	 * @param pt   target caret position
-	 * @return range information or length: [textNode,charOffset] or [nontextNode,charNodesOffset] or [null, nlen] 
+	 * @return range information or length: [textNode,charOffset] or
+	 *         [nontextNode,charNodesOffset] or [null, nlen]
 	 */
 	@SuppressWarnings("unused")
 	@Override
-	protected Object[] getJSNodePt(DOMNode node, int pt, boolean isRoot) {
+	protected Object[] getJSNodePt(DOMNode dnode, int pt, Object[] lastRange, int level) {
 		// JavaScript below will call this method iteratively with off >= 0.
+		Node node = /** @j2sNative dnode || */
+				null;
+		boolean isRoot = (lastRange == null);
 		pt = Math.max(0, pt);
-		if (isRoot) {
-			//System.out.println("JSEPUI getJSNodePt " + editor.getText().replace('\n', '.').replace('\t', '^'));
-			lastRange = null;
-		} 
-		
-		boolean isTAB = isJSTAB(node);
-	
-		//System.out.println("getting JSNodePt for " + isTAB + " " + pt + " " + (/** @j2sNative node.data||node.outerHTML ||*/""));
-		
+//		if (isRoot) {
+//			System.out.println("JSEPUI getJSNodePt " + editor.getText().replace('\n', '.').replace('\t', '^'));
+//		}
+
+		boolean isTAB = isJSTAB(dnode);
+
+		// System.out.println("getting JSNodePt for " + isTAB + " " + pt + " " + (/**
+		// @j2sNative node.data||node.outerHTML ||*/""));
+
 		// Must consider several cases for BR and DIV:
 		// <br>
 		// <div><br><div> where br counts as 1 character --> [div, 0] or [null, 1]
-		// <div>.....<br><div> where childNodes[i] is br, counts as 0 charactors --> [div, i] or [null, 0]
+		// <div>.....<br><div> where childNodes[i] is br, counts as 0 charactors -->
+		// [div, i] or [null, 0]
 		// as well as "raw" text in the root domNode:
-		// text....<br>...text...<br>.... where br counts as 1 character --> [node.parentNode, i] or [null, 1]
+		// text....<br>...text...<br>.... where br counts as 1 character -->
+		// [node.parentNode, i] or [null, 1]
 		//
-		// also note that range can point to a character position only if the node is #text
-		// otherwise, it must point to a childNodes index in the parent node. So <br> must
-		// be indicated this second way.
+		// also note that range can point to a character position only if the node is
+		// #text
+		// otherwise, it must point to a childNode index in the parent node. So <br>
+		// must be indicated this second way.
 		//
 		// TAB will be indicated as a JSTAB string (see above).
-
-		/**
-		 * @j2sNative
-		 * 
-			
-		
-		    this.lastRange = [node, 0];
-		    if (isTAB) {
-		 	  return (pt == 0 ? this.lastRange : [null, pt - 1]);
-		 	}
-			var nodes = node.childNodes;
-			var tag = node.tagName;
-			var n = nodes.length;
+		//
+		Object[] r = /** @j2sNative 1?[]: */
+				null;
+		try {
+			lastRange = setNode(null, node, 0);
+			if (isTAB) {
+				return (pt == 0 ? r = lastRange : setNode(r, null, pt - 1));
+			}
+			Node[] nodes = node.childNodes;
+			String tag = node.tagName;
+			int n = nodes.length;
 			if (tag == "BR" || n == 1 && nodes[0].tagName == "BR") {
-				return (pt == 0 ? [node, 0] : [null, pt - 1]);
-			} 
-			var nlen = 0;
-			var i1 = (tag == "DIV" || tag == "P" ? 1 : 0);
-			for (var i = 0; i < n; i++) {
+				return (pt == 0 ? setNode(r, node, 0) : setNode(r, null, pt - 1));
+			}
+			int nlen = 0;
+			int i1 = (tag == "DIV" || tag == "P" ? 1 : 0);
+			for (int i = 0; i < n; i++) {
 				node = nodes[i];
-				if (node.innerText) {
-				  var ret=this.getJSNodePt$swingjs_api_js_DOMNode$I$Z(node, pt, false);
-				  if (ret[0] != null)
-				    return ret;
-				  pt = ret[1];
+				if (node.innerText != null) {
+					r = getJSNodePt((DOMNode) (Object) node, pt, lastRange, ++level);
+					if (r[0] != null) {
+						return r;
+					}
+					pt = /** @j2sNative 1?r[1] : */
+							0;
 				} else if (node.tagName == "BR") {
 					if (pt == 0)
-					  return [node.parentNode, i];
+						return setNode(r, node.parentNode, i);
 					pt -= (isRoot ? 1 : 0);
 				} else {
 					nlen = node.length;
 					if (nlen >= pt)
-						return this.lastRange = [node, pt];
-					this.lastRange = [node, nlen];
+						return r = setNode(lastRange, node, pt);
+					lastRange = setNode(lastRange, node, nlen);
 					pt -= nlen;
 				}
 			}
 			if (!isRoot)
-			  return [null, Math.max(0, pt - i1)];
-			var r = this.lastRange;
-			this.lastRange = null;
-			return r;
-		 */
-		{
-			return null;
+				return setNode(r, null, Math.max(0, pt - i1));
+			return r = lastRange;
+		} finally {
+//			System.out.println("level " + level 
+//					+ " pt = " + r[1] 
+//					+ " text=" + (r[0] == null ? "<null>" : (((Node) r[0]).parentNode == null ? "NULL" : ((Node) r[0]).parentNode.tagName) + " " 
+//					+ ((Node) r[0]).textContent.replace('\n','.').replace('\t','^').replace(' ','_')));
 		}
 	}
 	
+	private Object[] setNode(Object[] r, Node node, int i) {
+			/**
+			 @j2sNative if (r) {
+			 			r[0] = node;
+			 			r[1] = i;
+			 			return r;
+			 			}
+			 			r = [node, i];
+			 */
+		return r;
+	}
+
 	@Override
 	public String getJSTextValue() {
 		String s = getInnerTextSafely(domNode, false, null).toString().replaceAll("\u00A0"," "); // &nbsp;
@@ -776,7 +804,6 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 			fixTabRange(r2);
 		
 		andScroll |= (jc.秘keyAction != null);
-			
 			
 		
 //		System.out.println("jsSelect " + r1 + r2 + " " + andScroll);
