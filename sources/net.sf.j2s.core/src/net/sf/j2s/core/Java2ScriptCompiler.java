@@ -38,7 +38,7 @@ class Java2ScriptCompiler {
 	/**
 	 * The name of the J2S options file, aka as the "Dot-j2s" file.
 	 */
-	private static final String J2S_OPTIONS_FILE_NAME = ".j2s";
+	private static final String J2S_OPTIONS_FILE_NAME = System.getProperty("net.sf.j2s.core.j2sFileName",".j2s");
 	
 	private int nResources, nSources, nJS, nHTML;
 
