@@ -36,7 +36,6 @@ import java.util.EventListener;
 
 import javax.swing.event.EventListenerList;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import swingjs.JSToolkit;
 //import java.util.concurrent.locks.Lock;
 //import java.util.concurrent.locks.ReentrantLock;
@@ -144,8 +143,10 @@ public class Timer implements Serializable {
 	// notify is set to true when the Timer fires and the Runnable is queued.
 	// It will be set to false after notifying the listeners (if coalesce is
 	// true) or if the developer invokes stop.
-	private transient final AtomicBoolean notify = new AtomicBoolean(false);
-
+	//SwingJS unnecessarily adds another class
+	//private transient final AtomicBoolean notify = new AtomicBoolean(false);
+    private boolean notify = false;
+    
 	private volatile int initialDelay, delay;
 	private volatile boolean repeats0 = true, repeats = true, coalesce = true;
 
@@ -201,12 +202,13 @@ public class Timer implements Serializable {
 	 * @see Timer#post
 	 */
 	class DoPostEvent implements Runnable {
+		@Override
 		public void run() {
 			if (logTimers) {
 				System.out.println("Timer ringing: " + Timer.this);
 			}
 			int id = html5Id;
-			if (notify.get()) {
+			if (notify) {//.get()) {
 				fireActionPerformed(new ActionEvent(Timer.this, 0, getActionCommand(),
 						System.currentTimeMillis(), 0));
 				if (coalesce) {	
@@ -551,9 +553,7 @@ public class Timer implements Serializable {
 		ArrayList<Object> q = timerQueue();
 		if (q != null)
 			q.remove(this);
-		html5Id = Integer.MIN_VALUE;
-		// TODO Auto-generated method stub
-		
+		html5Id = Integer.MIN_VALUE;		
 	}
 
 	private ArrayList<Object> timerQueue() {
@@ -580,13 +580,17 @@ public class Timer implements Serializable {
 	 * <code>stop</code> for that.
 	 */
 	void cancelNotify() {
-		notify.set(false);
+		notify = false;//.set(false);
 	}
 
 	void post() {
-		if (notify.compareAndSet(false, true) || !coalesce) {
-			SwingUtilities.invokeLater(doPostEvent);
+		if (notify == false && (notify = true) || !coalesce) {
+			SwingUtilities.invokeLater(doPostEvent);			
 		}
+// SwingJS
+//		if (notify.compareAndSet(false, true) || !coalesce) {
+//			SwingUtilities.invokeLater(doPostEvent);			
+//		}
 	}
 
 	// Lock getLock() {

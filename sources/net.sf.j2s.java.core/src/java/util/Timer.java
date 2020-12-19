@@ -25,6 +25,9 @@
 
 package java.util;
 import java.util.Date;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -87,35 +90,35 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 
 public class Timer {
-    /**
-     * The timer task queue.  This data structure is shared with the timer
-     * thread.  The timer produces tasks, via its various schedule calls,
-     * and the timer thread consumes, executing timer tasks as appropriate,
-     * and removing them from the queue when they're obsolete.
-     */
-    private final TaskQueue queue = new TaskQueue();
-
-    /**
-     * The timer thread.
-     */
-    private final TimerThread thread = new TimerThread(queue);
-
-    /**
-     * This object causes the timer's task execution thread to exit
-     * gracefully when there are no live references to the Timer object and no
-     * tasks in the timer queue.  It is used in preference to a finalizer on
-     * Timer as such a finalizer would be susceptible to a subclass's
-     * finalizer forgetting to call it.
-     */
-    private final Object threadReaper = new Object() {
-        protected void finalize() throws Throwable {
-            synchronized(queue) {
-                thread.newTasksMayBeScheduled = false;
-                queue.notify(); // In case queue is empty.
-            }
-        }
-    };
-
+//    /**
+//     * The timer task queue.  This data structure is shared with the timer
+//     * thread.  The timer produces tasks, via its various schedule calls,
+//     * and the timer thread consumes, executing timer tasks as appropriate,
+//     * and removing them from the queue when they're obsolete.
+//     */
+//    private final TaskQueue queue = new TaskQueue();
+//
+//    /**
+//     * The timer thread.
+//     */
+//    private final TimerThread thread = new TimerThread(queue);
+//
+//    /**
+//     * This object causes the timer's task execution thread to exit
+//     * gracefully when there are no live references to the Timer object and no
+//     * tasks in the timer queue.  It is used in preference to a finalizer on
+//     * Timer as such a finalizer would be susceptible to a subclass's
+//     * finalizer forgetting to call it.
+//     */
+//    private final Object threadReaper = new Object() {
+//        protected void finalize() throws Throwable {
+//            synchronized(queue) {
+//                thread.newTasksMayBeScheduled = false;
+//                queue.notify(); // In case queue is empty.
+//            }
+//        }
+//    };
+//
     /**
      * This ID is used to generate thread names.
      */
@@ -145,6 +148,14 @@ public class Timer {
     public Timer(boolean isDaemon) {
         this("Timer-" + serialNumber(), isDaemon);
     }
+    
+    protected Thread thread = new Thread();
+	private ScheduledExecutorService exec;
+	private javax.swing.Timer timer;
+	
+	private ScheduledExecutorService getExec() {
+		return (exec == null ? (exec = Executors.newSingleThreadScheduledExecutor()) : exec);
+	}
 
     /**
      * Creates a new timer whose associated thread has the specified name.
@@ -157,7 +168,7 @@ public class Timer {
      */
     public Timer(String name) {
         thread.setName(name);
-        thread.start();
+//        thread.start();
     }
 
     /**
@@ -173,7 +184,7 @@ public class Timer {
     public Timer(String name, boolean isDaemon) {
         thread.setName(name);
         thread.setDaemon(isDaemon);
-        thread.start();
+//        thread.start();
     }
 
     /**
@@ -370,46 +381,64 @@ public class Timer {
         sched(task, firstTime.getTime(), period);
     }
 
-    /**
-     * Schedule the specified timer task for execution at the specified
-     * time with the specified period, in milliseconds.  If period is
-     * positive, the task is scheduled for repeated execution; if period is
-     * zero, the task is scheduled for one-time execution. Time is specified
-     * in Date.getTime() format.  This method checks timer state, task state,
-     * and initial execution time, but not period.
-     *
-     * @throws IllegalArgumentException if <tt>time</tt> is negative.
-     * @throws IllegalStateException if task was already scheduled or
-     *         cancelled, timer was cancelled, or timer thread terminated.
-     * @throws NullPointerException if {@code task} is null
-     */
-    private void sched(TimerTask task, long time, long period) {
-        if (time < 0)
-            throw new IllegalArgumentException("Illegal execution time.");
+	/**
+	 * Schedule the specified timer task for execution at the specified time with
+	 * the specified period, in milliseconds. If period is positive, the task is
+	 * scheduled for repeated execution; if period is zero, the task is scheduled
+	 * for one-time execution. Time is specified in Date.getTime() format. This
+	 * method checks timer state, task state, and initial execution time, but not
+	 * period.
+	 *
+	 * @throws IllegalArgumentException if <tt>time</tt> is negative.
+	 * @throws IllegalStateException    if task was already scheduled or cancelled,
+	 *                                  timer was cancelled, or timer thread
+	 *                                  terminated.
+	 * @throws NullPointerException     if {@code task} is null
+	 */
+	private void sched(TimerTask task, long time, long period) {
+		// SwingJS there is no need to add 20+ classes assoicated with
+		// Executors unless this is a fixed-rate timer, and even then
+		// we could create our own such timer if we wanted to.
+		if (time < 0)
+			throw new IllegalArgumentException("Illegal execution time.");
+		long delay = time - System.currentTimeMillis();
+		// Constrain value of period sufficiently to prevent numeric
+		// overflow while still being effectively infinitely large.
+//		if (Math.abs(period) > (Long.MAX_VALUE >> 1))
+//			period >>= 1;
+		// SwingJS safe integer / 2
+		boolean isFixed = (period > 0);
+		period = Math.abs(period);
+		if (period > Integer.MAX_VALUE)
+			period = Integer.MAX_VALUE >> 2;
+		// SwingJS allowing for slop in clock ticks.
+		if (delay == -1)
+			delay = 0; 
 
-        // Constrain value of period sufficiently to prevent numeric
-        // overflow while still being effectively infinitely large.
-        if (Math.abs(period) > (Long.MAX_VALUE >> 1))
-            period >>= 1;
-
-        synchronized(queue) {
-            if (!thread.newTasksMayBeScheduled)
-                throw new IllegalStateException("Timer already cancelled.");
-
-            synchronized(task.lock) {
-                if (task.state != TimerTask.VIRGIN)
-                    throw new IllegalStateException(
-                        "Task already scheduled or cancelled");
-                task.nextExecutionTime = time;
-                task.period = period;
-                task.state = TimerTask.SCHEDULED;
-            }
-
-            queue.add(task);
-            if (queue.getMin() == task)
-                queue.notify();
-        }
-    }
+		if (thread.isInterrupted())
+			throw new IllegalStateException("Timer already cancelled.");
+		if (period == 0) {
+			timer = new javax.swing.Timer((int) delay, (a) -> {
+				if (!thread.isInterrupted() && task.state != TimerTask.CANCELLED)
+					task.run();
+			});
+			timer.setRepeats(false);
+			timer.start();			
+		} else if (isFixed) {
+			getExec().scheduleAtFixedRate(() -> {
+				if (!thread.isInterrupted() && task.state != TimerTask.CANCELLED)
+					task.run();
+			}, delay, period, TimeUnit.MILLISECONDS);
+		} else {
+			timer = new javax.swing.Timer((int) period, (a) -> {
+				if (!thread.isInterrupted() && task.state != TimerTask.CANCELLED)
+					task.run();
+			});
+			timer.setRepeats(true);
+			timer.setInitialDelay((int) delay);
+			timer.start();			
+		}
+	}
 
     /**
      * Terminates this timer, discarding any currently scheduled tasks.
@@ -426,11 +455,11 @@ public class Timer {
      * calls have no effect.
      */
     public void cancel() {
-        synchronized(queue) {
-            thread.newTasksMayBeScheduled = false;
-            queue.clear();
-            queue.notify();  // In case queue was already empty.
-        }
+    	thread.interrupt();
+    	if(exec != null)
+    		exec.shutdownNow();
+    	if (timer != null)
+    		timer.stop();
     }
 
     /**
@@ -454,267 +483,7 @@ public class Timer {
      * @since 1.5
      */
      public int purge() {
-         int result = 0;
-
-         synchronized(queue) {
-             for (int i = queue.size(); i > 0; i--) {
-                 if (queue.get(i).state == TimerTask.CANCELLED) {
-                     queue.quickRemove(i);
-                     result++;
-                 }
-             }
-
-             if (result != 0)
-                 queue.heapify();
-         }
-
-         return result;
+    	 return 0;
      }
-}
 
-/**
- * This "helper class" implements the timer's task execution thread, which
- * waits for tasks on the timer queue, executions them when they fire,
- * reschedules repeating tasks, and removes cancelled tasks and spent
- * non-repeating tasks from the queue.
- */
-class TimerThread extends Thread {
-    /**
-     * This flag is set to false by the reaper to inform us that there
-     * are no more live references to our Timer object.  Once this flag
-     * is true and there are no more tasks in our queue, there is no
-     * work left for us to do, so we terminate gracefully.  Note that
-     * this field is protected by queue's monitor!
-     */
-    boolean newTasksMayBeScheduled = true;
-
-    /**
-     * Our Timer's queue.  We store this reference in preference to
-     * a reference to the Timer so the reference graph remains acyclic.
-     * Otherwise, the Timer would never be garbage-collected and this
-     * thread would never go away.
-     */
-    private TaskQueue queue;
-
-    TimerThread(TaskQueue queue) {
-        this.queue = queue;
-    }
-
-    public void run() {
-        try {
-            mainLoop();
-        } finally {
-            // Someone killed this Thread, behave as if Timer cancelled
-            synchronized(queue) {
-                newTasksMayBeScheduled = false;
-                queue.clear();  // Eliminate obsolete references
-            }
-        }
-    }
-
-    /**
-     * The main timer loop.  (See class comment.)
-     */
-    private void mainLoop() {
-        while (true) {
-            try {
-                TimerTask task;
-                boolean taskFired;
-                synchronized(queue) {
-                    // Wait for queue to become non-empty
-                    while (queue.isEmpty() && newTasksMayBeScheduled)
-                        queue.wait();
-                    if (queue.isEmpty())
-                        break; // Queue is empty and will forever remain; die
-
-                    // Queue nonempty; look at first evt and do the right thing
-                    long currentTime, executionTime;
-                    task = queue.getMin();
-                    synchronized(task.lock) {
-                        if (task.state == TimerTask.CANCELLED) {
-                            queue.removeMin();
-                            continue;  // No action required, poll queue again
-                        }
-                        currentTime = System.currentTimeMillis();
-                        executionTime = task.nextExecutionTime;
-                        if (taskFired = (executionTime<=currentTime)) {
-                            if (task.period == 0) { // Non-repeating, remove
-                                queue.removeMin();
-                                task.state = TimerTask.EXECUTED;
-                            } else { // Repeating task, reschedule
-                                queue.rescheduleMin(
-                                  task.period<0 ? currentTime   - task.period
-                                                : executionTime + task.period);
-                            }
-                        }
-                    }
-                    if (!taskFired) // Task hasn't yet fired; wait
-                        queue.wait(executionTime - currentTime);
-                }
-                if (taskFired)  // Task fired; run it, holding no locks
-                    task.run();
-            } catch(InterruptedException e) {
-            }
-        }
-    }
-}
-
-/**
- * This class represents a timer task queue: a priority queue of TimerTasks,
- * ordered on nextExecutionTime.  Each Timer object has one of these, which it
- * shares with its TimerThread.  Internally this class uses a heap, which
- * offers log(n) performance for the add, removeMin and rescheduleMin
- * operations, and constant time performance for the getMin operation.
- */
-class TaskQueue {
-    /**
-     * Priority queue represented as a balanced binary heap: the two children
-     * of queue[n] are queue[2*n] and queue[2*n+1].  The priority queue is
-     * ordered on the nextExecutionTime field: The TimerTask with the lowest
-     * nextExecutionTime is in queue[1] (assuming the queue is nonempty).  For
-     * each node n in the heap, and each descendant of n, d,
-     * n.nextExecutionTime <= d.nextExecutionTime.
-     */
-    private TimerTask[] queue = new TimerTask[128];
-
-    /**
-     * The number of tasks in the priority queue.  (The tasks are stored in
-     * queue[1] up to queue[size]).
-     */
-    private int size = 0;
-
-    /**
-     * Returns the number of tasks currently on the queue.
-     */
-    int size() {
-        return size;
-    }
-
-    /**
-     * Adds a new task to the priority queue.
-     */
-    void add(TimerTask task) {
-        // Grow backing store if necessary
-        if (size + 1 == queue.length)
-            queue = Arrays.copyOf(queue, 2*queue.length);
-
-        queue[++size] = task;
-        fixUp(size);
-    }
-
-    /**
-     * Return the "head task" of the priority queue.  (The head task is an
-     * task with the lowest nextExecutionTime.)
-     */
-    TimerTask getMin() {
-        return queue[1];
-    }
-
-    /**
-     * Return the ith task in the priority queue, where i ranges from 1 (the
-     * head task, which is returned by getMin) to the number of tasks on the
-     * queue, inclusive.
-     */
-    TimerTask get(int i) {
-        return queue[i];
-    }
-
-    /**
-     * Remove the head task from the priority queue.
-     */
-    void removeMin() {
-        queue[1] = queue[size];
-        queue[size--] = null;  // Drop extra reference to prevent memory leak
-        fixDown(1);
-    }
-
-    /**
-     * Removes the ith element from queue without regard for maintaining
-     * the heap invariant.  Recall that queue is one-based, so
-     * 1 <= i <= size.
-     */
-    void quickRemove(int i) {
-        assert i <= size;
-
-        queue[i] = queue[size];
-        queue[size--] = null;  // Drop extra ref to prevent memory leak
-    }
-
-    /**
-     * Sets the nextExecutionTime associated with the head task to the
-     * specified value, and adjusts priority queue accordingly.
-     */
-    void rescheduleMin(long newTime) {
-        queue[1].nextExecutionTime = newTime;
-        fixDown(1);
-    }
-
-    /**
-     * Returns true if the priority queue contains no elements.
-     */
-    boolean isEmpty() {
-        return size==0;
-    }
-
-    /**
-     * Removes all elements from the priority queue.
-     */
-    void clear() {
-        // Null out task references to prevent memory leak
-        for (int i=1; i<=size; i++)
-            queue[i] = null;
-
-        size = 0;
-    }
-
-    /**
-     * Establishes the heap invariant (described above) assuming the heap
-     * satisfies the invariant except possibly for the leaf-node indexed by k
-     * (which may have a nextExecutionTime less than its parent's).
-     *
-     * This method functions by "promoting" queue[k] up the hierarchy
-     * (by swapping it with its parent) repeatedly until queue[k]'s
-     * nextExecutionTime is greater than or equal to that of its parent.
-     */
-    private void fixUp(int k) {
-        while (k > 1) {
-            int j = k >> 1;
-            if (queue[j].nextExecutionTime <= queue[k].nextExecutionTime)
-                break;
-            TimerTask tmp = queue[j];  queue[j] = queue[k]; queue[k] = tmp;
-            k = j;
-        }
-    }
-
-    /**
-     * Establishes the heap invariant (described above) in the subtree
-     * rooted at k, which is assumed to satisfy the heap invariant except
-     * possibly for node k itself (which may have a nextExecutionTime greater
-     * than its children's).
-     *
-     * This method functions by "demoting" queue[k] down the hierarchy
-     * (by swapping it with its smaller child) repeatedly until queue[k]'s
-     * nextExecutionTime is less than or equal to those of its children.
-     */
-    private void fixDown(int k) {
-        int j;
-        while ((j = k << 1) <= size && j > 0) {
-            if (j < size &&
-                queue[j].nextExecutionTime > queue[j+1].nextExecutionTime)
-                j++; // j indexes smallest kid
-            if (queue[k].nextExecutionTime <= queue[j].nextExecutionTime)
-                break;
-            TimerTask tmp = queue[j];  queue[j] = queue[k]; queue[k] = tmp;
-            k = j;
-        }
-    }
-
-    /**
-     * Establishes the heap invariant (described above) in the entire tree,
-     * assuming nothing about the order of the elements prior to the call.
-     */
-    void heapify() {
-        for (int i = size/2; i >= 1; i--)
-            fixDown(i);
-    }
 }
