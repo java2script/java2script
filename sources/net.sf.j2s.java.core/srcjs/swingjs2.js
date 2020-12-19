@@ -17669,7 +17669,7 @@ var $i$ = new Int32Array(1);
 m$(Number,["byteValue"],function(){return ($b$[0] = this, $b$[0]);});
 m$(Number,["shortValue"],function(){return ($s$[0] = this, $s$[0]);});
 m$(Number,["intValue"],function(){return ($i$[0] = this, $i$[0]);});
-m$(Number,["longValue"],function(){return (this|0);});
+m$(Number,["longValue"],function(){return Clazz.toLong(this);});
 
 // Object values
 m$(Number,["byteValue$"],function(){return this.valueOf().byteValue();});
@@ -17677,6 +17677,17 @@ m$(Number,["shortValue$"],function(){return this.valueOf().shortValue();});
 m$(Number,["intValue$"],function(){return this.valueOf().intValue();});
 m$(Number,["longValue$"],function(){return this.valueOf().longValue();});
 m$(Number,["floatValue$", "doubleValue$"],function(){return this.valueOf();});
+m$(Number,["longValue$"],function(){return this.valueOf().longValue();});
+m$(Number,["$incr$"],function(n){return this.$box$(this.valueOf() + n);});
+m$(Number,["$mul$"],function(v){return this.$box$(this.valueOf() * v);});
+m$(Number,["$neg$"],function(v){return this.$box$(-this.valueOf());});
+m$(Number,["$inv$"],function(v){return this.$box$(~this.valueOf());});
+
+Clazz.incrAN = function(A,i,n,isPost) {
+	var v = A[i];
+	A[i] = v.$incr$(n);
+	return (isPost ? A[i] : v);
+}
 
 Clazz._setDeclared("java.lang.Integer", java.lang.Integer=Integer=function(){
 if (arguments[0] === null || typeof arguments[0] != "object")this.c$(arguments[0]);
@@ -17802,6 +17813,7 @@ function(s, radix){
 
 m$(Integer,"valueOf$I",
 function(i){
+  v |= 0;
   var v = getCachedNumber(i, ints, Integer, "c$$I");
   return (v ? v : Clazz.new_(Integer.c$$I, [i]));
 }, 1);
@@ -17890,6 +17902,10 @@ m$(Integer,"numberOfTrailingZeros$I",
 m$(Integer,"equals$O",
 function(s){
 return (s instanceof Integer) && s.valueOf()==this.valueOf();
+});
+
+m$(Integer, "$box$", function(v) {
+	return Integer.valueOf$I(v);
 });
 
 Integer.toHexString$I=function(d){
@@ -17996,6 +18012,7 @@ function(s, radix){
 
 m$(Long,"valueOf$J",
 function(i){
+  i = Clazz.toLong(i);
   var v = getCachedNumber(i, longs, Long, "c$$J");
   return (v ? v : Clazz.new_(Long.c$$J, [i]));
 }, 1);
@@ -18011,12 +18028,6 @@ function(s,radix){
  return parseIntLimit(s, radix, minLong, maxLong);
 }, 1);
 
-m$(Long,"equals$O",
-function(s){
-return (s instanceof Long) && s.valueOf()==this.valueOf();
-}, 1);
-
-
 m$(Long,"decode$S",
 function(n){
   if (isNaN(n = Integer.decodeRaw$S(n)))
@@ -18024,6 +18035,14 @@ function(n){
   return Clazz.new_(Long.c$$J, [n]);
 }, 1);
 
+m$(Long,"equals$O",
+		function(s){
+		return (s instanceof Long) && s.valueOf()==this.valueOf();
+});
+
+m$(Long, "$box$", function(v) {
+	return Long.valueOf$J(v.longValue$());
+});
 
 Long.toUnsignedString$J=Long.toUnsignedString$J$I = function(i,r) {
 	if (i <= minLong)
@@ -18125,6 +18144,7 @@ Short.toString = Short.toString$H = Short.toString$H$I = Short.prototype.toStrin
 	}
 };
 
+
 Short.toUnsignedInt$H = Short.toUnsignedLong$H = function (i) {
   return (i < 0 ? i + 0x10000 : i);
 };
@@ -18135,6 +18155,16 @@ function(n){
     throw Clazz.new_(NumberFormatException.c$$S, ["Invalid Short"]);
   return Clazz.new_(Short.c$$H, [n]);
 }, 1);
+
+
+m$(Short, "equals$O", function(s){
+	return (s instanceof Short) && s.valueOf()==this.valueOf();
+});
+
+m$(Short, "$box$", function(v) {
+	return Short.valueOf$H(v.shortValue$());
+});
+
 
 Clazz._setDeclared("Byte", java.lang.Byte=Byte=function(){
 if (arguments[0] === null || typeof arguments[0] != "object")this.c$(arguments[0]);
@@ -18223,6 +18253,10 @@ function (s,radix) {
 m$(Byte,"equals$O",
 function(s){
 return (s instanceof Byte) && s.valueOf()==this.valueOf();
+});
+
+m$(Byte, "$box$", function(v) {
+	return Byte.valueOf$B(v.byteValue$());
 });
 
 Byte.toUnsignedInt$B = Byte.toUnsignedLong$B = function (i) {
@@ -18369,6 +18403,10 @@ function(s){
 return (s instanceof Float) && s.valueOf()==this.valueOf();
 });
 
+m$(Float, "$box$", function(v) {
+	return Float.valueOf$F(v.floatValue$());
+});
+
 Clazz._setDeclared("Double", java.lang.Double=Double=function(){
 if (arguments[0] === null || typeof arguments[0] != "object")this.c$(arguments[0]);
 });
@@ -18449,6 +18487,11 @@ m$(Double,"equals$O",
 function(s){
 return (s instanceof Double) && s.valueOf()==this.valueOf();
 });
+
+m$(Double, "$box$", function(v) {
+	return Double.valueOf$D(v.doubleValue$());
+});
+
 
 Clazz._setDeclared("Boolean", 
 Boolean = java.lang.Boolean = Boolean || function(){
@@ -19295,6 +19338,14 @@ if(Clazz.instanceOf(obj,Character)){
 return this.value.charCodeAt(0)==obj.value.charCodeAt(0);
 }return false;
 });
+
+m$(C$, "$box$", function(c) {
+	return Character.valueOf$C(typeof c == "string" ? c : String.fromCharCode(c));
+});
+
+m$(C$, "$incr$",function(n){return this.$box$(this.value.charCodeAt(0) + n);});
+
+
 m$(C$,"charCodeAt$I",
 function(i){
 return(this.value).charCodeAt(i);
