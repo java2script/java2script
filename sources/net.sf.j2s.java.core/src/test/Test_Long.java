@@ -12,6 +12,15 @@ public abstract class Test_Long extends Test_ {
 
 		long l;
 		double d;
+		
+		
+		d = Integer.MAX_VALUE;
+		d += 1e13;
+		l = (long) d;
+		System.out.println(d + " " + l);
+		assert(false);
+		
+		
 		int ii = (int) Float.MAX_VALUE;
 		assert (ii == Integer.MAX_VALUE);
 		assert (Long.parseLong("1FFFFFFFFFFFFF", 16) == 0x1FFFFFFFFFFFFFL);

@@ -906,13 +906,14 @@ public abstract class JSComponent extends Component {
 	public static boolean 秘dispatchKeyEvent(JComponent c, int id, Object jqevent, long time) {
 		if (id == 0)
 			id = JSMouse.fixEventType(jqevent, 0);
+		JSComponentUI ui = (c == null ? null : c.秘getUI());
 		if (id == KeyEvent.KEY_TYPED) {
 			// HTML5 keypress is no longer reliable
-			JSToolkit.consumeEvent(jqevent);
+			if (ui != null && !ui.j2sDoPropagate)
+				JSToolkit.consumeEvent(jqevent);
 			return false;
 		}
 		if (c != null) {
-			JSComponentUI ui = c.秘getUI();
 			KeyEvent e = JSKeyEvent.newJSKeyEvent(c, jqevent, id, false);
 			// create our own KEY_PRESSED event
 			c.dispatchEvent(e);

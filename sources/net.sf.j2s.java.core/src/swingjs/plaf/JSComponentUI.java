@@ -1614,6 +1614,8 @@ public class JSComponentUI extends ComponentUI
 			setCursor();
 		if (outerNode != null)
 			setVisible(outerNode, jc.isVisible());
+		if (pasteHandler != null)
+			setPasteHandler(pasteHandler);
 		return domNode;
 	}
 
@@ -3716,5 +3718,30 @@ public class JSComponentUI extends ComponentUI
 	public boolean isDisplayable() {
 		return !isDisposed && domNode != null;
 	}
+
+	private JSFunction pasteHandler;
+	
+	/**
+	 * Set the handler for paste operations
+	 * @param handler
+	 */
+	public void setPasteHandler(JSFunction handler) {
+		pasteHandler = handler;
+		if (domNode != null) {
+			Object oldHandler = DOMNode.getAttr(domNode,  "paste-handler");
+			if (oldHandler == handler)
+				return;
+			/**
+			 * @j2sNative
+			 * 			oldHandler && this.domNode.removeEventListener("paste", oldHandler);
+			 *          handler && this.domNode.addEventListener("paste", handler);
+			 */
+			DOMNode.setAttrs(domNode, "contentEditable", (handler == null ? FALSE : TRUE));
+			// critical
+			j2sDoPropagate = (handler != null);
+			setFocusable();
+		}
+	}
+	
 
 }

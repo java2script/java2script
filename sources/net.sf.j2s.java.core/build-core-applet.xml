@@ -9,7 +9,14 @@
   	<echo>Deleting the site directory.</echo>
    	 	<delete quiet="true" dir="site" />
     -->
-   	
+
+  	
+<!-- non-Java resources to copy to site/swingjs/j2s -->
+<property name="resource.dir" value="resources" />  	
+
+<!-- non-Java resources to copy to site/ -->
+<property name="site-resource.dir" value="site-resources" />  	  	
+
    	<echo>creating swingjs2.js</echo>
    	<concat destfile="srcjs/swingjs2.js">
 	   	<filelist dir="srcjs/js" files="jquery.js,j2sJQueryExt.js,j2sApplet.js,j2sClazz.js,SwingJSApplet.js" />
@@ -20,6 +27,26 @@
       <fileset dir="srcjs"/>
     </copy>
 
+
+	<property name="site.dir" value="site" />
+	<property name="j2s.dir" value="${site.dir}/swingjs/j2s" />
+
+	<!-- transfer resources -->
+
+	<echo> Copying ${resource.dir} files into ${j2s.dir} </echo>
+	<copy todir="${j2s.dir}">
+  		<fileset dir="${resource.dir}" erroronmissingdir="false" >
+  			<include name="**/*"/>
+		</fileset>
+	</copy>
+  		
+	<echo> Copying ${site-resource.dir} files into ${site.dir} </echo>
+	<copy todir="${site.dir}">
+  		<fileset dir="${site-resource.dir}" erroronmissingdir="false" >
+  			<include name="**/*"/>
+		</fileset>
+	</copy>
+  		
    	<!-- make core files -->
  
    	<echo>creating and compressing core files - warnings are OK; "does not exist" is trouble</echo>
