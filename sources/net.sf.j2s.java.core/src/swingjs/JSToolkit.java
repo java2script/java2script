@@ -131,10 +131,9 @@ public class JSToolkit extends SunToolkit
 	public static void getScreenSize(Dimension d) {
 		@SuppressWarnings("unused")
 		JQuery jq = JSUtil.jQuery;
-		d.width = /** @j2sNative jq.$(window).width() || */0;
-		d.height = /** @j2sNative jq.$(window).height() || */0;
+		d.width = /** @j2sNative window.innerWidth || */0;
+		d.height = /** @j2sNative window.innerHeight || */0;
 	}
-
 
 	@Override
 	protected int getScreenWidth() {

@@ -11,6 +11,7 @@ public class Test_ {
 	
 	static public boolean j2sHeadless = true;
 
+	static public int bhtest = 100;
 	private static int i_ = 0;
 
 	private int t = 0;

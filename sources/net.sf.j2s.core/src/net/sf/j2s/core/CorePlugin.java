@@ -30,6 +30,7 @@ public class CorePlugin extends Plugin {
 	// if you change the x.x.x number, be sure to also indicate that in 
 	// j2sApplet.js and also (Bob only) update.bat, update-clean.bat
 
+	// BH 2020.12.14 -- 3.2.9-v1s fix for Boolean |= boolean and related boxing
 	// BH 2020.12.06 -- 3.2.9-v1r fix for (long) double using |0 
 	// BH 2020.11.20 -- 3.2.9-v1q fix for  new ImmutableCollections.ListN<>(E...) should use Object[] 
 	// BH 2020.08.03 -- 3.2.9-v1p fix for boxing boolean should be Boolean.valueOf$, not new Boolean

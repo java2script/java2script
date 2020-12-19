@@ -43,6 +43,9 @@ import sun.awt.AppContext;
 
 
 /**
+ * 
+ * Not used in SwingJS
+ * 
  * Internal class to manage all Timers using one thread.
  * TimerQueue manages a queue of Timers. The Timers are chained
  * together in a linked list sorted by the order in which they will expire.

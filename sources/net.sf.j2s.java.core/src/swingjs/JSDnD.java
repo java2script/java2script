@@ -249,8 +249,16 @@ public class JSDnD {
 		HTML5DataTransfer dataTransfer;
 		String[] mimeTypes;
 		DataFlavor[] flavors;
+
+		public JSTransferable() {
+			// for dynamic loading;
+		}
 		
 		public JSTransferable(Object html5DataTransfer) {
+			set(html5DataTransfer);
+		}
+		
+		public JSTransferable set(Object html5DataTransfer) {
 			dataTransfer = (HTML5DataTransfer)html5DataTransfer;
 			mimeTypes = /** @j2sNative html5DataTransfer && html5DataTransfer.types ||*/null;
 			if (mimeTypes != null) {
@@ -267,6 +275,7 @@ public class JSDnD {
 				mimeTypes = t;
 				}
 			}
+			return this;
 		}
 
 		@Override

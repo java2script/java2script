@@ -304,44 +304,28 @@ public final class Matcher implements MatchResult {
 		return this;
 	}
 
+	/**
+	 * A JS class to represent the JavaScript RegExp object.
+	 * This class is never actually initialized. 
+	 * 
+	 * @author hansonr
+	 *
+	 */
 	static abstract class RegExp {
-		boolean global, dotall, ignoreCase, multiline, sticky, unicode;
+		
+		private RegExp() {}
+		
+		static RegExp clone(RegExp rg) {
+			return /** @j2sNative 1?new RegExp(rg.source, rg.flags):*/null;
+		}
+		
+		// JavaScript RegExp 
+//		boolean global, dotall, ignoreCase, multiline, sticky, unicode;
 		int lastIndex;
-		String flags;
-		String source;
+//		String flags;
+//		String source;
 		// compile(), exec(), test(), toString(),
 		// @@match, @@matchAll, @@replace, @@search, @@split
-
-		Object __match(String s) {
-			return /** @j2sNative 1 ? this["@@match"](s) : */
-			null;
-		}
-
-		Object[] __matchAll(String s) {
-			return /** @j2sNative 1 ? this["@@matchAll"](s) : */
-			new Object[0];
-		}
-
-		String __replace(String s1, String s2) {
-			return /** @j2sNative 1 ? this["@@replace"](s1, s2) : */
-			"";
-		}
-
-		String[] __split(String s) {
-			return /** @j2sNative 1 ? this["@@split"](s) : */
-			new String[] { s };
-		}
-
-		int _search(String s) {
-			return /** @j2sNative 1 ? this["@@search"](s) : */
-			0;
-		}
-
-		static Object __species() {
-			return /** @j2sNative 1 ? RegExp["@@species"]() : */
-			null;
-		}
-
 	}
 
 	/**
@@ -365,10 +349,8 @@ public final class Matcher implements MatchResult {
 		leftBound = 0;
 		rightBound = getTextLength();
 		strString = null;
-		// reset JavaScript RegExp from pattern
-		@SuppressWarnings("unused")
-		RegExp rg = getRE();
-		/** @j2sNative this.pat.regexp = new RegExp(rg.source, rg.flags); */
+		// reset JavaScript RegExp from pattern by creating a new one
+		pat.regexp = RegExp.clone(pat.regexp);
 		return this;
 	}
 
@@ -446,7 +428,7 @@ public final class Matcher implements MatchResult {
 		oldLast = (oldLast < 0 ? from : oldLast);
 		clearGroups();
 		String s = (rightBound == strString.length() ? strString : strString.substring(0, rightBound));
-		RegExp rg = getRE();
+		RegExp rg = pat.regexp;
 		rg.lastIndex = from;
 		acceptMode = (anchor == UNSPECIFIED ? NOANCHOR : anchor);
 		results = execRE(rg, s);
@@ -1047,7 +1029,7 @@ public final class Matcher implements MatchResult {
 		clearGroups();
 		boolean result = search(from, anchor);
 		oldLast = from;
-		getRE().lastIndex = from;
+		pat.regexp.lastIndex = from;
 		return result;
 	}
 
@@ -1090,10 +1072,6 @@ public final class Matcher implements MatchResult {
 		default:
 			return true;
 		}
-	}
-
-	private RegExp getRE() {
-		return pat.regexp;
 	}
 
 	/**

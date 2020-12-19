@@ -29,6 +29,7 @@ import java.util.zip.ZipInputStream;
 
 import javax.sound.sampled.AudioFormat;
 import javax.swing.JComponent;
+import javax.swing.TransferHandler;
 import javax.swing.plaf.ComponentUI;
 
 import javajs.util.AU;
@@ -40,6 +41,7 @@ import sun.awt.AppContext;
 import swingjs.api.Interface;
 import swingjs.api.JSUtilI;
 import swingjs.api.js.DOMNode;
+import swingjs.api.js.DOMNode.Promise;
 import swingjs.api.js.HTML5Applet;
 import swingjs.api.js.J2SInterface;
 import swingjs.api.js.JQuery;
@@ -51,6 +53,15 @@ import swingjs.plaf.JSFrameUI;
 public class JSUtil implements JSUtilI {
 
 	public JSUtil() {}
+
+	/**
+	 * @j2sAlias newJSUtil
+	 * 
+	 * @return instance of this class
+	 */
+	static JSUtil newJSUtil() {
+		return new JSUtil();
+	}
 	
 	static {
 		boolean j2sdebug = false;
@@ -1199,6 +1210,56 @@ public class JSUtil implements JSUtilI {
 	public void playAudio(byte[] buffer, Object format) throws Exception {
 		JSToolkit.playAudio(buffer, (AudioFormat) format);
 	}
+
+	// ES6 module code
+
+
+	@Override
+	public Promise importModule(String resource, Function<Object, Object> resolve, Function<Object,Object> reject) {
+		Object o = DOMNode.class;
+		loadStaticResource("/_ES6/jsutil.js");
+		if (resource.startsWith("$J2S$/"))
+			resource = getJ2SPath() + resource.substring(5);
+		System.out.println("JSUtil.importModule " + resource);
+		return /** @j2sNative J2S._ES6.jsutil.importModule(resource, resolve, reject) ||*/null;
+	}
+
+	@Override
+	public void setPasteListener(Component c, TransferHandler handler) {
+		JSComponentUI ui = ((JSComponent) c).秘getUI();
+		if (handler == null) {
+			ui.setPasteHandler(null);
+			return;
+		}
+		@SuppressWarnings("unused")
+		Consumer<Object> co = new Consumer<Object>() {
+
+			@Override
+			public void accept(Object o) {
+				try {
+					handler.importData((JComponent) c, new JSDnD.JSTransferable().set(o));
+				} catch (Exception e) {
+					return;
+				}
+			}
+			
+		};
+
+		JSFunction f = /** (function(e) {e.preventDefault();co.accept$O(e.clipboardData);}) ||*/ null;
+		ui.setPasteHandler(f);
+		
+	}
+
+	/**
+	 * this path does not end in /
+	 */
+	@Override
+	public String getJ2SPath() {
+		return (String) getAppletAttribute("_j2sFullPath");
+	}
+
+	
+
 
 }
 

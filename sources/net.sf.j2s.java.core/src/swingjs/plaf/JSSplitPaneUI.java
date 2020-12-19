@@ -2219,15 +2219,20 @@ public class JSSplitPaneUI extends JSPanelUI {
 	     * Returns dividerSize x dividerSize
 	     */
 	    @Override
+		public Dimension getMinimumSize() {
+	    	return getPreferredSize();
+	    }
+		/**
+	     * Returns dividerSize x dividerSize
+	     */
+	    @Override
 		public Dimension getPreferredSize() {
 	        // Ideally this would return the size from the layout manager,
 	        // but that could result in the layed out size being different from
 	        // the dividerSize, which may break developers as well as
 	        // BasicSplitPaneUI.
-	        if (orientation == JSplitPane.HORIZONTAL_SPLIT) {
-	            return new Dimension(paneui.splitPane.getDividerSize(), 1);
-	        }
-	        return new Dimension(1, paneui.splitPane.getDividerSize());
+	    	int d = paneui.splitPane.getDividerSize();
+	        return (orientation == JSplitPane.HORIZONTAL_SPLIT ? new Dimension(d, 1) : new Dimension(1, d));
 	    }
 
 	    SplitPaneDivider(JSSplitPaneUI ui) {

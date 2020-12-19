@@ -10671,6 +10671,7 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// BH 2020.12.09 touch fixes for fdown and fdrag (j2sSlider)
 // BH 2020.12.03 note that relay is disabled using J2S.addDirectDatabaseCall(".")
 // BH 2020.04.24 Info.width includes "px" allowed and implies Info.isResizable:false; 
 //               fixes early hidden 100x100 size issue due to node.offsetWidth == 0 in that case
@@ -12026,8 +12027,9 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 		// necessary for MSIE in strict mode -- apparently, we can't call
 		// J2S.readyCallback, but we can call J2S.readyCallback. Go figure...
 		if (isReady) {
+			// applet._appletPanel is set in SwingJSApplet upon creation
+			applet._appletPanel || (applet._appletPanel = (javaAppletPanel || javaApplet));
 			// when leaving page, Java applet may be dead
-			applet._appletPanel = (javaAppletPanel || javaApplet);
 			applet._applet = javaApplet;
 			!applet.getApp && (applet.getApp = function(){ applet._setThread();return javaApplet });
 			J2S.$css(J2S.$(applet, 'appletdiv'), { 'background-image': '' });
@@ -12618,9 +12620,6 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		if (ev.target.getAttribute("role")) {
 			return true;
 		}
-
-		if (who.applet._appletPanel)
-			who.applet._appletPanel.startHoverWatcher$Z(true);
 		if (J2S._mouseOwner && !J2S._mouseOwner.isDragging)
 			J2S.setMouseOwner(null);
 		var xym = getXY(who, ev, 0);
@@ -12829,21 +12828,12 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		var x, y;
 		var oe = ev.originalEvent;
 		// drag-drop jQuery event is missing pageX
-		ev.pageX || (ev.pageX = oe.pageX);
-		ev.pageY || (ev.pageY = oe.pageY);
-		J2S._mousePageX = ev.pageX;
-		J2S._mousePageY = ev.pageY;
-		if (oe.targetTouches && oe.targetTouches[0]) {
-			x = oe.targetTouches[0].pageX - offsets.left;
-			y = oe.targetTouches[0].pageY - offsets.top;
-		} else if (oe.changedTouches) {
-			x = oe.changedTouches[0].pageX - offsets.left;
-			y = oe.changedTouches[0].pageY - offsets.top;
-		} else {
-			x = ev.pageX - offsets.left;
-			y = ev.pageY - offsets.top;
-		}
-		return (x == undefined ? null : [ Math.round(x), Math.round(y), mods]);
+		oe.targetTouches && (oe = oe.targetTouches[0]);
+		ev.pageX || (ev.pageX = oe ? oe.pageX : J2S._mousePageX);
+		ev.pageY || (ev.pageY = oe ? oe.pageY : J2S._mousePageY);
+		x = J2S._mousePageX = ev.pageX;
+		y = J2S._mousePageY = ev.pageY;
+		return [ Math.round(x - offsets.left), Math.round(y - offsets.top), mods];
 	}
 	
 	J2S._gestureUpdate = function(who, ev) {
@@ -13439,7 +13429,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 					//cl.$static$ && cl.$static$();
 					if (clazz.indexOf("_.") == 0)
 						J2S.setWindowVar(clazz.substring(2), cl);
-					applet.__Info.headless = (J2S._headless || isApp && (cl.$j2sHeadless || cl.j2sHeadless));
+					applet.__Info.headless = (J2S._headless || isApp && (cl.$j2sHeadless || cl.j2sHeadless
+							|| cl.superclazz && cl.superclazz.j2sHeadless));
 					if (applet.__Info.headless) {
 						Clazz._isHeadless = "true";
 						System.out.println("j2sApplet running headlessly");
@@ -13448,7 +13439,23 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 					alert("Java class " + clazz + " was not found.");
 					return;
 				}
+				var codePath = applet._j2sPath + "/";
+				if (codePath.indexOf("://") < 0) {
+					var base = document.location.href.split("#")[0]
+							.split("?")[0].split("/");
+					if (codePath.indexOf("/") == 0)
+						base = [ base[0], codePath.substring(1) ];
+					else
+						base[base.length - 1] = codePath;
+					codePath = base.join("/");
+				}
+				applet._j2sFullPath = codePath.substring(0, codePath.length - 1);
+				if (applet.__Info.code)
+					codePath += applet.__Info.code.replace(/\./g, "/");
+				codePath = codePath.substring(0,
+						codePath.lastIndexOf("/") + 1);
 				if (isApp && applet.__Info.headless) {
+					applet._codePath = codePath;
 					Clazz.loadClass("java.lang.Thread").currentThread$().group.html5Applet = applet;
 					cl.main$SA(applet.__Info.args || []);
 					System.exit$(0);
@@ -13467,20 +13474,6 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 						viewerOptions.put("script", applet._startupScript)
 					viewerOptions.put("platform", applet._platform);
 					viewerOptions.put("documentBase", document.location.href);
-					var codePath = applet._j2sPath + "/";
-					if (codePath.indexOf("://") < 0) {
-						var base = document.location.href.split("#")[0]
-								.split("?")[0].split("/");
-						if (codePath.indexOf("/") == 0)
-							base = [ base[0], codePath.substring(1) ];
-						else
-							base[base.length - 1] = codePath;
-						codePath = base.join("/");
-					}
-					if (applet.__Info.code)
-						codePath += applet.__Info.code.replace(/\./g, "/");
-					codePath = codePath.substring(0,
-							codePath.lastIndexOf("/") + 1);
 					viewerOptions.put("codePath", codePath);
 					viewerOptions.put("appletReadyCallback",
 							"J2S.readyCallback");
@@ -13856,15 +13849,24 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			}
 		};
 
+		var fixTouch = function(ev) {
+			if (ev.originalEvent.targetTouches) {
+				ev.pageX = ev.originalEvent.targetTouches[0].pageX;
+				ev.pageY = ev.originalEvent.targetTouches[0].pageY;
+			}
+			return ev;
+		}
+
 		$tag.bind('mousedown touchstart', function(ev) {
-			return down && down(ev);
+			return down && down(fixTouch(ev));
 		});
 
 		$tag.bind('mousemove touchmove', function(ev) {
-			return drag && drag(ev);
+			return drag && drag(fixTouch(ev));
 		});
 
 		$tag.bind('mouseup touchend', function(ev) {
+			// touchend does not express a position, and we don't use it anyway
 			return up && up(ev);
 		});
 
@@ -14019,6 +14021,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2020.12.11 fixing interface extended override of interface default
 // BH 2020.12.06 changing Long maxval to 0x1FFFFFFFFFFFFF from 0x20000000000000
 // BH 2020.12.06 better error checking for TYPE.parseTYPE(string)
 // BH 2020.07.27 fix for inner class array names
@@ -14901,8 +14904,10 @@ var setB$key = function(key, b, outerObj) {
 		// arg6 is the type:  anonymous(1), local(2), or absent
 */
 
-Clazz.newInterface = function (prefix, name, _null1, _null2, interfacez, _0) {
-  return Clazz.newClass(prefix, name, function(){}, null, interfacez, 0);
+Clazz.newInterface = function (prefix, name, f, _null2, interfacez, _0) {
+  var c = Clazz.newClass(prefix, name, function(){}, null, interfacez, 0);
+  f && f(c); // allow for j2sNative block
+  return c;
 };
 
 // An interesting idea, but too complicated, and probably not that effective anyway.
@@ -15589,6 +15594,7 @@ var excludeSuper = function(o) {
       || o == "$init$"
       || o == "$init0$"
       || o == "$static$"
+      || o == "$defaults$"
       || o == "$clinit$"
       || o == "$classes$"
       || o == "$fields$"
@@ -15619,10 +15625,12 @@ var copyStatics = function(clazzFrom, clazzThis, isInterface) {
 	        clazzThis.prototype[o] = clazzFrom.prototype[o];
 	    }
 	  }
-	  __allowOverwriteClass = false;
-	  if (clazzFrom.$defaults$)
+	  if (clazzFrom.$defaults$) {
+		  __allowOverwriteClass = false;
+		  clazzThis.$defaults$ && clazzThis.$defaults$(clazzThis);
 		  clazzFrom.$defaults$(clazzThis);
-	  __allowOverwriteClass = true;
+		  __allowOverwriteClass = true;
+	  }
   }
 }
 
@@ -19699,7 +19707,7 @@ var caller = arguments.callee.caller;
 var i = 0;
 while (caller.caller) {
 	caller = caller.caller;
-	if (++i > 3 && caller.exClazz)
+	if (++i > 3 && caller.exClazz || caller == Clazz.load)
 		break;
 }
 var superCaller = null;

@@ -1876,6 +1876,8 @@ public final class Pattern {
 
 		checkFlags();
 		pattern = removeQEQuoting(pattern);
+		// GLOBAL is always important, since it allows the
+		// RegExp to seek multiple times using an iterator
 		regexp = newRegExp(pattern, getFlags(flags | GLOBAL));
 		compiled = true;
 	}

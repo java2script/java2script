@@ -161,10 +161,9 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 		return false;
 	}
 
-	@Override
+	@Deprecated
 	public void startHoverWatcher(boolean enable) {
-		// TODO Auto-generated method stub
-
+		// this was for legacy JSmol
 	}
 
 	public Graphics getGraphics() {

@@ -461,9 +461,11 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 				DOMNode.setStyles(sliderTrack, "width", "1px", "left", "12px", "background", "black", "border", "none");
 				setSliderAttr("scaleY", 0.5f);
 			}
-
 		} else {
+			if (isHoriz && paintLabels)
+				barPlace = 30;
 			DOMNode.setStyles(sliderTrack, isHoriz ? "top" : "left", barPlace + "%");
+			DOMNode.setStyles(sliderHandle, isHoriz ? "top" : "left", "50%", "transform", "translateY(-50%)");
 		}
 		if (isScrollBar) {
 			setScrollBarExtentAndCSS();

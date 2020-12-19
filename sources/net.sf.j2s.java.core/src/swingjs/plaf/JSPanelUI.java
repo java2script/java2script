@@ -5,11 +5,11 @@ import java.awt.Dimension;
 import java.awt.peer.ContainerPeer;
 
 import javax.swing.JComponent;
-import javax.swing.JLayeredPane;
 import javax.swing.JRootPane;
 import javax.swing.LookAndFeel;
 
 import swingjs.api.js.DOMNode;
+import swingjs.api.js.JSFunction;
 
 public class JSPanelUI extends JSLightweightUI implements ContainerPeer {
 
@@ -18,12 +18,13 @@ public class JSPanelUI extends JSLightweightUI implements ContainerPeer {
 		isContainer = isPanel = true;
 		setDoc();
 	}
-	
+
 	@Override
 	public DOMNode updateDOMNode() {
 		JRootPane root = jc.getRootPane();
 		boolean isGlassPane = (root != null && root.getGlassPane() == c);
-		if (domNode == null) {
+		boolean isNew = (domNode == null);
+		if (isNew) {
 			containerNode = domNode = newDOMObject("div", id);
 			DOMNode.setStyle(domNode,  "outline", "none");
 			if (isGlassPane) {
