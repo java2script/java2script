@@ -14,6 +14,15 @@ public abstract class Test_Long extends Test_ {
 	static Long getLong(long l) {
 		return Long.valueOf(l);
 	}
+	
+	static {
+		long l = 1;
+		for (int i = 1; i < 21; i++) {
+			l *= i;
+			System.out.println(i + "\t" + l + " " + (double) l);
+		}
+	}
+
 
 	public static void main(String[] args) {
 
