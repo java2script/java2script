@@ -365,8 +365,8 @@ class Java2ScriptCompiler {
 	}
 
 	/**
-	 * Iteratively look for a .j2s file to use for configuration information.
-	 * Up to five iterations are allowed.
+	 * Iteratively look for a .j2s file to use for configuration information. Up to
+	 * five iterations are allowed.
 	 * 
 	 * @param j2sFile
 	 * @param level
@@ -381,10 +381,14 @@ class Java2ScriptCompiler {
 			newProps.load(os);
 			os.close();
 			String j2sAltFileProperty = newProps.getProperty(J2S_OPTIONS_ALTFILEPROPERTY);
-			String j2sAltFileName = (j2sAltFileProperty == null ? null : System.getProperty(j2sAltFileProperty));
-			if (j2sAltFileName != null && j2sAltFileName.length() > 0) {
-				initializeUsing(new File(projectFolder, j2sAltFileName), level);
-				return;
+			if (j2sAltFileProperty != null) {
+				System.out.println(J2S_OPTIONS_ALTFILEPROPERTY + " = " + j2sAltFileProperty);
+				String j2sAltFileName = System.getProperty(j2sAltFileProperty);
+				System.out.println("J2S System.getProperty(\"" + j2sAltFileProperty + "\") = " + j2sAltFileName);
+				if (j2sAltFileName != null && j2sAltFileName.length() > 0) {
+					initializeUsing(new File(projectFolder, j2sAltFileName), level);
+					return;
+				}
 			}
 			props = newProps;
 		} catch (Exception e) {
