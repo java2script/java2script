@@ -30,6 +30,7 @@ public class CorePlugin extends Plugin {
 	// if you change the x.x.x number, be sure to also indicate that in 
 	// j2sApplet.js and also (Bob only) update.bat, update-clean.bat
 
+	// BH 2020.12.19 -- 3.2.10-v1a adds .j2s config option j2s.config.altfileproperty
 	// BH 2020.12.19 -- 3.2.10-v1 preliminary work for 64-bit long
 	// BH 2020.12.14 -- 3.2.9-v1s fix for Boolean |= boolean and related boxing
 	// BH 2020.12.06 -- 3.2.9-v1r fix for (long) double using |0 
