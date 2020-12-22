@@ -3,6 +3,7 @@ package swingjs.image;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Hashtable;
@@ -64,8 +65,9 @@ public abstract class JSImageWriter extends ImageWriter {
 	    		outputChannel = (OC) out;
 	    		fileName = null;
 	    	}    
-	    	if (outputChannel == null)
+	    	if (outputChannel == null) {
 	    		outputChannel = new OC().setParams(null, fileName, false, (OutputStream) out);
+	    	}
 			params.put("outputChannel", outputChannel);
 			write(null, new IIOImage(im, null, null), null);
 		} catch (IOException e) {

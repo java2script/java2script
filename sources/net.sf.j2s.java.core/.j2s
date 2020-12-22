@@ -1,3 +1,4 @@
+#j2s.config.altfileproperty=j2s.alt.file
 j2s.compiler.status=enable
 
 # read.annotations to false to not record annotations

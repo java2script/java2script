@@ -8,8 +8,7 @@
             class="net.sf.j2s.core.Java2ScriptCompilationParticipant"
             createsProblems="false"
             id="Java2Script CompilationParticipant"
-            modifiesEnvironment="false"
-            requiredSourceLevel="1.6">
+            modifiesEnvironment="false">
       </compilationParticipant>
    </extension>
 
