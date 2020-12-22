@@ -135,6 +135,7 @@ import org.eclipse.jdt.core.dom.WildcardType;
 
 // TODO: superclass inheritance for JAXB XmlAccessorType
 
+//BH 2020.12.19 -- 3.2.10-v1 preliminary work for 64-bit long
 //BH 2020.12.14 -- 3.2.9-v1s fix for Boolean |= boolean and related boxing 
 //BH 2020.12.06 -- 3.2.9-v1r fix for (long) double using |0 
 //BH 2020.11.20 -- 3.2.9-v1q fix for  new ImmutableCollections.ListN<>(E...) should use Object[] 
@@ -657,7 +658,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	/**
 	 * flag to indicate that we need the $I$(i,n,m) definition.
 	 */
-	private boolean[] package_haveStaticArgsReversal = new boolean[] {false};
+	private boolean[] package_haveStaticArgsReversal = new boolean[] { false };
 
 	private int b$count;
 
@@ -849,7 +850,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			else
 				buffer.append(" new ").append(finalQualifiedClassName).append("(");
 		} else {
-			pt = openNew(javaClass, javaClassName, null, constructorMethodBinding, 
+			pt = openNew(javaClass, javaClassName, null, constructorMethodBinding,
 					lambdaArity >= 0 ? METHOD_LAMBDA_C : METHOD_NOTSPECIAL);
 			pt1 = buffer.length();
 			isDefault = (arguments != null && arguments.isEmpty() && !constructorMethodBinding.isVarargs());
@@ -869,7 +870,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		} else if (!isDefault) {
 			IMethodBinding constructorMethodDeclaration = (constructorMethodBinding == null ? null
 					: constructorMethodBinding.getMethodDeclaration());
-			addMethodParameterList(arguments, constructorMethodDeclaration, prefix, postfix, METHOD_CONSTRUCTOR);			
+			addMethodParameterList(arguments, constructorMethodDeclaration, prefix, postfix, METHOD_CONSTRUCTOR);
 			checkStaticParams2(pt, pt1, true);
 		}
 		buffer.append(")");
@@ -915,61 +916,62 @@ public class Java2ScriptVisitor extends ASTVisitor {
 //		buffer.append(args).append(",").append(f);
 //	}
 //
-	
+
 	/**
 	 * 3.2.9.v1c
 	 * 
-	 * Static method invocations must process parameters before initializing the method's class
-	 * if any parameter either calls a method or defines a static variable. We do this by changing
-	 *  
-	 *  $I$(3).xxxx(x,y,z)
-	 *  
-	 *    to 
-	 *    
-	 *  $I$(3,"xxxx",[x,y,z])
+	 * Static method invocations must process parameters before initializing the
+	 * method's class if any parameter either calls a method or defines a static
+	 * variable. We do this by changing
 	 * 
-	 * In addition, for constructors, Clazz.new_ needs to have the parameters as the first
-	 * parameter and the constructor method as the second parameter:
+	 * $I$(3).xxxx(x,y,z)
 	 * 
-	 *   Clazz.new_([args],constr)
+	 * to
+	 * 
+	 * $I$(3,"xxxx",[x,y,z])
+	 * 
+	 * In addition, for constructors, Clazz.new_ needs to have the parameters as the
+	 * first parameter and the constructor method as the second parameter:
+	 * 
+	 * Clazz.new_([args],constr)
 	 * 
 	 * The method invocation has not been closed at this point.
 	 * 
-	 * @param pt   start of method name
-	 * @param pt1  end of method name
+	 * @param pt  start of method name
+	 * @param pt1 end of method name
 	 */
 	private void checkStaticParams2(int pt, int pt1, boolean isConstructor) {
 		String args;
-		// must switch from Clazz.new_($I$(3).xxxx,[x,y,z] to Clazz.new([x,y,z],$I$(3).xxxx
-	    // ............................^pt........^pt1           
-		// must switch from $I$(3).xxxx(x,y,z  to $I$(3,"xxxx",[x,y,z])
+		// must switch from Clazz.new_($I$(3).xxxx,[x,y,z] to
+		// Clazz.new([x,y,z],$I$(3).xxxx
+		// ............................^pt........^pt1
+		// must switch from $I$(3).xxxx(x,y,z to $I$(3,"xxxx",[x,y,z])
 		// .................fffffffffff
 		// .................^pt..^fpt..^pt1
-		if (pt1 == pt 
-				|| buffer.charAt(pt) != '$' 
+		if (pt1 == pt || buffer.charAt(pt) != '$'
 				|| (args = buffer.substring(pt1 + 1)).indexOf("(") < 0 && args.indexOf("=") < 0)
 			return;
 		String f = buffer.substring(pt, pt1);
 		buffer.setLength(pt);
 		if (isConstructor) {
-			buffer.append(args).append(",").append(f);			
+			buffer.append(args).append(",").append(f);
 		} else {
 			package_haveStaticArgsReversal[0] = true;
 			int fpt = f.indexOf(")");
-			buffer.append(f.substring(0, fpt))
-				.append(",\"").append(f.substring(fpt+2)).append("\",[")
-				.append(args).append("]");
+			buffer.append(f.substring(0, fpt)).append(",\"").append(f.substring(fpt + 2)).append("\",[").append(args)
+					.append("]");
 		}
 	}
 
 	/**
-	 * Start a new Clazz.new_(cl,[args],innerClass) call for class creation or inner classes
-	 * and adds the construtor reference. 
+	 * Start a new Clazz.new_(cl,[args],innerClass) call for class creation or inner
+	 * classes and adds the construtor reference.
 	 * 
-	 * Starting in 3.2.9 we allow for the more correct sequence of ([args],cl,innerClass)
-	 * since then it is certain that the arguments will be processed prior to static initialization 
-	 * (Java <clinit>) of cl. Clazz.new_ will use Array.isArray() to check that order, since cl itself
-	 * cannot be an array.
+	 * Starting in 3.2.9 we allow for the more correct sequence of
+	 * ([args],cl,innerClass) since then it is certain that the arguments will be
+	 * processed prior to static initialization (Java <clinit>) of cl. Clazz.new_
+	 * will use Array.isArray() to check that order, since cl itself cannot be an
+	 * array.
 	 * 
 	 * @param javaClassName            the class name to use if there is no
 	 *                                 anonymous class name
@@ -1000,7 +1002,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			// an interface instance, so no constructor
 			buffer.append(finalQualifiedName + ".$init$");
 		} else {
-			String qName = getFinalMethodNameWith$Params(finalQualifiedName + ".c$", constructorMethodBinding, null, false, specialType);
+			String qName = getFinalMethodNameWith$Params(finalQualifiedName + ".c$", constructorMethodBinding, null,
+					false, specialType);
 			// if no parameters, we just give the name of the class, not the constructor
 			buffer.append(qName.endsWith(".c$") ? finalQualifiedName : qName);
 		}
@@ -1062,7 +1065,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// creation time and recover it here.
 
 		int b$count0 = b$count;
-		
+
 		// String finals;
 		boolean isStatic = true;
 		if (localType != REALLY_LOCAL_CLASS) {
@@ -1101,8 +1104,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 		String key = binding.getKey();
 		Set<IVariableBinding> set = package_htClassKeyToVisitedFinalVars.get(key);
-		boolean canBeReused = (set == null || set.isEmpty()
-				&& b$count == b$count0);		
+		boolean canBeReused = (set == null || set.isEmpty() && b$count == b$count0);
 		return (canBeReused ? anonName : null);
 	}
 
@@ -1341,7 +1343,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	public boolean visit(IfStatement node) {
 		buffer.append("if (");
-		appendBoxingNode(node.getExpression(), false);
+		appendBoxingNode(node.getExpression(), false, null, false);
 		buffer.append(") ");
 		node.getThenStatement().accept(this);
 		Statement ifElse = node.getElseStatement();
@@ -1384,6 +1386,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	private static final String varOrLet = "var ";
 
+	private static final long JAVASCRIPT_MAX_LONG = 0x1FFFFFFFFFFFFFL;
+
 	/**
 	 * Called by visit(MethodDeclaration) as well as addLambdaMethod().
 	 * 
@@ -1412,11 +1416,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// lambdaType != NOT_LAMBDA ? METHOD_FULLY_QUALIFIED
 		// : temp_add$UnqualifiedMethod ? METHOD_$_QUALIFIED :
 		METHOD_FULLY_QUALIFIED);
-		
+
 		if (isUserApplet && lambdaType == NOT_LAMBDA && !isConstructor && !isStatic && isPublic)
 			qualification |= METHOD_UNQUALIFIED;
 
-		
 		if (addGeneric) {
 			qualification |= METHOD_ADD_GENERIC;
 			if (isAbstract && abstractMethodList != null) {
@@ -1611,13 +1614,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if (!isSpecialMethod) {
 			// TODO: for now we are just returning name$ for all lambda methods
 			// note that simpleNameInMethodBinding can return C$.xxxx
-			String j2sName = getFinalDotQualifiedNameForMethod(javaQualifier, mBinding,
-					METHOD_ISQUALIFIED);
-			
+			String j2sName = getFinalDotQualifiedNameForMethod(javaQualifier, mBinding, METHOD_ISQUALIFIED);
 
 			String finalMethodNameWith$Params = getFinalMethodNameWith$Params(j2sName, mBinding, null, true,
 					METHOD_NOTSPECIAL);
-			
+
 			if (lambdaArity >= 0) {
 				// The problem here is that we cannot apply a method from an interface
 				// because those methods are not present in JavaScript.
@@ -1631,8 +1632,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 						|| "java.lang.Class".equals(removeBracketsAndFixNullPackageName(declaringClassJavaClassName)) // String.class::cast
 				) // BH Added 2019.05.13
 						&& lambdaArity == mBinding.getParameterTypes().length));
-				String opening = (!classIsTarget ? "t." : isPrivate ? "" : "$$.") + finalMethodNameWith$Params + ".apply("
-						+ (isStatic ? "null" : classIsTarget ? "$$" : "t") + ",[";
+				String opening = (!classIsTarget ? "t." : isPrivate ? "" : "$$.") + finalMethodNameWith$Params
+						+ ".apply(" + (isStatic ? "null" : classIsTarget ? "$$" : "t") + ",[";
 				buffer.append(opening);
 				buffer.append(getLambdaParamList(mBinding, lambdaArity));
 				buffer.append("])");
@@ -1665,7 +1666,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				appendFinalMethodQualifier(expression, declaringClass, bname, FINAL_CACHE);
 				buffer.append(", [");
 				term = "])";
-			} 
+			}
 		}
 		int pt1 = buffer.length();
 		if (term == ")")
@@ -1770,7 +1771,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			return false;
 		}
 		String myThis = "this";
-		
+
 		if (isQualified) {
 			node.getQualifier().accept(this);
 			if (class_isAnonymousOrLocal) {
@@ -1845,20 +1846,20 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		int nCatch = catchClauses.size();
 		Block finallyBlock = node.getFinally();
 		List<ASTNode> resources = node.resources();
-		
+
 		// try(resourceDefs) {
-		//   block code
+		// block code
 		// } optional catch/finally{}
-		// same as 
-		// 
-		// try {  resourceDefs;
-		//  try {
-		//    block code
-		//  } finally {resourceDefs.close();}
+		// same as
+		//
+		// try { resourceDefs;
+		// try {
+		// block code
+		// } finally {resourceDefs.close();}
 		// } nonOptional catch/finally{}
 
 		// same rules apply in terms of catch
-		
+
 		// Returns the live ordered list of resources for this try statement (added in
 		// JLS4 API).
 		// [ooh...JSL9 change...]
@@ -1883,7 +1884,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			pt = buffer.lastIndexOf("}");
 			buffer.setLength(pt);
 			buffer.append("\n}finally{/*res*/").append(closing).append("}\n}");
-		}		
+		}
 		if (nCatch > 0) {
 			String catchEName = "e$$";
 			if (nCatch == 1) {
@@ -1947,9 +1948,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if (finallyBlock != null) {
 			buffer.append(" finally ");
 			finallyBlock.accept(this);
-		}  else if (!haveCatchOrFinal) {
+		} else if (!haveCatchOrFinal) {
 			buffer.append("finally{}");
-		}		
+		}
 		buffer.append("\n");
 		return false;
 	}
@@ -2059,7 +2060,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if (binding == null)
 			return false;
 
-		
 //		checkGenericBinding(binding, binding);
 
 		ASTNode parent = node.getParent();
@@ -2074,7 +2074,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		boolean isTopLevel = (!isLambda && binding.isTopLevel());
 		boolean isAbstract = ((binding.getModifiers() & Modifier.ABSTRACT) != 0);
 
-		
 		if (!isTopLevel && !isAnonymous && node != innerNode) {
 			// inner named class first pass only
 
@@ -2621,8 +2620,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				buffer.append(varOrLet + "$vals=[];\n");
 				// implicit Enum methods added as trailer
 				buffer.append("Clazz.newMeth(C$, 'values$', function() { return $vals }, 1);\n");
-				buffer.append(
-						"Clazz.newMeth(C$, 'valueOf$S', function(name) { for ("+varOrLet+"val in $vals){ if ($vals[val].name == name) return $vals[val]} return null }, 1);\n");
+				buffer.append("Clazz.newMeth(C$, 'valueOf$S', function(name) { for (" + varOrLet
+						+ "val in $vals){ if ($vals[val].name == name) return $vals[val]} return null }, 1);\n");
 			}
 		}
 
@@ -2637,11 +2636,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				class_annotations = oldAnnotations;
 			}
 		}
-		
 
 		lambdaCount = lc;
 
-		
 		return isStatic;
 	}
 
@@ -2830,7 +2827,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// Clazz.new_(constructor, [args], innerClass)
 		// or Clazz.new_([args], constructor, innerClass);
 		int pt = openNew(superAnonOrInnerClass == null ? binding : superAnonOrInnerClass,
-					(superAnonName == null ? javaInnerClassName : superAnonName), anonName, constructorMethodDeclaration, METHOD_NOTSPECIAL);
+				(superAnonName == null ? javaInnerClassName : superAnonName), anonName, constructorMethodDeclaration,
+				METHOD_NOTSPECIAL);
 		int pt1 = buffer.length();
 		// add constructor application arguments: [object, parameters]
 		buffer.append(",[");
@@ -2858,7 +2856,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		checkStaticParams2(pt, pt1, true);
 
 		// an anonymous class will be calling a constructor in another
-		// class, so we need to indicate its actual call explicitly with a third parameter
+		// class, so we need to indicate its actual call explicitly with a third
+		// parameter
 
 		if (superAnonName != null && javaInnerClassName != null)
 			buffer.append(",").append(getFinalJ2SClassName(javaInnerClassName, FINAL_PC));
@@ -3176,6 +3175,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// >>=
 		// >>>=
 
+		
 		Expression left = node.getLeftHandSide();
 		Expression right = node.getRightHandSide();
 		ITypeBinding leftTypeBinding = left.resolveTypeBinding();
@@ -3190,7 +3190,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		IVariableBinding toBinding = getLeftVariableBinding(left, leftTypeBinding);
 		String op = node.getOperator().toString();
 		String opType = (op.length() == 1 ? null : op.substring(0, op.length() - 1));
-		
+
 		boolean needNewStaticParenthesis = false;
 		boolean isParenthesized = (right instanceof ParenthesizedExpression);
 //		boolean haveDocRight = (getJ2sJavadoc(right, DOC_CHECK_ONLY) != null);
@@ -3234,17 +3234,18 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 		int ptArray = (temp_processingArrayIndex ? buffer.length() : -1);
 		if (toBinding != null)
-			addFieldName(left, toBinding);
+			addFieldName(left, toBinding, null, false);
 		else
 			left.accept(this);
 		int ptArray2 = (temp_processingArrayIndex ? buffer.length() : -1);
 		boolean leftIsString = leftName.equals("String");
-		boolean mustBoxAll = !(leftIsString || leftTypeBinding != null && leftTypeBinding.isPrimitive());
+		boolean mustBoxAll = !leftIsString &&  (leftTypeBinding == null || !leftTypeBinding.isPrimitive());
 		if (!"char".equals(leftName)) {
 			if (isIntegerType(leftName) || "boolean".equals(leftName) || mustBoxAll) {
 				// can't just use a |= b because that ends up as 1 or 0, not true or false.
 				// byte|short|int|long += ...
-				if (!addPrimitiveTypedExpression(left, toBinding, leftName, opType, right, rightName, null, true, mustBoxAll ? leftTypeBinding : null))
+				if (!addPrimitiveTypedExpression(left, toBinding, leftName, opType, right, rightName, null, true,
+						mustBoxAll ? leftTypeBinding : null))
 					ptArray = -1;
 			} else {
 				ptArray = -1;
@@ -3313,7 +3314,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				needCharCode = (c == '\'' || c == '"');
 			} else {
 				buffer.append("(");
-				appendBoxingNode(right, true);
+				appendBoxingNode(right, true, null, false);
 				buffer.append(")");
 			}
 		} else if ("char".equals(rightName)) {
@@ -3327,13 +3328,13 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					buffer.append("(");
 					addJ2SDoc(right);
 				}
-				needCharCode = appendBoxingNode(right, false);
+				needCharCode = appendBoxingNode(right, false, null, false);
 				if (needParenthesis) {
 					buffer.append(")");
 				}
 			}
 		} else {
-			appendBoxingNode(right, true);
+			appendBoxingNode(right, true, null, false);
 			needCharCode = false;
 		}
 		if (needCharCode)
@@ -3580,6 +3581,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		Expression right = node.getRightOperand();
 		List<?> extendedOperands = node.extendedOperands();
 
+		 // bufferDebug("infix " + left + " " + right);
+
 		if (noDocProblem(left) && noDocProblem(right) && getConstantValue(node, true)) {
 			return false;
 		}
@@ -3590,7 +3593,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		boolean isToString = (expTypeName.indexOf("String") >= 0);
 
 		String operator = node.getOperator().toString();
-		
+
 		boolean isBitwise = isBitwiseBinaryOperator(node);
 		boolean isComparison = (!isBitwise && "!==<=>=".indexOf(operator) >= 0);
 		ITypeBinding leftTypeBinding = left.resolveTypeBinding();
@@ -3600,12 +3603,16 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		String leftName = leftTypeBinding.getName();
 		String rightName = rightTypeBinding.getName();
 
-		boolean leftIsInt = leftTypeBinding.isPrimitive() && isIntegerType(leftName);
-		boolean rightIsInt = rightTypeBinding.isPrimitive() && isIntegerType(rightName);
+		 // bufferDebug("infix " + operator + " " + expTypeName + " ln=" + leftName + " rn=" + rightName);
+
+		boolean leftIsInt = (leftTypeBinding.isPrimitive()) && isIntegerType(leftName);
+		boolean rightIsInt = (rightTypeBinding.isPrimitive()) && isIntegerType(rightName);
+		 // bufferDebug("??? " + leftIsInt + " " + rightIsInt + " " + leftName + " " + rightName);
 		if ("/".equals(operator) && leftIsInt && rightIsInt) {
 			// left and right are one of byte, short, int, or long
 			// division must take care of this.
-			addPrimitiveTypedExpression(left, null, leftName, operator, right, rightName, extendedOperands, false, null);
+			addPrimitiveTypedExpression(left, null, leftName, operator, right, rightName, extendedOperands, false,
+					null);
 			return false;
 		}
 
@@ -3618,13 +3625,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			post = ')';
 			buffer.append("!!(");
 		}
-		
+
 		boolean isDirect = isBitwise && !toBoolean && leftIsInt && rightIsInt;
 		// string literal comparison check in 3.2.9.v1d
-		boolean isStringComparison = (isComparison 
-				&& !(left instanceof NullLiteral) && !(right instanceof NullLiteral)
-				&& isInternOrLiteral(left) != isInternOrLiteral(right)
-			);
+		boolean isStringComparison = (isComparison && !(left instanceof NullLiteral) && !(right instanceof NullLiteral)
+				&& isInternOrLiteral(left) != isInternOrLiteral(right));
 		if (isDirect || isComparison && !isStringComparison) {
 
 			// we do not have to do a full conversion
@@ -3655,23 +3660,34 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				}
 
 			if (isDirect) {
-				appendBoxingNode(left, false);
+				appendBoxingNode(left, false, null, false);
 				buffer.append(' ');
 				buffer.append(operator);
 				buffer.append(' ');
-				appendBoxingNode(right, false);
+				appendBoxingNode(right, false, null, false);
 				addExtendedOperands(extendedOperands, operator, pre, post, isToString);
 				return false;
 			}
 		}
 
-//		boolean isToStringLeft = isToString && !isBitwise;
-//		boolean isToStringRight = isToString && !isBitwise;
-
 		// String s = "e";
 		// s += 'c' | 'd';
 
 		// left
+
+		 // bufferDebug("infix3 " + boxType(node) + " " + operator + " " + left);
+
+		String trail = null;
+		if (boxType(left) == UN_BOX || boxType(right) == UN_BOX) {
+			if (expTypeName.toLowerCase().equals("long")) {
+				// We must look out for L / L or L / 3 or boxing to Long or Integer
+				buffer.append("Clazz.toLong(");
+				trail = ")";
+			} else if (expTypeName.equals("int") || expTypeName.equals("Integer")) {
+				buffer.append("(");
+				trail = ")|0";
+			}
+		}
 
 		addOperandWithJ2SDoc(left, isToString && !isBitwise);
 		buffer.append(' ');
@@ -3684,8 +3700,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		buffer.append(' ');
 		// right
 		boolean parenthesize = (
-				//isStringComparison || 
-				right instanceof ParenthesizedExpression || getJ2sJavadoc(right, DOC_CHECK_ONLY) != null);
+		// isStringComparison ||
+		right instanceof ParenthesizedExpression || getJ2sJavadoc(right, DOC_CHECK_ONLY) != null);
 //		if (isStringComparison)
 //			buffer.append("new String");
 		if (parenthesize) {
@@ -3711,11 +3727,14 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		addExtendedOperands(extendedOperands, operator, pre, post, isToString);
 		if (toBoolean)
 			buffer.append(post);
+		if (trail != null)
+			buffer.append(trail);
 		return false;
 	}
 
 	private boolean isInternOrLiteral(Expression e) {
-		return e instanceof StringLiteral || (e instanceof MethodInvocation) &&(((MethodInvocation) e).resolveMethodBinding().getName().equals("intern"));
+		return e instanceof StringLiteral || (e instanceof MethodInvocation)
+				&& (((MethodInvocation) e).resolveMethodBinding().getName().equals("intern"));
 	}
 
 	private void addOperandWithJ2SDoc(Expression exp, boolean toString) {
@@ -3753,7 +3772,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	public boolean visit(NumberLiteral node) {
-		buffer.append(node.resolveConstantExpressionValue());
+		buffer.append(getLiteralSafely(node.resolveConstantExpressionValue()));
 		return false;
 	}
 
@@ -3782,7 +3801,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * </pre>
 	 */
 	public boolean visit(PostfixExpression node) {
-		return addPrePost(node, node.getOperand(), node.getOperator().toString(), true);
+		return addPrePost(node, node.getOperand(), node.getOperator().toString(), POSTFIX);
 	}
 
 	/**
@@ -3799,17 +3818,23 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * </pre>
 	 */
 	public boolean visit(PrefixExpression node) {
-		Expression exp = node.getOperand();
-// NO! Don't do this! !(/** @j2sNative true||*/false  does not work 
-//		if (getConstantValue(node, true))
-//			return false;
 		String op = node.getOperator().toString();
-
-		if ("~".equals(op)) {
-			buffer.append(op);
-			return true;
+		Expression exp = node.getOperand();
+//		bufferDebug("PRE " + boxType(exp) + " " + exp.resolveBoxing() + " " + exp.resolveUnboxing() + " "
+//				+ exp.resolveTypeBinding().getName());
+		switch (boxType(exp)) {
+		default:
+		case NO_BOX:
+			if ("~".equals(op)) {
+				buffer.append(op);
+				return true;
+			}
+			return addPrePost(node, exp, node.getOperator().toString(), PREFIX);
+		case UN_BOX:
+			return addPrePost(node, exp, node.getOperator().toString(), PREFIX);
+		case DO_BOX:
+			return addPrePost(node, exp, node.getOperator().toString(), PREFIX);
 		}
-		return addPrePost(node, exp, node.getOperator().toString(), false);
 	}
 
 	public boolean visit(QualifiedName node) {
@@ -3916,13 +3941,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			// otherwise it will be qualified in getQualifiedSimpleNameForinvocation
 			dumpStack("node is null in simpleNameInMethodBinding " + mBinding);
 			return (mBinding.getDeclaringClass().getFunctionalInterfaceMethod() == null ? name : name + "$");
-		} 
-		if ((flags & METHOD_ISQUALIFIED) == 0 
-				&& declaringClass != null 
-				&& class_shortName != null
-				&& !isStatic(mBinding) 
-				&& (parent = node.getParent()) != null 
-				&& !(parent instanceof FieldAccess)) {
+		}
+		if ((flags & METHOD_ISQUALIFIED) == 0 && declaringClass != null && class_shortName != null
+				&& !isStatic(mBinding) && (parent = node.getParent()) != null && !(parent instanceof FieldAccess)) {
 			String classDot = getClassNameAndDot(parent, declaringClass, isPrivate(mBinding));
 			if (classDot.length() > 0)
 				return getFinalJ2SClassName(classDot + name, FINAL_PC);
@@ -4077,62 +4098,80 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	////////// END visit/endVisit ///////////
 
 	/**
-	 * pre: ++,--, +, -, ~, !
-	 * 
-	 * post: ++,--
+	 * fix pre/post business
 	 * 
 	 * @param node
-	 * @param left
-	 * @param op
-	 * @param isPost
+	 * @param exp
+	 * @param pre  (++,--,+,-,~,!) or post (++ or -- only)
+	 * @param type PREFIX or POSTFIX
 	 * @return
 	 */
 	@SuppressWarnings({ "null" })
-	private boolean addPrePost(Expression node, Expression left, String op, boolean isPost) {
+	private boolean addPrePost(Expression node, Expression exp, String op, int prePost) {
 
+		// we need to pass through ((((A[i]))))++ to A[i]++
+		Expression e = exp, inner = null;
+		while (e instanceof ParenthesizedExpression) {
+			e =((ParenthesizedExpression) e).getExpression();
+			if (e instanceof ArrayAccess) {
+				inner = e;
+				e = null;
+			}
+		}
+		if (inner != null) {
+			exp = inner;
+		}
 		ASTNode parent = node.getParent();
 
-		ITypeBinding leftTypeBinding = left.resolveTypeBinding();
-		IVariableBinding varBinding = getLeftVariableBinding(left, leftTypeBinding);
+		ITypeBinding expTypeBinding = exp.resolveTypeBinding();
+		boolean isPrimitive = (expTypeBinding != null && expTypeBinding.isPrimitive());
+		int boxType = boxType(exp);
+
+//		bufferDebug("???" + isPrimitive + " " + boxType + "  " + expTypeBinding.getName() + " " + (exp instanceof ArrayAccess));
+
+		IVariableBinding varBinding = getLeftVariableBinding(exp, expTypeBinding);
 		String name = null;
-		boolean isChar = (leftTypeBinding != null && leftTypeBinding.isPrimitive()
-				&& "char".equals(name = leftTypeBinding.getName()));
+		boolean isChar = (expTypeBinding != null && isPrimitive && "char".equals(name = expTypeBinding.getName()));
 		boolean isShortOrByte = ("short".equals(name) || "byte".equals(name));
 		String term = "";
 		if (isStaticBinding(varBinding)) {
 			// new Test_Static().y++ where y is static
-			if ((isChar || !haveDirectStaticAccess(left))
+			if ((isChar || !haveDirectStaticAccess(exp))
 					&& !(parent instanceof Statement || parent instanceof ParenthesizedExpression)) {
 
 				buffer.append("(");
 				term = ")";
 			}
-			addLeftSidePrefixName(left);
+			addLeftSidePrefixName(exp);
 		} else {
 			varBinding = null;
 		}
-
-		if (isPost) {
-			if (isChar || isShortOrByte) {
-				addPrePostFix(left, parent, varBinding, op, false, name.charAt(0));
-			} else {
-				// TODO: have to consider short and byte
-				addFieldName(left, varBinding);
-				buffer.append(op);
-			}
-		} else {
+		switch (prePost) {
+		default:
+		case PREFIX:
 			if (isChar || isShortOrByte) {
 				if (varBinding == null)
 					buffer.append("(");
-				addPrePostFix(left, (varBinding == null ? parent : null), varBinding, op, true, name.charAt(0));
+				addPrePostFix(exp, (varBinding == null ? parent : null), varBinding, op, true, name.charAt(0));
 				if (varBinding == null)
 					buffer.append(")");
 			} else {
 				// have to consider short and byte
-				buffer.append(op);
-				addFieldName(left, varBinding);
+				if (!op.equals("+") && boxType != UN_BOX)
+					buffer.append(op);
+				addFieldName(exp, varBinding, (boxType == UN_BOX ? op : null), false);
 			}
-
+			break;
+		case POSTFIX:
+			if (isChar || isShortOrByte) {
+				addPrePostFix(exp, parent, varBinding, op, false, name.charAt(0));
+			} else {
+				// TODO: have to consider short and byte
+				addFieldName(exp, varBinding, (boxType == UN_BOX ? op : null), true);
+				if (boxType != UN_BOX)
+					buffer.append(op);
+			}
+			break;
 		}
 		buffer.append(term);
 		return false;
@@ -4161,12 +4200,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 		if (isChar) {
 			if (addAnonymousWrapper) {
-				addFieldName(left, varBinding);
+				addFieldName(left, varBinding, null, false);
 				buffer.append(",");
 			}
-			addFieldName(left, varBinding);
+			addFieldName(left, varBinding, null, false);
 			buffer.append(isChar ? "=String.fromCharCode(" : "=");
-			addFieldName(left, varBinding);
+			addFieldName(left, varBinding, null, false);
 			buffer.append(CHARCODEAT0).append("++".equals(op) ? "+1" : "-1");
 			buffer.append(")");
 		} else {
@@ -4182,10 +4221,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			if (isPrefix)
 				buffer.append(op);
 			int ptArray = (temp_processingArrayIndex ? buffer.length() : -1);
-			addFieldName(left, varBinding);
+			addFieldName(left, varBinding, null, false);
 			int ptArray2 = (temp_processingArrayIndex ? buffer.length() : -1);
 			buffer.append(",");
-			addFieldName(left, varBinding);
+			addFieldName(left, varBinding, null, false);
 			buffer.append("=");
 			if (temp_processingArrayIndex)
 				fixAssignArray((ArrayAccess) left, ptArray, ptArray2, wasArray);
@@ -4196,7 +4235,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			} else {
 				// postfix
 				// statement: ($b$[0]=b,b=(++$b$[0] ,$b$[0]))
-				// not statement: i = ($b$[0]=b,b=(++$b$[0] ,$b$[0]),--$b$[0],$b$[0]);
+				// nonstatement: i = ($b$[0]=b,b=(++$b$[0] ,$b$[0]),--$b$[0],$b$[0]);
 				buffer.append("(");
 				buffer.append(op);
 				buffer.append(key);
@@ -4216,8 +4255,14 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 	}
 
-	private static boolean isBoxTyped(Expression exp) {
-		return exp.resolveBoxing() || exp.resolveUnboxing();
+	private final static int NO_BOX = 0;
+	private final static int DO_BOX = 1;
+	private final static int UN_BOX = 2;
+	private final static int PREFIX = 4;
+	private final static int POSTFIX = 8;
+
+	private static int boxType(Expression exp) {
+		return (exp.resolveBoxing() ? DO_BOX : exp.resolveUnboxing() ? UN_BOX : NO_BOX);
 	}
 
 	private static boolean isIntegerType(String type) {
@@ -4265,8 +4310,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		ITypeBinding ebinding = type.getElementType();
 		if (ebinding == null)
 			ebinding = type; // creating for Enum
-		
-		System.out.println("J2S.clazzArray " + type + "  k=" + type.getKey() + " n=" + type.getName());
+
+//		System.out.println("J2S.clazzArray " + type + "  k=" + type.getKey() + " n=" + type.getName());
 		String params = (ebinding.isPrimitive() ? NameMapper.getPrimitiveTYPE(ebinding.getName()) + ".TYPE"
 				: getFinalJ2SClassNameQualifier(null, ebinding, null, FINAL_ESCAPECACHE))
 				+ (dimFlag == ARRAY_DIM_ONLY ? "" : ", " + (Math.abs(dimFlag) * type.getDimensions() * -1));
@@ -4325,13 +4370,13 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// OK, now we have the same situation as any operand.
 		String rightName = expTypeBinding.getName();
 		if (rightName.equals("char") && op == "q") {
-			appendBoxingNode(exp, false);
+			appendBoxingNode(exp, false, null, false);
 			return;
 		}
 		String paramName = (exp.resolveTypeBinding().isArray() ? ";"
 				: targetType instanceof ITypeBinding ? ((ITypeBinding) targetType).getName() : targetType.toString());
 		boolean isNumeric = isIntegerType(paramName);
-		if ((isNumeric || paramName.equals("char")) && !isBoxTyped(exp)) {
+		if ((isNumeric || paramName.equals("char")) && boxType(exp) == NO_BOX) {
 			// using operator "m" to limit int application of $i$
 
 			addPrimitiveTypedExpression(null, null, paramName, op, exp, rightName, extendedOperands, false, null);
@@ -4339,7 +4384,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			// char f() { return Character }
 			// Character f() { return char }
 			// int f() { return Character }
-			appendBoxingNode(exp, isNumeric);
+			appendBoxingNode(exp, isNumeric, null, false);
 		}
 	}
 
@@ -4357,14 +4402,14 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 	}
 
-	private void addFieldName(Expression left, IVariableBinding qualifier) {
+	private void addFieldName(Expression exp, IVariableBinding qualifier, String op, boolean isPost) {
 		if (qualifier != null) {
 			addQualifiedNameForBinding(qualifier, false);
 			buffer.append('.');
-			left = (left instanceof QualifiedName ? ((QualifiedName) left).getName()
-					: left instanceof FieldAccess ? ((FieldAccess) left).getName() : left);
+			exp = (exp instanceof QualifiedName ? ((QualifiedName) exp).getName()
+					: exp instanceof FieldAccess ? ((FieldAccess) exp).getName() : exp);
 		}
-		appendBoxingNode(left, false);
+		appendBoxingNode(exp, false, op, isPost);
 	}
 
 	/**
@@ -4388,15 +4433,15 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	/**
 	 * 
-	 * @param methodDeclaration 
+	 * @param methodDeclaration
 	 * @param parameterTypes
 	 * @param methodIsVarArgs
 	 * @param arguments
-	 * @param flags           METHOD_INDEXOF | 0
+	 * @param flags             METHOD_INDEXOF | 0
 	 */
 	@SuppressWarnings("null")
-	private void addMethodArguments(IMethodBinding methodDeclaration, ITypeBinding[] parameterTypes, boolean methodIsVarArgs, List<?> arguments,
-			int flags) {
+	private void addMethodArguments(IMethodBinding methodDeclaration, ITypeBinding[] parameterTypes,
+			boolean methodIsVarArgs, List<?> arguments, int flags) {
 		String post = ", ";
 		int nparam = parameterTypes.length;
 		int argCount = arguments.size();
@@ -4424,16 +4469,17 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				// or it is not compatible
 				) {
 					String close;
-					if (NameMapper.isPackageOrClassNonqualified(methodDeclaration.getDeclaringClass().getQualifiedName())) {
-						// calls to DOMNode.setAttrs(DOMNode node, Object... attr) need not be wrapped by a Java array type
+					if (NameMapper
+							.isPackageOrClassNonqualified(methodDeclaration.getDeclaringClass().getQualifiedName())) {
+						// calls to DOMNode.setAttrs(DOMNode node, Object... attr) need not be wrapped
+						// by a Java array type
 						close = "";
 					} else {
 						buffer.append(clazzArray(paramType.getComponentType(), ARRAY_DIM_ONLY));
 						buffer.append(", -1, ");
 						close = ")";
 					}
-					
-					
+
 					buffer.append("[");
 //					
 //					
@@ -4534,7 +4580,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				buffer.append(".toString()");
 			}
 		} else if (!binding.isPrimitive() || !"char".equals(name)) {
-			appendBoxingNode(exp, !isToString);
+			
+			
+			 // bufferDebug("addBoxNode0 " + exp);
+
+			appendBoxingNode(exp, !isToString, null, false);
 		} else {
 			// to numeric only
 			// oddly enough, 'c' is considered a simple
@@ -4545,7 +4595,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				buffer.append(0 + ((Character) constValue).charValue());
 			} else if (exp instanceof SimpleName || exp instanceof QualifiedName) {
 				int pt = buffer.length();
-				appendBoxingNode(exp, false);
+				appendBoxingNode(exp, false, null, false);
 				if (pt == buffer.length() - 3 && buffer.charAt(pt) == '\'') {
 					char c = buffer.charAt(pt + 1);
 					buffer.setLength(pt);
@@ -4555,12 +4605,14 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				}
 			} else if (exp instanceof PrefixExpression || exp instanceof PostfixExpression
 					|| exp instanceof ParenthesizedExpression) {
-				appendBoxingNode(exp, false);
+				appendBoxingNode(exp, false, null, false);
 				buffer.append(CHARCODEAT0);
 			} else {
 				int pt = buffer.length();
 				buffer.append("(");
-				appendBoxingNode(exp, false);
+				
+	 // bufferDebug("addOperand box " + exp);
+				appendBoxingNode(exp, false, null, false);
 				buffer.append(")");
 				addCharCodeAt(exp, pt);
 			}
@@ -4580,11 +4632,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @param rightName
 	 * @param extendedOperands
 	 * @param isAssignment      (+=, &=, etc)
-	 * @param mustBoxAll Integer != b
+	 * @param mustBoxAll        Integer != b
 	 * @return true if is an assignment and a = (a op b) was used
 	 */
 	private boolean addPrimitiveTypedExpression(Expression left, IVariableBinding assignmentBinding, String leftName,
-			String op, Expression right, String rightName, List<?> extendedOperands, boolean isAssignment, ITypeBinding allBinding) {
+			String op, Expression right, String rightName, List<?> extendedOperands, boolean isAssignment,
+			ITypeBinding allBinding) {
 		// byte|short|int|long /= ...
 		// convert to proper number of bits
 
@@ -4594,17 +4647,18 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 		// a = ($b$[0] = a | right, $b$[0])
 
-		
-		
-		// also boolean |= boolean  op will be !!|
+		// also boolean |= boolean op will be !!|
 		String classIntArray = null;
 		String more = null, less = null;
-
 		String prefix = (isAssignment ? "=" : "");
 		boolean fromChar = ("char".equals(rightName));
 		boolean fromIntType = ("long int short byte".indexOf(rightName) >= 0);
 		boolean addParens = (op != "r" || fromChar || right instanceof ParenthesizedExpression);
 		boolean isDiv = "/".equals(op);
+		
+		 // bufferDebug("addPrim " + leftName + " " + op + " " + rightName);
+		
+		
 		boolean toChar = false;
 		boolean isBoolean = false;
 		switch (leftName) {
@@ -4637,12 +4691,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			}
 			break;
 		case "int":
-			if (!isDiv && (op != null && fromIntType 
-						|| fromChar 
-						|| rightName.equals("short")
-						|| rightName.equals("byte")
-						)
-				) {
+			if (!isDiv && (op != null && fromIntType || fromChar || rightName.equals("short")
+					|| rightName.equals("byte"))) {
 				left = null;
 			} else {
 				more = "|0)";
@@ -4672,8 +4722,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 		boolean wasArray = temp_processingArrayIndex;
 
-
-		
 		if (isAssignment && left == null) {
 			buffer.append(op);
 		}
@@ -4689,25 +4737,24 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			buffer.append("(");
 		}
 		if (left != null) {
-			
+
 			// a += b
-		
-			
+
 			if (allBinding != null) {
 				// Boolean.from(!!(a | (b))
 				buffer.append(leftName + ".valueOf$" + getJSTypeCode(leftName.toLowerCase()))
-				.append(isBoolean ? "(!!(" : "(");
+						.append(isBoolean ? "(!!(" : "(");
 			}
 
-			addFieldName(left, assignmentBinding);
+			addFieldName(left, assignmentBinding, null, false);
 			buffer.append(op);
-			
-		    if (isAssignment) {
+
+			if (isAssignment) {
 				buffer.append("(");
 			}
-			
+
 		}
-		if (!appendBoxingNode(right, fromChar) && fromChar && !toChar) {
+		if (!appendBoxingNode(right, fromChar, null, false) && fromChar && !toChar) {
 			buffer.append(CHARCODEAT0);
 		}
 		if (extendedOperands != null) {
@@ -4716,12 +4763,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if (left != null && isAssignment) {
 			buffer.append(")");
 		}
-		
+
 		if (allBinding != null)
 			buffer.append(isBoolean ? "))" : ")");
-		
+
 		if (classIntArray != null) {
-			// this is necessary because in JavaScript, 
+			// this is necessary because in JavaScript,
 			// a = new Int8Array(1)
 			// (a[0]=3.4) will be 3.4, not 3:
 			//
@@ -4741,6 +4788,18 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 		return (isAssignment && left != null);
 	}
+	
+	private String getLiteralSafely(Object val) {
+		if (val instanceof Long) {
+			long l = ((Long) val).longValue();
+			if (l > JAVASCRIPT_MAX_LONG || l < -JAVASCRIPT_MAX_LONG) {
+				val = "Clazz.toLong('" + l + "')";
+			}
+		}
+		return val.toString();
+	}
+
+
 
 	/**
 	 * for example: new Test_Static().y++
@@ -4856,8 +4915,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private String getSyntheticReference(String className) {
 		b$count++;
 		return "this" + (className.equals("java.lang.Object") || className.equals("Object") ? ""
-				//: className.equals(this$0Name) ? ".this$0"
-						: ".b$['" + getFinalJ2SClassName(className, FINAL_RAW) + "']");
+				// : className.equals(this$0Name) ? ".this$0"
+				: ".b$['" + getFinalJ2SClassName(className, FINAL_RAW) + "']");
 	}
 
 	/**
@@ -4865,12 +4924,17 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * 
 	 * @param element
 	 * @param toCharCode true to append .c$(), not .valueOf();
+	 * @param op         TODO
+	 * @param isPost     TODO
 	 * @return true if boxing or unboxing
 	 */
-	private boolean appendBoxingNode(ASTNode element, boolean toCharCode) {
+	private boolean appendBoxingNode(ASTNode element, boolean toCharCode, String op, boolean isPost) {
+		
+		
 		// Double > x will be unboxed
 		// Character == 'c' will be unboxed
 		// f$Integer(int) will be boxed
+
 		if (element instanceof Expression) {
 			Expression exp = (Expression) element;
 			if (exp.resolveBoxing()) {
@@ -4881,12 +4945,14 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					String t = getJSTypeCode(name);
 					switch (name) {
 					case "char":
-						name = "Character";break;
+						name = "Character";
+						break;
 					case "int":
-						name = "Integer";break;
+						name = "Integer";
+						break;
 					default:
-						 name = Character.toUpperCase(name.charAt(0)) + name.substring(1);
-						 break;
+						name = Character.toUpperCase(name.charAt(0)) + name.substring(1);
+						break;
 					}
 					buffer.append(name + ".valueOf$" + t + "(");
 					element.accept(this);
@@ -4896,9 +4962,78 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			} else if (exp.resolveUnboxing()) {
 				// expression is the site of an unboxing conversion
 				ITypeBinding typeBinding = exp.resolveTypeBinding();
+				String term = ").valueOf()";
 				if (!typeBinding.isPrimitive()) {
 					buffer.append("(");
+					int pt = -1;
+					int incr = 0;
+					if (op != null) {
+						switch (op) {
+						case "!":
+							buffer.append("!((");
+							term += "))";
+							break;
+						case "++":
+							incr = 1;
+							pt = buffer.length();
+							break;
+						case "--":
+							incr = -1;
+							pt = buffer.length();
+							break;
+						case "/////////":
+							term = ".$div$(" + term;
+							break;
+						case "~":
+							term = ".$inv$()" + term;
+							break;
+						case "-":
+							term = ".$neg$()" + term;
+							break;
+						case "+":
+							// unnecessary -- Java will unbox and rebox this
+							break;
+						default:
+							break;
+						}
+
+					}
 					element.accept(this);
+					if (pt >= 0) {
+						// ++L, --L, L++, L--
+						String s = buffer.substring(pt);
+						if (s.startsWith("(")) {
+							// (L) ==> L
+							// L ==> L=L...
+							s = s.substring(1, s.length() - 1);
+						}
+						buffer.setLength(pt);
+						term = ".$incr$(" + incr + ")";
+						if (exp instanceof ArrayAccess) {
+							String[] a = splitArrayAccess(s);
+							// a[0] delivers the array, a[1] the (updated?) array pointer
+							// we need this because we need to have access to slot to increment
+							buffer.append("Clazz.incrAN(" + a[0] + "," + a[1] + "," + incr + "," + isPost + ")");
+							term = ")";
+						} else {
+							if (isPost) {
+								// [L, L=L.xxx()][0]
+								buffer.append("[");
+								buffer.append(s);
+								buffer.append(",");
+								buffer.append(s);
+								buffer.append("=");
+								buffer.append(s);
+								term += "][0])";
+							} else {
+								// (L=L.xxx())
+								buffer.append(s);
+								buffer.append("=");
+								buffer.append(s);
+								term += ")";
+							}
+						}
+					}
 					if (toCharCode) {
 						String name = getUnreplacedJavaClassNameQualified(typeBinding);
 						if (toCharCode && name.length() == 0)
@@ -4908,7 +5043,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 							return true;
 						}
 					}
-					buffer.append(").valueOf()");
+					buffer.append(term);
 					return true;
 				}
 			}
@@ -4920,6 +5055,46 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 		element.accept(this);
 		return false;
+	}
+
+	/**
+	 * Safely find the last element of an array A[...][...][THIS]
+	 * @param s
+	 * @return  ["A[...][...]","THIS"]
+	 */
+	private String[] splitArrayAccess(String s) {
+		int i = s.lastIndexOf(']');
+		int n = 1;
+		char quote = '\0';
+		while (n > 0 && --i >= 0) {
+			switch (s.charAt(i)) {
+				default:
+					break;
+				case '\'':
+					if (quote == '\'') {
+						quote = 0;
+					} else if (quote == 0) {
+						quote = '\'';
+					}
+					break;
+				case '"':
+					if (quote == '"') {
+						quote = 0;
+					} else if (quote == 0) {
+						quote = '"';
+					}
+					break;
+				case '[':
+					if (quote == 0)
+						n -= 1;
+					break;
+				case ']':
+					if (quote == 0)
+						n += 1;
+					break;
+			}
+		}
+		return new String[] {s.substring (0, i), s.substring(i + 1, s.length() - 1)};
 	}
 
 	private boolean checkSimpleBooleanOperator(String op) {
@@ -5175,10 +5350,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// It will require synchronous loading,
 		// but it will ensure that a class is only
 		// loaded when it is really needed.
-		
+
 		if (declaringJavaClassName == null)
 			declaringJavaClassName = getUnreplacedJavaClassNameQualified(declaringJavaClass);
-		
+
 		boolean isStatic = ((flags & FINAL_STATIC) == FINAL_STATIC);
 		boolean doEscape = isStatic || ((flags & FINAL_ESCAPE) == FINAL_ESCAPE);
 		boolean doCache = ((flags & FINAL_CACHE) == FINAL_CACHE);
@@ -5190,7 +5365,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 //		    }
 
 			return "java.lang.Object";
-		}		
+		}
 		doEscape &= !NameMapper.isClassKnown(name);
 		if (!doEscape) {
 			if (methodQualifier != null) {
@@ -5214,8 +5389,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * Turns "test.Test0.Exc1.Exc2" into "['test.Test0','.Exc1','.Exc2']"
 	 * 
 	 * For Clazz.newClass we want an array if the superclass is an inner class so
-	 * that the outer class is guaranteed to be loaded first. The same goes for
-	 * I$[] dynamic class loading and interfaces, (but interfaces are handled
+	 * that the outer class is guaranteed to be loaded first. The same goes for I$[]
+	 * dynamic class loading and interfaces, (but interfaces are handled
 	 * differently).
 	 * 
 	 * @param packageName   Java package name or "_"
@@ -5361,7 +5536,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	private void visitList(List<ASTNode> list, String separator) {
 		for (Iterator<ASTNode> iter = list.iterator(); iter.hasNext();) {
-			appendBoxingNode(iter.next(), false);
+			appendBoxingNode(iter.next(), false, null, false);
 			if (iter.hasNext()) {
 				buffer.append(separator);
 			}
@@ -5762,7 +5937,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		case "float":
 			return "F";
 		case "integer":
-			case "int":
+		case "int":
 			return "I";
 		case "long":
 			return "J";
@@ -5878,7 +6053,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			if (!andWrite)
 				return true;
 			sb = new StringBuffer();
-			String s = constValue.toString();
+			String s = getLiteralSafely(constValue);
 			if (s.startsWith("-") && buffer.charAt(buffer.length() - 1) == '-')
 				sb.append(' ');
 			sb.append(s);
@@ -6119,7 +6294,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * 
 	 * @param annotation
 	 * @param node
-	 * @param mode one of {CHECK_ANNOTATIONS_ONLY}
+	 * @param mode       one of {CHECK_ANNOTATIONS_ONLY}
 	 * @return true if successful
 	 */
 	private boolean addAnnotation(Annotation annotation, ASTNode node, int mode) {
@@ -6255,23 +6430,15 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		String[] parts = js.split(ELEMENT_KEY + eq);
 		String header = parts[0];
 		String header_noIncludes = header.replace(",I$=[[]]", "");
-		header = header
-				.replace(",I$=[]",
-						privateVarString + (package_includes.length() == 0 ? ""
-								: package_includes.append("]]," 
-										+ "$I$=function"
-									//3.2.9-v1e:
-										+ (package_haveStaticArgsReversal[0] ? 
-											"(i,n,m){return m?$I$(i)[n].apply(null,m):"
-											: "(i,n){return"
-										  )	
-									//3.2.9-v1a:
-										//+ "(i,n){return"
-										+ "((i=(I$[i]||(I$[i]=Clazz.load(I$[0][i]))))"
-										+ ",!n&&i.$load$&&Clazz.load(i,2)" 
-										+ ",i)"
-                                      + "}"
-						)));
+		header = header.replace(",I$=[]",
+				privateVarString + (package_includes.length() == 0 ? "" : package_includes.append("]]," + "$I$=function"
+				// 3.2.9-v1e:
+						+ (package_haveStaticArgsReversal[0] ? "(i,n,m){return m?$I$(i)[n].apply(null,m):"
+								: "(i,n){return")
+						// 3.2.9-v1a:
+						// + "(i,n){return"
+						+ "((i=(I$[i]||(I$[i]=Clazz.load(I$[0][i]))))" + ",!n&&i.$load$&&Clazz.load(i,2)" + ",i)"
+						+ "}")));
 		for (int i = 1; i < parts.length; i++) {
 			js = parts[i];
 			int pt = js.indexOf("\n");
@@ -6481,7 +6648,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		String methodName = mBinding.getName();
 		if (j2sName == null)
 			j2sName = methodName;
-		if (NameMapper.isMethodNonqualified(getUnreplacedJavaClassNameQualified(mBinding.getDeclaringClass()), methodName)) {
+		if (NameMapper.isMethodNonqualified(getUnreplacedJavaClassNameQualified(mBinding.getDeclaringClass()),
+				methodName)) {
 			return j2sName;
 		}
 
@@ -6588,31 +6756,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			return type.substring(0, type.indexOf(","));
 		}
 
-		private final static String[] knownClasses = new String[] { 
-				"java.lang.Object", 
-				"java.lang.Class",
-				"java.lang.String",
-				"java.lang.Number", 
-				"java.lang.Byte", 
-				"java.lang.Character", 
-				"java.lang.Short", 
-				"java.lang.Long",
-				"java.lang.Integer", 
-				"java.lang.Float", 
-				"java.lang.Double", 
-				"java.lang.Boolean",
-				"java.lang.Iterable", 
-				"java.lang.CharSequence", 
-				"java.lang.Cloneable", 
-				"java.lang.Comparable",
-				"java.lang.Runnable", 
-				"java.lang.System", 
-				"java.lang.Throwable", 
-				"java.lang.ClassLoader", 
-				"java.lang.Math", 
-				"java.io.Serializable",
-				"java.util.Date"
-				};
+		private final static String[] knownClasses = new String[] { "java.lang.Object", "java.lang.Class",
+				"java.lang.String", "java.lang.Number", "java.lang.Byte", "java.lang.Character", "java.lang.Short",
+				"java.lang.Long", "java.lang.Integer", "java.lang.Float", "java.lang.Double", "java.lang.Boolean",
+				"java.lang.Iterable", "java.lang.CharSequence", "java.lang.Cloneable", "java.lang.Comparable",
+				"java.lang.Runnable", "java.lang.System", "java.lang.Throwable", "java.lang.ClassLoader",
+				"java.lang.Math", "java.io.Serializable", "java.util.Date" };
 		private final static Set<String> knownClassHash = new HashSet<String>();
 		static {
 			for (int i = knownClasses.length; --i >= 0;)
@@ -7070,8 +7219,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			if (varName.startsWith("set")) {
 				return getMethodBinding(methods, "g" + varName.substring(1));
 			}
-			IMethodBinding v2 = getMethodBinding(methods,
-					"set" + varName.substring(varName.startsWith("get") ? 3 : 2));
+			IMethodBinding v2 = getMethodBinding(methods, "set" + varName.substring(varName.startsWith("get") ? 3 : 2));
 			return (v2 == null ? null : returnVar2 ? v2 : v);
 		}
 
@@ -7673,8 +7821,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	///////////////// debugging //////////////////////////
 
 	/**
-	 * Add a comment message in the output buffer for debugging.
-	 * This has proven exceptionally useful!
+	 * Add a comment message in the output buffer for debugging. This has proven
+	 * exceptionally useful!
 	 * 
 	 * @param msg
 	 */

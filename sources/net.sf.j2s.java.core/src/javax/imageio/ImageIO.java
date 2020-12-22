@@ -33,6 +33,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FilePermission;
 import java.io.IOException;
 import java.io.InputStream;
@@ -268,7 +269,7 @@ public final class ImageIO {
 	public static boolean writeJS(RenderedImage im, String formatName, File output)
 			throws IOException {
 		ImageWriter writer = getWriter(formatName);
-		return (writer != null && ((JSImageWriter)writer).write(im, output.getPath(), null));
+		return (writer != null && ((JSImageWriter)writer).write(im, output.getPath(), new FileOutputStream(output)));
 	}
 
 	/**

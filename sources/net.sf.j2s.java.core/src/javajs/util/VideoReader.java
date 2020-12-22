@@ -21,7 +21,7 @@ import java.util.Map.Entry;
  *
  */
 public class VideoReader {
-	long pt = 0;		
+	int pt = 0;		
 	String blockType;
 	int blockLen;
 	byte[] buf = new byte[10]; 
@@ -81,7 +81,7 @@ public class VideoReader {
 	}
 	
 	protected void readBlock(List<Map<String, Object>> contents) throws IOException {
-		long pt = this.pt;
+		int pt = this.pt;
 		blockLen = readInt();
 		blockType = readString(4);
 		if (verbose)
@@ -151,7 +151,7 @@ public class VideoReader {
 		List<Map<String, Object>> list = new ArrayList<>();
 		map.put("blocks", list);
 		while (len > 0) {
-			long p = pt;
+			int p = pt;
 			readBlock(list);
 			len -= (pt - p);
 		}
@@ -175,8 +175,8 @@ public class VideoReader {
 
 	protected int readMVHD(int len, Map<String, Object> map) throws IOException {
 		map.put("version_flags", readInt()); 
-		map.put("creationTime", readIntLong());
-		map.put("modificationTime", readIntLong());
+		map.put("creationTime", readUIntLong());
+		map.put("modificationTime", readUIntLong());
 		timeScale = readInt();
 		int dur = readInt();
 		map.put("timeScale", timeScale);
@@ -198,8 +198,8 @@ public class VideoReader {
 
 	protected int readTKHD(int len, Map<String, Object> map) throws IOException {
 		map.put("version_flags", readInt()); 
-		map.put("creationTime", readIntLong());
-		map.put("modificationTime", readIntLong());
+		map.put("creationTime", readUIntLong());
+		map.put("modificationTime", readUIntLong());
 		map.put("trackID", readInt());
 		readInt(); // reserved
 		int dur = readInt();
@@ -246,7 +246,7 @@ public class VideoReader {
 		return buf;
 	}
 
-	protected long readIntLong() throws IOException {
+	protected long readUIntLong() throws IOException {
 		pt += 4;
 		return is.readInt() & 0xFFFFFFFFL;
 	}
