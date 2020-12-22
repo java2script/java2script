@@ -135,6 +135,7 @@ import org.eclipse.jdt.core.dom.WildcardType;
 
 // TODO: superclass inheritance for JAXB XmlAccessorType
 
+//BH 2020.12.19 -- 3.2.10-v1 preliminary work for 64-bit long
 //BH 2020.12.14 -- 3.2.9-v1s fix for Boolean |= boolean and related boxing 
 //BH 2020.12.06 -- 3.2.9-v1r fix for (long) double using |0 
 //BH 2020.11.20 -- 3.2.9-v1q fix for  new ImmutableCollections.ListN<>(E...) should use Object[] 
