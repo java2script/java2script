@@ -38,7 +38,9 @@ class Java2ScriptCompiler {
 	/**
 	 * The name of the J2S options file, aka as the "Dot-j2s" file.
 	 */
-	private static final String J2S_OPTIONS_FILE_NAME = System.getProperty("net.sf.j2s.core.j2sFileName",".j2s");
+	private static final String J2S_OPTIONS_FILE_NAME = ".j2s";
+
+	private static final String J2S_OPTIONS_ALT_FILE_CONF = "j2s.config.altfileproperty";
 	
 	private int nResources, nSources, nJS, nHTML;
 
@@ -218,7 +220,51 @@ class Java2ScriptCompiler {
 			props = new Properties();
 			try {
 				File j2sFile = new File(projectFolder, J2S_OPTIONS_FILE_NAME);
-				props.load(new FileInputStream(j2sFile));
+				Properties j2sProps = new Properties();
+				j2sProps.load(new FileInputStream(j2sFile));
+				boolean j2sAltFileUsed = false;
+				if (j2sProps.getProperty(J2S_OPTIONS_ALT_FILE_CONF) != null) {
+					String j2sAltFileProperty = j2sProps
+									.getProperty(J2S_OPTIONS_ALT_FILE_CONF);
+					System.out.println(
+									"Alternative J2S configuration file property is set to '"
+													+ j2sAltFileProperty + "'");
+					String j2sAltFileName = System.getProperty(j2sAltFileProperty);
+					System.out
+									.println("Alternative J2S configuration file is set to '"
+													+ j2sAltFileName + "'");
+					if (j2sAltFileName != null) {
+						File j2sAltFile = new File(projectFolder, j2sAltFileName);
+						if (j2sAltFile.exists()) {
+							System.out
+											.println("Using alternative J2S configuration file '"
+															+ j2sAltFileName + "'");
+							props.load(new FileInputStream(j2sAltFile));
+							j2sAltFileUsed = true;
+						} else {
+							System.err.println(
+											"Alternative J2S configuration file property '"
+															+ j2sAltFileProperty + "' is set to '"
+															+ j2sAltFileName
+															+ "' but this file does not exist.  Using original '"
+															+ J2S_OPTIONS_FILE_NAME + "' file.");
+						}
+					} else {
+						System.out.println(
+										"J2S did not find property value for j2s alt file property '"
+														+ j2sAltFileProperty + "'");
+					}
+					if (!j2sAltFileUsed) {
+						j2sProps.remove(J2S_OPTIONS_ALT_FILE_CONF);
+						props = j2sProps;
+					}
+				} else {
+					System.out.println("J2S did not find configuration for '"
+									+ J2S_OPTIONS_ALT_FILE_CONF + "' in "
+									+ j2sFile.getPath());
+					props = j2sProps;
+				}
+
 				String status = getProperty(J2S_COMPILER_STATUS, J2S_COMPILER_STATUS_ENABLED);
 				if (!J2S_COMPILER_STATUS_ENABLE.equalsIgnoreCase(status)
 						&& !J2S_COMPILER_STATUS_ENABLED.equalsIgnoreCase(status)) {
