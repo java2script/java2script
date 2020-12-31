@@ -9,7 +9,7 @@ class Test_Byte extends Test_ {
 	  private static byte v=127;
 
 	  public static byte test1() {
-		  return v++;
+		  return v;
 	  }
 	  
 	public static void main(String[] args) {
@@ -50,7 +50,7 @@ class Test_Byte extends Test_ {
 		int i12 = 100 / byte0;
 		byte b2 = test1();
 
-		assert ((b2 + " " + v).equals("127 -128"));
+		assert ((b2 + " " + v).equals("127 127"));
 
 		// implied integer division can be done with int /=
 		double d = 3;

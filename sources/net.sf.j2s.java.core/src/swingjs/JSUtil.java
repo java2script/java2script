@@ -50,7 +50,7 @@ import swingjs.json.JSON;
 import swingjs.plaf.JSComponentUI;
 import swingjs.plaf.JSFrameUI;
 
-public class JSUtil implements JSUtilI {
+public class JSUtil implements JSUtilI { 
 
 	public JSUtil() {}
 

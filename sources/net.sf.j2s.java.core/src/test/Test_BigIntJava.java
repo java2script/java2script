@@ -59,16 +59,16 @@ public class Test_BigIntJava extends Test_ {
 		}
 	}
 
-	private static void testSquare() {
-		BigInteger m = BigInteger.valueOf(0x1FFFFFF);
-		for (int i = 0; i < 8; i++) {
-			String s = m.square().toString();
-			String t = (m = m.multiply(m)).toString();
-			System.out.println(i + "." + s);
-			System.out.println(i + "." + t);
-			assert(s.equals(t));
-		}
-	}
+//	private static void testSquare() {
+//		BigInteger m = BigInteger.valueOf(0x1FFFFFF);
+//		for (int i = 0; i < 8; i++) {
+//			String s = m.square().toString();
+//			String t = (m = m.multiply(m)).toString();
+//			System.out.println(i + "." + s);
+//			System.out.println(i + "." + t);
+//			assert(s.equals(t));
+//		}
+//	}
 
 	private static void testPow10() {
 		BigInteger m = BigInteger.ONE;

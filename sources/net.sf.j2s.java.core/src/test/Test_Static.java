@@ -27,50 +27,50 @@ class Test_Static extends Test_ implements Test_int3, Test_int2, Test_int1 {
 	static Test_Static test = null;
 	static Test_Class testc = null;
 	
-//	private static byte[] bytearray = {1,2,127};
-//	
-//	private final static Integer iI = 11;
-//	private final static Integer iI1 = new Integer(13);
-//	private final static Float fF2 = 12f;
-//	private final static Float fF1 = new Float(12);
-//
-//	private final static String st = "testing";
-//	static {
-//		assert (iI == 11);
-//	}
-//	private static String st1 = st;
-//	private static boolean b = false;
-//	private static int y;
-//	private static char c = 'c';
-//	private static int innerI = Test_Class_Inner.i;
-//	static {
-//		System.out.println(Test_int1.int1);
-//		System.out.println(Test_int2.int2);
-//		System.out.println(Test_int3.int3);
-//
-//		System.out.println(innerI);
-//		assert(innerI == 5);
-//		int x = 3;
-//		y = Test_Boolean.i_;
-//		Test_Array.y = 3;
-//		y = Test_Array.y;
-//		y = x;
-//		Test_Boolean.main(null);
-//		t = "setFromStaticInitializer";
-//		s = "setFromStaticInitializer";
-//	}
-//
-//	public static String s, t = null;
-//
-//	private void test1() {};
-//	private void test() {
-//		test1();
-//	};
-//
-//	private static byte[] bytes = new byte[3]; 
-//	public static byte[] getByteArray() {
-//		return bytes;
-//	}
+	private static byte[] bytearray = {1,2,127,12,15};
+	
+	private final static Integer iI = 11;
+	private final static Integer iI1 = new Integer(13);
+	private final static Float fF2 = 12f;
+	private final static Float fF1 = new Float(12);
+
+	private final static String st = "testing";
+	static { 
+		assert (iI == 11);
+	}
+	private static String st1 = st;
+	private static boolean b = false;
+    static int y;
+	private static char c = 'c';
+	private static int innerI = Test_Class_Inner.i;
+	static {
+		System.out.println(Test_int1.int1);
+		System.out.println(Test_int2.int2);
+		System.out.println(Test_int3.int3);
+
+		System.out.println(innerI);
+		assert(innerI == 5);
+		int x = 3;
+		y = Test_Boolean.i_;
+		Test_Array.y = 3;
+		y = Test_Array.y;
+		y = x;
+		Test_Boolean.main(null);
+		t = "setFromStaticInitializer";
+		s = "setFromStaticInitializer";
+	}
+
+	public static String s, t = null;
+
+	private void test1() {};
+	private void test() {
+		test1();
+	};
+
+	private static byte[] bytes = new byte[3]; 
+	public static byte[] getByteArray() {
+		return bytes;
+	}
 	
 	@SuppressWarnings("static-access")
 	public static void main(String[] args) {
@@ -92,14 +92,14 @@ class Test_Static extends Test_ implements Test_int3, Test_int2, Test_int1 {
 		Test_Class.testStatic();
 
 		
-				String s = test.testStatic();
-		System.out.println(s);
+		String ss = test.testStatic();
+		System.out.println(ss);
 		System.out.println(test.testStatic());
 	
-//		assert(t == null);
-//		assert s == "setFromStaticInitializer";
-//
-//		
+		assert(t == null);
+		assert s == "setFromStaticInitializer";
+
+		
 //		  /**
 //		   * @j2sNative
 //		   * 
@@ -113,53 +113,53 @@ class Test_Static extends Test_ implements Test_int3, Test_int2, Test_int1 {
 //		   *   }
 //	       *
 //		   */
-//		  {
-//			  args = new String[] {"1","2","3"};
-//		  }
-//		  assert(args[1] == "2");
-//
-//		assert (y == 3); 
-//		b = false;
-//		new Test_Static().test();
-//		new Test_Static().b ^= true;
-//		System.out.println(bytearray[2]);
-//
-//		new Test_Static().bytearray[--y]++;
-//		
-//		
-//		System.out.println(bytearray[2]);
-//		assert(bytearray[2] == -128);
-//
-//		int p = 0;
-//		getByteArray()[p++] += (byte) ++p;
-//		System.out.println((new Test_Static()).getByteArray()[2]++);
-//		System.out.println((new Test_Static()).getByteArray()[2]);
-//		
-//		byte bb = 127;
-//		bb++;
-//		System.out.println("bb = " + bb); 
-//		assert(bb == -128);
-//		y++; 
-//		new Test_Static().y++;
-//		new Test_Static().s += "test1" + c++ + 3 + 5.5f + c + 5.5 + y; 
-//		assert (s.equals("setFromStaticInitializertest1c35.5d5.54") && b == true);
-//
-//		int i = 3 + y + (new Test_Static().y++);
-//
-//		assert (i == 11 && y == 5);
-//		i += 3 + y + ++(new Test_Static().y); 
-//		assert (y == 6 && i == 25); 
-//
-//		Test_Static st = new Test_Static();
-//		st.y++;
-//		
-//		new Test_Static().y--;
-//		y--;
-//
-//		String y1 = "0";
-//		y1 += "test" + c + 3 + 5.5f + c + 5.5;
-//		assert (y1.equals("0testd35.5d5.5"));
-//		System.out.println("Test_Static OK");
+		  {
+			  args = new String[] {"1","2","3"};
+		  }
+		  assert(args[1] == "2");
+
+		assert (y == 3); 
+		b = false;
+		new Test_Static().test();
+		new Test_Static().b ^= true;
+		System.out.println(bytearray[2]);
+
+		new Test_Static().bytearray[--y]++;
+		
+		
+		System.out.println(bytearray[2]);
+		assert(bytearray[2] == -128);
+
+		int p = 0;
+		getByteArray()[p++] += (byte) ++p;
+		System.out.println((new Test_Static()).getByteArray()[2]++);
+		System.out.println((new Test_Static()).getByteArray()[2]);
+		
+		byte bb = 127;
+		bb++;
+		System.out.println("bb = " + bb); 
+		assert(bb == -128);
+		y++; 
+		new Test_Static().y++;
+		new Test_Static().s += "test1" + c++ + 3 + 5.5f + c + 5.5 + y; 
+		assert (s.equals("setFromStaticInitializertest1c35.5d5.54") && b == true);
+
+		int i = 3 + y + (new Test_Static().y++);
+
+		assert (i == 11 && y == 5);
+		i += 3 + y + ++(new Test_Static().y); 
+		assert (y == 6 && i == 25); 
+
+		Test_Static st = new Test_Static();
+		st.y++;
+		
+		new Test_Static().y--;
+		y--;
+
+		String y1 = "0";
+		y1 += "test" + c + 3 + 5.5f + c + 5.5;
+		assert (y1.equals("0testd35.5d5.5"));
+		System.out.println("Test_Static OK");
 	}
 
 	private void callStatic() {

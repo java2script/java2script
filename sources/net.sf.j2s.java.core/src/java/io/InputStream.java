@@ -253,7 +253,8 @@ public abstract class InputStream extends Object implements Closeable {
 		switch (/** @j2sNative ins.__CLASS_NAME__|| */
 		"") {
 		case "java.io.ByteArrayInputStream":
-			((ByteArrayInputStream) ins).pos -= pt;
+			ByteArrayInputStream bis = (ByteArrayInputStream) ins;
+			bis.pos -= pt;
 			break;
 		case "java.io.FileInputStream":
 			newIn = ((FileInputStream) ins).秘is;

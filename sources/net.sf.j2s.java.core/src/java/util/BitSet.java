@@ -20,12 +20,12 @@ package java.util;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
+import java.nio.LongBuffer;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
 import javajs.api.JSONEncodable;
 import javajs.util.SB;
-import swingjs.JSUtil;
 
 
 /**
@@ -153,6 +153,69 @@ public class BitSet implements Cloneable, JSONEncodable {
   public BitSet(int nbits) {
 	this();
     init(nbits);
+  }
+
+
+  /**
+   * Returns a new bit set containing all the bits in the given long array.
+   *
+   * <p>More precisely,
+   * <br>{@code BitSet.valueOf(longs).get(n) == ((longs[n/64] & (1L<<(n%64))) != 0)}
+   * <br>for all {@code n < 64 * longs.length}.
+   *
+   * <p>This method is equivalent to
+   * {@code BitSet.valueOf(LongBuffer.wrap(longs))}.
+   *
+   * @param longs a long array containing a little-endian representation
+   *        of a sequence of bits to be used as the initial bits of the
+   *        new bit set
+   * @return a {@code BitSet} containing all the bits in the long array
+   * @since 1.7
+   */
+  public static BitSet valueOf(long[] longs) {
+      int n;
+      for (n = longs.length; n > 0 && longs[n - 1] == 0; n--);
+      int[] words = new int[n * 2];
+      int len = -1, last;
+      for (int i = 0, pt = 0; i < n; i++) {
+    	  long l = longs[i];
+    	  words[pt++] = (int) l;
+    	  words[pt++] = (last = (int) (l>>32));
+    	  if (last != 0)
+    		  len = pt;
+      }
+      BitSet bs = new BitSet(words);
+      if (len < words.length)
+    	  bs.wordsInUse--;
+      return bs;
+  }
+
+  /**
+   * Returns a new bit set containing all the bits in the given long
+   * buffer between its position and limit.
+   *
+   * <p>More precisely,
+   * <br>{@code BitSet.valueOf(lb).get(n) == ((lb.get(lb.position()+n/64) & (1L<<(n%64))) != 0)}
+   * <br>for all {@code n < 64 * lb.remaining()}.
+   *
+   * <p>The long buffer is not modified by this method, and no
+   * reference to the buffer is retained by the bit set.
+   *
+   * @param lb a long buffer containing a little-endian representation
+   *        of a sequence of bits between its position and limit, to be
+   *        used as the initial bits of the new bit set
+   * @return a {@code BitSet} containing all the bits in the buffer in the
+   *         specified range
+   * @since 1.7
+   */
+  public static BitSet valueOf(LongBuffer lb) {
+      lb = lb.slice();
+      int n;
+      for (n = lb.remaining(); n > 0 && lb.get(n - 1) == 0; n--)
+          ;
+      long[] words = new long[n];
+      lb.get(words);
+      return BitSet.valueOf(words);
   }
 
   private BitSet(int[] words) {
@@ -1028,10 +1091,12 @@ protected void init(int nbits) {
         * @return
         */
        public long[] toLongArray() {
-    	   JSUtil.notImplemented("BitSet.toLongArray returns a 32-bit array");
-    	   long[] a = new long[words.length];
-    	   for (int i = a.length; --i >= 0;)
-    		   a[i] = words[i];
+    	   // requires j2s.exact.long
+    	   long[] a = new long[(words.length+1)/2];
+    	   for (int i = 0, pt = 0, n = words.length; i < n; i += 2) {
+    		   long l = (i == n - 1 ? 0 : words [i + 1]);
+    		   a[pt++] = (l<<32) | (words[i]&0xFFFFFFFFL);
+    	   }
     	   return a;
        }
        

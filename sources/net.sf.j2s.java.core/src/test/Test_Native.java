@@ -171,7 +171,20 @@ class Test_Native extends Test_ {
 
 	public static void main(String[] args) {
 //		new Test_Native().test2();
-		
+
+		int y = (/** @j2sNative 1?'s': */
+		'\t');
+		assert (y == 9 || y == 's');
+		int z = (/** @j2sNative 1?2: */
+		909 + y);
+		assert (z == 918 || z == 2);
+		int x = (/** @j2sNative 1?3: */
+		909);
+		assert (x == 909 || x == 3);
+		Object g = "testing";
+		Object o = (/** @j2sNative g.mark$ ? g : */
+		null);
+		assert (o == null || o == g);
 		
 		/** 
 		 * @j2sNative

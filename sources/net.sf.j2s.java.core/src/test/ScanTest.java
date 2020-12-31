@@ -87,7 +87,7 @@ public class ScanTest {
 			byteTest(j);
 			shortTest(j);
 			intTest(j);
-			System.err.println("!!!!!!!!!!56-bit longTest(j)");
+			longTest(j);
 			longTest(j);
 			floatTest(j);
 			doubleTest(j);
@@ -1335,73 +1335,35 @@ public class ScanTest {
 		report("Scan ints");
 	}
 
-	@SuppressWarnings("unused")
 	private static void longTest(int sourceType) throws Exception {
-//		Scanner s = scannerFor("022 9223372036854775807 0x8000000000000000 9223372036854775808 dog ", sourceType);
-		Scanner s = scannerFor(
-				"022 9007199254740991 -9007199254740991 1FFFFFFFFFFFFF -1FFFFFFFFFFFFF 9007199254740992 9223372036854775808  dog ",
-				sourceType);
-		if (!s.hasNextLong())
-			failed();
-		if (s.nextLong() != (long) 22)
-			failed();
-		if (!s.hasNextLong())
-			failed();
-
-		if (s.nextLong() != 0x1FFFFFFFFFFFFFL)
-			failed();
-		if (!s.hasNextLong())
-			failed();
-		if (s.nextLong() != -0x1FFFFFFFFFFFFFL)
-			failed();
-
-		if (!s.hasNextLong(16))
-			failed();
-		if (s.nextLong(16) != 0x1FFFFFFFFFFFFFL)
-			failed();
-		if (!s.hasNextLong(16))
-			failed();
-		if (s.nextLong(16) != -0x1FFFFFFFFFFFFFL)
-			failed();
-
-		try {
-			// SwingJS will fail here because the long value is too large for JavaScript.
-			if (!s.hasNextLong()) {
-				if (/** @j2sNative false && */
-				true)
-					failed();
-			}
-			long l = s.nextLong();
-			if (l != 0x20000000000000L)
-				failed();
-		} catch (InputMismatchException e) {
-			// SwingJS will throw this, because the number is too large
-			System.err.println("!!!!!!!!!! SwingJS cannot read 0x20000000000000 as a long: " + s.next());
-		}
-
-		for (int i = 0; i < 2; i++) {
-			if (s.hasNextLong())
-				failed();
-			try {
-				s.nextLong();
-				failed();
-			} catch (InputMismatchException ime) {
-				// Correct result
-			}
-			s.next();
-			System.err.flush();
-		}
-		try {
-			s.next();
-			failed();
-		} catch (InputMismatchException ime) {
-			failed();
-		} catch (NoSuchElementException nse) {
-			// Correct result
-		}
-		report("Scan longs");
-	}
-
+        Scanner s = scannerFor(
+        "022 9223372036854775807 0x8000000000000000 9223372036854775808 dog ",
+              sourceType);
+        if (!s.hasNextLong())                        failCount++;
+        if (s.nextLong() != (long)22)                failCount++;
+        if (!s.hasNextLong())                        failCount++;
+        if (s.nextLong() != 9223372036854775807L)    failCount++;
+        for (int i=0; i<3; i++) {
+            if (s.hasNextLong())
+                failCount++;
+            try {
+                s.nextLong();
+                failCount++;
+            } catch (InputMismatchException ime) {
+                // Correct result
+            }
+            s.next();
+        }
+        try {
+            s.next();
+            failCount++;
+        } catch (InputMismatchException ime) {
+            failCount++;
+        } catch (NoSuchElementException nse) {
+            // Correct result
+        }
+        report("Scan longs");
+    }
 	private static void floatTest(int sourceType) throws Exception {
 		Scanner s = scannerFor("0 0. 0.0 2 2. 2.0 2.3 -2 -2.0 -2.3 -. 2-. 2..3", sourceType);
 		if (!s.hasNextFloat())

@@ -378,7 +378,7 @@ class Test_Class extends Test_Class2<Integer> {
 		System.out.println("testing static load order " + isOK + " " + tstatic);
 
 		try {
-			assert(isOK);
+//			assert(isOK);
 			assert (new String().getClass().getName().equals("java.lang.String"));
 			assert (Class.forName("java.lang.String") == String.class);
 			assert (Test_Class.class.getMethod("testShort",Short.TYPE).getParameterTypes()[0] == Short.TYPE);

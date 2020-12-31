@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Java2Script Core
 Bundle-SymbolicName: net.sf.j2s.core;singleton:=true
-Bundle-Version: 3.2.10
+Bundle-Version: 3.3.1
 Bundle-Activator: net.sf.j2s.core.CorePlugin
 Bundle-Vendor: j2s.sourceforge.net
 Require-Bundle: org.eclipse.core.runtime,

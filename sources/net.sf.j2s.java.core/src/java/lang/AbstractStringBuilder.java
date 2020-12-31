@@ -755,9 +755,10 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
      * @return  a reference to this object.
      */
     public AbstractStringBuilder append(long l) {
+    	String s = Long.toString(l);
         /**
          * @j2sNative
-         *  this.秘s += l;
+         *  this.秘s += s;
          */
     	return this;
 //        if (l == Long.MIN_VALUE) {
