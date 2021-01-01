@@ -4,7 +4,39 @@ public class JavaFiddle extends javax.swing.JFrame implements java.awt.dnd.DropT
 
 	java.awt.dnd.DropTarget target;
 
+	public class ThreadTest {
+		
+		public String delayedReturn(String s) {
+			
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				return e.getMessage();
+			}
+			return s;
+			
+		}
+	}
+
+	private javax.swing.JButton newTestButton() {
+		javax.swing.JButton b = new javax.swing.JButton("testing");
+		b.addActionListener(new java.awt.event.ActionListener() {
+
+			@Override
+			public void actionPerformed(java.awt.event.ActionEvent e) {				
+				javax.swing.JOptionPane.showConfirmDialog(null, new ThreadTest().delayedReturn("OK"));
+				System.out.println("ok");
+			}
+			
+		});
+		return b;
+	}
+
+
 	public JavaFiddle() {
+		
+		startFiddleFrame();
+		
 		setSize(new java.awt.Dimension(400,400));
 		//setPreferredSize(new java.awt.Dimension(400,400));
 			setTransferHandler(new javax.swing.TransferHandler() {
@@ -50,6 +82,14 @@ public class JavaFiddle extends javax.swing.JFrame implements java.awt.dnd.DropT
 
 	}
 
+	private void startFiddleFrame() {
+		
+		javax.swing.JFrame f = new javax.swing.JFrame();
+		f.setLocation(400, 400);
+		f.add(newTestButton());
+		f.pack();
+		f.setVisible(true);
+	}
 	@Override
 	public void dragEnter(java.awt.dnd.DropTargetDragEvent dtde) {		
 	}

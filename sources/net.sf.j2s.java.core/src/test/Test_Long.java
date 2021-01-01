@@ -61,8 +61,22 @@ public class Test_Long extends Test_ {
 
 	private static void testLongMath(long j, long k, long l) {
 		
-		// TODO Auto-generated method stub
+		k = -230842039822340L;
+		l = 23942392332L;
+		j = k/l;
+		assert(j == -9641);
 		
+		j = Math.floorDiv(k, l);
+		assert(j == -9642);
+
+		
+		l = -12323942392332L;
+		j = k/l;
+		assert(j == 18);
+		
+		j = Math.floorDiv(k, l);
+		assert(j == 18);
+
 	}
 
 	private static void testFieldAccess() {

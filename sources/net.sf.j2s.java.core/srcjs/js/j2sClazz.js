@@ -3455,7 +3455,7 @@ Math.subtractExact$J$J = function(x, y) {
 
 Math.floorDiv$J$J = function(x,y) { 
 	var r = Long.$div(x,y);
-	return (r < 0 && Long.$ne(Long.$mul(r,y), x) ? Long.$dec(r) : r);
+	return (r < 0 && Long.$ne(Long.$mul(r,y), x) ? Long.$inc(r, -1) : r);
 }
 
 Math.floorMod$J$J = function(x,y) { return Long.$sub(x, Long.$mul(Math.floorDiv(x, y), y)); }
