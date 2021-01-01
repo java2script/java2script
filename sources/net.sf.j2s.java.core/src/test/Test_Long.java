@@ -539,8 +539,12 @@ public class Test_Long extends Test_ {
 		k = Long.parseLong("" + Long.MAX_VALUE);
 		assert (k == Long.MAX_VALUE);
 		
+		try {
 		k = Long.parseLong("9223372036854775808");
-		assert (k == Long.MAX_VALUE);
+		assert (false);
+		} catch (NumberFormatException e) {
+			assert(true);
+		}
 				
 
 	

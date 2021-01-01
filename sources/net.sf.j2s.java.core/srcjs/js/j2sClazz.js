@@ -3437,54 +3437,51 @@ Math.min$J$J = function(x,y) { return Long.min$J$J(x,y); }
 
 Math.round$D = function(x) { return Clazz.toLong(Math.round(x)); }
 
-
 var arex = function(s) {
 	throw Clazz.new_(Clazz.load('ArithmeticException').c$$S,[s||"integer overflow"]);
 }
 
 Math.addExact$J$J = function(x, y) {
     var r = Long.$add(x,y);
-    if (Long.$sign(r) != 0 && Long.$sign(x) == Long.$sign(y) && Long.$sign(x) != Long.$sign(r)) {
-    	arex();
-    }
+    (Long.$sign(r) != 0 && Long.$sign(x) == Long.$sign(y) && Long.$sign(x) != Long.$sign(r)) && arex();
     return r;
 }
 
 Math.subtractExact$J$J = function(x, y) {
     var r = Long.$sub(x,y);
-    if (Long.$sign(r) != 0 && Long.$sign(x) == Long.$sign(y) && Long.$sign(x) != Long.$sign(r)) {
-    	arex();
-    }
+    (Long.$sign(r) != 0 && Long.$sign(x) == Long.$sign(y) && Long.$sign(x) != Long.$sign(r)) && arex();
     return r;
 }
 
-Math.multiplyExact$J$J = function(x, y) {
-    var r = Long.$mul(x,y);
-    // long check?
-//    if (?) { ??
-//        throw new ArithmeticException("integer overflow");
-//    }
-    return r;
+Math.floorDiv$J$J = function(x,y) { 
+	var r = Long.$div(x,y);
+	return (r < 0 && Long.$ne(Long.$mul(r,y), x) ? Long.$dec(r) : r);
 }
+
+Math.floorMod$J$J = function(x,y) { return Long.$sub(x, Long.$mul(Math.floorDiv(x, y), y)); }
 
 Math.incrementExact$J = function(a) {
-    if (Long.$eq(a, Long_MAX_VALUE)) {
-    	arex();
-    }
+    (Long.$eq(a, Long_MAX_VALUE)) && arex();
     return Long.$inc(a,1);
 }
 
 Math.decrementExact$J = function(a) {
-    if (Long.$eq(a, Long_MIN_VALUE)) {
+    (Long.$eq(a, Long_MIN_VALUE)) && arex();
+    return Long.$inc(a,-1);
+}
+
+Math.multiplyExact$J$J = function(x, y) {
+    var r = Long.$mul(x,y);
+    if (Long.$sign(r) != Long.$sign(x) * Long.$sign(y)) {
     	arex();
     }
-    return Long.$inc(a,-1);
+    return r;
 }
 
 Math.negateExact$J = function(a) {return Long.$neg(a);}
 
 Math.toIntExact$J = function(value) {
-    if (Long.$ival(value) != Long.$lval(value)) {
+    if (!Long.$eq(Long.$ival(value), value)) {
     	arex();
     }
     return value;
@@ -3532,8 +3529,6 @@ Math.decrementExact = function(a) {
 }
 
 Math.negateExact = function(a) {return -a}
-
-Math.toIntExact = function(a) { return a}
 
 Math.floorDiv || (Math.floorDiv = function(x,y) { 
     var r = (x / y) | 0;
@@ -3933,7 +3928,7 @@ m$(Integer,"numberOfTrailingZeros$I",
 	function(i) {
 	if (i == 0) return 32;
 	var n = 31;
-	var y = i <<16; if (y != 0) { n = n -16; i = y; }
+	var y = i <<16; if (y != 0) { n = n - 16; i = y; }
 	y = i << 8; if (y != 0) { n = n - 8; i = y; }
 	y = i << 4; if (y != 0) { n = n - 4; i = y; }
 	y = i << 2; if (y != 0) { n = n - 2; i = y; }
@@ -4155,7 +4150,7 @@ var toLongRMS = function(s0, noOver) {
 	r += Math.floor((r0 - rh)*MAXR);
 
 	lm += r/MAXR|0;
-	r = r&RMASK;
+	r &= RMASK;
 
 	// combining the integer high part h * ti with the overflow of the
 	// lower numbers (rh and lm):
@@ -4629,7 +4624,7 @@ Long.$xor=function(a,b){
 	return fromLongRLH(a);	
 }
 
-Long.$mul=function(a,b){ 
+Long.$mul = function(a,b){ 
 	if (arguments.length > 2)
 		return doLong(Long.$mul,arguments);
 	if (fixLongAB(a,b)) {
@@ -4758,18 +4753,17 @@ var toLongRLH = function(rms) {
 		return [0,0,0];
 	}
 	var isNeg = (rms[2] == -1);
-	var rl = r;
 	var ml = m&LMASK;
-	var mh = (m - ml)/MAXL;
+	m = (m - ml)/MAXL;
 	if (isNeg) {
 		r = (~r&RMASK) + 1;
 		ml = (~ml&LMASK) + (r == MAXR ? 1 : 0);   
-		mh = (~mh&HMASK) + (ml == MAXL ? 1 : 0); 
-		rl = r&RMASK;
-		ml = ml&LMASK;
-		mh = mh&HMASK;
+		m = (~m&HMASK) + (ml == MAXL ? 1 : 0); 
+		r &= RMASK;
+		ml &= LMASK;
+		m &= HMASK;
 	}
-	return [rl,ml,mh];
+	return [r,ml,m];
 }
 
 var fromLongRLH = function(rlh) {
@@ -4783,7 +4777,7 @@ var fromLongRLH = function(rlh) {
 	if (isNeg) {   
 		r = (~r&RMASK) + 1;
 		m = MAXM - m - (r == MAXR ? 0 : 1);   
-		r = r&RMASK;
+		r &= RMASK;
 	}
 	return checkLong([r,m, !r&&!m ? 0 : isNeg ? -1 : 1]);
 }
@@ -4791,8 +4785,8 @@ var fromLongRLH = function(rlh) {
 //Long.TYPE=Long.prototype.TYPE=Long;
 //Note that the largest usable "Long" in JavaScript is 53 digits:
 
-Long.MIN_VALUE=Long.prototype.MIN_VALUE=-0x1fffffffffffff;
-Long.MAX_VALUE=Long.prototype.MAX_VALUE=0x1fffffffffffff;
+Long.MIN_VALUE=Long.prototype.MIN_VALUE=LONG_MIN_VALUE;
+Long.MAX_VALUE=Long.prototype.MAX_VALUE=LONG_MAX_VALUE;
 
 var maxLong =  0x1000000000000000000000; // ignored
 var minLong = -maxLong;
@@ -4819,8 +4813,6 @@ function(v){
 }, 1);
 
 Long.compare$J$J = function(a,b) { return Long.$cmp(a,b); }
-
-Long.compareUnsigned$J$J = function(a,b) { return Long.$cmp(a,b,1); }
 
 m$(Long,"compareTo$Long", function(l){return Long.$cmp(this.valueOf(), l.valueOf());});
 
@@ -4899,8 +4891,10 @@ m$(Long, "$box$", function(v) {
 ;(function(C$) {
 
 m$(C$, 'compareUnsigned$J$J', function (x, y) {
-return C$.compare$J$J(Long.$add(x,[0,549755813888,-1]), Long.$add(y,[0,549755813888,-1]));
+return C$.compare$J$J(Long.$add(x,LONG_MIN_VALUE), Long.$add(y,LONG_MIN_VALUE));
 }, 1);
+
+//Long.compareUnsigned$J$J = function(a,b) { return Long.$cmp(a,b,1); }
 
 m$(C$, 'divideUnsigned$J$J', function (dividend, divisor) {
 if (Long.$lt(divisor,0 )) {
@@ -5032,34 +5026,67 @@ m$(C$, 'min$J$J', function (a, b) {
 return (Long.$le(a,b) ? a : b);
 }, 1);
 
+Clazz.newMeth(C$, 'getLong$S', function (nm) {
+	return C$.getLong$S$Long(nm, null);
+}, 1);
+
+Clazz.newMeth(C$, 'getLong$S$J', function (nm, val) {
+	var result=C$.getLong$S$Long(nm, null);
+	return (Long.$eq(result,null )) ? C$.valueOf$J(val) : result;
+}, 1);
+
+Clazz.newMeth(C$, 'getLong$S$Long', function (nm, val) {
+	var v=null;
+	try {
+	v=System.getProperty$S(nm);
+	} catch (e) {
+	if (Clazz.exceptionOf(e,"IllegalArgumentException") || Clazz.exceptionOf(e,"NullPointerException")){
+	} else {
+	throw e;
+	}
+	}
+	if (v != null ) {
+	try {
+	return C$.decode$S(v);
+	} catch (e) {
+	if (Clazz.exceptionOf(e,"NumberFormatException")){
+	} else {
+	throw e;
+	}
+	}
+	}return val;
+}, 1);
+
+Clazz.newMeth(C$, 'parseUnsignedLong$S', function (s) {
+	return C$.parseUnsignedLong$S$I(s, 10);
+}, 1);
+
+Clazz.newMeth(C$, 'parseUnsignedLong$S$I', function (s, radix) {
+	if (s == null ) {
+	throw Clazz.new_(Clazz.load('NumberFormatException').c$$S,["null"]);
+	}var len=s.length$();
+	if (len > 0) {
+	var firstChar=s.charAt$I(0);
+	if (firstChar == "-") {
+	throw Clazz.new_(Clazz.load('NumberFormatException').c$$S,[String.format$S$OA("Illegal leading minus sign on unsigned string %s.", Clazz.array(java.lang.Object, -1, [s]))]);
+	} else {
+	if (len <= 12 || (radix == 10 && len <= 18 ) ) {
+	return C$.parseLong$S$I(s, radix);
+	}var first=C$.parseLong$S$I(s.substring$I$I(0, len - 1), radix);
+	var second=Character.digit$C$I(s.charAt$I(len - 1), radix);
+	if (second < 0) {
+	throw Clazz.new_(Clazz.load('NumberFormatException').c$$S,["Bad digit at end of " + s]);
+	}var result=Long.$add(Long.$mul(first,radix),second);
+	if (C$.compareUnsigned$J$J(result, first) < 0) {
+	throw Clazz.new_(Clazz.load('NumberFormatException').c$$S,[String.format$S$OA("String value %s exceeds range of unsigned long.", Clazz.array(java.lang.Object, -1, [s]))]);
+	}return result;
+	}} else {
+	throw Clazz.load('NumberFormatException').forInputString$S(s);
+}}, 1);
+
+
 })(Long);
 		
-/*
- * TODO - Long
- * 
-
-    public static Long getLong(String nm) {
-    public static Long getLong(String nm, long val) {
-    public static Long getLong(String nm, Long val) {
-    public static long divideUnsigned(long dividend, long divisor) {
-    public static long remainderUnsigned(long dividend, long divisor) {
-    public static long highestOneBit(long i) {
-    public static long lowestOneBit(long i) {
-    public static int numberOfLeadingZeros(long i) {
-    public static int numberOfTrailingZeros(long i) {
-    public static int bitCount(long i) {
-    public static long rotateLeft(long i, int distance) {
-    public static long rotateRight(long i, int distance) {
-    public static long reverse(long i) {
-    public static long reverseBytes(long i) {
-    public static long max(long a, long b) {
-    public static long min(long a, long b) {
-    public static String toUnsignedString(long i, int radix) {
-    public static String toUnsignedString(long i) {
-    public static long parseUnsignedLong(String s, int radix)
-    public static long parseUnsignedLong(String s) throws NumberFormatException {
-
- */
 Long.toUnsignedString$J=Long.toUnsignedString$J$I = function(i,r) {
 	if (i >= 0)
 		return Long.toString$J$I(i,r || 10);
