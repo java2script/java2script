@@ -5,6 +5,8 @@ java2script/java2script is the overall master of the project. However, all activ
 These notes are for Java developers who want to convert their Java applets or Java applications to 
 JavaScript, allowing continued, simultaneous one-source development of both Java and JavaScript. 
 
+A discussion of application limitations and features is at https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.core/dist/swingjs/differences.txt 
+
 Developers of java2script/SwingJS itself should read README-developers.md
 
 Bob Hanson (hansonr@stolaf.edu)
