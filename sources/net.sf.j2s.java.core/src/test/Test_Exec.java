@@ -18,7 +18,7 @@ public class Test_Exec implements StateMachine {
 	StateHelper helper;
 	ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 	static Set<Integer> pending = new HashSet<>();
-	int N = 10, j = 0;
+	int N = 1000, j = 0;
 
 	public static void main(String[] args) {
 		new Test_Exec();
@@ -44,7 +44,7 @@ public class Test_Exec implements StateMachine {
 					System.out.println(pending.size());
 					executor.submit(() -> {
 						pending.remove(i);
-						System.out.println(pending.size());
+						System.out.println(i + " " + pending.size());
 						if (pending.size() == 0) {
 							helper.next(2);
 						}
