@@ -25,7 +25,7 @@
 
 package test.math;
 
-/**
+/** 
  * A class used to represent multiprecision integers that makes efficient
  * use of allocated space by allowing a number to occupy only part of
  * an array so that the arrays do not have to be reallocated as often.
@@ -44,9 +44,10 @@ package test.math;
 
 import static test.math.BigDecimal.INFLATED;
 import static test.math.BigInteger.LONG_MASK;
+
 import java.util.Arrays;
 
-class MutableBigInteger {
+public class MutableBigInteger {
     /**
      * Holds the magnitude of this MutableBigInteger in big endian order.
      * The magnitude may start at an offset into the value array, and it may
@@ -267,8 +268,8 @@ class MutableBigInteger {
         // comparison.
         int[] bval = b.value;
         for (int i = offset, j = b.offset; i < intLen + offset; i++, j++) {
-            int b1 = value[i] + 0x80000000;
-            int b2 = bval[j]  + 0x80000000;
+            int b1 = (value[i] + 0x80000000)|0; // SwingJS needs explicit int check (x)|0 
+            int b2 = (bval[j]  + 0x80000000)|0; // SwingJS needs explicit int check (x)|0
             if (b1 < b2)
                 return -1;
             if (b1 > b2)
@@ -1091,6 +1092,7 @@ class MutableBigInteger {
             int q = (int) (dividendValue / divisorLong);
             int r = (int) (dividendValue - q * divisorLong);
             quotient.value[0] = q;
+            
             quotient.intLen = (q == 0) ? 0 : 1;
             quotient.offset = 0;
             return r;
@@ -2054,14 +2056,23 @@ class MutableBigInteger {
     /**
      * Returns the multiplicative inverse of val mod 2^32.  Assumes val is odd.
      */
-    static int inverseMod32(int val) {
+    public static int inverseMod32(int val) {
         // Newton's iteration!
-        int t = val;
-        t *= 2 - val*t;
-        t *= 2 - val*t;
-        t *= 2 - val*t;
-        t *= 2 - val*t;
-        return t;
+//        int t = val;
+//        t *= 2 - val*t;
+//        t *= 2 - val*t;
+//        t *= 2 - val*t;
+//        t *= 2 - val*t;
+//        return t;
+//        
+    	// SwingJS needs long here since integer does not wrap
+    	long v = val;
+        long t = val;
+        t *= 2 - (v*t);
+        t *= 2 - (v*t);
+        t *= 2 - (v*t);
+        t *= 2 - (v*t);
+        return (int) t;
     }
 
     /**

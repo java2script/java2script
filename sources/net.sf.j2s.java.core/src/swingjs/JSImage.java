@@ -73,61 +73,9 @@ public class JSImage extends BufferedImage {
 	 */
 	@SuppressWarnings("unused")
 	void setImageNode(JSPath source, byte[] b, String type) {
-		Object src = null;
 		DOMNode img = null;
 		if (type == "video") {
-			try {
-				src = (source == null ? null : JSUtil.getWebPathFor(source.toString()));
-				if (b == null && source != null)
-					b = source.秘bytes;
-				System.out.println("JSImage video " + src + " " + (b == null ? 0 : b.length));
-				img = DOMNode.createElement("video", File.createTempFile("video_", "").getName());
-				DOMNode node = img;
-				Runnable r = new Runnable() {
-					// set dimension when available
-					@Override
-					public void run() {
-						int w = 0, h = 0;
-						DOMNode n = node;
-						/**
-						 * @j2sNative
-						 * 
-						 * 			w = n.width = n.videoWidth; h = n.height = n.videoHeight;
-						 * 
-						 */
-						JSComponentUI ui = (JSComponentUI) DOMNode.getAttr(node, "data-ui");
-						System.out.println("JSImage " + (ui == null ? "video" 
-								: ui.getId()) + " " + w + "x" + h);
-						秘init(w, h, TYPE_4BYTE_HTML5); 
-						// indicating that this video is ready for image capture
-						if (ui != null && ui.jc instanceof JLabel) {
-							JLabel label = (JLabel) ui.jc;
-							w = label.getWidth();
-							h = label.getHeight();
-							n.setAttribute("width", w + "");
-							n.setAttribute("height", h + "");
-							ui.setTainted();
-							ImageIcon icon = (ImageIcon) label.getIcon();
-							if (icon != null) {
-								icon.秘setIconSize(w, h);
-							}
-						}
-					}					
-				};
-				if (b != null)
-					src = JSImagekit.getDataBlob(b, null);
-				// see https://developer.mozilla.org/en-US/docs/Web/HTML/CORS_enabled_image
-				/**
-				 * @j2sNative
-				 *          img.crossOrigin = "Anonymous";
-				 *          img.onerror = function(e) {img.err = e}; 
-				 * 			img.src = src;
-				 * 			img.onloadedmetadata = function(){ r.run$()};
-				 *          img.load();
-				 */
-
-			} catch (IOException e) {
-			}
+				img = injectVideo(null, source, b);
 		} else {
 			String dataurl = "data:image/" + type + ";base64," + Base64.getBase64(b).toString();
 			/**
@@ -141,6 +89,70 @@ public class JSImage extends BufferedImage {
 
 		}
 		秘setImageNode(img, true);
+	}
+
+	
+	/**
+	 * 
+	 * @param img
+	 * @param source
+	 * @param b
+	 * @return
+	 */
+	public DOMNode injectVideo(DOMNode img, JSPath source, byte[] b) {
+		try {
+			if (img == null)
+				img = DOMNode.createElement("video", File.createTempFile("video_", "").getName());
+			Object src = (source == null ? null : JSUtil.getWebPathFor(source.toString()));
+			if (b == null && source != null)
+				b = source.秘bytes;
+			System.out.println("JSImage video " + src + " " + (b == null ? 0 : b.length));
+			DOMNode node = img;
+			@SuppressWarnings("unused")
+			Runnable r = new Runnable() {
+				// set dimension when available
+				@Override
+				public void run() {
+					int w = 0, h = 0;
+					DOMNode n = node;
+					/**
+					 * @j2sNative
+					 * 
+					 * 			w = n.width = n.videoWidth; h = n.height = n.videoHeight;
+					 * 
+					 */
+					JSComponentUI ui = (JSComponentUI) DOMNode.getAttr(node, "data-ui");
+					System.out.println("JSImage " + (ui == null ? "video" : ui.getId()) + " " + w + "x" + h);
+					秘init(w, h, TYPE_4BYTE_HTML5);
+					// indicating that this video is ready for image capture
+					if (ui != null && ui.jc instanceof JLabel) {
+						JLabel label = (JLabel) ui.jc;
+						w = label.getWidth();
+						h = label.getHeight();
+						n.setAttribute("width", w + "");
+						n.setAttribute("height", h + "");
+						ui.setTainted();
+						ImageIcon icon = (ImageIcon) label.getIcon();
+						if (icon != null) {
+							icon.秘setIconSize(w, h);
+						}
+					}
+				}
+			};
+			if (b != null)
+				src = JSImagekit.getDataBlob(b, "video/mp4");
+			// see https://developer.mozilla.org/en-US/docs/Web/HTML/CORS_enabled_image
+			/**
+			 * @j2sNative img.crossOrigin = "Anonymous"; 
+			 * img.onerror = function(e) { img.err = e}; 
+			 * img.src = src; 
+			 * img.onloadedmetadata = function(){ r.run$()};
+			 * img.load();
+			 */
+
+		} catch (IOException e) {
+		}
+		return img;
 	}
 
 	/**

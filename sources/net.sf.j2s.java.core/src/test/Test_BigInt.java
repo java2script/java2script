@@ -1,164 +1,102 @@
 
 package test;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.math.MathContext;
-import java.math.MutableBigInteger;
-import java.util.GregorianCalendar;
 
-import org.apache.xerces.jaxp.datatype.XMLGregorianCalendarImpl;
+//import test.math.BigInteger;
+//import test.math.MutableBigInteger;
 
 public class Test_BigInt extends Test_ {
 
 	public static void main(String[] args) {
 
-		testLong();
-		testInverseMod();
+//		// working with full long support. 
+		
+		// three tweaks needed: 
+		
+		// 1) MutableBigInteger.compare explicit int check (x)|0
+		// 2) MutableBigInteger.inverseMod32 requires long rather than int for Newton's method
+        // 1) BigInteger needs alias valueOf for toString;
+		testModPow();
+		testShift();
 		testSub();
-		testDiv3();
-		testSquare();
+		testLong();
 		testPow10();
 		testBI();
 		testMulOdd();
 		testMulEven();
 		testModPow2();
-		testModPow();
-		testShift();
-		testCalendar();
+
+		// test.math.BigInteger only:
+
+//		testInverseMod();
+//		testDiv3();
+//		testSquare();
 
 	}
 
 	private static void testLong() {
+		System.out.println("testLong");
 		BigInteger bi = new BigInteger("18446744073709551616");
+		assert (bi.toString().equals("18446744073709551616"));
 		long l = -0x20000000000000L;
-		System.out.println(Long.toUnsignedString(l));
 		l = 0x20000000000000L;
-		System.out.println(Long.toUnsignedString(l));
 		l = -1;
-		String s ="";
-		for (int i = 0; i < 50; i++) {
-			String su =  Long.toUnsignedString(l);
-			String sbi = BigInteger.valueOf(l).add(bi).toString();
-			assert(su.equals(sbi));
-			s += ("\n" + i + " " + l + " " + su + " " + sbi + " " + Long.toUnsignedString(l).length() + " " + 
-					" "+ su.equals(sbi));
-			l *= 2;
+		for (int i = 0; i < 50; i++, l *= 2) {
+			String su = Long.toUnsignedString(l);
+			BigInteger bi1 = BigInteger.valueOf(l);
+			String sbi = bi1.add(bi).toString();
+			String ss = (i + " " + l + " " + su + " " + sbi + " " + Long.toUnsignedString(l).length() + "  "
+					+ su.equals(sbi));
+			System.out.println(ss);
+			assert (su.equals(sbi));
+			assert (sLongOK.indexOf(ss) >= 0);
 		}
-		System.out.println(s);
-		assert (s.equals("\n0 -1 18446744073709551615 18446744073709551615 20  true\n" + 
-				"1 -2 18446744073709551614 18446744073709551614 20  true\n" + 
-				"2 -4 18446744073709551612 18446744073709551612 20  true\n" + 
-				"3 -8 18446744073709551608 18446744073709551608 20  true\n" + 
-				"4 -16 18446744073709551600 18446744073709551600 20  true\n" + 
-				"5 -32 18446744073709551584 18446744073709551584 20  true\n" + 
-				"6 -64 18446744073709551552 18446744073709551552 20  true\n" + 
-				"7 -128 18446744073709551488 18446744073709551488 20  true\n" + 
-				"8 -256 18446744073709551360 18446744073709551360 20  true\n" + 
-				"9 -512 18446744073709551104 18446744073709551104 20  true\n" + 
-				"10 -1024 18446744073709550592 18446744073709550592 20  true\n" + 
-				"11 -2048 18446744073709549568 18446744073709549568 20  true\n" + 
-				"12 -4096 18446744073709547520 18446744073709547520 20  true\n" + 
-				"13 -8192 18446744073709543424 18446744073709543424 20  true\n" + 
-				"14 -16384 18446744073709535232 18446744073709535232 20  true\n" + 
-				"15 -32768 18446744073709518848 18446744073709518848 20  true\n" + 
-				"16 -65536 18446744073709486080 18446744073709486080 20  true\n" + 
-				"17 -131072 18446744073709420544 18446744073709420544 20  true\n" + 
-				"18 -262144 18446744073709289472 18446744073709289472 20  true\n" + 
-				"19 -524288 18446744073709027328 18446744073709027328 20  true\n" + 
-				"20 -1048576 18446744073708503040 18446744073708503040 20  true\n" + 
-				"21 -2097152 18446744073707454464 18446744073707454464 20  true\n" + 
-				"22 -4194304 18446744073705357312 18446744073705357312 20  true\n" + 
-				"23 -8388608 18446744073701163008 18446744073701163008 20  true\n" + 
-				"24 -16777216 18446744073692774400 18446744073692774400 20  true\n" + 
-				"25 -33554432 18446744073675997184 18446744073675997184 20  true\n" + 
-				"26 -67108864 18446744073642442752 18446744073642442752 20  true\n" + 
-				"27 -134217728 18446744073575333888 18446744073575333888 20  true\n" + 
-				"28 -268435456 18446744073441116160 18446744073441116160 20  true\n" + 
-				"29 -536870912 18446744073172680704 18446744073172680704 20  true\n" + 
-				"30 -1073741824 18446744072635809792 18446744072635809792 20  true\n" + 
-				"31 -2147483648 18446744071562067968 18446744071562067968 20  true\n" + 
-				"32 -4294967296 18446744069414584320 18446744069414584320 20  true\n" + 
-				"33 -8589934592 18446744065119617024 18446744065119617024 20  true\n" + 
-				"34 -17179869184 18446744056529682432 18446744056529682432 20  true\n" + 
-				"35 -34359738368 18446744039349813248 18446744039349813248 20  true\n" + 
-				"36 -68719476736 18446744004990074880 18446744004990074880 20  true\n" + 
-				"37 -137438953472 18446743936270598144 18446743936270598144 20  true\n" + 
-				"38 -274877906944 18446743798831644672 18446743798831644672 20  true\n" + 
-				"39 -549755813888 18446743523953737728 18446743523953737728 20  true\n" + 
-				"40 -1099511627776 18446742974197923840 18446742974197923840 20  true\n" + 
-				"41 -2199023255552 18446741874686296064 18446741874686296064 20  true\n" + 
-				"42 -4398046511104 18446739675663040512 18446739675663040512 20  true\n" + 
-				"43 -8796093022208 18446735277616529408 18446735277616529408 20  true\n" + 
-				"44 -17592186044416 18446726481523507200 18446726481523507200 20  true\n" + 
-				"45 -35184372088832 18446708889337462784 18446708889337462784 20  true\n" + 
-				"46 -70368744177664 18446673704965373952 18446673704965373952 20  true\n" + 
-				"47 -140737488355328 18446603336221196288 18446603336221196288 20  true\n" + 
-				"48 -281474976710656 18446462598732840960 18446462598732840960 20  true\n" + 
-				"49 -562949953421312 18446181123756130304 18446181123756130304 20  true"));
 		System.out.println("testLong OK");
 	}
 
-	private static void testInverseMod() {
-		for (int n = 1; n < 10000; n += 2)
-			assert (((MutableBigInteger.inverseMod24(n) * n) & 0xFFFFFF) == 1);
-		System.out.println("testInverseMod OK");
-	}
-
-	private static void testDiv3() {
-		BigInteger m = BigInteger.valueOf(9);
-		BigInteger three = BigInteger.valueOf(3);
-		for (int i = 0; i < 100; i++) {
-			System.out.println(m + " " + m.exactDivideBy3());
-			assert (m.exactDivideBy3().multiply(three).equals(m));
-			m = m.multiply(three);
-		}
-		System.out.println("testDiv3 OK");
-	}
-
 	private static void testSub() {
+		System.out.println("testSub");
+		Long l = 100000000000L;
+		l = 100000000L;
+		for (int i = 1; i < 100; i++) {
+			BigInteger m = BigInteger.valueOf(l);
+			BigInteger n = BigInteger.valueOf(l * i);
+			BigInteger mi = BigInteger.valueOf(i);
+			BigInteger m1 = n.divide(mi);
+			assert (m1.equals(m));
+		}
+		for (int i = -100; i < 100; i++) {
+			BigInteger m = BigInteger.valueOf(l);
+			BigInteger n = BigInteger.valueOf(l + i);
+			BigInteger mi = BigInteger.valueOf(i);
+			BigInteger m1 = n.subtract(mi);
+			assert (m1.equals(m));
+		}
 		for (int i = 0; i < 100; i++) {
-			BigInteger m = BigInteger.valueOf((int) (Math.random() * 1000000000)).square().square();
-			BigInteger n = BigInteger.valueOf((int) (Math.random() * 1000000000)).square().square();
-			System.out.println(m + " " + n);
-			BigInteger ms = m.subtract(n);
-			assert (ms.add(n).equals(m));
-			checkWords(ms);
+
+			long r1 = (long) (Math.random() * 10000000000000L);
+			long r2 = (long) (Math.random() * 10000000000000L);
+
+//			r1=
+//			8251732205720L;
+//			r2=
+//			488710243863L;
+			BigInteger m = BigInteger.valueOf(r1);
+			BigInteger n = BigInteger.valueOf(r2);
+			BigInteger mm = m.multiply(m);
+			BigInteger ms = mm.subtract(n);
+			BigInteger m1 = ms.add(n);
+			BigInteger md = m1.divide(m);
+//			System.out.println(m + " " + n + " *=" + mm + " -=" + ms + "\n +=" + m1 + " /=" + md);
+			assert (md.equals(m));
+//			break;
 		}
 		System.out.println("testSub OK");
 	}
 
-	private static void checkWords(BigInteger ms) {
-		for (int i = 0; i < ms.mag.length; i++) {
-			assert (ms.mag[i] >= 0 && ms.mag[i] < (1 << 24));
-		}
-	}
-
-	private static void testSquare() {
-		BigInteger m = BigInteger.valueOf(0x1FFFFFF);
-		for (int i = 0; i < 8; i++) {
-			String s = m.square().toString();
-			String t = (m = m.multiply(m)).toString();
-			System.out.println(i + "." + s);
-			System.out.println(i + "." + t);
-			assert (s.equals(t));
-		}
-		System.out.println("testSquare OK");
-	}
-
-//	private static void testSquare() {
-//		BigInteger m = new BigInteger("2582248646774490172124085712888104546427167222226810472718877943316781043330129979932998020933713905804029623515616378881");
-//		for (int i = 0; i < 1; i++) {
-//			System.out.println(m);
-//			String s = m.square().toString();
-//			String t = (m = m.multiply(m)).toString();
-//			System.out.println(i + "." + s);
-//			System.out.println(i + "." + t);
-//			assert(s.equals(t));
-//		}
-//	}
-
 	private static void testPow10() {
+		System.out.println("testPow10");
 		BigInteger m = BigInteger.ONE;
 		String s = "1";
 		for (int i = 0; i < 100; i++) {
@@ -170,17 +108,18 @@ public class Test_BigInt extends Test_ {
 		System.out.println("testPow10 OK");
 	}
 
-	private static void testCalendar() {
-		GregorianCalendar gc = new GregorianCalendar(2019, 3, 1, 2, 3, 4, 567);
-		System.out.println(gc);
-		XMLGregorianCalendarImpl cc = new XMLGregorianCalendarImpl(gc);
-		String ccf = cc.toXMLFormat();
-		System.out.println(ccf.toString());
-		assert (ccf.toString().indexOf(":03:04.567") >= 0);
-		System.out.println("testCalendar OK");
-	}
+//	private static void testCalendar() {
+//		GregorianCalendar gc = new GregorianCalendar(2019, 3, 1, 2, 3, 4, 567);
+//		System.out.println(gc);
+//		XMLGregorianCalendarImpl cc = new XMLGregorianCalendarImpl(gc);
+//		String ccf = cc.toXMLFormat();
+//		System.out.println(ccf.toString());
+//		assert (ccf.toString().indexOf(":03:04.567") >= 0);
+//		System.out.println("testCalendar OK");
+//	}
 
 	private static void testBI() {
+		System.out.println("testBI");
 		BigInteger b = BigInteger.valueOf(25);
 		BigInteger c = new BigInteger("12345678901234567");// BigInteger.valueOf(2000);
 		System.out.println(c);
@@ -265,6 +204,7 @@ public class Test_BigInt extends Test_ {
 	}
 
 	private static void testMulOdd() {
+		System.out.println("testMulOdd");
 		BigInteger x = new BigInteger("7");
 		BigInteger y = new BigInteger("13");
 		for (int i = 0; i < 100; i++) {
@@ -280,6 +220,7 @@ public class Test_BigInt extends Test_ {
 	}
 
 	private static void testMulEven() {
+		System.out.println("testMulEven");
 		BigInteger x = new BigInteger("6");
 		BigInteger y = new BigInteger("18");
 		for (int i = 0; i < 100; i++) {
@@ -295,11 +236,17 @@ public class Test_BigInt extends Test_ {
 	}
 
 	private static void testModPow() {
+		System.out.println("testModPow");
 		int v = 7;
 		int n = 5;
 		BigInteger m = BigInteger.valueOf(v);
-		for (int i = 0; i <= 100; i++) {
-			String s = i + "." + m.modPow(BigInteger.valueOf(i), BigInteger.valueOf(n)) + "." + m.pow(i);
+		for (int i = 0; i <= 4/* 100 */; i++) {
+			BigInteger bi = BigInteger.valueOf(i);
+			BigInteger bn = BigInteger.valueOf(n);
+			if (i == 3)
+				System.out.println(bi + " " + bn);
+			BigInteger bp = m.modPow(bi, bn);
+			String s = i + "." + bp + "." + m.pow(i);
 			System.out.println(s);
 			assert (s.equals(modPowTest[i]));
 		}
@@ -307,6 +254,7 @@ public class Test_BigInt extends Test_ {
 	}
 
 	private static void testModPow2() {
+		System.out.println("testModPow2");
 		int v = 9;
 		int n = 6;
 		BigInteger m = BigInteger.valueOf(v);
@@ -326,10 +274,12 @@ public class Test_BigInt extends Test_ {
 	 * @param m
 	 */
 	private static void testShift() {
+		System.out.println("testShift");
 		BigInteger m = BigInteger.valueOf(7).pow(63);
+		assert (m.toString().equals("174251498233690814305510551794710260107945042018748343"));
 		for (int i = 0; i < 100; i++) {
 			BigInteger r = m.shiftLeft(i).shiftRight(i);
-			System.out.println(r);
+//			System.out.println(r);
 			assert (r.equals(m));
 		}
 		System.out.println("testShift OK");
@@ -701,4 +651,90 @@ public class Test_BigInt extends Test_ {
 			"98.112235244142505632862486875924001565847535098438692415817450334913486790923816187677047835784919003274224872899135126521249792",
 			"99.2020234394565101391524763766632028185255631771896463484714106028442762236628691378186861044128542058936047712184432277382496256" };
 
+	static String sLongOK = "\n0 -1 18446744073709551615 18446744073709551615 20  true\n"
+			+ "1 -2 18446744073709551614 18446744073709551614 20  true\n"
+			+ "2 -4 18446744073709551612 18446744073709551612 20  true\n"
+			+ "3 -8 18446744073709551608 18446744073709551608 20  true\n"
+			+ "4 -16 18446744073709551600 18446744073709551600 20  true\n"
+			+ "5 -32 18446744073709551584 18446744073709551584 20  true\n"
+			+ "6 -64 18446744073709551552 18446744073709551552 20  true\n"
+			+ "7 -128 18446744073709551488 18446744073709551488 20  true\n"
+			+ "8 -256 18446744073709551360 18446744073709551360 20  true\n"
+			+ "9 -512 18446744073709551104 18446744073709551104 20  true\n"
+			+ "10 -1024 18446744073709550592 18446744073709550592 20  true\n"
+			+ "11 -2048 18446744073709549568 18446744073709549568 20  true\n"
+			+ "12 -4096 18446744073709547520 18446744073709547520 20  true\n"
+			+ "13 -8192 18446744073709543424 18446744073709543424 20  true\n"
+			+ "14 -16384 18446744073709535232 18446744073709535232 20  true\n"
+			+ "15 -32768 18446744073709518848 18446744073709518848 20  true\n"
+			+ "16 -65536 18446744073709486080 18446744073709486080 20  true\n"
+			+ "17 -131072 18446744073709420544 18446744073709420544 20  true\n"
+			+ "18 -262144 18446744073709289472 18446744073709289472 20  true\n"
+			+ "19 -524288 18446744073709027328 18446744073709027328 20  true\n"
+			+ "20 -1048576 18446744073708503040 18446744073708503040 20  true\n"
+			+ "21 -2097152 18446744073707454464 18446744073707454464 20  true\n"
+			+ "22 -4194304 18446744073705357312 18446744073705357312 20  true\n"
+			+ "23 -8388608 18446744073701163008 18446744073701163008 20  true\n"
+			+ "24 -16777216 18446744073692774400 18446744073692774400 20  true\n"
+			+ "25 -33554432 18446744073675997184 18446744073675997184 20  true\n"
+			+ "26 -67108864 18446744073642442752 18446744073642442752 20  true\n"
+			+ "27 -134217728 18446744073575333888 18446744073575333888 20  true\n"
+			+ "28 -268435456 18446744073441116160 18446744073441116160 20  true\n"
+			+ "29 -536870912 18446744073172680704 18446744073172680704 20  true\n"
+			+ "30 -1073741824 18446744072635809792 18446744072635809792 20  true\n"
+			+ "31 -2147483648 18446744071562067968 18446744071562067968 20  true\n"
+			+ "32 -4294967296 18446744069414584320 18446744069414584320 20  true\n"
+			+ "33 -8589934592 18446744065119617024 18446744065119617024 20  true\n"
+			+ "34 -17179869184 18446744056529682432 18446744056529682432 20  true\n"
+			+ "35 -34359738368 18446744039349813248 18446744039349813248 20  true\n"
+			+ "36 -68719476736 18446744004990074880 18446744004990074880 20  true\n"
+			+ "37 -137438953472 18446743936270598144 18446743936270598144 20  true\n"
+			+ "38 -274877906944 18446743798831644672 18446743798831644672 20  true\n"
+			+ "39 -549755813888 18446743523953737728 18446743523953737728 20  true\n"
+			+ "40 -1099511627776 18446742974197923840 18446742974197923840 20  true\n"
+			+ "41 -2199023255552 18446741874686296064 18446741874686296064 20  true\n"
+			+ "42 -4398046511104 18446739675663040512 18446739675663040512 20  true\n"
+			+ "43 -8796093022208 18446735277616529408 18446735277616529408 20  true\n"
+			+ "44 -17592186044416 18446726481523507200 18446726481523507200 20  true\n"
+			+ "45 -35184372088832 18446708889337462784 18446708889337462784 20  true\n"
+			+ "46 -70368744177664 18446673704965373952 18446673704965373952 20  true\n"
+			+ "47 -140737488355328 18446603336221196288 18446603336221196288 20  true\n"
+			+ "48 -281474976710656 18446462598732840960 18446462598732840960 20  true\n"
+			+ "49 -562949953421312 18446181123756130304 18446181123756130304 20  true\n";
+
+//	private static void testSquare() {
+//		System.out.println("testSquare");
+//		BigInteger m = new BigInteger(
+//				"2582248646774490172124085712888104546427167222226810472718877943316781043330129979932998020933713905804029623515616378881");
+//		for (int i = 0; i < 3; i++) {
+//			System.out.println("m=" + m);
+//			String s = m.square().toString();
+//			String t = (m = m.multiply(m)).toString();
+//			assert (s.equals(t));
+//			m = m.multiply(m);
+//		}
+//		System.out.println("testSquare OK");
+//	}
+//
+//	private static void testInverseMod() {
+//		System.out.println("testInverseMod");
+//		for (int n = 1; n < 40; n += 2) {
+//			int v = MutableBigInteger.inverseMod32(n);
+//			assert (((n * v) | 0) == 1);
+//		}
+//		System.out.println("testInverseMod OK");
+//	}
+//
+//	private static void testDiv3() {
+//		System.out.println("testDiv3");
+//		BigInteger m = BigInteger.valueOf(9);
+//		BigInteger three = BigInteger.valueOf(3);
+//		for (int i = 0; i < 100; i++) {
+//			System.out.println(m + " " + m.exactDivideBy3());
+//			assert (m.exactDivideBy3().multiply(three).equals(m));
+//			m = m.multiply(three);
+//		}
+//		System.out.println("testDiv3 OK");
+//	}
+//
 }

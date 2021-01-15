@@ -312,7 +312,7 @@ public class ScheduledThreadPoolExecutor
 						task.run();
 					}
 					
-				}), Math.max(-1, (int) task.getDelay(TimeUnit.MILLISECONDS)), 0), task);
+				}), Math.max(1, (int) task.getDelay(TimeUnit.MILLISECONDS)), 0), task);
 
 			} else /** @j2sIgnore */
 			{

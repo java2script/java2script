@@ -1,10 +1,11 @@
 package test;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.math.MathContext;
-import java.math.MutableBigInteger;
-import java.util.GregorianCalendar;
+import test.math.BigDecimal;
+
+import test.math.MathContext;
+//import test.math.BigInteger;
+//import test.math.MutableBigInteger;
+//import java.util.GregorianCalendar;
 
 import org.apache.xerces.jaxp.datatype.XMLGregorianCalendarImpl;
 
@@ -14,8 +15,8 @@ public class Test_BigDec extends Test_ {
     
     public static void main(String[] args) {
 
-    	testBDMul();
     	testBDDiv();
+    	testBDMul();
     	
 		System.out.println("testBD OK");
 
@@ -26,6 +27,8 @@ public class Test_BigDec extends Test_ {
 	
 
 	private static void testBDMul() {
+		
+		System.out.println("testBDMul");
 		BigDecimal g;
 		g = new BigDecimal(200.05, new MathContext(6));
 		System.out.println("200.050 == " + g.toString());
@@ -68,7 +71,30 @@ public class Test_BigDec extends Test_ {
 	}
 
 	private static void testBDDiv() {
+		
+		System.out.println("testBDDiv");
+
 		BigDecimal g, a, b;
+		
+		String zeros = "";
+//		for (int i = 1; i < 100; i++) {
+//			g = new BigDecimal("50" + zeros).divide(BigDecimal.valueOf(2), 10, BigDecimal.ROUND_DOWN);
+//			//System.out.println(g);
+//			assert(g.toString().equals("25" + zeros + ".0000000000"));
+//			zeros += "0";
+//		}
+//
+		zeros = "";
+		BigDecimal b1000 = BigDecimal.valueOf(1000);
+		for (int i = 1; i < 100; i++) {
+			g = new BigDecimal("50000" + zeros);
+			g=g.divide(b1000, 10, BigDecimal.ROUND_DOWN);
+			System.out.println(g);
+			assert(g.toString().equals("50" + zeros + ".0000000000"));
+			zeros += "0";
+		}
+
+		
 		a = new BigDecimal(0);
 		b = new BigDecimal(2.01);
 		g = a.divide(b,10,BigDecimal.ROUND_DOWN);
@@ -78,13 +104,6 @@ public class Test_BigDec extends Test_ {
 		g = a.divide(b,10,BigDecimal.ROUND_DOWN);
 		System.out.println(g);
 		assert(g.toString().equals("2.5373134328"));
-		String zeros = "";
-		for (int i = 0; i < 10; i ++) {
-			g = new BigDecimal("50" + zeros).divide(BigDecimal.valueOf(2), 10, BigDecimal.ROUND_DOWN);
-			System.out.println(g);
-			assert(g.toString().equals("25" + zeros + ".0000000000"));
-			zeros += "0";
-		}
 		System.out.println("testBDDiv OK");
 	}
 	
