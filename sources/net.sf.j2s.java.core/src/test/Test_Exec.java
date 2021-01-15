@@ -1,17 +1,18 @@
 package test;
 
-import java.awt.Font;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
-
-import javax.swing.JFrame;
 
 import javajs.async.SwingJSUtils.StateHelper;
 import javajs.async.SwingJSUtils.StateMachine;
 
+/**
+ * StateMachine ensures task is completed before shutdown is complete
+ * @author hansonr
+ *
+ */
 public class Test_Exec implements StateMachine {
 
 	
@@ -25,9 +26,6 @@ public class Test_Exec implements StateMachine {
 	}
 
 	Test_Exec() {
-		JFrame f = new JFrame();
-		f.setSize(100,100);
-		f.setVisible(true);
 		helper = new StateHelper(this);
 		helper.next(0);
 	}
