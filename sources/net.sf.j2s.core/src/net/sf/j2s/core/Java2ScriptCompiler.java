@@ -80,6 +80,20 @@ class Java2ScriptCompiler {
 	private static final String J2S_BREAK_ON_ERROR_DEFAULT = "false";
 
 	/**
+	 * add methods that can handle 64-bit long exactly (experimental) 
+	 * 
+	 */
+	private static final String J2S_EXACT_LONG = "j2s.exact.long";
+	private static final String J2S_EXACT_LONG_DEFAULT = "true";
+
+	/**
+	 * allow async for Runnable.run (experimental) 
+	 * 
+	 */
+	private static final String J2S_ALLOW_ASYNC_THREAD = "j2s.async.thread";
+	private static final String J2S_ALLOW_ASYNC_THREAD_DEFAULT = "false";
+
+	/**
 	 * office use only
 	 */
 	private static final String J2S_TESTING = "j2s.testing";
@@ -172,7 +186,16 @@ class Java2ScriptCompiler {
 
 	private boolean isDebugging;
 
+	
+	/**
+	 * For now, optional, but will be default TRUE soon enough.
+	 * 
+	 */
+	private boolean exactLong;
+	
 	private boolean breakOnError;
+
+	private boolean allowAsyncThread;
 
 	public boolean doBreakOnError() {
 		return breakOnError;
@@ -265,6 +288,11 @@ class Java2ScriptCompiler {
 
 			breakOnError = !"false".equalsIgnoreCase(getProperty(J2S_BREAK_ON_ERROR, J2S_BREAK_ON_ERROR_DEFAULT));
 
+			exactLong = "true".equalsIgnoreCase(getProperty(J2S_EXACT_LONG, J2S_EXACT_LONG_DEFAULT));
+
+			allowAsyncThread = "true".equalsIgnoreCase(getProperty(J2S_ALLOW_ASYNC_THREAD, J2S_ALLOW_ASYNC_THREAD_DEFAULT));
+
+
 			// includes @j2sDebug blocks
 			isDebugging = J2S_COMPILER_MODE_DEBUG
 					.equalsIgnoreCase(getProperty(J2S_COMPILER_MODE, J2S_COMPILER_MODE_DEFAULT));
@@ -347,6 +375,8 @@ class Java2ScriptCompiler {
 
 			Java2ScriptVisitor.setAnnotating(ignoredAnnotations);
 			Java2ScriptVisitor.setDebugging(isDebugging);
+			Java2ScriptVisitor.setExactLong(exactLong);
+			Java2ScriptVisitor.setAllowAsyncThread(allowAsyncThread);
 			Java2ScriptVisitor.setLogging(lstMethodsDeclared, htMethodsCalled, logAllCalls);
 
 			Java2ScriptVisitor.NameMapper.setNonQualifiedNamePackages(nonqualifiedPackages);

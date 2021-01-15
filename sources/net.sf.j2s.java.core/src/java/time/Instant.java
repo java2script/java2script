@@ -1307,8 +1307,8 @@ public final class Instant
      * @return a suitable hash code
      */
     @Override
-    public int hashCode() { // SwingJS 16 not 32 here
-        return ((int) (seconds ^ (seconds >>> 16))) + 51 * nanos;
+    public int hashCode() {
+        return ((int) (seconds ^ (seconds >>> 32))) + 51 * nanos;
     }
 
     //-----------------------------------------------------------------------

@@ -2195,22 +2195,12 @@ public final class Scanner implements Iterator<String>, Closeable {
         boolean result = hasNext(integerPattern());
         if (result) { // Cache it
             try {
-                String s = (matcher.group(SIMPLE_GROUP_INDEX) == null ?
-                    processIntegerToken(hasNextResult) : hasNextResult);
-                // SwingJS may choke here
+                String s = (matcher.group(SIMPLE_GROUP_INDEX) == null) ?
+                    processIntegerToken(hasNextResult) :
+                    hasNextResult;
                 typeCache = Long.parseLong(s, radix);
             } catch (NumberFormatException nfe) {
-            	/** @j2sNative 
-            	var l = parseInt(s, radix);
-            	result = (l < -0x1FFFFFFFFFFFFF || l > 0x1FFFFFFFFFFFFF);
-            	*/
-    			{
-    				result = false;
-    			}
-    			if (result) {
-    				JSUtil.notImplemented("Scanner found long value with > 53 bits");
-    				result = false;
-    			}
+                result = false;
             }
         }
         return result;
@@ -2668,5 +2658,4 @@ public final class Scanner implements Iterator<String>, Closeable {
         clearCaches();
         return this;
     }
-       
 }

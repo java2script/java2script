@@ -14,6 +14,19 @@ public class Test_String extends Test_ {
 
 	public static void main(String[] args) {
 
+		System.out.println("abcde".indexOf(99));
+		assert ("test".contentEquals(new StringBuffer("test")));
+		int ii = "test\2ing".charAt(4);
+		switch (ii | 'd') {
+		case 'f':
+			assert (true);
+			break;
+		case '3':
+		case 3:
+		default:
+			assert (false);
+		}
+
 		CharBuffer cb = CharBuffer.allocate(10);
 		cb.mark();
 		cb.put('a');
