@@ -2745,6 +2745,17 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			J2S._lang && (applet.__Info.language = J2S._lang);
 			var isApp = applet._isApp = !!applet.__Info.main; 
 			try {
+				var codePath = applet._j2sPath + "/";
+				if (codePath.indexOf("://") < 0) {
+					var base = document.location.href.split("#")[0]
+							.split("?")[0].split("/");
+					if (codePath.indexOf("/") == 0)
+						base = [ base[0], codePath.substring(1) ];
+					else
+						base[base.length - 1] = codePath;
+					codePath = base.join("/");
+				}
+				applet._j2sFullPath = codePath.substring(0, codePath.length - 1);
 				var clazz = (applet.__Info.main || applet.__Info.code);
 				try {
 					if (clazz.indexOf(".") < 0) {
@@ -2769,17 +2780,6 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 					alert("Java class " + clazz + " was not found.");
 					return;
 				}
-				var codePath = applet._j2sPath + "/";
-				if (codePath.indexOf("://") < 0) {
-					var base = document.location.href.split("#")[0]
-							.split("?")[0].split("/");
-					if (codePath.indexOf("/") == 0)
-						base = [ base[0], codePath.substring(1) ];
-					else
-						base[base.length - 1] = codePath;
-					codePath = base.join("/");
-				}
-				applet._j2sFullPath = codePath.substring(0, codePath.length - 1);
 				if (applet.__Info.code)
 					codePath += applet.__Info.code.replace(/\./g, "/");
 				codePath = codePath.substring(0,

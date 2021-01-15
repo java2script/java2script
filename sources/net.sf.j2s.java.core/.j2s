@@ -1,6 +1,7 @@
 j2s.compiler.status=enable
 
 j2s.exact.long=true
+j2s.allow.sync.thread=true
 
 # read.annotations to false to not record annotations
 j2s.compiler.read.annotations=true

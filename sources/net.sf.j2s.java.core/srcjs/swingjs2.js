@@ -13416,6 +13416,17 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			J2S._lang && (applet.__Info.language = J2S._lang);
 			var isApp = applet._isApp = !!applet.__Info.main; 
 			try {
+				var codePath = applet._j2sPath + "/";
+				if (codePath.indexOf("://") < 0) {
+					var base = document.location.href.split("#")[0]
+							.split("?")[0].split("/");
+					if (codePath.indexOf("/") == 0)
+						base = [ base[0], codePath.substring(1) ];
+					else
+						base[base.length - 1] = codePath;
+					codePath = base.join("/");
+				}
+				applet._j2sFullPath = codePath.substring(0, codePath.length - 1);
 				var clazz = (applet.__Info.main || applet.__Info.code);
 				try {
 					if (clazz.indexOf(".") < 0) {
@@ -13440,17 +13451,6 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 					alert("Java class " + clazz + " was not found.");
 					return;
 				}
-				var codePath = applet._j2sPath + "/";
-				if (codePath.indexOf("://") < 0) {
-					var base = document.location.href.split("#")[0]
-							.split("?")[0].split("/");
-					if (codePath.indexOf("/") == 0)
-						base = [ base[0], codePath.substring(1) ];
-					else
-						base[base.length - 1] = codePath;
-					codePath = base.join("/");
-				}
-				applet._j2sFullPath = codePath.substring(0, codePath.length - 1);
 				if (applet.__Info.code)
 					codePath += applet.__Info.code.replace(/\./g, "/");
 				codePath = codePath.substring(0,
@@ -14078,8 +14078,95 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
   var setWindowValue = function(a, v) { window[a] = v; }
   var getWindowValue = function(a) { return window[a] }
-  
-  
+
+/* not compatible with Safari 2021.01.08
+ * 
+try {
+
+	
+Clazz.Runnable = class {
+	constructor(f) {
+		this.f = f;			
+	}
+	run = async function(){
+		await this.f();
+	};
+
+}
+
+Clazz.Thread = class {
+	constructor(name, r) {
+		this.name = name;
+		this.stopped = false;
+		this.runnable = r;
+	}
+	start = async function() {
+		let me = this;
+		setTimeout(function(){me.run.apply(me,[])},1);
+	};
+
+	run = async function() { 
+			if (this.stopped) return;
+			Clazz.Thread.thread = this;
+			try {
+				await this.runnable.run();
+			} catch (e) {
+				console.log("..Thread.run caught " + (e.getMessage ? e.getMessage():e))
+			}
+			Clazz.Thread.thread = null;
+	};
+	stop = function() {
+		this.waiting = false;
+		this.stopped = true;
+		console.log("..Thread stopped: " + this.name);
+	};
+
+	restart = function() {
+		this.stopped = this.waiting = false;
+		console.log("..Thread restarted: " + this.name);
+		this.start();
+	};
+
+	static wait = async function(obj) {
+		let t = Clazz.Thread.currentThread();
+		obj || (obj = t);
+		obj.__WAIT__ = t;
+		t.waitingOn = obj;
+		while (obj.__WAIT__ == t){
+       		await Clazz.Thread.sleep(500); 
+		}
+	};
+
+	static notify = function(obj) {
+		if (!obj)return;
+		if (obj.__WAIT__) {
+			obj.__WAIT__.waitingOn = null;
+			obj.__WAIT__ = null;
+ 		}
+	};
+
+	static thread = null;
+
+	static sleep = async function(ms) {
+			let t = Clazz.Thread.currentThread();			
+   			return new Promise(r => setTimeout(async function() {
+			await r();
+			Clazz.Thread.thread = t;			
+		}, ms));
+	}
+	
+	static currentThread() {
+		return Clazz.Thread.thread;
+	}
+}
+
+Clazz.Thread.sleep$J = Clazz.Thread.sleep;
+
+
+} catch(e) {}
+
+*/ 
+
 J2S.LoadClazz = function(Clazz) {
 	
 Clazz.setTVer = function(ver) { // from class loading
@@ -21355,7 +21442,7 @@ if (!J2S._loadcore || J2S._coreFiles.length == 0) {
   J2S.onClazzLoaded && J2S.onClazzLoaded(2, "Clazz loaded; core files loaded");
 }
 
-}
+} // LoadClazz
 })(J2S, window, document); 
 // SwingJSApplet.js
 

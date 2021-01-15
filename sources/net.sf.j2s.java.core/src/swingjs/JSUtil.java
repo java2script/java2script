@@ -1224,6 +1224,15 @@ public class JSUtil implements JSUtilI {
 		return /** @j2sNative J2S._ES6.jsutil.importModule(resource, resolve, reject) ||*/null;
 	}
 
+	public  Promise importModuleData(String resource, Function<Object, Object> resolve, Function<Object,Object> reject) {
+		Object o = DOMNode.class;
+		loadStaticResource("/_ES6/jsutil.js");
+		if (resource.startsWith("$J2S$/"))
+			resource = getJ2SPath() + resource.substring(5);
+		System.out.println("JSUtil.importModule " + resource);
+		return /** @j2sNative J2S._ES6.jsutil.importModule(resource, resolve, reject,1) ||*/null;
+	}
+
 	@Override
 	public void setPasteListener(Component c, TransferHandler handler) {
 		JSComponentUI ui = ((JSComponent) c).秘getUI();
