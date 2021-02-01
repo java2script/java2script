@@ -34,6 +34,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 
 import javax.swing.DefaultListCellRenderer;
+import javax.swing.JTextField;
 import javax.swing.LookAndFeel;
 import javax.swing.UIDefaults;
 import javax.swing.plaf.BorderUIResource;
@@ -563,6 +564,53 @@ public class HTML5LookAndFeel extends LookAndFeel {
 		Color textText = table.getColor("textText");
 		Color window = table.getColor("window");
 
+		
+		
+		
+        Object fieldInputMap = new UIDefaults.LazyInputMap(new Object[] {
+                "ctrl C", "pass-through",
+                "ctrl V", "pass-through",
+                "ctrl X", "pass-through",
+//                  "COPY", DefaultEditorKit.copyAction,
+//                 "PASTE", DefaultEditorKit.pasteAction,
+//                   "CUT", DefaultEditorKit.cutAction,
+//        "control INSERT", DefaultEditorKit.copyAction,
+//          "shift INSERT", DefaultEditorKit.pasteAction,
+//          "shift DELETE", DefaultEditorKit.cutAction,
+//            "shift LEFT", DefaultEditorKit.selectionBackwardAction,
+//         "shift KP_LEFT", DefaultEditorKit.selectionBackwardAction,
+//           "shift RIGHT", DefaultEditorKit.selectionForwardAction,
+//        "shift KP_RIGHT", DefaultEditorKit.selectionForwardAction,
+//             "ctrl LEFT", DefaultEditorKit.previousWordAction,
+//          "ctrl KP_LEFT", DefaultEditorKit.previousWordAction,
+//            "ctrl RIGHT", DefaultEditorKit.nextWordAction,
+//         "ctrl KP_RIGHT", DefaultEditorKit.nextWordAction,
+//       "ctrl shift LEFT", DefaultEditorKit.selectionPreviousWordAction,
+//    "ctrl shift KP_LEFT", DefaultEditorKit.selectionPreviousWordAction,
+//      "ctrl shift RIGHT", DefaultEditorKit.selectionNextWordAction,
+//   "ctrl shift KP_RIGHT", DefaultEditorKit.selectionNextWordAction,
+                "ctrl A", "pass-through",
+//                  "HOME", DefaultEditorKit.beginLineAction,
+//                   "END", DefaultEditorKit.endLineAction,
+//            "shift HOME", DefaultEditorKit.selectionBeginLineAction,
+//             "shift END", DefaultEditorKit.selectionEndLineAction,
+//            "BACK_SPACE", DefaultEditorKit.deletePrevCharAction,
+//      "shift BACK_SPACE", DefaultEditorKit.deletePrevCharAction,
+//                "ctrl H", DefaultEditorKit.deletePrevCharAction,
+//                "DELETE", DefaultEditorKit.deleteNextCharAction,
+//           "ctrl DELETE", DefaultEditorKit.deleteNextWordAction,
+//       "ctrl BACK_SPACE", DefaultEditorKit.deletePrevWordAction,
+//                 "RIGHT", DefaultEditorKit.forwardAction,
+//                  "LEFT", DefaultEditorKit.backwardAction,
+//              "KP_RIGHT", DefaultEditorKit.forwardAction,
+//               "KP_LEFT", DefaultEditorKit.backwardAction,
+//                 "ENTER", JTextField.notifyAction,
+//       "ctrl BACK_SLASH", "unselect"/*DefaultEditorKit.unselectAction*/,
+//        "control shift O", "toggle-componentOrientation"/*DefaultEditorKit.toggleComponentOrientation*/
+});
+
+		
+		
 		// *** Shared Insets
 		InsetsUIResource zeroInsets = new InsetsUIResource(0, 0, 0, 0);
 		InsetsUIResource twoInsets = new InsetsUIResource(2, 2, 2, 2);
@@ -1859,6 +1907,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				// "TextField.border", textFieldBorder,
 				"TextField.margin",
 				zeroInsets,
+	            "TextField.focusInputMap", fieldInputMap,
 
 				"FormattedTextField.font",
 				sansSerifPlain12,
@@ -1876,6 +1925,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				// "FormattedTextField.border", textFieldBorder,
 				"FormattedTextField.margin",
 				zeroInsets,
+	            "FormattedTextField.focusInputMap", fieldInputMap,
 				// "FormattedTextField.focusInputMap",
 				// new UIDefaults.LazyInputMap(new Object[] {
 				// "ctrl C", DefaultEditorKit.copyAction,

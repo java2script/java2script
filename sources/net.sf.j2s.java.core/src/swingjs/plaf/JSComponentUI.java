@@ -1719,10 +1719,10 @@ public class JSComponentUI extends ComponentUI
 				: new Dimension(b.getIcon().getIconWidth(), b.getIcon().getIconHeight()));
 	}
 	
-	private Dimension getTextSize(AbstractButton b) {
+	public Dimension getTextSize(AbstractButton b) {
 		if (textNode == null)
 			return null;
-		DOMNode.setStyle(textNode,  "padding", "0");
+		DOMNode.setStyle(textNode,  "padding", "0px");
 		String t = b.getText();
 		if (isAWT && t == "")
 			t = "\u00A0"; // AWT labels do not hide if ""
@@ -1747,7 +1747,7 @@ public class JSComponentUI extends ComponentUI
 		String w0 = null, h0 = null, w0i = null, h0i = null, position = null;
 		DOMNode parentNode = null;
 		boolean hasFocus = false;
-		if (scrollPaneUI != null && scrollPaneUI.c.getWidth() != 0) {
+		if (!usePreferred && scrollPaneUI != null && scrollPaneUI.c.getWidth() != 0) {
 			w = scrollPaneUI.c.getWidth();
 			h = scrollPaneUI.c.getHeight();
 		} else if (usePreferred && preferredSize != null) {
@@ -2699,14 +2699,13 @@ public class JSComponentUI extends ComponentUI
 	protected void setAlignments(AbstractButton b, boolean justGetPreferred) {
 		if (alignmentDisabled)
 			return;
-		boolean hasItemIconAndAction = (!isSimpleButton && isMenuItem && iconNode != null && actionNode != null
-				&& iconNode != actionNode);
-
 		getJSInsets();
 		Dimension dimIcon = getIconSize(b);
 		Dimension dimText = getTextSize(b);
+		boolean hasItemIconAndAction = (!isSimpleButton && isMenuItem && iconNode != null && actionNode != null
+				&& iconNode != actionNode);
 		int wAction = (hasItemIconAndAction ? 15 : 0);
-		int wIcon = (actionNode != null ? (isMenuItem && !hasItemIconAndAction ? 15 : 20)
+		int wIcon = (actionNode != null ? (isMenuItem && dimIcon == null ? 5 : 20)
 				: dimIcon == null ? 0 : Math.max(0, dimIcon.width));
 		int wText = (dimText == null ? 0 : dimText.width);
 		int gap = (wText == 0 || wIcon == 0 ? 0 : b.getIconTextGap());
@@ -3011,10 +3010,10 @@ public class JSComponentUI extends ComponentUI
 //				if (wIcon > 0)
 				// addJSKeyVal(cssTxt, "top", "50%", "transform", "translateY(-50%)");
 				if (hasItemIconAndAction) {
-					addJSKeyVal(cssAction, "top", "50%", "transform", "translateY(-100%) scale(0.6,0.6)");
+					addJSKeyVal(cssAction, "top", "65%", "transform", "translateY(-100%) scale(0.6)");
 					addJSKeyVal(cssIcon, "top", "50%", "transform", "translateY(-80%)");
 				} else {
-					addJSKeyVal(cssIcon, "top", "50%", "transform", "translateY(-80%) scale(0.6,0.6)");
+					addJSKeyVal(cssIcon, "top", "50%", "transform", "translateY(-80%) scale(0.6)");
 				}
 			}
 
@@ -3281,7 +3280,7 @@ public class JSComponentUI extends ComponentUI
 	protected void setForegroundFor(DOMNode node, Color color) {
 		if (node != null)
 			DOMNode.setStyle(node, "color",
-					(color == null ? "rgba(0,0,0,0)" : JSToolkit.getCSSColor(color == null ? Color.black : color)));
+					(color == null ? "rgba(0,0,0,0)" : toCSSString(color == null ? Color.black : color)));
 	}
 
 	@Override
@@ -3469,26 +3468,21 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	public static String toCSSString(Color c) {
-		int opacity = c.getAlpha();
-		if (opacity == 255)
-			return "#" + toRGBHexString(c);
-		int rgb = c.getRGB();
-		return "rgba(" + ((rgb >> 16) & 0xFF) + "," + ((rgb >> 8) & 0xff) + "," + (rgb & 0xff) + "," + opacity / 255f
-				+ ")";
+		return JSToolkit.getCSSColor(c, false);
 	}
 
-	public static String toRGBHexString(Color c) {
-		int rgb = c.getRGB();
-		if (rgb == 0)
-			return "000000";
-		String r = "00" + Integer.toHexString((rgb >> 16) & 0xFF);
-		r = r.substring(r.length() - 2);
-		String g = "00" + Integer.toHexString((rgb >> 8) & 0xFF);
-		g = g.substring(g.length() - 2);
-		String b = "00" + Integer.toHexString(rgb & 0xFF);
-		b = b.substring(b.length() - 2);
-		return r + g + b;
-	}
+//	public static String toRGBHexString(Color c) {
+//		int rgb = c.getRGB();
+//		if (rgb == 0)
+//			return "000000";
+//		String r = "00" + Integer.toHexString((rgb >> 16) & 0xFF);
+//		r = r.substring(r.length() - 2);
+//		String g = "00" + Integer.toHexString((rgb >> 8) & 0xFF);
+//		g = g.substring(g.length() - 2);
+//		String b = "00" + Integer.toHexString(rgb & 0xFF);
+//		b = b.substring(b.length() - 2);
+//		return r + g + b;
+//	}
 
 	/**
 	 * We allow here for an off-screen graphic for which the paint operation also
@@ -3747,7 +3741,7 @@ public class JSComponentUI extends ComponentUI
 
 	protected void setBackgroundDOM(DOMNode node, Color color) {
 		DOMNode.setStyle(node, "background-color",
-				color == null ? null : JSToolkit.getCSSColor(color));
+				color == null ? null : toCSSString(color));
 	}
 
 

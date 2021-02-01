@@ -157,7 +157,7 @@ public abstract class JSTextUI extends JSLightweightUI {
 		setEditable(editable);
 		Color cc = editor.getCaretColor();
 		if (cc != null)
-			DOMNode.setStyle(domNode, "caret-color", JSToolkit.getCSSColor(cc));
+			DOMNode.setStyle(domNode, "caret-color", toCSSString(cc));
 		setPadding(editor.getMargin());
 		return updateDOMNodeCUI();
 	}
@@ -170,11 +170,11 @@ public abstract class JSTextUI extends JSLightweightUI {
 	 * 
 	 * 
 	 */
-	@Override  
+	@Override
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
-		
-		//String type = /** @j2sNative jQueryEvent.type || */null;
-		//System.out.println("JSTextUI handlejs "+type + " " + eventType);
+
+		// String type = /** @j2sNative jQueryEvent.type || */null;
+		// System.out.println("JSTextUI handlejs "+type + " " + eventType);
 		if (JSToolkit.isMouseEvent(eventType)) {
 			return NOT_HANDLED;
 		}
@@ -195,16 +195,12 @@ public abstract class JSTextUI extends JSLightweightUI {
 				return HANDLED;
 			switch (keyCode) {
 			case KeyEvent.VK_ALT:
-				/**
-				 * @j2sNative
-				 * 
-				 * 			jQueryEvent.preventDefault(); jQueryEvent.stopPropagation();
-				 */
+				JSToolkit.consumeEvent(jQueryEvent);
 				// fall through
-				//case KeyEvent.VK_SHIFT: 
-					//BH note 2019.11.03 
-					//Including VK_SHIFT here caused Firefox to ignore a first upper-case L in 
-					//SequenceSearcher pattern JTextField
+				// case KeyEvent.VK_SHIFT:
+				// BH note 2019.11.03
+				// Including VK_SHIFT here caused Firefox to ignore a first upper-case L in
+				// SequenceSearcher pattern JTextField
 			case KeyEvent.VK_CONTROL:
 				ret = HANDLED;
 				break;
@@ -218,17 +214,42 @@ public abstract class JSTextUI extends JSLightweightUI {
 				ret = HANDLED;
 			}
 			editor.dispatchEvent(keyEvent);
-			if (keyEvent.isConsumed()) {
-				/**
-				 * @j2sNative
-				 * 
-				 * 			jQueryEvent.preventDefault(); jQueryEvent.stopPropagation();
-				 */
+			boolean ignore =
+					/**
+					 * set in DefaultEditorKit for a "pass-through" action CTRL-C,V,X,A
+					 * 
+					 * @j2sNative keyEvent.bdata.doPropagate ||
+					 */
+					false;
+			if (!ignore && keyEvent.isConsumed()) {
+				JSToolkit.consumeEvent(jQueryEvent);
 				return HANDLED;
 			}
+			if (!ignore && eventType == KeyEvent.KEY_PRESSED
+					&& (keyEvent.getModifiersEx() & (KeyEvent.CTRL_DOWN_MASK | KeyEvent.ALT_DOWN_MASK)) != 0) {
+				// dispatch a missing KeyTyped event.
+				int code = keyEvent.getKeyCode();
+				if (code >= 65 && code <= 90) {
+					@SuppressWarnings("unused")
+					char c = (char) (code & 0x1F); // 1-26
+
+					/**
+					 * @j2sNative keyEvent.id = 400; keyEvent.keyCode = 0; keyEvent.keyChar = c; jQueryEvent.stopPropagation();
+					 * keyEvent.consumed = false;
+					 */
+
+					editor.dispatchEvent(keyEvent);
+					JSToolkit.consumeEvent(jQueryEvent);
+					if (keyEvent.isConsumed()) {
+						return HANDLED;
+					}
+				}
+			}
+
 		}
-		if (ret != HANDLED)
+		if (ret != HANDLED) {
 			handleJSTextEvent(eventType, jQueryEvent, keyCode, false);
+		}
 		return HANDLED;
 	}
 
@@ -474,11 +495,11 @@ public abstract class JSTextUI extends JSLightweightUI {
 	 */
 	InputMap getInputMap() {
 		InputMap map = new InputMapUIResource();
-//        InputMap shared =
-//                (InputMap) UIManager.get(getPropertyPrefix() + ".focusInputMap", Locale.US);
-//        if (shared != null) {
-//            map.setParent(shared);
-//        }
+        InputMap shared =
+                (InputMap) UIManager.get(getPropertyPrefix() + ".focusInputMap", null);
+        if (shared != null) {
+            map.setParent(shared);
+        }
 		return map;
 	}
 

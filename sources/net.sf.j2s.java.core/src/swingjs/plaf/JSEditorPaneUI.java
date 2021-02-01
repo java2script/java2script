@@ -6,6 +6,7 @@ import java.awt.Font;
 import java.awt.Insets;
 import java.awt.JSComponent;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -164,7 +165,6 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
             (InputMap)DefaultLookup.get(editor, this,
             getPropertyPrefix() + ".focusInputMap");
         if (shared != null) {
-        	//System.out.println("JSEditorPaneUI inputmap " + shared.keys());
             map.setParent(shared);
         }
 		return map;
@@ -529,9 +529,9 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 	private String getCSSStyle(AttributeSet a, AttributeSet currAttr) {
 		String style = "";
 		if (checkAttr(BACKGROUND, a, currAttr))
-			style += "background:" + JSToolkit.getCSSColor((Color) getBackground(a)) + ";";
+			style += "background:" + toCSSString((Color) getBackground(a)) + ";";
 		if (checkAttr(FOREGROUND, a, currAttr))
-			style += "color:" + JSToolkit.getCSSColor((Color) getForeground(a)) + ";";
+			style += "color:" + toCSSString((Color) getForeground(a)) + ";";
 		if (checkAttr(BOLD, a, currAttr))
 			style += "font-weight:" + (isBold(a) ? "bold;" : "normal;");
 		if (checkAttr(ITALIC, a, currAttr))
@@ -1189,8 +1189,24 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 	}
 	
 	@Override
+	public Dimension getPreferredSize(JComponent c) {
+		if (isTextPane) {
+			updateDOMNode();
+			String sh = DOMNode.getStyle(domNode,  "height");
+			int w = (scrollPaneUI != null && scrollPaneUI.c.getWidth() != 0 ? scrollPaneUI.c.getWidth() : DOMNode.getWidth(domNode));
+			DOMNode.setStyle(domNode, "height", null);
+			Rectangle r = this.getBoundingRect(domNode);
+			int h = (int) Math.max(0, Math.ceil(r.height));
+			DOMNode.setStyle(domNode, "height", sh);
+			return new Dimension(w,h);
+		} else {
+			return super.getPreferredSize(c);
+		}
+	}
+
+	@Override
 	public Dimension getMinimumSize(JComponent jc) {
-		getPreferredSize(jc);
+//		getPreferredSize(jc);
 //        Document doc = editor.getDocument();
         Insets i = jc.getInsets();
         Dimension d = new Dimension();
