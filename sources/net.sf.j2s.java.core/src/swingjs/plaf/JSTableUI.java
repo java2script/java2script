@@ -349,6 +349,8 @@ public class JSTableUI extends JSPanelUI {
 
 	private void setHidden(boolean b) {
 		DOMNode.setStyle(domNode, "visibility", b ? "hidden" : "visible");
+		if (b && outerNode != null && DOMNode.getStyle(outerNode, "width") == null)
+			DOMNode.setStyle(outerNode, "width", "inherit");
 	}
 
 	private int[] cw = new int[10];
@@ -1320,16 +1322,18 @@ public class JSTableUI extends JSPanelUI {
 		}
 
 		private void setDispatchComponent(MouseEvent e) {
-//			Component editorComponent = table.getEditorComponent();
-//			Point p = e.getPoint();
-//			Point p2 = SwingUtilities.convertPoint(table, p, editorComponent);
-//			dispatchComponent = SwingUtilities.getDeepestComponentAt(editorComponent, p2.x, p2.y);
-			dispatchComponent = JSMouse.getJ2SEventTarget(e);
+
+			Component editorComponent = table.getEditorComponent();
+			Point p = e.getPoint();
+			Point p2 = SwingUtilities.convertPoint(table, p, editorComponent);
+			dispatchComponent = SwingUtilities.getDeepestComponentAt(editorComponent, p2.x, p2.y);			
+			
+//			dispatchComponent = JSMouse.getJ2SEventTarget(e);
 			if (dispatchComponent == null && table.isEditing()) {
 				dispatchComponent = table.getEditorComponent();
 			}
-			// SwingUtilities2.setSkipClickCount(dispatchComponent,
-			// e.getClickCount() - 1);
+			 SwingUtilities2.setSkipClickCount(dispatchComponent,
+			 e.getClickCount() - 1);
 		}
 
 		private void setValueIsAdjusting(boolean flag) {
@@ -2428,7 +2432,7 @@ public class JSTableUI extends JSPanelUI {
 	 */
 	private void paintGrid(Graphics g, int rMin, int rMax, int cMin, int cMax) {
 		g.setColor(table.getGridColor());
-
+		//System.out.println("JSTableUI paintGrid " + rMin + " " + rMax);
 		table._getCellRect(rMin, cMin, true, minCell);
 		table._getCellRect(rMax, cMax, true, maxCell);
 		Rectangle damagedArea = minCell.union(maxCell);
