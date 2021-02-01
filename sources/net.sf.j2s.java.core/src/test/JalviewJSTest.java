@@ -10,9 +10,11 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.Label;
 import java.awt.MediaTracker;
+import java.awt.MenuItem;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
@@ -21,6 +23,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 
 import javax.swing.AbstractButton;
@@ -60,7 +63,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 	public static final int ALT_DOWN_MASK;
 	public static final int SHORTCUT_MASK;
 
-	boolean isAll = false;
+	boolean isAll = true;
 
 	static {
 		float modern = 11;
@@ -111,7 +114,17 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		}
 
 	};
-	JMenu mRight;
+	JMenu mRight = new JMenu("right") {
+		@Override
+		// TODO NOT WORKING IN JAVASCRIPT
+		public void processKeyEvent(KeyEvent e, MenuElement[] path, MenuSelectionManager m) {
+			System.out.println("RIGHT JMenu path length=" + path.length + " key=" + e.getKeyCode());
+			for (int i = 0; i < path.length; i++)
+				System.out.println("[" + i + "]" + path[i].getClass().getName() + "  "
+						+ (path[i] instanceof JMenuItem ? ((JMenuItem) path[i]).getText() : ""));
+			super.processKeyEvent(e, path, m);
+		}
+	};
 
 	int nAction = 0;
 
@@ -155,9 +168,30 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		}
 
 	};
+	
+	KeyListener keyListener = new KeyListener() {
+
+		@Override
+		public void keyTyped(KeyEvent e) {
+			System.out.println(e);
+			System.out.println(0 + e.getKeyChar());
+		}
+
+		@Override
+		public void keyPressed(KeyEvent e) {
+			System.out.println(e);
+		}
+
+		@Override
+		public void keyReleased(KeyEvent e) {
+			System.out.println(e);
+		}
+		
+	};
+	
 	private JLabel status;
 	private JMenu menu, menu1, menu2;
-	private JCheckBoxMenuItem cb4m;
+	private JCheckBoxMenuItem cb4m, cb1m, cb2m;
 
 	/**
 	 * Put some content in a JFrame and show it
@@ -166,24 +200,9 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		if (isAll) {
 			// JInternalFrame main = new JInternalFrame();
 
-			frame.addKeyListener(new KeyListener() {
+			frame.addKeyListener(keyListener);
 
-				@Override
-				public void keyTyped(KeyEvent e) {
-					System.out.println(e);
-				}
-
-				@Override
-				public void keyPressed(KeyEvent e) {
-					System.out.println(e);
-				}
-
-				@Override
-				public void keyReleased(KeyEvent e) {
-					System.out.println(e);
-				}
-
-			});
+			frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
 			menu = new JMenu("TESTING");
 
@@ -210,97 +229,95 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 			menu2 = new JMenu("testing2");
 			menu.setHorizontalAlignment(SwingConstants.RIGHT);
 
-//		frame.setJMenuBar(mb);
+			frame.setJMenuBar(mb);
 			mb.add(menu);
 			mb.add(menu1);
 			mb.add(menu2);
-		}
-		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		frame.setContentPane(getVisualPaneContent(menu, menu1, menu2));
-		frame.pack();
-		System.out.println(frame.getContentPane());
-		// frame.setBackground(Color.blue);
-		// note -- this blue color is never seen
-		JPopupMenu pmenu = new JPopupMenu();
-		JMenuItem b = new JMenuItem("testing1");
-		b.addActionListener(listener);
-		pmenu.add(b);
-		b = new JMenuItem("testing2");
-		b.addActionListener(listener);
-		pmenu.add(b);
-		b = new JMenuItem("testing3");
-		b.addActionListener(listener);
-		pmenu.add(b);
-		final JMenuItem bb = b;
+			frame.setContentPane(getVisualPaneContent(menu, menu1, menu2));
+			frame.pack();
+			System.out.println(frame.getContentPane());
+			// frame.setBackground(Color.blue);
+			// note -- this blue color is never seen
+			JPopupMenu pmenu = new JPopupMenu();
+			JMenuItem b = new JMenuItem("testing1");
+			b.addActionListener(listener);
+			pmenu.add(b);
+			b = new JMenuItem("testing2");
+			b.addActionListener(listener);
+			pmenu.add(b);
+			b = new JMenuItem("testing3");
+			b.addActionListener(listener);
+			pmenu.add(b);
+			final JMenuItem bb = b;
 
-		frame.addMouseListener(new MouseListener() {
+			frame.addMouseListener(new MouseListener() {
 
-			@Override
-			public void mouseClicked(MouseEvent e) {
+				@Override
+				public void mouseClicked(MouseEvent e) {
 
 //				frame.dispose();
 //				System.out.println("frame after dispose " + frame.isValid());
 //				frame.show();
 //				
-			}
+				}
 
-			@Override
-			public void mousePressed(MouseEvent e) {
-				System.out.println(frame.getContentPane().getSize());
-				frame.getContentPane().setBackground(Color.yellow);
-				System.out.println(frame.getContentPane());
-				System.out.println(frame.getContentPane().getComponent(0));
-				System.out.println(frame.getContentPane().getComponent(0).getBackground());
+				@Override
+				public void mousePressed(MouseEvent e) {
+					System.out.println(frame.getContentPane().getSize());
+					frame.getContentPane().setBackground(Color.yellow);
+					System.out.println(frame.getContentPane());
+					System.out.println(frame.getContentPane().getComponent(0));
+					System.out.println(frame.getContentPane().getComponent(0).getBackground());
 
-				((JPanel) frame.getContentPane()).setOpaque(true);
+					((JPanel) frame.getContentPane()).setOpaque(true);
 
-				invalidate();
-				repaint();
-				// System.out.println(e.getButton());
-				if (e.getButton() != MouseEvent.BUTTON3)
-					return;
-				int n = pmenu.getComponentCount();
-				if (n > 1)
-					pmenu.remove(n - 1);
-				pmenu.show(frame, e.getX(), e.getY() - 10);
-			}
+					invalidate();
+					repaint();
+					// System.out.println(e.getButton());
+					if (e.getButton() != MouseEvent.BUTTON3)
+						return;
+					int n = pmenu.getComponentCount();
+					if (n > 1)
+						pmenu.remove(n - 1);
+					pmenu.show(frame, e.getX(), e.getY() - 10);
+				}
 
-			@Override
-			public void mouseReleased(MouseEvent e) {
-//				//System.out.println(e.getButton());
-//				if (e.getButton() != MouseEvent.BUTTON3)
-//					return;
-//				int n = pmenu.getComponentCount();
-//				if (n > 1)
-//					pmenu.remove(n - 1);
-//				pmenu.show(frame, e.getX(), e.getY() - 10);
-			}
+				@Override
+				public void mouseReleased(MouseEvent e) {
+					// System.out.println(e.getButton());
+					if (e.getButton() != MouseEvent.BUTTON3)
+						return;
+					int n = pmenu.getComponentCount();
+					if (n > 1)
+						pmenu.remove(n - 1);
+					pmenu.show(frame, e.getX(), e.getY() - 10);
+				}
 
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				// TODO Auto-generated method stub
+				@Override
+				public void mouseEntered(MouseEvent e) {
+					// TODO Auto-generated method stub
 
-			}
+				}
 
-			@Override
-			public void mouseExited(MouseEvent e) {
-				// TODO Auto-generated method stub
+				@Override
+				public void mouseExited(MouseEvent e) {
+					// TODO Auto-generated method stub
 
-			}
+				}
 
-		});
+			});
 
-		frame.addMouseWheelListener(new MouseWheelListener() {
+			frame.addMouseWheelListener(new MouseWheelListener() {
 
-			@Override
-			public void mouseWheelMoved(MouseWheelEvent e) {
+				@Override
+				public void mouseWheelMoved(MouseWheelEvent e) {
 
-				System.out.println("mouse wheel " + e.getModifiers() + " " + e.isShiftDown());
-			}
-		});
+					System.out.println("mouse wheel " + e.getModifiers() + " " + e.isShiftDown());
+				}
+			});
 
-		frame.setVisible(true);
-
+			frame.setVisible(true);
+		}
 //		JDesktopPane d = new JDesktopPane();
 //		d.setPreferredSize(new Dimension(600,300));
 //		d.add(main);
@@ -329,6 +346,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		panel.setOpaque(true);
 		panel.setBackground(Color.blue);
 		panel.setLayout(new BorderLayout());
+		panel.add(status = new JLabel("ok"), BorderLayout.SOUTH);
 		
 		
 		JPanel firstColumn = new JPanel();
@@ -347,7 +365,6 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		theTab.setBackground(Color.GREEN);
 		theTab.add(firstColumn);
 		panel.add(theTab);
-
 		return panel;
 	}
 
@@ -404,6 +421,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 			}
 
 		});
+		t1.addKeyListener(keyListener);
 		JLabel l1 = new JLabel(getImage("test3.png"));
 		l1.setText("trailing right");
 		l1.setHorizontalTextPosition(SwingConstants.TRAILING);
@@ -425,6 +443,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		// b1.setBorder(null);
 		b1.setHorizontalTextPosition(SwingConstants.RIGHT);
 		b1.setHorizontalAlignment(SwingConstants.LEFT);
+		
 		Insets i = (b1.getBorder() instanceof CompoundBorder
 				? ((CompoundBorder) b1.getBorder()).getOutsideBorder().getBorderInsets(b1)
 				: b1.getInsets());
@@ -462,12 +481,14 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		cb5.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 		cb5.setHorizontalTextPosition(SwingConstants.TRAILING);
 
-		JRadioButton rb1 = new JRadioButton();
+		JRadioButton rb1 = new JRadioButton("rb1");
+		rb1.addKeyListener(keyListener);
+
 		rb1.setFont(font);
 //	rb1.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 //	rb1.setHorizontalTextPosition(SwingConstants.TRAILING);
 
-		JRadioButton rb2 = new JRadioButton();
+		JRadioButton rb2 = new JRadioButton("rb2");
 		rb2.setFont(font);
 //	rb2.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 //	rb2.setHorizontalTextPosition(SwingConstants.RIGHT);
@@ -484,6 +505,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		firstColumn.add(rb2);
 		firstColumn.add(rb3);
 		JMenuItem cb3m = new JMenuItem("tooltiptest");// XXleading,left-to-rightXX");
+		cb3m.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.CTRL_DOWN_MASK));
 		cb3m.setToolTipText("THIS IS A TEST");
 		cb3m.setFont(font);
 		cb3m.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
@@ -504,6 +526,12 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		cb4m.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 		cb4m.setHorizontalTextPosition(SwingConstants.LEADING);
 		cb4m.addActionListener(listener);
+//		cb4m.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
+//				ActionEvent.ALT_MASK | ActionEvent.CTRL_MASK | ActionEvent.SHIFT_MASK));
+
+		cb4m.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK));
+
+		
 
 		JCheckBoxMenuItem cb5m = new JCheckBoxMenuItem("XXCb5mtrailing,left-to-rightXX"
 		// ) {
@@ -567,9 +595,6 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		mb5.setHorizontalTextPosition(SwingConstants.RIGHT);
 		addListeners(mb5);
 
-		cb4m.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
-				ActionEvent.ALT_MASK | ActionEvent.CTRL_MASK | ActionEvent.SHIFT_MASK));
-
 		JMenu m1 = new JMenu("left") {
 			@Override
 			public void processKeyEvent(KeyEvent e, MenuElement[] path, MenuSelectionManager m) {
@@ -623,14 +648,15 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 
 		menu1.add(cb4m);
 		menu1.add(cb3m);
-
+		menu1.add(new JCheckBoxMenuItem("cb2a"));
+		menu1.add(new JCheckBoxMenuItem("cb2b"));
 		menu2.add(cb5m);
 
 		JMenuItem sep = new JMenuItem("-");
 		JMenuItem btn;
 		sep.setFont(font);
 		menu.addSeparator();
-		testbtn = new JMenuItem("testingbtn");
+		testbtn = new JMenuItem("testbtn");
 		testbtn.setFont(font);
 		testbtn.addActionListener(new ActionListener() {
 
@@ -651,25 +677,13 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 				});
 
 		menu.add(testbtn);
-
-		mRight = new JMenu("right") {
-			@Override
-			// TODO NOT WORKING IN JAVASCRIPT
-			public void processKeyEvent(KeyEvent e, MenuElement[] path, MenuSelectionManager m) {
-				System.out.println("RIGHT JMenu path length=" + path.length + " key=" + e.getKeyCode());
-				for (int i = 0; i < path.length; i++)
-					System.out.println("[" + i + "]" + path[i].getClass().getName() + "  "
-							+ (path[i] instanceof JMenuItem ? ((JMenuItem) path[i]).getText() : ""));
-				super.processKeyEvent(e, path, m);
-			}
-		};
 		menu.add(mRight);
 		mRight.setMnemonic('r');
 		mRight.setFont(font);
 		mRight.add(cb6m);
 		mRight.add(rb1m);
-//	mRight.addMenuListener(this);
-
+		mRight.addMenuListener(this);
+	
 		mRight.addMenuListener(new MenuListener() {
 
 			@Override
@@ -704,6 +718,8 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		mRight2.add(mb3);
 		mRight2.add(mb4);
 		mRight2.addMenuListener(this);
+
+		JPanel theTab = new JPanel();
 
 		JButton bh = new JButton("<html>remove <i>testbtn</i></html>") {
 			{
@@ -750,7 +766,6 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 				});
 			}
 		});
-
 	}
 
 	protected void addMenuActionAndAccelerator(KeyStroke keyStroke, JMenuItem menuItem, ActionListener actionListener) {
