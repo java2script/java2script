@@ -271,10 +271,17 @@ public class JSToolkit extends SunToolkit
 	}
 
 
-	public static String getCSSColor(Color c) {
+	public static String getCSSColor(Color c, boolean asHex) {
 		int i = c.getRGB() & 0xFFFFFF;
-		String s = (i == 0 ? "000" : "000000" + Integer.toHexString(i));
-		return "#" + s.substring(s.length() - 6);
+		if (asHex) {
+			String s = (i == 0 ? "000" : "000000" + Integer.toHexString(i));
+			return "#" + s.substring(s.length() - 6);
+		} else {
+			int opacity = c.getAlpha();
+			int rgb = c.getRGB();
+			String s = ((rgb >> 16) & 0xFF) + ", " + ((rgb >> 8) & 0xff) + ", " + (rgb & 0xff);
+			return (opacity == 255 ? "rgb(" + s + ")" : "rgba(" + s + ", " + opacity / 255f + ")");
+		}
 	}
 
 	private static UIDefaults uid;

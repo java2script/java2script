@@ -19,6 +19,7 @@ import java.lang.annotation.Annotation;
 import java.util.Map;
 
 import sun.reflect.annotation.AnnotationParser;
+import swingjs.api.js.JSFunction;
 
 /**
  * This class must be implemented by the VM vendor. This class models a
@@ -53,10 +54,18 @@ Member {
 			//parameterTypes = null;
 		// Special case - constructors with parameters have c$$, not just c$. For whatever reason!
 		// This signals NOT to add "$" if there are no parameters.
-		if (paramTypes == null)
-			paramTypes = Class.NO_PARAMETERS;
-		this.signature = "c$" + Class.argumentTypesToString(paramTypes);
+		if (paramTypes != null && paramTypes.length == 0)
+			paramTypes = null;
+		this.signature = (paramTypes == Class.UNKNOWN_PARAMETERS 
+				|| paramTypes  == null || declaringClass.$constructors$ != null 
+				? "c$" : "c$" + Class.argumentTypesToString(paramTypes));
  		constr = /** @j2sNative this.Class_.$clazz$[this.signature] || */ null;
+	}
+
+	public void _setJSMethod(Object o, int modifiers) {
+		constr = o;
+		signature = /** @j2sNative	o && o.exName || */ null;
+		this.modifiers |= modifiers;
 	}
 
 	/**
@@ -298,7 +307,8 @@ Member {
 	 * @return the parameter types
 	 */
 	public Class<?>[] getParameterTypes() {
-		return parameterTypes;
+		return (parameterTypes == Class.UNKNOWN_PARAMETERS ?
+			parameterTypes = AnnotationParser.JSAnnotationObject.guessMethodParameterTypes(signature) : parameterTypes);
 	}
 
 	/**

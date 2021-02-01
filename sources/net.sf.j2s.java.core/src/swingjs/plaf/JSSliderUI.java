@@ -57,7 +57,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 
 	protected JSlider slider;
 	private int min, max;
-	protected int val;
+	protected int jsval;
 	private int majorSpacing;
 	private int minorSpacing;
 	protected boolean paintTicks;
@@ -94,7 +94,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		setSliderFields();
 		min = slider.getMinimum();
 		max = slider.getMaximum();
-		val = slider.getValue();
+		jsval = slider.getValue();
 		if (!isScrollBar) {
 			minorSpacing = slider.getMinorTickSpacing();
 			majorSpacing = slider.getMajorTickSpacing();
@@ -152,7 +152,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		awtPeerFG = null;		
 		if (c == null || c instanceof UIResource)
 			c = Color.black;
-		String s = JSToolkit.getCSSColor(c);
+		String s = toCSSString(c);
 		if (foreColor == s)
 			return;
 		foreColor = s;
@@ -184,7 +184,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 			} else {
 				DOMNode node = (myScrollPaneUI == null && !paintTicks ? jqSlider : sliderTrack);
 				if (isScrollBar)
-					DOMNode.setStyle(node, "background-color", JSToolkit.getCSSColor(c));
+					DOMNode.setStyle(node, "background-color", toCSSString(c));
 				if (isScrollBar&& (Color.WHITE.equals(c) || c.getRGB() == (0xFFEEEEEE & -1)))
 					DOMNode.setStyle(sliderHandle, "background", "#ccc");
 			}
@@ -316,15 +316,17 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	 * @param event
 	 * @param ui
 	 */
-	public void jqueryCallback(Object event, Object ui) {
-		val = Math.round(/** @j2sNative ui.value || */0);
+	public void jqueryCallback(Object event, Object obj) {
+		jsval = Math.round(/** @j2sNative obj.value || */0);
 		boolean ok = (noSnapping || !slider.getSnapToValue() || slider.getValueIsAdjusting());
-		setValue(ok ? val : snapTo(val));
+		int setVal = (ok ? jsval : snapTo(jsval));
+		setValue(setVal);
 	}
 
 	protected void setValue(int val) {
 		if (val == slider.getValue())
 			return;
+		//System.out.println("JSSliderUI.setValue " + val);
 		slider.setValue(val);
 	}
 
@@ -389,7 +391,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		// hack is for list to not show bottom line
 		int max = this.max;//(myScrollPaneUI == null ? this.max : this.max - 1);
 		setSliderAttr("max", max);
-		setSliderAttr("value", val);
+		setSliderAttr("value", jsval);
 
 		myHeight = 10;
 		int barPlace = 40; // not for general slider or scrollbar
@@ -551,8 +553,9 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 			setSliderAttr("min", min = v);
 		if ((v = slider.getMaximum()) != max)
 			setSliderAttr("max", max = v);
-		if ((v = slider.getValue()) != val) {
-			setSliderAttr("value", val = v);
+		if ((v = slider.getValue()) != jsval) {
+			//System.out.println("JSSliderUI val set to " + v + " from " + jsval);
+			setSliderAttr("value", jsval = v);
 		}
 		setup(false);
 	}
