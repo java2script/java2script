@@ -129,10 +129,11 @@ public class TextListener implements KeyListener, FocusListener, ChangeListener,
 		boolean setCaret = (mark != Integer.MIN_VALUE);
 		switch (eventType) {
 		case KeyEvent.KEY_TYPED:
+			
 //			setCaret = false;
 			break;
-		case KeyEvent.KEY_PRESSED:
-			
+		case KeyEvent.KEY_PRESSED:			
+
 			//System.out.println("TextListener key pressed " + keyCode);
 //			if (keyCode == KeyEvent.VK_TAB) {
 //				System.out.println("tab pressed");
