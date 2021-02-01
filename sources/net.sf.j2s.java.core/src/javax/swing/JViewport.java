@@ -156,6 +156,8 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
     transient protected Image backingStoreImage = null;
 
     /**
+     * SwingJS - this will never be set TRUE
+     * 
      * The <code>scrollUnderway</code> flag is used for components like
      * <code>JList</code>.  When the downarrow key is pressed on a
      * <code>JList</code> and the selected
@@ -254,14 +256,14 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
      */
     private transient boolean repaintAll;
 
-    /**
-     * This is set to true in paint, if <code>repaintAll</code>
-     * is true and the clip rectangle does not match the bounds.
-     * If true, and scrolling happens the
-     * repaint manager is not cleared which then allows for the repaint
-     * previously invoked to succeed.
-     */
-    private transient boolean waitingForRepaint;
+//    /**
+//     * This is set to true in paint, if <code>repaintAll</code>
+//     * is true and the clip rectangle does not match the bounds.
+//     * If true, and scrolling happens the
+//     * repaint manager is not cleared which then allows for the repaint
+//     * previously invoked to succeed.
+//     */
+//    private transient boolean waitingForRepaint;
 
 //    /**
 //     * Instead of directly invoking repaint, a <code>Timer</code>
@@ -347,7 +349,7 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
     @Override
 		public void scrollRectToVisible(Rectangle contentRect) {
         Component view = getView();
-
+        //System.out.println("JViewport.scrollRectToVis");
         if (view == null) {
             return;
         } else {
@@ -600,6 +602,7 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
 
 
     private Graphics getBackingStoreGraphics(Graphics g) {
+    	//System.out.println("JViewport.getBackingStore------------------------" );
         Graphics bsg = backingStoreImage.getGraphics();
         bsg.setColor(g.getColor());
         bsg.setFont(g.getFont());
@@ -675,40 +678,35 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
         }
     }
 
-    /**
-     * Depending on whether the <code>backingStore</code> is enabled,
-     * either paint the image through the backing store or paint
-     * just the recently exposed part, using the backing store
-     * to "blit" the remainder.
-     * <blockquote>
-     * The term "blit" is the pronounced version of the PDP-10
-     * BLT (BLock Transfer) instruction, which copied a block of
-     * bits. (In case you were curious.)
-     * </blockquote>
-     *
-     * @param g the <code>Graphics</code> context within which to paint
-     */
-    @Override
-		public void paint(Graphics g)
-    {
-        int width = getWidth();
-        int height = getHeight();
+	/**
+	 * Depending on whether the <code>backingStore</code> is enabled, either paint
+	 * the image through the backing store or paint just the recently exposed part,
+	 * using the backing store to "blit" the remainder. <blockquote> The term "blit"
+	 * is the pronounced version of the PDP-10 BLT (BLock Transfer) instruction,
+	 * which copied a block of bits. (In case you were curious.) </blockquote>
+	 *
+	 * @param g the <code>Graphics</code> context within which to paint
+	 */
+	@Override
+	public void paint(Graphics g) {
+		int width = getWidth();
+		int height = getHeight();
 
-        if ((width <= 0) || (height <= 0)) {
-            return;
-        }
+		if ((width <= 0) || (height <= 0)) {
+			return;
+		}
 
-        秘myClip.width = width;
-        秘myClip.height = height;
+		秘myClip.width = width;
+		秘myClip.height = height;
 //    	((JSViewportUI) ui).setClip(秘myClip); no longer necessary (test!)
-        if (inBlitPaint) {
-            // We invoked paint as part of copyArea cleanup, let it through.
-            super.paint(g);
-            return;
-        }
+		if (inBlitPaint) {
+			// We invoked paint as part of copyArea cleanup, let it through.
+			super.paint(g);
+			return;
+		}
 
-        if (repaintAll) {
-            repaintAll = false;
+		if (repaintAll) {
+			repaintAll = false;
 //           Rectangle clipB = g.getClipBounds();
 //            if (clipB.width < getWidth() ||
 //                clipB.height < getHeight()) {
@@ -727,107 +725,105 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
 //                }
 //                waitingForRepaint = false;
 //            }
-        }
-        else if (waitingForRepaint) {
-            // Need a complete repaint before resetting waitingForRepaint
-            Rectangle clipB = g.getClipBounds();
-            if (clipB.width >= getWidth() &&
-                clipB.height >= getHeight()) {
-                waitingForRepaint = false;
-//                repaintTimer.stop();
-            }
-        }
+//		} else if (waitingForRepaint) {
+//			// Need a complete repaint before resetting waitingForRepaint
+//			Rectangle clipB = g.getClipBounds();
+//			if (clipB.width >= getWidth() && clipB.height >= getHeight()) {
+//				waitingForRepaint = false;
+////                repaintTimer.stop();
+//			}
+		}
 
-        if (!backingStore || isBlitting() || getView() == null) {
-            super.paint(g);
-            lastPaintPosition = getViewLocation();
-            return;
-        }
-
-        // If the view is smaller than the viewport and we are not opaque
-        // (that is, we won't paint our background), we should set the
-        // clip. Otherwise, as the bounds of the view vary, we will
-        // blit garbage into the exposed areas.
-        Rectangle viewBounds = getView().getBounds();
-        if (!isOpaque()) {
-            g.clipRect(0, 0, viewBounds.width, viewBounds.height);
-        }
-
-        if (backingStoreImage == null) {
-            // Backing store is enabled but this is the first call to paint.
-            // Create the backing store, paint it and then copy to g.
-            // The backing store image will be created with the size of
-            // the viewport. We must make sure the clip region is the
-            // same size, otherwise when scrolling the backing image
-            // the region outside of the clipped region will not be painted,
-            // and result in empty areas.
-            backingStoreImage = createImage(width, height);
-            Rectangle clip = g.getClipBounds();
-//            if (clip.width != width || clip.height != height) {
-//                if (!isOpaque()) {
-//                    g.clipRect(0, 0, Math.min(viewBounds.width, width),
-//                              Math.min(viewBounds.height, height));
-//                }
-//                else {
-//                    g.setClip(0, 0, width, height);
-//                }
-//                paintViaBackingStore(g, clip);
+//        if (!backingStore || isBlitting() || getView() == null) {
+		super.paint(g);
+		lastPaintPosition = getViewLocation();
+		return;
+//        }
+//
+//        // If the view is smaller than the viewport and we are not opaque
+//        // (that is, we won't paint our background), we should set the
+//        // clip. Otherwise, as the bounds of the view vary, we will
+//        // blit garbage into the exposed areas.
+//        Rectangle viewBounds = getView().getBounds();
+//        if (!isOpaque()) {
+//            g.clipRect(0, 0, viewBounds.width, viewBounds.height);
+//        }
+//        
+//        if (backingStoreImage == null) {
+//            // Backing store is enabled but this is the first call to paint.
+//            // Create the backing store, paint it and then copy to g.
+//            // The backing store image will be created with the size of
+//            // the viewport. We must make sure the clip region is the
+//            // same size, otherwise when scrolling the backing image
+//            // the region outside of the clipped region will not be painted,
+//            // and result in empty areas.
+//            backingStoreImage = createImage(width, height);
+//            Rectangle clip = g.getClipBounds();
+////            if (clip.width != width || clip.height != height) {
+////                if (!isOpaque()) {
+////                    g.clipRect(0, 0, Math.min(viewBounds.width, width),
+////                              Math.min(viewBounds.height, height));
+////                }
+////                else {
+////                    g.setClip(0, 0, width, height);
+////                }
+////                paintViaBackingStore(g, clip);
+////            }
+////            else {
+//                paintViaBackingStore(g);
+////            }
+//        }
+//        else {
+//            if (!scrollUnderway || lastPaintPosition.equals(getViewLocation())) {
+//                // No scrolling happened: repaint required area via backing store.
+//                paintViaBackingStore(g);
+//            } else {
+//                // The image was scrolled. Manipulate the backing store and flush it to g.
+////                Point blitFrom = new Point();
+////                Point blitTo = new Point();
+////                Dimension blitSize = new Dimension();
+////                Rectangle blitPaint = new Rectangle();
+////
+////                Point newLocation = getViewLocation();
+////                int dx = newLocation.x - lastPaintPosition.x;
+////                int dy = newLocation.y - lastPaintPosition.y;
+////                boolean canBlit = computeBlit(dx, dy, blitFrom, blitTo, blitSize, blitPaint);
+////                if (!canBlit) {
+//                    // The image was either moved diagonally or
+//                    // moved by more than the image size: paint normally.
+//                    paintViaBackingStore(g);
+////                } else {
+////                    int bdx = blitTo.x - blitFrom.x;
+////                    int bdy = blitTo.y - blitFrom.y;
+////
+////                    // Move the relevant part of the backing store.
+////                    Rectangle clip = g.getClipBounds();
+////                    // We don't want to inherit the clip region when copying
+////                    // bits, if it is inherited it will result in not moving
+////                    // all of the image resulting in garbage appearing on
+////                    // the screen.
+////                    g.setClip(0, 0, width, height);
+////                    Graphics bsg = getBackingStoreGraphics(g);
+////                    try {
+////                        bsg.copyArea(blitFrom.x, blitFrom.y, blitSize.width, blitSize.height, bdx, bdy);
+////
+////                        g.setClip(clip.x, clip.y, clip.width, clip.height);
+////                        // Paint the rest of the view; the part that has just been exposed.
+////                        Rectangle r = viewBounds.intersection(blitPaint);
+////                        bsg.setClip(r);
+////                        super.paint(bsg);
+////
+////                        // Copy whole of the backing store to g.
+////                        ((JSGraphics2D)(Object)g).drawImagePriv(backingStoreImage, 0, 0, this);
+////                    } finally {
+////                        bsg.dispose();
+////                    }
+////                }
 //            }
-//            else {
-                paintViaBackingStore(g);
-//            }
-        }
-        else {
-            if (!scrollUnderway || lastPaintPosition.equals(getViewLocation())) {
-                // No scrolling happened: repaint required area via backing store.
-                paintViaBackingStore(g);
-            } else {
-                // The image was scrolled. Manipulate the backing store and flush it to g.
-//                Point blitFrom = new Point();
-//                Point blitTo = new Point();
-//                Dimension blitSize = new Dimension();
-//                Rectangle blitPaint = new Rectangle();
-//
-//                Point newLocation = getViewLocation();
-//                int dx = newLocation.x - lastPaintPosition.x;
-//                int dy = newLocation.y - lastPaintPosition.y;
-//                boolean canBlit = computeBlit(dx, dy, blitFrom, blitTo, blitSize, blitPaint);
-//                if (!canBlit) {
-                    // The image was either moved diagonally or
-                    // moved by more than the image size: paint normally.
-                    paintViaBackingStore(g);
-//                } else {
-//                    int bdx = blitTo.x - blitFrom.x;
-//                    int bdy = blitTo.y - blitFrom.y;
-//
-//                    // Move the relevant part of the backing store.
-//                    Rectangle clip = g.getClipBounds();
-//                    // We don't want to inherit the clip region when copying
-//                    // bits, if it is inherited it will result in not moving
-//                    // all of the image resulting in garbage appearing on
-//                    // the screen.
-//                    g.setClip(0, 0, width, height);
-//                    Graphics bsg = getBackingStoreGraphics(g);
-//                    try {
-//                        bsg.copyArea(blitFrom.x, blitFrom.y, blitSize.width, blitSize.height, bdx, bdy);
-//
-//                        g.setClip(clip.x, clip.y, clip.width, clip.height);
-//                        // Paint the rest of the view; the part that has just been exposed.
-//                        Rectangle r = viewBounds.intersection(blitPaint);
-//                        bsg.setClip(r);
-//                        super.paint(bsg);
-//
-//                        // Copy whole of the backing store to g.
-//                        ((JSGraphics2D)(Object)g).drawImagePriv(backingStoreImage, 0, 0, this);
-//                    } finally {
-//                        bsg.dispose();
-//                    }
-//                }
-            }
-        }
-        lastPaintPosition = getViewLocation();
-        scrollUnderway = false;
-    }
+//        }
+//        lastPaintPosition = getViewLocation();
+//        scrollUnderway = false;
+	}
 
 
     /**
@@ -938,9 +934,10 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
     }
 
     private final boolean isBlitting() {
-        Component view = getView();
-        return (scrollMode == BLIT_SCROLL_MODE) &&
-               (view instanceof JComponent) && ((JComponent)view).isOpaque();
+    	return true;
+//        Component view = getView();
+//        return (scrollMode == BLIT_SCROLL_MODE) &&
+//               (view instanceof JComponent) && ((JComponent)view).isOpaque();
     }
 
 
@@ -1059,84 +1056,83 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
     }
 
 
-    /**
-     * Sets the view coordinates that appear in the upper left
-     * hand corner of the viewport, does nothing if there's no view.
-     *
-     * @param p  a <code>Point</code> object giving the upper left coordinates
-     */
-    public void setViewPosition(Point p)
-    {
-        Component view = getView();
-        if (view == null) {
-            return;
-        }
+	/**
+	 * Sets the view coordinates that appear in the upper left hand corner of the
+	 * viewport, does nothing if there's no view.
+	 *
+	 * @param p a <code>Point</code> object giving the upper left coordinates
+	 */
+	public void setViewPosition(Point p) {
+		Component view = getView();
+		if (view == null) {
+			return;
+		}
 
-        int oldX, oldY, x = p.x, y = p.y;
+		int oldX, oldY, x = p.x, y = p.y;
 
-        /* Collect the old x,y values for the views location
-         * and do the song and dance to avoid allocating
-         * a Rectangle object if we don't have to.
-         */
-        if (view instanceof JComponent) {
-            JComponent c = (JComponent)view;
-            oldX = c.getX();
-            oldY = c.getY();
-        }
-        else {
-            Rectangle r = view.getBounds();
-            oldX = r.x;
-            oldY = r.y;
-        }
+		/*
+		 * Collect the old x,y values for the views location and do the song and dance
+		 * to avoid allocating a Rectangle object if we don't have to.
+		 */
+		if (view instanceof JComponent) {
+			JComponent c = (JComponent) view;
+			oldX = c.getX();
+			oldY = c.getY();
+		} else {
+			Rectangle r = view.getBounds();
+			oldX = r.x;
+			oldY = r.y;
+		}
 
-        /* The view scrolls in the opposite direction to mouse
-         * movement.
-         */
-        int newX = -x;
-        int newY = -y;
+		/*
+		 * The view scrolls in the opposite direction to mouse movement.
+		 */
+		int newX = -x;
+		int newY = -y;
 
-        if ((oldX != newX) || (oldY != newY)) {
-            if (!waitingForRepaint && isBlitting() && canUseWindowBlitter()) {
-                RepaintManager rm = RepaintManager.currentManager(this);
-                // The cast to JComponent will work, if view is not
-                // a JComponent, isBlitting will return false.
-                JComponent jview = (JComponent)view;
-                Rectangle dirty = rm.getDirtyRegion(jview);
-                if (dirty == null || !dirty.contains(jview.getVisibleRect())) {
-                    rm.beginPaint();
-                    Graphics g = JComponent.safelyGetGraphics(this, SwingUtilities.getRoot(this));
-                    try {
-                        flushViewDirtyRegion(g, dirty);
-                        view.setLocation(newX, newY);
-                        g.clipRect(0,0,getWidth(), Math.min(getHeight(),
-                                                           jview.getHeight()));
-                        // Repaint the complete component if the blit succeeded
-                        // and needsRepaintAfterBlit returns true.
-                        repaintAll = (windowBlitPaint(g) &&
-                                      needsRepaintAfterBlit());
-                        rm.markCompletelyClean((JComponent)getParent());
-                        rm.markCompletelyClean(this);
-                        rm.markCompletelyClean(jview);
-                    } finally {
-                        g.dispose();
-                        rm.endPaint();
-                    }
-                }
-                else {
-                    // The visible region is dirty, no point in doing copyArea
-                    view.setLocation(newX, newY);
-                    repaintAll = false;
-                }
-            }
-            else {
-                scrollUnderway = true;
-                // This calls setBounds(), and then 秘repaint().
-                view.setLocation(newX, newY);
-                repaintAll = false;
-            }
-            fireStateChanged();
-        }
-    }
+		if ((oldX != newX) || (oldY != newY)) {
+//			if (//!waitingForRepaint && 
+//					isBlitting() && canUseWindowBlitter()) {
+//				RepaintManager rm = RepaintManager.currentManager(this);
+//				// The cast to JComponent will work, if view is not
+//				// a JComponent, isBlitting will return false.
+//				JComponent jview = (JComponent) view;
+//				Rectangle dirty = rm.getDirtyRegion(jview);
+//				if (dirty == null || !dirty.contains(jview.getVisibleRect())) {
+//					rm.beginPaint();
+//					Graphics g = JComponent.safelyGetGraphics(this, SwingUtilities.getRoot(this));
+//					try {
+//						flushViewDirtyRegion(g, dirty);
+//						view.setLocation(newX, newY);
+//						g.clipRect(0, 0, getWidth(), Math.min(getHeight(), jview.getHeight()));
+//						// Repaint the complete component if the blit succeeded
+//						// and needsRepaintAfterBlit returns true.
+//////////						repaintAll = (windowBlitPaint(g) && needsRepaintAfterBlit());
+//						rm.markCompletelyClean((JComponent) getParent());
+//						rm.markCompletelyClean(this);
+//						rm.markCompletelyClean(jview);
+//					} finally {
+//						g.dispose();
+//						rm.endPaint();
+//					}
+//				} else 
+//				{
+					// The visible region is dirty, no point in doing copyArea
+					view.setLocation(newX, newY);
+					repaintAll = false;
+//				}
+//			} else {
+//				scrollUnderway = true;
+//				// This calls setBounds(), and then 秘repaint().
+//				view.setLocation(newX, newY);
+//				repaintAll = false;
+//			}
+			fireStateChanged();
+			if (view instanceof JTable) {
+				view.repaint();
+			}
+		}
+	}
 
 
     /**
@@ -1627,50 +1623,47 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
     
     private Rectangle 秘myClip = new Rectangle();
     
-    /**
-     * Called to paint the view, usually when <code>blitPaint</code>
-     * can not blit.
-     *
-     * @param g the <code>Graphics</code> context within which to paint
-     */
-    private void paintView(Graphics g) {
-        JComponent view = (JComponent)getView();
-        Rectangle clip = g.getClipBounds();
-        if (view.getWidth() >= getWidth()) {
-            // Graphics is relative to JViewport, need to map to view's
-            // coordinates space.
-            int x = view.getX();
-            int y = view.getY();// will be negative
-            //Graphics g1 = g.create();
-            g.translate(x, y);
-            秘myClip.width = clip.width;
-            秘myClip.height = clip.height;
-            秘myClip.x = clip.x - x;
-            秘myClip.y = clip.y - y;
-            paintForceDoubleBuffered(g, view);
-            //g.setColor(Math.random() > 0.5 ? Color.GREEN : Color.MAGENTA);
-            //g.fillRect(-x, 50-y, clip.width, clip.height);
-            //g1.dispose();
-            //g.translate(-x, -y);
-            //g.setClip(clip.x, clip.y, clip.width, clip.height);
-        }
-        else {
-            秘myClip.x = clip.x;
-            秘myClip.y = clip.y;
-            // To avoid any problems that may result from the viewport being
-            // bigger than the view we start painting from the viewport.
-            try {
-                inBlitPaint = true;
-                paintForceDoubleBuffered(g, this);
-            } finally {
-                inBlitPaint = false;
-            }
-        }
+	/**
+	 * Called to paint the view, usually when <code>blitPaint</code> can not blit.
+	 *
+	 * @param g the <code>Graphics</code> context within which to paint
+	 */
+	private void paintView(Graphics g) {
+		JComponent view = (JComponent) getView();
+		Rectangle clip = g.getClipBounds();
+		if (view.getWidth() >= getWidth()) {
+			// Graphics is relative to JViewport, need to map to view's
+			// coordinates space.
+			int x = view.getX();
+			int y = view.getY();// will be negative
+			// Graphics g1 = g.create();
+			g.translate(x, y);
+			秘myClip.width = clip.width;
+			秘myClip.height = clip.height;
+			秘myClip.x = clip.x - x;
+			秘myClip.y = clip.y - y;
+			paintForceDoubleBuffered(g, view);
+			// g.setColor(Math.random() > 0.5 ? Color.GREEN : Color.MAGENTA);
+			// g.fillRect(-x, 50-y, clip.width, clip.height);
+			// g1.dispose();
+			// g.translate(-x, -y);
+			// g.setClip(clip.x, clip.y, clip.width, clip.height);
+		} else {
+			秘myClip.x = clip.x;
+			秘myClip.y = clip.y;
+			// To avoid any problems that may result from the viewport being
+			// bigger than the view we start painting from the viewport.
+			try {
+				inBlitPaint = true;
+				paintForceDoubleBuffered(g, this);
+			} finally {
+				inBlitPaint = false;
+			}
+		}
 
-    }
+	}
 
     private void paintForceDoubleBuffered(Graphics g, JComponent c) {
-    	
         g.clipRect(秘myClip.x, 秘myClip.y, 秘myClip.width, 秘myClip.height);
 		RepaintManager rm = RepaintManager.currentManager(c);
 		rm.beginPaint();
