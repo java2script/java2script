@@ -10899,7 +10899,7 @@ window.J2S = J2S = (function() {
 				.indexOf("safari") >= 0);
 		j._isMsie = (window.ActiveXObject !== undefined);
 		j._isEdge = (navigator.userAgent.indexOf("Edge/") >= 0);
-		j._useDataURI = !j._isSafari && !j._isMsie && !j._isEdge; // safari
+		j._useDataURI = /*!j._isSafari && */  !j._isMsie && !j._isEdge; // safari
 																	// may be OK
 																	// here --
 																	// untested
