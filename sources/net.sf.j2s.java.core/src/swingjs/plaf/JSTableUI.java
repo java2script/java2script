@@ -465,6 +465,8 @@ public class JSTableUI extends JSPanelUI {
 		} else { 
 			row = table.getEditingRow();
 			col = table.getEditingColumn();
+			if (col >= table.getColumnCount())
+				return;
 			DOMNode td = CellHolder.findCellNode(this, null, row, col);
 			if (td == null) {
 				td = addElement(row, col, table.getRowHeight());

@@ -3679,7 +3679,7 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
 				calculatedBaseline = false;
 				break;
 			default:
-				System.out.println("JSTabbedPaneUI prop changed " + name);
+				//System.out.println("JSTabbedPaneUI prop changed " + name);
 				break;
 			}
 		}
