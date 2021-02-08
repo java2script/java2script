@@ -29,8 +29,15 @@ public class Test_Long extends Test_ {
 	
 	public static void main(String[] args) {
 
-		long j = 2, k = 10, l = 1, m = 12;
-
+		
+		long j = Long.parseLong("2"), k = 10, l = 1, m = 12;
+		Long J = Long.valueOf(j);
+		assert(J == 2);
+		J = Long.valueOf("2");
+		assert(J == 2);
+		assert(J == Long.valueOf(2));
+		J = new Long(2000);
+		assert(J != Long.valueOf(2000));
 		
 		// TODO
 		 

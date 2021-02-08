@@ -33,6 +33,8 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -49,7 +51,7 @@ import swingjs.JSMouse;
 import swingjs.api.js.DOMNode;
 
 public class TextListener implements KeyListener, FocusListener, ChangeListener,
-		PropertyChangeListener, DocumentListener, CaretListener {
+		PropertyChangeListener, DocumentListener, CaretListener, MouseListener {
 
 	private JTextComponent txtComp;
 
@@ -206,6 +208,35 @@ public class TextListener implements KeyListener, FocusListener, ChangeListener,
 	public void keyReleased(KeyEvent e) {
 		// NOTE: Any System.out here will cause problems with the cursor
 //		System.out.println("TextListener " + e);
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		ui.setCursor();
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

@@ -1637,7 +1637,7 @@ public class JSComponentUI extends ComponentUI
 	}
 
 
-	private Cursor getCursor() {
+	protected Cursor getCursor() {
 		Cursor cur = c.getCursor();
 		return (cur == Cursor.getDefaultCursor() ? null : cur);		
 	}

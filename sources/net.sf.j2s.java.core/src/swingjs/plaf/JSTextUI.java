@@ -29,6 +29,7 @@ package swingjs.plaf;
 
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -149,12 +150,15 @@ public abstract class JSTextUI extends JSLightweightUI {
     TextListener textListener; // referred to in j2sApplet.js
 
 	protected boolean useRootView = false; // TextArea only?
-	
+
+	private static final Cursor textCursor = new Cursor(Cursor.TEXT_CURSOR);	
 	@Override
 	public DOMNode updateDOMNode() {
 		if (editor.isOpaque() && editor.isEnabled())
 			setBackgroundImpl(getBackground());
 		setEditable(editable);
+		if (editor.getCursor() == null)
+			DOMNode.setStyle(domNode, "cursor", "text");
 		Color cc = editor.getCaretColor();
 		if (cc != null)
 			DOMNode.setStyle(domNode, "caret-color", toCSSString(cc));
@@ -162,7 +166,15 @@ public abstract class JSTextUI extends JSLightweightUI {
 		return updateDOMNodeCUI();
 	}
 	
-	
+    @Override
+	protected Cursor getCursor() {
+        if ((! editor.isCursorSet())
+               || editor.getCursor() instanceof UIResource) {
+            return (editor.isEditable()) ? textCursor : null;
+        }
+        return super.getCursor();
+    }
+
 	/**
 	 * called by JSComponentUI.bindJSEvents
 	 * 
@@ -668,7 +680,7 @@ public abstract class JSTextUI extends JSLightweightUI {
 
 	protected void installListeners(JTextComponent b) {
 		TextListener listener = textListener;
-//		b.addMouseListener(listener);
+		b.addMouseListener(listener);
 //		b.addMouseMotionListener(listener);
 		b.addKeyListener(textListener);
 		b.addFocusListener(listener);
@@ -681,7 +693,7 @@ public abstract class JSTextUI extends JSLightweightUI {
 	protected void uninstallListeners(JTextComponent b) {
 		TextListener listener = textListener;
 		b.removeKeyListener(textListener);
-//		b.removeMouseListener(listener);
+		b.removeMouseListener(listener);
 //		b.removeMouseMotionListener(listener);
 		b.removeFocusListener(listener);
 		b.removePropertyChangeListener(listener);
@@ -1130,6 +1142,7 @@ public abstract class JSTextUI extends JSLightweightUI {
 			setBackgroundImpl(editable || !(bg instanceof UIResource) 
 					|| inactiveBackground == colorUNKNOWN ? bg : inactiveBackground);
 		}		
+		setCursor();
 	}
 	
 	protected void setEditableCSS() {
