@@ -15122,7 +15122,7 @@ Clazz.newMeth = function (clazzThis, funName, funBody, modifiers) {
   else 
 	clazzThis.prototype[funName] = funBody;
   return funBody; // allow static calls as though they were not static
-};                     
+};
 
 Clazz.newPackage = function (pkgName) {
   Clazz._Loader && Clazz._Loader.doTODO();
@@ -18086,10 +18086,11 @@ m$(Integer,"decode$S", function(n){
 // Note that Long is problematic in JavaScript 
 
 Clazz._setDeclared("java.lang.Long", java.lang.Long=Long=function(){
-if (arguments[0] === null || typeof arguments[0] != "object")this.c$(arguments[0]);
+	this.c$(arguments[0]);
 });
 
 decorateAsNumber(Long, "Long", "long", "J", lHCOffset);
+
 Long.toString=Long.toString$J=Long.toString$J$I = Long.prototype.toString=function(i, radix){
 	switch(arguments.length) {
 	case 2:
@@ -18100,7 +18101,7 @@ Long.toString=Long.toString$J=Long.toString$J$I = Long.prototype.toString=functi
 		i = this.valueOf();
 		break;
 	}
-	return (i.length ? Long.$s(i) : i);
+	return (i.length ? Long.$s(i) : "" + i);
 };
 
 	
@@ -18899,8 +18900,8 @@ m$(Long,["longValue","longValue$"],function(){return this.valueOf();});
 
 m$(Long,"c$",
 function(v) {
- if (typeof v != "number")
-	v = Long.parseLong$S$I(v, 10);
+	if (typeof v != "number" && typeof v != "object")
+		v = Long.parseLong$S$I(v, 10);
  this.valueOf=function(){return v;};
 }, 1);
 
@@ -18931,7 +18932,7 @@ function(s, radix){
 m$(Long,"valueOf$J",
 function(i){
   i = Clazz.toLong(i);
-  var v = (i.length ? 0 : getCachedNumber(i, longs, Long, "c$$J"));
+  var v = (!i.length || (v = Long.$ival(i)) == Long.$lval(i) && (i = v) == i ? getCachedNumber(i, longs, Long, "c$$J") : 0);
   return (v ? v : Clazz.new_(Long.c$$J, [i]));
 }, 1);
 
