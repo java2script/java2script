@@ -73,6 +73,8 @@ public abstract class FocusManager extends DefaultKeyboardFocusManager {
     public static FocusManager getCurrentManager() {
         KeyboardFocusManager manager =
             KeyboardFocusManager.getCurrentKeyboardFocusManager();
+        if (manager instanceof DefaultKeyboardFocusManager)
+        	return (FocusManager) manager; // SwingJS just do this 
         if (manager instanceof FocusManager) {
             return (FocusManager)manager;
         } else {
