@@ -28,6 +28,7 @@
 
 package swingjs.plaf;
 
+import java.awt.Component;
 import java.awt.Point;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -38,6 +39,8 @@ import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import javax.swing.FocusManager;
+import javax.swing.SwingUtilities;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.ChangeEvent;
@@ -183,8 +186,16 @@ public class TextListener implements KeyListener, FocusListener, ChangeListener,
 
 	@Override
 	public void changedUpdate(DocumentEvent e) {
-		if (!working)
+		if (!working) {
+			Component c = FocusManager.getCurrentManager().getFocusOwner();
 			ui.setJSText();
+			int p = e.getOffset() + e.getLength();
+			ui.setJavaMarkAndDot(new Point(p, p));
+			if (c != null)
+			SwingUtilities.invokeLater(() -> {
+				c.requestFocus();
+			});
+		}
 	}
 
 	@Override

@@ -1335,11 +1335,7 @@ public abstract class JSTextUI extends JSLightweightUI {
 			case KeyEvent.VK_V: // paste
 				if (!isCTRL)
 					return null;
-				// TODO -- JEditorPane needs this -- right now we cannot do this correctly with
-				// multiple new lines
-
-				if (!isEditorPane)
-					allowKeyEvent(jQueryEvent);
+				allowKeyEvent(jQueryEvent);
 				if (type == "keydown")
 					handleCtrlV(KeyEvent.KEY_PRESSED);
 				else if (type == "keyup")
@@ -1359,6 +1355,8 @@ public abstract class JSTextUI extends JSLightweightUI {
 			
 			case KeyEvent.VK_TAB:
 				return handleTab(jQueryEvent, type);
+			case KeyEvent.VK_HOME:
+			case KeyEvent.VK_END:
 			case KeyEvent.VK_UP:
 			case KeyEvent.VK_DOWN:
 			case KeyEvent.VK_LEFT:
@@ -1398,6 +1396,11 @@ public abstract class JSTextUI extends JSLightweightUI {
 		 */		
 	}
 
+	/**
+	 * 
+	 * @param mode
+	 * @return ignored)
+	 */
 	protected boolean handleCtrlV(int mode) {
 		switch (mode) {
 		case KeyEvent.KEY_PRESSED:
@@ -1435,6 +1438,10 @@ public abstract class JSTextUI extends JSLightweightUI {
     	return pt.y;    	
     }
     
+    /**
+     * transfer the mark and dot to the Java TextComponent
+     * @param markDot
+     */
 	void setJavaMarkAndDot(Point markDot) {
 		int mark = markDot.x;
 		int dot = markDot.y;
@@ -3644,6 +3651,7 @@ public abstract class JSTextUI extends JSLightweightUI {
 
 
 	public void action(String what, int data) {
+		// see JSEditorPaneUI
 	}
 
 
