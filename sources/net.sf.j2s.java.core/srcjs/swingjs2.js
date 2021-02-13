@@ -14022,6 +14022,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2021.02.12 implements better(?) interface defaults resolution -- in order of presentation
 // BH 2020.12.31 3.3.1-v1 full 64-bit long support; BigDecimal, BigInteger fully 64-bit
 
 // BH 2020.12.19 3.2.10-v1 preliminary work aiming to back long with [r,m,s].
@@ -15714,6 +15715,7 @@ var copyStatics = function(clazzFrom, clazzThis, isInterface) {
     }
   }
   if (isInterface) {
+	clazzThis.$defaults$ && clazzThis.$defaults$(clazzThis);
 	for (var o in clazzFrom.prototype) {
 	if (clazzThis.prototype[o] == undefined && !excludeSuper(o)) {
 	clazzThis.prototype[o] = clazzFrom.prototype[o];
@@ -15721,7 +15723,6 @@ var copyStatics = function(clazzFrom, clazzThis, isInterface) {
 	}
 	if (clazzFrom.$defaults$) {
 		__allowOverwriteClass = false;
-		clazzThis.$defaults$ && clazzThis.$defaults$(clazzThis);
 		clazzFrom.$defaults$(clazzThis);
 		__allowOverwriteClass = true;
 	}
@@ -16078,7 +16079,7 @@ var setSuperclass = function(clazzThis, clazzSuper){
  */
 var addInterface = function (clazzThis, interfacez) {
   if (interfacez instanceof Array) {
-    for (var i = interfacez.length; --i >= 0;) {
+    for (var i = 0, n = interfacez.length; i < n; i++) {
       var iface = interfacez[i];
       if (iface instanceof Array) {
         var cl;
