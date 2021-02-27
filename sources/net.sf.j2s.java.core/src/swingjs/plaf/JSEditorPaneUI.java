@@ -254,7 +254,7 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		String prop = e.getPropertyName();
-		System.out.println("JSEPUI prop " + prop);
+		//System.out.println("JSEPUI prop " + prop);
 		switch(prop) {
 		case "editorKit":
 			isHtmlKit = (editor.秘jsHTMLHelper != null);

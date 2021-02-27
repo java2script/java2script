@@ -1301,7 +1301,7 @@ public class JSComponentUI extends ComponentUI
 		String prop = e.getPropertyName();
 		Object value = e.getNewValue();
 		if (prop == "jscanvas") {
-			addLocalCanvas();
+			addLocalCanvas(false);
 		}
 		if (domNode == null)
 			return;
@@ -1320,8 +1320,8 @@ public class JSComponentUI extends ComponentUI
 		propertyChangedCUI(e, prop);
 	}
 	
-	protected void addLocalCanvas() {
-		if (jc.秘g != null)
+	protected void addLocalCanvas(boolean forceNew) {
+		if (jc.秘g != null && !forceNew)
 			return;
 		jc.秘g = (JSGraphics2D)(Object) Boolean.TRUE;
 		setTainted();
