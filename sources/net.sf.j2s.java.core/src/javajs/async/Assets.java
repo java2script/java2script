@@ -8,9 +8,11 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -231,11 +233,16 @@ public class Assets {
 	}
 
 	private static HashSet<String> loadedAssets = new HashSet<>();
+
+	private static boolean debugging;
 	
 	public static boolean hasLoaded(String name) {
 		return loadedAssets.contains(name);
 	}
 
+	public static void setDebugging(boolean tf) {
+		debugging = tf;
+	}
 	/**
 	 * Completely reset the assets data.
 	 * 
@@ -254,10 +261,21 @@ public class Assets {
 	private void _add(String name, String zipFile, String[] paths) {
 		if (hasLoaded(name)) {
 			System.err.println("Assets warning: Asset " + name + " already exists");
+			List<String> toRemove = new ArrayList<>();
+			for (String key: assetsByPath.keySet()) {
+				if (assetsByPath.get(key).name.equals(name)) {
+					toRemove.add(key);					
+				}
+			}
+			for (int i = 0; i < toRemove.size(); i++) {
+				System.err.println("Assets warning: removing " + assetsByPath.get(toRemove.get(i)));
+				assetsByPath.remove(toRemove.get(i));
+			}
 		}
 		loadedAssets.add(name);
 		for (int i = paths.length; --i >= 0;) {
 			assetsByPath.put(paths[i], new Asset(name, zipFile, paths[i]));
+			System.out.println("Assets: adding " + assetsByPath.get(paths[i]));
 		}
 		resort();
 	}
@@ -325,8 +343,8 @@ public class Assets {
 
 
 	/**
-	 * Get the contents of a path from a zip file asset as byte[], optionally loading
-	 * the resource directly using a class loader.
+	 * Get the contents of a path from a zip file asset as byte[], optionally
+	 * loading the resource directly using a class loader.
 	 * 
 	 * @param path
 	 * @param zipOnly
@@ -334,25 +352,29 @@ public class Assets {
 	 */
 	private static byte[] getAssetBytes(String path, boolean zipOnly) {
 		byte[] bytes = null;
+		URL url = null;
 		try {
-			URL url = getInstance()._getURLFromPath(path, true);
+			url = getInstance()._getURLFromPath(path, true);
 			if (url == null && !zipOnly) {
 				url = getAbsoluteURL(path);
-				//url = Assets.class.getResource(path);
+				// url = Assets.class.getResource(path);
 			}
-			if (url == null)
-				return null;
-			if (isJS) {
-				bytes = jsutil.getURLBytes(url);
-				if (bytes == null) {
-					url.openStream();
+			if (url != null) {
+				if (isJS) {
 					bytes = jsutil.getURLBytes(url);
+					if (bytes == null) {
+						url.openStream();
+						bytes = jsutil.getURLBytes(url);
+					}
+				} else {
+					bytes = getLimitedStreamBytes(url.openStream(), -1, null);
 				}
-			} else {
-				bytes = getLimitedStreamBytes(url.openStream(), -1, null);
 			}
 		} catch (Throwable t) {
 			t.printStackTrace();
+		}
+		if (debugging) {
+			System.out.println("Assets.getAssetBytes " + path + " " + url + (bytes == null ? " null" : " " + bytes.length + " bytes"));
 		}
 		return bytes;
 	}
@@ -371,24 +393,25 @@ public class Assets {
 	}
 
 	/**
-	 * Get the contents of a path from a zip file asset as an InputStream, optionally
-	 * loading the resource directly using a class loader.
+	 * Get the contents of a path from a zip file asset as an InputStream,
+	 * optionally loading the resource directly using a class loader.
 	 * 
 	 * @param path
 	 * @param zipOnly
 	 * @return
 	 */
 	private static InputStream getAssetStream(String path, boolean zipOnly) {
+		URL url = null;
+		url = getInstance()._getURLFromPath(path, true);
+		if (url == null && !zipOnly) {
+			url = Assets.class.getClassLoader().getResource(path);
+		}
+		InputStream is = null;
 		try {
-			URL url = getInstance()._getURLFromPath(path, true);
-			if (url == null && !zipOnly) {
-				url = Assets.class.getClassLoader().getResource(path);
-			}
-			if (url != null)
-				return url.openStream();
+			is = url.openStream();
 		} catch (Throwable t) {
 		}
-		return null;
+		return is;
 	}
 	/**
 	 * Determine the path to an asset. If not found in a zip file asset, return the
@@ -428,15 +451,18 @@ public class Assets {
 						if (isJS) {
 							jsutil.setURLBytes(url, jsutil.getZipBytes(ze));
 						}
-						return url;
+						break;
 					}
 				}
 			}
-			if (!zipOnly)
-				return getAbsoluteURL((fullPath.startsWith("TEMP/") ? "/" + fullPath : fullPath));
+			if (url == null && !zipOnly)
+				url = getAbsoluteURL((fullPath.startsWith("TEMP/") ? "/" + fullPath : fullPath));
 		} catch (MalformedURLException e) {
 		}
-		return null;
+		if (debugging) {
+			System.out.println("Assets.getURLFromPath " + url);
+		}
+		return url;
 	}
 
 	public static ZipEntry findZipEntry(URL url) {
@@ -583,7 +609,7 @@ public class Assets {
 	 * @return
 	 * @throws IOException
 	 */
-	private static byte[] getLimitedStreamBytes(InputStream is, long n, OutputStream out) throws IOException {
+	private static byte[] getLimitedStreamBytes(InputStream is, int n, OutputStream out) throws IOException {
 
 		// Note: You cannot use InputStream.available() to reliably read
 		// zip data from the web.
