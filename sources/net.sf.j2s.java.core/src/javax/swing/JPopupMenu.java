@@ -993,16 +993,19 @@ public class JPopupMenu extends JComponent implements MenuElement {
      * description: The size of the popup menu
      */
     public void setPopupSize(Dimension d) {
-        Dimension oldSize = getPreferredSize();
-
-        setPreferredSize(d);
-        if (popup != null) {
-            Dimension newSize = getPreferredSize();
-
-            if (!oldSize.equals(newSize)) {
-                popup = getPopup();
-            }
-        }
+    	
+    	return;
+// SwingJS popup menus are not sizable
+//        Dimension oldSize = getPreferredSize();
+//
+//        setPreferredSize(d);
+//        if (popup != null) {
+//            Dimension newSize = getPreferredSize();
+//
+//            if (!oldSize.equals(newSize)) {
+//                popup = getPopup();
+//            }
+//        }
     }
 
     /**

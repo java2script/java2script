@@ -273,8 +273,21 @@ public class ScheduledThreadPoolExecutor
                 reExecutePeriodic(outerTask);
             }
         }
+        
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            // The racy read of heapIndex below is benign:
+            // if heapIndex < 0, then OOTA guarantees that we have surely
+            // been removed; else we recheck under lock in remove()
+            boolean cancelled = super.cancel(mayInterruptIfRunning);
+            if (cancelled && removeOnCancel)//SwingJS && heapIndex >= 0)
+                remove(this);
+            return cancelled;
+        }
+
+
     }
 
+    
     /**
      * Returns true if can run a task given current run state
      * and run-after-shutdown parameters.
@@ -743,4 +756,35 @@ public class ScheduledThreadPoolExecutor
             };
         }
     }
+
+    /**
+     * Sets the policy on whether cancelled tasks should be immediately
+     * removed from the work queue at time of cancellation.  This value is
+     * by default {@code false}.
+     *
+     * @param value if {@code true}, remove on cancellation, else don't
+     * @see #getRemoveOnCancelPolicy
+     * @since 1.7
+     */
+    public void setRemoveOnCancelPolicy(boolean value) {
+        removeOnCancel = value;
+    }
+    
+    /**
+     * Gets the policy on whether cancelled tasks should be immediately
+     * removed from the work queue at time of cancellation.  This value is
+     * by default {@code false}.
+     *
+     * @return {@code true} if cancelled tasks are immediately removed
+     *         from the queue
+     * @see #setRemoveOnCancelPolicy
+     * @since 1.7
+     */
+    public boolean getRemoveOnCancelPolicy() {
+        return removeOnCancel;
+    }
+
+    volatile boolean removeOnCancel;
+
+
 }

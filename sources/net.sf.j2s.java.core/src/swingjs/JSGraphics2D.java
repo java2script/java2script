@@ -494,8 +494,8 @@ public class JSGraphics2D implements
 				GradientPaint p = (GradientPaint) shader;
 				Point2D.Float p1 = (Point2D.Float) p.getPoint1();
 				Point2D.Float p2 = (Point2D.Float) p.getPoint2();
-				HTML5CanvasContext2D.createLinearGradient(ctx, p1, p2, JSToolkit.getCSSColor(p.getColor1()),
-						JSToolkit.getCSSColor(p.getColor2()));
+				HTML5CanvasContext2D.createLinearGradient(ctx, p1, p2, JSToolkit.getCSSColor(p.getColor1(), true),
+						JSToolkit.getCSSColor(p.getColor2(), true));
 				ctx.beginPath();
 				doShape(s);
 				ctx.fill();
@@ -1004,7 +1004,7 @@ public class JSGraphics2D implements
 		float fa = a / 255F;
 		if (ctx.globalAlpha != fa)
 			ctx.globalAlpha = fa;
-		ctx.fillStyle = ctx.strokeStyle = JSToolkit.getCSSColor(c);
+		ctx.fillStyle = ctx.strokeStyle = JSToolkit.getCSSColor(c, true);
 	}
 
 	public void copyArea(int x, int y, int width, int height, int dx, int dy) {

@@ -2148,7 +2148,8 @@ public abstract class Component implements ImageObserver/*
 //			nativeY += c.y;
 //		}
 //		peer.setBounds(nativeX, nativeY, width, height, op);
-		peer.setBounds(0, 0, width, height, op);
+		if (peer != null)
+			peer.setBounds(0, 0, width, height, op);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -2411,8 +2412,7 @@ public abstract class Component implements ImageObserver/*
 		if (dim == null || !(isPreferredSizeSet() || isValid())) {
 			// synchronized (getTreeLock()) {
 			dim = (width != 0 || height != 0 ? null 
-					: isDisplayable() ? //
-						// peer != null) ?
+					: isDisplayable() && peer != null ? //
 						peer.getPreferredSize() :
 					getMinimumSize());
 			prefSize = dim;

@@ -29,12 +29,12 @@
 package swingjs.plaf;
 
 import java.awt.Dimension;
-import java.awt.Rectangle;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.JComponent;
 import javax.swing.JViewport;
 import javax.swing.event.ChangeListener;
+
 import swingjs.api.js.DOMNode;
 
 public class JSViewportUI extends JSLightweightUI implements PropertyChangeListener,

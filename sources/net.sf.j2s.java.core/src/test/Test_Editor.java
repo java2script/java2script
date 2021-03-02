@@ -159,7 +159,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 		JPanel panel = getButtonPanel(editor, area, area1, field);
 		panel.add(field2);
 		field2.addKeyListener(ka);
-
+		//editor.addKeyListener(ka);
 		new DropTarget(editor, this);
 		new DropTarget(area, this);
 
@@ -658,24 +658,23 @@ public void setCarentPosition(int i) {
 	KeyListener ka = new KeyAdapter() {
 		@Override
 		public void keyPressed(KeyEvent e) {
-			System.out.println("ok1");
+			if (e.getKeyCode() == 17)
+				return;
 			showKeyEvent(e);
-			System.out.println("ok2");
 		}
 
 		@Override
 		public void keyTyped(KeyEvent e) {
-			System.out.println("ok3");
+			if (e.getKeyCode() == 17)
+				return;
 			showKeyEvent(e);
-			System.out.println("ok4");
 		}
 
 		@Override
 		public void keyReleased(KeyEvent e) {
-			System.out.println("ok5");
+			if (e.getKeyCode() == 17)
+				return;
 			showKeyEvent(e);
-			System.out.println("ok6");
-			System.out.println(area.getText());
 		}
 	};
 

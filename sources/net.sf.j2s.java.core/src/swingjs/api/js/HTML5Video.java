@@ -227,7 +227,7 @@ public interface HTML5Video extends DOMNode {
 			public Void apply(Object jsevent) {
 				String name = (/** @j2sNative jsevent.type || */
 				"?");
-				System.out.println("HTML5Video " + (/** @j2sNative jsevent.target.id || */null) + " " + name);
+				//System.out.println("HTML5Video " + (/** @j2sNative jsevent.target.id || */null) + " " + name);
 				ActionEvent e = new ActionEvent(new Object[] { jsvideo, jsevent }, 12345, name,
 						System.currentTimeMillis(), 0);
 				listener.actionPerformed(e);

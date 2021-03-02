@@ -63,7 +63,6 @@ import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.JViewport;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.LookAndFeel;
@@ -86,7 +85,6 @@ import javax.swing.table.TableColumnModel;
 import sun.swing.DefaultLookup;
 import sun.swing.SwingUtilities2;
 import sun.swing.UIAction;
-import swingjs.JSMouse;
 import swingjs.api.js.DOMNode;
 
 /**
@@ -112,6 +110,14 @@ public class JSTableUI extends JSPanelUI {
 		
 	private boolean isScrolling, justLaidOut;
 
+//	private DOMNode canvasNode;
+//
+//	public DOMNode getCanvasNode() {
+//		return canvasNode;
+//	}
+	
+	private DOMNode tableNode;
+
 	public void setScrolling() {
 		// from JSScrollPane
 		isScrolling = true;
@@ -121,6 +127,11 @@ public class JSTableUI extends JSPanelUI {
 		super();
 		isTable = true;
 	}
+
+	public DOMNode getDOMNode() {
+		return updateDOMNode();
+	}
+
 
 	@Override
 	public DOMNode updateDOMNode() {
@@ -135,8 +146,13 @@ public class JSTableUI extends JSPanelUI {
 
 		if (domNode == null) {
 			domNode = newDOMObject("div", id);
+			tableNode = domNode;
+//			canvasNode = newDOMObject("canvas", id + "_canvas");
+//			tableNode = newDOMObject("div", id + "_table");
+//			domNode.appendChild(canvasNode);
+//			domNode.appendChild(tableNode);
 			enableJSKeys(true);
-			DOMNode.setStyle(domNode,  "outline", "none");
+			DOMNode.setStyle(tableNode,  "outline", "none");
 			// bindJSKeyEvents(domNode, true);
 		}
 		if (rebuild) {
@@ -150,12 +166,13 @@ public class JSTableUI extends JSPanelUI {
 		if (w != oldWidth || h != oldHeight) {
 			oldWidth = w;
 			oldHeight = h;
-			DOMNode.setStyles(domNode, "width", w + "px", "height", h + "px");
+			DOMNode.setStyles(tableNode, "width", w + "px", "height", h + "px");
+//			DOMNode.setStyles(canvasNode, "width", w + "px", "height", h + "px");
 		}
 		Font font = c.getFont();
 		if (!font.equals(oldFont)) {
 			oldFont = font;
-			setCssFont(domNode, c.getFont());
+			setCssFont(tableNode, c.getFont());
 		}
 		return updateDOMNodeCUI();
 	}
@@ -337,7 +354,8 @@ public class JSTableUI extends JSPanelUI {
 				}
 			}
 
-			$(domNode).empty();
+			$(tableNode).empty();
+			addLocalCanvas(true);
 			rminy = tmpRect.y;
 			rmaxy = tmpRect.y + tmpRect.height;
 			if (tmpRect.height != 0) {
@@ -349,6 +367,8 @@ public class JSTableUI extends JSPanelUI {
 
 	private void setHidden(boolean b) {
 		DOMNode.setStyle(domNode, "visibility", b ? "hidden" : "visible");
+		if (b && outerNode != null && DOMNode.getStyle(outerNode, "width") == null)
+			DOMNode.setStyle(outerNode, "width", "inherit");
 	}
 
 	private int[] cw = new int[10];
@@ -406,7 +426,7 @@ public class JSTableUI extends JSPanelUI {
 			boolean rowExists = (tr != null);
 			if (!rowExists) {
 				tr = DOMNode.createElement("div", rid);
-				domNode.appendChild(tr);
+				tableNode.appendChild(tr);
 			}
 			DOMNode.setStyle(tr, "height", h + "px");
 			col = col1;
@@ -463,6 +483,8 @@ public class JSTableUI extends JSPanelUI {
 		} else { 
 			row = table.getEditingRow();
 			col = table.getEditingColumn();
+			if (col >= table.getColumnCount())
+				return;
 			DOMNode td = CellHolder.findCellNode(this, null, row, col);
 			if (td == null) {
 				td = addElement(row, col, table.getRowHeight());
@@ -1320,16 +1342,18 @@ public class JSTableUI extends JSPanelUI {
 		}
 
 		private void setDispatchComponent(MouseEvent e) {
-//			Component editorComponent = table.getEditorComponent();
-//			Point p = e.getPoint();
-//			Point p2 = SwingUtilities.convertPoint(table, p, editorComponent);
-//			dispatchComponent = SwingUtilities.getDeepestComponentAt(editorComponent, p2.x, p2.y);
-			dispatchComponent = JSMouse.getJ2SEventTarget(e);
+
+			Component editorComponent = table.getEditorComponent();
+			Point p = e.getPoint();
+			Point p2 = SwingUtilities.convertPoint(table, p, editorComponent);
+			dispatchComponent = SwingUtilities.getDeepestComponentAt(editorComponent, p2.x, p2.y);			
+			
+//			dispatchComponent = JSMouse.getJ2SEventTarget(e);
 			if (dispatchComponent == null && table.isEditing()) {
 				dispatchComponent = table.getEditorComponent();
 			}
-			// SwingUtilities2.setSkipClickCount(dispatchComponent,
-			// e.getClickCount() - 1);
+			 SwingUtilities2.setSkipClickCount(dispatchComponent,
+			 e.getClickCount() - 1);
 		}
 
 		private void setValueIsAdjusting(boolean flag) {
@@ -2428,7 +2452,7 @@ public class JSTableUI extends JSPanelUI {
 	 */
 	private void paintGrid(Graphics g, int rMin, int rMax, int cMin, int cMax) {
 		g.setColor(table.getGridColor());
-
+		//System.out.println("JSTableUI paintGrid " + rMin + " " + rMax);
 		table._getCellRect(rMin, cMin, true, minCell);
 		table._getCellRect(rMax, cMax, true, maxCell);
 		Rectangle damagedArea = minCell.union(maxCell);

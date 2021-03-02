@@ -42,6 +42,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.PlainDocument;
@@ -857,7 +858,7 @@ public class JTextField extends JTextComponent implements SwingConstants {
     private String command;
 
     private static final Action[] defaultActions = {
-        new NotifyAction()
+        new NotifyAction(), new DefaultEditorKit.PassThroughAction()
     };
 
     // --- Action implementations -----------------------------------
