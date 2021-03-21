@@ -28,14 +28,19 @@
 
 package swingjs.plaf;
 
+import java.awt.Component;
 import java.awt.Point;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import javax.swing.FocusManager;
+import javax.swing.SwingUtilities;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.ChangeEvent;
@@ -49,7 +54,7 @@ import swingjs.JSMouse;
 import swingjs.api.js.DOMNode;
 
 public class TextListener implements KeyListener, FocusListener, ChangeListener,
-		PropertyChangeListener, DocumentListener, CaretListener {
+		PropertyChangeListener, DocumentListener, CaretListener, MouseListener {
 
 	private JTextComponent txtComp;
 
@@ -129,10 +134,11 @@ public class TextListener implements KeyListener, FocusListener, ChangeListener,
 		boolean setCaret = (mark != Integer.MIN_VALUE);
 		switch (eventType) {
 		case KeyEvent.KEY_TYPED:
+			
 //			setCaret = false;
 			break;
-		case KeyEvent.KEY_PRESSED:
-			
+		case KeyEvent.KEY_PRESSED:			
+
 			//System.out.println("TextListener key pressed " + keyCode);
 //			if (keyCode == KeyEvent.VK_TAB) {
 //				System.out.println("tab pressed");
@@ -180,8 +186,17 @@ public class TextListener implements KeyListener, FocusListener, ChangeListener,
 
 	@Override
 	public void changedUpdate(DocumentEvent e) {
-		if (!working)
+		if (!working) {
+			Component c = FocusManager.getCurrentManager().getFocusOwner();
 			ui.setJSText();
+			int p = e.getOffset() + e.getLength();
+			ui.setJavaMarkAndDot(new Point(p, p));
+// but this sets the focus even if it is just having its text changed. Tracker Model Builder issue
+//			if (c != null)
+//				SwingUtilities.invokeLater(() -> {
+//					c.requestFocus();
+//				});
+		}
 	}
 
 	@Override
@@ -205,6 +220,35 @@ public class TextListener implements KeyListener, FocusListener, ChangeListener,
 	public void keyReleased(KeyEvent e) {
 		// NOTE: Any System.out here will cause problems with the cursor
 //		System.out.println("TextListener " + e);
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		ui.setCursor();
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

@@ -11,6 +11,7 @@ package test;
 
 import java.awt.Adjustable;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -404,6 +405,7 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener, Mouse
 		label.setVerticalAlignment(SwingConstants.CENTER);
 
 		final JTextField tf = new JTextField(/** @j2sNative "null" ||*/null, "12.5", 8);
+//		tf.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
 //		final JTextField tf = new JTextField(new PlainDocument() {
 //			@Override
 //			public void getText(int offset, int length, Segment txt) throws BadLocationException {

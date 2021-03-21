@@ -1697,9 +1697,11 @@ public class SwingUtilities implements SwingConstants
             // was called with a null.
             command = null;
         }
-        action.actionPerformed(new ActionEvent(sender,
-                        ActionEvent.ACTION_PERFORMED, command, event.getWhen(),
-                        modifiers));
+        ActionEvent ae = new ActionEvent(sender,
+                ActionEvent.ACTION_PERFORMED, command, event.getWhen(),
+                modifiers);
+        action.actionPerformed(ae);
+        /** @j2sNative if (ae.bdata.doPropagate) event.bdata.doPropagate = true; */
         return true;
     }
 

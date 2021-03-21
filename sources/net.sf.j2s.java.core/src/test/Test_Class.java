@@ -1,8 +1,8 @@
 package test;
 
-
 import static java.awt.Color.getColor;
 import static java.awt.Toolkit.getDefaultToolkit;
+import static java.lang.String.format;
 
 import java.awt.Color;
 import java.awt.Toolkit;
@@ -10,20 +10,12 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.Date;
 import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import static java.lang.String.format
-;
+
 class Test_Class extends Test_Class2<Integer> {
 
 	public static String $(String a) {
@@ -37,76 +29,78 @@ class Test_Class extends Test_Class2<Integer> {
 	}
 
 	static {
-		
+
 		System.out.println(new NullPointerException($("test")));
 		System.out.println(new NullPointerException(S("test")));
-		
-	}
-	static class TestStatic {
-		
-		static String sayHello() { return "Hello there"; }
+
 	}
 
-	
-	
-	
-	
+	static class TestStatic {
+
+		static String sayHello() {
+			return "Hello there";
+		}
+	}
+
 	public int test_int = 3; // shadows Test_
 
-
-	Test_Class(short i) { 
-		super();	
+	public Test_Class(short i) {
+		super();
 		test_int = super.test_int;
 		System.out.println("Hello?");
 	}
-	
-	Test_Class(byte[]...d) { 
+
+	public Test_Class(byte[]... d) {
 		super(d);
-		
+
 		test_int = super.test_int;
-		
-		assert(getClass().getPackage().toString().equals("package test"));
-		
+
+		assert (getClass().getPackage().toString().equals("package test"));
+
 		getDefaultToolkit();
 		Toolkit.getDefaultToolkit();
 		String f = format("testing");
-		assert(f.equals("testing"));
+		assert (f.equals("testing"));
 		Color c1 = Color.getColor("green");
-		
+
 		Color c = getColor("red");
-	// just for testing transpiler bug	main(null);
+		// just for testing transpiler bug main(null);
 
 		System.out.println("Test_Class len = " + d.length);
 	}
-	
+
 	int x = 2000000000 + 2000000000;
-	
+
 	static int istatic = 5;
 	static String sstatic = "test5";
-	
+
 	static String tstatic = "initial";
 	String same$ = null;
-	String same() {return null;}
-	
+
+	String same() {
+		return null;
+	}
+
 	static class Singleton {
 		static {
 			tstatic = "changed by static";
 		}
-		// reference to Test_Class.Singleton.instance 
-		// lazily initializes a new instance of Test_Class() 
+		// reference to Test_Class.Singleton.instance
+		// lazily initializes a new instance of Test_Class()
 		static Test_Class instance = new Test_Class();
+
 		// actually, not recommended for JavaScript, because this
 		// instance would be shared among applications, unlike in Java.
 		public static void test(String s) {
 		}
 	}
-	
-	static  {
+
+	static {
 		System.out.println("Test_Class static init " + istatic + " " + sstatic);
 	}
 
-    //static Test_Class cl0_1 = new Test_Class("test-static0_1 <<<<<<<<<<<<<<<<<<<");
-
+	// static Test_Class cl0_1 = new Test_Class("test-static0_1
+	// <<<<<<<<<<<<<<<<<<<");
 
 	{
 		istatic = 0;
@@ -115,18 +109,18 @@ class Test_Class extends Test_Class2<Integer> {
 
 	@SuppressWarnings("unused")
 	private void test(String s) {
-	
+
 	}
 
-    void c() {
-		
+	void c() {
+
 	}
-	
+
 	@SuppressWarnings("unused")
 	private void test(Integer i) {
 		c();
 	}
-	
+
 	int test1 = '0';
 	static String s = "test";
 
@@ -144,7 +138,7 @@ class Test_Class extends Test_Class2<Integer> {
 	private String getTesting1() {
 		return test;
 	}
-	
+
 	static class Test_Class_Inner {
 		static Integer i = 5;
 		static int i2 = new Integer(3);
@@ -152,26 +146,25 @@ class Test_Class extends Test_Class2<Integer> {
 		static char c = 'c';
 		static Character c2 = 'c';
 		static char c3 = new Character('c');
-		
+
 		Test_Class_Inner(String... s) {
 			System.out.println(s.length);
 		}
-		
+
 		public static Test_Class newInstance(Object... objects) {
 			System.out.println("This is static Test_Class.newInstance(Object... objects");
 			return null;
 		}
 
-
 	}
-
 
 	public Test_Class(Test_ t) {
-       System.out.println("Test_Class(t) constructor");		
+		System.out.println("Test_Class(t) constructor");
 	}
+
 	public Test_Class() {
 
-	       System.out.println("Test_Class() constructor");		
+		System.out.println("Test_Class() constructor");
 
 		PropertyChangeListener l = new PropertyChangeListener() {
 			@Override
@@ -184,22 +177,21 @@ class Test_Class extends Test_Class2<Integer> {
 			}
 		};
 
-		
 		final Test_Class me = Test_Class.this;
 		MouseListener c = new MouseListener() {
-			
+
 			public int showt() {
 				return 2;
 			}
-			
+
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				System.out.println("mouseClicked1");
 				// test of qualified this
 				setT(1);
-				assert(Test_Class.this.showt() == 1); 
-				assert(showt() == 2);				
-				assert(Test_Class.this == me);
+				assert (Test_Class.this.showt() == 1);
+				assert (showt() == 2);
+				assert (Test_Class.this == me);
 				setT(0);
 				System.out.println("mouseClicked2");
 			}
@@ -207,74 +199,74 @@ class Test_Class extends Test_Class2<Integer> {
 			@Override
 			public void mousePressed(MouseEvent e) {
 				// TODO Auto-generated method stub
-				
+
 			}
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				// TODO Auto-generated method stub
-				
+
 			}
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
 				// TODO Auto-generated method stub
-				
+
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e) {
 				// TODO Auto-generated method stub
-				
+
 			}
-			
+
 		};
 		c.mouseClicked(null);
 		final String testfinal = "testFinal" + Double.valueOf(3);
-		
+
 		String pseudofinal = "testPseudo";
 
 		@SuppressWarnings("serial")
 		Hashtable<String, Object> t = new Hashtable<String, Object>() {
 			@Override
 			public Object put(String key, Object value) {
-				super.put(key,  value); 
+				super.put(key, value);
 				System.out.println("t.put:" + key + "/" + value);
-				// test for inner class access to an outer class's superclass method 
-				assert(showt() == 0);
+				// test for inner class access to an outer class's superclass method
+				assert (showt() == 0);
 				// test for inner class access to a private outer-class method
-				assert(getTesting1() == "testing1");
+				assert (getTesting1() == "testing1");
 				// test for inner class access to a private outer-class field
-				assert(test == "testing1");
+				assert (test == "testing1");
 				// test for inner class access to a final variable
 				String myfinal = testfinal;
-				assert(myfinal.equals("testFinal3.0"));
-				
+				assert (myfinal.equals("testFinal3.0"));
+
 				// note that the following will fail in Java but succeed in JavaScript:
-				
+
 				// assert(myfinal == "testFinal3.0");
-				
-				
-				
+
 				// test for inner class access to an implicitly final variable
-				assert(pseudofinal == "testPseudo");
+				assert (pseudofinal == "testPseudo");
 				return value;
-			}			
+			}
 		};
-		
-		t.replace("test","testing");
+
+		t.replace("test", "testing");
 		Object o = t.put("test", getTesting());
-		assert(o == "testing2");
-		
+		assert (o == "testing2");
+
 	}
 
 	public Test_Class(String s) {
 		System.out.println(">>>>>>>>>>>>>>>>>>Test_Class(s) " + s + " " + i5 + " " + i8);
 	}
+
 	public Test_Class(Object... ab) {
-		//System.out.println(">>>>>>Test_Class(Object...) " + cl1 +  " " + i5 + " " + i8 + " ??? ");
-		
-		System.out.println("a==test3 " + (ab[0] == "test3")); 
+		// System.out.println(">>>>>>Test_Class(Object...) " + cl1 + " " + i5 + " " + i8
+		// + " ??? ");
+
+		System.out.println("a==test3 " + (ab[0] == "test3"));
 		assert (ab[0] == "test3");
 		System.out.println("b==test4 " + (ab[1] == "test4"));
 		assert (ab[1] == "test4");
@@ -328,51 +320,70 @@ class Test_Class extends Test_Class2<Integer> {
 		C() {
 			super();
 		}
-		
-		C(byte[]...d) {
+
+		C(byte[]... d) {
 			super(d);
 			System.out.println("C len = " + d.length);
 		}
-		
+
 	}
 
 	Class C() {
 		return C.class;
 	}
-	
-	
-	
-	public short testShort(short s) {return 0;}
+
+	public short testShort(short s) {
+		return 0;
+	}
 
 	public static String localtest() {
 		return tstatic = "changed by localtest";
 	}
-	
+
 	public static void main(String[] args) {
-		
+
+		Class<?> cc = null;
+		try {
+			cc = Class.forName("test.Test_Class");
+			Constructor<?>[] constructors = cc.getConstructors();
+			for (int i = 0; i < constructors.length; i++) {
+				Class<?>[] parameters = constructors[i].getParameterTypes();
+				if (parameters.length == 1 && parameters[0] == Short.TYPE) {
+					Test_Class tc;
+					tc = (Test_Class) constructors[i].newInstance(new Object[] { Short.valueOf((short) 99) });
+					System.out.println(tc.getClass().getName());
+					break;
+				}
+			}
+
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException e) {
+			e.printStackTrace();
+		}
+
 		TestStatic ts = null;
-		
+
 		System.out.println(ts.sayHello());
-		
+
 //		System.out.println(new Date() + " " + Date.parse("3/4/2020"));
 
 		System.out.println(Number.class.isAssignableFrom(Double.class));
 		System.out.println(System.getProperty("user.dir"));
 		System.out.println(System.getProperty("user.home"));
-		
-	    float specversion = Float.parseFloat(
-	                    System.getProperty("java.specification.version"));
+
+		float specversion = Float.parseFloat(System.getProperty("java.specification.version"));
 
 		System.out.println(System.getProperty("screen"));
 
 		System.out.println(Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
 
-		// tricky situation where a parameter changes a value that is also changed by the static initializer of a class:
+		// tricky situation where a parameter changes a value that is also changed by
+		// the static initializer of a class:
 		boolean test1 = false;
 		if (test1) {
-			Test_Class.Singleton.test(tstatic = "changed by parameters");			
+			Test_Class.Singleton.test(tstatic = "changed by parameters");
 		} else {
-			Test_Class.Singleton.test(localtest());			
+			Test_Class.Singleton.test(localtest());
 		}
 		boolean isOK = tstatic.equals("changed by static");
 		System.out.println("testing static load order " + isOK + " " + tstatic);
@@ -381,7 +392,7 @@ class Test_Class extends Test_Class2<Integer> {
 //			assert(isOK);
 			assert (new String().getClass().getName().equals("java.lang.String"));
 			assert (Class.forName("java.lang.String") == String.class);
-			assert (Test_Class.class.getMethod("testShort",Short.TYPE).getParameterTypes()[0] == Short.TYPE);
+			assert (Test_Class.class.getMethod("testShort", Short.TYPE).getParameterTypes()[0] == Short.TYPE);
 			assert (Class.forName("java.lang.String") == String.class);
 			assert (new String[0].getClass().getName().equals("[Ljava.lang.String;"));
 			assert (Class.forName("[Ljava.lang.String;").getComponentType() == String.class);
@@ -389,14 +400,15 @@ class Test_Class extends Test_Class2<Integer> {
 			assert (Class.forName("[S").getComponentType() == Short.TYPE);
 		} catch (Throwable t) {
 			t.printStackTrace();
-			assert(false);
+			assert (false);
 		}
-		
+
 		System.out.println("===========");
 		// these won't be the same, because Java declares synthetic access$n methods
 		showMethods(Test_Class.class.getDeclaredMethods());
 		System.out.println("-----------");
-		// these won't be the same, because SwingJS returns public and package-private methods
+		// these won't be the same, because SwingJS returns public and package-private
+		// methods
 		showMethods(Test_Class.class.getMethods());
 		System.out.println("===========");
 		showMethods(Test_Class_int.class.getDeclaredMethods());
@@ -517,34 +529,31 @@ class Test_Class extends Test_Class2<Integer> {
 
 	public static void testStatic() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
-	
 	public void testAbstract(int i, Integer n, long j) {
 		System.out.println("OK -- Test_Class.testAbstract int Integer long");
-		
+
 	}
 
 	public void testAbstract(int i, Double n, long j) {
 		System.out.println("OHOH!!!!!!!!!!!!!!!!!!!!!!!!!");
-		//assert(false);
-		
+		// assert(false);
+
 	}
 
 	@Override
 	public void testClassInt(int i) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	@Override
 	public void testClassLong(long i) {
 		// TODO Auto-generated method stub
-		
+
 	}
-
-
 
 }
 

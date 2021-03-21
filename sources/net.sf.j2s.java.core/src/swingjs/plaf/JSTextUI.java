@@ -29,6 +29,7 @@ package swingjs.plaf;
 
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -149,20 +150,31 @@ public abstract class JSTextUI extends JSLightweightUI {
     TextListener textListener; // referred to in j2sApplet.js
 
 	protected boolean useRootView = false; // TextArea only?
-	
+
+	private static final Cursor textCursor = new Cursor(Cursor.TEXT_CURSOR);	
 	@Override
 	public DOMNode updateDOMNode() {
 		if (editor.isOpaque() && editor.isEnabled())
 			setBackgroundImpl(getBackground());
 		setEditable(editable);
+		if (editor.getCursor() == null)
+			DOMNode.setStyle(domNode, "cursor", "text");
 		Color cc = editor.getCaretColor();
 		if (cc != null)
-			DOMNode.setStyle(domNode, "caret-color", JSToolkit.getCSSColor(cc));
+			DOMNode.setStyle(domNode, "caret-color", toCSSString(cc));
 		setPadding(editor.getMargin());
 		return updateDOMNodeCUI();
 	}
 	
-	
+    @Override
+	protected Cursor getCursor() {
+        if ((! editor.isCursorSet())
+               || editor.getCursor() instanceof UIResource) {
+            return (editor.isEditable()) ? textCursor : null;
+        }
+        return super.getCursor();
+    }
+
 	/**
 	 * called by JSComponentUI.bindJSEvents
 	 * 
@@ -170,11 +182,11 @@ public abstract class JSTextUI extends JSLightweightUI {
 	 * 
 	 * 
 	 */
-	@Override  
+	@Override
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
-		
-		//String type = /** @j2sNative jQueryEvent.type || */null;
-		//System.out.println("JSTextUI handlejs "+type + " " + eventType);
+
+		// String type = /** @j2sNative jQueryEvent.type || */null;
+		// System.out.println("JSTextUI handlejs "+type + " " + eventType);
 		if (JSToolkit.isMouseEvent(eventType)) {
 			return NOT_HANDLED;
 		}
@@ -195,16 +207,12 @@ public abstract class JSTextUI extends JSLightweightUI {
 				return HANDLED;
 			switch (keyCode) {
 			case KeyEvent.VK_ALT:
-				/**
-				 * @j2sNative
-				 * 
-				 * 			jQueryEvent.preventDefault(); jQueryEvent.stopPropagation();
-				 */
+				JSToolkit.consumeEvent(jQueryEvent);
 				// fall through
-				//case KeyEvent.VK_SHIFT: 
-					//BH note 2019.11.03 
-					//Including VK_SHIFT here caused Firefox to ignore a first upper-case L in 
-					//SequenceSearcher pattern JTextField
+				// case KeyEvent.VK_SHIFT:
+				// BH note 2019.11.03
+				// Including VK_SHIFT here caused Firefox to ignore a first upper-case L in
+				// SequenceSearcher pattern JTextField
 			case KeyEvent.VK_CONTROL:
 				ret = HANDLED;
 				break;
@@ -218,17 +226,42 @@ public abstract class JSTextUI extends JSLightweightUI {
 				ret = HANDLED;
 			}
 			editor.dispatchEvent(keyEvent);
-			if (keyEvent.isConsumed()) {
-				/**
-				 * @j2sNative
-				 * 
-				 * 			jQueryEvent.preventDefault(); jQueryEvent.stopPropagation();
-				 */
+			boolean ignore =
+					/**
+					 * set in DefaultEditorKit for a "pass-through" action CTRL-C,V,X,A
+					 * 
+					 * @j2sNative keyEvent.bdata.doPropagate ||
+					 */
+					false;
+			if (!ignore && keyEvent.isConsumed()) {
+				JSToolkit.consumeEvent(jQueryEvent);
 				return HANDLED;
 			}
+			if (!ignore && eventType == KeyEvent.KEY_PRESSED
+					&& (keyEvent.getModifiersEx() & (KeyEvent.CTRL_DOWN_MASK | KeyEvent.ALT_DOWN_MASK)) != 0) {
+				// dispatch a missing KeyTyped event.
+				int code = keyEvent.getKeyCode();
+				if (code >= 65 && code <= 90) {
+					@SuppressWarnings("unused")
+					char c = (char) (code & 0x1F); // 1-26
+
+					/**
+					 * @j2sNative keyEvent.id = 400; keyEvent.keyCode = 0; keyEvent.keyChar = c; jQueryEvent.stopPropagation();
+					 * keyEvent.consumed = false;
+					 */
+
+					editor.dispatchEvent(keyEvent);
+					JSToolkit.consumeEvent(jQueryEvent);
+					if (keyEvent.isConsumed()) {
+						return HANDLED;
+					}
+				}
+			}
+
 		}
-		if (ret != HANDLED)
+		if (ret != HANDLED) {
 			handleJSTextEvent(eventType, jQueryEvent, keyCode, false);
+		}
 		return HANDLED;
 	}
 
@@ -474,11 +507,11 @@ public abstract class JSTextUI extends JSLightweightUI {
 	 */
 	InputMap getInputMap() {
 		InputMap map = new InputMapUIResource();
-//        InputMap shared =
-//                (InputMap) UIManager.get(getPropertyPrefix() + ".focusInputMap", Locale.US);
-//        if (shared != null) {
-//            map.setParent(shared);
-//        }
+        InputMap shared =
+                (InputMap) UIManager.get(getPropertyPrefix() + ".focusInputMap", null);
+        if (shared != null) {
+            map.setParent(shared);
+        }
 		return map;
 	}
 
@@ -647,7 +680,7 @@ public abstract class JSTextUI extends JSLightweightUI {
 
 	protected void installListeners(JTextComponent b) {
 		TextListener listener = textListener;
-//		b.addMouseListener(listener);
+		b.addMouseListener(listener);
 //		b.addMouseMotionListener(listener);
 		b.addKeyListener(textListener);
 		b.addFocusListener(listener);
@@ -660,7 +693,7 @@ public abstract class JSTextUI extends JSLightweightUI {
 	protected void uninstallListeners(JTextComponent b) {
 		TextListener listener = textListener;
 		b.removeKeyListener(textListener);
-//		b.removeMouseListener(listener);
+		b.removeMouseListener(listener);
 //		b.removeMouseMotionListener(listener);
 		b.removeFocusListener(listener);
 		b.removePropertyChangeListener(listener);
@@ -1109,6 +1142,7 @@ public abstract class JSTextUI extends JSLightweightUI {
 			setBackgroundImpl(editable || !(bg instanceof UIResource) 
 					|| inactiveBackground == colorUNKNOWN ? bg : inactiveBackground);
 		}		
+		setCursor();
 	}
 	
 	protected void setEditableCSS() {
@@ -1301,11 +1335,7 @@ public abstract class JSTextUI extends JSLightweightUI {
 			case KeyEvent.VK_V: // paste
 				if (!isCTRL)
 					return null;
-				// TODO -- JEditorPane needs this -- right now we cannot do this correctly with
-				// multiple new lines
-
-				if (!isEditorPane)
-					allowKeyEvent(jQueryEvent);
+				allowKeyEvent(jQueryEvent);
 				if (type == "keydown")
 					handleCtrlV(KeyEvent.KEY_PRESSED);
 				else if (type == "keyup")
@@ -1325,6 +1355,8 @@ public abstract class JSTextUI extends JSLightweightUI {
 			
 			case KeyEvent.VK_TAB:
 				return handleTab(jQueryEvent, type);
+			case KeyEvent.VK_HOME:
+			case KeyEvent.VK_END:
 			case KeyEvent.VK_UP:
 			case KeyEvent.VK_DOWN:
 			case KeyEvent.VK_LEFT:
@@ -1364,6 +1396,11 @@ public abstract class JSTextUI extends JSLightweightUI {
 		 */		
 	}
 
+	/**
+	 * 
+	 * @param mode
+	 * @return ignored)
+	 */
 	protected boolean handleCtrlV(int mode) {
 		switch (mode) {
 		case KeyEvent.KEY_PRESSED:
@@ -1401,6 +1438,10 @@ public abstract class JSTextUI extends JSLightweightUI {
     	return pt.y;    	
     }
     
+    /**
+     * transfer the mark and dot to the Java TextComponent
+     * @param markDot
+     */
 	void setJavaMarkAndDot(Point markDot) {
 		int mark = markDot.x;
 		int dot = markDot.y;
@@ -3610,6 +3651,7 @@ public abstract class JSTextUI extends JSLightweightUI {
 
 
 	public void action(String what, int data) {
+		// see JSEditorPaneUI
 	}
 
 

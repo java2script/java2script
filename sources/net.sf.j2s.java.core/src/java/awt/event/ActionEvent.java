@@ -203,6 +203,7 @@ public class ActionEvent extends AWTEvent {
         this.actionCommand = command;
         this.when = when;
         this.modifiers = modifiers;
+        this.bdata = new byte[0];// for e.bdata.doPropagate
     }
 
     /**

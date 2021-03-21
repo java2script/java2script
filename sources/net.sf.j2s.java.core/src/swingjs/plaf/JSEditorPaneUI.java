@@ -6,14 +6,18 @@ import java.awt.Font;
 import java.awt.Insets;
 import java.awt.JSComponent;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.event.CaretEvent;
@@ -29,13 +33,17 @@ import javax.swing.text.JTextComponent;
 import javax.swing.text.Keymap;
 import javax.swing.text.Position;
 import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 import javax.swing.text.StyledEditorKit;
 import javax.swing.text.View;
 
+import javajs.util.PT;
 import javajs.util.SB;
 import sun.swing.DefaultLookup;
 import swingjs.JSToolkit;
 import swingjs.api.js.DOMNode;
+import swingjs.api.js.JQueryObject.JQEvent;
+import swingjs.api.js.JSFunction;
 
 /**
  * Note that JEditorPane does not have a no-wrap option the way JTextArea does.
@@ -67,16 +75,51 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 	// unfortunately, different browsers handle contentEditable differently.
 	
 	
-	private static final String JSTAB = "<span class='j2stab'>&nbsp;&nbsp;&nbsp;&nbsp;</span>";
+	private static final String JSTAB = "<span class=\"j2stab\">\u00a0\u00a0\u00a0\u00a0</span>";
+	private static final String JSTAB2 = "<span class=\"j2stab data-ui\">\u00a0\u00a0\u00a0\u00a0</span>";
 	private static final int SPACES_PER_TAB = 4;
 	
 	protected boolean isTextPane = false;
 	
 	protected boolean isHtmlKit = false;
+	private String jsPasteText, jsPasteHTML;
 
 	public JSEditorPaneUI() {
 		isEditorPane = isTextView = true;
 	}
+	
+	@Override
+	public DOMNode updateDOMNode() {
+		if (domNode == null) {
+			domNode = newDOMObject("div", id);
+			DOMNode.setStyles(domNode); // default for pre is font-height
+			$(domNode).addClass("swingjs-doc");
+			allowPaintedBackground = false;
+			focusNode = enableNode = textNode = domNode;
+			DOMNode.setStyles(domNode, "resize", "none", "margin", "0px", "padding", "1px", "box-sizing", "border-box");
+			bindJSKeyEvents(focusNode, true);
+			JSEditorPaneUI me = this;
+			$(domNode).on("paste", /** @j2sNative function(e){ return me.handleJSPasteEvent(e.originalEvent,e)} || */null);
+		}
+		textListener.checkDocument();
+		Font font = c.getFont();
+		boolean fontChanged = !font.equals(myfont);
+		if (fontChanged)
+			setCssFont(domNode, font);// will check enabled and also set background
+		DOMNode.setAttrs(domNode, "contentEditable", isHtmlKit || editor.isEditable() ? TRUE : FALSE, "spellcheck",
+				FALSE);
+		if (jc.getTopLevelAncestor() != null) {
+			if (fontChanged || editor.getText() != mytext) {
+				myfont = font;
+				setText(null);
+				// should be OK here
+//			} else {
+//			    System.out.println(JSUtil.getStackTrace(10));
+//				System.out.println("updateDomnode");
+			}
+		}
+		return updateDOMNodeCUI();
+	} 
 	
 	@Override
 	public void installUI(JComponent jc) {
@@ -164,7 +207,6 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
             (InputMap)DefaultLookup.get(editor, this,
             getPropertyPrefix() + ".focusInputMap");
         if (shared != null) {
-        	//System.out.println("JSEditorPaneUI inputmap " + shared.keys());
             map.setParent(shared);
         }
 		return map;
@@ -205,36 +247,6 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 //			});
 
 	@Override
-	public DOMNode updateDOMNode() {
-		if (domNode == null) {
-			domNode = newDOMObject("div", id);
-			DOMNode.setStyles(domNode); // default for pre is font-height
-			$(domNode).addClass("swingjs-doc");
-			allowPaintedBackground = false;
-			focusNode = enableNode = textNode = domNode;
-			DOMNode.setStyles(domNode, "resize", "none", "margin", "0px", "padding", "1px", "box-sizing", "border-box");
-			bindJSKeyEvents(focusNode, true);
-		}
-		textListener.checkDocument();
-		Font font = c.getFont();
-		boolean fontChanged = !font.equals(myfont);
-		if (fontChanged)
-			setCssFont(domNode, font);// will check enabled and also set background
-		DOMNode.setAttrs(domNode, "contentEditable", isHtmlKit || editor.isEditable() ? TRUE : FALSE, "spellcheck", FALSE);
-		if (jc.getTopLevelAncestor() != null) {
-			if (fontChanged || editor.getText() != mytext) {
-				myfont = font;
-				setText(null);
-				// should be OK here
-//			} else {
-//			    System.out.println(JSUtil.getStackTrace(10));
-//				System.out.println("updateDomnode");
-			}
-		}
-		return updateDOMNodeCUI();
-	} 
-
-	@Override
 	protected void setBorder(String prefix) {
 		 Border b = editor.getBorder();
 		 if ((b == null) || (b instanceof UIResource)) {
@@ -262,6 +274,7 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 	private boolean isStyled;
 	private String mytext;
 	private DOMNode bodyNode;
+	private String rawHTML;
 	
 //	private int epTimer;
 //	@Override
@@ -354,6 +367,9 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 
 //	@Override
 	public void setText(String text) {
+
+///**@j2sNative xxu= this;*/
+
 		Document d = editor.getDocument();
 		if (d == null)
 			return;
@@ -364,7 +380,7 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 			mytext = html = text;
 			isHTML = true;
 			DOMNode.setAttr(domNode, "innerHTML", "");
-			// we will have to figure out a way for images and base. 
+			// we will have to figure out a way for images and base.
 			html = (String) editor.秘jsHTMLHelper.get("html", getInner(text, "body"));
 			DOMNode.setAttrs(domNode, "contentEditable", TRUE);
 			bodyNode = DOMNode.createElement("div", id0 + "_body");
@@ -373,7 +389,7 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 			if (styles != null)
 				DOMNode.setStyles(bodyNode, styles);
 			String css = (String) editor.秘jsHTMLHelper.get("css", id);
-	        setStyle(id0 + "_styles", css);
+			setStyle(id0 + "_styles", css);
 		} else {
 			bodyNode = domNode;
 			mytext = text;
@@ -385,17 +401,43 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 				SB sb = new SB();
 				isStyled = ((JEditorPane) editor).getEditorKit() instanceof StyledEditorKit;
 				fromJava(text, sb, d.getRootElements()[0], true, null);
-				// System.out.println("JSEPUI setText " + text.replace('\n', '.').replace('\t',
-				// '^'));
+//				System.out.println("JSEPUI setText\n" + dumpText(text) + "\n" + dumpText(sb.toString()));
 				// This added 5 px is necessary for the last line when scrolled to appear in
 				// full.
 				// Don't know why. Maybe the scrollbar just needs one last div?
-				html = sb.toString();//	 + "<div style='height:5px'><br></div>";
+				html = sb.toString();// + "<div style='height:5px'><br></div>";
 			}
 		}
 		if (isHTML) {
-			html = fixText(html);
 			setBackgroundDOM(domNode, jc.getBackground());
+			if (html.equals(rawHTML))
+				return;
+			rawHTML = html;
+			html = fixText(html);
+			if (isHtmlKit) {
+				URL page = (URL) editor.getDocument().getProperty("stream");
+				if (page != null && page.getProtocol().equals("file") && text.indexOf("src=\".") >= 0) {
+					String rp = J2S.getResourcePath("", true);
+					if (rp.indexOf("://") < 0)
+						rp = "file:/" + rp;
+					try {
+						page = new URL(rp + page.getPath().substring(1));
+					} catch (MalformedURLException e1) {
+					}
+					String[] srcs = PT.split(text, "src=\".");
+					String out = srcs[0];
+					for (int i = 1; i < srcs.length; i++) {
+						int pt = srcs[i].indexOf('"');
+						String src = "." + srcs[i].substring(0, pt);
+						try {
+							src = new URL(page, src).getPath().substring(1);
+						} catch (MalformedURLException e) {
+						}
+						out += "src=\"" +src+ srcs[i].substring(pt);
+					}
+					html = out;
+				}
+			}
 		}
 		// System.out.println(html);
 		if (html == currentHTML)
@@ -407,6 +449,13 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 		JSToolkit.dispatch(updateRunnable, 10, 0);
 	}
 	
+	String dumpText(String text) {
+		text = text.replace('\n', '.').replace('\t', '^')
+				.replace(' ', '~').replace('\u00a0', '-').substring(text.indexOf(">") + 1);
+		return text;
+	}
+
+
 	private Runnable updateRunnable = new Runnable() {
 
 		@Override
@@ -417,10 +466,6 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 		
 	};
 	
-
-
-
-
 	private void setStyle(String id, String css) {
 		DOMNode d = DOMNode.getElement(id);
 		if (d == null) {
@@ -506,8 +551,9 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 		} else {
 			String t = text.substring(start, isDiv ? end - 1 : end);
 			// but this is nbsp; -- no breaks?? Why did I do this?
-			if (t.indexOf("  ") >= 0)
-				t = t.replace("  ", "\u00A0 ");
+			while (t.indexOf("  ") >= 0) {
+				t = t.replaceAll("  ", "\u00A0 ");
+			}
 			if (t.indexOf('<') >= 0) {
 				t = t.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 			}
@@ -529,9 +575,9 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 	private String getCSSStyle(AttributeSet a, AttributeSet currAttr) {
 		String style = "";
 		if (checkAttr(BACKGROUND, a, currAttr))
-			style += "background:" + JSToolkit.getCSSColor((Color) getBackground(a)) + ";";
+			style += "background:" + toCSSString((Color) getBackground(a)) + ";";
 		if (checkAttr(FOREGROUND, a, currAttr))
-			style += "color:" + JSToolkit.getCSSColor((Color) getForeground(a)) + ";";
+			style += "color:" + toCSSString((Color) getForeground(a)) + ";";
 		if (checkAttr(BOLD, a, currAttr))
 			style += "font-weight:" + (isBold(a) ? "bold;" : "normal;");
 		if (checkAttr(ITALIC, a, currAttr))
@@ -802,9 +848,10 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 		fixTabRange(r1);
 		if (r1 != r2)
 			fixTabRange(r2);
-		
+		if (r1[0] == null)
+			return;
 		andScroll |= (jc.秘keyAction != null);
-			
+		
 		
 //		System.out.println("jsSelect " + r1 + r2 + " " + andScroll);
 		// range index may be NaN
@@ -1066,54 +1113,154 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
     }
 
 	/**
-	 * CTRL-V insertion requires knowledge of the text length at the time of keypress and 
-	 * then comparing that to the value at the time of keyup. Hopefully no repeating!
+	 * CTRL-V insertion requires knowledge of the text length at the time of
+	 * keypress and then comparing that to the value at the time of keyup. Hopefully
+	 * no repeating!
 	 * 
+	 * @return (ignored)
 	 */
 	@Override
 	protected boolean handleCtrlV(int mode) {
-		//System.out.println(getJavaMarkAndDot());
-		if (isHtmlKit)
-			return false;
-
 		getJSMarkAndDot(markDot, 0);
-		//System.out.println(markDot);
 		String s = (String) DOMNode.getAttr(domNode, "innerText");
-		if (mode == KeyEvent.KEY_PRESSED) {
+		switch (mode) {
+		case KeyEvent.KEY_PRESSED:
 			stemp = s;
 			xyTemp = getJavaMarkAndDot();
 			return false;
-		}
-	
-		// problem here is that JavaScript raw text has extra \n in it that the Java does not.
-
-		int x = xyTemp[0];
-		int n = s.length() - stemp.length() + xyTemp[1] - x;
-		
-		//System.out.println("n=" + n + " x=" + x + " newlen=" + s.length() + " len0=" + len0);
-		if (n <= 0)
+		case KeyEvent.KEY_TYPED:
 			return false;
-		try {
-			
-			x += (SPACES_PER_TAB - 1) * tabCount(editor.getDocument().getText(0, x));
-			if (x < 0)
-				return false;
-			s = s.substring(x, x + n);
-			
-			//System.out.println("x=" + x + " n=" + n + " s=" +s);
-
-			if (xyTemp[0] != xyTemp[1])
-				editor.getDocument().remove(xyTemp[0], xyTemp[1] - xyTemp[0]);
-
-			editor.getDocument().insertString(xyTemp[0], s, null);
-		
-			//replaceText(s, -1);
-			//setJSMarkAndDot(markDot.x, markDot.x, false);
-		} catch (BadLocationException bl) {
+		case KeyEvent.KEY_RELEASED:
+			return handleJSPasteRelease(s);
 		}
 		return true;
 	}
 	
+
+	/**
+	 * @j2sAlias handleJSPasteEvent
+	 * 
+	 * @param jqevent
+	 * @param e
+	 * @return
+	 */
+    @SuppressWarnings("null")
+	boolean handleJSPasteEvent(JQEvent jqevent, Object e) {
+    	String text = null, html = null;
+		/**
+		 * @j2sNative
+		 * 
+		 *  var d = (e.originalEvent.clipboardData || window.clipboardData);
+		 * 	text = d.getData("text");
+		 *  html = d.getData("text/html");
+		 * 
+		 */
+    	jsPasteText = text;
+    	jsPasteHTML = (html.indexOf('\u00A0') >= 0 ? html.replaceAll(JSTAB,"\t").replaceAll(JSTAB2,"\t") : html);
+    	return false;
+	}
+
+	private boolean handleJSPasteRelease(String s) {
+		if (isHtmlKit) {
+			return true;
+		}
+		// problem here is that JavaScript raw text has extra \n in it that the Java
+		// does not.
+
+		try {
+			Document doc = editor.getDocument();
+			int mark = xyTemp[0];
+			int dot = xyTemp[1];
+			int p = Math.min(dot, mark);
+			AttributeSet a = null;
+			String text = jsPasteText;
+			if (doc instanceof StyledDocument) {
+				StyledDocument sd = (StyledDocument) doc;
+				a = sd.getCharacterElement(p).getAttributes();
+				if (jsPasteHTML.indexOf('\t') >= 0) {
+					text = fixTabs(text, jsPasteHTML);
+				}
+			}
+			int len = text.length();
+			if (dot != mark)
+				doc.remove(p, Math.abs(dot - mark));
+			if (len > 0)
+				doc.insertString(p, text, a);
+			SwingUtilities.invokeLater(() -> {
+				editor.getCaret().setDot(p + len);
+			});
+//
+//			if (true)
+//				return true;
+//			
+//			
+//			int x = xyTemp[0];
+//			int n = s.length() - stemp.length() + xyTemp[1] - x;
+//
+//			System.out.println("n=" + n + " x=" + x + " newlen=" + s.length());
+//			if (n <= 0)
+//				return false;
+//			
+//		
+//			x += (SPACES_PER_TAB - 1) * tabCount(editor.getDocument().getText(0, x));
+//			if (x < 0)
+//				return false;
+//			s = s.substring(x, x + n);
+//
+//			// System.out.println("x=" + x + " n=" + n + " s=" +s);
+//
+//			if (xyTemp[0] != xyTemp[1])
+//				editor.getDocument().remove(xyTemp[0], xyTemp[1] - xyTemp[0]);
+//
+//			editor.getDocument().insertString(xyTemp[0], s, null);
+//
+//			// replaceText(s, -1);
+//			// setJSMarkAndDot(markDot.x, markDot.x, false);
+		} catch (BadLocationException bl) {
+		}
+		return true;
+	}
+
+	private static String fixTabs(String text, String html) {
+		// challenge here is to find the right number of tabs.
+		html= replaceTag(html, "", "");
+		/**
+		 * @j2sNative
+		 * 
+		 * var s = "";
+		 * var p, q, i, j;
+		 * for (p = 0, q = 0, i = html.indexOf("\t"), j = text.indexOf("    "); i >= 0 && j >= 0; i = html.indexOf("\t", p), j = text.indexOf("    ", q)) {
+		 *      s += text.substring(q, j) + "\t";
+		 *   p = i + 1;
+		 *   q = j + 4;   
+		 * }
+		 * text = s + text.substring(q);
+		 */
+		return text;
+	}
+
+	private static String replaceTag(String html, String tag, String rep) {
+		/**
+		 * @j2sNative
+		 * 
+		 *   var S = html.replace(/\n/g,'').split("<" + tag);
+		 *   var s = S[0];
+		 *   for (var i = 1; i < S.length; i++) {
+		 *    var p = S[i].indexOf("/>");
+		 *    var q = S[i].indexOf(">");
+		 *    if (q >= 0 && (p < 0 || q < p))
+		 *      p = q;
+		 *    var t = S[i].substring(p + (q == p ? 1 : 2));
+		 *    s += (rep.length ? "<" + tag + ">" : "") + t;
+		 *   }
+		 *   !rep && (s = s.replaceAll("</" + tag + ">",""));
+		 *   return s;
+		 */
+		{
+				return null;
+		}
+	}
+
 	private int tabCount(String s) {
 		int n = 0;
 		for (int i = s.length(); --i >= 0;)
@@ -1189,8 +1336,24 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 	}
 	
 	@Override
+	public Dimension getPreferredSize(JComponent c) {
+		if (isTextPane) {
+			updateDOMNode();
+			String sh = DOMNode.getStyle(domNode,  "height");
+			int w = (scrollPaneUI != null && scrollPaneUI.c.getWidth() != 0 ? scrollPaneUI.c.getWidth() : DOMNode.getWidth(domNode));
+			DOMNode.setStyle(domNode, "height", null);
+			Rectangle r = this.getBoundingRect(domNode);
+			int h = (int) Math.max(0, Math.ceil(r.height));
+			DOMNode.setStyle(domNode, "height", sh);
+			return new Dimension(w,h);
+		} else {
+			return super.getPreferredSize(c);
+		}
+	}
+
+	@Override
 	public Dimension getMinimumSize(JComponent jc) {
-		getPreferredSize(jc);
+//		getPreferredSize(jc);
 //        Document doc = editor.getDocument();
         Insets i = jc.getInsets();
         Dimension d = new Dimension();

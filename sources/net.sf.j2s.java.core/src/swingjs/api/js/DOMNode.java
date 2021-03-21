@@ -207,9 +207,10 @@ public interface DOMNode {
 		/**
 		 * @j2sNative
 		 * 
-		 *            if (node) for (var i = 0; i < av.length;) {
-		 *             node.style[av[i++]] = av[i++];
-		 *             }
+if (node)for (var i = 0, n = av.length; i < n;) {
+	var k = av[i++], v = av[i++];
+	node.style[k] != v && (node.style[k] = v);
+}
 		 * 
 		 */
 		return node;

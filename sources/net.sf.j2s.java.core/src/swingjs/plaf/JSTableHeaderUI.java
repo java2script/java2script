@@ -171,13 +171,18 @@ public class JSTableHeaderUI extends JSLightweightUI {
 		DOMNode.setStyle(headdiv, "height", thh + "px");
 		domNode.appendChild(headdiv);
 		for (int col = 0, tx = 0; col < ncols; col++) {
-			DOMNode td = CellHolder.createCellOuterNode(this, -1, col);
-			DOMNode.setStyles(td, "width", cw[col] + "px", "height", thh + "px", "left", tx + "px", "top", "0px");
-			tx += cw[col];
-			headdiv.appendChild(td);
-			CellHolder.updateCellNode(td, (JSComponent) getHeaderComponent(col), cw[col], thh);
+			int w = cw[col];
+			DOMNode td = CellHolder.findOrCreateNode(this, -1, col, tx, 0, w, headdiv);
+			updateCellNode(td, col, w, thh);
+			tx += w;
 		}
 
+	}
+
+	private void updateCellNode(DOMNode td, int col, int w, int thh) {
+		JSComponent c = (JSComponent) getHeaderComponent(col, w, thh, td);
+		if (c != null)
+			CellHolder.updateCellNode(td, c, -1, -1);
 	}
 
 	private static Cursor resizeCursor = Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR);
@@ -727,7 +732,6 @@ public class JSTableHeaderUI extends JSLightweightUI {
 		working = true;
 
 		boolean ltr = tableHeader.getComponentOrientation().isLeftToRight();
-
 		Rectangle clip = g.getClipBounds();
 		Point left = clip.getLocation();
 		Point right = new Point(clip.x + clip.width - 1, clip.y);
@@ -798,13 +802,12 @@ public class JSTableHeaderUI extends JSLightweightUI {
 
 	private void paintGrid(Graphics g, int cMin, int cMax) {
 		g.setColor(table.getGridColor());
-
+		int h = tableHeader.getHeight();
 		table._getCellRect(0, cMin, true, JSTableUI.minCell);
 		table._getCellRect(0, cMax, true, JSTableUI.maxCell);
 		Rectangle damagedArea = JSTableUI.minCell.union(JSTableUI.maxCell);
-		int tableHeight = getHeaderHeight();
 		if (table.getShowHorizontalLines()) {
-			g.drawLine(0, tableHeight - 1, damagedArea.width, tableHeight - 1);			
+			g.drawLine(0, h - 1, damagedArea.width, h - 1);			
 		}
 		if (table.getShowVerticalLines()) {
 			TableColumnModel cm = table.getColumnModel();
@@ -814,14 +817,15 @@ public class JSTableHeaderUI extends JSLightweightUI {
 				for (int column = cMin; column <= cMax; column++) {
 					int w = cm.getColumn(column).getWidth();
 					x += w;
-					g.drawLine(x - 1, 0, x - 1, tableHeight - 1);
+					g.drawLine(x, 0, x, h - 1); 
+					// BH don't know why we need x not x-1 here and below
 				}
 			} else {
 				x = damagedArea.x;
 				for (int column = cMax; column >= cMin; column--) {
 					int w = cm.getColumn(column).getWidth();
 					x += w;
-					g.drawLine(x - 1, 0, x - 1, tableHeight - 1);
+					g.drawLine(x, 0, x, h - 1);
 				}
 			}
 		}
@@ -831,27 +835,40 @@ public class JSTableHeaderUI extends JSLightweightUI {
 	// Paint Methods and support
 	//
 
-	private Component getHeaderComponent(int columnIndex) {
-		TableColumn aColumn = tableHeader.getColumnModel().getColumn(columnIndex);
+	private JSComponent getHeaderComponent(int col) {
+		return getHeaderComponent(col, 0, 0, null);
+	}
+	private JSComponent getHeaderComponent(int col, int w, int h, DOMNode td) {
+		TableColumn aColumn = tableHeader.getColumnModel().getColumn(col);
 		TableCellRenderer renderer = aColumn.getHeaderRenderer();
 		if (renderer == null) {
 			renderer = tableHeader.getDefaultRenderer();
 		}
 
-		boolean hasFocus = !tableHeader.isPaintingForPrint() && (columnIndex == getSelectedColumnIndex())
+		boolean hasFocus = !tableHeader.isPaintingForPrint() && (col == getSelectedColumnIndex())
 				&& tableHeader.hasFocus();
 				
 		JComponent c = (JComponent) renderer.getTableCellRendererComponent(tableHeader.getTable(), aColumn.getHeaderValue(), false, hasFocus,
-				-1, columnIndex);
+				-1, col);
+		if (c != null && td != null) {
+			JSTableUI.prepareCellRendererUI(c, false, w, h, td, true, tableHeader);
+		}
 		return c;
 	}
 
 	private void paintCell(Graphics g, Rectangle cellRect, int columnIndex) {
 		// System.out.println("paintCell header" + columnIndex);
-		JComponent c = (JComponent) getHeaderComponent(columnIndex);
-		c.秘getUI().setRenderer(c, cellRect.width, cellRect.height, null);
-		rendererPane.paintComponent(g, c, tableHeader, cellRect.x, cellRect.y, cellRect.width, cellRect.height,
-				true);
+		DOMNode td = CellHolder.findCellNode(this, null, -1, columnIndex);
+		if (td == null)
+			return;
+		int w = cellRect.width;
+		int h = cellRect.height;
+		JComponent comp = (JComponent) getHeaderComponent(columnIndex, w, h, td);
+		if (comp == null)
+			return;
+		rendererPane.paintComponent(g, comp, tableHeader, cellRect.x, cellRect.y, w, h, true);
+		if (td != null)
+			comp.秘getUI().setRenderer(null, 0, 0, td);
 	}
 
 	private int viewIndexForColumn(TableColumn aColumn) {
@@ -877,8 +894,10 @@ public class JSTableHeaderUI extends JSLightweightUI {
 			boolean isDefault = (aColumn.getHeaderRenderer() == null);
 
 			if (!isDefault || !accomodatedDefault) {
-				Component comp = getHeaderComponent(column);
-				int rendererHeight = comp.getPreferredSize().height;
+				
+				JSComponent comp = getHeaderComponent(column);
+				JSComponentUI ui = comp.秘getUI();
+				int rendererHeight = (ui.isUIDisabled ? ui.cellHeight : comp.getPreferredSize().height);
 				height = Math.max(height, rendererHeight);
 
 				// Configuring the header renderer to calculate its preferred size

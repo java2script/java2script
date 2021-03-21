@@ -1771,7 +1771,7 @@ public final class Class<T> {
 	 * @since JDK1.1
 	 */
 	public Constructor<?>[] getConstructors() throws SecurityException {
-		return null;// TODO
+		return /*copyMethods*/(privateGetConstructors());
 //		// be very careful not to change the stack depth of this
 //		// checkMemberAccess call for security reasons
 //		// see java.lang.SecurityManager.checkMemberAccess
@@ -2043,12 +2043,7 @@ public final class Class<T> {
 	 * @since JDK1.1
 	 */
 	public Constructor<T> getConstructor(Class<?>... parameterTypes) throws NoSuchMethodException, SecurityException {
-		// be very careful not to change the stack depth of this
-		// checkMemberAccess call for security reasons
-		// see java.lang.SecurityManager.checkMemberAccess
-//		checkMemberAccess(Member.PUBLIC, ClassLoader.getCallerClassLoader());
 		return new Constructor(this, parameterTypes, new Class<?>[0], Member.PUBLIC);
-//	return getConstructor0(parameterTypes, Member.PUBLIC);
 	}
 
 	/**
@@ -3111,6 +3106,7 @@ public final class Class<T> {
 
 	    return ms;
 
+	    
 //		checkInitted();
 //		Method[] res = null;
 //		if (useCaches) {
@@ -3172,6 +3168,54 @@ public final class Class<T> {
 //		return res;
 	}
 
+	
+	public Constructor[] $constructors$;
+
+
+	// Returns an array of "root" methods. These Method objects must NOT
+	// be propagated to the outside world, but must instead be copied
+	// via ReflectionFactory.copyMethod.
+	private Constructor[] privateGetConstructors() {
+		Constructor[] ms;
+		if ($constructors$ != null) {
+			// interface hack
+			ms = new Constructor[$constructors$.length];
+			for (int i = ms.length; --i >= 0;) {
+				ms[i] = new Constructor(this, $constructors$[i].getParameterTypes(), null, java.lang.reflect.Modifier.PUBLIC);
+			}
+			return ms;
+		}
+
+		ms = new Constructor[0];
+		String attr = null;
+		Object o = null;
+		/**
+		 * @j2sNative
+		 * 
+		 * 
+		 * 			var p = this.$clazz$;
+		 * 
+		 *            for (attr in p) { o = p[attr]; if (
+		 *            typeof o == "function" 
+		 *            && o.exName && o.exName.startsWith("c$")
+		 *            && !o.__CLASS_NAME__ 
+		 *            && (o.exClazz == this.$clazz$)
+		 *            ) { 
+		 */
+		
+		Constructor m = new Constructor(this, UNKNOWN_PARAMETERS, null, Modifier.PUBLIC);
+		m._setJSMethod(o, Modifier.PUBLIC);
+
+		/**
+		 * @j2sNative
+		 * 
+		 * 			ms.push(m);
+		 * }}
+		 */
+
+	    return ms;
+	}
+	
 //	//
 //	// Helpers for fetchers of one field, method, or constructor
 //	//

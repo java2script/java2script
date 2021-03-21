@@ -32,7 +32,7 @@ public class JSPanelUI extends JSLightweightUI implements ContainerPeer {
 			}
 		}
 		if (isGlassPane) {
-			addLocalCanvas();
+			addLocalCanvas(false);
 			DOMNode.setZ(domNode, 1);
 		}
 		isContentPane = (root != null && jc == root.getContentPane());

@@ -84,7 +84,7 @@ public class JSTextFieldUI extends JSTextUI {
 				jsmap = new InputMap();
 				jsmap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0, false), JTextField.notifyAction);
 			}
-			map.setParent(jsmap);
+			map.getParent().setParent(jsmap);
 		}
 		return map;
 	}

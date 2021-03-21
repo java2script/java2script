@@ -1,24 +1,5 @@
 package test;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.function.BiPredicate;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.ToIntFunction;
-import java.util.stream.DoubleStream;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
-import test.baeldung.doublecolon.Computer;
-import test.baeldung.doublecolon.MacbookPro;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -31,21 +12,36 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 public class Test_Future extends JFrame {
 
+	public class CompletionStageTest
+	{
+	  public void test() {
+	    CompletableFuture<String> future1 = new CompletableFuture<>();
+	    future1.thenAccept(System.out::println);
+	    future1.complete("Future 1");
+	    
+	    CompletionStage<String> future2 = CompletableFuture.completedFuture("Future 2");
+	    future2.thenAccept(System.out::println);
+	    
+	    CompletionStage<String> future3 = CompletableFuture.completedStage("Future 3");
+	    future3.thenAccept(System.out::println);
+	  }
+	}
+	
 	Executor executor = (Runnable r) -> {
 		new Thread(r).start();
 	};
 	private JButton b1, b2;
 	
 	public Test_Future() {
+		if (/** @j2sNative true || */false)
+			new CompletionStageTest().test();
 		setLocation(400,200);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		b1 = new JButton("fixed");

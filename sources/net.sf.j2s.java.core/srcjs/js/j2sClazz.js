@@ -7,6 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2021.02.12 implements better(?) interface defaults resolution -- in order of presentation
 // BH 2020.12.31 3.3.1-v1 full 64-bit long support; BigDecimal, BigInteger fully 64-bit
 
 // BH 2020.12.19 3.2.10-v1 preliminary work aiming to back long with [r,m,s].
@@ -1107,7 +1108,7 @@ Clazz.newMeth = function (clazzThis, funName, funBody, modifiers) {
   else 
 	clazzThis.prototype[funName] = funBody;
   return funBody; // allow static calls as though they were not static
-};                     
+};
 
 Clazz.newPackage = function (pkgName) {
   Clazz._Loader && Clazz._Loader.doTODO();
@@ -1699,6 +1700,7 @@ var copyStatics = function(clazzFrom, clazzThis, isInterface) {
     }
   }
   if (isInterface) {
+	clazzThis.$defaults$ && clazzThis.$defaults$(clazzThis);
 	for (var o in clazzFrom.prototype) {
 	if (clazzThis.prototype[o] == undefined && !excludeSuper(o)) {
 	clazzThis.prototype[o] = clazzFrom.prototype[o];
@@ -1706,7 +1708,6 @@ var copyStatics = function(clazzFrom, clazzThis, isInterface) {
 	}
 	if (clazzFrom.$defaults$) {
 		__allowOverwriteClass = false;
-		clazzThis.$defaults$ && clazzThis.$defaults$(clazzThis);
 		clazzFrom.$defaults$(clazzThis);
 		__allowOverwriteClass = true;
 	}
@@ -2063,7 +2064,7 @@ var setSuperclass = function(clazzThis, clazzSuper){
  */
 var addInterface = function (clazzThis, interfacez) {
   if (interfacez instanceof Array) {
-    for (var i = interfacez.length; --i >= 0;) {
+    for (var i = 0, n = interfacez.length; i < n; i++) {
       var iface = interfacez[i];
       if (iface instanceof Array) {
         var cl;
@@ -4071,10 +4072,11 @@ m$(Integer,"decode$S", function(n){
 // Note that Long is problematic in JavaScript 
 
 Clazz._setDeclared("java.lang.Long", java.lang.Long=Long=function(){
-if (arguments[0] === null || typeof arguments[0] != "object")this.c$(arguments[0]);
+	this.c$(arguments[0]);
 });
 
 decorateAsNumber(Long, "Long", "long", "J", lHCOffset);
+
 Long.toString=Long.toString$J=Long.toString$J$I = Long.prototype.toString=function(i, radix){
 	switch(arguments.length) {
 	case 2:
@@ -4085,7 +4087,7 @@ Long.toString=Long.toString$J=Long.toString$J$I = Long.prototype.toString=functi
 		i = this.valueOf();
 		break;
 	}
-	return (i.length ? Long.$s(i) : i);
+	return (i.length ? Long.$s(i) : "" + i);
 };
 
 	
@@ -4884,8 +4886,8 @@ m$(Long,["longValue","longValue$"],function(){return this.valueOf();});
 
 m$(Long,"c$",
 function(v) {
- if (typeof v != "number")
-	v = Long.parseLong$S$I(v, 10);
+	if (typeof v != "number" && typeof v != "object")
+		v = Long.parseLong$S$I(v, 10);
  this.valueOf=function(){return v;};
 }, 1);
 
@@ -4916,7 +4918,7 @@ function(s, radix){
 m$(Long,"valueOf$J",
 function(i){
   i = Clazz.toLong(i);
-  var v = (i.length ? 0 : getCachedNumber(i, longs, Long, "c$$J"));
+  var v = (!i.length || (v = Long.$ival(i)) == Long.$lval(i) && (i = v) == i ? getCachedNumber(i, longs, Long, "c$$J") : 0);
   return (v ? v : Clazz.new_(Long.c$$J, [i]));
 }, 1);
 

@@ -785,6 +785,7 @@ public class DefaultEditorKit extends EditorKit {
     // --- Action implementations ---------------------------------
 
     private static final Action[] defaultActions = {
+    	new PassThroughAction(),
         new InsertContentAction(), new DeletePrevCharAction(),
         new DeleteNextCharAction(), new ReadOnlyAction(),
 //        new DeleteWordAction(deletePrevWordAction),
@@ -1099,6 +1100,26 @@ public class DefaultEditorKit extends EditorKit {
         }
     }
 
+    /*
+     * Deletes the character of content that follows the
+     * current caret position.
+     * @see DefaultEditorKit#deleteNextCharAction
+     * @see DefaultEditorKit#getActions
+     */
+    public static class PassThroughAction extends TextAction {
+
+        /* Create this object with the appropriate identifier. */
+        public PassThroughAction() {
+            super("pass-through");
+        }
+
+		/** The operation to perform when this action is triggered. */
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			System.out.println("DefaultEdKit ignoring");
+			/** @j2sNative e.bdata.doPropagate = true;*/
+		}
+    }
 
 //    /*
 //     * Deletes the word that precedes/follows the beginning of the selection.

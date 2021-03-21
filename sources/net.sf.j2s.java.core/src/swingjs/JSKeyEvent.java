@@ -54,6 +54,7 @@ public class JSKeyEvent extends KeyEvent {
 		 *            ev.originalEvent.preventDefault();
 		 */
 
+		//System.out.println(id + " " + evType + " " + jskey + " " + jskeyCode);
 		if (id == 0)
 			id = JSMouse.fixEventType(jqevent, 0);
 		if (id == 0)

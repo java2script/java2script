@@ -246,7 +246,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 		}
 	}	
 	
-	private Cursor getCursor() {
+	protected Cursor getCursor() {
 		isHorizontal = (splitPane.getOrientation() == JSplitPane.HORIZONTAL_SPLIT);
 		if (cursor == null) {
 			cursor = Toolkit.getDefaultToolkit().createCustomCursor(null, null, isHorizontal ? "col-resize" : "row-resize");

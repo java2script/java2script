@@ -240,6 +240,7 @@ public abstract class AbstractButton extends JComponent implements ItemSelectabl
     protected transient ChangeEvent changeEvent;
 
     private boolean hideActionText = false;
+	private int 秘lastWidth;
 
     /**
      * Sets the <code>hideActionText</code> property, which determines
@@ -314,13 +315,26 @@ public abstract class AbstractButton extends JComponent implements ItemSelectabl
 //                AccessibleContext.ACCESSIBLE_VISIBLE_DATA_PROPERTY,
 //                oldValue, text);
 //        }
-		if (text == null || oldValue == null || !text.equals(oldValue)) {
-	        if (秘isAWT()) {
-	        	invalidateIfValid();
-	        } else {
-	        	revalidate();
-	        	秘repaint();
-	        }
+		boolean isTainted = false;
+		if (text == null || oldValue == null || (isTainted = !text.equals(oldValue))) {
+			if (秘isAWT()) {
+				invalidateIfValid();
+			} else {
+				if (isTainted) {
+					int width = (ui == null ||秘getUI().textNode == null ? Integer.MIN_VALUE :
+						 getFont().getFontMetrics().stringWidth(text));
+					if (width == 秘lastWidth) {
+						秘getUI().setTainted();
+					} else {
+						if (width != Integer.MIN_VALUE)
+							秘lastWidth = width;
+						isTainted = false;
+					}
+				}
+				if (!isTainted)
+					revalidate();
+				秘repaint();
+			}
 		}
 	}
 
