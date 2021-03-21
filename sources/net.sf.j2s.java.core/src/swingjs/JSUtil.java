@@ -804,11 +804,11 @@ public class JSUtil implements JSUtilI {
 
 	/**
 	 * 
-	 * @param f anything with 秘bytes (File, JSPath)
+	 * @param f anything with 秘bytes (File, JSPath) or URL._streamData
 	 * @return
 	 */
 	public static byte[] getBytes(Object f) {
-		return ((File) f).秘bytes;
+		return (f instanceof URL ? (byte[]) ((URL) f)._streamData : ((File) f).秘bytes);
 	}
 
 	@Override
