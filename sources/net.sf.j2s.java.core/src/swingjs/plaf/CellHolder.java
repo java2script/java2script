@@ -57,5 +57,15 @@ public abstract class CellHolder {
 			comp.秘getUI().setRenderer(comp, 0, 0, null);
 	}
 
+	public static DOMNode findOrCreateNode(JSComponentUI ui, int row, int col, int tx, int ty, int w, DOMNode tr) {
+		DOMNode td = findCellNode(ui, null, row, col);
+		if (td == null) {
+			td = createCellOuterNode(ui, row, col);
+			tr.appendChild(td);
+		}
+		DOMNode.setStyles(td, "left", tx + "px", "width", w + "px", "height", "inherit", "top", ty + "px");
+		return td;
+	}
+
 
 }

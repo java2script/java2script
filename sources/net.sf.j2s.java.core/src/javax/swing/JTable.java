@@ -3723,10 +3723,12 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 				comp.setVisible(true);
 				// force domNode to be visible as well as outer node
 				comp.秘getUI().setVisible(null, true);
+				JTable me = this;
 				SwingUtilities.invokeLater(new Runnable() {
 					@Override
 					public void run() {
-						comp.requestFocus();
+						if (me.hasFocus())
+							comp.requestFocus();
 					}
 				});
 			}

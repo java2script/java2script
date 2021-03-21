@@ -1499,7 +1499,9 @@ public class JSComponentUI extends ComponentUI
 	/**
 	 * table cell width and height
 	 */
-	private int cellWidth, cellHeight;
+	private int cellWidth;
+
+	protected int cellHeight;
 	
 	/**
 	 * this ui has been disabled from receiving any events; see JTableUI

@@ -289,7 +289,7 @@ public class JSTableUI extends JSPanelUI {
 	 * @param col
 	 * @return
 	 */
-	private JSComponent getCellComponent(TableCellRenderer renderer, int row, int col, int w, int h, DOMNode td,
+	private JSComponent getCellRendererComponent(TableCellRenderer renderer, int row, int col, int w, int h, DOMNode td,
 			boolean fullPaint) {
 		// SwingJS adds the idea that the default renderers need only be prepared once
 		// the
@@ -298,25 +298,31 @@ public class JSTableUI extends JSPanelUI {
 		// one.
 		JSComponent cNoPrep = /** @j2sNative renderer.秘getComponent$ && renderer.秘getComponent$() || */
 				null;
-		JSComponent c = (cNoPrep == null ? (JSComponent) table.prepareRenderer(renderer, row, col) : cNoPrep);
+		JSComponent c = (cNoPrep == null ? (JSComponent) table.prepareRenderer(renderer, row, col) : cNoPrep);			
 		if (c != null) {
-			JSComponentUI ui = c.秘getUI();
-			boolean wasDisabled = ui.isUIDisabled;
-			c.秘reshape(c.getX(), c.getY(), w, h, false);
-			ui.setRenderer(c, w, h, null);
-			ui.setTargetParent(table);
-			if (fullPaint && wasDisabled || cNoPrep != null) {
-				// repeat, now that the UI is enabled
-				if (wasDisabled) {
-					ui.restoreCellNodes(td);
-					// at this point td COULD still empty, if we wanted it to be, and
-					// domNode is just an attribute of td.
-				}
-				ui.setTainted();
+			if (prepareCellRendererUI(c, cNoPrep != null, w, h, td, fullPaint, (JComponent) table))
 				table.prepareRenderer(renderer, row, col);
-			}
 		}
 		return c;
+	}
+
+	static boolean prepareCellRendererUI(JSComponent c, boolean forcePrep, int w, int h, DOMNode td, boolean fullPaint, JComponent table) {
+		JSComponentUI ui = c.秘getUI();
+		boolean wasDisabled = ui.isUIDisabled;
+		c.秘reshape(c.getX(), c.getY(), w, h, false);
+		ui.setRenderer(c, w, h, null);
+		ui.setTargetParent(table);
+		if (fullPaint && wasDisabled || forcePrep) {
+			// repeat, now that the UI is enabled
+			if (wasDisabled) {
+				ui.restoreCellNodes(td);
+				// at this point td COULD still empty, if we wanted it to be, and
+				// domNode is just an attribute of td.
+			}
+			ui.setTainted();
+			return true;
+		}
+		return false;
 	}
 
 	@Override
@@ -434,12 +440,7 @@ public class JSTableUI extends JSPanelUI {
 				w = cw[col];
 				if (tx + w < rminx)
 					continue;
-				DOMNode td = CellHolder.findCellNode(this, null, row, col);
-				if (td == null) {
-					td = CellHolder.createCellOuterNode(this, row, col);
-					tr.appendChild(td);
-				}
-				DOMNode.setStyles(td, "left", tx + "px", "width", w + "px", "height", "inherit", "top", ty + "px");
+				DOMNode td = CellHolder.findOrCreateNode((JSComponentUI) this, row, col, tx, ty, w, tr); 
 				updateCellNode(td, row, col, w, h);
 				if (rminx < 0)
 					return td;
@@ -449,9 +450,9 @@ public class JSTableUI extends JSPanelUI {
 	}
 
 	private void updateCellNode(DOMNode td, int row, int col, int w, int h) {
-		JSComponent cell = (JSComponent) getCellComponent(table.getCellRenderer(row, col), row, col, w, h, td, true);
-		if (cell != null)
-			CellHolder.updateCellNode(td, cell, -1, -1);
+		JSComponent c = (JSComponent) getCellRendererComponent(table.getCellRenderer(row, col), row, col, w, h, td, true);
+		if (c != null)
+			CellHolder.updateCellNode(td, c, -1, -1);
 	}
 
 	JComponent editorComp;
@@ -2399,49 +2400,50 @@ public class JSTableUI extends JSPanelUI {
 		havePainted = true;
 	}
 
-	private void paintCell(Graphics g, Rectangle cellRect, int row, int col, int h, DOMNode tr,
-			boolean forceNew, boolean colTainted) {
+	private void paintCell(Graphics g, Rectangle cellRect, int row, int col, int h, DOMNode tr, boolean forceNew,
+			boolean colTainted) {
 
 		if (table.isEditing() && table.getEditingRow() == row && table.getEditingColumn() == col) {
 			Component component = table.getEditorComponent();
 			if (component instanceof JTextField) {
-				component.setBounds(new Rectangle(cellRect.x - 2, cellRect.y - 2, cellRect.width, cellRect.height));		
+				component.setBounds(new Rectangle(cellRect.x - 2, cellRect.y - 2, cellRect.width, cellRect.height));
 			} else {
 				component.setBounds(cellRect);
 			}
 			component.validate();
-		} else {
-			// Get the appropriate rendering component
-			// and switch its ui domNode to the one for the
-			// given row and column. Painting the component
-			// then modifies this particular cell. and switch it back
-			DOMNode td = (forceNew || tr == null ? null : CellHolder.findCellNode(this, null, row, col));
-			boolean newtd = (td == null);
-			if (newtd) {
-				td = addElement(row, col, h);
-			} else if (colTainted) {
-				DOMNode.setStyles(td, "left", cellRect.x + "px", "width", cw[col] + "px", "display", null);
-			} else {
-				DOMNode.setStyle(td, "display", null);
-			}
-			boolean fullPaint = (newtd || !havePainted || !isScrolling || table.getSelectedRowCount() > 0);
-			TableCellRenderer renderer = (fullPaint ? table.getCellRenderer(row, col)
-					: table.getCellRendererOrNull(row, col, isScrolling));
-			if (!fullPaint) {
-				// no need to paint the default renderers with nothing selected
-				/**
-				 * @j2sNative if (!renderer || renderer.__CLASS_NAME__.indexOf("javax.swing.") == 0) return;
-				 */
-			}
-			JComponent comp = (JComponent) getCellComponent(renderer, row, col, cw[col], h, td, fullPaint);
-			if (comp == null)
-				return;
-			boolean shouldValidate = fullPaint && !isScrolling;
-			rendererPane.paintComponent(g, comp, table, cellRect.x, cellRect.y, cellRect.width, cellRect.height,
-					shouldValidate);
-			// Note that this sets ui.jc = null.
-			comp.秘getUI().setRenderer(null, 0, 0, td);
+			return;
 		}
+		// Get the appropriate rendering component
+		// and switch its ui domNode to the one for the
+		// given row and column. Painting the component
+		// then modifies this particular cell. and switch it back
+		DOMNode td = (forceNew || tr == null ? null : CellHolder.findCellNode(this, null, row, col));
+		boolean newtd = (td == null);
+		if (newtd) {
+			td = addElement(row, col, h);
+		} else if (colTainted) {
+			DOMNode.setStyles(td, "left", cellRect.x + "px", "width", cw[col] + "px", "display", null);
+		} else {
+			DOMNode.setStyle(td, "display", null);
+		}
+		boolean fullPaint = (newtd || !havePainted || !isScrolling || table.getSelectedRowCount() > 0);
+		TableCellRenderer renderer = (fullPaint ? table.getCellRenderer(row, col)
+				: table.getCellRendererOrNull(row, col, isScrolling));
+		if (!fullPaint) {
+			// no need to paint the default renderers with nothing selected
+			/**
+			 * @j2sNative if (!renderer || renderer.__CLASS_NAME__.indexOf("javax.swing.")
+			 *            == 0) return;
+			 */
+		}
+		JComponent comp = (JComponent) getCellRendererComponent(renderer, row, col, cw[col], h, td, fullPaint);
+		if (comp == null)
+			return;
+		boolean shouldValidate = fullPaint && !isScrolling;
+		rendererPane.paintComponent(g, comp, table, cellRect.x, cellRect.y, cellRect.width, cellRect.height,
+				shouldValidate);
+		// Note that this sets ui.jc = null.
+		comp.秘getUI().setRenderer(null, 0, 0, td);
 	}
 
 	/*
