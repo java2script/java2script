@@ -149,7 +149,8 @@ public class JSHTMLHelper {
 		for (int i = 0; iter.isValid(); i++) {
 			aTagElements.add(iter.秘getElement());
 			int pt = html.indexOf("href=#_JSINDEX_#");
-			html = html.substring(0, pt + 14) + i + html.substring(pt + 16);
+			if (pt > 0)
+				html = html.substring(0, pt + 14) + i + html.substring(pt + 16);
 			iter.next();
 		}
 		return html;

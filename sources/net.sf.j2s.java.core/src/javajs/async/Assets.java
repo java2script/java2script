@@ -446,8 +446,10 @@ public class Assets {
 					if (fullPath.startsWith(sortedList[i])) {
 						url = assetsByPath.get(sortedList[i]).getURL(fullPath);
 						ZipEntry ze = findZipEntry(url);
-						if (ze == null)
+						if (ze == null) {
+							url = null;
 							break;
+						}
 						if (isJS) {
 							jsutil.setURLBytes(url, jsutil.getZipBytes(ze));
 						}

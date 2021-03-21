@@ -151,6 +151,15 @@ public class TableDemo extends JPanel {
 		});
 		btn.setMaximumSize(new Dimension(80, 20));
 		add(btn);
+		btn = new JButton("New headings");
+		btn.addActionListener((e) -> {
+			for (int i = table.getColumnModel().getColumnCount(); --i >= 0;) {
+				table.getColumnModel().getColumn(i).setHeaderValue("col" + "abcdefghijklm".substring(0,(int) (Math.random()*10)));			
+			}
+			table.getTableHeader().repaint();
+		});
+		btn.setMaximumSize(new Dimension(80, 20));
+		add(btn);
 
 	}
 
