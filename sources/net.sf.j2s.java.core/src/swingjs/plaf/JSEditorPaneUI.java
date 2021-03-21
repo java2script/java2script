@@ -11,6 +11,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import javax.swing.InputMap;
 import javax.swing.JComponent;
@@ -35,6 +37,7 @@ import javax.swing.text.StyledDocument;
 import javax.swing.text.StyledEditorKit;
 import javax.swing.text.View;
 
+import javajs.util.PT;
 import javajs.util.SB;
 import sun.swing.DefaultLookup;
 import swingjs.JSToolkit;
@@ -271,6 +274,7 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 	private boolean isStyled;
 	private String mytext;
 	private DOMNode bodyNode;
+	private String rawHTML;
 	
 //	private int epTimer;
 //	@Override
@@ -405,8 +409,35 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 			}
 		}
 		if (isHTML) {
-			html = fixText(html);
 			setBackgroundDOM(domNode, jc.getBackground());
+			if (html.equals(rawHTML))
+				return;
+			rawHTML = html;
+			html = fixText(html);
+			if (isHtmlKit) {
+				URL page = (URL) editor.getDocument().getProperty("stream");
+				if (page != null && page.getProtocol().equals("file") && text.indexOf("src=\".") >= 0) {
+					String rp = J2S.getResourcePath("", true);
+					if (rp.indexOf("://") < 0)
+						rp = "file:/" + rp;
+					try {
+						page = new URL(rp + page.getPath().substring(1));
+					} catch (MalformedURLException e1) {
+					}
+					String[] srcs = PT.split(text, "src=\".");
+					String out = srcs[0];
+					for (int i = 1; i < srcs.length; i++) {
+						int pt = srcs[i].indexOf('"');
+						String src = "." + srcs[i].substring(0, pt);
+						try {
+							src = new URL(page, src).getPath().substring(1);
+						} catch (MalformedURLException e) {
+						}
+						out += "src=\"" +src+ srcs[i].substring(pt);
+					}
+					html = out;
+				}
+			}
 		}
 		// System.out.println(html);
 		if (html == currentHTML)

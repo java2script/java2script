@@ -72,6 +72,7 @@ import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 
 import swingjs.JSHTMLHelper;
+import swingjs.JSUtil;
 //import swingjs.JSAbstractDocument;
 import swingjs.api.Interface;
 //import swingjs.api.JSMinimalAbstractDocument;
@@ -423,6 +424,7 @@ public class JEditorPane extends JTextComponent {
 	 * @see #getPage
 	 * @beaninfo description: the URL used to set content bound: true expert: true
 	 */
+	@SuppressWarnings("unused")
 	public void setPage(URL page) throws IOException {
 		if (page == null) {
 			throw new IOException("invalid url");
@@ -464,6 +466,7 @@ public class JEditorPane extends JTextComponent {
 						// load asynchronously
 						setDocument(doc);
 						synchronized (this) {
+							秘setPage(doc, page);
 							loading = new PageStream(in);
 							Thread pl = new PageLoader(doc, loading, p, loaded, page);
 							pl.start();
@@ -472,6 +475,7 @@ public class JEditorPane extends JTextComponent {
 					}
 					read(in, doc);
 					setDocument(doc);
+					秘setPage(doc, page);
 					reloaded = true;
 				}
 			} else {
@@ -499,6 +503,16 @@ public class JEditorPane extends JTextComponent {
 			getDocument().putProperty(Document.StreamDescriptionProperty, page);
 		}
 		firePropertyChange("page", loaded, page);
+	}
+
+	private void 秘setPage(Document doc, URL page) {
+		if (doc instanceof HTMLDocument) {
+			byte[] bytes = JSUtil.getBytes(page);
+			if (bytes != null) {
+				if (秘jsHTMLHelper != null)
+					秘jsHTMLHelper.setText(new String(bytes));
+			}
+		}
 	}
 
 	/**
@@ -1225,6 +1239,7 @@ public class JEditorPane extends JTextComponent {
 			// try to dynamically load the support
 			String classname = (String) getKitTypeRegistry().get(type);
 //            ClassLoader loader = (ClassLoader) getKitLoaderRegistry().get(type);
+			if (classname != null)
 			try {
 				k = (EditorKit) Interface.getInstance(classname, false);
 //                Class c;
@@ -1436,12 +1451,7 @@ public class JEditorPane extends JTextComponent {
 		try {
 			Document doc = getDocument();
 			if (doc instanceof HTMLDocument) {
-				if (t.indexOf("<body")< 0)
-				t = "<body>" + t + "</body>";
-				if (t.indexOf("<head")< 0)
-				t = "<head>" + t + "</head>";
-				if (t.indexOf("<html")< 0)
-				t = "<html>" + t + "</html>";
+				t = 秘fixHTML(t);
 			}
 			if (秘jsHTMLHelper != null)
 				秘jsHTMLHelper.setText(t);
@@ -1457,6 +1467,16 @@ public class JEditorPane extends JTextComponent {
 		} catch (BadLocationException ble) {
 			UIManager.getLookAndFeel().provideErrorFeedback(JEditorPane.this);
 		}
+	}
+
+	private static String 秘fixHTML(String t) {
+		if (t.indexOf("<body")< 0)
+		t = "<body>" + t + "</body>";
+		if (t.indexOf("<head")< 0)
+		t = "<head>" + t + "</head>";
+		if (t.indexOf("<html")< 0)
+		t = "<html>" + t + "</html>";
+		return t;
 	}
 
 	/**
