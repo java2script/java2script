@@ -191,10 +191,11 @@ public class TextListener implements KeyListener, FocusListener, ChangeListener,
 			ui.setJSText();
 			int p = e.getOffset() + e.getLength();
 			ui.setJavaMarkAndDot(new Point(p, p));
-			if (c != null)
-			SwingUtilities.invokeLater(() -> {
-				c.requestFocus();
-			});
+// but this sets the focus even if it is just having its text changed. Tracker Model Builder issue
+//			if (c != null)
+//				SwingUtilities.invokeLater(() -> {
+//					c.requestFocus();
+//				});
 		}
 	}
 
