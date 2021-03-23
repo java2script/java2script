@@ -823,7 +823,6 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 		if (r.get(0) != null) {
 			SwingUtilities.invokeLater(()->{
 				fn.scrollTop(0);
-				System.out.println("later jsepui s2r " + r.offset().top + " " + fn.offset());
 				fn.scrollTop(r.offset().top - fn.offset().top);
 			});
 		}
