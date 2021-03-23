@@ -220,6 +220,32 @@ public class JSHTMLHelper {
         return css.replaceAll("NamedStyle:", "#" + id + " ").replaceAll("=",":").replaceAll(",", ";");
 	}
 
+	public static String fixLinks(String html, URL page) {
+		if (page != null && page.getProtocol().equals("file") && html.indexOf("src=\".") >= 0) {
+			String rp = JSUtil.J2S.getResourcePath("", true);
+			if (rp.indexOf("://") < 0)
+				rp = "file:/" + rp;
+			try {
+				page = new URL(rp + page.getPath().substring(1));
+			} catch (MalformedURLException e1) {
+			}
+			String[] srcs = PT.split(html, "src=\"");
+			String out = srcs[0];
+			for (int i = 1; i < srcs.length; i++) {
+				int pt = srcs[i].indexOf('"');
+				String src = srcs[i].substring(0, pt);
+				try {
+					if (!src.startsWith("http://") && !src.startsWith("https://"))
+						src = new URL(page, src).getPath().substring(1);
+				} catch (MalformedURLException e) {
+				}
+				out += "src=\"" + src + srcs[i].substring(pt);
+			}
+			html = out;
+		}
+		return html;
+	}
+
 
 }
 

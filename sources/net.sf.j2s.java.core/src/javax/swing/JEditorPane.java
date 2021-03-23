@@ -53,6 +53,7 @@ import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.BoxView;
 import javax.swing.text.Caret;
@@ -68,6 +69,7 @@ import javax.swing.text.StyledEditorKit;
 import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
 import javax.swing.text.WrappedPlainView;
+import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 
@@ -77,6 +79,7 @@ import swingjs.JSUtil;
 import swingjs.api.Interface;
 //import swingjs.api.JSMinimalAbstractDocument;
 //import java.io.ObjectOutputStream;
+import swingjs.plaf.JSEditorPaneUI;
 
 /**
  * A text component to edit various kinds of content. You can find how-to
@@ -906,8 +909,11 @@ public class JEditorPane extends JTextComponent {
 	 * @param reference the named location to scroll to
 	 */
 	public void scrollToReference(String reference) {
-//        Document d = getDocument();
-//        if (d instanceof HTMLDocument) {
+        Document d = getDocument();
+        if (d instanceof HTMLDocument) {
+           //SwingUtilities.invokeLater(() -> {
+            	((JSEditorPaneUI) getUI()).scrollToReference(reference);
+            //});
 //            HTMLDocument doc = (HTMLDocument) d;
 //            HTMLDocument.Iterator iter = doc.getIterator(HTML.Tag.A);
 //            for (; iter.isValid(); iter.next()) {
@@ -919,6 +925,7 @@ public class JEditorPane extends JTextComponent {
 //                        int pos = iter.getStartOffset();
 //                        Rectangle r = modelToView(pos);
 //                        if (r != null) {
+//                        	
 //                            // the view is visible, scroll it to the
 //                            // center of the current visible area.
 //                            Rectangle vis = getVisibleRect();
@@ -932,7 +939,7 @@ public class JEditorPane extends JTextComponent {
 //                    }
 //                }
 //            }
-//        }
+        }
 	}
 
 	/**
