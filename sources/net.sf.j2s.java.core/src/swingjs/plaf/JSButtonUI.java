@@ -32,12 +32,15 @@ package swingjs.plaf;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Insets;
+import java.awt.JSComponent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+import java.awt.image.BufferedImage;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
+import javax.swing.ButtonModel;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -46,6 +49,7 @@ import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 import javax.swing.plaf.UIResource;
 
+import swingjs.JSToolkit;
 import swingjs.api.js.DOMNode;
 
 /**
@@ -141,7 +145,7 @@ public class JSButtonUI extends JSLightweightUI {
 		// all subclasses will call this method, including
 		// standard MenuItem and Menu labels
 		String text = button.getText();
-		ImageIcon icon = (ImageIcon) button.getIcon();
+		Icon icon = getIcon();
 		int gap = button.getIconTextGap();
 		isMenuSep = (("|").equals(text) || ("-").equals(text));
 		if (isMenuSep) {
@@ -188,21 +192,24 @@ public class JSButtonUI extends JSLightweightUI {
 		setMenuItem(centeringNode);
 	}
 
+	@SuppressWarnings("unused")
 	@Override
 	protected void enableNode(DOMNode node, boolean b) {
+		if (node == null || isUIDisabled)
+			return;
 		if (isMenuItem) {
 			if (b) {
 				removeClass(node, JSPopupMenuUI.UI_DISABLED);
 			} else {
 				addClass(node, JSPopupMenuUI.UI_DISABLED);
 			}
-		} else {
-			super.enableNode(node, b);
+			return;
 		}
+		super.enableNode(node, b);
 	}
 
 	protected void setupButton() {
-		setIconAndText("button", (ImageIcon) button.getIcon(), button.getIconTextGap(), button.getText());
+		setIconAndText("button", getIcon(), button.getIconTextGap(), button.getText());
 		// "emptyBorder" is not really empty.
 		if (button.getBorder() == null || button.getBorder() == BorderFactory.emptyBorder)
 			DOMNode.setStyle(buttonNode, "border", "none");
@@ -802,12 +809,37 @@ public class JSButtonUI extends JSLightweightUI {
 		return setHTMLSize1(obj, addCSS, true);
 	}
 
+	/**
+	 * set in getIcon(); checked in paint
+	 * 
+	 */
+	private Icon thisIcon;
+
+	@SuppressWarnings("unused")
 	@Override
 	public void paint(Graphics g, JComponent c) {
-		if (jc.秘paintsSelfEntirely())
+		if (jc.秘paintsSelfEntirely()) {
 			DOMNode.setStyle(centeringNode, "visibility", "visible");
+		} else if (currentIcon != null && imageNode != null && imagePersists) {
+			Icon icon = thisIcon;
+			if (icon != null && icon != getIcon()) {
+				$(iconNode).empty();
+				currentIcon = getOrCreateIcon(c, thisIcon);
+				imageNode = ((BufferedImage) currentIcon.getImage()).秘getImageNode(BufferedImage.GET_IMAGE_FOR_ICON);
+				iconNode.appendChild(imageNode);
+			}
+		}
 		super.paint(g, c);
 	}
+
+	@Override
+	protected Icon getIcon() {
+		ButtonModel model = button.getModel();
+		Icon disabledIcon = /** @j2sNative this.button.disabledIcon || */
+				null;
+		return thisIcon = (disabledIcon != null && !model.isEnabled() ? disabledIcon : button.getIcon());
+	}
+
 
 	@Override
 	public boolean isFocusable() {
@@ -819,7 +851,7 @@ public class JSButtonUI extends JSLightweightUI {
 		if (isAWT && isSimpleButton)
 			return JSLabelUI.getMinimumSizePeer(jc, button);
 		Icon ic;
-		if (!isSimpleButton || isAWT || button.getText() != null || (ic = button.getIcon()) == null)
+		if (!isSimpleButton || isAWT || button.getText() != null || (ic = getIcon()) == null)
 			return super.getPreferredSize(jc);
 		Insets in = button.getInsets();
 		return new Dimension(in.left + in.right + ic.getIconWidth(), in.top + in.bottom + ic.getIconHeight());
