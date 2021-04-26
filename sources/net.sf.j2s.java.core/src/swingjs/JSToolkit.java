@@ -68,6 +68,8 @@ import javajs.util.JSThread;
 import javajs.util.PT;
 import sun.awt.AppContext;
 import sun.awt.SunToolkit;
+import sun.awt.image.FileImageSource;
+import sun.awt.image.ToolkitImage;
 import swingjs.api.Interface;
 import swingjs.api.JSFileHandler;
 import swingjs.api.js.HTML5Applet;
@@ -597,7 +599,15 @@ public class JSToolkit extends SunToolkit
 	public Image getImage(String filename) {
 		if (filename.indexOf("/") != 0)
 			filename = "../" + filename;
-		return createImage(JSToolkit.class.getResource(filename));
+		Image img = null;
+		try {
+			img = createImage(JSToolkit.class.getResource(filename));
+		} catch (Exception e) {
+		}
+		if (img == null)
+			img = new ToolkitImage(new FileImageSource(filename));
+		return img;
+		
 	}
 
 
