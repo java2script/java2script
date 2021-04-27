@@ -1120,6 +1120,7 @@ public class JSComponentUI extends ComponentUI
 	 */
 	protected final static String TRUE = "秘TRUE";
 	protected final static String FALSE = "秘FALSE";
+	protected final static String NULL = null;
 	/**
 	 * for jQuery return
 	 */
@@ -2327,7 +2328,7 @@ public class JSComponentUI extends ComponentUI
 		if (node == null || isUIDisabled)
 			return;
 		
-		DOMNode.setAttr(node, "disabled", (b ? FALSE : TRUE));
+		DOMNode.setAttr(node, "disabled", (b ? NULL : TRUE));
 		if (!b && inactiveForeground == colorUNKNOWN)
 			getDisabledColors(buttonNode == null ? getPropertyPrefix() : "Button");
 		if (jc.isOpaque()) {
