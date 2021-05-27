@@ -862,21 +862,35 @@ public class CifDataParser implements GenericCifDataParser {
   protected boolean isQuote(char ch) {
     switch (ch) {
     case '\'':
-    case '\"':
+    case '"':
     case '\1':
+    case '[':  
+    case ']':
       return  true;
     }
     return false;
   }
 
   /**
-   * CIF 1.0 only. 
+   * CIF 1.0 only.
    * 
-   *  
-   * @param ch current character being pointed to
+   * 
+   * @param ch
+   *        current character being pointed to
    * @return a String data object
    */
   protected Object getQuotedStringOrObject(char ch) {
+    switch (ch) {
+    case '[':
+      try {
+        return readList();
+      } catch (Exception e) {
+        System.out.println("exception in CifDataParser ; " + e);
+      }
+    case ']':
+      ich++;
+      return  "]";
+    }
     int ichStart = ich;
     char chClosingQuote = ch;
     boolean wasQuote = false;
@@ -896,9 +910,48 @@ public class CifDataParser implements GenericCifDataParser {
       pt2++;
     } else {
       // throw away the last white character
-      ++ich; 
+      ++ich;
     }
     return str.substring(pt1, pt2);
+  }
+
+  /**
+   * Read a CIF 2.0 list structure, converting it to either a JSON string or to
+   * a Java data structure
+   * 
+   * @return a string or data structure, depending upon setting asObject
+   * @throws Exception
+   */
+  public Object readList() throws Exception {
+    ich++;
+    // save the current globals cterm and nullString, 
+    // and restore them afterward. 
+    // nullString is what is returned for '.' and '?'; 
+    // for the Jmol CifReader only, this needs to be "\0"
+    char cterm0 = cterm;
+    cterm = ']';
+    String ns = nullString;
+    nullString = null;
+    Lst<Object> lst = (asObject ? new Lst<Object>() : null);
+    int n = 0;
+    String str = "";
+    while (true) {
+      // Iteratively pick up all the objects until the closing bracket
+      // This is akin to an array "deep copy"
+      Object value = (asObject ? getNextTokenObject() : getNextToken());
+      if (value == null || value.equals("]"))
+        break;
+      if (asObject) {
+        lst.addLast(value);
+      } else {
+        if (n++ > 0)
+          str += ",";
+        str += value;
+      }
+    }
+    cterm = cterm0;
+    nullString = ns;
+    return (asObject ? lst : "[" + str + "]");
   }
 
   

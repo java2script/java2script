@@ -7,6 +7,7 @@ import java.awt.Insets;
 import java.awt.JSComponent;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -23,6 +24,7 @@ import javax.swing.border.Border;
 import javax.swing.event.CaretEvent;
 import javax.swing.plaf.InputMapUIResource;
 import javax.swing.plaf.UIResource;
+import javax.swing.text.AbstractDocument;
 import javax.swing.text.AbstractDocument.BranchElement;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
@@ -40,8 +42,10 @@ import javax.swing.text.View;
 import javajs.util.PT;
 import javajs.util.SB;
 import sun.swing.DefaultLookup;
+import swingjs.JSHTMLHelper;
 import swingjs.JSToolkit;
 import swingjs.api.js.DOMNode;
+import swingjs.api.js.JQueryObject;
 import swingjs.api.js.JQueryObject.JQEvent;
 import swingjs.api.js.JSFunction;
 
@@ -410,33 +414,14 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 		}
 		if (isHTML) {
 			setBackgroundDOM(domNode, jc.getBackground());
-			if (html.equals(rawHTML))
+			if (currentHTML != null && html.equals(rawHTML))
 				return;
 			rawHTML = html;
 			html = fixText(html);
 			if (isHtmlKit) {
 				URL page = (URL) editor.getDocument().getProperty("stream");
-				if (page != null && page.getProtocol().equals("file") && text.indexOf("src=\".") >= 0) {
-					String rp = J2S.getResourcePath("", true);
-					if (rp.indexOf("://") < 0)
-						rp = "file:/" + rp;
-					try {
-						page = new URL(rp + page.getPath().substring(1));
-					} catch (MalformedURLException e1) {
-					}
-					String[] srcs = PT.split(text, "src=\".");
-					String out = srcs[0];
-					for (int i = 1; i < srcs.length; i++) {
-						int pt = srcs[i].indexOf('"');
-						String src = "." + srcs[i].substring(0, pt);
-						try {
-							src = new URL(page, src).getPath().substring(1);
-						} catch (MalformedURLException e) {
-						}
-						out += "src=\"" +src+ srcs[i].substring(pt);
-					}
-					html = out;
-				}
+				if (page != null)
+					html = JSHTMLHelper.fixLinks(html, page);
 			}
 		}
 		// System.out.println(html);
@@ -832,6 +817,16 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 				&& (/** @j2sNative node.nodeType != 3 && ("" + node.getAttribute("class")).indexOf("j2stab") >= 0 && */true);
 	}
 
+	public void scrollToReference(String ref) {
+		JQueryObject fn = $(focusNode);
+		JQueryObject r = fn.find("[name=\"" + ref + "\"]");
+		if (r.get(0) != null) {
+			SwingUtilities.invokeLater(()->{
+				fn.scrollTop(0);
+				fn.scrollTop(r.offset().top - fn.offset().top);
+			});
+		}
+	}
 	
 	/**
 	 * no backward selections in a div with contentEditable TRUE
@@ -1369,6 +1364,27 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 //            }
 //        }
         return d;
+	}
+
+	@Override
+	public Rectangle modelToView(JTextComponent tc, int pos, Position.Bias bias) throws BadLocationException {
+		Rectangle alloc = getVisibleEditorRect();
+		Document doc = editor.getDocument();
+		Object[] r1 = getJSNodePt(focusNode, pos, null, 0);
+		try {
+			if (alloc != null) {
+				rootView.setSize(alloc.width, alloc.height);
+				Shape s = rootView.modelToView(pos, alloc, bias);
+				if (s != null) {
+					return s.getBounds();
+				}
+			}
+		} finally {
+			if (doc instanceof AbstractDocument) {
+				((AbstractDocument) doc).readUnlock();
+			}
+		}
+		return null;
 	}
 
 	@Override

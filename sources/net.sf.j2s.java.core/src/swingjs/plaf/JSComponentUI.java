@@ -578,6 +578,9 @@ public class JSComponentUI extends ComponentUI
 	protected Color inactiveForeground = colorUNKNOWN, 
 			inactiveBackground = colorUNKNOWN;
 
+	/**
+	 * from JButton.isEnabled()
+	 */
 	private boolean enabled = true;
 
 	/**
@@ -1117,6 +1120,7 @@ public class JSComponentUI extends ComponentUI
 	 */
 	protected final static String TRUE = "秘TRUE";
 	protected final static String FALSE = "秘FALSE";
+	protected final static String NULL = null;
 	/**
 	 * for jQuery return
 	 */
@@ -1448,7 +1452,7 @@ public class JSComponentUI extends ComponentUI
 			// note that we use AbstractButton cast here just because
 			// it has a getIcon() method. JavaScript will not care if
 			// it is really a JLabel or JOptionPane, which also have icons
-			ImageIcon icon = getIcon(c, null);
+			ImageIcon icon = getOrCreateIcon(c, null);
 			if (icon == null ? currentIcon != null : !icon.equals(currentIcon))
 				setIconAndText("icon", icon, currentGap, currentText);
 		}
@@ -2324,7 +2328,7 @@ public class JSComponentUI extends ComponentUI
 		if (node == null || isUIDisabled)
 			return;
 		
-		DOMNode.setAttr(node, "disabled", (b ? FALSE : TRUE));
+		DOMNode.setAttr(node, "disabled", (b ? NULL : TRUE));
 		if (!b && inactiveForeground == colorUNKNOWN)
 			getDisabledColors(buttonNode == null ? getPropertyPrefix() : "Button");
 		if (jc.isOpaque()) {
@@ -2442,10 +2446,20 @@ public class JSComponentUI extends ComponentUI
 	protected void setInnerComponentBounds(int width, int height) {
 	}
 
-	private ImageIcon getIcon(JSComponent c, Icon icon) {
-		return (c == null || icon == null && (icon = ((AbstractButton) c).getIcon()) == null ? null
+	/**
+	 * Create an image icon if necessary
+	 * @param c
+	 * @param icon
+	 * @return
+	 */
+	protected ImageIcon getOrCreateIcon(JSComponent c, Icon icon) {
+		return (c == null || icon == null && (icon = getIcon()) == null ? null
 				: icon.getIconWidth() <= 0 || icon.getIconHeight() <= 0 ? null
 						: (icon instanceof ImageIcon) ? (ImageIcon) icon : JSToolkit.createImageIcon(jc, icon, id + "tmpIcon"));
+	}
+
+	protected Icon getIcon() {
+		return ((AbstractButton) c).getIcon();
 	}
 
 	@SuppressWarnings("unused")
@@ -2500,13 +2514,13 @@ public class JSComponentUI extends ComponentUI
 		imageNode = null;
 		int h = 0;
 		if (iconNode != null) {
-			icon = currentIcon = getIcon(jc, icon);
+			icon = currentIcon = getOrCreateIcon(jc, icon);
 			$(iconNode).empty();
 			if (currentIcon != null) {
 				imageNode = ((BufferedImage) currentIcon.getImage()).秘getImageNode(BufferedImage.GET_IMAGE_FOR_ICON);
+				iconNode.appendChild(imageNode);
 				if (DOMNode.getAttr(imageNode, "tagName") == "VIDEO")
 					isVideoIcon = imagePersists = true;
-				iconNode.appendChild(imageNode);
 				int w;
 				if (isVideoIcon) {
 					if (jc.isPreferredSizeSet()) {
@@ -3717,7 +3731,7 @@ public class JSComponentUI extends ComponentUI
 			if (!paintsSelf)
 				setBackgroundDOM(domNode, color);
 			// preliminary -- DOM only, when the background is set
-		} else if (allowPaintedBackground && (isOpaque && (cellComponent != null || jc.getComponentCount() > 0) || jc.秘g != null)) {
+		} else if (allowPaintedBackground && (isOpaque && (isPanel || cellComponent != null || jc.getComponentCount() > 0) || jc.秘g != null)) {
 			// all opaque components must paint their background
 			// just in case they have painted CHILDREN or if they are table cell components
 			if (isOpaque == (color.getAlpha() == 255)) {

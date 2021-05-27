@@ -175,4 +175,20 @@ public class DF {
     return str.substring(0, m + 1); // 0.##...
   }
 
+  /**
+   * an alternative to DecimalFormat "0.0"
+   * 
+   * @param x
+   * @param precision
+   * @return  formatted number 
+   */
+  public static String formatDecimalTrimmed0(double x, int precision) {
+    String str = DF.formatDecimalDbl(x, precision);
+    int m = str.length() - 1;
+    int pt = str.indexOf(".") + 1;
+    while (m > pt && str.charAt(m) == '0')
+      m--;
+    return str.substring(0, m + 1); // 0.0##...
+  }
+
 }

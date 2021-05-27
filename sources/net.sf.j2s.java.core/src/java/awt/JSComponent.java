@@ -153,6 +153,10 @@ public abstract class JSComponent extends Component {
      * 
      */
     private int 秘iPaintMyself = PAINTS_SELF_UNKNOWN;
+    
+    /**
+     * 	paint(g) or paintComponent(g) or update(g) or paintContainer(g) is overridden
+     */
     private boolean 秘iPaintMyselfEntirely;
 	private boolean 秘repaintAsUpdate = true;
 	private static boolean 秘isRepaint = true;

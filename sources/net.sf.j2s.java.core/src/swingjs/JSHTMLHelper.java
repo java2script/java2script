@@ -10,9 +10,11 @@ import java.util.List;
 import javax.swing.JEditorPane;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkEvent.EventType;
+import javax.swing.text.AttributeSet;
 import javax.swing.text.Element;
 import javax.swing.text.Style;
 import javax.swing.text.StyleContext;
+import javax.swing.text.StyleContext.NamedStyle;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLDocument.Iterator;
@@ -20,6 +22,9 @@ import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 
 import javajs.util.PT;
+import swingjs.api.js.DOMNode;
+import swingjs.api.js.J2SInterface;
+import swingjs.api.js.JQueryObject;
 import swingjs.plaf.JSComponentUI;
 
 /**
@@ -75,7 +80,8 @@ public class JSHTMLHelper {
 	@SuppressWarnings("unused")
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
 		EventType type = null;
-		String href = /** @j2sNative jQueryEvent.target.href || */
+		JQueryObject node = JSUtil.jQuery.$(/** @j2sNative jQueryEvent.target ||*/ null).closest("a");
+		String href = /** @j2sNative node && node[0].href || */
 				null;
 		if (href == null)
 			return JSComponentUI.HANDLED;
@@ -104,6 +110,10 @@ public class JSHTMLHelper {
 			String left = href.substring(0, pt);
 			elem = getElementFromHref(left);
 			href = trimHRef(href.substring(pt + 9));
+			J2SInterface j2s = JSUtil.J2S;
+			String j2sPath = /** @j2sNative j2s.thisApplet._j2sPath || */null;
+			if (href.startsWith(j2sPath))
+				href = href.substring(j2sPath.length());
 			url =  new URL(doc.getBase(), href);
 		} catch (MalformedURLException e) {
 			// ignore -- could be anything the developer wants.
@@ -190,7 +200,8 @@ public class JSHTMLHelper {
 		Style bodyStyle = sheet.getStyle(name);
 		if (bodyStyle != null) 
 		{
-			return( /** @j2sNative bodyStyle.attributes.attributes || */null);
+			Object r = bodyStyle.getAttribute("resolver");
+			return( /** @j2sNative (r || bodyStyle).attributes.attributes || */null);
 		}
 		return null;
 	}
@@ -207,17 +218,52 @@ public class JSHTMLHelper {
 		StyleSheet sheet = doc.getStyleSheet();
 		if (sheet == null)
 			return null;
-        Enumeration styles = sheet.getStyleNames();
-        while (styles.hasMoreElements()) {
-            String name = (String) styles.nextElement();
-            // Don't write out the default style.
-            if (!name.equals(StyleContext.DEFAULT_STYLE)
-            		&& !name.equals("body")) {
-            	Style s = sheet.getStyle(name);
-            	css += s + "\n";
-            }
-        }
-        return css.replaceAll("NamedStyle:", "#" + id + " ").replaceAll("=",":").replaceAll(",", ";");
+		Enumeration styles = sheet.getStyleNames();
+		while (styles.hasMoreElements()) {
+			String name = (String) styles.nextElement();
+			// Don't write out the default style.
+			Style s = sheet.getStyle(name);
+			NamedStyle r = (NamedStyle) s.getAttribute("resolver");
+			String a;
+			if (name.equals(StyleContext.DEFAULT_STYLE) || name.equals("body")) {
+				continue;
+//				a = (r == null ? s : r).toString();
+	//			a = "#" + id + "_body" + a.substring(a.indexOf("{"));
+			} else if (r == null) {
+				a = s.toString();
+			} else {
+				r.setName(name);
+				a = r.toString();
+			}
+			css += a + "\n";
+		}
+		return css.replaceAll("NamedStyle:", "#" + id + " ").replaceAll("=", ":").replaceAll(",", ";");
+	}
+
+	public static String fixLinks(String html, URL page) {
+		if (page != null && page.getProtocol().equals("file") && html.indexOf("src=\".") >= 0) {
+			String rp = JSUtil.J2S.getResourcePath("", true);
+			if (rp.indexOf("://") < 0)
+				rp = "file:/" + rp;
+			try {
+				page = new URL(rp + page.getPath().substring(1));
+			} catch (MalformedURLException e1) {
+			}
+			String[] srcs = PT.split(html, "src=\"");
+			String out = srcs[0];
+			for (int i = 1; i < srcs.length; i++) {
+				int pt = srcs[i].indexOf('"');
+				String src = srcs[i].substring(0, pt);
+				try {
+					if (!src.startsWith("http://") && !src.startsWith("https://"))
+						src = new URL(page, src).getPath().substring(1);
+				} catch (MalformedURLException e) {
+				}
+				out += "src=\"" + src + srcs[i].substring(pt);
+			}
+			html = out;
+		}
+		return html;
 	}
 
 
