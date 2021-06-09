@@ -1330,6 +1330,8 @@ public final class Matcher implements MatchResult {
 		Objects.requireNonNull(name, "Group name");
 		if (first < 0)
 			throw new IllegalStateException("No match found");
+		if (pat.namedGroups == null)
+			pat.秘setNameGroups();
 		if (pat.namedGroups == null || !pat.namedGroups().containsKey(name))
 			throw new IllegalArgumentException("No group with name <" + name + ">");
 		return pat.namedGroups().get(name);
