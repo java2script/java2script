@@ -3792,7 +3792,7 @@ public abstract class Component implements ImageObserver/*
 		 * notify AWTEventListeners.
 		 */
 
-		 if (e instanceof SunDropTargetEvent) {
+        if (e instanceof swingjs.JSDnD.JSDropMouseEvent) {
 			 ((SunDropTargetEvent)e).dispatch();
 			 return;
 		 }
