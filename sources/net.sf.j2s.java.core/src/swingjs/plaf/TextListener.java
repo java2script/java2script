@@ -89,6 +89,7 @@ public class TextListener implements KeyListener, FocusListener, ChangeListener,
 			ui.setEditable(((Boolean) e.getNewValue()).booleanValue());
 			break;
 		case "document":
+		case "lineWrap":
 			if (e.getNewValue() != null)
 				ui.updateRootView();
 			break;

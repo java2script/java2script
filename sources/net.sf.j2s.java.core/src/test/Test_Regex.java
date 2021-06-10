@@ -13,29 +13,25 @@ public class Test_Regex extends Test_ {
 
 		
 		
+		String st;
 		Pattern p;
 		Matcher m;
 
 		
-		String st;
+	
 		
 		
-
-		
-		
-		st = "12a-Carbon.jdf";
-		
-		p = Pattern.compile("^(?<IFS0nmr0representation0vender0dataset>(?<IFS0structure0param0compound0id>([^-]+(?:-[^-]+)*))\\Q-\\E(?<IFS0nmr0param0expt>[^|/]+)\\Q.jdf\\E)$");
+		st = "...pre-20a-b/DEPT135/3/pdata/1/procs";
+		st = "...pre-20a-b/DEPT135|3/pdata/1/procs";
+		p = Pattern.compile("^(?<path>.+(?:/|\\|)(?<dir>[^/]+))/pdata/[^/]+/procs$");		
 		m = p.matcher(st);
 		System.out.println(m.find());
 		for (int i = 1, n = m.groupCount(); i <= n; i++) {
 			System.out.println(i + "/" + n + ">"+m.group(i)+"<");
 		}
-		assert(m.group("IFSnmr0param0expt").equals("test"));
-		
 
-		st = "FID for Publication/S6.zip|S6/HRMS.zip|HRMS/67563_hazh180_maxis_pos.pdf";
 		
+		st = "FID for Publication/S6.zip|S6/HRMS.zip|HRMS/67563_hazh180_maxis_pos.pdf";
 		p = Pattern.compile("^\\QFID for Publication/\\E(?<id>[^|/]+)\\Q.zip"
 			+ "|\\E\\k<id>\\Q/HRMS.zip|\\E(?:[^/]+/)*(?<IFS0ms0representation0pdf>[^|/]+\\Q.pdf\\E)$");
 		m = p.matcher(st);
@@ -43,20 +39,18 @@ public class Test_Regex extends Test_ {
 		for (int i = 1, n = m.groupCount(); i <= n; i++) {
 			System.out.println(i + "/" + n + ">"+m.group(i)+"<");
 		}
-		assert(m.group("IFSnmr0param0expt").equals("test"));
-		
-		
+
+		st = "{abc::now {jkl::{def::and} {ghi::then}}}";
 		p = Pattern.compile("\\{([^:]+)::(.+)\\}");
-		m = p.matcher("{abc::now {jkl::{def::and} {ghi::then}}}");
+		m = p.matcher(st);
 		m.find();
 		for (int i = 1, n = m.groupCount(); i <= n; i++) {
 			System.out.println(i + "/" + n + ">"+m.group(i)+"<");
 		}
-		assert(m.group("IFSnmr0param0expt").equals("test"));
 		
-
+		st = "AtestB";
 		p = Pattern.compile("\\QA\\E(?<IFS0nmr0param0expt>\\Q\\E.+\\Q\\E)\\QB\\E");
-		m = p.matcher("AtestB");
+		m = p.matcher(st);
 		m.find();
 		// note that go [1,n] here, not [0,n)
 		System.out.println("ID was " + m.group("IFS0nmr0param0expt"));
