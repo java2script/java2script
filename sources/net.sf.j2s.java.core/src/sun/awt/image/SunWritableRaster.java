@@ -128,28 +128,29 @@ public class SunWritableRaster extends WritableRaster {
 	// SurfaceData.getPrimarySurfaceData(img).markDirty();
 	// }
 	//
-	private StateTrackableDelegate theTrackable;
+//	private StateTrackableDelegate theTrackable;
 
 	public SunWritableRaster(SampleModel sampleModel, Point origin) {
 		super(sampleModel, origin);
-		theTrackable = stealTrackable(dataBuffer);
+//		theTrackable = stealTrackable(dataBuffer);
 	}
 
 	public SunWritableRaster(SampleModel sampleModel, DataBuffer dataBuffer, Point origin) {
 		super(sampleModel, dataBuffer, origin);
-		theTrackable = stealTrackable(dataBuffer);
+//		theTrackable = stealTrackable(dataBuffer);
 	}
 
 	public SunWritableRaster(SampleModel sampleModel, DataBuffer dataBuffer, Rectangle aRegion,
 			Point sampleModelTranslate, WritableRaster parent) {
 		super(sampleModel, dataBuffer, aRegion, sampleModelTranslate, parent);
-		theTrackable = stealTrackable(dataBuffer);
+//		theTrackable = stealTrackable(dataBuffer);
 	}
 
 	/**
 	 * Mark the TrackableDelegate of the associated DataBuffer dirty.
 	 */
 	public final void markDirty() {
-		theTrackable.markDirty();
+		stealTrackable(dataBuffer).markDirty();
+//		theTrackable.markDirty();
 	}
 }

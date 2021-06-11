@@ -593,6 +593,11 @@ public class JSGraphics2D implements
 		if (img != null) {
 			DOMNode imgNode = ((BufferedImage) img).秘getImageNode(BufferedImage.GET_IMAGE_ALLOW_NULL);
 			if (imgNode == null) {
+				if (width != img.getWidth(null) || height != img.getHeight(null)) {
+					// scaled image
+					drawImage(img, x, y, x + width, y + width, 0, 0, img.getWidth(null), img.getHeight(null), observer);
+					return true;
+				}
 				drawImagePriv(img, x, y, width, height, observer);
 			} else {
 				ctx.drawImage(imgNode, x, y, width, height);
