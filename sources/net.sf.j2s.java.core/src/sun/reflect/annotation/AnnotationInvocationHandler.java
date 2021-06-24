@@ -25,19 +25,12 @@
 
 package sun.reflect.annotation;
 
-import java.io.Serializable;
 import java.lang.annotation.Annotation;
-import java.lang.annotation.AnnotationFormatError;
-import java.lang.annotation.IncompleteAnnotationException;
-import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Arrays;
 import java.util.Map;
 

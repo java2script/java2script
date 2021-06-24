@@ -29,12 +29,9 @@ package javax.swing;
 
 import java.awt.AWTEvent;
 import java.awt.EventQueue;
-import java.awt.JSComponent;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
-
-import swingjs.JSUtil;
 
 /**
  * An implementation of a two-state button. The <code>JRadioButton</code> and

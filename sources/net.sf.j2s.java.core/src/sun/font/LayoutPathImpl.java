@@ -40,7 +40,6 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
-import java.util.Formatter;
 import java.util.ArrayList;
 
 import static java.awt.geom.PathIterator.*;

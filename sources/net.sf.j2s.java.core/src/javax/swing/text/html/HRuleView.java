@@ -27,7 +27,6 @@ package javax.swing.text.html;
 import java.awt.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.text.*;
-import java.util.Enumeration;
 import java.lang.Integer;
 
 /**

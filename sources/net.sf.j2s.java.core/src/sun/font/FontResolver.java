@@ -32,7 +32,6 @@ package sun.font;
 
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
-import java.awt.font.TextAttribute;
 import java.util.ArrayList;
 import java.util.Map;
 import sun.text.CodePointIterator;

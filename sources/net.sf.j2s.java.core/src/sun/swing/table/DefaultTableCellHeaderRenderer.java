@@ -29,13 +29,11 @@ package sun.swing.table;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Graphics;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
-import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.UIResource;
 import javax.swing.table.DefaultTableCellRenderer;

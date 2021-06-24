@@ -53,8 +53,6 @@ import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.validation.Schema;
 
-import swingjs.JSUtil;
-
 import java.io.UnsupportedEncodingException;
 import java.io.File;
 import java.io.OutputStream;

@@ -25,8 +25,6 @@
 
 package sun.nio.fs;
 
-import sun.misc.Unsafe;
-
 /**
  * Factory for native buffers.
  */

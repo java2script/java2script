@@ -7,8 +7,6 @@ import test.math.MathContext;
 //import test.math.MutableBigInteger;
 //import java.util.GregorianCalendar;
 
-import org.apache.xerces.jaxp.datatype.XMLGregorianCalendarImpl;
-
 
 public class Test_BigDec extends Test_ {
 

@@ -48,7 +48,6 @@ import sun.awt.image.PixelConverter;
 import sun.awt.image.ShortComponentRaster;
 import sun.awt.image.SunWritableRaster;
 import swingjs.JSGraphics2D;
-import swingjs.JSUtil;
 import swingjs.api.JSUtilI;
 import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Canvas;

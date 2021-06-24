@@ -9,7 +9,6 @@ import javax.swing.JRootPane;
 import javax.swing.LookAndFeel;
 
 import swingjs.api.js.DOMNode;
-import swingjs.api.js.JSFunction;
 
 public class JSPanelUI extends JSLightweightUI implements ContainerPeer {
 

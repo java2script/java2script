@@ -28,8 +28,6 @@ package java.nio.charset;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.spi.CharsetProvider;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -40,14 +38,10 @@ import java.util.Set;
 import java.util.ServiceLoader;
 import java.util.ServiceConfigurationError;
 import java.util.SortedMap;
-import java.util.TreeMap;
-
 import swingjs.JSCharSet;
 import swingjs.JSUtil;
-import sun.misc.ASCIICaseInsensitiveComparator;
 import sun.nio.cs.StandardCharsets;
 import sun.nio.cs.ThreadLocalCoders;
-import sun.security.action.GetPropertyAction;
 
 
 /**

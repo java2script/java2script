@@ -16,7 +16,6 @@
 package java.lang.reflect;
 
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
 import java.util.Map;
 
 import sun.reflect.annotation.AnnotationParser;

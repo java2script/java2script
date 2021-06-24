@@ -28,8 +28,6 @@
 
 package sun.awt;
 
-import java.lang.annotation.Native;
-
 ////import java.lang.ref.WeakReference;
 //import java.util.HashMap;
 //

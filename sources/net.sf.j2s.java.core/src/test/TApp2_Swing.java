@@ -2,17 +2,13 @@ package test;
 
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
-import java.awt.Button;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Insets;
-import java.awt.Label;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
@@ -23,8 +19,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.Line2D;
 
-import javax.swing.ImageIcon;
-import javax.swing.InputMap;
 import javax.swing.JApplet;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -34,8 +28,6 @@ import javax.swing.JPasswordField;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
 
 public class TApp2_Swing extends JApplet {
 

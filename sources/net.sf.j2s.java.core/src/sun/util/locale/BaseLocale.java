@@ -31,7 +31,6 @@
  */
 
 package sun.util.locale;
-import java.lang.ref.SoftReference;
 import java.util.HashMap;
 
 

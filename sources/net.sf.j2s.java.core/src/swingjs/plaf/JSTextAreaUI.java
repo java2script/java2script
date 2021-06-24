@@ -7,10 +7,7 @@ import java.beans.PropertyChangeEvent;
 
 import javax.swing.JComponent;
 import javax.swing.JTextArea;
-import javax.swing.UIManager;
-import javax.swing.border.Border;
 import javax.swing.event.CaretEvent;
-import javax.swing.plaf.UIResource;
 import javax.swing.text.Element;
 import javax.swing.text.PlainView;
 import javax.swing.text.View;

@@ -1,15 +1,11 @@
 package swingjs.a2s;
 
 import java.awt.AWTEventMulticaster;
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.event.TextListener;
 import java.awt.im.InputMethodRequests;
 
-import javax.swing.JScrollBar;
-import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
 

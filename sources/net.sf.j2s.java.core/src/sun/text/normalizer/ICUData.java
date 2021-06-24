@@ -38,7 +38,6 @@
 package sun.text.normalizer;
 
 import java.io.InputStream;
-import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.MissingResourceException;

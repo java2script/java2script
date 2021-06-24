@@ -1,10 +1,6 @@
 package test;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -14,10 +10,7 @@ import javax.swing.JApplet;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JScrollBar;
-import javax.swing.SwingConstants;
 import javax.swing.Timer;
-
-import javajs.util.JSThread;
 
 public class TApp4 extends JApplet {
 	JLabel label;

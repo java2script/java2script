@@ -27,14 +27,10 @@ package java.lang;
 
 import java.util.Arrays;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Spliterator;
 import java.util.function.IntConsumer;
-import java.util.stream.IntStream;
-
 import static java.lang.String9.LATIN1;
 import static java.lang.String9.UTF16;
-import static java.lang.String9.checkOffset;
 import static java.lang.String9.checkBoundsOffCount;
 
 final class StringLatin1 {

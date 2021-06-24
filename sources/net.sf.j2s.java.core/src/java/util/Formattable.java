@@ -25,8 +25,6 @@
 
 package java.util;
 
-import java.io.IOException;
-
 /**
  * The <tt>Formattable</tt> interface must be implemented by any class that
  * needs to perform custom formatting using the <tt>'s'</tt> conversion

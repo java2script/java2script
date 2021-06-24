@@ -25,8 +25,6 @@
 
 package sun.nio.cs.ext;
 
-import java.security.AccessController;
-
 import sun.nio.cs.AbstractCharsetProvider;
 import sun.security.action.GetPropertyAction;
 

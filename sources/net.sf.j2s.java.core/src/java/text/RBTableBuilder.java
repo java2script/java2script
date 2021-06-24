@@ -42,7 +42,6 @@ import java.util.Vector;
 import sun.text.UCompactIntArray;
 import sun.text.IntHashtable;
 import sun.text.ComposedCharIter;
-import sun.text.CollatorUtilities;
 import sun.text.normalizer.NormalizerImpl;
 
 /**

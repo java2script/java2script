@@ -26,12 +26,6 @@
 package java.util.prefs;
 import java.util.*;
 import java.io.*;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.security.PrivilegedExceptionAction;
-import java.security.PrivilegedActionException;
-
-import sun.util.logging.PlatformLogger;
 
 /**
  * Preferences implementation for Unix.  Preferences are stored in the file

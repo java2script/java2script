@@ -26,9 +26,6 @@
 package java.security;
 
 import java.util.HashMap;
-import java.util.ArrayList;
-import java.net.URL;
-
 import sun.security.util.Debug;
 
 /**

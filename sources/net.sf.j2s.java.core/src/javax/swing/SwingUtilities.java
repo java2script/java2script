@@ -27,7 +27,6 @@
  */
 package javax.swing;
 
-import java.applet.JSApplet;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -35,7 +34,6 @@ import java.awt.EventQueue;
 import java.awt.FontMetrics;
 import java.awt.JSFrame;
 import java.awt.Graphics;
-import java.awt.GraphicsEnvironment;
 import java.awt.HeadlessException;
 import java.awt.IllegalComponentStateException;
 import java.awt.Image;
@@ -64,7 +62,6 @@ import sun.swing.SwingUtilities2;
 import sun.swing.UIAction;
 import swingjs.JSAppletViewer;
 import swingjs.JSToolkit;
-import swingjs.api.Interface;
 import swingjs.api.js.DOMNode;
 import swingjs.plaf.JSComponentUI;
 

@@ -24,7 +24,6 @@
  */
 package java.util;
 
-import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.CountedCompleter;
 
 /**

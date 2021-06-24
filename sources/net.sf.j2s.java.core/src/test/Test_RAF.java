@@ -1,17 +1,8 @@
 package test;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
-import java.net.URL;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
-import javajs.util.Rdr;
-import javajs.util.ZipTools;
 
 /**
  * Test for RandomAccessFile

@@ -4,7 +4,6 @@ import java.awt.EventQueue;
 import java.awt.event.KeyEvent;
 
 import javax.swing.JComponent;
-import javax.swing.LookAndFeel;
 import javax.swing.MenuElement;
 import javax.swing.MenuSelectionManager;
 

@@ -36,18 +36,15 @@ import java.awt.Shape;
 
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphJustificationInfo;
-import java.awt.font.GlyphMetrics;
 import java.awt.font.LineMetrics;
 import java.awt.font.TextAttribute;
 
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 import java.util.Map;
 
 import swingjs.JSGraphics2D;
-import swingjs.JSUtil;
 
 /**
  * Default implementation of ExtendedTextLabel.

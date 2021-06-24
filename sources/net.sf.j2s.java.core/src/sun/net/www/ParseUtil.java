@@ -26,7 +26,6 @@
 package sun.net.www;
 
 import java.util.BitSet;
-import java.io.UnsupportedEncodingException;
 import java.io.File;
 import java.net.URL;
 import java.net.MalformedURLException;

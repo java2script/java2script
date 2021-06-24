@@ -37,9 +37,6 @@ import java.util.concurrent.ExecutorService;
 
 import swingjs.JSFileSystem;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-
 /**
  * Service-provider class for file systems. The methods defined by the {@link
  * java.nio.file.Files} class will typically delegate to an instance of this

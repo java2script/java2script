@@ -25,19 +25,6 @@
 
 package sun.font;
 
-import java.lang.ref.SoftReference;
-import java.lang.ref.WeakReference;
-import java.awt.Font;
-import java.awt.GraphicsEnvironment;
-import java.awt.Rectangle;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.NoninvertibleTransformException;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-import java.util.concurrent.ConcurrentHashMap;
-import static sun.awt.SunHints.*;
-
 
 public class FileFontStrike {//extends PhysicalStrike {
 //

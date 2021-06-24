@@ -28,7 +28,6 @@
 
 package javax.xml.stream;
 
-import java.io.Reader;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
 

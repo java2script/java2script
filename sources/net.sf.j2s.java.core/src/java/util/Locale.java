@@ -40,29 +40,22 @@
 
 package java.util;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamField;
 import java.io.Serializable;
 //import java.security.AccessController;
 import java.text.MessageFormat;
 import java.util.spi.LocaleNameProvider;
 
-import sun.security.action.GetPropertyAction;
 import sun.util.locale.BaseLocale;
 import sun.util.locale.InternalLocaleBuilder;
 import sun.util.locale.LanguageTag;
 import sun.util.locale.LocaleExtensions;
 import sun.util.locale.LocaleMatcher;
-import sun.util.locale.LocaleObjectCache;
 import sun.util.locale.LocaleSyntaxException;
 import sun.util.locale.LocaleUtils;
 import sun.util.locale.ParseStatus;
 import sun.util.locale.provider.LocaleProviderAdapter;
 import sun.util.locale.provider.LocaleResources;
 import sun.util.locale.provider.LocaleServiceProviderPool;
-import sun.util.locale.provider.ResourceBundleBasedAdapter;
 
 /**
  * A <code>Locale</code> object represents a specific geographical, political,

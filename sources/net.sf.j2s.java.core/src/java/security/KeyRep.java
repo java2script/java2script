@@ -30,9 +30,6 @@ import java.util.Locale;
 
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.security.spec.InvalidKeySpecException;
-
-import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.SecretKeySpec;
 
 /**

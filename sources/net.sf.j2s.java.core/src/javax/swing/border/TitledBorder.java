@@ -38,7 +38,6 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import javax.swing.JComponent;
 import javax.swing.UIManager;
-import swingjs.JSGraphics2D;
 
 /**
  * A class which implements an arbitrary border

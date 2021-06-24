@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GraphicsConfiguration;
-import java.awt.JSComponent;
 
 public class Canvas extends Panel {
 

@@ -27,7 +27,6 @@
  */
 package java.awt;
 
-import java.awt.Container.DropTargetEventTargetFilter;
 import java.awt.dnd.DropTarget;
 import java.awt.event.AWTEventListener;
 import java.awt.event.ComponentEvent;

@@ -25,7 +25,6 @@
 
 package java.security.cert;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 

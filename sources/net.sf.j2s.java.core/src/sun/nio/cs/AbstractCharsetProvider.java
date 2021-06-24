@@ -31,7 +31,6 @@ import java.nio.charset.spi.CharsetProvider;
 import java.util.ArrayList;
 import java.util.TreeMap;
 import java.util.Iterator;
-import java.util.Locale;
 import java.util.Map;
 import sun.misc.ASCIICaseInsensitiveComparator;
 

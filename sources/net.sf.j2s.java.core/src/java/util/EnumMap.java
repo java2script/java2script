@@ -25,9 +25,6 @@
 
 package java.util;
 
-import java.util.Map.Entry;
-//import sun.misc.SharedSecrets;
-
 /**
  * A specialized {@link Map} implementation for use with enum type keys.  All
  * of the keys in an enum map must come from a single enum type that is

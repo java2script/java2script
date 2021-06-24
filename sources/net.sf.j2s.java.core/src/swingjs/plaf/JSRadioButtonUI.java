@@ -1,7 +1,6 @@
 package swingjs.plaf;
 
 import javax.swing.AbstractButton;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JToggleButton;

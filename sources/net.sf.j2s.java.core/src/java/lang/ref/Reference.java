@@ -25,8 +25,6 @@
 
 package java.lang.ref;
 
-import sun.misc.Cleaner;
-
 /**
  * Abstract base class for reference objects.  This class defines the
  * operations common to all reference objects.  Because reference objects are

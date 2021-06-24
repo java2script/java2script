@@ -27,8 +27,6 @@ package java.net;
 
 import java.io.InputStream;
 import java.io.IOException;
-//import java.security.Permission;
-import java.util.Date;
 
 /**
  * A URLConnection with support for HTTP-specific features. See

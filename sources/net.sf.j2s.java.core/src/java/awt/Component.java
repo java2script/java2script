@@ -51,7 +51,6 @@ import java.awt.event.MouseWheelListener;
 import java.awt.event.PaintEvent;
 import java.awt.event.TextEvent;
 import java.awt.event.WindowEvent;
-import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.awt.image.ImageProducer;
 import java.awt.image.VolatileImage;

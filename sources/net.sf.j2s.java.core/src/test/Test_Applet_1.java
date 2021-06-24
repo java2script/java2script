@@ -17,7 +17,6 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
-import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
 
 /**

@@ -8,8 +8,6 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.Validator;
 
-import swingjs.JSUtil;
-
 public class JSJAXBContext extends JAXBContext {
 
 	private Map<String, ?> properties;

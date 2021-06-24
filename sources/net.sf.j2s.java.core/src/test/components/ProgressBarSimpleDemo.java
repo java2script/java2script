@@ -13,8 +13,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-import javax.swing.UIManager;
-
 import javajs.async.SwingJSUtils.StateHelper;
 import javajs.async.SwingJSUtils.StateMachine;
 

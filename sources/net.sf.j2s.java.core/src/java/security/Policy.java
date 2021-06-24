@@ -27,11 +27,6 @@
 package java.security;
 
 import java.util.Enumeration;
-import java.util.WeakHashMap;
-import java.util.concurrent.atomic.AtomicReference;
-import sun.security.jca.GetInstance;
-import sun.security.util.Debug;
-import sun.security.util.SecurityConstants;
 
 
 /**

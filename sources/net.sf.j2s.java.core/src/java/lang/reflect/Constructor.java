@@ -19,7 +19,6 @@ import java.lang.annotation.Annotation;
 import java.util.Map;
 
 import sun.reflect.annotation.AnnotationParser;
-import swingjs.api.js.JSFunction;
 
 /**
  * This class must be implemented by the VM vendor. This class models a

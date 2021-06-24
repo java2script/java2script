@@ -28,7 +28,6 @@
 
 package java.awt.event;
 
-import java.applet.JSApplet;
 import java.awt.Component;
 import java.awt.Window;
 import sun.awt.AppContext;

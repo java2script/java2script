@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Spliterator;
 import java.util.Spliterators;
-import java.util.Spliterator.OfInt;
-import java.util.Spliterator.OfPrimitive;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 

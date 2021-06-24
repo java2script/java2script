@@ -24,9 +24,6 @@
  */
 package swingjs.plaf;
 
-import java.awt.Color;
-
-import swingjs.JSToolkit;
 import swingjs.api.js.DOMNode;
 
 public class JSTextPaneUI extends JSEditorPaneUI {

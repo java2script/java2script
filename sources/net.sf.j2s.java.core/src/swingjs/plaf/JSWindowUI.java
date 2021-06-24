@@ -2,10 +2,7 @@ package swingjs.plaf;
 
 import java.awt.Dialog;
 import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
 import java.awt.Insets;
-import java.awt.JSComponent;
 import java.awt.JSDialog;
 import java.awt.Window;
 import java.awt.event.ComponentEvent;
@@ -19,7 +16,6 @@ import javax.swing.JComponent;
 import javax.swing.JWindow;
 
 import swingjs.JSAppletViewer;
-import swingjs.JSToolkit;
 import swingjs.api.js.DOMNode;
 
 public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListener, ComponentListener  {

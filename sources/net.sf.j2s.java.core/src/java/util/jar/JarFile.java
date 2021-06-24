@@ -51,10 +51,6 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 import sun.misc.IOUtils;
-import sun.misc.SharedSecrets;
-import sun.security.action.GetPropertyAction;
-import sun.security.util.ManifestEntryVerifier;
-import sun.security.util.SignatureFileVerifier;
 
 /**
  * The <code>JarFile</code> class is used to read the contents of a jar file

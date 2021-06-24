@@ -39,10 +39,7 @@
 package java.util;
 
 import java.io.Serializable;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.time.ZoneId;
-import sun.security.action.GetPropertyAction;
 import sun.util.calendar.ZoneInfo;
 import sun.util.calendar.ZoneInfoFile;
 import sun.util.locale.provider.TimeZoneNameUtility;

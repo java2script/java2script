@@ -35,7 +35,6 @@
 
 package java.util.concurrent;
 import java.util.*;
-import java.util.concurrent.atomic.*;
 
 /**
  * For SwingJS, we just use a standard LinkedHashMap

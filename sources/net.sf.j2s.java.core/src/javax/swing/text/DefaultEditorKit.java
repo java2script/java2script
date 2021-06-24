@@ -35,7 +35,6 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 
-import swingjs.JSToolkit;
 import swingjs.api.Interface;
 import swingjs.plaf.JSTextUI;
 

@@ -27,7 +27,6 @@ package javax.xml.xpath;
 
 import java.net.URL;
 import java.security.*;
-import java.net.*;
 import java.io.*;
 import java.util.*;
 

@@ -29,12 +29,7 @@
 
 package sun.font;
 
-import java.awt.Font;
-
 import java.awt.font.GlyphJustificationInfo;
-import java.awt.font.LineMetrics;
-
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 /**

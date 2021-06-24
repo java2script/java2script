@@ -9,37 +9,18 @@ package test;
 //web_Date= $Date$
 //web_Features= graphics, AWT-to-Swing
 
-import java.awt.Adjustable;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.ScrollPane;
-import java.awt.event.ActionEvent;
-import java.awt.event.AdjustmentEvent;
-import java.awt.event.AdjustmentListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
-import java.text.DecimalFormat;
-
-import javax.swing.ButtonGroup;
 import javax.swing.JApplet;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
-import javax.swing.JSlider;
-import javax.swing.JTextField;
-import javax.swing.JToggleButton;
 import javax.swing.JViewport;
-import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.plaf.ViewportUI;
 
 @SuppressWarnings("serial")
 public class Test_Applet_Scroll2 extends JApplet implements ChangeListener {

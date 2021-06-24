@@ -31,7 +31,6 @@ package javax.swing;
 
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Window;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.beans.PropertyChangeEvent;

@@ -9,8 +9,6 @@ import javax.swing.Icon;
 import javax.swing.JCheckBox;
 import javax.swing.JRadioButton;
 
-import swingjs.plaf.JSCheckBoxUI;
-
 public class Checkbox extends JCheckBox {
 
 	

@@ -35,7 +35,6 @@ import java.awt.event.InputEvent;
 
 import javax.swing.AbstractButton;
 import javax.swing.Icon;
-import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 
 

@@ -25,9 +25,6 @@
 
 package sun.nio.fs;
 
-import sun.misc.Unsafe;
-import sun.misc.Cleaner;
-
 /**
  * A light-weight buffer in native memory.
  */

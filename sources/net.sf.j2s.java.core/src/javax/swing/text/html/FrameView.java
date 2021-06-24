@@ -25,7 +25,6 @@
 package javax.swing.text.html;
 
 import java.awt.*;
-import java.util.*;
 import java.net.*;
 import java.io.*;
 import javax.swing.*;

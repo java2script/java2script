@@ -48,10 +48,7 @@ import java.util.Vector;
 import javax.swing.JComponent;
 import javax.swing.JLayeredPane;
 import javax.swing.JRootPane;
-import javax.swing.RepaintManager;
 import javax.swing.RootPaneContainer;
-import javax.swing.SwingUtilities;
-
 import sun.awt.AppContext;
 import swingjs.JSToolkit;
 import swingjs.plaf.JSComponentUI;

@@ -31,7 +31,6 @@ import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.Polygon;
 import java.awt.Rectangle;
-import java.awt.Shape;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.border.AbstractBorder;

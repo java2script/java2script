@@ -4,7 +4,6 @@ import java.beans.PropertyChangeEvent;
 
 import javax.swing.JComponent;
 import javax.swing.LookAndFeel;
-import javax.swing.SwingUtilities;
 
 public class JSToolTipUI extends JSLabelUI {
 

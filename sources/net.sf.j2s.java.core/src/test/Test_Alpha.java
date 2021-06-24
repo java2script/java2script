@@ -6,15 +6,6 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.GridLayout;
-import java.awt.Label;
-import java.awt.List;
-import java.awt.Polygon;
-import java.awt.Scrollbar;
-import java.awt.TextArea;
-
-import javax.swing.JLabel;
-import javax.swing.JPanel;
 
 
 public class Test_Alpha extends Applet {

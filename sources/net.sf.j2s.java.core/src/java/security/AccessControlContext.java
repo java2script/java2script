@@ -25,9 +25,6 @@
 
 package java.security;
 
-import java.util.ArrayList;
-import java.util.List;
-import sun.security.util.Debug;
 import sun.security.util.SecurityConstants;
 
 

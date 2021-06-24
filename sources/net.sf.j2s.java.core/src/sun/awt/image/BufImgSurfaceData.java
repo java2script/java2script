@@ -28,16 +28,7 @@
 
 package sun.awt.image;
 
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.DirectColorModel;
-import java.awt.image.IndexColorModel;
-import java.awt.image.Raster;
-import java.awt.image.SampleModel;
-
 import sun.java2d.SurfaceData;
-import sun.java2d.loops.SurfaceType;
 
 public class BufImgSurfaceData extends SurfaceData {
 //    BufferedImage bufImg;

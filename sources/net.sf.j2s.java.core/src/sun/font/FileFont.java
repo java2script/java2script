@@ -25,21 +25,6 @@
 
 package sun.font;
 
-import java.lang.ref.Reference;
-import java.awt.FontFormatException;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-import java.io.File;
-import java.nio.ByteBuffer;
-import sun.java2d.Disposer;
-import sun.java2d.DisposerRecord;
-
-import java.io.IOException;
-import java.security.AccessController;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
-
 public abstract class FileFont {// extends PhysicalFont {
 //
 //    protected boolean useJavaRasterizer = true;

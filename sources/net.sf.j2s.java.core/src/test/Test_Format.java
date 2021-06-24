@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.FieldPosition;
 import java.text.NumberFormat;
+import java.util.Date;
 
 public class Test_Format extends Test_ {
 	private static FieldPosition fp;
@@ -14,6 +15,7 @@ public class Test_Format extends Test_ {
 		
 		String s;
 
+		s = new Date().toString();
 		NumberFormat nf = new DecimalFormat();
 		nf.setMaximumFractionDigits(2);
 		nf.setMinimumFractionDigits(2);

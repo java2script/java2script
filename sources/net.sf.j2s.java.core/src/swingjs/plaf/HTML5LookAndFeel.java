@@ -34,7 +34,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 
 import javax.swing.DefaultListCellRenderer;
-import javax.swing.JTextField;
 import javax.swing.LookAndFeel;
 import javax.swing.UIDefaults;
 import javax.swing.plaf.BorderUIResource;

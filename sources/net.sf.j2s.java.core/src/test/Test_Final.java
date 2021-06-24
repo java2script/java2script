@@ -1,8 +1,6 @@
 package test;
 
-import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.function.DoubleConsumer;
 import java.util.function.Function;
 
 public class Test_Final extends Test_ {

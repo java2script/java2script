@@ -19,8 +19,6 @@ import javax.xml.namespace.QName;
 import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
 
-import javajs.util.Base64;
-import javajs.util.PT;
 import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 

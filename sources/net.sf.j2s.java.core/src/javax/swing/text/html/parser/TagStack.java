@@ -26,7 +26,6 @@
 package javax.swing.text.html.parser;
 
 import java.util.BitSet;
-import java.util.Vector;
 import java.io.*;
 
 

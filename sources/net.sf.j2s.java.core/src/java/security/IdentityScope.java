@@ -25,9 +25,7 @@
 
 package java.security;
 
-import java.io.Serializable;
 import java.util.Enumeration;
-import java.util.Properties;
 
 /**
  * <p>This class represents a scope for identities. It is an Identity

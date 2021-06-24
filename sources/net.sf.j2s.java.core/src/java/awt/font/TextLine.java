@@ -39,20 +39,16 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.awt.im.InputMethodHighlight;
 import java.awt.image.BufferedImage;
-import java.text.Annotation;
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedCharacterIterator.Attribute;
 import java.text.Bidi;
 import java.text.CharacterIterator;
-import java.util.Hashtable;
 import java.util.Map;
 import sun.font.AttributeValues;
 import sun.font.BidiUtils;
 import sun.font.CoreMetrics;
 import sun.font.Decoration;
-import sun.font.FontLineMetrics;
 import sun.font.FontResolver;
 import sun.font.GraphicComponent;
 import sun.font.LayoutPathImpl;
@@ -61,8 +57,6 @@ import sun.font.LayoutPathImpl.SegmentPathBuilder;
 import sun.font.TextLabelFactory;
 import sun.font.TextLineComponent;
 import sun.text.CodePointIterator;
-
-import java.awt.geom.Line2D;
 
 final class TextLine {
 

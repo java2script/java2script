@@ -30,7 +30,6 @@ import java.util.Locale;
 import java.awt.AWTEvent;
 import java.beans.Transient;
 import java.lang.Character.Subset;
-import sun.awt.im.InputMethodContext;
 
 /**
  * Provides methods to control text input facilities such as input

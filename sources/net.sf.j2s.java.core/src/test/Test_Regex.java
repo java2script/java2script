@@ -17,8 +17,13 @@ public class Test_Regex extends Test_ {
 		Pattern p;
 		Matcher m;
 
-		
-	
+		st = "NMR DATA/product/3a-C'.mnova";
+		p = Pattern.compile("^\\QNMR DATA/\\E[^|/]+\\Q/\\E(?<IFS0spec0nmr0representation0vendor0dataset>(?<IFS0spec0nmr0property0expt>(?<id>[^|/]+)\\Q-\\E[^|/]+)\\Q.mnova\\E)$");
+		m = p.matcher(st);
+		System.out.println(m.find());
+		for (int i = 1, n = m.groupCount(); i <= n; i++) {
+			System.out.println(i + "/" + n + ">"+m.group(i)+"<");
+		}
 		
 		
 		st = "...pre-20a-b/DEPT135/3/pdata/1/procs";

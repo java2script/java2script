@@ -38,8 +38,6 @@ import java.nio.charset.Charset;
 //import sun.nio.cs.StreamEncoder;
 import java.nio.charset.CharsetEncoder;
 
-import swingjs.api.Interface;
-
 /**
  * An OutputStreamWriter is a bridge from character streams to byte streams:
  * Characters written to it are encoded into bytes using a specified

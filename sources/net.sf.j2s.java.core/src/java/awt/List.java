@@ -24,17 +24,6 @@
  */
 package java.awt;
 
-import java.util.Vector;
-import java.util.Locale;
-import java.util.EventListener;
-import java.awt.peer.ListPeer;
-import java.awt.event.*;
-import java.io.ObjectOutputStream;
-import java.io.ObjectInputStream;
-import java.io.IOException;
-import javax.accessibility.*;
-import javax.swing.JList;
-
 
 /**
  * The <code>List</code> component presents the user with a

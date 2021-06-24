@@ -26,9 +26,6 @@ package java.util;
 
 import sun.util.logging.PlatformLogger;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-
 /**
  * Utility class for detecting inadvertent uses of boxing in
  * {@code java.util} classes.  The detection is turned on or off based on

@@ -35,7 +35,6 @@ import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
 
 import sun.java2d.StateTrackable.State;
-import sun.java2d.SurfaceData;
 import sun.java2d.StateTrackableDelegate;
 
 /**

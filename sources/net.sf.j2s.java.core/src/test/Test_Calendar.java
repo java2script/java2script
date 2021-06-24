@@ -2,8 +2,6 @@ package test;
 
 import java.util.Date;
 
-import test.function.Exception1;
-
 public class Test_Calendar extends Test_ {
 
 

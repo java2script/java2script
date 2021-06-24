@@ -25,11 +25,6 @@
 
 package sun.font;
 
-import java.awt.Font;
-import java.awt.font.GlyphVector;
-import java.awt.font.FontRenderContext;
-import sun.java2d.loops.FontInfo;
-
 /*
  * This class represents a list of actual renderable glyphs.
  * It can be constructed from a number of text sources, representing

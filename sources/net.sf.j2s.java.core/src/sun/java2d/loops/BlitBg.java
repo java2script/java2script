@@ -28,15 +28,8 @@ package sun.java2d.loops;
 import java.awt.Font;
 import java.awt.Color;
 import java.awt.Composite;
-import java.awt.AlphaComposite;
-import java.awt.Transparency;
-import java.awt.image.ColorModel;
-import java.awt.image.WritableRaster;
-import java.awt.image.BufferedImage;
-import sun.awt.image.BufImgSurfaceData;
 import sun.java2d.loops.GraphicsPrimitive;
 import sun.java2d.SurfaceData;
-import sun.java2d.SunGraphics2D;
 import sun.java2d.pipe.Region;
 
 /**

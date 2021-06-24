@@ -29,7 +29,6 @@
  */
 package java.awt.font;
 
-import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.im.InputMethodHighlight;
 import java.text.Annotation;
