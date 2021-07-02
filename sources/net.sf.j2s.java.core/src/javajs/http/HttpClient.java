@@ -1,5 +1,6 @@
 package javajs.http;
 
+import java.io.ByteArrayInputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -88,7 +89,10 @@ public interface HttpClient {
 		 * @param fileName    server-side fileName to associate with this file
 		 * @return
 		 */
-		public HttpRequest addFilePart(String name, String data, String contentType, String fileName);
+		public default HttpRequest addFilePart(String name, String data, String contentType, String fileName) {
+			var stream = new ByteArrayInputStream(data.getBytes());
+			return addFilePart(name, stream, contentType, fileName);
+		}
 
 		/**
 		 * Add a file-type multipart/form-data derived from a File object, using
