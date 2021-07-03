@@ -2,10 +2,7 @@ package test;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Date;
-import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.Map.Entry;
  
 
 /**

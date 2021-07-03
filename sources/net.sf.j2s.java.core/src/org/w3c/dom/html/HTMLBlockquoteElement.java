@@ -1,7 +1,5 @@
 package org.w3c.dom.html;
 
-import org.w3c.dom.*;
-
 /**
  * ??? See the BLOCKQUOTE element definition in HTML 4.0.
  */

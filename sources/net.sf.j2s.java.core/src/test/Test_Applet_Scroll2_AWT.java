@@ -9,7 +9,6 @@ import java.awt.ScrollPane;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
-import java.awt.ScrollPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 

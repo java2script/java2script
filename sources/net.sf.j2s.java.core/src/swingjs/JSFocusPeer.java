@@ -12,12 +12,8 @@ import java.awt.event.WindowEvent;
 import java.awt.peer.KeyboardFocusManagerPeer;
 import java.beans.PropertyVetoException;
 
-import javax.swing.JApplet;
 import javax.swing.JComponent;
 import javax.swing.JInternalFrame;
-import javax.swing.JPopupMenu;
-import javax.swing.KeyboardManager;
-
 import swingjs.api.js.DOMNode;
 import swingjs.api.js.JQueryObject;
 import swingjs.plaf.JSComponentUI;

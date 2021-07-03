@@ -27,10 +27,7 @@ package com.sun.imageio.plugins.gif;
 
 import java.io.IOException;
 import java.util.Locale;
-import java.util.Iterator;
 import javax.imageio.ImageReader;
-import javax.imageio.metadata.IIOMetadataFormat;
-import javax.imageio.metadata.IIOMetadataFormatImpl;
 import javax.imageio.spi.ImageReaderSpi;
 import javax.imageio.stream.ImageInputStream;
 

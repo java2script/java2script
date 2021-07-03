@@ -26,7 +26,6 @@
 package java.util;
 
 import java.io.Serializable;
-import java.util.HashMap.Node;
 import java.util.function.Consumer;
 import java.util.function.Function;
 

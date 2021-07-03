@@ -4,9 +4,7 @@ import java.io.IOException;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageReader;
-import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.ImageWriteParam;
-import javax.imageio.ImageWriter;
 import javax.imageio.metadata.IIOMetadata;
 
 /**

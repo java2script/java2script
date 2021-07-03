@@ -24,11 +24,7 @@
  */
 package javax.swing.text.html;
 
-import java.util.Enumeration;
 import java.awt.*;
-import javax.swing.*;
-import javax.swing.border.*;
-import javax.swing.event.*;
 import javax.swing.text.*;
 
 /**

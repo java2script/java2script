@@ -30,7 +30,6 @@ import javax.xml.transform.Result;
 import java.io.File;
 import java.io.OutputStream;
 import java.io.Writer;
-import java.net.MalformedURLException;
 
 /**
  * <p>Acts as an holder for a transformation result,

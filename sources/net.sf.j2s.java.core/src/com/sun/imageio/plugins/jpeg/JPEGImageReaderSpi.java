@@ -28,8 +28,6 @@ package com.sun.imageio.plugins.jpeg;
 import java.util.Locale;
 import javax.imageio.spi.ImageReaderSpi;
 import javax.imageio.stream.ImageInputStream;
-import javax.imageio.spi.IIORegistry;
-import javax.imageio.spi.ServiceRegistry;
 import java.io.IOException;
 import javax.imageio.ImageReader;
 import javax.imageio.IIOException;

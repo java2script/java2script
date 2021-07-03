@@ -1,11 +1,5 @@
 package test;
 
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.Hashtable;
-
 abstract class Test_Class2<T extends Number> extends Test_ implements Test_Class_int {
 
 

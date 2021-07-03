@@ -4,7 +4,6 @@ package org.xml.sax.demo;
 // No warranty; no copyright -- use this as you will.
 // $Id: DemoHandler.java,v 1.3 1998/05/01 20:45:16 david Exp $
 
-import org.xml.sax.HandlerBase;
 import org.xml.sax.InputSource;
 import org.xml.sax.Locator;
 import org.xml.sax.AttributeList;

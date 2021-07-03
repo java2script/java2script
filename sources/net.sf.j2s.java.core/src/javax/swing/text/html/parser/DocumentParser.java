@@ -30,9 +30,7 @@ import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.HTML;
 import javax.swing.text.ChangedCharSetException;
 
-import java.util.*;
 import java.io.*;
-import java.net.*;
 
 /**
  * A Parser for HTML Documents (actually, you can specify a DTD, but

@@ -32,8 +32,6 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Graphics;
 import java.awt.Rectangle;
-import java.awt.peer.ComponentPeer;
-
 import swingjs.api.js.DOMNode;
 import swingjs.plaf.JSComponentUI;
 

@@ -25,11 +25,6 @@
 
 package sun.misc;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.LongBuffer;
-import java.security.AccessController;
-
 /**
  * Performance counter support for internal JRE classes.
  * This class defines a fixed list of counters for the platform

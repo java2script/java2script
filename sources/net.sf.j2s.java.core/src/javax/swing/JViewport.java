@@ -28,7 +28,6 @@
 
 package javax.swing;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -49,7 +48,6 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 
 import swingjs.JSGraphics2D;
-import swingjs.plaf.JSViewportUI;
 
 
 

@@ -26,18 +26,15 @@ package javax.swing.text.html;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
 import java.awt.HeadlessException;
 import java.awt.Image;
 import java.io.*;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.MalformedURLException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
-import java.util.Locale;
 import javax.swing.ImageIcon;
 import javax.swing.SizeRequirements;
 import javax.swing.text.*;

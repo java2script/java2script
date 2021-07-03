@@ -1,7 +1,6 @@
 package javajs.util;
 
 import java.io.BufferedInputStream;
-import java.io.InputStream;
 import java.util.Hashtable;
 import java.util.Map;
 

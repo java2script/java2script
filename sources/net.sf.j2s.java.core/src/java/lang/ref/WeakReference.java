@@ -25,8 +25,6 @@
 
 package java.lang.ref;
 
-import java.util.Map;
-
 /**
  * SwingJS uses WeakMap with "this" as key
  * 

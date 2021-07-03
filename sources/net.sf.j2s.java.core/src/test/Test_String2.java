@@ -1,13 +1,5 @@
 package test;
 
-import java.awt.Image;
-import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.nio.CharBuffer;
-
-import javajs.util.PT;
-import javajs.util.SB;
-
 public class Test_String2 extends Test_ {
 
 	@SuppressWarnings("unused")

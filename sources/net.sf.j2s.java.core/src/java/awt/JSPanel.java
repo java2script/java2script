@@ -27,8 +27,6 @@
  */
 package java.awt;
 
-import java.awt.peer.ComponentPeer;
-
 /**
  * <code>Panel</code> is the simplest container class. A panel
  * provides space in which an application can attach any other

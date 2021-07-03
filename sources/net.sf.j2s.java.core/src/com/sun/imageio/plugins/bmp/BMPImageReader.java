@@ -27,13 +27,11 @@ package com.sun.imageio.plugins.bmp;
 
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.Transparency;
 import java.awt.color.ColorSpace;
 import java.awt.color.ICC_ColorSpace;
 import java.awt.color.ICC_Profile;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
-import java.awt.image.ComponentColorModel;
 import java.awt.image.ComponentSampleModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
@@ -66,8 +64,6 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.StringTokenizer;
-
 import com.sun.imageio.plugins.common.ImageUtil;
 import com.sun.imageio.plugins.common.I18N;
 

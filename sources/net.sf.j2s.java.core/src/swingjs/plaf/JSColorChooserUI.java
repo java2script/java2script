@@ -40,7 +40,6 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.LookAndFeel;
 import javax.swing.TransferHandler;
-import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
 import javax.swing.colorchooser.AbstractColorChooserPanel;
 import javax.swing.colorchooser.ColorChooserComponentFactory;

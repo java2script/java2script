@@ -26,11 +26,7 @@ package java.beans;
 
 import java.io.Serializable;
 import java.io.ObjectStreamField;
-import java.io.ObjectOutputStream;
-import java.io.ObjectInputStream;
-import java.io.IOException;
 import java.util.Hashtable;
-import java.util.Map.Entry;
 
 /**
  * This is a utility class that can be used by beans that support constrained

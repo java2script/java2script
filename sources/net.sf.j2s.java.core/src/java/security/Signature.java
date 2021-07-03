@@ -37,7 +37,6 @@ import java.nio.ByteBuffer;
 import java.security.Provider.Service;
 
 import javax.crypto.Cipher;
-import javax.crypto.CipherSpi;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.BadPaddingException;
 import javax.crypto.NoSuchPaddingException;

@@ -31,14 +31,11 @@ import java.awt.image.SinglePixelPackedSampleModel;
 
 import javax.imageio.spi.ImageWriterSpi;
 import javax.imageio.spi.ServiceRegistry;
-import javax.imageio.spi.IIORegistry;
 import javax.imageio.stream.ImageOutputStream;
 import javax.imageio.ImageWriter;
 import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.IIOException;
 import java.util.Locale;
-
-import javax.imageio.plugins.bmp.BMPImageWriteParam;
 
 public class BMPImageWriterSpi extends ImageWriterSpi {
     private static String [] readerSpiNames =

@@ -1,9 +1,5 @@
 package test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * This is the troubling class. We have a method that appears not to have a
  * generic-replaced method, because its class def has no indication of it. But

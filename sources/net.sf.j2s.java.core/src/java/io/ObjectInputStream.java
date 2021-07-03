@@ -25,8 +25,6 @@
 
 package java.io;
 
-import java.io.ObjectStreamClass.WeakClassKey;
-import java.lang.ref.ReferenceQueue;
 import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
@@ -37,13 +35,8 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import javajs.util.BC;
 
-import static java.io.ObjectStreamClass.processQueue;
 import sun.reflect.misc.ReflectUtil;
 
 /**

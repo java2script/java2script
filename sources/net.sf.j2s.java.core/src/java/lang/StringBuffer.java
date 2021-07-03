@@ -25,8 +25,6 @@
 
 package java.lang;
 
-import java.util.Arrays;
-
 /**
  * A thread-safe, mutable sequence of characters.
  * A string buffer is like a {@link String}, but can be modified. At any

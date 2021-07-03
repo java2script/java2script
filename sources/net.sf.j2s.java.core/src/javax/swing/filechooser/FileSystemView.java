@@ -29,13 +29,8 @@ package javax.swing.filechooser;
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-//import java.text.MessageFormat;
-
 import javax.swing.Icon;
 import javax.swing.JFileChooser;
-import javax.swing.UIManager;
 
 /**
  * FileSystemView is JFileChooser's gateway to the

@@ -28,8 +28,6 @@
 
 package javax.xml.stream.events;
 
-import javax.xml.namespace.QName;
-
 /**
  * An interface that contains information about a namespace.
  * Namespaces are accessed from a StartElement.

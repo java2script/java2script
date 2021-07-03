@@ -25,7 +25,6 @@
 
 package java.nio;
 
-import java.util.Comparator;
 import java.util.Spliterator;
 import java.util.function.IntConsumer;
 

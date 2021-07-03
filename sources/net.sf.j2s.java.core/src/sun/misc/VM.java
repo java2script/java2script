@@ -27,9 +27,6 @@ package sun.misc;
 
 import static java.lang.Thread.State.*;
 import java.util.Properties;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 public class VM {
 

@@ -68,14 +68,6 @@
 
 package sun.font;
 
-import static java.lang.Character.COMBINING_SPACING_MARK;
-import static java.lang.Character.ENCLOSING_MARK;
-import static java.lang.Character.NON_SPACING_MARK;
-//import static java.lang.Character.getType;
-import static java.lang.Character.isHighSurrogate;
-import static java.lang.Character.isLowSurrogate;
-import static java.lang.Character.toCodePoint;
-
 import java.awt.Font;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
@@ -85,8 +77,6 @@ import java.awt.geom.Point2D;
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
-
-import swingjs.JSUtil;
 
 public final class GlyphLayout {
     // data for glyph vector

@@ -2049,6 +2049,10 @@ public final class Pattern {
 		return pattern.codePointAt(cursor++);
 	}
 
+	/** This is a problem for JavaScript. How can we retrieve named groups?
+	 * 
+	 * @return
+	 */
 	Map<String, Integer> namedGroups() {
 		if (namedGroups == null)
 			namedGroups = new HashMap<>(2);
@@ -2166,5 +2170,50 @@ public final class Pattern {
 		return StreamSupport.stream(
 				Spliterators.spliteratorUnknownSize(new MatcherIterator(), Spliterator.ORDERED | Spliterator.NONNULL),
 				false);
+	}
+
+	/**
+	 * JavaScript hack for no named groups.
+	 */
+	void 秘setNameGroups() {
+		namedGroups();
+		String s = this.pattern;
+		int pt = s.lastIndexOf("(?<") + 1;
+		if (pt == 0)
+			return;
+		boolean ignore = false;
+		int n = -1;
+		for (int i = 0; i < pt; i++) {
+			char c = s.charAt(i);
+			switch (c) {
+			case '\\':
+				i++;
+				break;
+			case '[':
+				ignore = true;
+				break;
+			case ']':
+				ignore = false;
+				break;
+			case '(':
+				if (ignore)
+					continue;
+				n++;
+				if (s.charAt(i + 1) == '?') {
+					switch (s.charAt(i + 2)) {
+					case '<':						
+						String name = s.substring(i + 3, s.indexOf(">", i));
+						namedGroups.put(name, n);
+						i += s.indexOf(")", i); // ok if this is \\)
+						break;
+					case ':':
+						n--;
+						break;
+					} 
+				}
+				break;
+			}
+		}
+		
 	}
 }

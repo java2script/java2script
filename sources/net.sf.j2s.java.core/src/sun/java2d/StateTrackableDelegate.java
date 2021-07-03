@@ -81,7 +81,7 @@ public final class StateTrackableDelegate implements StateTrackable {
 	}
 
 	private State theState;
-	StateTracker theTracker; // package private for easy access from tracker
+	public /** SwingJS needs this */ StateTracker theTracker; // package private for easy access from tracker
 	private int numDynamicAgents;
 
 	/**
@@ -247,5 +247,22 @@ public final class StateTrackableDelegate implements StateTrackable {
 	 */
 	public final void markDirty() {
 		theTracker = null;
+		isDirty = true;
+	}
+
+	private boolean isDirty;
+	/**
+	 * SwingJS we have the problem that we also have a canvas to worry about. This checks that 
+	 * the raster data has been touched within the internal DataBuffer methods. It then clears
+	 * that.
+	 * @param doReset 
+	 * 
+	 * @return
+	 */
+	public boolean 秘isDirty(boolean doReset) {
+		boolean isDirty = this.isDirty;
+		if (doReset)
+			this.isDirty = false;
+		return isDirty;
 	}
 }

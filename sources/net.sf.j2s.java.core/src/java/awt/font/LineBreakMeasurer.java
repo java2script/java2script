@@ -41,7 +41,6 @@
 package java.awt.font;
 
 import java.text.BreakIterator;
-import java.text.CharacterIterator;
 import java.text.AttributedCharacterIterator;
 import java.awt.font.FontRenderContext;
 

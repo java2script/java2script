@@ -25,8 +25,6 @@
 
 package java.util.prefs;
 
-import java.io.NotSerializableException;
-
 /**
  * Thrown to indicate that an operation could not complete because
  * the input did not conform to the appropriate XML document type

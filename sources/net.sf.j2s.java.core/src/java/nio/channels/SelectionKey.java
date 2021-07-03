@@ -26,7 +26,6 @@
 package java.nio.channels;
 
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
-import java.io.IOException;
 
 
 /**

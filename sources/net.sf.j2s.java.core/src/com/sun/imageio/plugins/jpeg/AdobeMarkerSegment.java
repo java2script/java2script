@@ -25,7 +25,6 @@
 
 package com.sun.imageio.plugins.jpeg;
 
-import javax.imageio.IIOException;
 import javax.imageio.metadata.IIOInvalidTreeException;
 import javax.imageio.metadata.IIOMetadataNode;
 import javax.imageio.stream.ImageOutputStream;

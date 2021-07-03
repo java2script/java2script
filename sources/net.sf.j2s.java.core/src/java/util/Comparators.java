@@ -25,11 +25,6 @@
 package java.util;
 
 import java.io.Serializable;
-import java.util.function.BinaryOperator;
-import java.util.function.Function;
-import java.util.function.ToDoubleFunction;
-import java.util.function.ToIntFunction;
-import java.util.function.ToLongFunction;
 
 /**
  * Package private supporting class for {@link Comparator}.

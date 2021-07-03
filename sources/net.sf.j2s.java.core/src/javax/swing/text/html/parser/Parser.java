@@ -29,13 +29,7 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.html.HTML;
 import javax.swing.text.ChangedCharSetException;
 import java.io.*;
-import java.util.Hashtable;
-import java.util.Properties;
 import java.util.Vector;
-import java.util.Enumeration;
-import java.net.URL;
-
-import sun.misc.MessageUtils;
 
 /**
  * A simple DTD-driven HTML parser. The parser reads an

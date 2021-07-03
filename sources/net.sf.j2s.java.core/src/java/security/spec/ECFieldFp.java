@@ -25,7 +25,6 @@
 package java.security.spec;
 
 import java.math.BigInteger;
-import java.util.Arrays;
 
 /**
  * This immutable class defines an elliptic curve (EC) prime

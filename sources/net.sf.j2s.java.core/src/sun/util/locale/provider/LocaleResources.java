@@ -41,7 +41,6 @@
 package sun.util.locale.provider;
 
 import java.lang.ref.ReferenceQueue;
-import java.lang.ref.SoftReference;
 import java.text.MessageFormat;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -50,8 +49,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import sun.util.calendar.ZoneInfo;
 import sun.util.resources.LocaleData;
 import sun.util.resources.OpenListResourceBundle;

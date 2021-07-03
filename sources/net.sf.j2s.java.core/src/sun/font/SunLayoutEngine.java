@@ -32,13 +32,8 @@ package sun.font;
 
 import sun.font.GlyphLayout.*;
 import swingjs.JSFontMetrics;
-import swingjs.JSUtil;
-
 import java.awt.geom.Point2D;
-import java.awt.geom.Point2D.Float;
-import java.lang.ref.SoftReference;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.Locale;
 
 /*
  * different ways to do this

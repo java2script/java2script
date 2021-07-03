@@ -34,7 +34,6 @@
  */
 
 package java.util.concurrent;
-import java.util.function.Supplier;
 import java.util.function.Consumer;
 import java.util.function.BiConsumer;
 import java.util.function.Function;

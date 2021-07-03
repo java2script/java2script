@@ -29,16 +29,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Vector;
 import javax.swing.plaf.*;
-import javax.accessibility.*;
-
 import java.awt.Component;
-import java.awt.Container;
-import java.awt.DefaultFocusTraversalPolicy;
-import java.awt.FocusTraversalPolicy;
-import java.awt.Window;
-import java.io.ObjectOutputStream;
-import java.io.ObjectInputStream;
-import java.io.IOException;
 import java.beans.PropertyVetoException;
 import java.util.Set;
 import java.util.TreeSet;

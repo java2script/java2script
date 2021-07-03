@@ -1,13 +1,8 @@
 package test;
 
-import java.io.ByteArrayInputStream;
-import java.io.FileOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.CharBuffer;
 
-import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
-
-import javajs.util.PT;
 import javajs.util.SB;
 
 public class Test_String extends Test_ {

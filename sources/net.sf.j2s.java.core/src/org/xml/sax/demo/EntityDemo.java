@@ -5,8 +5,6 @@ package org.xml.sax.demo;
 
 import org.xml.sax.InputSource;
 import org.xml.sax.Parser;
-import org.xml.sax.SAXException;
-
 import org.xml.sax.helpers.ParserFactory;
 
 import java.io.StringReader;

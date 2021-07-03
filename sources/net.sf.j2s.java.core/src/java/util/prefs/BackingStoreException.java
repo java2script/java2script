@@ -25,8 +25,6 @@
 
 package java.util.prefs;
 
-import java.io.NotSerializableException;
-
 /**
  * Thrown to indicate that a preferences operation could not complete because
  * of a failure in the backing store, or a failure to contact the backing

@@ -52,7 +52,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import sun.misc.LRUCache;
-import swingjs.JSUtil;
 
 /**
  * A simple text scanner which can parse primitive types and strings using

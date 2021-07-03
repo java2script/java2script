@@ -28,16 +28,12 @@
 package javax.swing;
 
 
-import java.applet.JSApplet;
 import java.awt.Container;
 import java.awt.JSComponent;
-import java.awt.Window;
 import java.awt.event.KeyEvent;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
-
-import swingjs.JSFocusPeer;
 
 /**
   * The KeyboardManager class is used to help dispatch keyboard actions for the

@@ -7,7 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
-import swingjs.JSToolkit;
 import swingjs.JSUtil;
 
 

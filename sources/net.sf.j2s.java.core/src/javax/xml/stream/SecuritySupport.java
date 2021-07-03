@@ -26,9 +26,7 @@
 package javax.xml.stream;
 
 import java.security.*;
-import java.net.*;
 import java.io.*;
-import java.util.*;
 
 /**
  * This class is duplicated for each JAXP subpackage so keep it in sync.

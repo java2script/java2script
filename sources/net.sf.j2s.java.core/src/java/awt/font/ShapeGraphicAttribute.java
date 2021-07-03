@@ -41,10 +41,7 @@
 package java.awt.font;
 
 import java.awt.Shape;
-import java.awt.Graphics;
-import java.awt.Rectangle;
 import java.awt.Graphics2D;
-import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 

@@ -1,17 +1,11 @@
 package swingjs.xml;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.GregorianCalendar;
 import java.util.Hashtable;
 import java.util.Map;
 
-import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
-import org.apache.xerces.jaxp.datatype.DatatypeFactoryImpl;
 
 public class JSXMLDocumentBuilderFactory extends DocumentBuilderFactory {
 

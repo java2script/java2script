@@ -1,7 +1,5 @@
 package test;
 
-import java.util.Date;
-
 class Test_Boolean extends Test_ {
 	
   public static int i_;

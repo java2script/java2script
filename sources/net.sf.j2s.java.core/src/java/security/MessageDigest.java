@@ -25,14 +25,8 @@
 
 package java.security;
 
-import java.util.*;
-import java.lang.*;
-import java.io.IOException;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.io.InputStream;
-import java.io.ByteArrayInputStream;
-
 import java.nio.ByteBuffer;
 
 import sun.security.util.Debug;

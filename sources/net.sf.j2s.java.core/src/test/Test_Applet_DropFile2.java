@@ -5,12 +5,7 @@ import java.awt.Font;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
-import java.awt.dnd.DropTargetDragEvent;
-import java.awt.dnd.DropTargetDropEvent;
-import java.awt.dnd.DropTargetEvent;
-import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedInputStream;
@@ -29,7 +24,7 @@ import javax.swing.TransferHandler;
 
 import javajs.util.Rdr;
 
-public class Test_Applet_DropFile extends JApplet implements DropTargetListener {
+public class Test_Applet_DropFile2 extends JApplet {
 
     JLabel fileName = new JLabel();
 	DropTarget target;
@@ -112,55 +107,6 @@ public class Test_Applet_DropFile extends JApplet implements DropTargetListener 
 
 	}
 
-	@Override
-	public void dragEnter(DropTargetDragEvent dtde) {		
-	}
-
-	@Override
-	public void dragOver(DropTargetDragEvent dtde) {
-	}
-
-	@Override
-	public void dropActionChanged(DropTargetDragEvent dtde) {
-	}
-	
-	
-	@Override
-	public void drop(DropTargetDropEvent dtde) {
-		
-		try {
-			Transferable tr = dtde.getTransferable();
-			JTextArea target = (JTextArea) ((DropTarget) dtde.getSource()).getComponent();			
-			target.setText("");
-			DataFlavor[] flavors = tr.getTransferDataFlavors();
-			for (int i = 0; i < flavors.length; i++) {
-				if (flavors[i].isFlavorJavaFileListType()) {
-					dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
-					List<File> list = (List<File>) tr.getTransferData(flavors[i]);
-					for (int j = 0; j < list.size(); j++) {
-						File file = (File) list.get(j);
-						byte[] data = getDroppedFileBytes(file);
-						String s = ">>>>>>>>>"+ file.getName() + " - " + data.length + " " + dtde.getLocation() + "\n";	
-						fileName.setText(s);
-						target.append(s);
-						target.append(new String(data));						
-						System.out.println("prefsize " + target.getPreferredSize());
-					}
-					dtde.dropComplete(true);					
-					return;
-				} else if (flavors[i].isFlavorTextType()) {
-					dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
-					String data = (String) tr.getTransferData(flavors[i]);
-					target.setText(data);
-					dtde.dropComplete(true);					
-				}
-			}
-			dtde.rejectDrop();
-		} catch (Exception e) {
-			e.printStackTrace();
-			dtde.rejectDrop();
-		}
-	}
 
 	private byte[] getDroppedFileBytes(File file) {
 		/**
@@ -176,10 +122,6 @@ public class Test_Applet_DropFile extends JApplet implements DropTargetListener 
 			}
 			return null;
 		}
-	}
-
-	@Override
-	public void dragExit(DropTargetEvent dte) {
 	}
 
 } 

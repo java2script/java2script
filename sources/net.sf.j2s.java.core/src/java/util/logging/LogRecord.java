@@ -29,9 +29,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.io.*;
 
-import sun.misc.JavaLangAccess;
-import sun.misc.SharedSecrets;
-
 /**
  * 
  * SwingJS - disabled resourceBundle

@@ -43,8 +43,6 @@ import org.w3c.dom.Node;
 
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
-import java.awt.image.SampleModel;
-import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
 import java.awt.image.ColorModel;
 import java.awt.image.IndexColorModel;

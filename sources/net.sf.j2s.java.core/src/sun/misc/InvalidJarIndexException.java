@@ -25,8 +25,6 @@
 
 package sun.misc;
 
-import java.lang.LinkageError;
-
 /**
  * Thrown if the URLClassLoader finds the INDEX.LIST file of
  * a jar file contains incorrect information.

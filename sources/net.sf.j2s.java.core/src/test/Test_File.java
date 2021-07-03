@@ -1,24 +1,14 @@
 package test;
 
-import java.awt.Toolkit;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
-import java.nio.file.FileSystem;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.nio.file.spi.FileSystemProvider;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Random;
 
-import javax.management.openmbean.OpenMBeanOperationInfoSupport;
 import javax.swing.filechooser.FileSystemView;
 
 import javajs.util.OC;

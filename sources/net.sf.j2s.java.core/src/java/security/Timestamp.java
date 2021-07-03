@@ -28,7 +28,6 @@ package java.security;
 import java.io.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertPath;
-import java.security.cert.X509Extension;
 import java.util.Date;
 import java.util.List;
 

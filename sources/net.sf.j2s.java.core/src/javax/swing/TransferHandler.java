@@ -28,7 +28,6 @@
 package javax.swing;
 
 import java.awt.Component;
-import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;

@@ -27,7 +27,6 @@
 package java.util.logging;
 
 import java.io.*;
-import java.text.*;
 import java.util.Date;
 import sun.util.logging.LoggingSupport;
 

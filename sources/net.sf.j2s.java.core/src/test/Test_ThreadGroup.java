@@ -1,13 +1,5 @@
 package test;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.lang.reflect.InvocationTargetException;
-
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
-import javax.swing.Timer;
-
 public class Test_ThreadGroup extends Test_ {
 
 	public static void main(String[] args) {

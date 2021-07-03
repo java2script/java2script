@@ -25,8 +25,6 @@
 
 package java.security;
 
-import java.util.*;
-
 /**
  * This class is a simple holder for a key pair (a public key and a
  * private key). It does not enforce any security, and, when initialized,

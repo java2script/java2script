@@ -6,7 +6,6 @@ import java.awt.Insets;
 
 import javax.swing.JComponent;
 
-import swingjs.JSGraphics2D;
 import swingjs.api.js.DOMNode;
 
 public class JSPopupUI extends JSWindowUI {

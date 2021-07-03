@@ -5,10 +5,6 @@ import java.awt.BorderLayout;
 import javax.swing.BoxLayout;
 import javax.swing.JApplet;
 import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 
 public class Test_Applet_3b extends JApplet {

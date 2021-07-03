@@ -31,8 +31,6 @@ import java.awt.image.SampleModel;
 import java.util.Locale;
 import javax.imageio.ImageWriter;
 import javax.imageio.ImageTypeSpecifier;
-import javax.imageio.metadata.IIOMetadataFormat;
-import javax.imageio.metadata.IIOMetadataFormatImpl;
 import javax.imageio.spi.ImageWriterSpi;
 import javax.imageio.stream.ImageOutputStream;
 

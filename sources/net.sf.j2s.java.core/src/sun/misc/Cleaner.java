@@ -25,10 +25,6 @@
 
 package sun.misc;
 
-//import java.lang.ref.*;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-
 
 /**
  * General-purpose phantom-reference-based cleaners.

@@ -24,16 +24,6 @@
  */
 package java.awt;
 
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.awt.peer.TextAreaPeer;
-import java.io.ObjectOutputStream;
-import java.io.ObjectInputStream;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
-import javax.accessibility.*;
-
 /**
  * A <code>TextArea</code> object is a multi-line region
  * that displays text. It can be set to allow editing or

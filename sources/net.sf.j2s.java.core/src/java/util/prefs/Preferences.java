@@ -31,10 +31,6 @@ import java.io.OutputStream;
 import java.security.AccessController;
 import java.security.Permission;
 import java.security.PrivilegedAction;
-import java.util.Iterator;
-import java.util.ServiceLoader;
-import java.util.ServiceConfigurationError;
-
 // These imports needed only as a workaround for a JavaDoc bug
 import java.lang.RuntimePermission;
 import java.lang.Integer;

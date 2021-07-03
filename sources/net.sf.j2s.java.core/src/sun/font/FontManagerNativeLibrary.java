@@ -25,8 +25,6 @@
 
 package sun.font;
 
-import sun.java2d.SunGraphicsEnvironment;
-
 public class FontManagerNativeLibrary {
     static {
         java.security.AccessController.doPrivileged(

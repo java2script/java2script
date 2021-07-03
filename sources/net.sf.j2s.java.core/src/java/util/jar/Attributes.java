@@ -25,16 +25,13 @@
 
 package java.util.jar;
 
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.Collection;
-import java.util.AbstractSet;
 import java.util.Iterator;
-import sun.util.logging.PlatformLogger;
 import java.util.Comparator;
 import sun.misc.ASCIICaseInsensitiveComparator;
 

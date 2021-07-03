@@ -1,7 +1,5 @@
 package test;
 
-//import java.awt.Button;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.DefaultKeyboardFocusManager;
 import java.awt.Dimension;
@@ -23,7 +21,6 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.JTextPane;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.text.Document;

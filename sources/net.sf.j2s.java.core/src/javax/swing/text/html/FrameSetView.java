@@ -24,11 +24,9 @@
  */
 package javax.swing.text.html;
 
-import java.awt.*;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.text.*;
-import javax.swing.event.*;
 
 /**
  * Implements a FrameSetView, intended to support the HTML

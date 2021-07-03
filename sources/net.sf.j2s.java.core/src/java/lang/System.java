@@ -33,7 +33,6 @@ import java.io.PrintStream;
 //import java.security.PrivilegedAction;
 //import java.security.AllPermission;
 import java.nio.channels.Channel;
-import java.nio.channels.spi.SelectorProvider;
 //import java.security.AccessControlContext;
 import java.util.Properties;
 

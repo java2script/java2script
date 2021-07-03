@@ -31,7 +31,6 @@ package javax.xml.stream.events;
 import javax.xml.namespace.QName;
 import javax.xml.namespace.NamespaceContext;
 
-import java.util.Map;
 import java.util.Iterator;
 
 /**

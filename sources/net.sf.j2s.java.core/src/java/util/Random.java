@@ -20,7 +20,6 @@ package java.util;
 
 import java.io.Serializable;
 
-import swingjs.JSToolkit;
 import swingjs.JSUtil;
 
 /**

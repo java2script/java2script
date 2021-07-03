@@ -40,7 +40,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.security.AccessController;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -58,7 +57,6 @@ import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
 
 import sun.awt.AppContext;
-import sun.security.action.GetPropertyAction;
 //import javax.imageio.spi.IIORegistry;
 //import javax.imageio.spi.ImageReaderSpi;
 //import javax.imageio.spi.ImageReaderWriterSpi;

@@ -7,6 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2021.06.11 Number.compareTo(....) missing
 // BH 2021.02.12 implements better(?) interface defaults resolution -- in order of presentation
 // BH 2020.12.31 3.3.1-v1 full 64-bit long support; BigDecimal, BigInteger fully 64-bit
 
@@ -3777,7 +3778,10 @@ Number.prototype._numberToString=Number.prototype.toString;
 Number.__CLASS_NAME__="Number";
 addInterface(Number,java.io.Serializable);
 //extendPrototype(Number, true, false);
-Number.prototype.compareTo$ = Number.prototype.compareTo$Number = Number.prototype.compareTo$O = function(x) { var a = this.valueOf(), b = x.valueOf(); return (a < b ? -1 : a == b ? 0 : 1) };
+Number.prototype.compareTo$ = Number.prototype.compareTo$Number = 
+	Number.prototype.compareTo$O = Number.prototype.compareTo$Byte = Number.prototype.compareTo$Integer = 
+	Number.prototype.compareTo$Short = Number.prototype.compareTo$Float = Number.prototype.compareTo$Double = 
+						function(x) { var a = this.valueOf(), b = x.valueOf(); return (a < b ? -1 : a == b ? 0 : 1) };
 
 var $b$ = new Int8Array(1);
 var $s$ = new Int16Array(1);

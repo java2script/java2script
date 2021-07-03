@@ -24,10 +24,8 @@
  */
 package javax.swing.text.html;
 
-import java.util.Enumeration;
 import java.awt.*;
 import javax.swing.SizeRequirements;
-import javax.swing.border.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.text.*;
 

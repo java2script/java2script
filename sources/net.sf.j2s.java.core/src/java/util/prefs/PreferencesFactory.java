@@ -24,7 +24,6 @@
  */
 
 package java.util.prefs;
-import java.util.*;
 
 /**
  * A factory object that generates Preferences objects.  Providers of

@@ -29,12 +29,7 @@
 package java.nio.channels.spi;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.channels.*;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import sun.nio.ch.Interruptible;
 
 
 /**

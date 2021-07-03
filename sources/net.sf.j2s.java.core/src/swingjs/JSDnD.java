@@ -102,7 +102,11 @@ public class JSDnD {
 	        	setBData(data);
 	    }
 
-//	    public JSDropMouseEvent(Component source, int id, int x, int y, Transferable t, Object[][] data) {
+	    public JSDropMouseEvent(Component target, int id, int x, int y) {
+			this(target, id, x, y, null, null, null);
+		}
+
+		//	    public JSDropMouseEvent(Component source, int id, int x, int y, Transferable t, Object[][] data) {
 //	        super(source, id, System.currentTimeMillis(), 0, x, y, 0, false, NOBUTTON);
 //	        System.out.println("new JSDropMouseEvent for " + source);
 //	        this.transferable = t;
@@ -113,18 +117,10 @@ public class JSDnD {
 	    protected void copyPrivateDataInto(AWTEvent that) {
 
 	    	// in case this gets transferred. 
-	    	
-	        /**
-	         * @j2sNative
-	         * 
-	         * that.dispatch$ = this.dispatch$;
-	         * that.transferable = this.transferable;
-	         * that.name = this.name;
-	         * that.bdata = this.bdata;
-	         * 
-	         * 
-	         */
-	    		    	
+	    	JSDropMouseEvent e = (JSDropMouseEvent)that;
+	    	e.transferable = transferable;
+	    	e.name = name;
+	    	e.bdata = bdata;
 	    }
 	    
 	    /**
@@ -162,6 +158,11 @@ public class JSDnD {
 	        }
 	        return typeStr + ",(" + getX() + "," + getY() + ")";
 	    }
+
+		public Transferable getDispatcher() {
+			// TODO Auto-generated method stub
+			return null;
+		}
 
 	}
 
