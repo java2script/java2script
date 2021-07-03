@@ -1,5 +1,6 @@
 package javajs.http;
 
+import java.io.ByteArrayInputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -88,7 +89,10 @@ public interface HttpClient {
 		 * @param fileName    server-side fileName to associate with this file
 		 * @return
 		 */
-		public HttpRequest addFilePart(String name, String data, String contentType, String fileName);
+		public default HttpRequest addFilePart(String name, String data, String contentType, String fileName) {
+			var stream = new ByteArrayInputStream(data.getBytes());
+			return addFilePart(name, stream, contentType, fileName);
+		}
 
 		/**
 		 * Add a file-type multipart/form-data derived from a File object, using
@@ -178,6 +182,64 @@ public interface HttpClient {
 		 * @return
 		 */
 		public int getStatusCode();
+
+		/**
+		 * Get the reason phrase for the response code.
+		 * Implementations should use the reason returned by the server.
+		 * Default implementation uses phrases defined by RFC 2616 and RFC 4918
+		 *
+		 * @return status line reason phrase
+		 */
+		public default String getReasonPhrase() {
+			switch (getStatusCode()) {
+			case 100: return "Continue";
+			case 101: return "Switching Protocols";
+			case 200: return "OK";
+			case 201: return "Created";
+			case 202: return "Accepted";
+			case 203: return "Non-Authoritative Information";
+			case 204: return "No Content";
+			case 205: return "Reset Content";
+			case 206: return "Partial Content";
+			case 207: return "Multi-status";
+			case 300: return "Multiple Choices";
+			case 301: return "Moved Permanently";
+			case 302: return "Found";
+			case 303: return "See Other";
+			case 304: return "Not Modified";
+			case 305: return "Use Proxy";
+			case 307: return "Temporary Redirect";
+			case 400: return "Bad Request";
+			case 401: return "Unauthorized";
+			case 402: return "Payment Required";
+			case 403: return "Forbidden";
+			case 404: return "Not Found";
+			case 405: return "Method Not Allowed";
+			case 406: return "Not Acceptable";
+			case 407: return "Proxy Authentication Required";
+			case 408: return "Request Timeout";
+			case 409: return "Conflict";
+			case 410: return "Gone";
+			case 411: return "Length Required";
+			case 412: return "Precondition Failed";
+			case 413: return "Request Entity Too Large";
+			case 414: return "Request-URI Too Long";
+			case 415: return "Unsupported Media Type";
+			case 416: return "Requested Range Not Satisfiable";
+			case 417: return "Expectation Failed";
+			case 422: return "Unprocessable Entity";
+			case 423: return "Locked";
+			case 424: return "Failed Dependency";
+			case 500: return "Internal Server Error";
+			case 501: return "Not Implemented";
+			case 502: return "Bad Gateway";
+			case 503: return "Service Unavailable";
+			case 504: return "Gateway Timeout";
+			case 505: return "HTTP Version Not Supported";
+			case 507: return "Insufficient Storage";
+			default: return "";
+			}
+		}
 
 		/**
 		 * Get the response headers, combining same-name headers with commas, preserving
