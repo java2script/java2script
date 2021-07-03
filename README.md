@@ -5,6 +5,8 @@ java2script/java2script is the overall master of the project. However, all activ
 These notes are for Java developers who want to convert their Java applets or Java applications to 
 JavaScript, allowing continued, simultaneous one-source development of both Java and JavaScript. 
 
+A discussion of application limitations and features is at https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.core/dist/swingjs/differences.txt 
+
 Developers of java2script/SwingJS itself should read README-developers.md
 
 Bob Hanson (hansonr@stolaf.edu)
@@ -56,18 +58,21 @@ In the author's own words, "There are Java APIs that are impossible to implement
 
 https://www.leaningtech.com/cheerpj/ "CheerpJ converts Java applications or libraries into JavaScript. Works on bytecode, does not require access to the source code. Compatible with 100% of Java including reflection and dynamic classes. Existing Java archives can be converted to Web applications effortlessly"
 
-This sounds terrific. Very straightforward -- just convert the Java class files to JavaScript. I don't doubt that most of what is written here is true. I am dubious about that "100%" claim, as there are plenty of problems in Java that would take considerably more work than just using class files directly. The Java Reporter demonstration at https://www.leaningtech.com/cheerpj/demos/ crashed both Firefox and Chrome for me, so I cannot really evaluate what I see here. 
+This sounds terrific. And truly it is. I am very impressed! Basically run the Java byte code in JavaScript. The Java Reporter demonstration at https://www.leaningtech.com/cheerpj/demos/ crashed both Firefox and Chrome for me, so I cannot really evaluate what I see here. But I have played with the JFiddle at https://javafiddle.leaningtech.com/, and it is pretty amazing. 
 
 The primary differences between java2script/SwingJS and CheerpJ, to the best of my knowledge, include:
 
-- implementing a true HTML5 UI rather than just painting a canvas the way Java does
+- fast start-up time. SwingJS applications generally start within a second or two, sometimes within 100 ms
+- small downloads, anywhere from about 800K for a small non-GUI program to 10 MB for a full-blown Swing application (JSmol)
+- class-level just-in-time dynamic class loading; no need to retrieve entire JAR files just for a few methods
+- leveraging features of HTML5 and modern JavaScript rather than just painting a canvas the way Java does natively
 - delivering an easily interpretable and debuggable JavaScript translation of Java classes, with little or no obscurification (unless that is desired)
-- well-designed JavaScript-friendly Java core classes that leverage the considerable power of HTML5 rather than ignoring that completely
+- well-designed JavaScript-friendly Java core classes that leverage the considerable power of JavaScript
 - open source and completely extensible
 
 # History - 2019-
 
-SwingJS is now more than just "Swing"-JS. AWT applets and applications are now supported. A test suite of over 500 AWT applets has been used to refine the AWT runtime classes with great success. Many thanks to Karsten Blankenagel (University of Wuppertal) for access to this source code set.
+SwingJS is now more than just "Swing"+JavaScript. AWT applets and applications are now supported. A test suite of over 500 AWT applets has been used to refine the AWT runtime classes with great success. Many thanks to Karsten Blankenagel (University of Wuppertal) for access to this source code set.
 
 Examples include:
 
@@ -75,8 +80,9 @@ MathePrisma (http://www.matheprisma.uni-wuppertal.de/) This site is still using 
 
 # History - 2017-
 
+https://github.com/BobHanson/java2script/tree/hanson1 (development branch)
 
-https://github.com/BobHanson/java2script (development master)
+https://github.com/BobHanson/java2script (master)
 
 Current development "Version 3 development master" involves a completely rewritten transpiler (2017) “CompilationParticipant” that follows the Eclipse Java compiler. The implementation nearly perfectly emulates the Java Virtual Machine. It includes fully qualified methods, compile-time method binding, generic methods and classes, Java 8 lambda functions and streams, Java reflection and dynamic class loading for efficient modular just-in-time performance, Java Swing components, modal and nonmodel dialogs, audio, jpdf, the AWT event thread, and many other added packages. Java applications and applets can both be run in JavaScript in any browser. 
 
