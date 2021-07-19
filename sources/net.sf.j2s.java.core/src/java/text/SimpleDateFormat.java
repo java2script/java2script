@@ -1257,7 +1257,7 @@ public class SimpleDateFormat extends DateFormat {
 		 * 
 		 * @j2sNative
 		 * 
-		 *            var i0 = pos.index; pos.index = Math.min(80, text.length()); while
+		 *            var i0 = pos.index; pos.index = Math.min(80, text.length); while
 		 *            (pos.index >= i0) { var d = new Date(text.substring(i0,
 		 *            pos.index)); var x = d.getMilliseconds(); if (!isNaN(x))
 		 *            return d; pos.index--; } 
