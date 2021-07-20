@@ -39,7 +39,6 @@ import java.nio.charset.CharsetEncoder;
 import java.nio.charset.UnsupportedCharsetException;
 import java.nio.channels.spi.AbstractInterruptibleChannel;
 import java.util.concurrent.ExecutionException;
-import sun.nio.ch.ChannelInputStream;
 import sun.nio.cs.StreamDecoder;
 import sun.nio.cs.StreamEncoder;
 import swingjs.JSFileSystem;

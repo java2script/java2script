@@ -1,9 +1,7 @@
 package test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
 
 public class Test_Sort extends Test_ implements Comparator<Test_Sort.SortItem>{
 	

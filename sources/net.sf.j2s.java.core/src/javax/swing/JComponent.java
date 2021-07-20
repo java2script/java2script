@@ -51,7 +51,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -76,7 +75,6 @@ import javajs.util.Lst;
 import sun.font.FontDesignMetrics;
 import swingjs.JSGraphics2D;
 import swingjs.JSUtil;
-import swingjs.api.js.DOMNode;
 import swingjs.plaf.JSComponentUI;
 
 /**

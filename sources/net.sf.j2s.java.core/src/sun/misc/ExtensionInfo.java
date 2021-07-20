@@ -29,9 +29,7 @@ import java.util.StringTokenizer;
 import java.util.jar.Attributes;
 import java.util.jar.Attributes.Name;
 import java.util.ResourceBundle;
-import java.util.MissingResourceException;
 import java.text.MessageFormat;
-import java.lang.Character.*;
 
 
 /**

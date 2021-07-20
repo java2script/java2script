@@ -27,6 +27,7 @@
  */
 package java.awt;
 
+import java.awt.dnd.DropTarget;
 import java.awt.event.AWTEventListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ContainerEvent;
@@ -49,6 +50,7 @@ import javax.swing.JInternalFrame;
 import javajs.util.Lst;
 import sun.awt.AppContext;
 import sun.awt.SunGraphicsCallback;
+import sun.awt.dnd.SunDropTargetEvent;
 import swingjs.JSFrameViewer;
 import swingjs.JSMouse;
 
@@ -2268,14 +2270,14 @@ public class Container extends JSComponent {
         }
     }
 
-//  /**
-//  * Fetches the top-most (deepest) component to receive SunDropTargetEvents.
-//  */
-// Component getDropTargetEventTarget(int x, int y, boolean includeSelf) {
-//     return getMouseEventTarget(x, y, includeSelf,
-//                                DropTargetEventTargetFilter.FILTER,
-//                                SEARCH_HEAVYWEIGHTS);
-// }
+  /**
+  * Fetches the top-most (deepest) component to receive SunDropTargetEvents.
+  */
+ Component getDropTargetEventTarget(int x, int y, boolean includeSelf) {
+     return getMouseEventTarget(x, y, includeSelf,
+                                DropTargetEventTargetFilter.FILTER,
+                                SEARCH_HEAVYWEIGHTS);
+ }
 
 
     /*
@@ -2435,17 +2437,17 @@ public class Container extends JSComponent {
         }
     }
 
-//    static class DropTargetEventTargetFilter implements EventTargetFilter {
-//        static final EventTargetFilter FILTER = new DropTargetEventTargetFilter();
-//
-//        private DropTargetEventTargetFilter() {}
-//
-//        public boolean accept(final Component comp) {
-////            DropTarget dt = comp.getDropTarget();
-////            return dt != null && dt.isActive();
-//        }
-//    }
-//
+    static class DropTargetEventTargetFilter implements EventTargetFilter {
+        static final EventTargetFilter FILTER = new DropTargetEventTargetFilter();
+
+        private DropTargetEventTargetFilter() {}
+
+        public boolean accept(final Component comp) {
+            DropTarget dt = comp.getDropTarget();
+            return dt != null && dt.isActive();
+        }
+    }
+
     /**
      * This is called by lightweight components that want the containing
      * windowed parent to enable some kind of events on their behalf.
@@ -4283,12 +4285,13 @@ class LightweightDispatcher implements AWTEventListener {
          * Dispatch SunDropTargetEvents regardless of eventMask value.
          * Do not update cursor on dispatching SunDropTargetEvents.
          */
-//        if (e instanceof SunDropTargetEvent) {
-//
-//            SunDropTargetEvent sdde = (SunDropTargetEvent) e;
-//            ret = processDropTargetEvent(sdde);
-//
-//        } else {
+        
+        if (e instanceof swingjs.JSDnD.JSDropMouseEvent) {
+
+            SunDropTargetEvent sdde = (SunDropTargetEvent) e;
+            ret = processDropTargetEvent(sdde);
+
+        } else {
             if (e instanceof MouseEvent && (eventMask & MOUSE_MASK) != 0) {
                 MouseEvent me = (MouseEvent) e;
                 ret = processMouseEvent(me);
@@ -4297,7 +4300,7 @@ class LightweightDispatcher implements AWTEventListener {
 //            if (e.getID() == MouseEvent.MOUSE_MOVED) {
 //                nativeContainer.updateCursorImmediately();
 //            }
-//        }
+        }
 
         return ret;
     }
@@ -4426,47 +4429,47 @@ class LightweightDispatcher implements AWTEventListener {
 		return e.isConsumed();
 	}
 
-//    private boolean processDropTargetEvent(SunDropTargetEvent e) {
-//        int id = e.getID();
-//        int x = e.getX();
-//        int y = e.getY();
-//
-//        /*
-//         * Fix for BugTraq ID 4395290.
-//         * It is possible that SunDropTargetEvent's Point is outside of the
-//         * native container bounds. In this case we truncate coordinates.
-//         */
-//        if (!nativeContainer.contains(x, y)) {
-//            final Dimension d = nativeContainer.getSize();
-//            if (d.width <= x) {
-//                x = d.width - 1;
-//            } else if (x < 0) {
-//                x = 0;
-//            }
-//            if (d.height <= y) {
-//                y = d.height - 1;
-//            } else if (y < 0) {
-//                y = 0;
-//            }
-//        }
-//        Component mouseOver =   // not necessarily sensitive to mouse events
-//            nativeContainer.getDropTargetEventTarget(x, y,
-//                                                     Container.INCLUDE_SELF);
-//        trackMouseEnterExit(mouseOver, e);
-//
-//        if (mouseOver != nativeContainer && mouseOver != null) {
-//            switch (id) {
-//            case SunDropTargetEvent.MOUSE_ENTERED:
-//            case SunDropTargetEvent.MOUSE_EXITED:
-//                break;
-//            default:
-//                retargetMouseEvent(mouseOver, id, e);
-//                e.consume();
-//                break;
-//            }
-//        }
-//        return e.isConsumed();
-//    }
+    private boolean processDropTargetEvent(SunDropTargetEvent e) {
+        int id = e.getID();
+        int x = e.getX();
+        int y = e.getY();
+
+        /*
+         * Fix for BugTraq ID 4395290.
+         * It is possible that SunDropTargetEvent's Point is outside of the
+         * native container bounds. In this case we truncate coordinates.
+         */
+        if (!nativeContainer.contains(x, y)) {
+            final Dimension d = nativeContainer.getSize();
+            if (d.width <= x) {
+                x = d.width - 1;
+            } else if (x < 0) {
+                x = 0;
+            }
+            if (d.height <= y) {
+                y = d.height - 1;
+            } else if (y < 0) {
+                y = 0;
+            }
+        }
+        Component mouseOver =   // not necessarily sensitive to mouse events
+            nativeContainer.getDropTargetEventTarget(x, y,
+                                                     Container.INCLUDE_SELF);
+        trackMouseEnterExit(mouseOver, e);
+
+        if (mouseOver != nativeContainer && mouseOver != null) {
+            switch (id) {
+            case SunDropTargetEvent.MOUSE_ENTERED:
+            case SunDropTargetEvent.MOUSE_EXITED:
+                break;
+            default:
+                retargetMouseEvent(mouseOver, id, e);
+                e.consume();
+                break;
+            }
+        }
+        return e.isConsumed();
+    }
 
     public void checkInternalFrameMouseDown(JSComponent c) {
     	JSFrameViewer fv = c.getFrameViewer();
@@ -4696,15 +4699,12 @@ class LightweightDispatcher implements AWTEventListener {
 		}
 		MouseEvent retargeted;
 		if (component != null) {
-//            if (e instanceof SunDropTargetEvent) {
-//                retargeted = new SunDropTargetEvent(target,
-//                                                    id,
-//                                                    x,
-//                                                    y,
-//                                                    ((SunDropTargetEvent)e).getDispatcher());
-//            } else 
-//            	
-			if (id == MouseEvent.MOUSE_WHEEL) {
+            if (e instanceof swingjs.JSDnD.JSDropMouseEvent) {
+                retargeted = new swingjs.JSDnD.JSDropMouseEvent(target,
+                                                    id,
+                                                    x,
+                                                    y);
+            } else if (id == MouseEvent.MOUSE_WHEEL) {
                 retargeted = new MouseWheelEvent(target,
                                       id,
                                        e.getWhen(),

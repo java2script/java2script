@@ -1,6 +1,5 @@
 package swingjs.a2s;
 
-import java.awt.Font;
 import java.util.Enumeration;
 
 import javax.swing.AbstractButton;

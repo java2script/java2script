@@ -27,7 +27,6 @@
  */
 package javax.swing.border;
 
-import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.Component;
 

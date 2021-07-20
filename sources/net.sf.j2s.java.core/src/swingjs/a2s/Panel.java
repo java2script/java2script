@@ -2,7 +2,6 @@ package swingjs.a2s;
 
 import java.awt.Color;
 import java.awt.FlowLayout;
-import java.awt.Graphics;
 import java.awt.LayoutManager;
 
 import javax.swing.JComponent;

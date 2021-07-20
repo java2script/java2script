@@ -25,7 +25,6 @@
 
 package java.awt.image;
 
-import java.util.Hashtable;
 import java.awt.image.ImageConsumer;
 import java.awt.image.ImageFilter;
 

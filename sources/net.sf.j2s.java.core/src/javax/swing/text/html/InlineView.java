@@ -25,7 +25,6 @@
 package javax.swing.text.html;
 
 import java.awt.*;
-import java.text.BreakIterator;
 import javax.swing.event.DocumentEvent;
 import javax.swing.text.*;
 

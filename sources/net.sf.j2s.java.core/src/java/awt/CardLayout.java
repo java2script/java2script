@@ -28,11 +28,7 @@
 
 package java.awt;
 
-import java.io.ObjectStreamField;
 import java.io.Serializable;
-import java.util.Hashtable;
-import java.util.Vector;
-
 import javajs.util.Lst;
 
 /**

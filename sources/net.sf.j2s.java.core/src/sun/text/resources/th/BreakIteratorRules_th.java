@@ -39,8 +39,6 @@
 package sun.text.resources.th;
 
 import java.util.ListResourceBundle;
-import java.util.MissingResourceException;
-import java.net.URL;
 
 public class BreakIteratorRules_th extends ListResourceBundle {
     protected final Object[][] getContents() {

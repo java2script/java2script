@@ -27,7 +27,6 @@ package com.sun.imageio.plugins.wbmp;
 
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.image.ColorModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
 import java.awt.image.IndexColorModel;
@@ -40,13 +39,10 @@ import java.awt.image.WritableRaster;
 import java.io.IOException;
 
 import javax.imageio.IIOImage;
-import javax.imageio.IIOException;
 import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.metadata.IIOMetadata;
-import javax.imageio.metadata.IIOMetadataFormatImpl;
-import javax.imageio.metadata.IIOInvalidTreeException;
 import javax.imageio.spi.ImageWriterSpi;
 import javax.imageio.stream.ImageOutputStream;
 

@@ -27,15 +27,12 @@ package javax.xml.xpath;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Properties;

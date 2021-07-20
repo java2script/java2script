@@ -34,7 +34,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Insets;
-import java.awt.JSComponent;
 import java.awt.Rectangle;
 import java.net.URL;
 
@@ -47,8 +46,6 @@ import javax.swing.plaf.ColorUIResource;
 import javax.swing.plaf.FontUIResource;
 
 import sun.swing.DefaultLookup;
-import swingjs.api.js.DOMNode;
-import swingjs.plaf.JSLabelUI;
 
 /**
  * Displays an entry in a tree.

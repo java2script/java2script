@@ -38,7 +38,6 @@
 
 package java.awt.image;
 
-import static sun.java2d.StateTrackable.State.STABLE;
 import static sun.java2d.StateTrackable.State.UNTRACKABLE;
 
 /**

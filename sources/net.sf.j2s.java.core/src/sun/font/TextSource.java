@@ -31,7 +31,6 @@ package sun.font;
 
 import java.awt.Font;
 import java.awt.font.FontRenderContext;
-import java.awt.font.LineMetrics;
 
 /**
  * A text source represents text for rendering, plus context information.

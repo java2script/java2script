@@ -35,7 +35,6 @@
 
 package java.util.concurrent;
 import java.util.*;
-import sun.misc.Unsafe;
 import swingjs.JSUtil;
 
 ///**

@@ -1,8 +1,5 @@
 package test.jaxb.field;
  
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
  
 // source: http://blog.bdoughan.com/2011/06/jaxb-and-complex-types-with-simple.html

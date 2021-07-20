@@ -42,7 +42,6 @@ package javax.xml.bind.helpers;
 
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
-import java.util.ResourceBundle.Control;
 
 /**
  * Formats error messages.

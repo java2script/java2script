@@ -25,12 +25,10 @@
 
 package java.awt.image;
 
-import java.awt.Image;
 import java.awt.image.ImageFilter;
 import java.awt.image.ImageConsumer;
 import java.awt.image.ImageProducer;
 import java.util.Hashtable;
-import java.awt.image.ColorModel;
 
 /**
  * This class is an implementation of the ImageProducer interface which

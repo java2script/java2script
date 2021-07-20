@@ -78,7 +78,6 @@ import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.ComponentInputMapUIResource;
-import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.UIResource;
 //import javax.swing.plaf.basic.BasicArrowButton;
 //import javax.swing.plaf.basic.BasicGraphicsUtils;

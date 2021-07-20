@@ -7,14 +7,6 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.URIResolver;
 
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import swingjs.api.js.DOMNode;
-
 public class JSXMLTransformerFactory extends javax.xml.transform.TransformerFactory {
 
 	@Override

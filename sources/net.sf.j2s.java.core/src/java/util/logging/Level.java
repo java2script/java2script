@@ -27,9 +27,7 @@ package java.util.logging;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.ResourceBundle;
 
 /**
  * The Level class defines a set of standard logging levels that

@@ -4,8 +4,6 @@ import java.util.Locale;
 
 import javax.imageio.ImageWriteParam;
 
-import com.sun.imageio.plugins.jpeg.JPEG;
-
 public class JpgImageWriteParam extends ImageWriteParam {
 
 	JpgImageWriteParam(Locale l) {

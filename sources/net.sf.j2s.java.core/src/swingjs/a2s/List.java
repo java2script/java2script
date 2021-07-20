@@ -21,8 +21,6 @@ import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import sun.swing.SwingUtilities2;
-
 import java.awt.JSComponent;
 public class List extends JList implements ItemSelectable, JSComponent.A2SWrappedComponent, ListSelectionListener  {
 

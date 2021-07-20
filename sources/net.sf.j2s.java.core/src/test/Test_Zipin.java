@@ -1,8 +1,6 @@
 package test;
 
 import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Arrays;
@@ -10,7 +8,6 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import javajs.util.AU;
 import javajs.util.Rdr;
 import javajs.util.ZipTools;
 

@@ -25,15 +25,7 @@
 package javax.swing.text.html;
 
 import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
 import javax.swing.text.*;
-import javax.swing.*;
-import javax.swing.border.*;
-import javax.swing.event.*;
-import java.util.*;
 
 /**
  * EditableView sets the view it contains to be visible only when the

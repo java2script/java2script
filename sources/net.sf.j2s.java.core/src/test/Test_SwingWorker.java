@@ -1,11 +1,6 @@
 package test;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 

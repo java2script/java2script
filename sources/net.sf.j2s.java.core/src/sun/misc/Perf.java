@@ -24,12 +24,6 @@
  */
 package sun.misc;
 
-import java.nio.ByteBuffer;
-import java.security.Permission;
-import java.security.PrivilegedAction;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-
 /**
  * The Perf class provides the ability to attach to an instrumentation
  * buffer maintained by a Java virtual machine. The instrumentation

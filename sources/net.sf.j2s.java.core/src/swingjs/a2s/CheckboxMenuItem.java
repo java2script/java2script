@@ -3,8 +3,6 @@ package swingjs.a2s;
 import javax.swing.DefaultButtonModel;
 import javax.swing.JCheckBoxMenuItem;
 
-import swingjs.plaf.JSCheckBoxUI;
-
 public class CheckboxMenuItem extends JCheckBoxMenuItem {
 
 	public void isAWT() {}

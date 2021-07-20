@@ -26,9 +26,6 @@
 package java.security;
 
 import java.security.spec.AlgorithmParameterSpec;
-import java.util.*;
-import java.io.*;
-
 import java.nio.ByteBuffer;
 
 import sun.security.jca.JCAUtil;

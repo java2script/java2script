@@ -25,8 +25,6 @@
 
 package java.security;
 
-import java.io.*;
-
 /**
  * This class is used to represent an Identity that can also digitally
  * sign data.

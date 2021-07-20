@@ -1,15 +1,12 @@
 package swingjs.a2s;
 
 import java.awt.Adjustable;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.Point;
 
 import javax.swing.JScrollPane;
-import javax.swing.border.Border;
-import javax.swing.border.LineBorder;
 
 public class ScrollPane extends JScrollPane {
 

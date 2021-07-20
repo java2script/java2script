@@ -30,19 +30,15 @@
 
 package sun.font;
 
-import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.font.FontRenderContext;
-import java.awt.font.LineMetrics;
 import java.awt.font.GraphicAttribute;
 import java.awt.font.GlyphJustificationInfo;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
-import java.text.Bidi;
-import java.util.Map;
 
 public final class GraphicComponent implements TextLineComponent,
                                                Decoration.Label {

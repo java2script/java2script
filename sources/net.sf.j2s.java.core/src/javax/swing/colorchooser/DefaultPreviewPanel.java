@@ -37,7 +37,6 @@ import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 
 
 /**

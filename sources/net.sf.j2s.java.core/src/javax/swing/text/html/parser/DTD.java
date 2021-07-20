@@ -27,21 +27,12 @@ package javax.swing.text.html.parser;
 
 import sun.awt.AppContext;
 
-import java.io.PrintStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.io.IOException;
-import java.io.FileNotFoundException;
-import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.util.Hashtable;
 import java.util.Vector;
 import java.util.BitSet;
 import java.util.StringTokenizer;
-import java.util.Enumeration;
-import java.util.Properties;
-import java.net.URL;
 
 /**
  * The representation of an SGML DTD.  DTD describes a document

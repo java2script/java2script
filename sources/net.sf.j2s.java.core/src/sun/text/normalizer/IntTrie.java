@@ -40,7 +40,6 @@ package sun.text.normalizer;
 import java.io.InputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * Trie implementation which stores data in int, 32 bits.

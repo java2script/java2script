@@ -46,6 +46,7 @@ import java.util.Hashtable;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import sun.util.TimeZoneNameUtility;
 import sun.util.resources.LocaleData;
 
 /**
@@ -409,47 +410,47 @@ public class DateFormatSymbols implements Cloneable {
         ampms = duplicate(newAmpms);
     }
 
-//    /**
-//     * Gets time zone strings.  Use of this method is discouraged; use
-//     * {@link java.util.TimeZone#getDisplayName() TimeZone.getDisplayName()}
-//     * instead.
-//     * <p>
-//     * The value returned is a
-//     * two-dimensional array of strings of size <em>n</em> by <em>m</em>,
-//     * where <em>m</em> is at least 5.  Each of the <em>n</em> rows is an
-//     * entry containing the localized names for a single <code>TimeZone</code>.
-//     * Each such row contains (with <code>i</code> ranging from
-//     * 0..<em>n</em>-1):
-//     * <ul>
-//     * <li><code>zoneStrings[i][0]</code> - time zone ID</li>
-//     * <li><code>zoneStrings[i][1]</code> - long name of zone in standard
-//     * time</li>
-//     * <li><code>zoneStrings[i][2]</code> - short name of zone in
-//     * standard time</li>
-//     * <li><code>zoneStrings[i][3]</code> - long name of zone in daylight
-//     * saving time</li>
-//     * <li><code>zoneStrings[i][4]</code> - short name of zone in daylight
-//     * saving time</li>
-//     * </ul>
-//     * The zone ID is <em>not</em> localized; it's one of the valid IDs of
-//     * the {@link java.util.TimeZone TimeZone} class that are not
-//     * <a href="../util/TimeZone.html#CustomID">custom IDs</a>.
-//     * All other entries are localized names.  If a zone does not implement
-//     * daylight saving time, the daylight saving time names should not be used.
-//     * <p>
-//     * If {@link #setZoneStrings(String[][]) setZoneStrings} has been called
-//     * on this <code>DateFormatSymbols</code> instance, then the strings
-//     * provided by that call are returned. Otherwise, the returned array
-//     * contains names provided by the Java runtime and by installed
-//     * {@link java.util.spi.TimeZoneNameProvider TimeZoneNameProvider}
-//     * implementations.
-//     *
-//     * @return the time zone strings.
-//     * @see #setZoneStrings(String[][])
-//     */
-//    public String[][] getZoneStrings() {
-//        return getZoneStringsImpl(true);
-//    }
+    /**
+     * Gets time zone strings.  Use of this method is discouraged; use
+     * {@link java.util.TimeZone#getDisplayName() TimeZone.getDisplayName()}
+     * instead.
+     * <p>
+     * The value returned is a
+     * two-dimensional array of strings of size <em>n</em> by <em>m</em>,
+     * where <em>m</em> is at least 5.  Each of the <em>n</em> rows is an
+     * entry containing the localized names for a single <code>TimeZone</code>.
+     * Each such row contains (with <code>i</code> ranging from
+     * 0..<em>n</em>-1):
+     * <ul>
+     * <li><code>zoneStrings[i][0]</code> - time zone ID</li>
+     * <li><code>zoneStrings[i][1]</code> - long name of zone in standard
+     * time</li>
+     * <li><code>zoneStrings[i][2]</code> - short name of zone in
+     * standard time</li>
+     * <li><code>zoneStrings[i][3]</code> - long name of zone in daylight
+     * saving time</li>
+     * <li><code>zoneStrings[i][4]</code> - short name of zone in daylight
+     * saving time</li>
+     * </ul>
+     * The zone ID is <em>not</em> localized; it's one of the valid IDs of
+     * the {@link java.util.TimeZone TimeZone} class that are not
+     * <a href="../util/TimeZone.html#CustomID">custom IDs</a>.
+     * All other entries are localized names.  If a zone does not implement
+     * daylight saving time, the daylight saving time names should not be used.
+     * <p>
+     * If {@link #setZoneStrings(String[][]) setZoneStrings} has been called
+     * on this <code>DateFormatSymbols</code> instance, then the strings
+     * provided by that call are returned. Otherwise, the returned array
+     * contains names provided by the Java runtime and by installed
+     * {@link java.util.spi.TimeZoneNameProvider TimeZoneNameProvider}
+     * implementations.
+     *
+     * @return the time zone strings.
+     * @see #setZoneStrings(String[][])
+     */
+    public String[][] getZoneStrings() {
+        return getZoneStringsImpl(true);
+    }
 
     /**
      * Sets time zone strings.  The argument must be a
@@ -614,56 +615,56 @@ public class DateFormatSymbols implements Cloneable {
         locale = desiredLocale;
     }
 
-//    /**
-//     * Package private: used by SimpleDateFormat
-//     * Gets the index for the given time zone ID to obtain the time zone
-//     * strings for formatting. The time zone ID is just for programmatic
-//     * lookup. NOT LOCALIZED!!!
-//     * @param ID the given time zone ID.
-//     * @return the index of the given time zone ID.  Returns -1 if
-//     * the given time zone ID can't be located in the DateFormatSymbols object.
-//     * @see java.util.SimpleTimeZone
-//     */
-//    final int getZoneIndex (String ID)
-//    {
-//        String[][] zoneStrings = getZoneStringsWrapper();
-//        for (int index=0; index<zoneStrings.length; index++)
-//        {
-//            if (ID.equalsIgnoreCase(zoneStrings[index][0])) return index;
-//        }
-//
-//        return -1;
-//    }
+    /**
+     * Package private: used by SimpleDateFormat
+     * Gets the index for the given time zone ID to obtain the time zone
+     * strings for formatting. The time zone ID is just for programmatic
+     * lookup. NOT LOCALIZED!!!
+     * @param ID the given time zone ID.
+     * @return the index of the given time zone ID.  Returns -1 if
+     * the given time zone ID can't be located in the DateFormatSymbols object.
+     * @see java.util.SimpleTimeZone
+     */
+    final int getZoneIndex (String ID)
+    {
+        String[][] zoneStrings = getZoneStringsWrapper();
+        for (int index=0; index<zoneStrings.length; index++)
+        {
+            if (ID.equalsIgnoreCase(zoneStrings[index][0])) return index;
+        }
 
-//    /**
-//     * Wrapper method to the getZoneStrings(), which is called from inside
-//     * the java.text package and not to mutate the returned arrays, so that
-//     * it does not need to create a defensive copy.
-//     */
-//    final String[][] getZoneStringsWrapper() {
-//        if (isSubclassObject()) {
-//            return getZoneStrings();
-//        } else {
-//            return getZoneStringsImpl(false);
-//        }
-//    }
+        return -1;
+    }
 
-//    private final String[][] getZoneStringsImpl(boolean needsCopy) {
-//        if (zoneStrings == null) {
-//            zoneStrings = TimeZoneNameUtility.getZoneStrings(locale);
-//        }
-//
-//        if (needsCopy) {
-//            String[][] aCopy = new String[zoneStrings.length][];
-//            for (int i = 0; i < zoneStrings.length; ++i) {
-//                aCopy[i] = duplicate(zoneStrings[i]);
-//            }
-//            return aCopy;
-//        } else {
-//            return zoneStrings;
-//        }
-//    }
-//
+    /**
+     * Wrapper method to the getZoneStrings(), which is called from inside
+     * the java.text package and not to mutate the returned arrays, so that
+     * it does not need to create a defensive copy.
+     */
+    final String[][] getZoneStringsWrapper() {
+        if (isSubclassObject()) {
+            return getZoneStrings();
+        } else {
+            return getZoneStringsImpl(false);
+        }
+    }
+
+    private final String[][] getZoneStringsImpl(boolean needsCopy) {
+        if (zoneStrings == null) {
+            zoneStrings = TimeZoneNameUtility.getZoneStrings(locale);
+        }
+
+        if (needsCopy) {
+            String[][] aCopy = new String[zoneStrings.length][];
+            for (int i = 0; i < zoneStrings.length; ++i) {
+                aCopy[i] = duplicate(zoneStrings[i]);
+            }
+            return aCopy;
+        } else {
+            return zoneStrings;
+        }
+    }
+
     @SuppressWarnings("unused")
 	private final boolean isSubclassObject() {
         return !getClass().getName().equals("java.text.DateFormatSymbols");

@@ -26,11 +26,8 @@
 package java.security;
 
 import java.io.IOException;
-import java.io.EOFException;
 import java.io.OutputStream;
 import java.io.FilterOutputStream;
-import java.io.PrintStream;
-import java.io.ByteArrayOutputStream;
 
 /**
  * A transparent stream that updates the associated message digest using

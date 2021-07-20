@@ -21,6 +21,7 @@ class Test_Char extends Test_ {
     public static final char separatorChar = '/';
 
 	public static void main(String[] args) {
+		testCharToInt('A');
 		assert('c' == new Character('c'));
 		assert(new Character('c') == 'c');
 		assert(Character.valueOf('c') == 'c');
@@ -212,6 +213,11 @@ class Test_Char extends Test_ {
 
         System.out.println("Test_Char OK");
 	}
+
+	private static void testCharToInt(char d) {
+		int[] a = new int[] {d};
+		assert(a[0] == 65);
+	}	
 
 	private static void testCharSet() {
 		

@@ -11,7 +11,6 @@ import java.awt.geom.Point2D;
 import java.text.CharacterIterator;
 
 import sun.font.Font2D;
-import sun.font.FontStrikeDesc;
 import sun.font.GlyphLayout.GVData;
 import sun.font.TextRecord;
 

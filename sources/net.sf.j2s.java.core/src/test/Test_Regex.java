@@ -10,9 +10,114 @@ public class Test_Regex extends Test_ {
 
 	public static void main(String[] args) {
 
+
 		
 		
+		String st;
+		Pattern p;
+		Matcher m;
+
+		st = "NMR DATA/product/3a-C'.mnova";
+		p = Pattern.compile("^\\QNMR DATA/\\E[^|/]+\\Q/\\E(?<IFS0spec0nmr0representation0vendor0dataset>(?<IFS0spec0nmr0property0expt>(?<id>[^|/]+)\\Q-\\E[^|/]+)\\Q.mnova\\E)$");
+		m = p.matcher(st);
+		System.out.println(m.find());
+		for (int i = 1, n = m.groupCount(); i <= n; i++) {
+			System.out.println(i + "/" + n + ">"+m.group(i)+"<");
+		}
 		
+		
+		st = "...pre-20a-b/DEPT135/3/pdata/1/procs";
+		st = "...pre-20a-b/DEPT135|3/pdata/1/procs";
+		p = Pattern.compile("^(?<path>.+(?:/|\\|)(?<dir>[^/]+))/pdata/[^/]+/procs$");		
+		m = p.matcher(st);
+		System.out.println(m.find());
+		for (int i = 1, n = m.groupCount(); i <= n; i++) {
+			System.out.println(i + "/" + n + ">"+m.group(i)+"<");
+		}
+
+		
+		st = "FID for Publication/S6.zip|S6/HRMS.zip|HRMS/67563_hazh180_maxis_pos.pdf";
+		p = Pattern.compile("^\\QFID for Publication/\\E(?<id>[^|/]+)\\Q.zip"
+			+ "|\\E\\k<id>\\Q/HRMS.zip|\\E(?:[^/]+/)*(?<IFS0ms0representation0pdf>[^|/]+\\Q.pdf\\E)$");
+		m = p.matcher(st);
+		System.out.println(m.find());
+		for (int i = 1, n = m.groupCount(); i <= n; i++) {
+			System.out.println(i + "/" + n + ">"+m.group(i)+"<");
+		}
+
+		st = "{abc::now {jkl::{def::and} {ghi::then}}}";
+		p = Pattern.compile("\\{([^:]+)::(.+)\\}");
+		m = p.matcher(st);
+		m.find();
+		for (int i = 1, n = m.groupCount(); i <= n; i++) {
+			System.out.println(i + "/" + n + ">"+m.group(i)+"<");
+		}
+		
+		st = "AtestB";
+		p = Pattern.compile("\\QA\\E(?<IFS0nmr0param0expt>\\Q\\E.+\\Q\\E)\\QB\\E");
+		m = p.matcher(st);
+		m.find();
+		// note that go [1,n] here, not [0,n)
+		System.out.println("ID was " + m.group("IFS0nmr0param0expt"));
+		for (int i = 1, n = m.groupCount(); i <= n; i++) {
+			System.out.println(i + "/" + n + ">"+m.group(i)+"<");
+		}
+		assert(m.group("IFSnmr0param0expt").equals("test"));
+
+		p = Pattern.compile("(?i)ID(?<id>.+) and this is id \\k<id>");
+		m = p.matcher("ID1 and this is id 1");
+		m.find();
+		// note that go [1,n] here, not [0,n)
+		System.out.println("ID was " + m.group("id"));
+		for (int i = 1, n = m.groupCount(); i <= n; i++) {
+			System.out.println(i + "/" + n + ">"+m.group(i)+"<");
+		}
+		assert(m.group(1).equals("1"));
+
+		p = Pattern.compile("ID((\\Q.\\E)(.((?<id>.+\\Q.\\E))))\\.and");
+		m = p.matcher("ID.23456..and this");
+		m.find();
+		// note that go [1,n] here, not [0,n)
+		System.out.println("ID was " + m.group("id"));
+		System.out.println(m.group("id"));
+		assert(m.group("id").equals("3456."));
+		for (int i = 1, n = m.groupCount(); i <= n; i++) {
+			System.out.println(i + "/" + n + ">"+m.group(i)+"<");
+		}
+
+		
+		p = Pattern.compile("(this)(.+)(is)(.+)(a)(.+)(new)(.+)(test)");
+		m = p.matcher("and this is a new test here");
+		m.find();
+		// note that go [1,n] here, not [0,n)
+		for (int i = 1, n = m.groupCount(); i <= n; i++) {
+			System.out.println(i + "/" + n + ">"+m.group(i)+"<");
+		}
+
+		p = Pattern.compile("([^-](?:-[^-]+)*)-(.+[.]jdf)$");//$");
+		m = p.matcher("compound3-reduced-1H.jdf");
+		m.find();
+		// note that go [1,n] here, not [0,n)
+		for (int i = 1, n = m.groupCount(); i <= n; i++) {
+			System.out.println(i + "/" + n + ">"+m.group(i)+"<");
+		}
+
+		p = Pattern.compile("this/([^/]+/)*(.+[.]pdf)$");//$");
+		m = p.matcher("this/is/a/test/testing.pdf");
+		m.find();
+		// note that go [1,n] here, not [0,n)
+		for (int i = 1, n = m.groupCount(); i <= n; i++) {
+			System.out.println(i + "/" + n + ">"+m.group(i)+"<");
+		}
+
+		p = Pattern.compile("(this/(?:[^/]+/)*).+\\Q.pdf\\E$");//$");
+		m = p.matcher("this/is/a/test/testing.1.pdf");
+		m.find();
+		// note that go [1,n] here, not [0,n)
+		for (int i = 1, n = m.groupCount(); i <= n; i++) {
+			System.out.println(i + "/" + n + ">"+m.group(i)+"<");
+		}
+
 		String s;
 		
 		Object[] o = new Object[] { new Float(3.5), Integer.valueOf(100)};
@@ -20,7 +125,6 @@ public class Test_Regex extends Test_ {
 	    System.out.println(s);
 	    assert(s.equals("val=3.500 Completed 100%."));
 
-		Pattern p;
 		String formatSpecifier
         = "%(\\d+\\$)?([-#+ 0,(\\<]*)?(\\d+)?(\\.\\d+)?([tT])?([a-zA-Z%])";
 		Pattern fsPattern = Pattern.compile(formatSpecifier);
@@ -56,7 +160,7 @@ public class Test_Regex extends Test_ {
 		assert ("y/2 is a very excellent 1/y or y".equals(s));
 
 		p = Pattern.compile("(\\W)y(\\W)");
-		Matcher m = p.matcher("(m*(@^2+~^2)/r+m*g*(1-y/r))*(1-y/r)");
+		m = p.matcher("(m*(@^2+~^2)/r+m*g*(1-y/r))*(1-y/r)");
 		s = m.replaceAll("$1`$2").trim();
 		assert (m.groupCount() == 2);
 		System.out.println(s);

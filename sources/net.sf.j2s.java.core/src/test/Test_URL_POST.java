@@ -1,15 +1,6 @@
 package test;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.URI;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.Date;
-
 import javajs.http.HttpClient;
 import javajs.http.HttpClientFactory;
 

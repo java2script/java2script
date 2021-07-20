@@ -27,7 +27,6 @@ package sun.misc;
 import java.io.OutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PushbackInputStream;
-import java.io.PrintStream;
 import java.io.IOException;
 
 /**

@@ -39,8 +39,6 @@
 package java.text;
 
 import java.text.Normalizer;
-import java.util.Vector;
-import java.util.Locale;
 
 /**
  * The <code>RuleBasedCollator</code> class is a concrete subclass of

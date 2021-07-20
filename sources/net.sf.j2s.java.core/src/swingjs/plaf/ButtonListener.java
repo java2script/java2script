@@ -29,7 +29,6 @@
 package swingjs.plaf;
 
 import java.awt.Container;
-import java.awt.JSComponent;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -60,7 +59,6 @@ import javax.swing.plaf.ComponentInputMapUIResource;
 
 import sun.swing.DefaultLookup;
 import sun.swing.UIAction;
-import swingjs.JSFocusPeer;
 import swingjs.api.js.DOMNode;
 
 /**

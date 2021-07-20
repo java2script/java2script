@@ -40,16 +40,13 @@
 
 package java.awt.font;
 
-import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
-import java.awt.font.NumericShaper;
 import java.awt.font.TextLine.TextLineMetrics;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
-import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.text.AttributedString;
@@ -57,12 +54,8 @@ import java.text.AttributedCharacterIterator;
 import java.text.AttributedCharacterIterator.Attribute;
 import java.text.CharacterIterator;
 import java.util.Map;
-import java.util.HashMap;
-import java.util.Hashtable;
 import sun.font.AttributeValues;
 import sun.font.CoreMetrics;
-import sun.font.Decoration;
-import sun.font.FontLineMetrics;
 import sun.font.FontResolver;
 import sun.font.GraphicComponent;
 import sun.font.LayoutPathImpl;

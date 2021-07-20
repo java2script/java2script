@@ -25,7 +25,6 @@
 
 package sun.util.locale.provider;
 
-import java.security.AccessController;
 import java.text.spi.BreakIteratorProvider;
 import java.text.spi.CollatorProvider;
 import java.text.spi.DateFormatProvider;

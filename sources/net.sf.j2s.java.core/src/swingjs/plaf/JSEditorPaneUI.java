@@ -12,7 +12,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.swing.InputMap;
@@ -39,7 +38,6 @@ import javax.swing.text.StyledDocument;
 import javax.swing.text.StyledEditorKit;
 import javax.swing.text.View;
 
-import javajs.util.PT;
 import javajs.util.SB;
 import sun.swing.DefaultLookup;
 import swingjs.JSHTMLHelper;
@@ -47,7 +45,6 @@ import swingjs.JSToolkit;
 import swingjs.api.js.DOMNode;
 import swingjs.api.js.JQueryObject;
 import swingjs.api.js.JQueryObject.JQEvent;
-import swingjs.api.js.JSFunction;
 
 /**
  * Note that JEditorPane does not have a no-wrap option the way JTextArea does.

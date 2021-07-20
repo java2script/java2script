@@ -3,8 +3,6 @@ package sun.awt;
 import java.awt.AWTEvent;
 import java.awt.EventQueue;
 
-import swingjs.JSUtil;
-
 /*
  * PostEventQueue is a Thread that runs in the same AppContext as the
  * Java EventQueue.  It is a queue of AWTEvents to be posted to the

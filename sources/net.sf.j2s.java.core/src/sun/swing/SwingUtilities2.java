@@ -28,7 +28,6 @@
 
 package sun.swing;
 
-import static java.awt.RenderingHints.KEY_TEXT_ANTIALIASING;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -40,7 +39,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.font.FontRenderContext;

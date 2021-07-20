@@ -1,10 +1,6 @@
 package test;
 
 import java.util.List;
-import java.util.Spliterator;
-import java.util.Spliterator.OfInt;
-import java.util.function.Consumer;
-import java.util.function.IntConsumer;
 import java.util.ArrayList;
 import java.util.Hashtable;
 

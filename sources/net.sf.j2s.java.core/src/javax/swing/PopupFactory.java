@@ -35,7 +35,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import java.applet.JSApplet;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;

@@ -31,7 +31,6 @@ import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.nio.file.FileTreeWalker.Event;
 
 /**

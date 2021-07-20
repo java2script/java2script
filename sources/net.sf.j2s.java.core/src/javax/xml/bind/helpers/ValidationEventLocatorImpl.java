@@ -42,8 +42,6 @@ package javax.xml.bind.helpers;
 
 import java.net.URL;
 import java.net.MalformedURLException;
-import java.text.MessageFormat;
-
 import javax.xml.bind.ValidationEventLocator;
 import org.w3c.dom.Node;
 import org.xml.sax.Locator;

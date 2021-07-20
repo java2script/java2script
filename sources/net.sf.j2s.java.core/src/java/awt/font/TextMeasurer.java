@@ -44,7 +44,6 @@ import java.awt.Font;
 
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedCharacterIterator.Attribute;
-import java.text.AttributedString;
 import java.text.Bidi;
 import java.text.BreakIterator;
 import java.text.CharacterIterator;
@@ -58,7 +57,6 @@ import sun.font.AttributeValues;
 import sun.font.BidiUtils;
 import sun.font.TextLineComponent;
 import sun.font.TextLabelFactory;
-import sun.font.FontResolver;
 
 /**
  * The <code>TextMeasurer</code> class provides the primitive operations

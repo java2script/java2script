@@ -225,7 +225,7 @@ public final class LocaleServiceProviderPool {
      *
      * @return true if any provider (other than JRE) is available
      */
-    boolean hasProviders() {
+    public boolean hasProviders() {
         return providers.size() != 1 ||
                (providers.get(LocaleProviderAdapter.Type.JRE) == null &&
                 providers.get(LocaleProviderAdapter.Type.FALLBACK) == null);

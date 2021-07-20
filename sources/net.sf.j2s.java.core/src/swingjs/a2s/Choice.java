@@ -3,7 +3,6 @@ package swingjs.a2s;
 import java.awt.Color;
 import java.awt.event.ItemEvent;
 
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 
 public class Choice extends JComboBox {

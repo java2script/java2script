@@ -28,7 +28,6 @@ package com.sun.imageio.plugins.bmp;
 import java.util.Locale;
 import javax.imageio.spi.ImageReaderSpi;
 import javax.imageio.stream.ImageInputStream;
-import javax.imageio.spi.IIORegistry;
 import javax.imageio.spi.ServiceRegistry;
 import java.io.IOException;
 import javax.imageio.ImageReader;

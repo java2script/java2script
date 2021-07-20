@@ -33,7 +33,6 @@ import java.awt.Dimension;
 import java.awt.HeadlessException;
 //import java.awt.HeadlessException;
 import java.awt.Insets;
-import java.awt.JSComponent;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -47,7 +46,6 @@ import java.awt.peer.LightweightPeer;
 import java.io.Serializable;
 import java.util.TooManyListenersException;
 
-import javax.swing.JComponent;
 import javax.swing.Timer;
 
 

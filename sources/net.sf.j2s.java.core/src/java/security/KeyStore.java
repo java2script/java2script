@@ -26,7 +26,6 @@
 package java.security;
 
 import java.io.*;
-import java.net.URI;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.security.cert.CertificateException;

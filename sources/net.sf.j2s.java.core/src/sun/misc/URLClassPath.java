@@ -38,7 +38,6 @@ import java.util.jar.Attributes.Name;
 import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.net.URLConnection;
 import java.net.HttpURLConnection;
 import java.net.URLStreamHandler;
@@ -47,13 +46,10 @@ import java.io.*;
 import java.security.AccessController;
 import java.security.AccessControlException;
 import java.security.CodeSigner;
-import java.security.Permission;
-import java.security.PrivilegedAction;
 import java.security.PrivilegedExceptionAction;
 import java.security.cert.Certificate;
 import sun.misc.FileURLMapper;
 import sun.net.util.URLUtil;
-import sun.security.action.GetPropertyAction;
 
 /**
  * This class is used to maintain a search path of URLs for loading classes

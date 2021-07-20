@@ -21,8 +21,6 @@ import java.awt.event.MouseListener;
 import javax.swing.JApplet;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
-import javax.swing.JFrame;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.event.CaretEvent;

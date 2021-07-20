@@ -1,10 +1,8 @@
 package test;
 
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import swingjs.JSUtil;
-import swingjs.api.js.DOMNode.Promise;
 
 class Test_ES6 extends Test_ {
 

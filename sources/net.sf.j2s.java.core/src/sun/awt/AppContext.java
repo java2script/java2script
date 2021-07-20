@@ -28,11 +28,7 @@
 
 package sun.awt;
 
-//import java.security.AccessController;
-//import java.security.PrivilegedAction;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;

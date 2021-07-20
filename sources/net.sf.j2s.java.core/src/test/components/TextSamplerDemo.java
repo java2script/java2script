@@ -45,7 +45,6 @@ import javax.swing.text.*;
 import java.awt.*;              //for layout managers and more
 import java.awt.event.*;        //for action events
 
-import java.net.URL;
 import java.io.IOException;
 
 public class TextSamplerDemo extends JPanel

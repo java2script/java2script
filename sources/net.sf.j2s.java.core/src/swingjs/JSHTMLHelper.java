@@ -10,7 +10,6 @@ import java.util.List;
 import javax.swing.JEditorPane;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkEvent.EventType;
-import javax.swing.text.AttributeSet;
 import javax.swing.text.Element;
 import javax.swing.text.Style;
 import javax.swing.text.StyleContext;
@@ -22,7 +21,6 @@ import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 
 import javajs.util.PT;
-import swingjs.api.js.DOMNode;
 import swingjs.api.js.J2SInterface;
 import swingjs.api.js.JQueryObject;
 import swingjs.plaf.JSComponentUI;

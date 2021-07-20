@@ -25,11 +25,6 @@
 
 package java.security;
 
-import java.security.*;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.StringTokenizer;
-
 /**
  * This class is for security permissions.
  * A SecurityPermission contains a name (also referred to as a "target name")

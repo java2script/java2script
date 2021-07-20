@@ -22,7 +22,6 @@ import javax.swing.JButton;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-import javajs.async.SwingJSUtils.Timeout;
 import test.baeldung.doublecolon.Computer;
 import test.baeldung.doublecolon.MacbookPro;
 

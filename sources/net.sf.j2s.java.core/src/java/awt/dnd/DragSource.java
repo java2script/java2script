@@ -30,7 +30,6 @@ package java.awt.dnd;
 
 import java.awt.Component;
 import java.awt.Cursor;
-import java.awt.GraphicsEnvironment;
 import java.awt.HeadlessException;
 import java.awt.Image;
 import java.awt.Point;

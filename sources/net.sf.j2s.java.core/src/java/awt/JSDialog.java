@@ -34,8 +34,6 @@ import java.awt.event.WindowEvent;
 import java.awt.peer.ComponentPeer;
 import java.awt.peer.DialogPeer;
 import java.util.ArrayList;
-import java.util.Iterator;
-
 import swingjs.plaf.JSDialogUI;
 
 /**

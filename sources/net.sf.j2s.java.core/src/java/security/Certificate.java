@@ -26,7 +26,6 @@
 package java.security;
 
 import java.io.*;
-import java.util.Date;
 
 /**
  * <p>This is an interface of abstract methods for managing a

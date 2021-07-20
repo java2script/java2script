@@ -27,14 +27,6 @@ package java.lang.reflect;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.AnnotationFormatError;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Objects;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import sun.reflect.annotation.AnnotationSupport;
-import sun.reflect.annotation.AnnotationType;
 
 /**
  * Represents an annotated element of the program currently running in this

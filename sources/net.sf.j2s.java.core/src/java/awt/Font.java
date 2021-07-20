@@ -63,7 +63,6 @@ import java.text.AttributedCharacterIterator.Attribute;
 //import java.util.Hashtable;
 //import java.util.Locale;
 import java.text.CharacterIterator;
-import java.util.Hashtable;
 import java.util.Map;
 
 import javajs.util.SB;
@@ -73,7 +72,6 @@ import sun.font.CoreMetrics;
 import sun.font.Font2DHandle;
 import sun.font.FontLineMetrics;
 import swingjs.JSFontMetrics;
-import swingjs.JSLineMetrics;
 import swingjs.JSToolkit;
 
 /**

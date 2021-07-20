@@ -1,7 +1,6 @@
 package swingjs.api.js;
 
 import java.awt.Insets;
-import java.awt.Rectangle;
 
 public interface JQueryObject {
 

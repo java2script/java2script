@@ -29,7 +29,6 @@ package javax.swing;
 
 import javax.swing.event.EventListenerList;
 
-import swingjs.JSToolkit;
 import swingjs.plaf.JSComponentUI;
 
 import java.awt.Component;

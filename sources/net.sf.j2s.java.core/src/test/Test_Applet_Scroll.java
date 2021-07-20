@@ -11,10 +11,8 @@ package test;
 
 import java.awt.Adjustable;
 import java.awt.Color;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
@@ -25,15 +23,11 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-import java.awt.font.TextAttribute;
 import java.text.DecimalFormat;
-import java.util.EventListener;
-
 import javax.swing.ButtonGroup;
 import javax.swing.JApplet;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
@@ -48,18 +42,6 @@ import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.event.EventListenerList;
-import javax.swing.event.UndoableEditListener;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
-import javax.swing.text.Element;
-import javax.swing.text.PlainDocument;
-import javax.swing.text.Position;
-import javax.swing.text.Segment;
-
 import swingjs.plaf.JSPanelUI;
 
 public class Test_Applet_Scroll extends JApplet implements ChangeListener, MouseListener, MouseMotionListener {

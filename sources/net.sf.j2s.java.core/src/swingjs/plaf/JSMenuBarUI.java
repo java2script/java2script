@@ -54,7 +54,6 @@ import javax.swing.plaf.UIResource;
 
 import sun.swing.DefaultLookup;
 import sun.swing.UIAction;
-import swingjs.JSKeyEvent;
 import swingjs.JSMenuManager;
 import swingjs.api.js.DOMNode;
 

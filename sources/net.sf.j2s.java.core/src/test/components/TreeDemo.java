@@ -51,7 +51,6 @@ import javax.swing.JSplitPane;
 import javax.swing.UIManager;
 
 import javax.swing.JTree;
-import javax.swing.UIDefaults;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 import javax.swing.event.TreeSelectionEvent;

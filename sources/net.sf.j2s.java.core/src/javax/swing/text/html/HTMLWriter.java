@@ -30,9 +30,6 @@ import java.util.Stack;
 import java.util.Enumeration;
 import java.util.Vector;
 import java.io.IOException;
-import java.util.StringTokenizer;
-import java.util.NoSuchElementException;
-import java.net.URL;
 
 /**
  * This is a writer for HTMLDocuments.

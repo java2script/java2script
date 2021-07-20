@@ -25,14 +25,6 @@
 package java.applet;
 
 import java.awt.*;
-import java.awt.image.ColorModel;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.util.Hashtable;
-import java.util.Locale;
-import javax.accessibility.*;
 
 /**
  * An applet is a small program that is intended not to be run on

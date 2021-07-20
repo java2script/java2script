@@ -27,7 +27,6 @@
  */
 package javax.swing.table;
 
-import java.text.Collator;
 import java.util.Comparator;
 
 import javax.swing.DefaultRowSorter;

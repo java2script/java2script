@@ -26,7 +26,6 @@
 package javax.swing.text.html.parser;
 
 import java.util.Vector;
-import java.util.Enumeration;
 import java.io.*;
 
 

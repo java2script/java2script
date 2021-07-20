@@ -35,7 +35,6 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.font.GlyphJustificationInfo;
 import java.awt.font.FontRenderContext;
-import java.awt.font.LineMetrics;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 

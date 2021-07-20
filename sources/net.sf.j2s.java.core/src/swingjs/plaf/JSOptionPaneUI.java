@@ -46,7 +46,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 
-import sun.security.action.GetPropertyAction;
 import sun.swing.DefaultLookup;
 import sun.swing.UIAction;
 import swingjs.api.js.DOMNode;
