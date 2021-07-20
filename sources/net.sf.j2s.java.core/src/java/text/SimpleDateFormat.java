@@ -52,9 +52,11 @@ import java.util.MissingResourceException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.TimeZone;
 import sun.util.calendar.CalendarUtils;
+import sun.util.locale.provider.LocaleProviderAdapter;
 import sun.util.resources.LocaleData;
 //import sun.util.calendar.ZoneInfoFile;
 
@@ -422,10 +424,12 @@ public class SimpleDateFormat extends DateFormat {
 	private static final String GMT = "GMT";
 
     /**
+     * BH SwingJS switched this to a key with time and date styles.
+     * 
      * Cache to hold the DateTimePatterns of a Locale.
      */
-    private static Hashtable<String,String[]> cachedLocaleData
-        = new Hashtable<String,String[]>(3);
+    private static Hashtable<String,String> cachedLocaleData
+        = new Hashtable<>(3);
 
     /**
      * Cache NumberFormat instances with Locale key.
@@ -537,40 +541,45 @@ public class SimpleDateFormat extends DateFormat {
         this.locale = loc;
         // initialize calendar and related fields
         initializeCalendar(loc);
-
         /* try the cache first */
-        String key = getKey();
-        String[] dateTimePatterns = cachedLocaleData.get(key);
-        if (dateTimePatterns == null) { /* cache miss */
-            ResourceBundle r = LocaleData.getDateFormatData(loc);
-            if (!isGregorianCalendar()) {
-                try {
-                    dateTimePatterns = r.getStringArray(getCalendarName() + ".DateTimePatterns");
-                } catch (MissingResourceException e) {
-                }
-            }
-            if (dateTimePatterns == null) {
-                dateTimePatterns = r.getStringArray("DateTimePatterns");
-            }
-            /* update cache */
-            cachedLocaleData.put(key, dateTimePatterns);
+        String key = getKey() + timeStyle + dateStyle;
+        pattern = cachedLocaleData.get(key);
+        if (pattern == null) { /* cache miss */
+        	// BH we just 
+        	pattern = LocaleProviderAdapter.getResourceBundleBased().getLocaleResources(loc)
+                    .getDateTimePattern(SHORT, SHORT, calendar);
+
+        	// BH SwingJS this must be an older style
+//        	
+//            ResourceBundle r = LocaleData.getDateFormatData(loc);
+//            if (!isGregorianCalendar()) {
+//                try {
+//                    dateTimePatterns = r.getStringArray(getCalendarName() + ".DateTimePatterns");
+//                } catch (MissingResourceException e) {
+//                }
+//            }
+//            if (dateTimePatterns == null) {
+//                dateTimePatterns = r.getStringArray("DateTimePatterns");
+//            }
+//            /* update cache */
+            cachedLocaleData.put(key, pattern);
         }
         formatData = DateFormatSymbols.getInstance(loc);
-        if ((timeStyle >= 0) && (dateStyle >= 0)) {
-            Object[] dateTimeArgs = {dateTimePatterns[timeStyle],
-                                     dateTimePatterns[dateStyle + 4]};
-            pattern = MessageFormat.format(dateTimePatterns[8], dateTimeArgs);
-        }
-        else if (timeStyle >= 0) {
-            pattern = dateTimePatterns[timeStyle];
-        }
-        else if (dateStyle >= 0) {
-            pattern = dateTimePatterns[dateStyle + 4];
-        }
-        else {
-            throw new IllegalArgumentException("No date or time style specified");
-        }
-
+//        if ((timeStyle >= 0) && (dateStyle >= 0)) {
+//            Object[] dateTimeArgs = {dateTimePatterns[timeStyle],
+//                                     dateTimePatterns[dateStyle + 4]};
+//            pattern = MessageFormat.format(dateTimePatterns[8], dateTimeArgs);
+//        }
+//        else if (timeStyle >= 0) {
+//            pattern = dateTimePatterns[timeStyle];
+//        }
+//        else if (dateStyle >= 0) {
+//            pattern = dateTimePatterns[dateStyle + 4];
+//        }
+//        else {
+//            throw new IllegalArgumentException("No date or time style specified");
+//        }
+//
         initialize(loc);
     }
 
@@ -1228,773 +1237,761 @@ public class SimpleDateFormat extends DateFormat {
 	 * Parses text from a string to produce a <code>Date</code>.
 	 * <p>
 	 * The method attempts to parse text starting at the index given by
-	 * <code>pos</code>. If parsing succeeds, then the index of <code>pos</code>
-	 * is updated to the index after the last character used (parsing does not
+	 * <code>pos</code>. If parsing succeeds, then the index of <code>pos</code> is
+	 * updated to the index after the last character used (parsing does not
 	 * necessarily use all characters up to the end of the string), and the parsed
 	 * date is returned. The updated <code>pos</code> can be used to indicate the
-	 * starting point for the next call to this method. If an error occurs, then
-	 * the index of <code>pos</code> is not changed, the error index of
-	 * <code>pos</code> is set to the index of the character where the error
-	 * occurred, and null is returned.
+	 * starting point for the next call to this method. If an error occurs, then the
+	 * index of <code>pos</code> is not changed, the error index of <code>pos</code>
+	 * is set to the index of the character where the error occurred, and null is
+	 * returned.
 	 * 
-	 * @param text
-	 *          A <code>String</code>, part of which should be parsed.
-	 * @param pos
-	 *          A <code>ParsePosition</code> object with index and error index
-	 *          information as described above.
-	 * @return A <code>Date</code> parsed from the string. In case of error,
-	 *         returns null.
-	 * @exception NullPointerException
-	 *              if <code>text</code> or <code>pos</code> is null.
+	 * @param text A <code>String</code>, part of which should be parsed.
+	 * @param pos  A <code>ParsePosition</code> object with index and error index
+	 *             information as described above.
+	 * @return A <code>Date</code> parsed from the string. In case of error, returns
+	 *         null.
+	 * @exception NullPointerException if <code>text</code> or <code>pos</code> is
+	 *                                 null.
 	 */
 	@Override
 	public Date parse(String text, ParsePosition pos) {
-		// SwingJS  brute force
+//		// SwingJS brute force
+//		Date d = null;
+//		int i0 = pos.index;
+//		pos.index = Math.min(80, text.length());
+//		while (pos.index >= i0) {
+//			double x = 0;
+//			String s = text.substring(i0, pos.index);
+//
+//			/**
+//			 *
+//			 * Just check for a date using brute force
+//			 * 
+//			 * @j2sNative
+//			 * 
+//			 * 			d = new Date(s); 
+//			 * 			x = d.getMilliseconds();
+//			 */
+//
+//			if (!Double.isNaN(x))
+//				return d;
+//			pos.index--;
+//		}
+//		pos.index = i0;
+//		return null;
+		 int start = pos.index;
+		 int oldStart = start;
+		 int textLength = text.length();
 		
-		/**
-		 *
-		 * Just check for a date using brute force
-		 * 
-		 * @j2sNative
-		 * 
-		 *            var i0 = pos.index; pos.index = Math.min(80, text.length); while
-		 *            (pos.index >= i0) { var d = new Date(text.substring(i0,
-		 *            pos.index)); var x = d.getMilliseconds(); if (!isNaN(x))
-		 *            return d; pos.index--; } 
-		 *            pos.index = i0;
-		 *            return null;
+		 calendar.clear(); // Clears all the time fields
+		
+		 boolean[] ambiguousYear = {false};
+		
+		
+		 for (int i = 0; i < compiledPattern.length; ) {
+		 int tag = compiledPattern[i] >>> 8;
+		 int count = compiledPattern[i++] & 0xff;
+		 if (count == 255) {
+		 count = compiledPattern[i++] << 16;
+		 count |= compiledPattern[i++];
+		 }
+		
+		 switch (tag) {
+		 case TAG_QUOTE_ASCII_CHAR:
+		 if (start >= textLength || text.charAt(start) != (char)count) {
+		 pos.index = oldStart;
+		 pos.errorIndex = start;
+		 return null;
+		 }
+		 start++;
+		 break;
+		
+		 case TAG_QUOTE_CHARS:
+		 while (count-- > 0) {
+		 if (start >= textLength || text.charAt(start) != compiledPattern[i++]) {
+		 pos.index = oldStart;
+		 pos.errorIndex = start;
+		 return null;
+		 }
+		 start++;
+		 }
+		 break;
+		
+		 default:
+		 // Peek the next pattern to determine if we need to
+		 // obey the number of pattern letters for
+		 // parsing. It's required when parsing contiguous
+		 // digit text (e.g., "20010704") with a pattern which
+		 // has no delimiters between fields, like "yyyyMMdd".
+		 boolean obeyCount = false;
+		 if (i < compiledPattern.length) {
+		 int nextTag = compiledPattern[i] >>> 8;
+		 if (!(nextTag == TAG_QUOTE_ASCII_CHAR || nextTag == TAG_QUOTE_CHARS)) {
+		 obeyCount = true;
+		 }
+		 }
+		 start = subParse(text, start, tag, count, obeyCount,
+		 ambiguousYear, pos);
+		 if (start < 0) {
+		 pos.index = oldStart;
+		 return null;
+		 }
+		 }
+		 }
+		
+		 // At this point the fields of Calendar have been set. Calendar
+		 // will fill in default values for missing fields when the time
+		 // is computed.
+		
+		 pos.index = start;
+		
+		 // This part is a problem: When we call parsedDate.after, we compute the		 time.
+		 // Take the date April 3 2004 at 2:30 am. When this is first set up, the		 year
+		 // will be wrong if we're parsing a 2-digit year pattern. It will be		 1904.
+		 // April 3 1904 is a Sunday (unlike 2004) so it is the DST onset day.		 2:30 am
+		 // is therefore an "impossible" time, since the time goes from 1:59 to		 3:00 am
+		 // on that day. It is therefore parsed out to fields as 3:30 am. Then we
+		 // add 100 years, and get April 3 2004 at 3:30 am. Note that April 3 2004		 is
+		 // a Saturday, so it can have a 2:30 am -- and it should. [LIU]
+		/*
+		 * Date parsedDate = calendar.getTime(); if( ambiguousYear[0] &&
+		 * !parsedDate.after(defaultCenturyStart) ) { calendar.add(Calendar.YEAR, 100);
+		 * parsedDate = calendar.getTime(); }
 		 */
-		{
-			return null;
-		}
-		// int start = pos.index;
-		// int oldStart = start;
-		// int textLength = text.length();
-		//
-		// calendar.clear(); // Clears all the time fields
-		//
-		// boolean[] ambiguousYear = {false};
-		//
-		//
-		// for (int i = 0; i < compiledPattern.length; ) {
-		// int tag = compiledPattern[i] >>> 8;
-		// int count = compiledPattern[i++] & 0xff;
-		// if (count == 255) {
-		// count = compiledPattern[i++] << 16;
-		// count |= compiledPattern[i++];
-		// }
-		//
-		// switch (tag) {
-		// case TAG_QUOTE_ASCII_CHAR:
-		// if (start >= textLength || text.charAt(start) != (char)count) {
-		// pos.index = oldStart;
-		// pos.errorIndex = start;
-		// return null;
-		// }
-		// start++;
-		// break;
-		//
-		// case TAG_QUOTE_CHARS:
-		// while (count-- > 0) {
-		// if (start >= textLength || text.charAt(start) != compiledPattern[i++]) {
-		// pos.index = oldStart;
-		// pos.errorIndex = start;
-		// return null;
-		// }
-		// start++;
-		// }
-		// break;
-		//
-		// default:
-		// // Peek the next pattern to determine if we need to
-		// // obey the number of pattern letters for
-		// // parsing. It's required when parsing contiguous
-		// // digit text (e.g., "20010704") with a pattern which
-		// // has no delimiters between fields, like "yyyyMMdd".
-		// boolean obeyCount = false;
-		// if (i < compiledPattern.length) {
-		// int nextTag = compiledPattern[i] >>> 8;
-		// if (!(nextTag == TAG_QUOTE_ASCII_CHAR || nextTag == TAG_QUOTE_CHARS)) {
-		// obeyCount = true;
-		// }
-		// }
-		// start = subParse(text, start, tag, count, obeyCount,
-		// ambiguousYear, pos);
-		// if (start < 0) {
-		// pos.index = oldStart;
-		// return null;
-		// }
-		// }
-		// }
-		//
-		// // At this point the fields of Calendar have been set. Calendar
-		// // will fill in default values for missing fields when the time
-		// // is computed.
-		//
-		// pos.index = start;
-		//
-		// // This part is a problem: When we call parsedDate.after, we compute the
-		// time.
-		// // Take the date April 3 2004 at 2:30 am. When this is first set up, the
-		// year
-		// // will be wrong if we're parsing a 2-digit year pattern. It will be
-		// 1904.
-		// // April 3 1904 is a Sunday (unlike 2004) so it is the DST onset day.
-		// 2:30 am
-		// // is therefore an "impossible" time, since the time goes from 1:59 to
-		// 3:00 am
-		// // on that day. It is therefore parsed out to fields as 3:30 am. Then we
-		// // add 100 years, and get April 3 2004 at 3:30 am. Note that April 3 2004
-		// is
-		// // a Saturday, so it can have a 2:30 am -- and it should. [LIU]
-		// /*
-		// Date parsedDate = calendar.getTime();
-		// if( ambiguousYear[0] && !parsedDate.after(defaultCenturyStart) ) {
-		// calendar.add(Calendar.YEAR, 100);
-		// parsedDate = calendar.getTime();
-		// }
-		// */
-		// // Because of the above condition, save off the fields in case we need to
-		// readjust.
-		// // The procedure we use here is not particularly efficient, but there is
-		// no other
-		// // way to do this given the API restrictions present in Calendar. We
-		// minimize
-		// // inefficiency by only performing this computation when it might apply,
-		// that is,
-		// // when the two-digit year is equal to the start year, and thus might
-		// fall at the
-		// // front or the back of the default century. This only works because we
-		// adjust
-		// // the year correctly to start with in other cases -- see subParse().
-		// Date parsedDate;
-		// try {
-		// if (ambiguousYear[0]) // If this is true then the two-digit year == the
-		// default start year
-		// {
-		// // We need a copy of the fields, and we need to avoid triggering a call
-		// to
-		// // complete(), which will recalculate the fields. Since we can't access
-		// // the fields[] array in Calendar, we clone the entire object. This will
-		// // stop working if Calendar.clone() is ever rewritten to call complete().
-		// Calendar savedCalendar = (Calendar)calendar.clone();
-		// parsedDate = calendar.getTime();
-		// if (parsedDate.before(defaultCenturyStart))
-		// {
-		// // We can't use add here because that does a complete() first.
-		// savedCalendar.set(Calendar.YEAR, defaultCenturyStartYear + 100);
-		// parsedDate = savedCalendar.getTime();
-		// }
-		// }
-		// else parsedDate = calendar.getTime();
-		// }
-		// // An IllegalArgumentException will be thrown by Calendar.getTime()
-		// // if any fields are out of range, e.g., MONTH == 17.
-		// catch (IllegalArgumentException e) {
-		// pos.errorIndex = start;
-		// pos.index = oldStart;
-		// return null;
-		// }
-		//
-		// return parsedDate;
+		 // Because of the above condition, save off the fields in case we need to		 readjust.
+		 // The procedure we use here is not particularly efficient, but there is		 no other
+		 // way to do this given the API restrictions present in Calendar. We		 minimize
+		 // inefficiency by only performing this computation when it might apply,		 that is,
+		 // when the two-digit year is equal to the start year, and thus might		 fall at the
+		 // front or the back of the default century. This only works because we		 adjust
+		 // the year correctly to start with in other cases -- see subParse().
+		 Date parsedDate;
+		 try {
+		 if (ambiguousYear[0]) // If this is true then the two-digit year == the		 default start year
+		 {
+		 // We need a copy of the fields, and we need to avoid triggering a call		 to
+		 // complete(), which will recalculate the fields. Since we can't access
+		 // the fields[] array in Calendar, we clone the entire object. This will
+		 // stop working if Calendar.clone() is ever rewritten to call complete().
+		 Calendar savedCalendar = (Calendar)calendar.clone();
+		 parsedDate = calendar.getTime();
+		 if (parsedDate.before(defaultCenturyStart))
+		 {
+		 // We can't use add here because that does a complete() first.
+		 savedCalendar.set(Calendar.YEAR, defaultCenturyStartYear + 100);
+		 parsedDate = savedCalendar.getTime();
+		 }
+		 }
+		 else parsedDate = calendar.getTime();
+		 }
+		 // An IllegalArgumentException will be thrown by Calendar.getTime()
+		 // if any fields are out of range, e.g., MONTH == 17.
+		 catch (IllegalArgumentException e) {
+		 pos.errorIndex = start;
+		 pos.index = oldStart;
+		 return null;
+		 }
+		
+		 return parsedDate;
 	}
-//
-//    /**
-//     * Private code-size reduction function used by subParse.
-//     * @param text the time text being parsed.
-//     * @param start where to start parsing.
-//     * @param field the date field being parsed.
-//     * @param data the string array to parsed.
-//     * @return the new start position if matching succeeded; a negative number
-//     * indicating matching failure, otherwise.
-//     */
-//    private int matchString(String text, int start, int field, String[] data)
-//    {
-//        int i = 0;
-//        int count = data.length;
-//
-//        if (field == Calendar.DAY_OF_WEEK) i = 1;
-//
-//        // There may be multiple strings in the data[] array which begin with
-//        // the same prefix (e.g., Cerven and Cervenec (June and July) in Czech).
-//        // We keep track of the longest match, and return that.  Note that this
-//        // unfortunately requires us to test all array elements.
-//        int bestMatchLength = 0, bestMatch = -1;
-//        for (; i<count; ++i)
-//        {
-//            int length = data[i].length();
-//            // Always compare if we have no match yet; otherwise only compare
-//            // against potentially better matches (longer strings).
-//            if (length > bestMatchLength &&
-//                text.regionMatches(true, start, data[i], 0, length))
-//            {
-//                bestMatch = i;
-//                bestMatchLength = length;
-//            }
-//        }
-//        if (bestMatch >= 0)
-//        {
-//            calendar.set(field, bestMatch);
-//            return start + bestMatchLength;
-//        }
-//        return -start;
-//    }
-//
-//    /**
-//     * Performs the same thing as matchString(String, int, int,
-//     * String[]). This method takes a Map<String, Integer> instead of
-//     * String[].
-//     */
-//    private int matchString(String text, int start, int field, Map<String,Integer> data) {
-//        if (data != null) {
-//            String bestMatch = null;
-//
-//            for (String name : data.keySet()) {
-//                int length = name.length();
-//                if (bestMatch == null || length > bestMatch.length()) {
-//                    if (text.regionMatches(true, start, name, 0, length)) {
-//                        bestMatch = name;
-//                    }
-//                }
-//            }
-//
-//            if (bestMatch != null) {
-//                calendar.set(field, data.get(bestMatch));
-//                return start + bestMatch.length();
-//            }
-//        }
-//        return -start;
-//    }
-//
-//    private int matchZoneString(String text, int start, int zoneIndex) {
-//        for (int j = 1; j <= 4; ++j) {
-//            // Checking long and short zones [1 & 2],
-//            // and long and short daylight [3 & 4].
-//            String[][] zoneStrings = formatData.getZoneStringsWrapper();
-//            String zoneName = zoneStrings[zoneIndex][j];
-//            if (text.regionMatches(true, start,
-//                                   zoneName, 0, zoneName.length())) {
-//                return j;
-//            }
-//        }
-//        return -1;
-//    }
-//
-//    private boolean matchDSTString(String text, int start, int zoneIndex, int standardIndex) {
-//        int index = standardIndex + 2;
-//        String[][] zoneStrings = formatData.getZoneStringsWrapper();
-//        String zoneName  = zoneStrings[zoneIndex][index];
-//        if (text.regionMatches(true, start,
-//                               zoneName, 0, zoneName.length())) {
-//            return true;
-//        }
-//        return false;
-//    }
 
-//    /**
-//     * find time zone 'text' matched zoneStrings and set to internal
-//     * calendar.
-//     */
-//    private int subParseZoneString(String text, int start) {
-//        boolean useSameName = false; // true if standard and daylight time use the same abbreviation.
-//        TimeZone currentTimeZone = getTimeZone();
-//
-//        // At this point, check for named time zones by looking through
-//        // the locale data from the TimeZoneNames strings.
-//        // Want to be able to parse both short and long forms.
-//        int zoneIndex =
-//            formatData.getZoneIndex (currentTimeZone.getID());
-//        TimeZone tz = null;
-//        String[][] zoneStrings = formatData.getZoneStringsWrapper();
-//        int j = 0, i = 0;
-//        if ((zoneIndex != -1) && ((j = matchZoneString(text, start, zoneIndex)) > 0)) {
-//            if (j <= 2) {
-//                useSameName = matchDSTString(text, start, zoneIndex, j);
-//            }
-//            tz = TimeZone.getTimeZone(zoneStrings[zoneIndex][0]);
-//            i = zoneIndex;
-//        }
-//        if (tz == null) {
-//            zoneIndex =
-//                formatData.getZoneIndex (TimeZone.getDefault().getID());
-//            if ((zoneIndex != -1) && ((j = matchZoneString(text, start, zoneIndex)) > 0)) {
-//                if (j <= 2) {
-//                    useSameName = matchDSTString(text, start, zoneIndex, j);
-//                }
-//                tz = TimeZone.getTimeZone(zoneStrings[zoneIndex][0]);
-//                i = zoneIndex;
-//            }
-//        }
-//
-//        if (tz == null) {
-//            for (i = 0; i < zoneStrings.length; i++) {
-//                if ((j = matchZoneString(text, start, i)) > 0) {
-//                    if (j <= 2) {
-//                        useSameName = matchDSTString(text, start, i, j);
-//                    }
-//                    tz = TimeZone.getTimeZone(zoneStrings[i][0]);
-//                    break;
-//                }
-//            }
-//        }
-//        if (tz != null) { // Matched any ?
-//            if (!tz.equals(currentTimeZone)) {
-//                setTimeZone(tz);
-//            }
-//            // If the time zone matched uses the same name
-//            // (abbreviation) for both standard and daylight time,
-//            // let the time zone in the Calendar decide which one.
-//            if (!useSameName) {
-//                calendar.set(Calendar.ZONE_OFFSET, tz.getRawOffset());
-//                calendar.set(Calendar.DST_OFFSET,
-//                             j >= 3 ? tz.getDSTSavings() : 0);
-//            }
-//            return (start + zoneStrings[i][j].length());
-//        }
-//        return 0;
-//    }
+    /**
+     * Private code-size reduction function used by subParse.
+     * @param text the time text being parsed.
+     * @param start where to start parsing.
+     * @param field the date field being parsed.
+     * @param data the string array to parsed.
+     * @return the new start position if matching succeeded; a negative number
+     * indicating matching failure, otherwise.
+     */
+    private int matchString(String text, int start, int field, String[] data)
+    {
+        int i = 0;
+        int count = data.length;
 
-//    /**
-//     * Private member function that converts the parsed date strings into
-//     * timeFields. Returns -start (for ParsePosition) if failed.
-//     * @param text the time text to be parsed.
-//     * @param start where to start parsing.
-//     * @param ch the pattern character for the date field text to be parsed.
-//     * @param count the count of a pattern character.
-//     * @param obeyCount if true, then the next field directly abuts this one,
-//     * and we should use the count to know when to stop parsing.
-//     * @param ambiguousYear return parameter; upon return, if ambiguousYear[0]
-//     * is true, then a two-digit year was parsed and may need to be readjusted.
-//     * @param origPos origPos.errorIndex is used to return an error index
-//     * at which a parse error occurred, if matching failure occurs.
-//     * @return the new start position if matching succeeded; -1 indicating
-//     * matching failure, otherwise. In case matching failure occurred,
-//     * an error index is set to origPos.errorIndex.
-//     */
-//    private int subParse(String text, int start, int patternCharIndex, int count,
-//                         boolean obeyCount, boolean[] ambiguousYear,
-//                         ParsePosition origPos)
-//    {
-//        Number number = null;
-//        int value = 0;
-//        ParsePosition pos = new ParsePosition(0);
-//        pos.index = start;
-//        int field = PATTERN_INDEX_TO_CALENDAR_FIELD[patternCharIndex];
-//
-//        // If there are any spaces here, skip over them.  If we hit the end
-//        // of the string, then fail.
-//        for (;;) {
-//            if (pos.index >= text.length()) {
-//                origPos.errorIndex = start;
-//                return -1;
-//            }
-//            char c = text.charAt(pos.index);
-//            if (c != ' ' && c != '\t') break;
-//            ++pos.index;
-//        }
-//
-//        // We handle a few special cases here where we need to parse
-//        // a number value.  We handle further, more generic cases below.  We need
-//        // to handle some of them here because some fields require extra processing on
-//        // the parsed value.
-//        if (patternCharIndex == 4 /*HOUR_OF_DAY1_FIELD*/ ||
-//            patternCharIndex == 15 /*HOUR1_FIELD*/ ||
-//            (patternCharIndex == 2 /*MONTH_FIELD*/ && count <= 2) ||
-//            patternCharIndex == 1)
-//        {
-//            // It would be good to unify this with the obeyCount logic below,
-//            // but that's going to be difficult.
-//            if (obeyCount)
-//            {
-//                if ((start+count) > text.length()) {
-//                    origPos.errorIndex = start;
-//                    return -1;
-//                }
-//                number = numberFormat.parse(text.substring(0, start+count), pos);
-//            }
-//            else number = numberFormat.parse(text, pos);
-//            if (number == null) {
-//                if (patternCharIndex != 1 || calendar instanceof GregorianCalendar) {
-//                    origPos.errorIndex = pos.index;
-//                    return -1;
-//                }
-//            } else {
-//                value = number.intValue();
-//            }
-//        }
-//
-//        boolean useDateFormatSymbols = useDateFormatSymbols();
-//
-//        int index;
-//        switch (patternCharIndex)
-//        {
-//        case 0: // 'G' - ERA
-//            if (useDateFormatSymbols) {
-//                if ((index = matchString(text, start, Calendar.ERA, formatData.getEras())) > 0) {
-//                    return index;
-//                }
-//            } else {
-//                Map<String, Integer> map = calendar.getDisplayNames(field,
-//                                                                    Calendar.ALL_STYLES,
-//                                                                    locale);
-//                if ((index = matchString(text, start, field, map)) > 0) {
-//                    return index;
-//                }
-//            }
-//            origPos.errorIndex = pos.index;
-//            return -1;
-//
-//        case 1: // 'y' - YEAR
-//            if (!(calendar instanceof GregorianCalendar)) {
-//                // calendar might have text representations for year values,
-//                // such as "\u5143" in JapaneseImperialCalendar.
-//                int style = (count >= 4) ? Calendar.LONG : Calendar.SHORT;
-//                Map<String, Integer> map = calendar.getDisplayNames(field, style, locale);
-//                if (map != null) {
-//                    if ((index = matchString(text, start, field, map)) > 0) {
-//                        return index;
-//                    }
-//                }
-//                calendar.set(field, value);
-//                return pos.index;
-//            }
-//
-//            // If there are 3 or more YEAR pattern characters, this indicates
-//            // that the year value is to be treated literally, without any
-//            // two-digit year adjustments (e.g., from "01" to 2001).  Otherwise
-//            // we made adjustments to place the 2-digit year in the proper
-//            // century, for parsed strings from "00" to "99".  Any other string
-//            // is treated literally:  "2250", "-1", "1", "002".
-//            if (count <= 2 && (pos.index - start) == 2
-//                && Character.isDigit(text.charAt(start))
-//                && Character.isDigit(text.charAt(start+1)))
-//            {
-//                // Assume for example that the defaultCenturyStart is 6/18/1903.
-//                // This means that two-digit years will be forced into the range
-//                // 6/18/1903 to 6/17/2003.  As a result, years 00, 01, and 02
-//                // correspond to 2000, 2001, and 2002.  Years 04, 05, etc. correspond
-//                // to 1904, 1905, etc.  If the year is 03, then it is 2003 if the
-//                // other fields specify a date before 6/18, or 1903 if they specify a
-//                // date afterwards.  As a result, 03 is an ambiguous year.  All other
-//                // two-digit years are unambiguous.
-//                int ambiguousTwoDigitYear = defaultCenturyStartYear % 100;
-//                ambiguousYear[0] = value == ambiguousTwoDigitYear;
-//                value += (defaultCenturyStartYear/100)*100 +
-//                    (value < ambiguousTwoDigitYear ? 100 : 0);
-//            }
-//            calendar.set(Calendar.YEAR, value);
-//            return pos.index;
-//
-//        case 2: // 'M' - MONTH
-//            if (count <= 2) // i.e., M or MM.
-//            {
-//                // Don't want to parse the month if it is a string
-//                // while pattern uses numeric style: M or MM.
-//                // [We computed 'value' above.]
-//                calendar.set(Calendar.MONTH, value - 1);
-//                return pos.index;
-//            }
-//            else
-//            {
-//                if (useDateFormatSymbols) {
-//                    // count >= 3 // i.e., MMM or MMMM
-//                    // Want to be able to parse both short and long forms.
-//                    // Try count == 4 first:
-//                    int newStart = 0;
-//                    if ((newStart=matchString(text, start, Calendar.MONTH,
-//                                              formatData.getMonths())) > 0)
-//                        return newStart;
-//                    else // count == 4 failed, now try count == 3
-//                        if ((index = matchString(text, start, Calendar.MONTH,
-//                                                 formatData.getShortMonths())) > 0) {
-//                            return index;
-//                        }
-//                } else {
-//                    Map<String, Integer> map = calendar.getDisplayNames(field,
-//                                                                        Calendar.ALL_STYLES,
-//                                                                        locale);
-//                    if ((index = matchString(text, start, field, map)) > 0) {
-//                        return index;
-//                    }
-//                }
-//            }
-//            origPos.errorIndex = pos.index;
-//            return -1;
-//
-//        case 4: // 'k' - HOUR_OF_DAY: 1-based.  eg, 23:59 + 1 hour =>> 24:59
-//            // [We computed 'value' above.]
-//            if (value == calendar.getMaximum(Calendar.HOUR_OF_DAY)+1) value = 0;
-//            calendar.set(Calendar.HOUR_OF_DAY, value);
-//            return pos.index;
-//
-//        case 9:
-//            { // 'E' - DAY_OF_WEEK
-//                if (useDateFormatSymbols) {
-//                    // Want to be able to parse both short and long forms.
-//                    // Try count == 4 (DDDD) first:
-//                    int newStart = 0;
-//                    if ((newStart=matchString(text, start, Calendar.DAY_OF_WEEK,
-//                                              formatData.getWeekdays())) > 0)
-//                        return newStart;
-//                    else // DDDD failed, now try DDD
-//                        if ((index = matchString(text, start, Calendar.DAY_OF_WEEK,
-//                                                 formatData.getShortWeekdays())) > 0) {
-//                            return index;
-//                        }
-//                } else {
-//                    int[] styles = { Calendar.LONG, Calendar.SHORT };
-//                    for (int style : styles) {
-//                        Map<String,Integer> map = calendar.getDisplayNames(field, style, locale);
-//                        if ((index = matchString(text, start, field, map)) > 0) {
-//                            return index;
-//                        }
-//                    }
-//                }
-//                origPos.errorIndex = pos.index;
-//                return -1;
-//            }
-//
-//        case 14:    // 'a' - AM_PM
-//            if (useDateFormatSymbols) {
-//                if ((index = matchString(text, start, Calendar.AM_PM, formatData.getAmPmStrings())) > 0) {
-//                    return index;
-//                }
-//            } else {
-//                Map<String,Integer> map = calendar.getDisplayNames(field, Calendar.ALL_STYLES, locale);
-//                if ((index = matchString(text, start, field, map)) > 0) {
-//                    return index;
-//                }
-//            }
-//            origPos.errorIndex = pos.index;
-//            return -1;
-//
-//        case 15: // 'h' - HOUR:1-based.  eg, 11PM + 1 hour =>> 12 AM
-//            // [We computed 'value' above.]
-//            if (value == calendar.getLeastMaximum(Calendar.HOUR)+1) value = 0;
-//            calendar.set(Calendar.HOUR, value);
-//            return pos.index;
-//
-//        case 17: // 'z' - ZONE_OFFSET
-//        case 18: // 'Z' - ZONE_OFFSET
-//            // First try to parse generic forms such as GMT-07:00. Do this first
-//            // in case localized TimeZoneNames contains the string "GMT"
-//            // for a zone; in that case, we don't want to match the first three
-//            // characters of GMT+/-hh:mm etc.
-//            {
-//                int sign = 0;
-//                int offset;
-//
-//                // For time zones that have no known names, look for strings
-//                // of the form:
-//                //    GMT[+-]hours:minutes or
-//                //    GMT.
-//                if ((text.length() - start) >= GMT.length() &&
-//                    text.regionMatches(true, start, GMT, 0, GMT.length())) {
-//                    int num;
-//                    calendar.set(Calendar.DST_OFFSET, 0);
-//                    pos.index = start + GMT.length();
-//
-//                    try { // try-catch for "GMT" only time zone string
-//                        if( text.charAt(pos.index) == '+' ) {
-//                            sign = 1;
-//                        } else if( text.charAt(pos.index) == '-' ) {
-//                            sign = -1;
-//                        }
-//                    }
-//                    catch(StringIndexOutOfBoundsException e) {}
-//
-//                    if (sign == 0) {    /* "GMT" without offset */
-//                        calendar.set(Calendar.ZONE_OFFSET, 0 );
-//                        return pos.index;
-//                    }
-//
-//                    // Look for hours.
-//                    try {
-//                        char c = text.charAt(++pos.index);
-//                        if (c < '0' || c > '9') { /* must be from '0' to '9'. */
-//                            origPos.errorIndex = pos.index;
-//                            return -1;   // Wasn't actually a number.
-//                        } else {
-//                            num = c - '0';
-//                        }
-//                        if (text.charAt(++pos.index) != ':') {
-//                            c = text.charAt(pos.index);
-//                            if (c < '0' || c > '9') { /* must be from '0' to '9'. */
-//                                origPos.errorIndex = pos.index;
-//                                return -1;   // Wasn't actually a number.
-//                            } else {
-//                                num *= 10;
-//                                num += c - '0';
-//                                pos.index++;
-//                            }
-//                        }
-//                        if (num > 23) {
-//                            origPos.errorIndex = pos.index - 1;
-//                            return -1;   // Wasn't actually a number.
-//                        }
-//                        if  (text.charAt(pos.index) != ':') {
-//                            origPos.errorIndex = pos.index;
-//                            return -1;   // Wasn't actually a number.
-//                        }
-//                    }
-//                    catch(StringIndexOutOfBoundsException e) {
-//                        origPos.errorIndex = pos.index;
-//                        return -1;   // Wasn't actually a number.
-//                    }
-//
-//                    // Look for minutes.
-//                    offset = num * 60;
-//                    try {
-//                        char c = text.charAt(++pos.index);
-//                        if (c < '0' || c > '9') { /* must be from '0' to '9'. */
-//                            origPos.errorIndex = pos.index;
-//                            return -1;   // Wasn't actually a number.
-//                        } else {
-//                            num = c - '0';
-//                            c = text.charAt(++pos.index);
-//                            if (c < '0' || c > '9') { /* must be from '0' to '9'. */
-//                                origPos.errorIndex = pos.index;
-//                                return -1;   // Wasn't actually a number.
-//                            } else {
-//                                num *= 10;
-//                                num += c - '0';
-//                            }
-//                        }
-//
-//                        if (num > 59) {
-//                            origPos.errorIndex = pos.index;
-//                            return -1;   // Wasn't actually a number.
-//                        }
-//                    }
-//                    catch(StringIndexOutOfBoundsException e) {
-//                        origPos.errorIndex = pos.index;
-//                        return -1;   // Wasn't actually a number.
-//                    }
-//                    offset += num;
-//
-//                    // Fall through for final processing below of 'offset' and 'sign'.
-//                }
-//                else {
-//                    // At this point, check for named time zones by looking through
-//                    // the locale data from the TimeZoneNames strings.
-//                    // Want to be able to parse both short and long forms.
-//                    int i = subParseZoneString(text, pos.index);
-//                    if (i != 0) {
-//                        return i;
-//                    }
-//
-//                    // As a last resort, look for numeric timezones of the form
-//                    // [+-]hhmm as specified by RFC 822.  This code is actually
-//                    // a little more permissive than RFC 822.  It will try to do
-//                    // its best with numbers that aren't strictly 4 digits long.
-//                    try {
-//                        if( text.charAt(pos.index) == '+' ) {
-//                            sign = 1;
-//                        } else if( text.charAt(pos.index) == '-' ) {
-//                            sign = -1;
-//                        }
-//                        if (sign == 0) {
-//                            origPos.errorIndex = pos.index;
-//                            return -1;
-//                        }
-//
-//                        // Look for hh.
-//                        int hours = 0;
-//                        char c = text.charAt(++pos.index);
-//                        if (c < '0' || c > '9') { /* must be from '0' to '9'. */
-//                            origPos.errorIndex = pos.index;
-//                            return -1;   // Wasn't actually a number.
-//                        } else {
-//                            hours = c - '0';
-//                            c = text.charAt(++pos.index);
-//                            if (c < '0' || c > '9') { /* must be from '0' to '9'. */
-//                                origPos.errorIndex = pos.index;
-//                                return -1;   // Wasn't actually a number.
-//                            } else {
-//                                hours *= 10;
-//                                hours += c - '0';
-//                            }
-//                        }
-//                        if (hours > 23) {
-//                            origPos.errorIndex = pos.index;
-//                            return -1;   // Wasn't actually a number.
-//                        }
-//
-//                        // Look for mm.
-//                        int minutes = 0;
-//                        c = text.charAt(++pos.index);
-//                        if (c < '0' || c > '9') { /* must be from '0' to '9'. */
-//                            origPos.errorIndex = pos.index;
-//                            return -1;   // Wasn't actually a number.
-//                        } else {
-//                            minutes = c - '0';
-//                            c = text.charAt(++pos.index);
-//                            if (c < '0' || c > '9') { /* must be from '0' to '9'. */
-//                                origPos.errorIndex = pos.index;
-//                                return -1;   // Wasn't actually a number.
-//                            } else {
-//                                minutes *= 10;
-//                                minutes += c - '0';
-//                            }
-//                        }
-//
-//                        if (minutes > 59) {
-//                            origPos.errorIndex = pos.index;
-//                            return -1;   // Wasn't actually a number.
-//                        }
-//
-//                        offset = hours * 60 + minutes;
-//                    } catch(StringIndexOutOfBoundsException e) {
-//                        origPos.errorIndex = pos.index;
-//                        return -1;   // Wasn't actually a number.
-//                    }
-//                }
-//
-//                // Do the final processing for both of the above cases.  We only
-//                // arrive here if the form GMT+/-... or an RFC 822 form was seen.
-//                if (sign != 0)
-//                {
-//                    offset *= millisPerMinute * sign;
-//                    calendar.set(Calendar.ZONE_OFFSET, offset);
-//                    calendar.set(Calendar.DST_OFFSET, 0);
-//                    return ++pos.index;
-//                }
-//            }
-//
-//            // All efforts to parse a zone failed.
-//            origPos.errorIndex = pos.index;
-//            return -1;
-//
-//        default:
-//            // case 3: // 'd' - DATE
-//            // case 5: // 'H' - HOUR_OF_DAY:0-based.  eg, 23:59 + 1 hour =>> 00:59
-//            // case 6: // 'm' - MINUTE
-//            // case 7: // 's' - SECOND
-//            // case 8: // 'S' - MILLISECOND
-//            // case 10: // 'D' - DAY_OF_YEAR
-//            // case 11: // 'F' - DAY_OF_WEEK_IN_MONTH
-//            // case 12: // 'w' - WEEK_OF_YEAR
-//            // case 13: // 'W' - WEEK_OF_MONTH
-//            // case 16: // 'K' - HOUR: 0-based.  eg, 11PM + 1 hour =>> 0 AM
-//
-//            // Handle "generic" fields
-//            if (obeyCount)
-//            {
-//                if ((start+count) > text.length()) {
-//                    origPos.errorIndex = pos.index;
-//                    return -1;
-//                }
-//                number = numberFormat.parse(text.substring(0, start+count), pos);
-//            }
-//            else number = numberFormat.parse(text, pos);
-//            if (number != null) {
-//                calendar.set(field, number.intValue());
-//                return pos.index;
-//            }
-//            origPos.errorIndex = pos.index;
-//            return -1;
-//        }
-//    }
+        if (field == Calendar.DAY_OF_WEEK) i = 1;
+
+        // There may be multiple strings in the data[] array which begin with
+        // the same prefix (e.g., Cerven and Cervenec (June and July) in Czech).
+        // We keep track of the longest match, and return that.  Note that this
+        // unfortunately requires us to test all array elements.
+        int bestMatchLength = 0, bestMatch = -1;
+        for (; i<count; ++i)
+        {
+            int length = data[i].length();
+            // Always compare if we have no match yet; otherwise only compare
+            // against potentially better matches (longer strings).
+            if (length > bestMatchLength &&
+                text.regionMatches(true, start, data[i], 0, length))
+            {
+                bestMatch = i;
+                bestMatchLength = length;
+            }
+        }
+        if (bestMatch >= 0)
+        {
+            calendar.set(field, bestMatch);
+            return start + bestMatchLength;
+        }
+        return -start;
+    }
+
+    /**
+     * Performs the same thing as matchString(String, int, int,
+     * String[]). This method takes a Map<String, Integer> instead of
+     * String[].
+     */
+    private int matchString(String text, int start, int field, Map<String,Integer> data) {
+        if (data != null) {
+            String bestMatch = null;
+
+            for (String name : data.keySet()) {
+                int length = name.length();
+                if (bestMatch == null || length > bestMatch.length()) {
+                    if (text.regionMatches(true, start, name, 0, length)) {
+                        bestMatch = name;
+                    }
+                }
+            }
+
+            if (bestMatch != null) {
+                calendar.set(field, data.get(bestMatch));
+                return start + bestMatch.length();
+            }
+        }
+        return -start;
+    }
+
+    private int matchZoneString(String text, int start, int zoneIndex) {
+        for (int j = 1; j <= 4; ++j) {
+            // Checking long and short zones [1 & 2],
+            // and long and short daylight [3 & 4].
+            String[][] zoneStrings = formatData.getZoneStringsWrapper();
+            String zoneName = zoneStrings[zoneIndex][j];
+            if (text.regionMatches(true, start,
+                                   zoneName, 0, zoneName.length())) {
+                return j;
+            }
+        }
+        return -1;
+    }
+
+    private boolean matchDSTString(String text, int start, int zoneIndex, int standardIndex) {
+        int index = standardIndex + 2;
+        String[][] zoneStrings = formatData.getZoneStringsWrapper();
+        String zoneName  = zoneStrings[zoneIndex][index];
+        if (text.regionMatches(true, start,
+                               zoneName, 0, zoneName.length())) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * find time zone 'text' matched zoneStrings and set to internal
+     * calendar.
+     */
+    private int subParseZoneString(String text, int start) {
+        boolean useSameName = false; // true if standard and daylight time use the same abbreviation.
+        TimeZone currentTimeZone = getTimeZone();
+
+        // At this point, check for named time zones by looking through
+        // the locale data from the TimeZoneNames strings.
+        // Want to be able to parse both short and long forms.
+        int zoneIndex =
+            formatData.getZoneIndex (currentTimeZone.getID());
+        TimeZone tz = null;
+        String[][] zoneStrings = formatData.getZoneStringsWrapper();
+        int j = 0, i = 0;
+        if ((zoneIndex != -1) && ((j = matchZoneString(text, start, zoneIndex)) > 0)) {
+            if (j <= 2) {
+                useSameName = matchDSTString(text, start, zoneIndex, j);
+            }
+            tz = TimeZone.getTimeZone(zoneStrings[zoneIndex][0]);
+            i = zoneIndex;
+        }
+        if (tz == null) {
+            zoneIndex =
+                formatData.getZoneIndex (TimeZone.getDefault().getID());
+            if ((zoneIndex != -1) && ((j = matchZoneString(text, start, zoneIndex)) > 0)) {
+                if (j <= 2) {
+                    useSameName = matchDSTString(text, start, zoneIndex, j);
+                }
+                tz = TimeZone.getTimeZone(zoneStrings[zoneIndex][0]);
+                i = zoneIndex;
+            }
+        }
+
+        if (tz == null) {
+            for (i = 0; i < zoneStrings.length; i++) {
+                if ((j = matchZoneString(text, start, i)) > 0) {
+                    if (j <= 2) {
+                        useSameName = matchDSTString(text, start, i, j);
+                    }
+                    tz = TimeZone.getTimeZone(zoneStrings[i][0]);
+                    break;
+                }
+            }
+        }
+        if (tz != null) { // Matched any ?
+            if (!tz.equals(currentTimeZone)) {
+                setTimeZone(tz);
+            }
+            // If the time zone matched uses the same name
+            // (abbreviation) for both standard and daylight time,
+            // let the time zone in the Calendar decide which one.
+            if (!useSameName) {
+                calendar.set(Calendar.ZONE_OFFSET, tz.getRawOffset());
+                calendar.set(Calendar.DST_OFFSET,
+                             j >= 3 ? tz.getDSTSavings() : 0);
+            }
+            return (start + zoneStrings[i][j].length());
+        }
+        return 0;
+    }
+
+    /**
+     * Private member function that converts the parsed date strings into
+     * timeFields. Returns -start (for ParsePosition) if failed.
+     * @param text the time text to be parsed.
+     * @param start where to start parsing.
+     * @param ch the pattern character for the date field text to be parsed.
+     * @param count the count of a pattern character.
+     * @param obeyCount if true, then the next field directly abuts this one,
+     * and we should use the count to know when to stop parsing.
+     * @param ambiguousYear return parameter; upon return, if ambiguousYear[0]
+     * is true, then a two-digit year was parsed and may need to be readjusted.
+     * @param origPos origPos.errorIndex is used to return an error index
+     * at which a parse error occurred, if matching failure occurs.
+     * @return the new start position if matching succeeded; -1 indicating
+     * matching failure, otherwise. In case matching failure occurred,
+     * an error index is set to origPos.errorIndex.
+     */
+    private int subParse(String text, int start, int patternCharIndex, int count,
+                         boolean obeyCount, boolean[] ambiguousYear,
+                         ParsePosition origPos)
+    {
+        Number number = null;
+        int value = 0;
+        ParsePosition pos = new ParsePosition(0);
+        pos.index = start;
+        int field = PATTERN_INDEX_TO_CALENDAR_FIELD[patternCharIndex];
+
+        // If there are any spaces here, skip over them.  If we hit the end
+        // of the string, then fail.
+        for (;;) {
+            if (pos.index >= text.length()) {
+                origPos.errorIndex = start;
+                return -1;
+            }
+            char c = text.charAt(pos.index);
+            if (c != ' ' && c != '\t') break;
+            ++pos.index;
+        }
+
+        // We handle a few special cases here where we need to parse
+        // a number value.  We handle further, more generic cases below.  We need
+        // to handle some of them here because some fields require extra processing on
+        // the parsed value.
+        if (patternCharIndex == 4 /*HOUR_OF_DAY1_FIELD*/ ||
+            patternCharIndex == 15 /*HOUR1_FIELD*/ ||
+            (patternCharIndex == 2 /*MONTH_FIELD*/ && count <= 2) ||
+            patternCharIndex == 1)
+        {
+            // It would be good to unify this with the obeyCount logic below,
+            // but that's going to be difficult.
+            if (obeyCount)
+            {
+                if ((start+count) > text.length()) {
+                    origPos.errorIndex = start;
+                    return -1;
+                }
+                number = numberFormat.parse(text.substring(0, start+count), pos);
+            }
+            else number = numberFormat.parse(text, pos);
+            if (number == null) {
+                if (patternCharIndex != 1 || calendar instanceof GregorianCalendar) {
+                    origPos.errorIndex = pos.index;
+                    return -1;
+                }
+            } else {
+                value = number.intValue();
+            }
+        }
+
+        boolean useDateFormatSymbols = useDateFormatSymbols();
+
+        int index;
+        switch (patternCharIndex)
+        {
+        case 0: // 'G' - ERA
+            if (useDateFormatSymbols) {
+                if ((index = matchString(text, start, Calendar.ERA, formatData.getEras())) > 0) {
+                    return index;
+                }
+            } else {
+                Map<String, Integer> map = calendar.getDisplayNames(field,
+                                                                    Calendar.ALL_STYLES,
+                                                                    locale);
+                if ((index = matchString(text, start, field, map)) > 0) {
+                    return index;
+                }
+            }
+            origPos.errorIndex = pos.index;
+            return -1;
+
+        case 1: // 'y' - YEAR
+            if (!(calendar instanceof GregorianCalendar)) {
+                // calendar might have text representations for year values,
+                // such as "\u5143" in JapaneseImperialCalendar.
+                int style = (count >= 4) ? Calendar.LONG : Calendar.SHORT;
+                Map<String, Integer> map = calendar.getDisplayNames(field, style, locale);
+                if (map != null) {
+                    if ((index = matchString(text, start, field, map)) > 0) {
+                        return index;
+                    }
+                }
+                calendar.set(field, value);
+                return pos.index;
+            }
+
+            // If there are 3 or more YEAR pattern characters, this indicates
+            // that the year value is to be treated literally, without any
+            // two-digit year adjustments (e.g., from "01" to 2001).  Otherwise
+            // we made adjustments to place the 2-digit year in the proper
+            // century, for parsed strings from "00" to "99".  Any other string
+            // is treated literally:  "2250", "-1", "1", "002".
+            if (count <= 2 && (pos.index - start) == 2
+                && Character.isDigit(text.charAt(start))
+                && Character.isDigit(text.charAt(start+1)))
+            {
+                // Assume for example that the defaultCenturyStart is 6/18/1903.
+                // This means that two-digit years will be forced into the range
+                // 6/18/1903 to 6/17/2003.  As a result, years 00, 01, and 02
+                // correspond to 2000, 2001, and 2002.  Years 04, 05, etc. correspond
+                // to 1904, 1905, etc.  If the year is 03, then it is 2003 if the
+                // other fields specify a date before 6/18, or 1903 if they specify a
+                // date afterwards.  As a result, 03 is an ambiguous year.  All other
+                // two-digit years are unambiguous.
+                int ambiguousTwoDigitYear = defaultCenturyStartYear % 100;
+                ambiguousYear[0] = value == ambiguousTwoDigitYear;
+                value += (defaultCenturyStartYear/100)*100 +
+                    (value < ambiguousTwoDigitYear ? 100 : 0);
+            }
+            calendar.set(Calendar.YEAR, value);
+            return pos.index;
+
+        case 2: // 'M' - MONTH
+            if (count <= 2) // i.e., M or MM.
+            {
+                // Don't want to parse the month if it is a string
+                // while pattern uses numeric style: M or MM.
+                // [We computed 'value' above.]
+                calendar.set(Calendar.MONTH, value - 1);
+                return pos.index;
+            }
+            else
+            {
+                if (useDateFormatSymbols) {
+                    // count >= 3 // i.e., MMM or MMMM
+                    // Want to be able to parse both short and long forms.
+                    // Try count == 4 first:
+                    int newStart = 0;
+                    if ((newStart=matchString(text, start, Calendar.MONTH,
+                                              formatData.getMonths())) > 0)
+                        return newStart;
+                    else // count == 4 failed, now try count == 3
+                        if ((index = matchString(text, start, Calendar.MONTH,
+                                                 formatData.getShortMonths())) > 0) {
+                            return index;
+                        }
+                } else {
+                    Map<String, Integer> map = calendar.getDisplayNames(field,
+                                                                        Calendar.ALL_STYLES,
+                                                                        locale);
+                    if ((index = matchString(text, start, field, map)) > 0) {
+                        return index;
+                    }
+                }
+            }
+            origPos.errorIndex = pos.index;
+            return -1;
+
+        case 4: // 'k' - HOUR_OF_DAY: 1-based.  eg, 23:59 + 1 hour =>> 24:59
+            // [We computed 'value' above.]
+            if (value == calendar.getMaximum(Calendar.HOUR_OF_DAY)+1) value = 0;
+            calendar.set(Calendar.HOUR_OF_DAY, value);
+            return pos.index;
+
+        case 9:
+            { // 'E' - DAY_OF_WEEK
+                if (useDateFormatSymbols) {
+                    // Want to be able to parse both short and long forms.
+                    // Try count == 4 (DDDD) first:
+                    int newStart = 0;
+                    if ((newStart=matchString(text, start, Calendar.DAY_OF_WEEK,
+                                              formatData.getWeekdays())) > 0)
+                        return newStart;
+                    else // DDDD failed, now try DDD
+                        if ((index = matchString(text, start, Calendar.DAY_OF_WEEK,
+                                                 formatData.getShortWeekdays())) > 0) {
+                            return index;
+                        }
+                } else {
+                    int[] styles = { Calendar.LONG, Calendar.SHORT };
+                    for (int style : styles) {
+                        Map<String,Integer> map = calendar.getDisplayNames(field, style, locale);
+                        if ((index = matchString(text, start, field, map)) > 0) {
+                            return index;
+                        }
+                    }
+                }
+                origPos.errorIndex = pos.index;
+                return -1;
+            }
+
+        case 14:    // 'a' - AM_PM
+            if (useDateFormatSymbols) {
+                if ((index = matchString(text, start, Calendar.AM_PM, formatData.getAmPmStrings())) > 0) {
+                    return index;
+                }
+            } else {
+                Map<String,Integer> map = calendar.getDisplayNames(field, Calendar.ALL_STYLES, locale);
+                if ((index = matchString(text, start, field, map)) > 0) {
+                    return index;
+                }
+            }
+            origPos.errorIndex = pos.index;
+            return -1;
+
+        case 15: // 'h' - HOUR:1-based.  eg, 11PM + 1 hour =>> 12 AM
+            // [We computed 'value' above.]
+            if (value == calendar.getLeastMaximum(Calendar.HOUR)+1) value = 0;
+            calendar.set(Calendar.HOUR, value);
+            return pos.index;
+
+        case 17: // 'z' - ZONE_OFFSET
+        case 18: // 'Z' - ZONE_OFFSET
+            // First try to parse generic forms such as GMT-07:00. Do this first
+            // in case localized TimeZoneNames contains the string "GMT"
+            // for a zone; in that case, we don't want to match the first three
+            // characters of GMT+/-hh:mm etc.
+            {
+                int sign = 0;
+                int offset;
+
+                // For time zones that have no known names, look for strings
+                // of the form:
+                //    GMT[+-]hours:minutes or
+                //    GMT.
+                if ((text.length() - start) >= GMT.length() &&
+                    text.regionMatches(true, start, GMT, 0, GMT.length())) {
+                    int num;
+                    calendar.set(Calendar.DST_OFFSET, 0);
+                    pos.index = start + GMT.length();
+
+                    try { // try-catch for "GMT" only time zone string
+                        if( text.charAt(pos.index) == '+' ) {
+                            sign = 1;
+                        } else if( text.charAt(pos.index) == '-' ) {
+                            sign = -1;
+                        }
+                    }
+                    catch(StringIndexOutOfBoundsException e) {}
+
+                    if (sign == 0) {    /* "GMT" without offset */
+                        calendar.set(Calendar.ZONE_OFFSET, 0 );
+                        return pos.index;
+                    }
+
+                    // Look for hours.
+                    try {
+                        char c = text.charAt(++pos.index);
+                        if (c < '0' || c > '9') { /* must be from '0' to '9'. */
+                            origPos.errorIndex = pos.index;
+                            return -1;   // Wasn't actually a number.
+                        } else {
+                            num = c - '0';
+                        }
+                        if (text.charAt(++pos.index) != ':') {
+                            c = text.charAt(pos.index);
+                            if (c < '0' || c > '9') { /* must be from '0' to '9'. */
+                                origPos.errorIndex = pos.index;
+                                return -1;   // Wasn't actually a number.
+                            } else {
+                                num *= 10;
+                                num += c - '0';
+                                pos.index++;
+                            }
+                        }
+                        if (num > 23) {
+                            origPos.errorIndex = pos.index - 1;
+                            return -1;   // Wasn't actually a number.
+                        }
+                        if  (text.charAt(pos.index) != ':') {
+                            origPos.errorIndex = pos.index;
+                            return -1;   // Wasn't actually a number.
+                        }
+                    }
+                    catch(StringIndexOutOfBoundsException e) {
+                        origPos.errorIndex = pos.index;
+                        return -1;   // Wasn't actually a number.
+                    }
+
+                    // Look for minutes.
+                    offset = num * 60;
+                    try {
+                        char c = text.charAt(++pos.index);
+                        if (c < '0' || c > '9') { /* must be from '0' to '9'. */
+                            origPos.errorIndex = pos.index;
+                            return -1;   // Wasn't actually a number.
+                        } else {
+                            num = c - '0';
+                            c = text.charAt(++pos.index);
+                            if (c < '0' || c > '9') { /* must be from '0' to '9'. */
+                                origPos.errorIndex = pos.index;
+                                return -1;   // Wasn't actually a number.
+                            } else {
+                                num *= 10;
+                                num += c - '0';
+                            }
+                        }
+
+                        if (num > 59) {
+                            origPos.errorIndex = pos.index;
+                            return -1;   // Wasn't actually a number.
+                        }
+                    }
+                    catch(StringIndexOutOfBoundsException e) {
+                        origPos.errorIndex = pos.index;
+                        return -1;   // Wasn't actually a number.
+                    }
+                    offset += num;
+
+                    // Fall through for final processing below of 'offset' and 'sign'.
+                }
+                else {
+                    // At this point, check for named time zones by looking through
+                    // the locale data from the TimeZoneNames strings.
+                    // Want to be able to parse both short and long forms.
+                    int i = subParseZoneString(text, pos.index);
+                    if (i != 0) {
+                        return i;
+                    }
+
+                    // As a last resort, look for numeric timezones of the form
+                    // [+-]hhmm as specified by RFC 822.  This code is actually
+                    // a little more permissive than RFC 822.  It will try to do
+                    // its best with numbers that aren't strictly 4 digits long.
+                    try {
+                        if( text.charAt(pos.index) == '+' ) {
+                            sign = 1;
+                        } else if( text.charAt(pos.index) == '-' ) {
+                            sign = -1;
+                        }
+                        if (sign == 0) {
+                            origPos.errorIndex = pos.index;
+                            return -1;
+                        }
+
+                        // Look for hh.
+                        int hours = 0;
+                        char c = text.charAt(++pos.index);
+                        if (c < '0' || c > '9') { /* must be from '0' to '9'. */
+                            origPos.errorIndex = pos.index;
+                            return -1;   // Wasn't actually a number.
+                        } else {
+                            hours = c - '0';
+                            c = text.charAt(++pos.index);
+                            if (c < '0' || c > '9') { /* must be from '0' to '9'. */
+                                origPos.errorIndex = pos.index;
+                                return -1;   // Wasn't actually a number.
+                            } else {
+                                hours *= 10;
+                                hours += c - '0';
+                            }
+                        }
+                        if (hours > 23) {
+                            origPos.errorIndex = pos.index;
+                            return -1;   // Wasn't actually a number.
+                        }
+
+                        // Look for mm.
+                        int minutes = 0;
+                        c = text.charAt(++pos.index);
+                        if (c < '0' || c > '9') { /* must be from '0' to '9'. */
+                            origPos.errorIndex = pos.index;
+                            return -1;   // Wasn't actually a number.
+                        } else {
+                            minutes = c - '0';
+                            c = text.charAt(++pos.index);
+                            if (c < '0' || c > '9') { /* must be from '0' to '9'. */
+                                origPos.errorIndex = pos.index;
+                                return -1;   // Wasn't actually a number.
+                            } else {
+                                minutes *= 10;
+                                minutes += c - '0';
+                            }
+                        }
+
+                        if (minutes > 59) {
+                            origPos.errorIndex = pos.index;
+                            return -1;   // Wasn't actually a number.
+                        }
+
+                        offset = hours * 60 + minutes;
+                    } catch(StringIndexOutOfBoundsException e) {
+                        origPos.errorIndex = pos.index;
+                        return -1;   // Wasn't actually a number.
+                    }
+                }
+
+                // Do the final processing for both of the above cases.  We only
+                // arrive here if the form GMT+/-... or an RFC 822 form was seen.
+                if (sign != 0)
+                {
+                    offset *= millisPerMinute * sign;
+                    calendar.set(Calendar.ZONE_OFFSET, offset);
+                    calendar.set(Calendar.DST_OFFSET, 0);
+                    return ++pos.index;
+                }
+            }
+
+            // All efforts to parse a zone failed.
+            origPos.errorIndex = pos.index;
+            return -1;
+
+        default:
+            // case 3: // 'd' - DATE
+            // case 5: // 'H' - HOUR_OF_DAY:0-based.  eg, 23:59 + 1 hour =>> 00:59
+            // case 6: // 'm' - MINUTE
+            // case 7: // 's' - SECOND
+            // case 8: // 'S' - MILLISECOND
+            // case 10: // 'D' - DAY_OF_YEAR
+            // case 11: // 'F' - DAY_OF_WEEK_IN_MONTH
+            // case 12: // 'w' - WEEK_OF_YEAR
+            // case 13: // 'W' - WEEK_OF_MONTH
+            // case 16: // 'K' - HOUR: 0-based.  eg, 11PM + 1 hour =>> 0 AM
+
+            // Handle "generic" fields
+            if (obeyCount)
+            {
+                if ((start+count) > text.length()) {
+                    origPos.errorIndex = pos.index;
+                    return -1;
+                }
+                number = numberFormat.parse(text.substring(0, start+count), pos);
+            }
+            else number = numberFormat.parse(text, pos);
+            if (number != null) {
+                calendar.set(field, number.intValue());
+                return pos.index;
+            }
+            origPos.errorIndex = pos.index;
+            return -1;
+        }
+    }
 
     private final String getCalendarName() {
         return calendar.getClass().getName();

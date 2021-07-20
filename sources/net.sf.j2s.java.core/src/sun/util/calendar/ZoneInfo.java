@@ -620,8 +620,10 @@ public class ZoneInfo extends java.util.TimeZone {
      * time zone of the ID.
      */
     public static TimeZone getTimeZone(String ID) {
-    	if (!ID.equals("GMT"))
+    	if (ID.startsWith("GMT")) {
     		return null;
+    	}
+        return ZoneInfoFile.getZoneInfo(ID);
     	
 //        String givenID = null;
 
@@ -660,10 +662,10 @@ public class ZoneInfo extends java.util.TimeZone {
 //        if (givenID != null && zi != null) {
 //            zi.setID(givenID);
 //        }
-        ZoneInfo zi = new ZoneInfo();
-        zi.setID(ID);
-        zi.setRawOffset(0);//TimeZone.toMillis(ID));
-        return zi;
+//        ZoneInfo zi = new ZoneInfo();
+//        zi.setID(ID);
+//        zi.setRawOffset(0);//TimeZone.toMillis(ID));
+//        return zi;
     }
 
     private transient SimpleTimeZone lastRule;
