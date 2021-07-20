@@ -14022,6 +14022,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2021.07.20 Date.toString() format yyyy moved to end, as in Java 
 // BH 2021.06.11 Number.compareTo(....) missing
 // BH 2021.02.12 implements better(?) interface defaults resolution -- in order of presentation
 // BH 2020.12.31 3.3.1-v1 full 64-bit long support; BigDecimal, BigInteger fully 64-bit
@@ -18901,6 +18902,8 @@ var minLong = -maxLong;
 Long.SIZE=Long.prototype.SIZE=64;// REALLY 53
 
 
+m$(Long,["intValue","intValue$"],function(){return Long.$ival(this.valueOf());});
+
 m$(Long,["longValue","longValue$"],function(){return this.valueOf();});
 
 m$(Long,"c$",
@@ -20779,10 +20782,13 @@ var ht=this.getTime();
 return parseInt(ht)^parseInt((ht>>32));
 });
 
-Date.prototype.toString$ = Date.prototype.toString;
+Date.prototype.toString$ = Date.prototype.toString$$ = Date.prototype.toString;
 m$(java.util.Date,"toString",
 function(){
-return this.toString$().split("(")[0].trim();
+var a = this.toString$().split(" ");
+// Sun Mar 10 1996 17:05:00 GMT-0600 (Central Daylight Time) -> Sun Mar 10 16:05:00 CST 1996 
+return a[0] + " " + a[1] + " " + a[2] + " " + a[4] + " " + a[5] + " " + a[3];
+//	return this.toString$().split("(")[0].trim();
 });
 })();
 
@@ -20809,7 +20815,7 @@ dp.setMonth$I = dp.setMonth;
 dp.setSeconds$I = dp.setSeconds;
 dp.setTime$J = dp.setTime;
 dp.setYear$I = dp.setYear;
-dp.toGMTString$ = dp.toGMTString;
+dp.toGMTString$ = dp.toUTCString || dp.toGMTString;
 dp.toLocaleString$ = dp.toLocaleString = dp.toLocaleDateString;
 dp.UTC$ = dp.UTC;
 
