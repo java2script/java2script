@@ -90,7 +90,7 @@ public interface HttpClient {
 		 * @return
 		 */
 		public default HttpRequest addFilePart(String name, String data, String contentType, String fileName) {
-			var stream = new ByteArrayInputStream(data.getBytes());
+		    ByteArrayInputStream stream = new ByteArrayInputStream(data.getBytes());
 			return addFilePart(name, stream, contentType, fileName);
 		}
 
