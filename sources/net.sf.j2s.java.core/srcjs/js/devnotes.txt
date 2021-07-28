@@ -3,6 +3,30 @@ j2sClazz and j2sApplet older development notes
 j2sClazz.js (formerly j2s.lib.js)
 -----------
 
+// BH 2020.12.31 3.3.1-v1 full 64-bit long support; BigDecimal, BigInteger fully 64-bit
+
+// BH 2020.12.19 3.2.10-v1 preliminary work aiming to back long with [r,m,s].
+//                         should be fully backward compatible;  
+//                         supports the 3.2.10 transpiler.
+// BH 2020.12.11 fixing interface extended override of interface default
+// BH 2020.12.06 changing Long maxval to 0x1FFFFFFFFFFFFF from 0x20000000000000
+// BH 2020.12.06 better error checking for TYPE.parseTYPE(string)
+// BH 2020.07.27 fix for inner class array names
+// BH 2020.06.18 better test for instanceof Object[]
+// BH 2020.06.03 sets user.home and user.dir to /TEMP/swingjs, and user.name to "swingjs"
+// BH 2020.04.01 2.2.0-v1e fixes missing C$.superclazz when class loaded from core
+// BH 2020.03.19 3.2.9-v1c fixes new String("xxx") !== "xxx"
+// BH 2020.03.11 3.2.9-v1b fixes numerous subtle issues with boxed primitives Integer, Float, etc.
+// BH 2020.03.07 3.2.9-v1a fixes array.hashCode() to be System.identityHashCode(array). 
+// BH 2020.02.18 3.2.8-v2 upgrades String, Integer, ClassLoader, Package, various Exceptions
+// BH 2020.02.12 3.2.8-v1 new Throwable().getStackTrace() should not include j2sClazz methods
+// BH 2020.02.02 3.2.7-v5 fixes array.getClass().getName() and getArrayClass() for short -- should be [S, not [H, for Java
+// BH 2019.12.29 3.2.6 fixes Float.parseFloat$S("NaN") [and Double]
+// BH 2019.12.23 3.2.6 update of System
+// BH 2019.12.19 3.2.6 revision of $clinit$
+// BH 2019.12.16 3.2.5-v4 adds ClassLoader static methods for system resources (just j2s/...)
+// BH 2019.12.15 3.2.5-v4 Character.prototype.valueOf() missing 
+// BH 2019.12.14 3.2.5-v3 Clazz._4Name initialization should be full static initialization 
 // BH 2019.12.03 3.2.5.v2 Object.class instanceof java.lang.Class
 // BH 2019.11.26 3.2.5.v1 errant if (args) in newInstance
 // BH 2019.11.07 3.2.5.v0 full encapsulation

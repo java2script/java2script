@@ -289,7 +289,8 @@ public class SimpleHttpClient implements HttpClient {
 		private byte[] toBytes(Object data) {
 			if (data == null || data instanceof byte[]) {
 				return (byte[]) data;
-			} else if (data instanceof File) {
+			} 
+			if (data instanceof File) {
 				try (FileInputStream fis = new FileInputStream((File) data)) {
 					return getBytes(fis);
 				}
@@ -297,7 +298,8 @@ public class SimpleHttpClient implements HttpClient {
 					e.printStackTrace();
 					return null;
 				}
-			} else if (data instanceof InputStream) {
+			} 
+			if (data instanceof InputStream) {
 				try (InputStream is = (InputStream) data) {
 					return getBytes(is);
 				}
@@ -305,9 +307,8 @@ public class SimpleHttpClient implements HttpClient {
 					e.printStackTrace();
 					return null;
 				}
-			} else {
-				return data.toString().getBytes();
 			}
+			return data.toString().getBytes();
 		}
 
 		@Override

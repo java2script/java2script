@@ -9,7 +9,13 @@ public class Test_String extends Test_ {
 
 	public static void main(String[] args) {
 
-		System.out.println("abcde".indexOf(99));
+		String sb = new String(new byte[] { 97, 98, 99 });
+		System.out.println(sb);
+		assert (sb.equals("abc"));
+		sb = new String(new byte[] { 97, 98, 99 }, 1, 2);
+		System.out.println(sb);
+		assert (sb.equals("bc"));
+		assert("abcde".indexOf(99) == 2);
 		assert ("test".contentEquals(new StringBuffer("test")));
 		int ii = "test\2ing".charAt(4);
 		switch (ii | 'd') {
@@ -22,32 +28,61 @@ public class Test_String extends Test_ {
 			assert (false);
 		}
 
-		CharBuffer cb = CharBuffer.allocate(10);
+		CharBuffer cb = CharBuffer.allocate(4);
 		cb.mark();
 		cb.put('a');
 		cb.put('b');
 		cb.put('c');
-
-		String sb = new String(new byte[] { 97, 98, 99 });
-		System.out.println(sb);
-		assert (sb.equals("abc"));
-
+		cb.reset();
 		StringBuffer sbb;
 		sbb = new StringBuffer("testing");
 		sbb.insert(0, cb);
-
 		System.out.println(sbb);
+		assert(sbb.toString().equals("abc\0testing"));
 		System.out.println(">" + cb.toString() + "<");
-		cb.reset();
+		cb.position(2);
 		System.out.println(">" + cb.toString() + "<");
+		assert(cb.toString().equals("c\0"));
 		sbb = new StringBuffer("testing");
-		sbb.insert(0, cb);
-
+		sbb.insert(3, cb, 0, 1);
 		System.out.println(sbb);
-
+		assert(sbb.toString().equals("tescting"));
 		sb = "ab\u2520c";
+		System.out.println(sb);
 		try {
 			byte[] b = sb.getBytes("UTF-8");
+			String s = "" + b[2] + b[3] + b[4];
+			System.out.println(s);
+			assert(s.equals("-30-108-96"));
+			s = new String(b, "UTF-8");
+			System.out.println(s);
+			assert(s.equals(sb));
+			b = sb.getBytes("UTF8"); // no BOM
+
+			b = sb.getBytes("UTF-16BE"); // no BOM
+			s = "" + b[2] + b[3] + b[4];
+			System.out.println(s);
+			assert(s.equals("09837"));
+			s = new String(b, "UTF-16BE");
+			System.out.println(s);
+			assert(s.equals(sb));
+
+			b = sb.getBytes("UTF-16"); // includes BOM -2, -1
+			s = "" + b[2] + b[3] + b[4];
+			System.out.println(s);
+			assert(s.equals("0970"));
+			s = new String(b, "UTF-16");
+			System.out.println(s);
+			assert(s.equals(sb));
+			
+			b = sb.getBytes("UTF-16LE"); // no BOM
+			s = "" + b[2] + b[3] + b[4];
+			System.out.println(s);
+			assert(s.equals("98032"));
+			s = new String(b, "UTF-16LE");
+			System.out.println(s);
+			assert(s.equals(sb));
+			
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -81,8 +116,9 @@ public class Test_String extends Test_ {
 			for (int j = 0; j < n; j++)
 				s += i;
 		}
-		System.out.println("ms " + (System.currentTimeMillis() - t0) + "\t s+= len=" + s.length());
-
+		System.out.println("\nms " + (System.currentTimeMillis() - t0) + "\t s+= len=" + s.length());
+		System.out.println("java : ms 14825	 s+= len=388900");
+		
 		t0 = System.currentTimeMillis();
 		StringBuffer Sb = new StringBuffer();
 		for (int i = 0; i < 10000; i++) {
@@ -90,7 +126,8 @@ public class Test_String extends Test_ {
 				Sb.append(i);
 		}
 		s = Sb.toString();
-		System.out.println("ms " + (System.currentTimeMillis() - t0) + "\t one StringBuffer len=" + s.length());
+		System.out.println("\nms " + (System.currentTimeMillis() - t0) + "\t one StringBuffer len=" + s.length());
+		System.out.println("java : ms 91	 one StringBuffer len=3889000");
 
 		t0 = System.currentTimeMillis();
 		StringBuilder S = new StringBuilder();
@@ -99,7 +136,8 @@ public class Test_String extends Test_ {
 				S.append(i);
 		}
 		s = S.toString();
-		System.out.println("ms " + (System.currentTimeMillis() - t0) + "\t one StringBuilder len=" + s.length());
+		System.out.println("\nms " + (System.currentTimeMillis() - t0) + "\t one StringBuilder len=" + s.length());
+		System.out.println("java : ms 76	 one StringBuilder len=3889000");
 
 		t0 = System.currentTimeMillis();
 		for (int i = 0; i < 10000; i++) {
@@ -109,8 +147,8 @@ public class Test_String extends Test_ {
 			}
 			s = SB.toString();
 		}
-		System.out.println("ms " + (System.currentTimeMillis() - t0) + "\t many StringBuilder len=" + s.length());
-
+		System.out.println("\nms " + (System.currentTimeMillis() - t0) + "\t many StringBuilder len=" + s.length());
+		System.out.println("java : ms 76	 many StringBuilder len=400");
 
 		t0 = System.currentTimeMillis();
 		SB b = new SB();
@@ -119,7 +157,8 @@ public class Test_String extends Test_ {
 				b.appendI(i);
 		}
 		s = b.toString();
-		System.out.println("ms " + (System.currentTimeMillis() - t0) + "\t javajs.util.SB len=" + s.length());
+		System.out.println("\nms " + (System.currentTimeMillis() - t0) + "\t javajs.util.SB len=" + s.length());
+		System.out.println("java : ms 85	 javajs.util.SB len=3889000");
 
 //Output prior to optimization of AbstractStringBuilder:
 //
