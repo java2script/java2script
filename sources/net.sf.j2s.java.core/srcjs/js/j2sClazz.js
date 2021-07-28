@@ -1975,7 +1975,7 @@ throw Clazz.new_(Clazz.load('java.util.NoSuchElementException'));
 
 Clazz.newMeth(C$, ['forEachRemaining$java_util_function_IntConsumer','forEachRemaining$O'], function (block) {
 for (; this.cur < this.b$['CharSequence'].length$(); this.cur++) {
-block.accept$(this.b$['CharSequence'].charAt$I(this.cur).$c());
+block.accept$I(this.b$['CharSequence'].charAt$I(this.cur).$c());
 }
 });
 
@@ -2004,14 +2004,14 @@ try {
 while (i < length){
 var c1 = this.b$['CharSequence'].charAt$I(i++);
 if (!Character.isHighSurrogate$C(c1) || i >= length ) {
-block.accept$(c1.$c());
+block.accept$I(c1.$c());
 } else {
 var c2 = this.b$['CharSequence'].charAt$I(i);
 if (Character.isLowSurrogate$C(c2)) {
 i++;
-block.accept$(Character.toCodePoint$C$C(c1, c2));
+block.accept$I(Character.toCodePoint$C$C(c1, c2));
 } else {
-block.accept$(c1.$c());
+block.accept$I(c1.$c());
 }}}
 } finally {
 this.cur=i;
@@ -5528,46 +5528,51 @@ m$(Boolean,"toString",function(){return this.valueOf()?"true":"false";});
 m$(Boolean,"toString$Z",function(b){return "" + b;}, 1);
 
 
-// this next part is InternetExplorer only, and only UTF8
-
 Clazz._Encoding={
-  UTF8:"utf-8",
-  UTF16:"utf-16", // LE
+  UTF8:"utf-8",   // EF BB BF
+  UTF16:"utf-16", // FF FE  (LE)
   ASCII:"ascii"
 };
 
-(function(Encoding) {
+(function(E) {
 
-Encoding.guessEncoding=function(str){
-return (str.charCodeAt(0)==0xEF&&str.charCodeAt(1)==0xBB&&str.charCodeAt(2)==0xBF ? Encoding.UTF8
-  : str.charCodeAt(0)==0xFF&&str.charCodeAt(1)==0xFE ? Encoding.UTF16 // LE 
-  : Encoding.ASCII);
+	var textDecoder = (self.TextDecoder && new TextDecoder() || null);
+
+E.guessEncoding=function(str){
+return ((str.charCodeAt(0)&0xFF)==0xEF&&(str.charCodeAt(1)&0xFF)==0xBB&&(str.charCodeAt(2)&0xFF)==0xBF ? E.UTF8
+  : (str.charCodeAt(0)&0xFF)==0xFF&&(str.charCodeAt(1)&0xFF)==0xFE ? E.UTF16 // LE 
+  : E.ASCII);
 };
 
-Encoding.guessEncodingArray=function(a, offset){
-return (a[offset]==0xEF&&a[offset + 1]==0xBB&&a[offset + 2]==0xBF ? Encoding.UTF8 
-  : a[offset + 0]==0xFF&&a[offset + 1]==0xFE ? Encoding.UTF16 : Encoding.ASCII);
+E.guessEncodingArray=function(a, offset){
+return ((a[offset]&0xFF)==0xEF&&(a[offset + 1]&0xFF)==0xBB&&(a[offset + 2]&0xFF)==0xBF ? E.UTF8 
+  : (a[offset + 0]&0xFF)==0xFF&&(a[offset + 1]&0xFF)==0xFE ? E.UTF16 : E.ASCII);
 };
 
-Encoding.readUTF8Array=function(a, offset, length){
+E.readUTF8Array=function(a, offset, length){
 	// a will be an Int8Array, UTF8 only
-if (textDecoder) {
+	// TextDecoder will accept a BOM or not. Java doesn't
+  var encoding=E.guessEncodingArray(a, offset);
+  var startIdx=0;
+  if(encoding==E.UTF8){
+	startIdx=3;
+  }else if(encoding==E.UTF16){
+	startIdx=2;
+  }
+  if (textDecoder) {
+	offset += startIdx;
+	length -= startIdx;
 	if (offset == 0 && length == a.length)
 		return textDecoder.decode(a);
 	var arr=new Uint8Array(length);
 	for(var i = 0; i < length; i++){
 		arr[i] = a[offset + i];
 	}
-	return textDecoder.decode(arr);
-}
+	// Java needs to see the 0xFEFF byte mark
+	var s = textDecoder.decode(arr);
+	return (startIdx ? '\ufeff' + s : s);
+  }
 // IE only. I don't know where this comes from. Is it Java?
-var encoding=Encoding.guessEncodingArray(a);
-var startIdx=0;
-if(encoding==Encoding.UTF8){
-startIdx=3;
-}else if(encoding==Encoding.UTF16){
-startIdx=2;
-}
 var arrs=new Array();
 for(var i=offset + startIdx, endIdx = offset + length; i < endIdx; i++){
 var charCode=a[i];
@@ -5590,12 +5595,12 @@ return arrs.join('');
 };
 
 
-Encoding.convert2UTF8=function(str){
+E.convert2UTF8=function(str){
 var encoding=this.guessEncoding(str);
 var startIdx=0;
-if(encoding==Encoding.UTF8){
+if(encoding==E.UTF8){
 return str;
-}else if(encoding==Encoding.UTF16){
+}else if(encoding==E.UTF16){
 startIdx=2;
 }
 
@@ -5619,7 +5624,6 @@ arrs[offset+i-startIdx]=String.fromCharCode(c1)+String.fromCharCode(c2)+String.f
 }
 return arrs.join('');
 };
-
 if(!String.__PARAMCODE){
 
 String.__PARAMCODE = "S";
@@ -5902,7 +5906,7 @@ if(arguments.length==1){
   return cs.encode$S(this.toString()).toArray$();	
  }
  if(cs=="utf-8"||cs=="utf8"){
-  s=Encoding.convert2UTF8(this);
+  s=E.convert2UTF8(this);
  }
 }
 var arrs=[];
@@ -6059,30 +6063,6 @@ sp.trim$ = function() {
 
 })(String.prototype);
 
-/*
-String(byte[] bytes)
-String(char[] value)
-String(StringBuffer buffer)
-String(StringBuilder builder)
-String(String original)
-
-String(char[] value, boolean share) // Java8
-String(byte[] ascii, int hibyte)
-String(byte[] bytes, Charset charset)
-String(byte[] bytes, String charsetName)
-
-String(byte[] bytes, int offset, int length)
-String(char[] value, int offset, int count)
-String(int[] codePoints, int offset, int count)
-
-String(byte[] bytes, int offset, int length, Charset charset)
-String(byte[] bytes, int offset, int length, String charsetName)
-String(byte[] ascii, int hibyte, int offset, int count)
-*/
-
-var textDecoder = (self.TextDecoder && new TextDecoder() || null);
-var textDecoders = {};
-
 // Note that of all these constructors, only new String("xxx") and new String(new String())
 // return actual JavaScript String objects (as of 3.2.9.v1)
 
@@ -6098,10 +6078,10 @@ case 1:
   // String(StringBuilder builder)
   // String(String original)
   if (x.__BYTESIZE){
-    return x.length == 0 ? "" : Encoding.readUTF8Array(x, 0, x.length).toString();
+    return x.length == 0 ? "" : E.readUTF8Array(x, 0, x.length).toString();
   }
   if (x instanceof Array){
-	    return x.length == 0 ? "" : typeof x[0]=="number" ? Encoding.readUTF8Array(new Uint8Array(x), 0, x.length).toString() : x.join('');
+	    return x.length == 0 ? "" : typeof x[0]=="number" ? E.readUTF8Array(new Uint8Array(x), 0, x.length).toString() : x.join('');
   }
   // raw JavaScript string unless new String(string)
   return (typeof x == "string" ||  x instanceof String ? new String(x) : x.toString());
@@ -6152,7 +6132,7 @@ case 4:
     var length=arguments[2];
     if (typeof cs == "string") {
     	if (",utf8,utf-8,".indexOf("," + cs.toLowerCase() + ",") >= 0)
-    		return Encoding.readUTF8Array(bytes,offset,length).toString();
+    		return E.readUTF8Array(bytes,offset,length).toString();
     	cs = Clazz.loadClass("java.nio.charset.Charset").forName$S(cs);
     	if (!cs)
     		throw new java.io.UnsupportedEncodingException();
