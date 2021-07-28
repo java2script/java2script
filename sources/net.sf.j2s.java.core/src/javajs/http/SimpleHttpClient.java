@@ -287,22 +287,27 @@ public class SimpleHttpClient implements HttpClient {
 		}
 
 		private byte[] toBytes(Object data) {
-			try {
-				if (data == null || data instanceof byte[]) {
-				} else if (data instanceof File) {
-					FileInputStream fis = new FileInputStream((File) data);
-					data = getBytes(fis);
-					fis.close();
-				} else if (data instanceof InputStream) {
-					InputStream is = (InputStream) data;
-					data = getBytes(is);
-					is.close();
-				} else {
-					data = data.toString().getBytes();
+			if (data == null || data instanceof byte[]) {
+				return (byte[]) data;
+			} else if (data instanceof File) {
+				try (FileInputStream fis = new FileInputStream((File) data)) {
+					return getBytes(fis);
 				}
-			} catch (IOException e) {
+				catch (IOException e) {
+					e.printStackTrace();
+					return null;
+				}
+			} else if (data instanceof InputStream) {
+				try (InputStream is = (InputStream) data) {
+					return getBytes(is);
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+					return null;
+				}
+			} else {
+				return data.toString().getBytes();
 			}
-			return (byte[]) data;
 		}
 
 		@Override
