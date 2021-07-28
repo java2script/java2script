@@ -157,7 +157,7 @@ public class Test_URL extends Test_ {
 			connection.setReadTimeout(10000);
 
 			InputStream is = url.openStream();
-			String s = JSUtil.streamToString(is);
+			String s = Rdr.streamToString(is);
 			is.close();
 			System.out.println(s);
 			assert (s.equals("{\"ping\":1}\n"));

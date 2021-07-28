@@ -12,7 +12,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.namespace.QName;
 
 import javajs.util.PT;
-import swingjs.JSUtil;
+import javajs.util.Rdr;
 import swingjs.api.Interface;
 
 class JSJAXBClass implements Cloneable {
@@ -113,7 +113,7 @@ class JSJAXBClass implements Cloneable {
 			if (is != null) {
 				String data;
 				try {
-					data = JSUtil.streamToString(is);
+					data = Rdr.streamToString(is);
 					packageAccessorType = parseAccessorType(data);
 					data = PT.getQuotedAttribute(data, "namespace");
 					if (data != null)

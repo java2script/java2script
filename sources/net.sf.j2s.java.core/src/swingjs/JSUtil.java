@@ -207,7 +207,7 @@ public class JSUtil implements JSUtilI {
 				try {
 					URL url = new URL(uri);
 					BufferedInputStream stream = (BufferedInputStream) url.getContent();
-					return (asBytes ? streamToBytes(stream) : streamToString(stream));
+					return (asBytes ? Rdr.streamToBytes(stream) : Rdr.streamToString(stream));
 				} catch (Exception e) {
 				}
 			}
@@ -253,7 +253,7 @@ public class JSUtil implements JSUtilI {
 			return data.toString();
 		if (data instanceof InputStream)
 			try {
-				return streamToString((InputStream) data);
+				return Rdr.streamToString((InputStream) data);
 			} catch (IOException e) {
 			}
 		return null;
@@ -1268,29 +1268,6 @@ public class JSUtil implements JSUtilI {
 	@Override
 	public String getJ2SPath() {
 		return (String) getAppletAttribute("_j2sFullPath");
-	}
-
-	/**
-	 * Read an InputStream in its entirety as a string, closing the stream.
-	 * 
-	 * @param is 
-	 * @return a String
-	 * @throws IOException
-	 */
-	public static String streamToString(InputStream is) throws IOException {
-		return new String(streamToBytes(is));
-	}
-
-	/**
-	 * Read an InputStream in its entirety as a byte array. Closes the stream.
-	 * 
-	 * @param is 
-	 * @return a byte array
-	 */
-	public static byte[] streamToBytes(InputStream is) throws IOException {
-			byte[] bytes = Rdr.getLimitedStreamBytes(is, -1);
-			is.close();
-			return bytes;
 	}
 
 	

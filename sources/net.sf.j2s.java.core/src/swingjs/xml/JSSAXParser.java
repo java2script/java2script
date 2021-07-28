@@ -104,7 +104,7 @@ public class JSSAXParser implements Parser, XMLReader {
 	private String getString(InputSource source) throws IOException {
 		Reader rdr = source.getCharacterStream();
 		if (rdr == null) {
-			return Rdr.fixUTF(JSUtil.streamToBytes(source.getByteStream()));
+			return Rdr.fixUTF(Rdr.streamToBytes(source.getByteStream()));
 		}
 		if (!(rdr instanceof BufferedReader))
 			rdr = new BufferedReader(rdr);
