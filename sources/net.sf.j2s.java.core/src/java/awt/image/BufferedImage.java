@@ -112,7 +112,8 @@ import swingjs.api.js.HTML5Canvas;
  * @see WritableRaster
  */
 
-public class BufferedImage extends Image implements RenderedImage, Transparency // , WritableRenderedImage
+public class BufferedImage extends Image implements RenderedImage, Transparency, ImageObserver
+// , WritableRenderedImage
 {
 
 	private static final int STATE_UNINITIALIZED = 0;
@@ -1366,7 +1367,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 			// allow creating a Graphics from MemoryImageSource
 			// so pixels would never be there.
 			if (秘pix != null)
-				秘g.drawImageFromPixelsOrRaster(this, 0, 0, null);
+				秘g.drawImageFromPixelsOrRaster(this, 0, 0, (ImageObserver) this);
 		}
 		Object pix = 秘pix;
 		/**
@@ -1389,8 +1390,11 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	}
 
 	public void 秘graphicsDisposed() {
-		gCount = Math.max(0, gCount - 1);
+		boolean doSync = (秘haveCanvas() && 秘isRasterDirty(false));
 		秘state = STATE_GRAPHICS;
+		if (doSync) {
+			秘syncRaster();
+		}
 	}
 
 	/**
@@ -1404,18 +1408,23 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 */
 	@Override
 	public void flush() {
-		boolean isStolen = 秘isRasterDirty(false);
-		boolean haveRaster = 秘haveRaster();
-		if (isStolen && !haveRaster)
-			秘ensureRasterUpToDate(); // will set STATE_RASTER
+		boolean setRasterState = 秘syncRaster();
 		if (秘haveRaster() && 秘pix == null) {
 			秘getPixelsFromRaster(0);
 		}
 		秘getImageGraphic();
-		if (isStolen || haveRaster)
+		if (setRasterState)
 			秘state |= STATE_RASTER;
-		while (gCount > 0 && --gCount >= 0)
+		while (gCount-- > 0)
 			秘g.dispose();
+	}
+
+	private boolean 秘syncRaster() {
+		boolean isStolen = 秘isRasterDirty(false);
+		boolean haveRaster = 秘haveRaster();
+		if (isStolen && !haveRaster)
+			秘ensureRasterUpToDate(); // will set STATE_RASTER
+		return (isStolen || haveRaster);
 	}
 
 	/**
@@ -2472,6 +2481,12 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 			break;
 		}
 		return new Color(pc.pixelToRgb(pc.rgbToPixel(c.getRGB(), null), null));
+	}
+
+	@Override
+	public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) {
+		// ignored
+		return false;
 	}
 
 }

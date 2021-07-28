@@ -156,10 +156,9 @@ public class Test_URL extends Test_ {
 			connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
 			connection.setReadTimeout(10000);
 
-			InputStream fis = url.openStream();
-			BufferedInputStream bis = new BufferedInputStream(fis);
-			String s = Rdr.streamToUTF8String(bis);
-			bis.close();
+			InputStream is = url.openStream();
+			String s = JSUtil.streamToString(is);
+			is.close();
 			System.out.println(s);
 			assert (s.equals("{\"ping\":1}\n"));
 

@@ -64,7 +64,9 @@ public class Test_J8_Stream extends Test_J8_Stream0 {
 		long n;
 		StringBuffer sb = new StringBuffer("test");
 		System.out.println("below is 'test'? " + sb);
-		sb.chars().mapToObj(i -> (char) i).forEach(System.out::print);
+		sb.chars()
+			.mapToObj(i -> (char) i)
+			.forEach(System.out::print);
 		System.out.println("\nabove is 'test'? " + sb);
 		n = sb.chars().count();
 		assert (n == 4);
