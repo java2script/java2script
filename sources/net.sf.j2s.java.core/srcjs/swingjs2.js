@@ -14022,33 +14022,10 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2021.07.28 String.instantialize upgraded to use TextDecoder() if possible (not in MSIE)
 // BH 2021.07.20 Date.toString() format yyyy moved to end, as in Java 
 // BH 2021.06.11 Number.compareTo(....) missing
 // BH 2021.02.12 implements better(?) interface defaults resolution -- in order of presentation
-// BH 2020.12.31 3.3.1-v1 full 64-bit long support; BigDecimal, BigInteger fully 64-bit
-
-// BH 2020.12.19 3.2.10-v1 preliminary work aiming to back long with [r,m,s].
-//                         should be fully backward compatible;  
-//                         supports the 3.2.10 transpiler.
-// BH 2020.12.11 fixing interface extended override of interface default
-// BH 2020.12.06 changing Long maxval to 0x1FFFFFFFFFFFFF from 0x20000000000000
-// BH 2020.12.06 better error checking for TYPE.parseTYPE(string)
-// BH 2020.07.27 fix for inner class array names
-// BH 2020.06.18 better test for instanceof Object[]
-// BH 2020.06.03 sets user.home and user.dir to /TEMP/swingjs, and user.name to "swingjs"
-// BH 2020.04.01 2.2.0-v1e fixes missing C$.superclazz when class loaded from core
-// BH 2020.03.19 3.2.9-v1c fixes new String("xxx") !== "xxx"
-// BH 2020.03.11 3.2.9-v1b fixes numerous subtle issues with boxed primitives Integer, Float, etc.
-// BH 2020.03.07 3.2.9-v1a fixes array.hashCode() to be System.identityHashCode(array). 
-// BH 2020.02.18 3.2.8-v2 upgrades String, Integer, ClassLoader, Package, various Exceptions
-// BH 2020.02.12 3.2.8-v1 new Throwable().getStackTrace() should not include j2sClazz methods
-// BH 2020.02.02 3.2.7-v5 fixes array.getClass().getName() and getArrayClass() for short -- should be [S, not [H, for Java
-// BH 2019.12.29 3.2.6 fixes Float.parseFloat$S("NaN") [and Double]
-// BH 2019.12.23 3.2.6 update of System
-// BH 2019.12.19 3.2.6 revision of $clinit$
-// BH 2019.12.16 3.2.5-v4 adds ClassLoader static methods for system resources (just j2s/...)
-// BH 2019.12.15 3.2.5-v4 Character.prototype.valueOf() missing 
-// BH 2019.12.14 3.2.5-v3 Clazz._4Name initialization should be full static initialization 
 
 // see earlier notes at net.sf.j2s.java.core.srcjs/js/devnotes.txt
 
@@ -14080,95 +14057,6 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
   // at least for now:
 
   var setWindowValue = function(a, v) { window[a] = v; }
-  var getWindowValue = function(a) { return window[a] }
-
-/* not compatible with Safari 2021.01.08
- * 
-try {
-
-	
-Clazz.Runnable = class {
-	constructor(f) {
-		this.f = f;			
-	}
-	run = async function(){
-		await this.f();
-	};
-
-}
-
-Clazz.Thread = class {
-	constructor(name, r) {
-		this.name = name;
-		this.stopped = false;
-		this.runnable = r;
-	}
-	start = async function() {
-		let me = this;
-		setTimeout(function(){me.run.apply(me,[])},1);
-	};
-
-	run = async function() { 
-			if (this.stopped) return;
-			Clazz.Thread.thread = this;
-			try {
-				await this.runnable.run();
-			} catch (e) {
-				console.log("..Thread.run caught " + (e.getMessage ? e.getMessage():e))
-			}
-			Clazz.Thread.thread = null;
-	};
-	stop = function() {
-		this.waiting = false;
-		this.stopped = true;
-		console.log("..Thread stopped: " + this.name);
-	};
-
-	restart = function() {
-		this.stopped = this.waiting = false;
-		console.log("..Thread restarted: " + this.name);
-		this.start();
-	};
-
-	static wait = async function(obj) {
-		let t = Clazz.Thread.currentThread();
-		obj || (obj = t);
-		obj.__WAIT__ = t;
-		t.waitingOn = obj;
-		while (obj.__WAIT__ == t){
-       		await Clazz.Thread.sleep(500); 
-		}
-	};
-
-	static notify = function(obj) {
-		if (!obj)return;
-		if (obj.__WAIT__) {
-			obj.__WAIT__.waitingOn = null;
-			obj.__WAIT__ = null;
- 		}
-	};
-
-	static thread = null;
-
-	static sleep = async function(ms) {
-			let t = Clazz.Thread.currentThread();			
-   			return new Promise(r => setTimeout(async function() {
-			await r();
-			Clazz.Thread.thread = t;			
-		}, ms));
-	}
-	
-	static currentThread() {
-		return Clazz.Thread.thread;
-	}
-}
-
-Clazz.Thread.sleep$J = Clazz.Thread.sleep;
-
-
-} catch(e) {}
-
-*/ 
 
 J2S.LoadClazz = function(Clazz) {
 	
@@ -15006,84 +14894,6 @@ Clazz.newInterface = function (prefix, name, f, _null2, interfacez, _0) {
   return c;
 };
 
-// An interesting idea, but too complicated, and probably not that effective anyway.
-//var lambdaCache = {};
-//Clazz.newLambda = function(fc, m, lambdaType) {
-//	var key = (fc.__CLASS_NAME__ || fc) + "." + (m||0) + "." + lambdaType;
-//	var ret = lambdaCache[key];
-//	if (ret)
-//		return ret;
-//    // creates a new functional interface
-//	// fc is either an executable method from i -> fc() or a class or object from Class::meth
-//	// m is the method name
-//	// lambdaType is 'S', 'F', 'C', or 'P' (Supplier, Function, Consumer, or Predicate)
-//	// note that we should be taking into account Boolean,Int,Double,Long here, and
-//	// we are not fully elaborating the classes. For example getClass() does not work here.
-//	var fAction;
-//	if (m) { // Lambda_M
-//		var g = fc[m];
-//		var f = g||fc.prototype[m];
-//		fAction = function(t) {return f.apply(f == g ? fc : t,[t])};		
-//	} else { // Lambda_E, Lambda_S, Lambda_C, Lambda_T
-//		fAction = fc;
-//	}	
-//	switch(lambdaType) {
-//	case 'S': 
-//		ret =  {get$: fAction,
-//			__CLASS_NAME__:"java_util_function_Supplier"
-//		};
-//		// this is a rough-in
-//		ret.getAsBoolean$ = ret.getAsDouble$ = ret.getAsInt$ = ret.getAsLong$ = ret.get$;
-//		break;
-//	case 'C':
-//		ret =  {accept$: fAction, 
-//				andThen$java_util_function_Function: function(after) { 
-//					if (!after) throw new NullPointerException(); 
-//					return function(t,u) { fAction(t,u); after.accept$(t,u);}
-//				}, 
-//			__CLASS_NAME__:"java_util_function_Consumer"
-//		};
-//		break;
-//	case 'F':
-//		ret = {
-//				apply$: fAction, 
-//				andThen$java_util_function_Function: function(after) { 
-//					if (!after) throw new NullPointerException(); 
-//					return function(t,u) { return after.apply$(fAction(t,u));}
-//				}, 
-//				compose$java_util_function_Function: function(before) {
-//					if (!before) throw new NullPointerException(); 
-//					return function(t,u) { return fAction(before.apply$(t,u));}		
-//				},
-//				identity$: function(t) { return t},
-//				__CLASS_NAME__:"java_util_function_Function"
-//			};
-//		break;
-//	case 'P':
-//		ret =  {test$: fAction, 
-//			and$java_util_function_predicate: function(other) {
-//				if (!other) throw new NullPointerException(); 
-//				return function(t,u) { return fAction(t,u) && other.test$(t,u);}
-//			},
-//			or$java_util_function_predicate: function(other) {
-//				if (!other) throw new NullPointerException(); 
-//				return function(t,u) { return fAction(t,u) || other.test$(t,u);}
-//			},
-//			negate$: function() {
-//				return function(t,u) { return !fAction(t,u) }	
-//			},
-//			isEqual$O: function(target) {
-//				return function(t) { return (target == null) == (t == null)
-//					&& (t == null  || t.equals$O(target));}
-//			},
-//			__CLASS_NAME__:"java_util_function_Predicate"
-//		};
-//		break;
-//	}
-//	
-//	return lambdaCache[key] = ret;
-//};
-
 var __allowOverwriteClass = true;
 
 Clazz.newMeth = function (clazzThis, funName, funBody, modifiers) {
@@ -15618,21 +15428,6 @@ objMethods.equals$O = objMethods.equals;
 
 ;(function(proto) {
 
-//  for (var i = minimalObjNames.length, name; --i >= 0;) {
-//    name = minimalObjNames[i];
-//    objMethods[name].exClazz = Clazz._O;
-//    objMethods[name].exName = name;
-//    Clazz._O[name = objNames[i]] = Array[name] = objMethods[name];
-//  }
-  
-//  addProto(proto, "isInstance", function(c) {
-//    return Clazz.instanceOf(this, c);
-//  }),
-//
-//  addProto(proto, "equals", function (obj) {
-//    return this == obj;
-//  });
-
   addProto(proto, "equals$O", function (obj) {
     return this == obj;
   });
@@ -15677,13 +15472,6 @@ var extendObject = function(clazz, ext) {
     cp[p] = op[p];
   }
 }
-
-//var checkObjectMethods = function (hostSuper, funName) {
-//  for (var k = objNames.length; --k >= 0;)
-//    if (funName == objNames[k] && objMethods[funName] === hostSuper[funName])
-//      return true;
-//  return false;
-//};
 
 // see also 
 var excludeSuper = function(o) {
@@ -19755,9 +19543,11 @@ m$(Boolean,"toString",function(){return this.valueOf()?"true":"false";});
 m$(Boolean,"toString$Z",function(b){return "" + b;}, 1);
 
 
+// this next part is InternetExplorer only, and only UTF8
+
 Clazz._Encoding={
   UTF8:"utf-8",
-  UTF16:"utf-16",
+  UTF16:"utf-16", // LE
   ASCII:"ascii"
 };
 
@@ -19765,7 +19555,7 @@ Clazz._Encoding={
 
 Encoding.guessEncoding=function(str){
 return (str.charCodeAt(0)==0xEF&&str.charCodeAt(1)==0xBB&&str.charCodeAt(2)==0xBF ? Encoding.UTF8
-  : str.charCodeAt(0)==0xFF&&str.charCodeAt(1)==0xFE ? Encoding.UTF16 
+  : str.charCodeAt(0)==0xFF&&str.charCodeAt(1)==0xFE ? Encoding.UTF16 // LE 
   : Encoding.ASCII);
 };
 
@@ -19775,10 +19565,17 @@ return (a[offset]==0xEF&&a[offset + 1]==0xBB&&a[offset + 2]==0xBF ? Encoding.UTF
 };
 
 Encoding.readUTF8Array=function(a, offset, length){
-if (arguments.length == 1) {
-  offset = 0;
-  length = a.length;
+	// a will be an Int8Array, UTF8 only
+if (textDecoder) {
+	if (offset == 0 && length == a.length)
+		return textDecoder.decode(a);
+	var arr=new Uint8Array(length);
+	for(var i = 0; i < length; i++){
+		arr[i] = a[offset + i];
+	}
+	return textDecoder.decode(arr);
 }
+// IE only. I don't know where this comes from. Is it Java?
 var encoding=Encoding.guessEncodingArray(a);
 var startIdx=0;
 if(encoding==Encoding.UTF8){
@@ -19928,20 +19725,6 @@ sp.replace$ = function(c1,c2){
   }
   return this.replace(new RegExp(c1,"gm"),c2);
 };
-
-//// experimental -- only marginally faster:
-//var reCache = new Map();
-//sp.replace2$ = function(c1,c2){
-//	if (c1 == c2 || this.indexOf(c1) < 0) return "" + this;
-//	var re;
-//	if (c1.length == 1) {
-//		re = reCache.get(c1);
-//		re || reCache.set(c1, re = new RegExp("\\$.*+|?^{}()[]".indexOf(c1) == 0 ? "\\" + c1 : c1, 'gm'));
-//	} else {    
-//	re = new RegExp(c1.replace(/([\\\$\.\*\+\|\?\^\{\}\(\)\[\]])/g,function($0,$1){return "\\"+$1;}), 'gm');
-//	}
-//	return this.replace(re,c2);
-//};
 
 // fastest:
 sp.replaceAll$=sp.replaceAll$S$S=sp.replaceAll$CharSequence$CharSequence=function(exp,str){
@@ -20312,7 +20095,8 @@ String(byte[] bytes, int offset, int length, String charsetName)
 String(byte[] ascii, int hibyte, int offset, int count)
 */
 
-var textDecoder = null;
+var textDecoder = (self.TextDecoder && new TextDecoder() || null);
+var textDecoders = {};
 
 // Note that of all these constructors, only new String("xxx") and new String(new String())
 // return actual JavaScript String objects (as of 3.2.9.v1)
@@ -20328,21 +20112,24 @@ case 1:
   // String(StringBuffer buffer)
   // String(StringBuilder builder)
   // String(String original)
-  if (x.__BYTESIZE || x instanceof Array){
-    return x.length == 0 ? "" : typeof x[0]=="number" ? Encoding.readUTF8Array(x).toString() : x.join('');
+  if (x.__BYTESIZE){
+    return x.length == 0 ? "" : Encoding.readUTF8Array(x, 0, x.length).toString();
+  }
+  if (x instanceof Array){
+	    return x.length == 0 ? "" : typeof x[0]=="number" ? Encoding.readUTF8Array(new Uint8Array(x), 0, x.length).toString() : x.join('');
   }
   // raw JavaScript string unless new String(string)
   return (typeof x == "string" ||  x instanceof String ? new String(x) : x.toString());
 case 2:  
-  // String(char[] value, boolean share)
   // String(byte[] ascii, int hibyte)
+  // String(char[] value, boolean share) ???
   // String(byte[] bytes, Charset charset)
   // String(byte[] bytes, String charsetName)
 
-  var hibyte=arguments[1];
-  return (typeof hibyte=="number" ? String.instantialize(x,hibyte,0,x.length) 
-	: typeof hibyte == "boolean" ? x.join('') : self.TextDecoder && (textDecoder || (textDecoder = new TextDecoder())) && arguments[1].toString().toUpperCase() == "UTF-8" ? textDecoder.decode(arguments[0])
-	: String.instantialize(x,0,x.length,hibyte)).toString();
+  var a1=arguments[1];
+  return (typeof a1=="number" ? String.instantialize(x,a1,0,x.length) 
+	: typeof a1 == "boolean" ? x.join('') 
+    : String.instantialize(x,0,x.length,a1.toString()));
 case 3:
   // String(byte[] bytes, int offset, int length)
   // String(char[] value, int offset, int count)
@@ -20351,27 +20138,21 @@ case 3:
   var bytes=x;
   var offset=arguments[1];
   var length=arguments[2];
-  if(arguments[2]instanceof Array){
-    // ???
-    bytes=arguments[2];
-    offset=x;
-    length=arguments[1];
-  }
-  var arr=new Array(length);
   if(offset<0||length+offset>bytes.length){
-    throw new IndexOutOfBoundsException();
+	    throw new IndexOutOfBoundsException();
   }
-  if(length>0){
-    var isChar=(bytes[offset].length!=null);
-    if(isChar){
+  if (length == 0)
+	  return "";
+  var arr=new Array(length);
+  var isChar=!!bytes[offset].length;
+  if(isChar){
       for(var i=0;i<length;i++){
         arr[i]=bytes[offset+i];
       }
-    }else{
+  }else{
       for(var i=0;i<length;i++){
         arr[i]=String.fromCharCode(bytes[offset+i]);
       }
-    }
   }
   return arr.join('');
 case 4:
@@ -20385,7 +20166,7 @@ case 4:
     var offset=arguments[1];
     var length=arguments[2];
     if (typeof cs == "string") {
-    	if (",utf8,utf-8,utf_8,".indexOf("," + cs + ",") >= 0)
+    	if (",utf8,utf-8,".indexOf("," + cs.toLowerCase() + ",") >= 0)
     		return Encoding.readUTF8Array(bytes,offset,length).toString();
     	cs = Clazz.loadClass("java.nio.charset.Charset").forName$S(cs);
     	if (!cs)
@@ -20822,24 +20603,6 @@ dp.UTC$ = dp.UTC;
 
 	
 })(Date.prototype);
-
-/*
- Java8 classes have default methods
-Clazz.newInterface(java.util,"Iterator");
-
-Clazz.newInterface(java.util,"ListIterator",java.util.Iterator);
-Clazz.newInterface(java.util,"Enumeration");
-Clazz.newInterface(java.util,"Collection",Iterable);
-
-Clazz.newInterface(java.util,"Set",java.util.Collection);
-Clazz.newInterface(java.util,"Map");
-Clazz.newInterface(java.util.Map,"Entry");
-
-Clazz.newInterface(java.util,"List",java.util.Collection);
-
-Clazz.newInterface(java.util,"Queue",java.util.Collection);
-Clazz.newInterface(java.util,"RandomAccess");
-*/
 
 var C$ = Clazz.newClass(java.lang, "Throwable", function () {
 Clazz.newInstance(this, arguments);
@@ -21433,9 +21196,6 @@ var newMethodNotFoundException = function (clazz, method) {
   console.log(message);
   throw Clazz.new_(java.lang.NoSuchMethodException.c$$S, [message]);        
 };
-
-// Constructor, Field, Method all moved back to their original class js; no need to have those here
-
 
 //  if (needPackage("core"))
   //  _Loader.loadPackage("core");  
