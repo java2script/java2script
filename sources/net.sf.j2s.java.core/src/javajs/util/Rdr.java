@@ -90,9 +90,32 @@ public class Rdr implements GenericLineReader {
     return reader.readLine();
   }
 
-  public static Map<String, Object> readCifData(GenericCifDataParser parser, BufferedReader br) {
-    return parser.set(null, br, false).getAllCifData();
-  }
+	/**
+	 * Read an InputStream in its entirety as a byte array, closing the stream.
+	 * 
+	 * @param is
+	 * @return a byte array
+	 */
+	public static byte[] streamToBytes(InputStream is) throws IOException {
+		byte[] bytes = getLimitedStreamBytes(is, -1);
+		is.close();
+		return bytes;
+	}
+
+	/**
+	 * Read an InputStream in its entirety as a string, closing the stream.
+	 * 
+	 * @param is
+	 * @return a String
+	 * @throws IOException
+	 */
+	public static String streamToString(InputStream is) throws IOException {
+		return new String(Rdr.streamToBytes(is));
+	}
+
+	public static Map<String, Object> readCifData(GenericCifDataParser parser, BufferedReader br) {
+		return parser.set(null, br, false).getAllCifData();
+	}
 
   ///////////
 
