@@ -110,7 +110,7 @@ public class Rdr implements GenericLineReader {
 	 * @throws IOException
 	 */
 	public static String streamToString(InputStream is) throws IOException {
-		return new String(Rdr.streamToBytes(is));
+		return new String(streamToBytes(is));
 	}
 
 	public static Map<String, Object> readCifData(GenericCifDataParser parser, BufferedReader br) {
@@ -350,7 +350,7 @@ public class Rdr implements GenericLineReader {
 
   public static BufferedInputStream toBIS(Object o) {
     return (AU.isAB(o) ? getBIS((byte[]) o)
-        : o instanceof SB ? getBIS(Rdr.getBytesFromSB((SB) o))
+        : o instanceof SB ? getBIS(getBytesFromSB((SB) o))
             : o instanceof String ? getBIS(((String) o).getBytes()) : null);
   }
 
