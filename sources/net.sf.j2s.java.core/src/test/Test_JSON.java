@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javajs.util.Rdr;
 import swingjs.JSUtil;
 
 public class Test_JSON extends Test_ {
@@ -43,7 +44,7 @@ public class Test_JSON extends Test_ {
 			 *            data = data["1cbs"][0].title;
 			 */
 			if (data instanceof InputStream) {
-				data = JSUtil.streamToString((InputStream) data);
+				data = Rdr.streamToString((InputStream) data);
 			}
 			System.out.println(data);
 
@@ -52,7 +53,7 @@ public class Test_JSON extends Test_ {
 			JSUtil.setAjax(url);
 		    HttpURLConnection connection = (HttpURLConnection) url.openConnection();		    
 		    data = connection.getInputStream();
-			data = JSUtil.streamToString((InputStream) data);
+			data = Rdr.streamToString((InputStream) data);
 			System.out.println(data);
 		    
 		
