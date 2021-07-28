@@ -114,7 +114,7 @@ public class Rdr implements GenericLineReader {
    * XMLReaders
    * 
    * @param bis
-   * @return a UTF-8 string
+   * @return a UTF-8 string or null if there is an error
    */
   public static String streamToUTF8String(BufferedInputStream bis) {
     String[] data = new String[1];
@@ -144,7 +144,8 @@ public class Rdr implements GenericLineReader {
   }
 
   /**
-   * This method is specifically for strings that are marked for UTF 8 or 16.
+   * This method is specifically for strings that might be marked for UTF 8 or 16.
+   * In this case, Java would return a (0xFEFF) code point as the first character.
    * 
    * @param bytes
    * @return UTF-decoded bytes
@@ -343,6 +344,8 @@ public class Rdr implements GenericLineReader {
   /**
    * Read a an entire BufferedInputStream for its bytes, and either return them or
    * leave them in the designated output channel.
+   * 
+   * Closes the stream.
    * 
    * @param bis
    * @param out a destination output channel, or null

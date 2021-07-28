@@ -1,6 +1,6 @@
 package swingjs.xml;
 
-import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,7 +12,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.namespace.QName;
 
 import javajs.util.PT;
-import javajs.util.Rdr;
+import swingjs.JSUtil;
 import swingjs.api.Interface;
 
 class JSJAXBClass implements Cloneable {
@@ -111,11 +111,15 @@ class JSJAXBClass implements Cloneable {
 			// Keeping this simple for now.
 			InputStream is = javaClass.getResourceAsStream("_$.js");
 			if (is != null) {
-				String data = Rdr.streamToUTF8String(new BufferedInputStream(is));
-				packageAccessorType = parseAccessorType(data);
-				data = PT.getQuotedAttribute(data, "namespace");
-				if (data != null)
-					packageNamespace = data;
+				String data;
+				try {
+					data = JSUtil.streamToString(is);
+					packageAccessorType = parseAccessorType(data);
+					data = PT.getQuotedAttribute(data, "namespace");
+					if (data != null)
+						packageNamespace = data;
+				} catch (IOException e) {
+				}
 			}
 		}
 	}

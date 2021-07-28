@@ -39,13 +39,14 @@ public class Test_Image extends Test_ {
 
 	public static void main(String[] args) {
 		
-//		testSource();
-		testPacked();
-//		testGray();
-//		testRead();
-//		testWrite();
+		System.err.println("TODO: testSource and testRead are not working!");
+		testPacked();  
+		testSource();
+		testGray();
+		testRead();
+		testWrite();
 
-		System.out.println("Test_Image OK");
+//		System.out.println("Test_Image OK");
 	}
 
 	@SuppressWarnings("unused")
@@ -263,9 +264,11 @@ public class Test_Image extends Test_ {
 	    	packedData[i] = (byte) i;
 	    }
 	    DataBuffer databuffer = new DataBufferByte(packedData, len);
-	    WritableRaster raster = Raster.createPackedRaster(databuffer, nx, ny, 1, null);
+	    int bitsPerPixel = 1;
+	    WritableRaster raster = Raster.createPackedRaster(databuffer, nx, ny, bitsPerPixel, null);
 	    // default colors are red and blue
-	    ColorModel colorModel = new IndexColorModel(1, 2, 
+	    int arrayLength = 2;
+	    ColorModel colorModel = new IndexColorModel(bitsPerPixel, arrayLength, 
 	    		new byte[] {(byte) 255, (byte) 0}, 
 	    		new byte[] {(byte) 0, (byte) 0}, 
 	    		new byte[] {(byte) 0, (byte) 255});
@@ -278,9 +281,11 @@ public class Test_Image extends Test_ {
 	    Graphics2D g = image.createGraphics();
 	    g.setColor(new Color(0,0,255));
 	    g.fillRect(0, 0, 100, 100);
+	    System.out.println("after drawing, not updated " + Arrays.toString(data));	    
 	    g.dispose();
+	    System.out.println("after disposing, updated " + Arrays.toString(data));	    
 	    image.flush();
-	    System.out.println(Arrays.toString(data));	    
+	    System.out.println("after flush, updated " + Arrays.toString(data));	    
 	    dumpImage(image, nx, ny);
 	}
 
@@ -288,16 +293,18 @@ public class Test_Image extends Test_ {
 		System.out.println("----------------");
 		int n = nx * ny;
 		int[] pixels = new int[n * 4];
-	    for (int i = 0, pt = 0; i < n; i++, pt+=4) {
-	    	
-	    	image.getColorModel().getComponents(i, pixels, pt);
-	    	System.out.println(i + " " + nx + " " + ny + ": " + pixels[pt] + " " + pixels[pt+1] + " " + pixels[pt+2] + " " + pixels[pt+3]);
-	    }
+		for (int i = 0, pt = 0; i < n; i++, pt += 4) {
+
+			image.getColorModel().getComponents(i, pixels, pt);
+			System.out.println(i + " " + nx + " " + ny + ": " + pixels[pt] + " " + pixels[pt + 1] + " " + pixels[pt + 2]
+					+ " " + pixels[pt + 3]);
+		}
 		System.out.println("===========");
-		for (int i = 0; i < nx; i++) {
-			for (int j = 0; j < ny; j++) {
-				System.out.println(Integer.toHexString(image.getRGB(i, j)));
+		for (int j = 0; j < ny; j++) {
+			for (int i = 0; i < nx; i++) {
+				System.out.print("\t" + Integer.toHexString(image.getRGB(i, j)));
 			}
+			System.out.println("");
 		}
 	}
 

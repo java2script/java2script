@@ -1,6 +1,5 @@
 package test;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -13,7 +12,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javajs.util.Rdr;
 import swingjs.JSUtil;
 
 public class Test_JSON extends Test_ {
@@ -45,7 +43,7 @@ public class Test_JSON extends Test_ {
 			 *            data = data["1cbs"][0].title;
 			 */
 			if (data instanceof InputStream) {
-				data = Rdr.streamToUTF8String(new BufferedInputStream((InputStream) data));
+				data = JSUtil.streamToString((InputStream) data);
 			}
 			System.out.println(data);
 
@@ -54,7 +52,7 @@ public class Test_JSON extends Test_ {
 			JSUtil.setAjax(url);
 		    HttpURLConnection connection = (HttpURLConnection) url.openConnection();		    
 		    data = connection.getInputStream();
-			data = Rdr.streamToUTF8String(new BufferedInputStream((InputStream) data));
+			data = JSUtil.streamToString((InputStream) data);
 			System.out.println(data);
 		    
 		
