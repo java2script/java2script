@@ -712,7 +712,7 @@ public class JSGraphics2D implements
 		int[] pixels = (int[]) (isTranslationOnly(m) && !isClipped(x,y,width,height) ? ((BufferedImage) img).get秘pixFromRaster() : null);
 		DOMNode imgNode = null;
 		if (pixels == null) {
-			imgNode = ((BufferedImage) img).秘getImageNode(BufferedImage.GET_IMAGE_FROM_RASTER);
+			imgNode = (img == observer ? canvas : ((BufferedImage) img).秘getImageNode(BufferedImage.GET_IMAGE_FROM_RASTER));
 			if (imgNode != null)
 				ctx.drawImage(imgNode, x, y, width, height);
 		} else {
