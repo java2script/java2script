@@ -349,6 +349,7 @@ public abstract class AsyncSwingWorker extends SwingWorker<Void, Void> implement
 				if (checkCanceled()) {
 					helper.setState(STATE_DONE);
 					firePropertyChange(PROPERTY_STATE, null, CANCELED_ASYNC);
+					cancelAsync();
 				} else {
 					int ret = doInBackgroundAsync(progressAsync);					
 					if (!helper.isAlive() || isPaused) {
