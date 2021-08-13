@@ -314,6 +314,11 @@ public interface HTML5Video extends DOMNode {
 	 */
 	public static JDialog createDialog(Frame parent, Object source, int maxWidth,
 			Function<HTML5Video, Void> whenReady) {
+		return createDialog(parent, source, maxWidth, true, whenReady);
+	}
+	
+	public static JDialog createDialog(Frame parent, Object source, int maxWidth, boolean addControls,
+			Function<HTML5Video, Void> whenReady) {
 		JDialog dialog = new JDialog(parent);
 		Container p = dialog.getContentPane();
 		p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
@@ -322,7 +327,8 @@ public interface HTML5Video extends DOMNode {
 		// not in Java! dialog.putClientProperty("jsvideo", label);
 		p.add(label);
 		label.setVisible(false);
-		p.add(getControls(label));
+		if (addControls)
+			p.add(getControls(label));
 		dialog.setModal(false);
 		dialog.pack();
 		dialog.setVisible(true);
