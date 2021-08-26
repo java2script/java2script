@@ -729,26 +729,23 @@ public class JOptionPane extends JComponent {
 	/**
 	 * Brings up a dialog displaying a message, specifying all parameters.
 	 * 
-	 * @param parentComponent
-	 *            determines the <code>Frame</code> in which the dialog is
-	 *            displayed; if <code>null</code>, or if the
-	 *            <code>parentComponent</code> has no <code>Frame</code>, a
-	 *            default <code>Frame</code> is used
-	 * @param message
-	 *            the <code>Object</code> to display
-	 * @param title
-	 *            the title string for the dialog
-	 * @param messageType
-	 *            the type of message to be displayed:
-	 *            <code>ERROR_MESSAGE</code>, <code>INFORMATION_MESSAGE</code>,
-	 *            <code>WARNING_MESSAGE</code>, <code>QUESTION_MESSAGE</code>,
-	 *            or <code>PLAIN_MESSAGE</code>
-	 * @param icon
-	 *            an icon to display in the dialog that helps the user identify
-	 *            the kind of message that is being displayed
-	 * @exception HeadlessException
-	 *                if <code>GraphicsEnvironment.isHeadless</code> returns
-	 *                <code>true</code>
+	 * @param parentComponent determines the <code>Frame</code> in which the dialog
+	 *                        is displayed; if <code>null</code>, or if the
+	 *                        <code>parentComponent</code> has no
+	 *                        <code>Frame</code>, a default <code>Frame</code> is
+	 *                        used
+	 * @param message         the <code>Object</code> to display
+	 * @param title           the title string for the dialog
+	 * @param messageType     the type of message to be displayed:
+	 *                        <code>ERROR_MESSAGE</code>,
+	 *                        <code>INFORMATION_MESSAGE</code>,
+	 *                        <code>WARNING_MESSAGE</code>,
+	 *                        <code>QUESTION_MESSAGE</code>, or
+	 *                        <code>PLAIN_MESSAGE</code>
+	 * @param icon            an icon to display in the dialog that helps the user
+	 *                        identify the kind of message that is being displayed
+	 * @exception HeadlessException if <code>GraphicsEnvironment.isHeadless</code>
+	 *                              returns <code>true</code>
 	 * @see java.awt.GraphicsEnvironment#isHeadless
 	 */
 	public static void showMessageDialog(Component parentComponent, Object message, String title, int messageType,
@@ -757,13 +754,15 @@ public class JOptionPane extends JComponent {
 		boolean simplify = USE_HTML5_MODAL_FOR_WARNINGS_AND_ERRORS
 				&& (messageType == WARNING_MESSAGE || messageType == ERROR_MESSAGE);
 
-		if (simplify || !isListener(parentComponent)) {
-			if (!simplify && !(message instanceof String))
-				warnJSDeveloper();
-			String s = getMessageTypeString(messageType, ": ") + (title == "Message" ? "" : title + "\n\n")
-					+ (message instanceof String ? "" + message : "?");
-			JSUtil.alert(s);
-			return;
+		boolean haveListener = isListener(parentComponent);
+		if (simplify || !haveListener) {
+			if (message instanceof String) {
+				String s = getMessageTypeString(messageType, ": ") + (title == "Message" ? "" : title + "\n\n")
+						+ (message instanceof String ? "" + message : "?");
+				JSUtil.alert(s);
+				return;
+			}
+			warnJSDeveloper();
 		}
 		showOptionDialog(parentComponent, message, title, DEFAULT_OPTION, messageType, icon, null, null);
 	}
