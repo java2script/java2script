@@ -45,6 +45,7 @@ import java.beans.PropertyVetoException;
 import java.util.EventListener;
 import java.util.Set;
 
+import javax.swing.JApplet;
 import javax.swing.JInternalFrame;
 
 import javajs.util.Lst;
@@ -1087,6 +1088,10 @@ public class Container extends JSComponent {
 				comp.background = comp.foreground = null; // this parent should not set the background color				
 			}
 			// SwingJS used for all add methods
+			// When adding an applet, we should just add its content pane
+			if (comp instanceof JApplet) {
+				comp = ((JApplet)comp).getLayeredPane();				
+			}
 
 			/*
 			 * Check for correct arguments: index in bounds, comp cannot be one of this
