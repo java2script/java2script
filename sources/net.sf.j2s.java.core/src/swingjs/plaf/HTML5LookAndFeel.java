@@ -614,7 +614,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 		InsetsUIResource zeroInsets = new InsetsUIResource(0, 0, 0, 0);
 		InsetsUIResource twoInsets = new InsetsUIResource(2, 2, 2, 2);
 		InsetsUIResource threeInsets = new InsetsUIResource(3, 3, 3, 3);
-
+		InsetsUIResource minus2Insets = new InsetsUIResource(0,2,-2,2); // a bit of a hack for JSMenu
 		// // *** Shared Borders
 	Object marginBorder = new SwingLazyValue("javax.swing.plaf.basic.BasicBorders$MarginBorder");
 	Object etchedBorder = new BorderUIResource.EtchedBorderUIResource();
@@ -1376,7 +1376,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				"Menu.border", marginBorder,
 				"Menu.borderPainted", Boolean.FALSE,
 				"Menu.margin",
-				twoInsets,
+				minus2Insets,//twoInsets,
 				// "Menu.checkIcon", menuItemCheckIcon,
 				// "Menu.arrowIcon", menuArrowIcon,
 				// "Menu.menuPopupOffsetX", new Integer(0),

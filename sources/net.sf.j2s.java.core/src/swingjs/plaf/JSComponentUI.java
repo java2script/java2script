@@ -1795,7 +1795,7 @@ public class JSComponentUI extends ComponentUI
 					w0 = w0i = "";
 				}
 			}
-			DOMNode.setStyles(node, "position", null, "width", null, "height", null);
+			DOMNode.setStyles(node, "position", null, "width", getSizingWidth(), "height", null);
 			if (innerNode != null) // JSListUI only
 				DOMNode.setStyles(innerNode, "width", null, "height", null);
 			// process of discovering width and height is facilitated using
@@ -1857,6 +1857,11 @@ public class JSComponentUI extends ComponentUI
 		}
 		return dim;
 	}
+
+	protected String getSizingWidth() {
+		return null;
+	}
+
 
 	protected Rectangle getBoundingRect(DOMNode node) {
 		if (tempDiv == null) {
