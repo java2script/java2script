@@ -463,6 +463,9 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		cb3.setFont(font);
 		cb3.addActionListener((e) -> {
 			System.out.println("cb3 checked " + cb3.isSelected());
+			Font f = t1.getFont();
+			t1.setFont(new Font(f.getFontName(), Font.PLAIN, f.getSize()+2));
+			t1.setText(t1.getText() + "+");
 
 		});
 		cb3.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
