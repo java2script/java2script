@@ -56,8 +56,6 @@ import swingjs.api.js.DOMNode;
  */
 public class JSSpinnerUI extends JSPanelUI {
 
-	private DOMNode up, dn;
-
 	@Override
 	public DOMNode updateDOMNode() {
 		spinner = (JSpinner) jc;
@@ -855,60 +853,54 @@ public class JSSpinnerUI extends JSPanelUI {
 		JSSpinnerUI ui = this;
 		if (e.getSource() instanceof JSpinner) {
 			JSpinner spinner = (JSpinner) (e.getSource());
-//			JSSpinnerUI spinnerUI = spinner.getUI();
-
-//			if (spinnerUI instanceof JSSpinnerUI) {
-//				JSSpinnerUI ui = (JSSpinnerUI) spinnerUI;
-
-				if ("editor".equals(prop)) {
-					JComponent oldEditor = (JComponent) e.getOldValue();
-					JComponent newEditor = (JComponent) e.getNewValue();
-					ui.replaceEditor(oldEditor, newEditor);
-					ui.updateEnabledState();
-					if (oldEditor instanceof JSpinner.DefaultEditor) {
-						JTextField tf = ((JSpinner.DefaultEditor) oldEditor).getTextField();
-						if (tf != null) {
-							tf.removeFocusListener(nextButtonHandler);
-							tf.removeFocusListener(previousButtonHandler);
-						}
+			switch (prop) {
+			case "editor":
+				JComponent oldEditor = (JComponent) e.getOldValue();
+				JComponent newEditor = (JComponent) e.getNewValue();
+				ui.replaceEditor(oldEditor, newEditor);
+				ui.updateEnabledState();
+				if (oldEditor instanceof JSpinner.DefaultEditor) {
+					JTextField tf = ((JSpinner.DefaultEditor) oldEditor).getTextField();
+					if (tf != null) {
+						tf.removeFocusListener(nextButtonHandler);
+						tf.removeFocusListener(previousButtonHandler);
 					}
-					if (newEditor instanceof JSpinner.DefaultEditor) {
-						JTextField tf = ((JSpinner.DefaultEditor) newEditor).getTextField();
-						if (tf != null) {
-							if (tf.getFont() instanceof UIResource) {
-								tf.setFont(spinner.getFont());
-							}
-							tf.addFocusListener(nextButtonHandler);
-							tf.addFocusListener(previousButtonHandler);
-						}
-					}
-				} else if ("enabled".equals(prop) || "model".equals(prop)) {
-					ui.updateEnabledState();
-				} else if ("font".equals(prop)) {
-					JComponent editor = spinner.getEditor();
-					if (editor != null && editor instanceof JSpinner.DefaultEditor) {
-						JTextField tf = ((JSpinner.DefaultEditor) editor).getTextField();
-						if (tf != null) {
-							if (tf.getFont() instanceof UIResource) {
-								tf.setFont(spinner.getFont());
-							}
-						}
-					}
-				} else if (JComponent.TOOL_TIP_TEXT_KEY.equals(prop)) {
-					updateToolTipTextForChildren(spinner);
 				}
-		//	}
+				if (newEditor instanceof JSpinner.DefaultEditor) {
+					JTextField tf = ((JSpinner.DefaultEditor) newEditor).getTextField();
+					if (tf != null) {
+						if (tf.getFont() instanceof UIResource) {
+							tf.setFont(spinner.getFont());
+						}
+						tf.addFocusListener(nextButtonHandler);
+						tf.addFocusListener(previousButtonHandler);
+					}
+				}
+				break;
+			case "enabled":
+			case "model":
+				ui.updateEnabledState();
+				break;
+			case "font":
+				JComponent editor = spinner.getEditor();
+				if (editor != null && editor instanceof JSpinner.DefaultEditor) {
+					JTextField tf = ((JSpinner.DefaultEditor) editor).getTextField();
+					if (tf != null) {
+						if (tf.getFont() instanceof UIResource) {
+							tf.setFont(spinner.getFont());
+						}
+					}
+				}
+				break;
+			case JComponent.TOOL_TIP_TEXT_KEY:
+				updateToolTipTextForChildren(spinner);
+				break;
+			}
 		} else if (e.getSource() instanceof JComponent) {
 			JComponent c = (JComponent) e.getSource();
 			if ((c.getParent() instanceof JPanel) && (c.getParent().getParent() instanceof JSpinner)
 					&& "border".equals(prop)) {
-
-				JSpinner spinner = (JSpinner) c.getParent().getParent();
-//				SpinnerUI spinnerUI = spinner.getUI();
-//				if (spinnerUI instanceof JSSpinnerUI) {
-//					JSSpinnerUI ui = (JSSpinnerUI) spinnerUI;
-					ui.maybeRemoveEditorBorder(c);
-//				}
+				ui.maybeRemoveEditorBorder(c);
 			}
 		}
 		super.propertyChange(e);

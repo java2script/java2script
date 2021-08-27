@@ -141,8 +141,9 @@ class JSComboPopupList extends JList {
 
 	void updateCSS() {
 		DOMNode.setSize(cbui.domNode, cbui.width, cbui.height);
-		if (j2scb != null)
+		if (j2scb != null) {
 			j2scb.j2sCB("updateCSS");
+		}
 	}
 
 	void updateList() {

@@ -17,13 +17,13 @@ J2S.__makeComboBox = function() {
   
   $( function() {
     $('head').append('<style>.j2scb-sel {background-color:#B8CFE5;}'
-    		+'\n.j2scb-unsel {background-color:white;}'
+    		+'\n.j2scb-unsel {background-color:inherit;}'
     		+'\n.j2scb-hov {background-color:lightblue;}'
     		+'\n.j2scbcont {position:absolute; left:0px;top:0px;}'
     		+'\n.j2scbhead {position:absolute; left:0px;top:0px;text-align:left;overflow:hidden;padding:0px 2px 1px 2px}'
-    		+'\n.j2scbbtn {position:absolute; leftbackground-color:white;:100px;top:0px; width:20px;text-align:center;cursor:pointer;background-color:lightblue;padding:0px}'
+    		+'\n.j2scbbtn {position:absolute; leftbackground-color:inherit;:100px;top:0px; width:20px;text-align:center;cursor:pointer;background-color:lightblue;padding:0px}'
     		+'\n.j2scbpopup {position:absolute; list-style:none}'
-    		+'\n.j2scblist {background-color:white;position:absolute; left:0px;top:0px;margin:0;border:black solid 1px;cursor:pointer;text-align:left;padding:0em;scrollbar-width:thin;cursor:pointer;}</style>'
+    		+'\n.j2scblist {background-color:inherit;position:absolute; left:0px;top:0px;margin:0;border:black solid 1px;cursor:pointer;text-align:left;padding:0em;scrollbar-width:thin;cursor:pointer;}</style>'
     );
     
     var CLOSE_DELAY = 100; // BH 2019.10.04 50 was just a bit too fast; could close early
@@ -40,7 +40,7 @@ J2S.__makeComboBox = function() {
  		disabled: false,
  		popupVisible: false,
  		selectedIndex: -1,
- 		backgroundColor: "white",
+ 		backgroundColor: "blue",
  		// z-index
  		zIndex:999999,
  		name:null,
@@ -185,10 +185,14 @@ J2S.__makeComboBox = function() {
       },
       updateCSS: function() {
     	  var cbox = this.cont.parent();
+    	  var bg = cbox.css("background-color");
+    	  this.options.backgroundColor = bg;
     	  var font = {"font-family": cbox.css("font-family")
     			  , "font-size": cbox.css("font-size")
     			  , "font-weight": cbox.css("font-weight")
     			  , "font-style": cbox.css("font-style")
+    			  , "font-style": cbox.css("font-style")
+    			  , backgroundColor: bg
     			  }; 	  
           var w = this.element.width();
           if (w == 0)
@@ -197,23 +201,23 @@ J2S.__makeComboBox = function() {
           this.cont.css({
           	width: (w - 2) + 'px',
           	height: h,
-          	backgroundColor: this.options.backgroundColor
+          	backgroundColor: bg
           });
           this.head.css({
           	width: (w - 20) + 'px',
-          	height: h,
-          	backgroundColor: this.options.backgroundColor
+          	height: h
           });
           this.head.css(font);
           this.btn.css({
           	left: (w - 20) + 'px',
-          	height: h
+          	height: h,
+          	backgroundColor: bg
           });
           h = (this.options.height ? this.options.height + 'px' : null);
           this.popup.css({
             width: w + 'px',
         	height: h
-          });  
+         });  
           this.popup.css(font);
           this.list.css({
             width: w + 'px',
