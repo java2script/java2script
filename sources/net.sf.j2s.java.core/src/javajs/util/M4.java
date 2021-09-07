@@ -570,6 +570,17 @@ public class M4 extends M34 {
     m32 -= m1.m32;
     m33 -= m1.m33;
   }
+  
+  /**
+   * add to translation
+   * 
+   * @param pt
+   */
+  public void add(T3 pt) {
+    m03 += pt.x;
+    m13 += pt.y;
+    m23 += pt.z;
+  }
 
   /**
    * Sets the value of this matrix to its transpose.
