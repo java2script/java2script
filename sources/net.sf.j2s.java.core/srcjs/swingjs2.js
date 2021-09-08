@@ -17866,9 +17866,9 @@ var radix=(n.startsWith("0x", i) ? 16 : n.startsWith("0", i) ? 8 : 10);
 // The general problem with parseInt is that is not strict -- ParseInt("10whatever") == 10.
 // Number is strict, but Number("055") does not work, though ParseInt("055", 8) does.
 // need to make sure negative numbers are negative
-if (n == "")
- return NaN
-n = Number(n) & 0xFFFFFFFF;
+if (n == "" || radix == 10 && isNaN(+n))
+	return NaN
+n = (+n) & 0xFFFFFFFF;
 return (radix == 8 ? parseInt(n, 8) : n);
 }, 1);
 
