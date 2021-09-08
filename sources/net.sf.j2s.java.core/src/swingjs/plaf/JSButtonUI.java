@@ -212,6 +212,8 @@ public class JSButtonUI extends JSLightweightUI {
 			DOMNode.setStyle(buttonNode, "border", "none");
 		else if (button.getBorder() == BorderFactory.html5Border)
 			DOMNode.setStyle(buttonNode, "border", null);
+		if (!button.isContentAreaFilled())
+			DOMNode.setStyles(domNode, "border", "none", "outline", "none");
 //
 //		System.out.println(button.getText() + " " + button.getBorder());
 		if (!isMenuSep) {

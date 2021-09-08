@@ -430,10 +430,13 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		Label awtlabel = new Label("AWT");
 		awtlabel.setFont(font);
 		awtlabel.setAlignment(Label.LEFT);
+		
 //	firstColumn.add(awtlabel);
 		awtlabel.setBackground(Color.white);
 
 		JButton b1 = new JButton("right left");
+		b1.setContentAreaFilled(false);
+
 		b1.setIcon(getImage("test2.png"));
 		b1.setFont(font);
 		// totally ignored

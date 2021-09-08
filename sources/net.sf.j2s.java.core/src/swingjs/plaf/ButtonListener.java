@@ -132,6 +132,9 @@ public class ButtonListener
 	}
 
 	protected void checkOpacity(AbstractButton b) {
+		if (!b.isContentAreaFilled()) {
+				DOMNode.setStyles(ui.domNode, "border", "none", "outline", "none");
+		}
 		b.setOpaque(b.isContentAreaFilled());
 	}
 
