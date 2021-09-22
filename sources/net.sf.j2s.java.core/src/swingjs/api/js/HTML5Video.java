@@ -253,7 +253,7 @@ public interface HTML5Video extends DOMNode {
 	 * Remove action listener
 	 * 
 	 * @param jsvideo   the HTML5 video element
-	 * @param listeners an array of event/listener pairs created by
+	 * @param listeners an array of event/listener epairs created by
 	 *                  addActionListener
 	 */
 	public static void removeActionListener(HTML5Video jsvideo, Object[] listeners) {
@@ -261,6 +261,7 @@ public interface HTML5Video extends DOMNode {
 			for (int i = 0; i < eventTypes.length; i++) {
 				jsvideo.removeEventListener(eventTypes[i]);
 			}
+			return;
 		}
 		
 		for (int i = 0; i < listeners.length; i += 2) {

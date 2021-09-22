@@ -10671,6 +10671,7 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// BH 2021.09.22 default file save as application/octet-stream, not text/plain
 // BH 2020.12.31 full 64-bit long
 // BH 2020.12.09 touch fixes for fdown and fdrag (j2sSlider)
 // BH 2020.12.03 note that relay is disabled using J2S.addDirectDatabaseCall(".")
@@ -11938,7 +11939,7 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 			// Asynchronous output generated using an anchor tag
 			var a = document.createElement("a");
 			a.href = "data:" + mimetype + ";base64," + data;
-			a.type = mimetype || (mimetype = "text/plain;charset=utf-8");
+			a.type = mimetype || (mimetype = "application/octet-stream");//was "text/plain;charset=utf-8");
 			a.download = filename;
 			a.target = "_blank";
 			$("body").append(a);
@@ -16405,7 +16406,7 @@ _Loader.setClasspathFor = function(clazzes) {
   if (!(clazzes instanceof Array))
     clazzes = [clazzes];
     for (var i = clazzes.length; --i >= 0;) {
-      path = clazzes[i];
+      var path = clazzes[i];
       var jar = _Loader.getJ2SLibBase() + path.split(".")[0]+".js";
       path = path.replace(/\//g,".");
       classpathMap["#" + path] = jar;

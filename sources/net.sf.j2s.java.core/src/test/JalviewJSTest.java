@@ -57,6 +57,8 @@ import javax.swing.event.MenuListener;
  */
 public class JalviewJSTest extends JPanel implements MenuListener, ItemListener {
 
+	// TODO:
+	// removeall and then restart 
 	public static final int SHIFT_DOWN_MASK;
 	public static final int ALT_DOWN_MASK;
 	public static final int SHORTCUT_MASK;

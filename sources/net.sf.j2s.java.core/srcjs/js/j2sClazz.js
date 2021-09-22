@@ -2390,7 +2390,7 @@ _Loader.setClasspathFor = function(clazzes) {
   if (!(clazzes instanceof Array))
     clazzes = [clazzes];
     for (var i = clazzes.length; --i >= 0;) {
-      path = clazzes[i];
+      var path = clazzes[i];
       var jar = _Loader.getJ2SLibBase() + path.split(".")[0]+".js";
       path = path.replace(/\//g,".");
       classpathMap["#" + path] = jar;
