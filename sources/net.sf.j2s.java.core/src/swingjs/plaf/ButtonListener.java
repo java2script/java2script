@@ -300,7 +300,7 @@ public class ButtonListener
 				return;
 			b.doClick(0);
 			verifyButtonClick(b, true);
-			JSComponentUI ui = b.秘getUI();
+//			JSComponentUI ui = b.秘getUI();
 		}
 	}
 

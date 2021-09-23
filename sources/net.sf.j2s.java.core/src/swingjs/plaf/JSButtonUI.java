@@ -224,6 +224,26 @@ public class JSButtonUI extends JSLightweightUI {
 		
 	}
 
+	@Override
+	public void dispose() {
+		if (isUIDisabled)
+			return;
+		super.dispose();
+		if (menuAnchorNode != null) {
+			// This is set in j2sMenu.js; we set it null here
+			// re-establish events when this button is added again
+			DOMNode.setAttr(menuAnchorNode, "_menu", null);
+		}
+	}
+
+	@Override
+	protected void undisposeUI(DOMNode node) {
+		if (!isDisposed)
+			return;
+		super.undisposeUI(node);
+	}
+
+
 	/**
 	 * called by j2sApplet.js
 	 * 

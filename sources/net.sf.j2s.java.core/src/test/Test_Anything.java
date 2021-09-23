@@ -15,6 +15,7 @@ public class Test_Anything extends javax.swing.JFrame {
 		
 		JMenuBar mb2 = new JMenuBar();
 		mb2.add(new JMenu("testing2"));
+		
 		setJMenuBar(mb2);
 		JTextField tf = new JTextField("test");
 		System.out.println(tf.getPreferredSize());
