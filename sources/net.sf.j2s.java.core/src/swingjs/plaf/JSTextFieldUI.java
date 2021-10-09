@@ -99,6 +99,13 @@ public class JSTextFieldUI extends JSTextUI {
 		return (isAWT ? getMinimumSize(c) : super.getPreferredSize(c));
     }
 
+	@Override
+	protected String getSizingWidth() {
+		String text = editor.getText();
+		return (text == null ? null : text.length() + "ch");
+	}
+
+
     
 
 	@Override

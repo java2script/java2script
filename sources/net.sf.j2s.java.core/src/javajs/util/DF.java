@@ -67,6 +67,9 @@ public class DF {
     if (decimalDigits == Integer.MAX_VALUE 
         || value == Float.NEGATIVE_INFINITY || value == Float.POSITIVE_INFINITY || Float.isNaN(value))
       return "" + value;
+    boolean isNeg = (value < 0);
+    if (isNeg)
+      value = -value;
     int n;
     if (decimalDigits < 0) {
       decimalDigits = -decimalDigits;
@@ -78,28 +81,27 @@ public class DF {
       n = 0;
       double d;
       if (Math.abs(value) < 1) {
-        n = 10;
-        d = value * 1e-10;
+        n = 100;
+        d = value * 1e-100;
       } else {
-        n = -10;
-        d = value * 1e10;
+        n = -100;
+        d = value * 1e100;
       }
       String s = ("" + d).toUpperCase();
-      int i = s.indexOf("E");
-      n = PT.parseInt(s.substring(i + 1)) + n;
+      int i1 = s.indexOf("E");
       String sf;
-      if (i < 0) {
+      if (i1 < 0) {
         sf = "" + value;
       } else {
-        float f = PT.parseFloat(s.substring(0, i));
-        if (f == 10 || f == -10) {
-          //d = 9.99999997465; n = -6 --> 10.00000E-5
-          f /= 10;
-          n += (n < 0 ? 1 : -1);          
-        }
+        n = PT.parseInt(s.substring(i1 + (s.indexOf("E+") == i1 ? 2 : 1))) + n;
+        float f = PT.parseFloat(s.substring(0, i1));
         sf = formatDecimal(f, decimalDigits - 1);
+        if (sf.startsWith("10.")) {
+          sf = formatDecimal(1, decimalDigits - 1);
+          n++;
+        }
       }
-      return sf  + "E" + (n >= 0 ? "+" : "") + n;
+      return (isNeg ? "-" : "") + sf  + "E" + (n >= 0 ? "+" : "") + n;
     }
   
     if (decimalDigits >= formattingStrings.length)
@@ -108,11 +110,6 @@ public class DF {
     int pt = s1.indexOf(".");
     if (pt < 0) // specifically JavaScript "-2" not "-2.0"
       return s1 + formattingStrings[decimalDigits].substring(1);
-    boolean isNeg = s1.startsWith("-");
-    if (isNeg) {
-      s1 = s1.substring(1);
-      pt--;
-    }
     int pt1 = s1.indexOf("E-");
     if (pt1 > 0) {
       n = PT.parseInt(s1.substring(pt1 + 1));
@@ -140,7 +137,8 @@ public class DF {
     int pt2 = decimalDigits + pt + 1;
     if (pt2 < len && s1.charAt(pt2) >= '5') {
       return formatDecimal(
-          value + (isNeg ? -1 : 1) * formatAdds[decimalDigits], decimalDigits);
+          (isNeg ? -1 : 1) * (value + formatAdds[decimalDigits]),
+          decimalDigits);
     }
   
     String s0 = s1.substring(0, (decimalDigits == 0 ? pt

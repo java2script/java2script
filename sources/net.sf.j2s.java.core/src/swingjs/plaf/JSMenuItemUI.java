@@ -85,7 +85,6 @@ public class JSMenuItemUI extends JSButtonUI {
 		return "MenuItem";
 	}
 	
-	
 	public void processJ2SMenuCmd(Object[] data) {
 		JSPopupMenuUI.processJ2SMenuCmd(data);
 	}

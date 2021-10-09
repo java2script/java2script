@@ -223,11 +223,13 @@ public abstract class AsyncSwingWorker extends SwingWorker<Void, Void> implement
 	}
 
 	/**
-	 * Cancel the asynchronous process.
+	 * Cancel the asynchronous process. This will fire the PROPERTY_STATE property
+	 * change with value CANCELED_ASYNC
 	 * 
 	 */
 	public void cancelAsync() {
 		helper.interrupt();
+		firePropertyChange(PROPERTY_STATE, null, CANCELED_ASYNC);
 	}
 
 	/**
@@ -348,7 +350,7 @@ public abstract class AsyncSwingWorker extends SwingWorker<Void, Void> implement
 			case STATE_LOOP:
 				if (checkCanceled()) {
 					helper.setState(STATE_DONE);
-					firePropertyChange(PROPERTY_STATE, null, CANCELED_ASYNC);
+					cancelAsync();
 				} else {
 					int ret = doInBackgroundAsync(progressAsync);					
 					if (!helper.isAlive() || isPaused) {

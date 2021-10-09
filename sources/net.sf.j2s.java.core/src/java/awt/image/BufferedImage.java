@@ -913,6 +913,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency,
 	 * @return the <code>WriteableRaster</code> of this <code>BufferedImage</code> .
 	 */
 	public WritableRaster getRaster() {
+		// ok, but raster.getDataBuffer().getData() is going to require a flush();
 		return raster;
 	}
 

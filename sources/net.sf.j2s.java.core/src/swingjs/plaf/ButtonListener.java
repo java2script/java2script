@@ -132,6 +132,9 @@ public class ButtonListener
 	}
 
 	protected void checkOpacity(AbstractButton b) {
+		if (!b.isContentAreaFilled()) {
+				DOMNode.setStyles(ui.domNode, "border", "none", "outline", "none");
+		}
 		b.setOpaque(b.isContentAreaFilled());
 	}
 
@@ -297,7 +300,7 @@ public class ButtonListener
 				return;
 			b.doClick(0);
 			verifyButtonClick(b, true);
-			JSComponentUI ui = b.秘getUI();
+//			JSComponentUI ui = b.秘getUI();
 		}
 	}
 

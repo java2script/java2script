@@ -10671,6 +10671,7 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// BH 2021.09.22 default file save as application/octet-stream, not text/plain
 // BH 2020.12.31 full 64-bit long
 // BH 2020.12.09 touch fixes for fdown and fdrag (j2sSlider)
 // BH 2020.12.03 note that relay is disabled using J2S.addDirectDatabaseCall(".")
@@ -11938,7 +11939,7 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 			// Asynchronous output generated using an anchor tag
 			var a = document.createElement("a");
 			a.href = "data:" + mimetype + ";base64," + data;
-			a.type = mimetype || (mimetype = "text/plain;charset=utf-8");
+			a.type = mimetype || (mimetype = "application/octet-stream");//was "text/plain;charset=utf-8");
 			a.download = filename;
 			a.target = "_blank";
 			$("body").append(a);
@@ -14022,6 +14023,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2021.08.16 fix for Interface initalizing its subclass with static initialization
 // BH 2021.07.28 String.instantialize upgraded to use TextDecoder() if possible (not in MSIE)
 // BH 2021.07.20 Date.toString() format yyyy moved to end, as in Java 
 // BH 2021.06.11 Number.compareTo(....) missing
@@ -14409,7 +14411,7 @@ var initStatic = function(cl, impls) {
 	} else if (cl.superclazz) {
 			initStatic(cl.superclazz);
 	}
-	cl.$static$ && cl.$static$();
+	cl.$static$ && (initStatics(cl), cl.$static$());
 }
 
 /**
@@ -14477,11 +14479,13 @@ var initClass0 = function(c) {
 	var fields = c.$fields$;
 	var objects = fields && fields[0];
 	createDefaults(c, objects, false);
-	if (!fields)
-		return;
-	var statics = fields[1];
+	fields && initStatics(c);
+}
+
+var initStatics = function(c) {
+	var statics = c.$fields$ && c.$fields$[1];
 	if (statics && statics.length)
-		createDefaults(c, statics, true);
+	createDefaults(c, statics, true);
 }
 
 //C$.$fields$=[
@@ -14492,20 +14496,20 @@ var createDefaults = function(c, data, isStatic) {
 	var a = getFields(c, data, true);
 	if (isStatic) {
 		for (var i = a.length; --i >= 0;) {
-			c[a[i][0]] = a[i][1];
+			var j = a[i][0];
+			if (c[j] != undefined)
+				return;
+			c[j] = a[i][1];
 		}
-	} else {
-		c.$init0$ = 
-			//(function(cs, a) {return 
-			function(){
-				var cs = c.superclazz;
-				cs && cs.$init0$ && cs.$init0$.apply(this);
-				for (var i = a.length; --i >= 0;){
-					this[a[i][0]] = a[i][1];
-				}
-			};
-//		})(c.superclazz, a);
+		return;
 	}
+	c.$init0$ = function(){
+			var cs = c.superclazz;
+			cs && cs.$init0$ && cs.$init0$.apply(this);
+			for (var i = a.length; --i >= 0;){
+				this[a[i][0]] = a[i][1];
+			}
+		};
 		
 }
 
@@ -16402,7 +16406,7 @@ _Loader.setClasspathFor = function(clazzes) {
   if (!(clazzes instanceof Array))
     clazzes = [clazzes];
     for (var i = clazzes.length; --i >= 0;) {
-      path = clazzes[i];
+      var path = clazzes[i];
       var jar = _Loader.getJ2SLibBase() + path.split(".")[0]+".js";
       path = path.replace(/\//g,".");
       classpathMap["#" + path] = jar;
@@ -17863,9 +17867,9 @@ var radix=(n.startsWith("0x", i) ? 16 : n.startsWith("0", i) ? 8 : 10);
 // The general problem with parseInt is that is not strict -- ParseInt("10whatever") == 10.
 // Number is strict, but Number("055") does not work, though ParseInt("055", 8) does.
 // need to make sure negative numbers are negative
-if (n == "")
- return NaN
-n = Number(n) & 0xFFFFFFFF;
+if (n == "" || radix == 10 && isNaN(+n))
+	return NaN
+n = (+n) & 0xFFFFFFFF;
 return (radix == 8 ? parseInt(n, 8) : n);
 }, 1);
 

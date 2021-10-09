@@ -107,6 +107,9 @@ public class Test_Applet_Combo extends JApplet {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				c1.setFont(c1.getFont().deriveFont(c1.getFont().getSize() + 1.0f));
+				System.out.println(c1.getFont());
+				c1.setBackground(c1.getBackground() == Color.YELLOW ? Color.WHITE : Color.YELLOW);
 				c1.setSelectedIndex((c1.getSelectedIndex() + 1) % c1.getItemCount());
 			}
 

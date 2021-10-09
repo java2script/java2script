@@ -173,7 +173,7 @@ public class Test_Video {
 		if (dialog != null) {
 			dialog.dispose();
 		}
-		dialog = HTML5Video.createDialog(null, label, 500, new Function<HTML5Video, Void>() {
+		dialog = HTML5Video.createDialog(null, label, 500, true, new Function<HTML5Video, Void>() {
 
 			@Override
 			public Void apply(HTML5Video video) {

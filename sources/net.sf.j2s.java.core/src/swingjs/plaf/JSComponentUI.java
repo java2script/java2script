@@ -1795,7 +1795,7 @@ public class JSComponentUI extends ComponentUI
 					w0 = w0i = "";
 				}
 			}
-			DOMNode.setStyles(node, "position", null, "width", null, "height", null);
+			DOMNode.setStyles(node, "position", null, "width", getSizingWidth(), "height", null);
 			if (innerNode != null) // JSListUI only
 				DOMNode.setStyles(innerNode, "width", null, "height", null);
 			// process of discovering width and height is facilitated using
@@ -1857,6 +1857,11 @@ public class JSComponentUI extends ComponentUI
 		}
 		return dim;
 	}
+
+	protected String getSizingWidth() {
+		return null;
+	}
+
 
 	protected Rectangle getBoundingRect(DOMNode node) {
 		if (tempDiv == null) {
@@ -3731,7 +3736,11 @@ public class JSComponentUI extends ComponentUI
 			if (!paintsSelf)
 				setBackgroundDOM(domNode, color);
 			// preliminary -- DOM only, when the background is set
-		} else if (allowPaintedBackground && (isOpaque && (isPanel || cellComponent != null || jc.getComponentCount() > 0) || jc.秘g != null)) {
+		} else if (allowPaintedBackground && (isOpaque && (isPanel 
+				|| isLabel && paintsSelf // overridden paintComponent 
+				|| cellComponent != null 
+				|| jc.getComponentCount() > 0) 
+				|| jc.秘g != null)) {
 			// all opaque components must paint their background
 			// just in case they have painted CHILDREN or if they are table cell components
 			if (isOpaque == (color.getAlpha() == 255)) {

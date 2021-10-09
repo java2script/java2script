@@ -337,7 +337,7 @@ public class JMenu extends JMenuItem implements MenuElement
 //            System.out.println("in JMenu.setPopupMenuVisible " + b);
 //            // Thread.dumpStack();
 //        }
-		if (!isEnabled())
+		if (!isEnabled() || popupMenu == null)
 			return;
     	if (b && popupMenu.getPeer() == null)
     		popupMenu.addNotify();// BH SwingJS 
