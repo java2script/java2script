@@ -212,6 +212,8 @@ public class JSButtonUI extends JSLightweightUI {
 			DOMNode.setStyle(buttonNode, "border", "none");
 		else if (button.getBorder() == BorderFactory.html5Border)
 			DOMNode.setStyle(buttonNode, "border", null);
+		if (!button.isContentAreaFilled())
+			DOMNode.setStyles(domNode, "border", "none", "outline", "none");
 //
 //		System.out.println(button.getText() + " " + button.getBorder());
 		if (!isMenuSep) {
@@ -221,6 +223,26 @@ public class JSButtonUI extends JSLightweightUI {
 		}
 		
 	}
+
+	@Override
+	public void dispose() {
+		if (isUIDisabled)
+			return;
+		super.dispose();
+		if (menuAnchorNode != null) {
+			// This is set in j2sMenu.js; we set it null here
+			// re-establish events when this button is added again
+			DOMNode.setAttr(menuAnchorNode, "_menu", null);
+		}
+	}
+
+	@Override
+	protected void undisposeUI(DOMNode node) {
+		if (!isDisposed)
+			return;
+		super.undisposeUI(node);
+	}
+
 
 	/**
 	 * called by j2sApplet.js

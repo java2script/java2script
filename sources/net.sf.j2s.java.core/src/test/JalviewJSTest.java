@@ -57,6 +57,8 @@ import javax.swing.event.MenuListener;
  */
 public class JalviewJSTest extends JPanel implements MenuListener, ItemListener {
 
+	// TODO:
+	// removeall and then restart 
 	public static final int SHIFT_DOWN_MASK;
 	public static final int ALT_DOWN_MASK;
 	public static final int SHORTCUT_MASK;
@@ -430,10 +432,13 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		Label awtlabel = new Label("AWT");
 		awtlabel.setFont(font);
 		awtlabel.setAlignment(Label.LEFT);
+		
 //	firstColumn.add(awtlabel);
 		awtlabel.setBackground(Color.white);
 
 		JButton b1 = new JButton("right left");
+		b1.setContentAreaFilled(false);
+
 		b1.setIcon(getImage("test2.png"));
 		b1.setFont(font);
 		// totally ignored
@@ -463,6 +468,9 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		cb3.setFont(font);
 		cb3.addActionListener((e) -> {
 			System.out.println("cb3 checked " + cb3.isSelected());
+			Font f = t1.getFont();
+			t1.setFont(new Font(f.getFontName(), Font.PLAIN, f.getSize()+2));
+			t1.setText(t1.getText() + "+");
 
 		});
 		cb3.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);

@@ -143,7 +143,7 @@ public class Test_Dialog extends JFrame implements PropertyChangeListener {
 		});
 		p.add(b);
 
-		b = new JButton("MessageDialog");
+		b = new JButton("Message1");
 		final JPanel message = new JPanel();
 		message.setLayout(new BorderLayout());
 		message.add(new JLabel("this is the message panel"), BorderLayout.CENTER);
@@ -151,12 +151,26 @@ public class Test_Dialog extends JFrame implements PropertyChangeListener {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(Test_Dialog.this, message);
+				JOptionPane.showMessageDialog(Test_Dialog.this, message, "title", JOptionPane.WARNING_MESSAGE);
+				System.out.println("continuing1");
 			}
 
 		});
 		p.add(b);
 
+		b = new JButton("Message2");
+		b.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JOptionPane.showMessageDialog(Test_Dialog.this, "message", "title", JOptionPane.ERROR_MESSAGE);
+				System.out.println("continuing2");
+			}
+
+		});
+		p.add(b);
+
+		
 		b = new JButton("InputDialog");
 		final JPanel input = new JPanel();
 		input.setLayout(new BorderLayout());

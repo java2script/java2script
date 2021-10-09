@@ -1,11 +1,13 @@
 package swingjs.plaf;
 
 
+import java.awt.Dimension;
+
 import javax.swing.JComponent;
 
 import swingjs.api.js.DOMNode;
 
-public class JSLayeredPaneUI extends JSLightweightUI {
+public class JSLayeredPaneUI extends JSPanelUI {
 
 	public JSLayeredPaneUI() {
 		isContainer = isLayeredPane = true;
@@ -19,6 +21,12 @@ public class JSLayeredPaneUI extends JSLightweightUI {
 		// add code here for adjustments when changes in bounds or other properties occur.
     return domNode;
 	}
+	
+	@Override
+	  protected Dimension getHTMLSizePreferred(DOMNode obj, boolean addCSS) {
+		return super.getHTMLSizePreferred(obj, addCSS);
+	}
+
 
 	@Override
 	public void installUI(JComponent jc) {

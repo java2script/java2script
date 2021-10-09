@@ -31,7 +31,10 @@ import javax.swing.JApplet;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -187,17 +190,27 @@ public class Test_Applet_2 extends JApplet {
 		}
 	}
 
-//	public static void main(String args[]) {
-//		JFrame f = new JFrame("Tanabe-Sugano");
+	public static void main(String args[]) {
+		// Note -- SwingJS cannot add an applet to a frame. 
+		JFrame f = new JFrame("Tanabe-Sugano");
 //		Test_Applet_2 tanabe = new Test_Applet_2();
+//		JMenuBar mb = new JMenuBar();
+//		mb.add(new JMenu("testing"));
+//		tanabe.setJMenuBar(mb);
 //		tanabe.init();
 //		tanabe.start();
+		
+		JMenuBar mb2 = new JMenuBar();
+		mb2.add(new JMenu("testing2"));
+		f.setJMenuBar(mb2);
+		
 //		f.add("Center", tanabe);
-//		f.setBackground(Color.white);
-//		f.pack();
-//		f.setVisible(true);
-//    f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//	}
+		f.setBackground(Color.white);
+		f.pack();
+
+		f.setVisible(true);
+    f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	}
 
 	@Override
 	public String getAppletInfo() {

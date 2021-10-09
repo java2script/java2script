@@ -386,7 +386,7 @@ public class Window extends JComponent {
 //
 //    private static final Logger log = Logger.getLogger("java.awt.Window");
 
-//    private static final boolean locationByPlatformProp;
+    private static final boolean locationByPlatformProp = false;
 
 	transient boolean isTrayIconWindow = false;
 
@@ -536,7 +536,8 @@ public class Window extends JComponent {
 	public Window(Window owner, GraphicsConfiguration gc) {
 		super();
 		秘winOrApplet = true;
-		 秘paintClass = 秘updateClass = /**@j2sNative C$ || */null;
+		秘paintClass = 秘updateClass = /** @j2sNative C$ || */
+				null;
 		setAppContext();
 		parent = owner;
 		if (owner != null)
@@ -567,16 +568,15 @@ public class Window extends JComponent {
 
 		/* offset the initial location with the original of the screen */
 		/* and any insets */
-		// SwingJS TODO ??
-		// Rectangle screenBounds = graphicsConfig.getBounds();
-		// Insets screenInsets = getToolkit().getScreenInsets(graphicsConfig);
-		// int x = getX() + screenBounds.x + screenInsets.left;
-		// int y = getY() + screenBounds.y + screenInsets.top;
-		// if (x != this.x || y != this.y) {
-		// setLocation(x, y);
-		// /* reset after setLocation */
-		// // setLocationByPlatform(locationByPlatformProp);
-		// }
+		Rectangle screenBounds = getGraphicsConfiguration().getBounds();
+		Insets screenInsets = getToolkit().getScreenInsets(graphicsConfig);
+		int x = getX() + screenBounds.x + screenInsets.left;
+		int y = getY() + screenBounds.y + screenInsets.top;
+		if (x != ((Container) this).x || y != ((Container) this).y) {
+			setLocation(x, y);
+			/* reset after setLocation */
+			setLocationByPlatform(locationByPlatformProp);
+		}
 
 		modalExclusionType = ModalExclusionType.NO_EXCLUDE;
 
@@ -3159,80 +3159,80 @@ public class Window extends JComponent {
 		return super.canContainFocusOwner(focusOwnerCandidate) && isFocusableWindow();
 	}
 
-//    private boolean locationByPlatform = locationByPlatformProp;
+    private boolean locationByPlatform = locationByPlatformProp;
 
-//    /**
-//     * Sets whether this Window should appear at the default location for the
-//     * native windowing system or at the current location (returned by
-//     * <code>getLocation</code>) the next time the Window is made visible.
-//     * This behavior resembles a native window shown without programmatically
-//     * setting its location.  Most windowing systems cascade windows if their
-//     * locations are not explicitly set. The actual location is determined once the
-//     * window is shown on the screen.
-//     * <p>
-//     * This behavior can also be enabled by setting the System Property
-//     * "java.awt.Window.locationByPlatform" to "true", though calls to this method
-//     * take precedence.
-//     * <p>
-//     * Calls to <code>setVisible</code>, <code>setLocation</code> and
-//     * <code>setBounds</code> after calling <code>setLocationByPlatform</code> clear
-//     * this property of the Window.
-//     * <p>
-//     * For example, after the following code is executed:
-//     * <pre><blockquote>
-//     * setLocationByPlatform(true);
-//     * setVisible(true);
-//     * boolean flag = isLocationByPlatform();
-//     * </blockquote></pre>
-//     * The window will be shown at platform's default location and
-//     * <code>flag</code> will be <code>false</code>.
-//     * <p>
-//     * In the following sample:
-//     * <pre><blockquote>
-//     * setLocationByPlatform(true);
-//     * setLocation(10, 10);
-//     * boolean flag = isLocationByPlatform();
-//     * setVisible(true);
-//     * </blockquote></pre>
-//     * The window will be shown at (10, 10) and <code>flag</code> will be
-//     * <code>false</code>.
-//     *
-//     * @param locationByPlatform <code>true</code> if this Window should appear
-//     *        at the default location, <code>false</code> if at the current location
-//     * @throws <code>IllegalComponentStateException</code> if the window
-//     *         is showing on screen and locationByPlatform is <code>true</code>.
-//     * @see #setLocation
-//     * @see #isShowing
-//     * @see #setVisible
-//     * @see #isLocationByPlatform
-//     * @see java.lang.System#getProperty(String)
-//     * @since 1.5
-//     */
-//    public void setLocationByPlatform(boolean locationByPlatform) {
-//        synchronized (getTreeLock()) {
-//            if (locationByPlatform && isShowing()) {
-//                throw new IllegalComponentStateException("The window is showing on screen.");
-//            }
-//            this.locationByPlatform = locationByPlatform;
-//        }
-//    }
+    /**
+     * Sets whether this Window should appear at the default location for the
+     * native windowing system or at the current location (returned by
+     * <code>getLocation</code>) the next time the Window is made visible.
+     * This behavior resembles a native window shown without programmatically
+     * setting its location.  Most windowing systems cascade windows if their
+     * locations are not explicitly set. The actual location is determined once the
+     * window is shown on the screen.
+     * <p>
+     * This behavior can also be enabled by setting the System Property
+     * "java.awt.Window.locationByPlatform" to "true", though calls to this method
+     * take precedence.
+     * <p>
+     * Calls to <code>setVisible</code>, <code>setLocation</code> and
+     * <code>setBounds</code> after calling <code>setLocationByPlatform</code> clear
+     * this property of the Window.
+     * <p>
+     * For example, after the following code is executed:
+     * <pre><blockquote>
+     * setLocationByPlatform(true);
+     * setVisible(true);
+     * boolean flag = isLocationByPlatform();
+     * </blockquote></pre>
+     * The window will be shown at platform's default location and
+     * <code>flag</code> will be <code>false</code>.
+     * <p>
+     * In the following sample:
+     * <pre><blockquote>
+     * setLocationByPlatform(true);
+     * setLocation(10, 10);
+     * boolean flag = isLocationByPlatform();
+     * setVisible(true);
+     * </blockquote></pre>
+     * The window will be shown at (10, 10) and <code>flag</code> will be
+     * <code>false</code>.
+     *
+     * @param locationByPlatform <code>true</code> if this Window should appear
+     *        at the default location, <code>false</code> if at the current location
+     * @throws <code>IllegalComponentStateException</code> if the window
+     *         is showing on screen and locationByPlatform is <code>true</code>.
+     * @see #setLocation
+     * @see #isShowing
+     * @see #setVisible
+     * @see #isLocationByPlatform
+     * @see java.lang.System#getProperty(String)
+     * @since 1.5
+     */
+    public void setLocationByPlatform(boolean locationByPlatform) {
+        synchronized (getTreeLock()) {
+            if (locationByPlatform && isShowing()) {
+                throw new IllegalComponentStateException("The window is showing on screen.");
+            }
+            this.locationByPlatform = locationByPlatform;
+        }
+    }
 
-//    /**
-//     * Returns <code>true</code> if this Window will appear at the default location
-//     * for the native windowing system the next time this Window is made visible.
-//     * This method always returns <code>false</code> if the Window is showing on the
-//     * screen.
-//     *
-//     * @return whether this Window will appear at the default location
-//     * @see #setLocationByPlatform
-//     * @see #isShowing
-//     * @since 1.5
-//     */
-//    public boolean isLocationByPlatform() {
+    /**
+     * Returns <code>true</code> if this Window will appear at the default location
+     * for the native windowing system the next time this Window is made visible.
+     * This method always returns <code>false</code> if the Window is showing on the
+     * screen.
+     *
+     * @return whether this Window will appear at the default location
+     * @see #setLocationByPlatform
+     * @see #isShowing
+     * @since 1.5
+     */
+    public boolean isLocationByPlatform() {
 //        synchronized (getTreeLock()) {
-//            return locationByPlatform;
-//        }
-//    }
+            return locationByPlatform;
+//       }
+    }
 
 	/**
 	 * {@inheritDoc}

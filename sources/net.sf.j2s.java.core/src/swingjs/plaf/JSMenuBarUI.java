@@ -133,7 +133,7 @@ public class JSMenuBarUI extends JSPanelUI implements ContainerListener {
 	public Dimension getPreferredSize(JComponent jc) {
 		// layout manager will call this specifically for the height
 		// we could make this larger if it ends up being multilevel?
-		Dimension d = new Dimension(0, getContainerHeight());
+		Dimension d = null;///new Dimension(0, getContainerHeight());
 		return d;
 	}
 

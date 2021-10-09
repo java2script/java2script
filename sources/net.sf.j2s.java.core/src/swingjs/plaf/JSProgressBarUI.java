@@ -738,9 +738,8 @@ private DOMNode barNode;
 		int amountFull = getAmountFull(b, barRectWidth, barRectHeight);
 
 		Graphics2D g2 = (Graphics2D) g;
-		g2.setColor(progressBar.getForeground());
-
 		if (progressBar.isIndeterminate()) {
+			g2.setColor(progressBar.getForeground());
 	   		DOMNode.setStyle(barNode, "display", "block");
 	   	 			if (progressBar.getOrientation() == JProgressBar.HORIZONTAL) {
     		DOMNode.setSize(barNode, barRectWidth, barRectHeight);
@@ -751,6 +750,9 @@ private DOMNode barNode;
 			}
 		} else {
 	   		DOMNode.setStyle(barNode, "display", "none");
+			g2.setColor(progressBar.getBackground());
+			g2.fillRect(b.left, b.top, barRectWidth, barRectHeight);
+			g2.setColor(progressBar.getForeground());
 			if (progressBar.getOrientation() == JProgressBar.HORIZONTAL) {
 				// draw the cells
 				if (cellSpacing == 0 && amountFull > 0) {

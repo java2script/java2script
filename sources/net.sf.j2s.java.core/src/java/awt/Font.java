@@ -1977,7 +1977,7 @@ public class Font
 			return f;
 		}
 		AttributeValues newValues = getAttributeValues().clone();
-		newValues.setSize(size);
+		newValues.setSize(sizePts);
 		return new Font(newValues, null, -1, createdFont, font2DHandle);
 	}
 

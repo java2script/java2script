@@ -406,12 +406,11 @@ public class Assets {
 		if (url == null && !zipOnly) {
 			url = Assets.class.getClassLoader().getResource(path);
 		}
-		InputStream is = null;
 		try {
-			is = url.openStream();
+			return (url == null ? null : url.openStream());
 		} catch (Throwable t) {
 		}
-		return is;
+		return null;
 	}
 	/**
 	 * Determine the path to an asset. If not found in a zip file asset, return the

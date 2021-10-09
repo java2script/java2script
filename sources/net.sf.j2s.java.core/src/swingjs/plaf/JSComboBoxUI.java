@@ -98,10 +98,12 @@ public class JSComboBoxUI extends JSLightweightUI {
 		if (domNode == null) {
 			domNode = focusNode = newDOMObject("div", id);
 			setDataShadowKeyComponent(domNode, listBox);
+			
 		}
 		addFocusHandler();
 		setCssFont(domNode, c.getFont());
 		popup.updateEnabled();
+		setBackgroundImpl(jc.isOpaque() ? getBackground() : null);
 		return updateDOMNodeCUI();
 	}
 
@@ -261,7 +263,7 @@ public class JSComboBoxUI extends JSLightweightUI {
 		// NOTE: this needs to default to true if not specified
 		Boolean b = (Boolean) UIManager.get("ComboBox.squareButton");
 		squareButton = b == null ? true : b;
-
+		
 		padding = UIManager.getInsets("ComboBox.padding");
 	}
 
@@ -1745,8 +1747,10 @@ public class JSComboBoxUI extends JSLightweightUI {
 		//
 		@Override
 		public void propertyChange(PropertyChangeEvent e) {
+			Component editor = JSComboBoxUI.this.editor;
 			String propertyName = e.getPropertyName();
-			//System.out.println("handler prop " + propertyName);
+			JSComboPopupList popup = JSComboBoxUI.this.popup;
+			// System.out.println("handler prop " + propertyName);
 			if (e.getSource() == editor) {
 				// If the border of the editor changes then this can effect
 				// the size of the editor which can cause the combo's size to
@@ -1758,7 +1762,8 @@ public class JSComboBoxUI extends JSLightweightUI {
 				}
 			} else {
 				JComboBox comboBox = (JComboBox) e.getSource();
-				if (propertyName == "model") {
+				switch (propertyName) {
+				case "model":
 					ComboBoxModel newModel = (ComboBoxModel) e.getNewValue();
 					ComboBoxModel oldModel = (ComboBoxModel) e.getOldValue();
 
@@ -1783,10 +1788,14 @@ public class JSComboBoxUI extends JSLightweightUI {
 					popup.updateSelectedIndex();
 					popup.updateCSS();
 					repaint();
-				} else if (propertyName == "editor" && comboBox.isEditable()) {
-					addEditor();
-					comboBox.revalidate();
-				} else if (propertyName == "editable") {
+					break;
+				case "editor":
+					if (comboBox.isEditable()) {
+						addEditor();
+						comboBox.revalidate();
+					}
+					break;
+				case "editable":
 					if (comboBox.isEditable()) {
 						comboBox.setRequestFocusEnabled(false);
 						addEditor();
@@ -1796,47 +1805,74 @@ public class JSComboBoxUI extends JSLightweightUI {
 					}
 					updateToolTipTextForChildren();
 					comboBox.revalidate();
-				} else if (propertyName == "enabled") {
+					break;
+				case "enabled":
 					boolean enabled = comboBox.isEnabled();
 					if (editor != null)
 						editor.setEnabled(enabled);
 //					if (arrowButton != null)
 //						arrowButton.setEnabled(enabled);
 					repaint();
-				} else if (propertyName == "focusable") {
+					break;
+				case "focusable":
 					boolean focusable = comboBox.isFocusable();
 					if (editor != null)
 						editor.setFocusable(focusable);
 //					if (arrowButton != null)
 //						arrowButton.setFocusable(focusable);
 					repaint();
-				} else if (propertyName == "maximumRowCount") {
+					break;
+				case "maximumRowCount":
 					if (isPopupVisible(comboBox)) {
 						setPopupVisible(comboBox, false);
 						setPopupVisible(comboBox, true);
 					}
-				} else if (propertyName == "font") {
+					break;
+				case "background":
+					Color c = comboBox.getBackground();
+					listBox.setBackground(c);
+					if (editor != null) {
+						editor.setBackground(c);
+					}
+					popup.updateCSS();
+					break;
+				case "foreground":
 					listBox.setFont(comboBox.getFont());
 					if (editor != null) {
 						editor.setFont(comboBox.getFont());
 					}
 					isMinimumSizeDirty = true;
 					isDisplaySizeDirty = true;
+					popup.updateCSS();
+					break;
+				case "font":
+					listBox.setFont(comboBox.getFont());
+					if (editor != null) {
+						editor.setFont(comboBox.getFont());
+					}
+					isMinimumSizeDirty = true;
+					isDisplaySizeDirty = true;
+					popup.updateCSS();
 					comboBox.validate();
-				} else if (propertyName == JComponent.TOOL_TIP_TEXT_KEY) {
+					break;
+				case JComponent.TOOL_TIP_TEXT_KEY:
 					updateToolTipTextForChildren();
-				} else if (propertyName == JSComboBoxUI.IS_TABLE_CELL_EDITOR) {
+					break;
+				case JSComboBoxUI.IS_TABLE_CELL_EDITOR:
 					Boolean inTable = (Boolean) e.getNewValue();
 					isTableCellEditor = inTable.equals(Boolean.TRUE) ? true : false;
-				} else if (propertyName == "prototypeDisplayValue") {
+					break;
+				case "prototypeDisplayValue":
 					isMinimumSizeDirty = true;
 					isDisplaySizeDirty = true;
 					comboBox.revalidate();
-				} else if (propertyName == "renderer") {
+					break;
+				case "renderer":
 					isMinimumSizeDirty = true;
 					isDisplaySizeDirty = true;
 					popup.updateList();
 					comboBox.revalidate();
+					break;
 				}
 			}
 		}

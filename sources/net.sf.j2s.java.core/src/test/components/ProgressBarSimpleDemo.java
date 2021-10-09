@@ -252,7 +252,7 @@ public class ProgressBarSimpleDemo {
 	}
 
 	protected void onProgress() {
-		progressBar.setValue(++count);
+		progressBar.setValue((int) (Math.random() * max));
 	}
 
 	protected void onDone() {

@@ -1,6 +1,7 @@
 package swingjs.plaf;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.JSComponent;
 import java.beans.PropertyChangeEvent;
 
@@ -112,16 +113,6 @@ public class JSMenuUI extends JSMenuItemUI implements MenuListener {
 	protected int getChildCount() {
 		return (isMenuItem ? 1 : jc.getComponentCount());
 	}
-
-//	@Override
-//	public Dimension getMaximumSize(JComponent jc) {
-//		return super.getPreferredSize(jc);
-//	}
-//
-//	@Override
-//	public Dimension getPreferredSize(JComponent jc) {
-//		return super.getPreferredSize(jc);
-//	}
 
 	@Override
 	protected String getPropertyPrefix() {

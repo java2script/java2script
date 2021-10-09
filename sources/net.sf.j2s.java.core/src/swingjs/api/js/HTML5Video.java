@@ -253,7 +253,7 @@ public interface HTML5Video extends DOMNode {
 	 * Remove action listener
 	 * 
 	 * @param jsvideo   the HTML5 video element
-	 * @param listeners an array of event/listener pairs created by
+	 * @param listeners an array of event/listener epairs created by
 	 *                  addActionListener
 	 */
 	public static void removeActionListener(HTML5Video jsvideo, Object[] listeners) {
@@ -261,6 +261,7 @@ public interface HTML5Video extends DOMNode {
 			for (int i = 0; i < eventTypes.length; i++) {
 				jsvideo.removeEventListener(eventTypes[i]);
 			}
+			return;
 		}
 		
 		for (int i = 0; i < listeners.length; i += 2) {
@@ -314,6 +315,11 @@ public interface HTML5Video extends DOMNode {
 	 */
 	public static JDialog createDialog(Frame parent, Object source, int maxWidth,
 			Function<HTML5Video, Void> whenReady) {
+		return createDialog(parent, source, maxWidth, true, whenReady);
+	}
+	
+	public static JDialog createDialog(Frame parent, Object source, int maxWidth, boolean addControls,
+			Function<HTML5Video, Void> whenReady) {
 		JDialog dialog = new JDialog(parent);
 		Container p = dialog.getContentPane();
 		p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
@@ -322,7 +328,8 @@ public interface HTML5Video extends DOMNode {
 		// not in Java! dialog.putClientProperty("jsvideo", label);
 		p.add(label);
 		label.setVisible(false);
-		p.add(getControls(label));
+		if (addControls)
+			p.add(getControls(label));
 		dialog.setModal(false);
 		dialog.pack();
 		dialog.setVisible(true);

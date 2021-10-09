@@ -56,6 +56,8 @@ import javax.swing.MenuSelectionManager;
 import javax.swing.Timer;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.Document;
@@ -758,6 +760,10 @@ public void setCarentPosition(int i) {
 		};
 
 		JMenuItem mb1a = new JMenuItem("test-1");
+		mb1a.addActionListener((e)->{
+			System.out.println("test-1 clicked");
+		});
+		
 		JMenuItem mb1b = new JMenuItem("test-2");
 		JMenuItem mb1c = new JMenuItem("test-3");
 		JMenuItem mb1d = new JMenuItem("test-4");
@@ -773,10 +779,33 @@ public void setCarentPosition(int i) {
 		mb1e.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, KeyEvent.CTRL_MASK));
 
 		mb1.add(mb1a);
-		mb1.add(mb1b);
-		mb1.add(mb1c);
-		mb1.add(mb1d);
-		mb1.add(mb1e);
+//		mb1.add(mb1b);
+//		mb1.add(mb1c);
+//		mb1.add(mb1d);
+//		mb1.add(mb1e);
+		mb1.addMenuListener(new MenuListener() {
+
+			@Override
+			public void menuSelected(MenuEvent e) {
+				mb1.removeAll();
+				mb1.add(mb1a);
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void menuDeselected(MenuEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void menuCanceled(MenuEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
 
 		KeyStroke[] a = mb1.getRegisteredKeyStrokes();
 		System.out.println("menubar menu registration: " + a.length);

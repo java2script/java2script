@@ -58,5 +58,9 @@ public class P3 extends T3 {
     p.z = z;
     return p;
   }
+  
+  public static P3 newA(float[] a) {
+   return new3(a[0], a[1], a[2]);    
+  }
 
 }
