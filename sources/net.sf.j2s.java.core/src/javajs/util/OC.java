@@ -2,6 +2,7 @@ package javajs.util;
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -354,7 +355,19 @@ public class OC extends OutputStream implements GenericOutputChannel {
       Object data = (sb == null ? toByteArray() : sb.toString());
       if (_function != null) {
         J2S.applyFunc(_function, data);
-      } else if (!isSwingJS) {
+      } else if (isSwingJS) {
+    	  if (os == null && bw == null && sb != null && fileName != null) {
+    		  try {
+				os = new FileOutputStream(fileName);
+				os.write(sb.toBytes(0, -1));
+				os.close();
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+    	  }
+      } else {
           Object info = /** @j2sNative { isBinary : (this.sb == null) } || */
               null;
           String mimetype = null;

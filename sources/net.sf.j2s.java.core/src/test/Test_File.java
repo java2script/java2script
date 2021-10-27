@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
@@ -17,11 +18,8 @@ public class Test_File extends Test_ {
 
 	@SuppressWarnings("unused")
 	public static void main(String[] args) {
-
-		File fff = new File("jar:file:testing/here");
-		System.out.println(fff.getPath());
-		System.out.println(fff.getAbsolutePath());
 		
+
 		testTempDir();
 		
 		System.out.println(System.getProperty("jnlp.codebase"));
