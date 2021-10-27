@@ -688,6 +688,8 @@ public class JSToolkit extends SunToolkit
 			if (url.getProtocol() == "jar") {
 				return createVideo(JSUtil.getFileAsBytes(url));
 			}
+			if (url.getProtocol().equals("file"))
+				return getVideo(url.getFile());
 			return createVideo(Paths.get(url.toURI()));
 		} catch (URISyntaxException e) {
 			return null;
