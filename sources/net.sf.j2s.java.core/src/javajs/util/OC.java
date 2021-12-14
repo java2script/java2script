@@ -235,6 +235,8 @@ public class OC extends OutputStream implements GenericOutputChannel {
 	public void write(byte[] buf, int i, int len) {
 		if (os == null)
 			initOS();
+	    if (len < 0)
+	        len = buf.length - i;
 		try {
 			os.write(buf, i, len);
 		} catch (IOException e) {
@@ -294,91 +296,91 @@ public class OC extends OutputStream implements GenericOutputChannel {
 		closeChannel();
 	}
 
-  @Override
-  @SuppressWarnings({ "unused", "null" })
-  public String closeChannel() {
-    if (closed)
-      return null;
-    // can't cancel file writers
-    try {
-      if (bw != null) {
-        bw.flush();
-        bw.close();
-      } else if (os != null) {
-        os.flush();
-        os.close();
-      }
-      if (os0 != null && isCanceled) {
-        os0.flush();
-        os0.close();
-      }
-    } catch (Exception e) {
-      // ignore closing issues
-    }
-    if (isCanceled) {
-      closed = true;
-      return null;
-    }
-    if (fileName == null) {
-      if (isBase64) {
-        String s = getBase64();
-        if (os0 != null) {
-          os = os0;
-          append(s);
-        }
-        sb = new SB();
-        sb.append(s);
-        isBase64 = false;
-        return closeChannel();
-      }
-      return (sb == null ? null : sb.toString());
-    }
-    closed = true;
-    if (!isLocalFile) {
-      String ret = postByteArray(); // unsigned applet could do this
-      if (ret.startsWith("java.net"))
-        byteCount = -1;
-      return ret;
-    }
-    J2SObjectInterface J2S = null;
-    Object _function = null;
-    boolean isSwingJS = false;
-    /**
-     * @j2sNative isSwingJS = !!self.J2S; J2S = self.J2S || self.Jmol; _function
-     *            = (typeof this.fileName == "function" ? this.fileName : null);
-     * 
-     */
-    if (J2S != null && !isTemp) {
-
-      // action here generally will be for the browser to display a download message
-      // temp files will not be sent this way.
-      Object data = (sb == null ? toByteArray() : sb.toString());
-      if (_function != null) {
-        J2S.applyFunc(_function, data);
-      } else if (isSwingJS) {
-    	  if (os == null && bw == null && sb != null && fileName != null) {
-    		  try {
-				os = new FileOutputStream(fileName);
-				os.write(sb.toBytes(0, -1));
+	@Override
+	@SuppressWarnings({ "unused", "null" })
+	public String closeChannel() {
+		if (closed)
+			return null;
+		// can't cancel file writers
+		try {
+			if (bw != null) {
+				bw.flush();
+				bw.close();
+			} else if (os != null) {
+				os.flush();
 				os.close();
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
 			}
-    	  }
-      } else {
-          Object info = /** @j2sNative { isBinary : (this.sb == null) } || */
-              null;
-          String mimetype = null;
-          if (bytes != null && Rdr.isZipB(bytes)) {
-            mimetype = "application/zip";
-          }
-          J2S.doAjax(fileName, mimetype, data, info);
-      }
-    }
-    return null;
-  }
+			if (os0 != null && isCanceled) {
+				os0.flush();
+				os0.close();
+			}
+		} catch (Exception e) {
+			// ignore closing issues
+		}
+		if (isCanceled) {
+			closed = true;
+			return null;
+		}
+		if (fileName == null) {
+			if (isBase64) {
+				String s = getBase64();
+				if (os0 != null) {
+					os = os0;
+					append(s);
+				}
+				sb = new SB();
+				sb.append(s);
+				isBase64 = false;
+				return closeChannel();
+			}
+			return (sb == null ? null : sb.toString());
+		}
+		closed = true;
+		if (!isLocalFile) {
+			String ret = postByteArray(); // unsigned applet could do this
+			if (ret == null || ret.startsWith("java.net"))
+				byteCount = -1;
+			return ret;
+		}
+		J2SObjectInterface J2S = null;
+		Object _function = null;
+		boolean isSwingJS = false;
+		/**
+		 * @j2sNative isSwingJS = !!self.J2S; J2S = self.J2S || self.Jmol; _function =
+		 *            (typeof this.fileName == "function" ? this.fileName : null);
+		 * 
+		 */
+		if (J2S != null && !isTemp) {
+
+			// action here generally will be for the browser to display a download message
+			// temp files will not be sent this way.
+			Object data = (sb == null ? toByteArray() : sb.toString());
+			if (_function != null) {
+				J2S.applyFunc(_function, data);
+			} else if (isSwingJS) {
+				if (os == null && bw == null && sb != null && fileName != null) {
+					try {
+						os = new FileOutputStream(fileName);
+						os.write(sb.toBytes(0, -1));
+						os.close();
+					} catch (FileNotFoundException e) {
+						e.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			} else {
+				Object info = /** @j2sNative { isBinary : (this.sb == null) } || */
+						null;
+				String mimetype = null;
+				if (bytes != null && Rdr.isZipB(bytes)) {
+					mimetype = "application/zip";
+				}
+				J2S.doAjax(fileName, mimetype, data, info);
+			}
+		}
+		return null;
+	}
 
 	public boolean isBase64() {
 		return isBase64;
@@ -423,22 +425,21 @@ public class OC extends OutputStream implements GenericOutputChannel {
 		return bytePoster == null ? null : bytePoster.postByteArray(fileName, toByteArray());
 	}
 
-	public final static String[] urlPrefixes = { "http:", "https:", "sftp:", "ftp:", "file:" };
+	public final static String[] urlPrefixes = { "http:", "https:", "sftp:", "ftp:", "file:", "cache:" };
 	// note that SFTP is not supported
-	public final static int URL_LOCAL = 4;
+	public final static int URL_LOCAL = 4, URL_CACHE = 5;
 
 	public static boolean isRemote(String fileName) {
-		if (fileName == null)
+		if (fileName == null || fileName.equals(";base64,"))
 			return false;
 		int itype = urlTypeIndex(fileName);
-		return (itype >= 0 && itype != URL_LOCAL);
+		// was !=, but I think cache counts as local
+		// this is only for Jmol. 
+		return (itype >= 0 && itype < URL_LOCAL);
 	}
 
 	public static boolean isLocal(String fileName) {
-		if (fileName == null)
-			return false;
-		int itype = urlTypeIndex(fileName);
-		return (itype < 0 || itype == URL_LOCAL);
+		return (fileName != null && !isRemote(fileName));
 	}
 
 	public static int urlTypeIndex(String name) {
