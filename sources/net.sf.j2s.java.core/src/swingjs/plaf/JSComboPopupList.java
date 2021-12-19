@@ -73,8 +73,7 @@ class JSComboPopupList extends JList {
 
 	@SuppressWarnings("unused")
 	void createJ2SCB() {
-		if (j2scb != null)
-			j2scb.j2sCB("destroy");
+		uninstallingUI();
 		j2scb = (api.js) cbui.$(cbui.domNode);
 		@SuppressWarnings("unused")
 		Object me = this;
@@ -140,6 +139,7 @@ class JSComboPopupList extends JList {
 	}
 
 	void updateCSS() {
+		秘getUI().allowPaintedBackground = false;
 		DOMNode.setSize(cbui.domNode, cbui.width, cbui.height);
 		if (j2scb != null) {
 			j2scb.j2sCB("updateCSS");
@@ -150,21 +150,26 @@ class JSComboPopupList extends JList {
 		if (j2scb == null)
 			return;
 		int n = cbui.comboBox.getItemCount();
-		DOMNode[] opts = new DOMNode[n];
+		DOMNode[] opts = new DOMNode[n*2];
 		JList l = this;
 		Dimension d = l.getPreferredSize();
 		int h = d.height;
 		int w = d.width;
 		JSListUI ui = (JSListUI) l.getUI();
-		for (int i = 0; i < n; i++) {
-			JComponent j = (JComponent) cbui.comboBox.getRenderer().getListCellRendererComponent(this,
-					getModel().getElementAt(i), i, true, false);
-			j.setSize(w, ui.getRowHeight(i));
-			opts[i] = j.秘getUI().getListNode();
+		for (int i = 0, p = 0; i < n; i++) {
+			opts[p++] = renderItem(i, w, ui);
+			opts[p++] = renderItem(i, w, ui);
 		}
-		j2scb.j2sCB("updateList", opts);
+		j2scb.j2sCB("updateList2", opts);
 		j2scb.j2sCB("setHeight", (h > JSComboBoxUI.MAX_HEIGHT ? JSComboBoxUI.MAX_HEIGHT : 0));
 		updateCSS();
+	}
+
+	private DOMNode renderItem(int i, int w, JSListUI ui) {
+		JComponent j = (JComponent) cbui.comboBox.getRenderer().getListCellRendererComponent(this,
+				getModel().getElementAt(i), i, true, false);
+		j.setSize(w, ui.getRowHeight(i));
+		return j.秘getUI().getListNode();
 	}
 
 	void updateSelectedIndex() {
@@ -240,6 +245,11 @@ class JSComboPopupList extends JList {
 	public KeyListener getKeyListener() {
 		return null;
 	}
+
+	public void dispose() {
+		uninstallingUI();
+	}
+
 
 	// @Override
 	public void uninstallingUI() {

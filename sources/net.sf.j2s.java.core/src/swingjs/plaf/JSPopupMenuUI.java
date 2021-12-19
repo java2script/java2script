@@ -231,7 +231,7 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener, Mouse
 					setHTMLElement();
 					menu = (JPopupMenu) jc;
 					j2sSwingMenu.setMenu(menu);
-					isTainted = false;
+					setTainted(false);
 					Component top = JSComponent.秘getTopInvokableAncestor(jc, true);
 					if (top != null) {
 						top.removeMouseListener(this);

@@ -443,6 +443,7 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
      */
     protected void positionCaret(MouseEvent e) {
         Point pt = new Point(e.getX(), e.getY());
+        pt.x = Integer.MAX_VALUE;
         ((TextUI) component.getUI()).viewToModel(component, pt, biasRet);
         if (pt.x >= 0) {
             if(biasRet[0] == null)
@@ -455,6 +456,7 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
 
     private int getPosition(MouseEvent e, Bias[] biasret) {
         Point pt = new Point(e.getX(), e.getY());
+        pt.x = Integer.MAX_VALUE;
         int pos = ((TextUI) component.getUI()).viewToModel(component, pt, biasRet);
         System.out.println("def caret getPos " + e.getID() + " " + pt);
         return pos;

@@ -409,8 +409,9 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 				html = sb.toString();// + "<div style='height:5px'><br></div>";
 			}
 		}
-		if (isHTML) {
+		if (jc.isOpaque())
 			setBackgroundDOM(domNode, jc.getBackground());
+		if (isHTML) {
 			if (currentHTML != null && html.equals(rawHTML))
 				return;
 			rawHTML = html;
@@ -1264,18 +1265,7 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 	@Override
 	void setJSText() {
 		mytext = null;
-		updateDOMNode();
-//		System.out.println("JSEPUI iskeyaction " + (jc.秘keyAction != null) + "dot=" + dot + " len=" + editor.getDocument().getLength() 
-//				+ "\nEDITOR: >>" + PT.esc(editor.getText()) + "<<" 
-//				+ "\nJAVASC: >>" + PT.esc((String)DOMNode.getAttr(domNode, "innerText")) + "<<"
-//		        + "\nJSHTML: >>" + PT.esc((String)DOMNode.getAttr(domNode, "innerHTML")) + "<<\n");
-//		for (int i = 0, len = editor.getCaretPosition(); i < len; i++)
-//			try {
-//				System.out.println("Ed[" + i + "]=" + editor.getDocument().getText(i, 1).codePointAt(0));
-//			} catch (BadLocationException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
+		super.setJSText();
 	}
 
 	

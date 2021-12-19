@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 //import java.awt.Button;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.DefaultKeyboardFocusManager;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -25,6 +26,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionAdapter;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.BufferedInputStream;
@@ -67,6 +69,7 @@ import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 
 public class Test_Editor extends JFrame implements DropTargetListener {
 
@@ -134,7 +137,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 		JTextPane editor = getEditor();
 		JScrollPane js = new JScrollPane(editor);
 		// js.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-
+		editor.setBackground(Color.yellow);
 		area = getArea();
 		area.addKeyListener(ka);
 		JScrollPane js2 = new JScrollPane(area);
@@ -613,6 +616,16 @@ public void setCarentPosition(int i) {
 
 	private JTextPane getEditor() {
 		JTextPane editor = new JTextPane();
+
+		editor.addMouseMotionListener(new MouseMotionAdapter() {
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				String text = editor.getText();
+				int i = editor.viewToModel(e.getPoint());
+				System.out.println(e.getPoint() + " " + i + " " + (i < 0 ? "<" :i >= text.length() ? ">" : text.charAt(i)) + "/" + text.length());
+			}
+		});
+
 		editor.setPreferredSize(new Dimension(400, 300));
 		System.out.println("Test_Editor " + editor.getDocument());
 		System.out.println("Test_Editor " + editor.getEditorKit());
@@ -622,7 +635,8 @@ public void setCarentPosition(int i) {
 		System.out
 				.println("Test_Editor Element count = " + editor.getDocument().getRootElements()[0].getElementCount());
 		editor.setBackground(new Color(200, 200, 200));
-		editor.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 16));
+		editor.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 26));
+		editor.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
 		System.out.println("Test_Editor editor pref size " + editor.getPreferredSize());
 
 		Style style = editor.addStyle("Red", null);
