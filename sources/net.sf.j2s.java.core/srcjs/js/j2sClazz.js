@@ -7,6 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2021.12.19 adds Double -0; fixes println(Double)
 // BH 2021.12.15 default encoding for String.getBytes() should be utf-8.
 // BH 2021.08.16 fix for Interface initializing its subclass with static initialization
 // BH 2021.07.28 String.instantialize upgraded to use TextDecoder() if possible (not in MSIE)
@@ -3263,12 +3264,19 @@ ps.printf = ps.printf$S$OA = ps.format = ps.format$S$OA = function (f, args) {
 
 ps.flush$ = function() {}
 
-ps.println = ps.println$ = ps.println$O = ps.println$Z = ps.println$I = ps.println$S = ps.println$C = function(s) {
+ps.println = ps.println$ = ps.println$Z = ps.println$I = ps.println$S = ps.println$C = function(s) {
  s = (typeof s == "undefined" ? "" : "" + s);
  checkTrace(s);
  s = (typeof s == "undefined" ? "\r\n" : s == null ?  s = "null\r\n" : s + "\r\n");
   f(s);
 };
+
+ps.println$O = function(s) {
+	 s = (typeof s == "undefined" ? "" : s.toString());
+	 checkTrace(s);
+	 s = (typeof s == "undefined" ? "\r\n" : s == null ?  s = "null\r\n" : s + "\r\n");
+	  f(s);
+	};
 
 ps.println$J = function(l) {ps.println(Long.$s(l))}
 ps.println$F = ps.println$D = function(f) {var s = "" + f; ps.println(s.indexOf(".") < 0 && s.indexOf("Inf") < 0 ? s + ".0" : s)};
@@ -5202,6 +5210,9 @@ function(n){
 }, 1);
 
 Clazz._floatToString = function(f) {
+	if (f === 0) {
+		return (1/f == -Infinity ? "-0.0" : "0.0");
+	}
  var check57 = (Math.abs(f) >= 1e-6 && Math.abs(f) < 1e-3);
  if (check57)
 	f/=1e7;
@@ -5229,7 +5240,7 @@ var maxFloat = 3.4028235E38;
 var minFloat = -3.4028235E38;
 
 m$(Float,"c$", function(v){
-	v || v == null || v != v || (v = 0);
+	v || v == null || v != v || (v == 0) || (v = 0);
 	if (typeof v != "number") 
 	v = Float.parseFloat$S(v);
 	this.valueOf=function(){return v;}
@@ -5245,6 +5256,7 @@ m$(Float, "c$$S", function(v){
 }, 1);
 
 m$(Float, "c$$D", function(v){
+	v || (v = 0);
   v = (v < minFloat ? -Infinity : v > maxFloat ? Infinity : v);
  this.valueOf=function(){return v;}
 }, 1);
@@ -5375,18 +5387,19 @@ return Clazz._floatToString(this.valueOf());
 };
 
 m$(Double, "c$$D", function(v){
+	v || (v = 0);
 	this.valueOf=function(){return v;};
 }, 1);
 
 m$(Double,"c$", function(v){
-v || v == null ||  v != v || (v = 0);
+  v || v == null || v != v || (v == 0) || (v = 0);
  if (typeof v != "number") 
   v = Double.parseDouble$S(v);
  this.valueOf=function(){return v;}
 }, 1);
 
 m$(Double, ["c$$S"], function(v){
-v || v == null || (v = 0);
+v || v == null || (v == 0) || (v = 0);
 if (typeof v != "number") 
 	v = Double.parseDouble$S(v);
 this.valueOf=function(){return v;};
