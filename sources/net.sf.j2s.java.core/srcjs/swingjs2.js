@@ -14023,7 +14023,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
-// BH 2021.08.16 fix for Interface initalizing its subclass with static initialization
+// BH 2021.12.15 default encoding for String.getBytes() should be utf-8.
+// BH 2021.08.16 fix for Interface initializing its subclass with static initialization
 // BH 2021.07.28 String.instantialize upgraded to use TextDecoder() if possible (not in MSIE)
 // BH 2021.07.20 Date.toString() format yyyy moved to end, as in Java 
 // BH 2021.06.11 Number.compareTo(....) missing
@@ -19907,8 +19908,7 @@ sp.getBytes$I$I$BA$I=function(i0, i1, dst, dpt) {
 
 sp.getBytes$=sp.getBytes$S=sp.getBytes$java_nio_charset_Charset=function(){
 var s=this;
-if(arguments.length==1){
- var cs=arguments[0].toString().toLowerCase();
+var cs = (arguments.length == 1 ? arguments[0] : "utf-8").toString().toLowerCase();
  var simple=false;
  for(var i=0;i<charset.length;i++){
   if(charset[i]==cs){
@@ -19927,7 +19927,6 @@ if(arguments.length==1){
  if(cs=="utf-8"||cs=="utf8"){
   s=E.convert2UTF8(this);
  }
-}
 var arrs=[];
 for(var i=0, ii=0;i<s.length;i++){
 var c=s.charCodeAt(i);
