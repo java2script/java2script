@@ -786,110 +786,115 @@ public class PT {
     // because in JavaScript those would be false for unwrapped primitives
     // coming from equivalent of Array.get()
     // Strings will need their own escaped processing
-    
-    return info instanceof Number || info instanceof Boolean;
+    /**
+     * @j2sNative
+     * 
+     * if(typeof info == "number" || typeof info == "boolean") {
+     * return true;
+     * }
+     * 
+     * 
+     */
+	  {}
+		 return info instanceof Number || info instanceof Boolean;
   }
 
-//  private static Object arrayGet(Object info, int i) {
-//    /**
-//     * 
-//     * Note that info will be a primitive in JavaScript
-//     * but a wrapped primitive in Java.
-//     * 
-//     * @j2sNative
-//     * 
-//     *            return info[i];
-//     */
-//    {
-//      return Array.get(info, i);
-//    }
-//  }
-//  
-  @SuppressWarnings("unchecked")
-  public static String toJSON(String infoType, Object info) {
-    if (info == null)
-      return packageJSON(infoType, null);
-    if (isNonStringPrimitive(info))
-      return packageJSON(infoType, info.toString());
-    String s = null;
-    SB sb = null;
-    while (true) {
-      if (info instanceof String) {
-        s = (String) info;
+	@SuppressWarnings({ "unused", "unchecked", "null" })
+	public static String toJSON(String infoType, Object info) {
+		if (info == null)
+			return packageJSON(infoType, null);
+		if (isNonStringPrimitive(info))
+			return packageJSON(infoType, info.toString());
+		String s = null;
+		SB sb = null;
+		while (true) {
+			if (info instanceof String) {
+				s = (String) info;
 //        /**
 //         * @j2sNative
 //         * 
 //         * if (typeof s == "undefined") s = "null"
 //         * 
 //         */
-        
-        if (s.indexOf("{\"") != 0) {
-          //don't doubly fix JSON strings when retrieving status
-          // what about  \1 \2 \3 etc.?
-          s = esc(s);
-        }
-        break;
-      }
-      if (info instanceof JSONEncodable) {
-        // includes javajs.util.BS, org.jmol.script.SV
-        if ((s = ((JSONEncodable) info).toJSON()) == null)
-          s = "null"; // perhaps a list has a null value (group3List, for example)
-        break;
-      }
-      sb = new SB();
-      if (info instanceof Map) {
-        sb.append("{ ");
-        String sep = "";
-        for (String key : ((Map<String, ?>) info).keySet()) {
-          sb.append(sep).append(
-              packageJSON(key, toJSON(null, ((Map<?, ?>) info).get(key))));
-          sep = ",";
-        }
-        sb.append(" }");
-        break;
-      }
-      if (info instanceof Lst) {
-        sb.append("[ ");
-        int n = ((Lst<?>) info).size();
-        for (int i = 0; i < n; i++) {
-          if (i > 0)
-            sb.appendC(',');
-          sb.append(toJSON(null, ((Lst<?>) info).get(i)));
-        }
-        sb.append(" ]");
-        break;
-      }
-      if (info instanceof M34) {
-        // M4 extends M3
-        int len = (info instanceof M4 ? 4 : 3);
-        float[] x = new float[len];
-        M34 m = (M34) info;
-        sb.appendC('[');
-        for (int i = 0; i < len; i++) {
-          if (i > 0)
-            sb.appendC(',');
-          m.getRow(i, x);
-          sb.append(toJSON(null, x));
-        }
-        sb.appendC(']');
-        break;
-      }
-      s = nonArrayString(info);
-      if (s == null) {
-        sb.append("[");
-        int n = AU.getLength(info);
-        for (int i = 0; i < n; i++) {
-          if (i > 0)
-            sb.appendC(',');
-          sb.append(toJSON(null, Array.get(info, i)));
-        }
-        sb.append("]");
-        break;
-      }
-      info = info.toString();
-    }
-    return packageJSON(infoType, (s == null ? sb.toString() : s));
-  }
+
+				if (s.indexOf("{\"") != 0) {
+					// don't doubly fix JSON strings when retrieving status
+					// what about \1 \2 \3 etc.?
+					s = esc(s);
+				}
+				break;
+			}
+			if (info instanceof JSONEncodable) {
+				// includes javajs.util.BS, org.jmol.script.SV
+				if ((s = ((JSONEncodable) info).toJSON()) == null)
+					s = "null"; // perhaps a list has a null value (group3List, for example)
+				break;
+			}
+			sb = new SB();
+			if (info instanceof Map) {
+				sb.append("{ ");
+				String sep = "";
+				for (String key : ((Map<String, ?>) info).keySet()) {
+					if (key == null)
+						key = "null";
+					sb.append(sep).append(packageJSON(key, toJSON(null, ((Map<?, ?>) info).get(key))));
+					sep = ",";
+				}
+				sb.append(" }");
+				break;
+			}
+			if (info instanceof Lst) {
+				sb.append("[ ");
+				int n = ((Lst<?>) info).size();
+				for (int i = 0; i < n; i++) {
+					if (i > 0)
+						sb.appendC(',');
+					sb.append(toJSON(null, ((Lst<?>) info).get(i)));
+				}
+				sb.append(" ]");
+				break;
+			}
+			if (info instanceof M34) {
+				// M4 extends M3
+				int len = (info instanceof M4 ? 4 : 3);
+				float[] x = new float[len];
+				M34 m = (M34) info;
+				sb.appendC('[');
+				for (int i = 0; i < len; i++) {
+					if (i > 0)
+						sb.appendC(',');
+					m.getRow(i, x);
+					sb.append(toJSON(null, x));
+				}
+				sb.appendC(']');
+				break;
+			}
+			s = nonArrayString(info);
+			if (s == null) {
+				sb.append("[");
+				int n = AU.getLength(info);
+				Object o = null;
+		        /** @j2sNative 
+		         *  o = info[0];
+		         *  typeof o != "number" && typeof 0 != "boolean" && (o = null);
+		         */
+		        {}
+		        if (o != null) {
+					sb.appendO(info);
+				} else {
+					for (int i = 0; i < n; i++) {
+						if (i > 0)
+							sb.appendC(',');
+						sb.append(toJSON(null, Array.get(info, i)));
+					}
+				}
+				sb.append("]");
+				break;
+			}
+			info = info.toString();
+		}
+		return packageJSON(infoType, (s == null ? sb.toString() : s));
+	}
 
   /**
    * Checks to see if an object is an array (including typed arrays), and if it is, returns null;

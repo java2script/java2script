@@ -14023,7 +14023,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
-// BH 2021.12.19 adds Double -0
+// BH 2021.12.19 adds Double -0; fixes println(Double)
 // BH 2021.12.15 default encoding for String.getBytes() should be utf-8.
 // BH 2021.08.16 fix for Interface initializing its subclass with static initialization
 // BH 2021.07.28 String.instantialize upgraded to use TextDecoder() if possible (not in MSIE)
