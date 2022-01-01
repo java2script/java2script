@@ -8,6 +8,7 @@ import javax.swing.JApplet;
 
 public class Test_Applet_Audio extends JApplet {
 	
+	@Override
 	public void init() {
 		try {
 			URL u = getCodeBase();
