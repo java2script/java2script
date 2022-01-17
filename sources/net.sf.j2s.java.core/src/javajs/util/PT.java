@@ -1155,6 +1155,10 @@ public class PT {
           if ((ch = strFormat.charAt(ich)) >= '0' && ch <= '9') {
             precision = ch - '0';
             ++ich;
+            if ((ch = strFormat.charAt(ich)) >= '0' && ch <= '9') {
+              precision = 10*precision + (ch - '0');
+              ++ich;
+            }
           }
           if (isExponential)
             precision = -precision;
