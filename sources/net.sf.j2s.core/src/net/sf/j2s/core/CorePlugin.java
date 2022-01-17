@@ -25,11 +25,12 @@ public class CorePlugin extends Plugin {
 	 * "net.sf.j2s.core.jar" not "net.sf.j2s.core.3.2.5"
 	 * 
 	 */
-	public static String VERSION = "3.3.1-v1";
+	public static String VERSION = "3.3.1-v4";
 	
 	// if you change the x.x.x number, be sure to also indicate that in 
 	// j2sApplet.js and also (Bob only) update.bat, update-clean.bat
 
+	// BH 2022.01.17 -- 3.3.1-v4 fixes default interface methods referencing their own static fields
 	// BH 2021.01.14 -- 3.3.1-v3 fixes missing finals for nested () -> {...}
 	// BH 2021.01.03 -- 3.3.1-v2 adds @j2sAsync adds async for function - experimental
 	// BH 2002.12.31 -- 3.3.1-v1 introduces full primitive 64-bit long support. 

@@ -7,6 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2022.01.17 fixes interface default method referencing own static fields
 // BH 2021.12.19 adds Double -0; fixes println(Double)
 // BH 2021.12.15 default encoding for String.getBytes() should be utf-8.
 // BH 2021.08.16 fix for Interface initializing its subclass with static initialization
@@ -1495,6 +1496,7 @@ var copyStatics = function(clazzFrom, clazzThis, isInterface) {
     }
   }
   if (isInterface) {
+	clazzFrom.$static$ && (initStatics(clazzFrom), clazzFrom.$static$());
 	clazzThis.$defaults$ && clazzThis.$defaults$(clazzThis);
 	for (var o in clazzFrom.prototype) {
 	if (clazzThis.prototype[o] == undefined && !excludeSuper(o)) {

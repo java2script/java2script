@@ -135,6 +135,7 @@ import org.eclipse.jdt.core.dom.WildcardType;
 
 // TODO: superclass inheritance for JAXB XmlAccessorType
 
+//BH 2022.01.17 -- 3.3.1-v4 fixes default interface methods referencing their own static fields
 //BH 2021.01.14 -- 3.3.1-v3 fixes missing finals for nested () -> {...}
 //BH 2021.01.03 -- 3.3.1-v2 adds @j2sAsync adds async for function - experimental
 //BH 2020.12.31 -- 3.3.1-v1 64-bit long implemented; adds "@j2sNoLongExact" for classes only, not methods
@@ -697,6 +698,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private String package_outerFinalKey;
 
 	private String package_currentFinalKey;
+
+	/**
+	 * This flag turns off C$ for interfaces, instead pointing to themselves.
+	 */
+	private int class_defpt = -1;
 
 	private void addApplication() {
 		if (apps == null)
@@ -2647,16 +2653,17 @@ public class Java2ScriptVisitor extends ASTVisitor {
 								|| mname.startsWith("is"))
 							methods.add(method);
 					}
-					int defpt = -1;
+					class_defpt = -1;
 					if (Modifier.isDefault(method.getModifiers())) {
 						// log("default method " + method.getKey());
-						defpt = buffer.length();
+						class_defpt = buffer.length();
 					}
 					processMethodDeclaration(mnode, method, mnode.parameters(), mnode.getBody(), mnode.isConstructor(),
 							abstractMethodList, NOT_LAMBDA);
-					if (defpt >= 0) {
-						defaults.append(buffer.substring(defpt));
-						buffer.setLength(defpt);
+					if (class_defpt >= 0) {
+						defaults.append(buffer.substring(class_defpt));
+						buffer.setLength(class_defpt);
+						class_defpt = -1;
 					}
 				} else if (element instanceof AnnotationTypeMemberDeclaration) {
 					processAnnotationTypeMemberDeclaration((AnnotationTypeMemberDeclaration) element);
@@ -2687,7 +2694,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			// generic
 			addSyntheticBridges(binding, abstractMethodList, defaults, true);
 			if (defaults.length() > 0) {
-				buffer.append("C$.$defaults$ = function(C$){\n").append(defaults).append("};");
+				buffer.append("var C$$ = C$;C$.$defaults$ = function(C$){\n").append(defaults).append("};");
 			}
 		} else {
 			addSyntheticBridges(binding, abstractMethodList, buffer, false);
@@ -5699,7 +5706,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			return stripJavaLang(name);
 		}
 		if (doCache && name.equals(class_fullName)) {
-			return "C$"; // anonymous class will be like this
+			return (class_defpt < 0 ? "C$" : "C$$"); // anonymous class will be like this
 		}
 
 		// lambda classes will always be defined at this point. No need to cache them
@@ -5903,6 +5910,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if (isInterface) {
 			buf.append(s);
 		} else {
+			// see java.text.CollationKey, but $synth$ is never called.
 			buf.append("\nC$.$synth$=function(){").append(s).append("}\n");
 		}
 	}
