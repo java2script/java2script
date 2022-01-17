@@ -1,4 +1,7 @@
 /*!
+  
+  // BH 2022.01.12 adds pointer option see BHTEST
+
  * jQuery JavaScript Library v1.11.0
  * http://jquery.com/
  *
@@ -10376,6 +10379,7 @@ return jQuery;
 
 }));
 // j2sQueryExt.js]
+// BH 2022.01.12 adds pointer option
 // BH 7/13/2019 removing hook for J2S.unsetMouse
 // BH 7/21/2016 9:25:38 PM passing .pageX and  .pageY to jQuery event
 // BH 7/24/2015 7:24:30 AM renamed from JSmoljQueryExt.js
@@ -10682,6 +10686,7 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// BH 2022.01.12 adds pointer option
 // BH 2021.09.22 default file save as application/octet-stream, not text/plain
 // BH 2020.12.31 full 64-bit long
 // BH 2020.12.09 touch fixes for fdown and fdrag (j2sSlider)
@@ -12584,7 +12589,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		// otherwise, if J2S._firstTouch is undefined (!!x != x), set J2S._firstTouch
 		// and ignore future touch events (through the first touchend):
 		
-		if (ev.type == "pointerdown" || "mousedown") {
+		if (ev.type == "pointerdown" || "mousedown") {// BHTEst
 		    J2S._haveMouse = true;
 		} else { 
 		    if (J2S._haveMouse) return;
@@ -14034,6 +14039,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2022.01.17 fixes interface default method referencing own static fields
 // BH 2021.12.19 adds Double -0; fixes println(Double)
 // BH 2021.12.15 default encoding for String.getBytes() should be utf-8.
 // BH 2021.08.16 fix for Interface initializing its subclass with static initialization
@@ -15522,6 +15528,7 @@ var copyStatics = function(clazzFrom, clazzThis, isInterface) {
     }
   }
   if (isInterface) {
+	clazzFrom.$static$ && (initStatics(clazzFrom), clazzFrom.$static$());
 	clazzThis.$defaults$ && clazzThis.$defaults$(clazzThis);
 	for (var o in clazzFrom.prototype) {
 	if (clazzThis.prototype[o] == undefined && !excludeSuper(o)) {
