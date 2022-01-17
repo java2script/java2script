@@ -3603,7 +3603,7 @@ public class JSComponentUI extends ComponentUI
 	protected void checkStopPopupMenuTimer(Object target, int eventType, Object jQueryEvent) {
 		if (target == domNode && eventType == -1) {
 			String type = (/** @j2sNative jQueryEvent.type || */"");
-			if (type.equals("mouseenter")) {
+			if (type.equals("mouseenter") || type.equals("pointerenter")) {
 				stopPopupMenuTimer();
 			}
 		}

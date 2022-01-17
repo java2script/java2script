@@ -279,15 +279,18 @@ class JSComboPopupList extends JList {
 			cbui.comboBox.setSelectedIndex(i);
 			cbui.comboBox.秘setTrigger(false);
 			return;
+		case "pointerover":
 		case "mouseover":
 			return;
 		case "mouse":
 			JSEvent jqEvent = /** @j2sNative event.originalEvent || */
 					null;
 			switch (/** @j2sNative jqEvent.type || */"") {
+			case "pointermove":
 			case "mousemove":
 				JSMouse.retargetMouseEvent(jqEvent, null, cbui.comboBox, JSComboPopupList.this, 0);
 				break;
+			case "pointerup":
 			case "mouseup":
 				JSToolkit.dispatch(new Runnable() {
 					@Override

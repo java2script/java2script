@@ -302,7 +302,7 @@ J2S.__makeMenu = function(){};
 		 //testing var r=me.active.children(".a").addClass("ui-state-focus");
 		 me.options.role&&me.element.attr("aria-activedescendant", r.attr("id"));
 		 myMenuItem(me.active.parent()).children(".a:first").addClass("ui-state-active");
-		 u.length&&/^mouse/.test(t.type)&&me._startOpening(u);
+		 u.length&&(/^pointer/.test(t.type) || /^mouse/.test(t.type))&&me._startOpening(u);
 		 me.activeMenu=n.parent();
 		 me._trigger("focus",t,{item:n});
 		 t = n;

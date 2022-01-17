@@ -551,21 +551,28 @@ public class JSMouse {
 			return KeyEvent.KEY_TYPED;
 		case "click":
 			return MouseEvent.MOUSE_CLICKED;
+		case "pointerdown":
 		case "mousedown":
 		case "touchstart":
 			return MouseEvent.MOUSE_PRESSED;
+		case "pointerup":
 		case "mouseup":
 		case "touchend":
 			return MouseEvent.MOUSE_RELEASED;
+		case "pointermove":
 		case "mousemove":
 			return MouseEvent.MOUSE_MOVED;
 		case "mousedrag":
 			return MouseEvent.MOUSE_DRAGGED;
 		case "mousewheel":
 			return MouseEvent.MOUSE_WHEEL;
+		case "pointerover":
+		case "pointerenter":
 		case "mouseover":
 		case "mouseenter":
 			return MouseEvent.MOUSE_ENTERED;
+		case "pointerout":
+		case "pointerleave":
 		case "mouseout":
 		case "mouseleave":
 			return MouseEvent.MOUSE_EXITED;

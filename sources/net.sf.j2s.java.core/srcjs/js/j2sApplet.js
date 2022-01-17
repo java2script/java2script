@@ -1,5 +1,6 @@
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// BH 2022.01.12 adds pointer option
 // BH 2021.09.22 default file save as application/octet-stream, not text/plain
 // BH 2020.12.31 full 64-bit long
 // BH 2020.12.09 touch fixes for fdown and fdrag (j2sSlider)
@@ -1902,7 +1903,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		// otherwise, if J2S._firstTouch is undefined (!!x != x), set J2S._firstTouch
 		// and ignore future touch events (through the first touchend):
 		
-		if (ev.type == "mousedown") {
+		if (ev.type == "pointerdown" || "mousedown") {// BHTEst
 		    J2S._haveMouse = true;
 		} else { 
 		    if (J2S._haveMouse) return;

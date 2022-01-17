@@ -1,4 +1,5 @@
 // j2sQueryExt.js]
+// BH 2022.01.12 adds pointer option
 // BH 7/13/2019 removing hook for J2S.unsetMouse
 // BH 7/21/2016 9:25:38 PM passing .pageX and  .pageY to jQuery event
 // BH 7/24/2015 7:24:30 AM renamed from JSmoljQueryExt.js
@@ -6,6 +7,14 @@
 // BH 9/2/2013 7:43:12 AM BH Opera/Safari fix for binary file reading
 
 ;(function($) {
+
+	var addPointerEvent = function(mode, a) {
+		  a = a.split(" ");
+		  for (var i = a.length; --i >= 0;)
+			  $.event.special[mode+a[i]] = {bindType: "pointer" +a[i], delegateType: "pointer" + a[i]};
+		}
+
+		addPointerEvent("mouse", "up down move over out enter leave"); // BHTEST
 
 	function createXHR(isMSIE) {
 		try {
