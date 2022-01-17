@@ -23,9 +23,9 @@ public class Test_Interface2 extends Test_ implements Test_Interface {
 
 		// test of public default override
 		assert(new Test_Interface2().isTestInterface() == 2);
-		assert(new I0().isTestInterface() == 0);
+		System.out.println("testing access to default methods values");
+		assert(new I0().isTestInterface() == -1);
 		assert(new I1().isTestInterface() == 1);
-		
 
 		System.out.println("Test_Interface2 OK");
 	}

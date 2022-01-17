@@ -13,6 +13,7 @@
  */
 
 // modified by Bob Hanson for local MSIE 11 reading remote files and skipping Opera test unless Opera
+// 2022.01.08 BHTEST adds pointer| to rmouseEvent
 
 (function( global, factory ) {
 
@@ -4248,7 +4249,7 @@ var rcheckableType = (/^(?:checkbox|radio)$/i);
 
 var rformElems = /^(?:input|select|textarea)$/i,
 	rkeyEvent = /^key/,
-	rmouseEvent = /^(?:mouse|contextmenu)|click/,
+	rmouseEvent = /^(?:mouse|pointer|contextmenu)|click/, // BHTEST
 	rfocusMorph = /^(?:focusinfocus|focusoutblur)$/,
 	rtypenamespace = /^([^.]*)(?:\.(.+)|)$/;
 
@@ -4992,6 +4993,8 @@ jQuery.Event.prototype = {
 
 // Create mouseenter/leave events using mouseover/out and event-time checks
 jQuery.each({
+	pointerenter: "pointerover",  // BHTEST
+	pointerleave: "pointerout",    // BHTEST
 	mouseenter: "mouseover",
 	mouseleave: "mouseout"
 }, function( orig, fix ) {
@@ -10381,6 +10384,14 @@ return jQuery;
 
 ;(function($) {
 
+	var addPointerEvent = function(mode, a) {
+		  a = a.split(" ");
+		  for (var i = a.length; --i >= 0;)
+			  $.event.special[mode+a[i]] = {bindType: "pointer" +a[i], delegateType: "pointer" + a[i]};
+		}
+
+		addPointerEvent("mouse", "up down move over out enter leave"); // BHTEST
+
 	function createXHR(isMSIE) {
 		try {
 			return (isMSIE ? new window.ActiveXObject( "Microsoft.XMLHTTP" ) : new window.XMLHttpRequest());
@@ -12573,7 +12584,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		// otherwise, if J2S._firstTouch is undefined (!!x != x), set J2S._firstTouch
 		// and ignore future touch events (through the first touchend):
 		
-		if (ev.type == "mousedown") {
+		if (ev.type == "pointerdown" || "mousedown") {
 		    J2S._haveMouse = true;
 		} else { 
 		    if (J2S._haveMouse) return;
