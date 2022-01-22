@@ -216,7 +216,14 @@ public class PT {
   0.000001f, 
   0.0000001f, 
   0.00000001f, 
-  0.000000001f
+  0.000000001f, 
+  // added for JavaScript to have full double precision if specified
+  0.0000000001f,
+  0.00000000001f,
+  0.000000000001f,
+  0.0000000000001f,
+  0.00000000000001f,
+  0.000000000000001f,
   };
   public static boolean checkTrailingText(String str, int ich, int ichMax) {
     //number must be pure -- no additional characters other than white space or ;

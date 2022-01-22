@@ -69,9 +69,10 @@ public class DF {
    * @return formatted decimal
    */
   public static String formatDecimal(double value, int decimalDigits) {
-    if (decimalDigits == Integer.MAX_VALUE 
-        || value == Double.NEGATIVE_INFINITY || value == Double.POSITIVE_INFINITY || Double.isNaN(value))
-      return "" + value;
+    if (value == Double.NEGATIVE_INFINITY || value == Double.POSITIVE_INFINITY || Double.isNaN(value))
+        return "" + value;
+      if (decimalDigits == Integer.MAX_VALUE)
+        return "" + (float) value;
     boolean isNeg = (value < 0);
     if (isNeg)
       value = -value;
