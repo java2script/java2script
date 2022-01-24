@@ -1669,11 +1669,11 @@ public class DefaultEditorKit extends EditorKit {
                     if(magicPosition == null &&
                        (direction == SwingConstants.NORTH ||
                         direction == SwingConstants.SOUTH)) {
-                        Rectangle r = (bidiCaret != null) ?
-                                ((TextUI) target.getUI()).modelToView(target, dot,
-                                                      bidiCaret.getDotBias()) :
-                                target.modelToView(dot);
-                        magicPosition = new Point(r.x, r.y);
+//                        Rectangle r = (bidiCaret != null) ?
+//                                ((TextUI) target.getUI()).modelToView(target, dot,
+//                                                      bidiCaret.getDotBias()) :
+//                                target.modelToView(dot);
+//BH can't do this in JavaScript yet    magicPosition = new Point(r.x, r.y);
                     }
 
                     NavigationFilter filter = target.getNavigationFilter();
