@@ -27,13 +27,7 @@
 package javajs.util;
 
 import javajs.api.EigenInterface;
-
 import javajs.api.Interface;
-
-
-
-
-//import org.jmol.script.T;
 
 final public class Measure {
 
@@ -171,6 +165,10 @@ final public class Measure {
                                               T3 pointB,
                                               T3 pointC, V3 vNorm,
                                               V3 vAB, P4 plane) {
+    if (vNorm == null)
+      vNorm = new V3();
+    if (vAB == null)
+      vAB = new V3();
     float w = getNormalThroughPoints(pointA, pointB, pointC, vNorm, vAB);
     plane.set4(vNorm.x, vNorm.y, vNorm.z, w);
     return plane;
@@ -252,12 +250,20 @@ final public class Measure {
     return -vTemp.dot(vNorm);
   }
 
-  public static void getPlaneProjection(P3 pt, P4 plane, P3 ptProj, V3 vNorm) {
+  /**
+   * Project a point onto a plane, also returning the normal vector.
+   * 
+   * @param pt
+   * @param plane
+   * @param retPtProj  returned pt (can be pt)
+   * @param retNorm returned normal vector
+   */
+  public static void getPlaneProjection(T3 pt, P4 plane, T3 retPtProj, V3 retNorm) {
     float dist = distanceToPlane(plane, pt);
-    vNorm.set(plane.x, plane.y, plane.z);
-    vNorm.normalize();
-    vNorm.scale(-dist);
-    ptProj.add2(pt, vNorm);
+    retNorm.set(plane.x, plane.y, plane.z);
+    retNorm.normalize();
+    retNorm.scale(-dist);
+    retPtProj.add2(pt, retNorm);
   }
 
   /**
@@ -267,7 +273,7 @@ final public class Measure {
    * @param ptB
    * @param ptC
    * @param isOutward
-   * @param normal set to be opposite to direction of ptCenter from ABC
+   * @param normal set to be opposite to direction of ptCenter from abd
    * @param vTemp
    * @return true if winding is CCW; false if CW
    */
@@ -299,23 +305,39 @@ final public class Measure {
     vTemp.normalize();
     getPlaneThroughPoint(ptTemp, vTemp, plane);
     }
-    
-  public static void projectOntoAxis(P3 point, P3 axisA,
+  
+  /**
+   * project point onto a line containing ptA and having axis unitVector axisUnitVector,
+   * returning the result in point and a vector from ptA to pt in vectorProjection  
+   * @param pt input pt to be projected, returns projected
+   * @param ptA input point on line
+   * @param axisUnitVector input unit vector
+   * @param vectorProjection return for pt.sub(ptA)
+   */
+  public static void projectOntoAxis(P3 pt, P3 ptA,
                                      V3 axisUnitVector,
                                      V3 vectorProjection) {
-    vectorProjection.sub2(point, axisA);
+    vectorProjection.sub2(pt, ptA);
     float projectedLength = vectorProjection.dot(axisUnitVector);
-    point.scaleAdd2(projectedLength, axisUnitVector, axisA);
-    vectorProjection.sub2(point, axisA);
+    pt.scaleAdd2(projectedLength, axisUnitVector, ptA);
+    vectorProjection.sub2(pt, ptA);
   }
-  
-  public static void calcBestAxisThroughPoints(P3[] points, P3 axisA,
+
+  /**
+   * 
+   * @param points
+   * @param nPoints 
+   * @param axisA
+   * @param axisUnitVector
+   * @param vectorProjection
+   * @param nTriesMax
+   */
+  public static void calcBestAxisThroughPoints(P3[] points, int nPoints, P3 axisA,
                                                V3 axisUnitVector,
                                                V3 vectorProjection,
                                                int nTriesMax) {
     // just a crude starting point.
 
-    int nPoints = points.length;
     axisA.setT(points[0]);
     axisUnitVector.sub2(points[nPoints - 1], axisA);
     axisUnitVector.normalize();
@@ -459,6 +481,7 @@ final public class Measure {
 
 
   /**
+   * Calculate the line that is the intersection of two planes.
    * 
    * @param plane1
    * @param plane2
@@ -513,6 +536,8 @@ final public class Measure {
   }
 
   /**
+   * 
+   * Calculate the intersection of a line with a plane.
    * 
    * @param pt1  point on line
    * @param v    unit vector of line
@@ -723,6 +748,253 @@ final public class Measure {
       sum2 += ptAnew.distanceSquared(ptsB[i]);
     }
     return (float) Math.sqrt(sum2 / n);
+  }
+
+  /**
+   * Get the endpoints of the best line through N points, where N >= 2
+   * 
+   * @param points
+   * @param nPoints
+   * @return end points
+   */
+  public static P3[] getBestLineThroughPoints(P3[] points, int nPoints) {
+    if (nPoints <= 0)
+      nPoints = points.length;
+    if (nPoints <= 2) {
+      return points;
+    }
+    P3 ptA = new P3();
+    V3 unitVector = new V3();
+    V3 vTemp = new V3();
+    calcBestAxisThroughPoints(points, nPoints, ptA, unitVector,
+        vTemp, 8);
+    return getProjectedLineSegment(points, nPoints, ptA, unitVector, vTemp);
+  }
+
+  public static P3[] getProjectedLineSegment(P3[] points, int nPoints,
+                                              P3 ptA, V3 unitVector,
+                                              V3 vTemp) {
+    if (nPoints < 0)
+      nPoints = points.length;
+    if (vTemp == null)
+      vTemp = new V3();
+    P3 pmin = null, pmax = null, p; 
+    float dmin = Float.MAX_VALUE, dmax = -Float.MAX_VALUE;
+    for (int i = 0; i < points.length; i++) {
+      projectOntoAxis(p = P3.newP(points[i]), ptA, unitVector, vTemp);
+      float d = unitVector.dot(vTemp);
+      if (d < dmin) {
+        dmin = d;
+        pmin = p;
+      }
+      if (d > dmax) {
+        dmax = d;
+        pmax = p;
+      }
+    }
+    return new P3[] { pmin, pmax };
+  }
+
+  public static boolean isInTriangle(P3 p, P3 a, P3 b, P3 c, V3 v0, V3 v1, V3 v2) { 
+    // from http: //www.blackpawn.com/texts/pointinpoly/default.html 
+    // Compute   barycentric coordinates 
+    v0.sub2(c, a);
+    v1.sub2(b, a);
+    v2.sub2(p, a);
+    float dot00 = v0.dot(v0);
+    float dot01 = v0.dot(v1);
+    float dot02 = v0.dot(v2);
+    float dot11 = v1.dot(v1);
+    float dot12 = v1.dot(v2);
+    float invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
+    float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+    float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+    return (u >= 0 && v >= 0 && u + v <= 1);
+  }
+  
+  /**
+   * Calculate the best ax + by + cz + d = 0 plane through a number of points
+   * using a three-step check for the best plane based on normal distance. this
+   * simple calculation isn't perfect, but it does the job quickly and with no
+   * need for a full singular value decomposition.
+   * 
+   * @param points
+   * @param nPoints
+   * @param plane
+   * @return RMSD for the best plane along with filling the plane itself
+   * 
+   * @author hansonr 2022.01.26
+   */
+  public static float calcBestPlaneThroughPoints(P3[] points, int nPoints,
+                                                 P4 plane) {
+    if (nPoints <= 0) {
+      nPoints = points.length;
+    }
+    if (nPoints == 3) {
+      getPlaneThroughPoints(points[0], points[1], points[2], null, null, plane);
+      return 0;
+    }
+    P4 pmin = plane;
+    P4 plane2 = new P4();
+    P4 plane3;
+    float rmsd = calcPlaneForMode(points, nPoints, plane, 'z');
+    if (rmsd < 1e-6)
+      return rmsd;
+    float f2 = calcPlaneForMode(points, nPoints, plane2, 'y');
+    if (f2 < rmsd) {
+      rmsd = f2;
+      pmin = plane2;
+      plane3 = plane;
+    } else {
+      plane3 = plane2;
+    }
+    if (rmsd >= 1e-6) {
+      f2 = calcPlaneForMode(points, nPoints, plane3, 'x');
+      if (f2 < rmsd) {
+        rmsd = f2;
+        pmin = plane3;
+      }
+    }
+    if (pmin != plane) {
+      plane.setT(pmin);
+      plane.w = pmin.w;
+    }
+    return rmsd;
+  }
+
+  /**
+   * Compact calculation of the best pane using a simple method discussed at 
+   *    https://stackoverflow.com/questions/12299540/plane-fitting-to-4-or-more-xyz-points
+   *    
+   * (A^T A)^-1 A^T B
+   *
+   * run three times to ensure that at least one is not perpendicular.
+
+   * @param points
+   * @param nPoints
+   * @param plane filled with best plane
+   * @param mode
+   * @return rmsd
+   */
+  public static float calcPlaneForMode(P3[] points, int nPoints, P4 plane, char mode) {
+    
+    double[][] A = new double[nPoints][3];
+    double[][] AT = new double[3][nPoints];
+    double[][] ATAT = new double[3][nPoints];
+    double[][] ATA1 = new double[3][3];
+    double[] B = new double[nPoints];
+    
+    for (int i = nPoints; --i >= 0;) {
+      P3 p = points[i];
+      A[i][0] = AT[0][i] = (mode == 'x' ? p.z : p.x);
+      A[i][1] = AT[1][i] = (mode == 'y' ? p.z : p.y);
+      A[i][2] = AT[2][i] = 1;
+      B[i] = -(mode == 'y' ? p.y : mode == 'x' ? p.x : p.z);
+    }
+    M3 m = new M3();
+    for (int i = 3; --i >= 0;) {
+      for (int j = 3; --j >= 0;) {
+        double d = 0;
+        for (int k = nPoints; --k >= 0;) {
+          d += AT[i][k] * A[k][j];
+        }
+        m.set33(i, j, (float) d);
+      }
+    }
+    m.invert();
+    for (int i = 3; --i >= 0;) {
+      for (int j = 3; --j >= 0;) {
+        ATA1[i][j] = m.get33(i, j);
+      }
+    }
+    for (int i = 3; --i >= 0;) {
+      for (int k = nPoints; --k >= 0;) {
+        double d = 0;
+      for (int j = 3; --j >= 0;) {
+          d += ATA1[i][j] * AT[j][k];
+        }
+      ATAT[i][k] = d;
+      }
+    }
+    switch (mode) {
+    case 'x':
+      plane.x = 1;
+      break;
+    case 'y':
+      plane.y = 1;
+      break;
+    case 'z':
+      plane.z = 1;
+      break;
+    }
+    float len2 = 1;
+    for (int j = 3; --j >= 0;) {
+      double v = 0;
+      for (int k = nPoints; --k >= 0;) {
+        v += ATAT[j][k]*B[k];
+      }
+      switch (j) {
+      case 0:
+        len2 += v * v;
+        if (mode == 'x')
+          plane.z = (float) v;
+        else
+          plane.x = (float) v;
+        break;
+      case 1:
+        len2 += v * v;
+        if (mode == 'y')
+          plane.z = (float) v;
+        else 
+          plane.y = (float) v;
+        break;
+      case 2:
+        plane.w = (float) v;
+      }
+    }
+    float f = (float) Math.sqrt(len2);
+    plane.scale4((1/plane.w > 0 ? 1 : -1)/f);
+    float sum2 = 0;
+    for (int i = 0; i < nPoints; i++) {
+      float d = distanceToPlane(plane, points[i]);
+      sum2 += d*d;
+    }
+    float ret = (float) Math.sqrt(sum2 / nPoints);
+    return ret;
+  }
+
+  static P3 rndPt() {
+    return P3.new3((float) Math.random()*20,(float) (Math.random()*20),(float) (Math.random()*20) );
+  }
+  static void testRnd() {
+    P4 plane = P4.new4((float) Math.random()*20, (float) Math.random()*20, (float) Math.random()*20, (float) Math.random()*20);
+    plane.scale4(1/plane.length());
+    System.out.println("\n==========\n ");
+    System.out.println("plane is " + plane);
+    P3 ptProj = new P3();
+    V3 vNorm = new V3();
+    P3[] pts = new P3[4];
+    for (int i = 0; i < pts.length; i++) {
+      pts[i] = new P3();
+      P3 p = rndPt();
+      getPlaneProjection(p, plane, ptProj, vNorm );
+      vNorm.scale(1/vNorm.length());
+      pts[i].setT(ptProj);
+      float d = (float)Math.random()*0.1f;
+      pts[i].scaleAdd2(d, vNorm, ptProj);
+      System.out.println(pts[i] + " d=" + d);
+    }
+    P4 p2 = new P4();
+    float f = calcBestPlaneThroughPoints(pts, -1, p2);
+    System.out.println("found " + p2 + " rmsd = " + f);
+  }
+  
+  
+  
+  static public void test() {
+    for (int i = 0; i < 10; i++)
+      testRnd();
+    System.exit(0);
   }
 
 }
