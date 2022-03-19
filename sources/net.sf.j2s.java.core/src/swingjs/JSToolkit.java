@@ -800,7 +800,7 @@ public class JSToolkit extends SunToolkit
 		case Cursor.TEXT_CURSOR:
 			return "text";
 		case Cursor.HAND_CURSOR:
-			return "grab";
+			return "point";
 		case Cursor.MOVE_CURSOR:
 			return "move";
 		case Cursor.N_RESIZE_CURSOR:
