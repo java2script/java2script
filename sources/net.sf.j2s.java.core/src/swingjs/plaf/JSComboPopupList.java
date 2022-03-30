@@ -169,7 +169,9 @@ class JSComboPopupList extends JList {
 		JComponent j = (JComponent) cbui.comboBox.getRenderer().getListCellRendererComponent(this,
 				getModel().getElementAt(i), i, true, false);
 		j.setSize(w, ui.getRowHeight(i));
-		return j.秘getUI().getListNode();
+		JSComponentUI jui = j.秘getUI();
+		jui.c = jui.jc = j;
+		return jui.getListNode();
 	}
 
 	void updateSelectedIndex() {

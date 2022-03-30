@@ -7,6 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2022.03.19 String.valueOf(Double) does not add ".0"
 // BH 2022.01.17 fixes interface default method referencing own static fields
 // BH 2021.12.19 adds Double -0; fixes println(Double)
 // BH 2021.12.15 default encoding for String.getBytes() should be utf-8.
@@ -102,7 +103,10 @@ Clazz.array = function(baseClass, paramType, ndims, params, isClone) {
 
 var _array = function(baseClass, paramType, ndims, params, isClone) {
 	
+  // Object x = Array.newInstance(componentClass, nElements);
+  // var x=Clazz.array((Clazz.array(componentClass, 3);
 
+	
   // int[][].class Clazz.array(Integer.TYPE, -2)
   // new int[] {3, 4, 5} Clazz.array(Integer.TYPE, -1, [3, 4, 5])    
   // new int[][]{new int[] {3, 4, 5}, {new int[] {3, 4, 5}} 
@@ -151,8 +155,26 @@ var _array = function(baseClass, paramType, ndims, params, isClone) {
         // new int[] {3, 4, 5};
         return _array(baseClass, prim + "A", -1, vals);
       }
-      // Array.newInstance(int[][].class, 3);  
-      return _array(baseClass, prim + "A", (cl.__NDIM || 0) + 1, [ndims]);
+      // Array.newInstance(int[][].class, 3);
+      
+
+      var nElem = ndims;
+      cl = baseClass;
+
+      ndims = 0;
+      while ((cl = cl.getComponentType$()) != null) {
+    	  baseClass = cl;
+    	  ndims++;
+      }
+      if (ndims > 0) {
+    	  a = new Array(nElem);
+          setArray(a, baseClass, prim + "A", ndims + 1);
+    	  for (var i = nElem; --i >= 0;)
+    		  a[i] = null;
+      } else {
+    	  a = _array(baseClass, prim + "A", ndims + 1, [nElem]);
+      }
+	  return a;
     }      
     params = vals;
     paramType = prim;
@@ -174,22 +196,7 @@ var _array = function(baseClass, paramType, ndims, params, isClone) {
   } else {
     var initValue = null;
     if (ndims >= 1 && dofill) {
-      switch (prim) {
-      case "J":
-      case "B":
-      case "H": // short
-      case "I":
-      case "F":
-      case "D":
-        initValue = 0;
-        break;
-      case "C": 
-        initValue = '\0';
-        break;
-      case "Z":
-        initValue = false;
-        break;
-      }
+    	initValue = _initVal(prim);
     }
     var p = params; // an Int32Array
     var n = p.length;
@@ -219,6 +226,24 @@ var _array = function(baseClass, paramType, ndims, params, isClone) {
     }  
   }
   return newTypedA(baseClass, params, nbits, (dofill ? ndims : -ndims), isClone);
+}
+
+var _initVal = function(p) {
+    switch (p) {
+    case "J":
+    case "B":
+    case "H": // short
+    case "I":
+    case "F":
+    case "D":
+      return 0;
+    case "C": 
+      return  '\0';
+    case "Z":
+        return  false;
+    default:
+    	return null;
+    }
 }
 
 Clazz.assert = function(clazz, obj, tf, msg) {
@@ -3244,44 +3269,46 @@ Sys.err = new Clazz._O ();
 Sys.err.__CLASS_NAME__ = "java.io.PrintStream";
 
 var checkTrace = function(s) {
-	if (J2S._nooutput || J2S._traceFilter && s.indexOf(J2S._traceFilter) < 0) return;
-	if (!J2S._traceFilter && J2S._traceOutput && s && 
-			(("" + s).indexOf(J2S._traceOutput) >= 0 || '"' + s + '"' == J2S._traceOutput)) {
+	if (J2S._nooutput || !J2S._traceFilter && !J2S._traceOutput) return;
+	if (J2S._traceFilter) {
+		if ((s= "" + s).indexOf(J2S._traceFilter) < 0) 
+			return;
+	} else if (!(s = "" + s) || s.indexOf(J2S._traceOutput) < 0 && '"' + s + '"' != J2S._traceOutput) {
+		return;
+	}
 	alert(s + "\n\n" + Clazz._getStackTrace());
 	doDebugger();
-	}
 }
 
 var setps = function(ps, f) {
 
-ps.print = ps.print$O = ps.print$Z = ps.print$I = ps.print$S = ps.print$C = function (s) { 
+ps.flush$ = function() {}
+
+ps.print = ps.print$ = ps.print$O = ps.print$Z = ps.print$I = ps.print$S = ps.print$C = function (s) { 
   checkTrace(s);
-  f(s);
+  f("" + s);
 };
 
 ps.print$J = function(l) {ps.print(Long.$s(l))}
+ps.print$F = ps.print$D = function(f) {
+	var s = "" + f; 
+	ps.println(s.indexOf(".") < 0 && s.indexOf("Inf") < 0 ? s + ".0" : s);
+}
+
 ps.printf = ps.printf$S$OA = ps.format = ps.format$S$OA = function (f, args) {
   ps.print(String.format$S$OA.apply(null, arguments));
 }
 
-ps.flush$ = function() {}
-
-ps.println = ps.println$ = ps.println$Z = ps.println$I = ps.println$S = ps.println$C = function(s) {
- s = (typeof s == "undefined" ? "" : "" + s);
+ps.println = ps.println$ = ps.println$Z = ps.println$I = ps.println$S = ps.println$C = ps.println$O = function(s) {
  checkTrace(s);
- s = (typeof s == "undefined" ? "\r\n" : s == null ?  s = "null\r\n" : s + "\r\n");
-  f(s);
+ f((s && s.toString ? s.toString() : "" + s)  + "\r\n");
 };
 
-ps.println$O = function(s) {
-	 s = (typeof s == "undefined" ? "" : s.toString());
-	 checkTrace(s);
-	 s = (typeof s == "undefined" ? "\r\n" : s == null ?  s = "null\r\n" : s + "\r\n");
-	  f(s);
-	};
-
 ps.println$J = function(l) {ps.println(Long.$s(l))}
-ps.println$F = ps.println$D = function(f) {var s = "" + f; ps.println(s.indexOf(".") < 0 && s.indexOf("Inf") < 0 ? s + ".0" : s)};
+ps.println$F = ps.println$D = function(f) {
+	var s = "" + f; 
+	ps.println(s.indexOf(".") < 0 && s.indexOf("Inf") < 0 ? s + ".0" : s);
+}
 
 ps.write$I = function(ch) {
   ps.print(String.fromCharCode(ch));	
@@ -3289,7 +3316,7 @@ ps.write$I = function(ch) {
 
 ps.write$BA = function (buf) {
 	ps.write$BA$I$I(buf, 0, buf.length);
-	};
+};
 
 ps.write$BA$I$I = function (buf, offset, len) {
   ps.print(String.instantialize(buf, offset, len));
@@ -5970,7 +5997,7 @@ oo[i]=o[off+i];
 return oo.join('');
 }
 }
-return""+o;
+return (o != null && o.toString ? o.toString() : ""+o);
 };
 
 sp.subSequence$I$I=function(beginIndex,endIndex){
