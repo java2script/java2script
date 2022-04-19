@@ -100,7 +100,7 @@ public class DF {
         sf = "" + value;
       } else {
         n = PT.parseInt(s.substring(i1 + (s.indexOf("E+") == i1 ? 2 : 1))) + n;
-        double f = PT.parseFloat(s.substring(0, i1));
+        double f = PT.parseDouble(s.substring(0, i1));
         sf = formatDecimal(f, decimalDigits - 1);
         if (sf.startsWith("10.")) {
           sf = formatDecimal(1, decimalDigits - 1);

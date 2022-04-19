@@ -41,6 +41,8 @@
 
 ;(function(J2S, window, document) {
 
+TypeError.prototype.printStackTrace$ = ReferenceError.prototype.printStackTrace$ = function() { console.log(this) }
+
   if (J2S.clazzLoaded) return;
   J2S.clazzLoaded = true;
 		
