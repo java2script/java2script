@@ -7,6 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2022.04.19 TypeError and ResourceError gain printStackTrace$() methods
 // BH 2022.03.19 String.valueOf(Double) does not add ".0"
 // BH 2022.01.17 fixes interface default method referencing own static fields
 // BH 2021.12.19 adds Double -0; fixes println(Double)
