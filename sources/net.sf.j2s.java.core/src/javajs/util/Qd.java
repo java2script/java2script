@@ -42,52 +42,53 @@ package javajs.util;
  * 
  */
 
-public class Quat {
-  public float q0, q1, q2, q3;
-  private M3 mat;
+public class Qd {
+  public double q0, q1, q2, q3;
+  private M3d mat;
 
-  private final static P4 qZero = new P4();
+  private final static P4d qZero = new P4d();
   private static final double RAD_PER_DEG = Math.PI / 180;
   
-  public Quat() {
+  public Qd() {
     q0 = 1;
   }
 
-  public static Quat newQ(Quat q) {
-    Quat q1 = new Quat();
+  public static Qd newQ(Qd q) {
+    Qd q1 = new Qd();
     q1.set(q);
     return q1;
   }
 
-  public static Quat newVA(T3 v, float theta) {
-    Quat q = new Quat();
+  public static Qd newVA(T3d v, double theta) {
+    Qd q = new Qd();
     q.setTA(v, theta);
     return q;
   }
 
-  public static Quat newM(M3 mat) {
-    Quat q = new Quat();
-    q.setM(M3.newM3(mat));
-    return q;
-  }
-
-  public static Quat newM(M3d mat) {
-    Quat q = new Quat();
+  public static Qd newM(M3d mat) {
+    Qd q = new Qd();
     q.setM(M3d.newM3(mat));
     return q;
   }
 
-  public static Quat newAA(A4 a) {
-    Quat q = new Quat();
+  public static Qd newAA(A4d a) {
+    Qd q = new Qd();
     q.setAA(a);
     return q;
   }
 
-  public static Quat newP4(P4 pt) {
-    Quat q = new Quat();
+  public static Qd newP4(P4d pt) {
+    Qd q = new Qd();
     q.setP4(pt);
     return q;
   }
+
+  public static Qd newP4(P4 pt) {
+    Qd q = new Qd();
+    q.setP4(P4d.new4(pt.x, pt.y, pt.z, pt.w));
+    return q;
+  }
+
 
   /**
    * Note that q0 is the last parameter here
@@ -98,8 +99,8 @@ public class Quat {
    * @param q0
    * @return {q1 q2 q3 q0}
    */
-  public static Quat new4(float q1, float q2, float q3, float q0) {
-    Quat q = new Quat();
+  public static Qd new4(double q1, double q2, double q3, double q0) {
+    Qd q = new Qd();
     if (q0 < -1) {
       q.q0 = -1;
       return q;
@@ -115,7 +116,7 @@ public class Quat {
     return q;
   }
 
-  public void set(Quat q) {
+  public void set(Qd q) {
     q0 = q.q0;
     q1 = q.q1;
     q2 = q.q2;
@@ -127,8 +128,8 @@ public class Quat {
    * 
    * @param pt
    */
-  private void setP4(P4 pt) {
-    float factor = (pt == null ? 0 : pt.distance4(qZero));
+  private void setP4(P4d pt) {
+    double factor = (pt == null ? 0 : pt.distance4(qZero));
     if (factor == 0) {
       q0 = 1;
       return;
@@ -145,31 +146,27 @@ public class Quat {
    * @param pt
    * @param theta
    */
-  public void setTA(T3 pt, float theta) {
+  public void setTA(T3d pt, double theta) {
     if (pt.x == 0 && pt.y == 0 && pt.z == 0) {
       q0 = 1;
       return;
     }
     double fact = (Math.sin(theta / 2 * RAD_PER_DEG) / Math.sqrt(pt.x
         * pt.x + pt.y * pt.y + pt.z * pt.z));
-    q0 = (float) (Math.cos(theta / 2 * RAD_PER_DEG));
-    q1 = (float) (pt.x * fact);
-    q2 = (float) (pt.y * fact);
-    q3 = (float) (pt.z * fact);
+    q0 = (Math.cos(theta / 2 * RAD_PER_DEG));
+    q1 = (pt.x * fact);
+    q2 = (pt.y * fact);
+    q3 = (pt.z * fact);
   }
 
-  public void setAA(A4 a) {
-    A4 aa = A4.newAA(a);
+  public void setAA(A4d a) {
+    A4d aa = A4d.newAA(a);
     if (aa.angle == 0)
       aa.y = 1;
-    setM(new M3().setAA(aa));
-  }
-  private void setM(M3d mat) {
-    // temporary only TODO
-    setM(mat.toM3());
+    setM(new M3d().setAA(aa));
   }
 
-  private void setM(M3 mat) {
+  private void setM(M3d mat) {
 
     /*
      * Changed 7/16/2008 to double precision for 11.5.48.
@@ -251,10 +248,10 @@ public class Quat {
       y = (mat.m21 + mat.m12) / z; // was -
     }
 
-    q0 = (float) (w * 0.5);
-    q1 = (float) (x * 0.5);
-    q2 = (float) (y * 0.5);
-    q3 = (float) (z * 0.5);
+    q0 = (w * 0.5);
+    q1 = (x * 0.5);
+    q2 = (y * 0.5);
+    q3 = (z * 0.5);
 
     /*
      *  Originally from http://www.gamedev.net/community/forums/topic.asp?topic_id=448380
@@ -274,19 +271,19 @@ public class Quat {
      double[] q = new double[4];
      if (tr > 0) {
      s = Math.sqrt(tr + 1);
-     q0 = (float) (0.5 * s);
+     q0 = (0.5 * s);
      s = 0.5 / s; // = 1/q0
-     q1 = (float) ((mat.m21 - mat.m12) * s);
-     q2 = (float) ((mat.m02 - mat.m20) * s);
-     q3 = (float) ((mat.m10 - mat.m01) * s);
+     q1 = ((mat.m21 - mat.m12) * s);
+     q2 = ((mat.m02 - mat.m20) * s);
+     q3 = ((mat.m10 - mat.m01) * s);
      } else {
-     float[][] m = new float[][] { new float[3], new float[3], new float[3] };
+     double[][] m = new double[][] { new double[3], new double[3], new double[3] };
      mat.getRow(0, m[0]);
      mat.getRow(1, m[1]);
      mat.getRow(2, m[2]);
 
      //Find out the biggest element along the diagonal 
-     float max = Math.max(mat.m11, mat.m00);
+     double max = Math.max(mat.m11, mat.m00);
      int i = (mat.m22 > max ? 2 : max == mat.m11 ? 1 : 0);
      int j = (i + 1) % 3;
      int k = (j + 1) % 3;
@@ -302,10 +299,10 @@ public class Quat {
      s = 0.5 / s; // = 1/q[i]
      q[j] = (m[i][j] + m[j][i]) * s;
      q[k] = (m[i][k] + m[k][i]) * s;
-     q0 = (float) ((m[k][j] - m[j][k]) * s);
-     q1 = (float) q[0]; // x
-     q2 = (float) q[1]; // y
-     q3 = (float) q[2]; // z 
+     q0 = ((m[k][j] - m[j][k]) * s);
+     q1 = q[0]; // x
+     q2 = q[1]; // y
+     q3 = q[2]; // z 
      }
 
      */
@@ -317,7 +314,7 @@ public class Quat {
    * that is, one that gives a positive dot product
    * 
    */
-  public void setRef(Quat qref) {
+  public void setRef(Qd qref) {
     if (qref == null) {
       mul(getFixFactor());
       return;
@@ -335,40 +332,36 @@ public class Quat {
    * or two vectors (vA, vB).
    * 
    * @param center  (null for vA/vB option)
-   * @param t1
-   * @param t2
+   * @param x
+   * @param xy
    * @return quaternion for frame
    */
-  public static final Quat getQuaternionFrame(P3 center, T3d t1,
-                                                    T3d t2) {
-    V3 vA = V3.new3((float) t1.x, (float) t1.y,(float)  t1.z);
-    V3 vB = V3.new3((float) t2.x, (float) t2.y, (float) t2.z);
+  public static final Qd getQuaternionFrame(P3d center, T3d x,
+                                                    T3d xy) {
+    return newFrame(center, x, xy, true);
+  }
+
+  public static final Qd getQuaternionFrame(P3 center, T3 x, T3 xy) {
+    return newFrame(center == null ? null : P3d.newPd(center), V3d.newV(x), V3d.newV(xy), false);
+  }
+
+  private static Qd newFrame(P3d center, T3d vA, T3d vB, boolean doCopy) {
+    if (doCopy) {
+      vA = V3d.newV(vA);
+      vB = V3d.newV(vB);
+    }
     if (center != null) {
       vA.sub(center);
       vB.sub(center);
     }
-    return getQuaternionFrameV(vA, vB, null, false);
+    return getQuaternionFrameV((V3d) vA, (V3d) vB, null, false);
   }
 
-  public static final Quat getQuaternionFrame(P3d center, T3d t1,
-                                              T3d t2) {
-     return getQuaternionFrame(center.asP3(), t1, t2);
+  public static final Qd getQuaternionFrameV(V3 vA, V3 vB, V3 vC,
+                                             boolean yBased) {
+    return getQuaternionFrameV(V3d.newV(vA), V3d.newV(vB), V3d.newV(vC),
+        yBased);
   }
-
-  public static final Quat getQuaternionFrame(P3d center, T3 x, T3 xy) {
-    return getQuaternionFrame(center.asP3(), x, xy);
-  }
-  
-  public static final Quat getQuaternionFrame(P3 center, T3 x, T3 xy) {
-    V3 vA = V3.newV(x);
-    V3 vB = V3.newV(xy);
-    if (center != null) {
-      vA.sub(center);
-      vB.sub(center);
-    }
-    return getQuaternionFrameV(vA, vB, null, false);
-  }
-
 
   /**
    * Create a quaternion based on a frame
@@ -378,20 +371,20 @@ public class Quat {
    * @param yBased
    * @return quaternion
    */
-  public static final Quat getQuaternionFrameV(V3 vA, V3 vB,
-                                                    V3 vC, boolean yBased) {
+  public static final Qd getQuaternionFrameV(V3d vA, V3d vB,
+                                                    V3d vC, boolean yBased) {
     if (vC == null) {
-      vC = new V3();
+      vC = new V3d();
       vC.cross(vA, vB);
       if (yBased)
         vA.cross(vB, vC);
     }
-    V3 vBprime = new V3();
+    V3d vBprime = new V3d();
     vBprime.cross(vC, vA);
     vA.normalize();
     vBprime.normalize();
     vC.normalize();
-    M3 mat = new M3();
+    M3d mat = new M3d();
     mat.setColumnV(0, vA);
     mat.setColumnV(1, vBprime);
     mat.setColumnV(2, vC);
@@ -417,7 +410,7 @@ public class Quat {
      
      */
 
-    Quat q = newM(mat);
+    Qd q = newM(mat);
 
      /*
      System.out.println("Quaternion mat from q \n" + q.getMatrix());
@@ -432,18 +425,14 @@ public class Quat {
     return q;
   }
 
-  private M3d m3d;
-  
   public M3d getMatrix() {
     if (mat == null)
       setMatrix();
-    if (m3d == null)
-      m3d = M3d.newM3(mat);
-    return m3d;
+    return mat;
   }
 
   private void setMatrix() {
-    mat = new M3();
+    mat = new M3d();
     // q0 = w, q1 = x, q2 = y, q3 = z
     mat.m00 = q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3;
     mat.m01 = 2 * q1 * q2 - 2 * q0 * q3;
@@ -456,18 +445,18 @@ public class Quat {
     mat.m22 = q0 * q0 - q1 * q1 - q2 * q2 + q3 * q3;
   }
 
-  public Quat add(float x) {
+  public Qd add(double x) {
     // scalar theta addition (degrees) 
    return newVA(getNormal(), getTheta() + x);
   }
 
-  public Quat mul(float x) {
+  public Qd mul(double x) {
     // scalar theta multiplication
     return (x == 1 ? new4(q1, q2, q3, q0) : 
       newVA(getNormal(), getTheta() * x));
   }
 
-  public Quat mulQ(Quat p) {
+  public Qd mulQ(Qd p) {
     return new4(
         q0 * p.q1 + q1 * p.q0 + q2 * p.q3 - q3 * p.q2, 
         q0 * p.q2 + q2 * p.q0 + q3 * p.q1 - q1 * p.q3, 
@@ -475,25 +464,25 @@ public class Quat {
         q0 * p.q0 - q1 * p.q1 - q2 * p.q2 - q3 * p.q3);
   }
 
-  public Quat div(Quat p) {
+  public Qd div(Qd p) {
     // unit quaternions assumed -- otherwise would scale by 1/p.dot(p)
     return mulQ(p.inv());
   }
 
-  public Quat divLeft(Quat p) {
+  public Qd divLeft(Qd p) {
     // unit quaternions assumed -- otherwise would scale by 1/p.dot(p)
     return this.inv().mulQ(p);
   }
 
-  public float dot(Quat q) {
+  public double dot(Qd q) {
     return this.q0 * q.q0 + this.q1 * q.q1 + this.q2 * q.q2 + this.q3 * q.q3;
   }
 
-  public Quat inv() {
+  public Qd inv() {
     return new4(-q1, -q2, -q3, q0);
   }
 
-  public Quat negate() {
+  public Qd negate() {
     return new4(-q1, -q2, -q3, -q0);
   }
 
@@ -512,23 +501,23 @@ public class Quat {
    * 
    */
 
-  private float getFixFactor() {
+  private double getFixFactor() {
     return (q0 < 0 || 
         q0 == 0 && (q1 < 0 || q1 == 0 && (q2 < 0 || q2 == 0 && q3 < 0)) ? -1 : 1);
   }
   
-  public V3 getVector(int i) {
+  public V3d getVector(int i) {
     return getVectorScaled(i, 1f);
   }
 
-  public V3 getVectorScaled(int i, float scale) {
+  public V3d getVectorScaled(int i, double scale) {
     if (i == -1) {
       scale *= getFixFactor();
-      return V3.new3(q1 * scale, q2 * scale, q3 * scale);
+      return V3d.new3(q1 * scale, q2 * scale, q3 * scale);
     }
     if (mat == null)
       setMatrix();
-    V3 v = new V3();
+    V3d v = new V3d();
     mat.getColumnV(i, v);
     if (scale != 1f)
       v.scale(scale);
@@ -539,16 +528,16 @@ public class Quat {
    * 
    * @return  vector such that 0 <= angle <= 180
    */
-  public V3 getNormal() {
-    V3 v = getRawNormal(this);
+  public V3d getNormal() {
+    V3d v = getRawNormal(this);
     v.scale(getFixFactor());
     return v;
   }
 
-  private static V3 getRawNormal(Quat q) {
-    V3 v = V3.new3(q.q1, q.q2, q.q3);
+  private static V3d getRawNormal(Qd q) {
+    V3d v = V3d.new3(q.q1, q.q2, q.q3);
     if (v.length() == 0)
-      return V3.new3(0, 0, 1);
+      return V3d.new3(0, 0, 1);
     v.normalize();
     return v;
   }
@@ -557,12 +546,12 @@ public class Quat {
    * 
    * @return 0 <= angle <= 180 in degrees
    */
-  public float getTheta() {
-    return (float) (Math.acos(Math.abs(q0)) * 2 * 180 / Math.PI);
+  public double getTheta() {
+    return (Math.acos(Math.abs(q0)) * 2 * 180 / Math.PI);
   }
 
-  public float getThetaRadians() {
-    return (float) (Math.acos(Math.abs(q0)) * 2);
+  public double getThetaRadians() {
+    return (Math.acos(Math.abs(q0)) * 2);
   }
 
   /**
@@ -571,15 +560,15 @@ public class Quat {
    * @return    vector option closest to v0
    * 
    */
-  public V3 getNormalDirected(V3 v0) {
-    V3 v = getNormal();
+  public V3d getNormalDirected(V3d v0) {
+    V3d v = getNormal();
     if (v.x * v0.x + v.y * v0.y + v.z * v0.z < 0) {
       v.scale(-1);
     }
     return v;
   }
 
-  public V3 get3dProjection(V3 v3d) {
+  public V3d get3dProjection(V3d v3d) {
     v3d.set(q1, q2, q3);
     return v3d;
   }
@@ -589,10 +578,10 @@ public class Quat {
    * @param axisAngle
    * @return   fill in theta of axisAngle such that 
    */
-  public P4 getThetaDirected(P4 axisAngle) {
+  public P4d getThetaDirected(P4d axisAngle) {
     //fills in .w;
-    float theta = getTheta();
-    V3 v = getNormal();
+    double theta = getTheta();
+    V3d v = getNormal();
     if (axisAngle.x * q1 + axisAngle.y * q2 + axisAngle.z * q3 < 0) {
       v.scale(-1);
       theta = -theta;
@@ -606,10 +595,10 @@ public class Quat {
    * @param vector  a vector, same as for getNormalDirected
    * @return   return theta 
    */
-  public float getThetaDirectedV(V3 vector) {
+  public double getThetaDirectedV(V3d vector) {
     //fills in .w;
-    float theta = getTheta();
-    V3 v = getNormal();
+    double theta = getTheta();
+    V3d v = getNormal();
     if (vector.x * q1 + vector.y * q2 + vector.z * q3 < 0) {
       v.scale(-1);
       theta = -theta;
@@ -618,7 +607,7 @@ public class Quat {
   }
 
   /**
-   *   Quaternions are saved as {q1, q2, q3, q0} 
+   *   Qdernions are saved as {q1, q2, q3, q0} 
    * 
    * While this may seem odd, it is so that for any point4 -- 
    * planes, axisangles, and quaternions -- we can use the 
@@ -627,37 +616,37 @@ public class Quat {
    * rotation angle (axisangle), and cos(theta/2) (quaternion).
    * @return {x y z w} (unnormalized)
    */
-  public P4 toPoint4f() {
-    return P4.new4(q1, q2, q3, q0); // x,y,z,w
+  public P4d toPoint4d() {
+    return P4d.new4(q1, q2, q3, q0); // x,y,z,w
   }
 
-  public A4 toAxisAngle4f() {
+  public A4d toAxisAngle4d() {
     double theta = 2 * Math.acos(Math.abs(q0));
     double sinTheta2 = Math.sin(theta/2);
-    V3 v = getNormal();
+    V3d v = getNormal();
     if (sinTheta2 < 0) {
       v.scale(-1);
       theta = Math.PI - theta;
     }
-    return A4.newVA(v, (float) theta);
+    return A4d.newVA(v, theta);
   }
 
-  public T3 transform2(T3 pt, T3 ptNew) {
+  public T3d transform2(T3d pt, T3d ptNew) {
     if (mat == null)
       setMatrix();
     mat.rotate2(pt, ptNew);
     return ptNew;
   }
 
-  public Quat leftDifference(Quat q2) {
+  public Qd leftDifference(Qd q2) {
     //dq = q.leftDifference(qnext);//q.inv().mul(qnext);
-    Quat q2adjusted = (this.dot(q2) < 0 ? q2.negate() : q2);
+    Qd q2adjusted = (this.dot(q2) < 0 ? q2.negate() : q2);
     return inv().mulQ(q2adjusted);
   }
 
-  public Quat rightDifference(Quat q2) {
+  public Qd rightDifference(Qd q2) {
     //dq = qnext.rightDifference(q);//qnext.mul(q.inv());
-    Quat q2adjusted = (this.dot(q2) < 0 ? q2.negate() : q2);
+    Qd q2adjusted = (this.dot(q2) < 0 ? q2.negate() : q2);
     return mulQ(q2adjusted.inv());
   }
 
@@ -683,13 +672,13 @@ public class Quat {
    * 
    * @return       pairwise array of data1 / data2 or data1 \ data2
    */
-  public static Quat[] div(Quat[] data1, Quat[] data2, int nMax, boolean isRelative) {
+  public static Qd[] div(Qd[] data1, Qd[] data2, int nMax, boolean isRelative) {
     int n;
     if (data1 == null || data2 == null || (n = Math.min(data1.length, data2.length)) == 0)
       return null;
     if (nMax > 0 && n > nMax)
       n = nMax;
-    Quat[] dqs = new Quat[n];
+    Qd[] dqs = new Qd[n];
     for (int i = 0; i < n; i++) {
       if (data1[i] == null || data2[i] == null)
         return null;
@@ -698,21 +687,21 @@ public class Quat {
     return dqs;
   }
   
-  public static Quat sphereMean(Quat[] data, float[] retStddev, float criterion) {
+  public static Qd sphereMean(Qd[] data, double[] retStddev, double criterion) {
     // Samuel R. Buss, Jay P. Fillmore: 
     // Spherical averages and applications to spherical splines and interpolation. 
     // ACM Trans. Graph. 20(2): 95-126 (2001)
       if (data == null || data.length == 0)
-        return new Quat();
+        return new Qd();
       if (retStddev == null)
-        retStddev = new float[1];
+        retStddev = new double[1];
       if (data.length == 1) {
         retStddev[0] = 0;
         return newQ(data[0]);
       }
-      float diff = Float.MAX_VALUE;
-      float lastStddev = Float.MAX_VALUE;
-      Quat qMean = simpleAverage(data);
+      double diff = Double.MAX_VALUE;
+      double lastStddev = Double.MAX_VALUE;
+      Qd qMean = simpleAverage(data);
       int maxIter = 100; // typically goes about 5 iterations
       int iter = 0;
       while (diff > criterion && lastStddev != 0 && iter < maxIter) {
@@ -734,17 +723,17 @@ public class Quat {
    * @param ndata
    * @return approximate average
    */
-  private static Quat simpleAverage(Quat[] ndata) {
-    V3 mean = V3.new3(0, 0, 1);
+  private static Qd simpleAverage(Qd[] ndata) {
+    V3d mean = V3d.new3(0, 0, 1);
     // using the directed normal ensures that the mean is 
     // continually added to and never subtracted from 
-    V3 v = ndata[0].getNormal();
+    V3d v = ndata[0].getNormal();
     mean.add(v);
     for (int i = ndata.length; --i >= 0;)
       mean.add(ndata[i].getNormalDirected(mean));
     mean.sub(v);
     mean.normalize();
-    float f = 0;
+    double f = 0;
     // the 3D projection of the quaternion is [sin(theta/2)]*n
     // so dotted with the normalized mean gets us an approximate average for sin(theta/2)
     for (int i = ndata.length; --i >= 0;)
@@ -752,13 +741,13 @@ public class Quat {
     if (f != 0)
       mean.scale(f / ndata.length);
     // now convert f to the corresponding cosine instead of sine
-    f = (float) Math.sqrt(1 - mean.lengthSquared());
-    if (Float.isNaN(f))
+    f = Math.sqrt(1 - mean.lengthSquared());
+    if (Double.isNaN(f))
       f = 0;
-    return newP4(P4.new4(mean.x, mean.y, mean.z, f));
+    return newP4(P4d.new4(mean.x, mean.y, mean.z, f));
   }
 
-  private static Quat newMean(Quat[] data, Quat mean) {
+  private static Qd newMean(Qd[] data, Qd mean) {
     /* quaternion derivatives nicely take care of producing the necessary 
      * metric. Since dq gives us the normal with the smallest POSITIVE angle, 
      * we just scale by that -- using degrees.
@@ -786,9 +775,9 @@ public class Quat {
      *  This is officially an "exponential" or "hyperbolic" projection.
      *  
      */
-    V3 sum = new V3();
-    V3 v;
-    Quat q, dq;
+    V3d sum = new V3d();
+    V3d v;
+    Qd q, dq;
     //System.out.println("newMean mean " + mean);
     for (int i = data.length; --i >= 0;) {
       q = data[i];
@@ -798,7 +787,7 @@ public class Quat {
       sum.add(v);
     }
     sum.scale(1f/data.length);
-    Quat dqMean = newVA(sum, sum.length());
+    Qd dqMean = newVA(sum, sum.length());
     //System.out.println("newMean dqMean " + dqMean + " " + dqMean.getNormal() + " " + dqMean.getTheta());
     return dqMean.mulQ(mean);
   }
@@ -808,46 +797,45 @@ public class Quat {
    * @param mean
    * @return     standard deviation in units of degrees
    */
-  private static float stdDev(Quat[] data, Quat mean) {
+  private static double stdDev(Qd[] data, Qd mean) {
     // the quaternion dot product gives q0 for dq (i.e. q / mean)
     // that is, cos(theta/2) for theta between them
     double sum2 = 0;
     int n = data.length;
     for (int i = n; --i >= 0;) {
-      float theta = data[i].div(mean).getTheta(); 
+      double theta = data[i].div(mean).getTheta(); 
       sum2 += theta * theta;
     }
-    return (float) Math.sqrt(sum2 / n);
+    return Math.sqrt(sum2 / n);
   }
 
-  public float[] getEulerZYZ() {
+  public double[] getEulerZYZ() {
     // http://www.swarthmore.edu/NatSci/mzucker1/e27/diebel2006attitude.pdf
     double rA, rB, rG;
     if (q1 == 0 && q2 == 0) {
-      float theta = getTheta();
+      double theta = getTheta();
       // pure Z rotation - ambiguous
-      return new float[] { q3 < 0 ? -theta : theta , 0, 0 };
+      return new double[] { q3 < 0 ? -theta : theta , 0, 0 };
     }
     rA = Math.atan2(2 * (q2 * q3 + q0 * q1), 2 * (-q1 * q3 + q0 * q2 ));
     rB = Math.acos(q3 * q3 - q2 * q2 - q1 * q1 + q0 * q0);
     rG = Math.atan2( 2 * (q2 * q3 - q0 * q1), 2 * (q0 * q2 + q1 * q3));
-    return new float[]  {(float) (rA / RAD_PER_DEG), (float) (rB / RAD_PER_DEG), (float) (rG / RAD_PER_DEG)};
+    return new double[]  {(rA / RAD_PER_DEG), (rB / RAD_PER_DEG), (rG / RAD_PER_DEG)};
   } 
 
-  public float[] getEulerZXZ() {
+  public double[] getEulerZXZ() {
     // NOT http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
     // http://www.swarthmore.edu/NatSci/mzucker1/e27/diebel2006attitude.pdf
     double rA, rB, rG;
     if (q1 == 0 && q2 == 0) {
-      float theta = getTheta();
+      double theta = getTheta();
       // pure Z rotation - ambiguous
-      return new float[] { q3 < 0 ? -theta : theta , 0, 0 };
+      return new double[] { q3 < 0 ? -theta : theta , 0, 0 };
     }
     rA = Math.atan2(2 * (q1 * q3 - q0 * q2), 2 * (q0 * q1 + q2 * q3 ));
     rB = Math.acos(q3 * q3 - q2 * q2 - q1 * q1 + q0 * q0);
     rG = Math.atan2( 2 * (q1 * q3 + q0 * q2), 2 * (-q2 * q3 + q0 * q1));
-    return new float[]  {(float) (rA / RAD_PER_DEG), (float) (rB / RAD_PER_DEG), (float) (rG / RAD_PER_DEG)};
+    return new double[]  {(rA / RAD_PER_DEG), (rB / RAD_PER_DEG), (rG / RAD_PER_DEG)};
   }
-
 
 }

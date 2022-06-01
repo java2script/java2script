@@ -12,58 +12,64 @@ import javajs.api.JSONEncodable;
  *         JavaScript using Java2Script and for subclassing to M3 and M4
  * 
  */
-public abstract class M34 implements JSONEncodable {
+public abstract class M34d implements JSONEncodable {
 
   /**
    * The first element of the first row
    */
-  public float m00;
+  public double m00;
 
   /**
    * The second element of the first row.
    */
-  public float m01;
+  public double m01;
 
   /**
    * third element of the first row.
    */
-  public float m02;
+  public double m02;
 
   /**
    * The first element of the second row.
    */
-  public float m10;
+  public double m10;
 
   /**
    * The second element of the second row.
    */
-  public float m11;
+  public double m11;
 
   /**
    * The third element of the second row.
    */
-  public float m12;
+  public double m12;
 
   /**
    * The first element of the third row.
    */
-  public float m20;
+  public double m20;
 
   /**
    * The second element of the third row.
    */
-  public float m21;
+  public double m21;
 
   /**
    * The third element of the third row.
    */
-  public float m22;
+  public double m22;
+
+  public int size;
 
   protected void setAA33(A4 a) {
-    double x = a.x;
-    double y = a.y;
-    double z = a.z;
-    double angle = a.angle;
+    setXYZAngle(a.x, a.y, a.z, a.angle);
+  }
+
+  protected void setAA33(A4d a) {
+    setXYZAngle(a.x, a.y, a.z, a.angle);
+  }
+  
+  protected void setXYZAngle(double x, double y, double z, double angle) {
     // Taken from Rick's which is taken from Wertz. pg. 412
     // Bug Fixed and changed into right-handed by hiranabe
     double n = Math.sqrt(x * x + y * y + z * z);
@@ -75,28 +81,32 @@ public abstract class M34 implements JSONEncodable {
     double c = Math.cos(angle);
     double s = Math.sin(angle);
     double omc = 1.0 - c;
-    m00 = (float) (c + x * x * omc);
-    m11 = (float) (c + y * y * omc);
-    m22 = (float) (c + z * z * omc);
+    m00 = (c + x * x * omc);
+    m11 = (c + y * y * omc);
+    m22 = (c + z * z * omc);
 
     double tmp1 = x * y * omc;
     double tmp2 = z * s;
-    m01 = (float) (tmp1 - tmp2);
-    m10 = (float) (tmp1 + tmp2);
+    m01 = (tmp1 - tmp2);
+    m10 = (tmp1 + tmp2);
 
     tmp1 = x * z * omc;
     tmp2 = y * s;
-    m02 = (float) (tmp1 + tmp2);
-    m20 = (float) (tmp1 - tmp2);
+    m02 = (tmp1 + tmp2);
+    m20 = (tmp1 - tmp2);
 
     tmp1 = y * z * omc;
     tmp2 = x * s;
-    m12 = (float) (tmp1 - tmp2);
-    m21 = (float) (tmp1 + tmp2);
+    m12 = (tmp1 - tmp2);
+    m21 = (tmp1 + tmp2);
+  }
+
+  public void rotate(T3d t) {
+    // alias-safe
+    rotate2(t, t);
   }
 
   public void rotate(T3 t) {
-    // alias-safe
     rotate2(t, t);
   }
 
@@ -109,10 +119,18 @@ public abstract class M34 implements JSONEncodable {
    * @param result
    *        the vector into which the transformed values are placed
    */
-  public void rotate2(T3 t, T3 result) {
+  public void rotate2(T3d t, T3d result) {
     // alias-safe
     result.set(m00 * t.x + m01 * t.y + m02 * t.z, m10 * t.x + m11 * t.y + m12
         * t.z, m20 * t.x + m21 * t.y + m22 * t.z);
+  }
+
+  public void rotate2(T3 t, T3 result) {
+    // alias-safe
+    result.set((float) (m00 * t.x + m01 * t.y + m02 * t.z), 
+        (float) (m10 * t.x + m11 * t.y + m12
+        * t.z), 
+        (float) (m20 * t.x + m21 * t.y + m22 * t.z));
   }
 
 
@@ -120,9 +138,9 @@ public abstract class M34 implements JSONEncodable {
    * Sets the value of this matrix to the double value of the Matrix3f argument.
    * 
    * @param m1
-   *        the matrix3f
+   *        the matrix3d
    */
-  protected void setM33(M34 m1) {
+  protected void setM33(M34d m1) {
     m00 = m1.m00;
     m01 = m1.m01;
     m02 = m1.m02;
@@ -135,10 +153,10 @@ public abstract class M34 implements JSONEncodable {
   }
 
   protected void clear33() {
-    m00 = m01 = m02 = m10 = m11 = m12 = m20 = m21 = m22 = 0.0f;
+    m00 = m01 = m02 = m10 = m11 = m12 = m20 = m21 = m22 = 0;
   }
 
-  protected void set33(int row, int col, float v) {
+  protected void set33(int row, int col, double v) {
     switch (row) {
     case 0:
       switch (col) {
@@ -183,7 +201,7 @@ public abstract class M34 implements JSONEncodable {
     err();
   }
 
-  protected float get33(int row, int col) {
+  protected double get33(int row, int col) {
     switch (row) {
     case 0:
       switch (col) {
@@ -220,7 +238,7 @@ public abstract class M34 implements JSONEncodable {
     return 0;
   }
 
-  protected void setRow33(int row, float v[]) {
+  protected void setRow33(int row, double v[]) {
     switch (row) {
     case 0:
       m00 = v[0];
@@ -242,9 +260,9 @@ public abstract class M34 implements JSONEncodable {
     }
   }
   
-  public abstract void getRow(int row, float v[]);
+  public abstract void getRow(int row, double v[]);
 
-  protected void getRow33(int row, float v[]) {
+  protected void getRow33(int row, double v[]) {
     switch (row) {
     case 0:
       v[0] = m00;
@@ -265,7 +283,7 @@ public abstract class M34 implements JSONEncodable {
     err();
   }
 
-  protected void setColumn33(int column, float v[]) {
+  protected void setColumn33(int column, double v[]) {
     switch(column) {
     case 0:
       m00 = v[0];
@@ -287,7 +305,7 @@ public abstract class M34 implements JSONEncodable {
     }
   }
 
-  protected void getColumn33(int column, float v[]) {
+  protected void getColumn33(int column, double v[]) {
     switch(column) {
     case 0:
       v[0] = m00;
@@ -309,7 +327,7 @@ public abstract class M34 implements JSONEncodable {
     }
   }
 
-  protected void add33(M34 m1) {
+  protected void add33(M34d m1) {
     m00 += m1.m00;
     m01 += m1.m01;
     m02 += m1.m02;
@@ -321,7 +339,7 @@ public abstract class M34 implements JSONEncodable {
     m22 += m1.m22;
   }
 
-  protected void sub33(M34 m1) {
+  protected void sub33(M34d m1) {
     m00 -= m1.m00;
     m01 -= m1.m01;
     m02 -= m1.m02;
@@ -333,7 +351,7 @@ public abstract class M34 implements JSONEncodable {
     m22 -= m1.m22;
   }
 
-  protected void mul33(float x) {
+  protected void mul33(double x) {
     m00 *= x;
     m01 *= x;
     m02 *= x;
@@ -346,7 +364,7 @@ public abstract class M34 implements JSONEncodable {
   }
 
   protected void transpose33() {
-    float tmp = m01;
+    double tmp = m01;
     m01 = m10;
     m10 = tmp;
 
@@ -359,52 +377,52 @@ public abstract class M34 implements JSONEncodable {
     m21 = tmp;
   }
 
-  protected void setXRot(float angle) {
+  protected void setXRot(double angle) {
     double c = Math.cos(angle);
     double s = Math.sin(angle);
-    m00 = 1.0f;
-    m01 = 0.0f;
-    m02 = 0.0f;
-    m10 = 0.0f;
-    m11 = (float) c;
-    m12 = (float) -s;
-    m20 = 0.0f;
-    m21 = (float) s;
-    m22 = (float) c;
+    m00 = 1.0d;
+    m01 = 0.0d;
+    m02 = 0.0d;
+    m10 = 0.0d;
+    m11 = c;
+    m12 = -s;
+    m20 = 0.0d;
+    m21 = s;
+    m22 = c;
   }
 
-  protected void setYRot(float angle) {
+  protected void setYRot(double angle) {
     double c = Math.cos(angle);
     double s = Math.sin(angle);
-    m00 = (float) c;
-    m01 = 0.0f;
-    m02 = (float) s;
-    m10 = 0.0f;
-    m11 = 1.0f;
-    m12 = 0.0f;
-    m20 = (float) -s;
-    m21 = 0.0f;
-    m22 = (float) c;
+    m00 = c;
+    m01 = 0.0d;
+    m02 = s;
+    m10 = 0.0d;
+    m11 = 1.0d;
+    m12 = 0.0d;
+    m20 = -s;
+    m21 = 0.0d;
+    m22 = c;
   }
   
-  protected void setZRot(float angle) {
+  protected void setZRot(double angle) {
     double c = Math.cos(angle);
     double s = Math.sin(angle);
-    m00 = (float) c;
-    m01 = (float) -s;
-    m02 = 0.0f;
-    m10 = (float) s;
-    m11 = (float) c;
-    m12 = 0.0f;
-    m20 = 0.0f;
-    m21 = 0.0f;
-    m22 = 1.0f;
+    m00 = c;
+    m01 = -s;
+    m02 = 0.0d;
+    m10 = s;
+    m11 = c;
+    m12 = 0.0d;
+    m20 = 0.0d;
+    m21 = 0.0d;
+    m22 = 1.0d;
   }
   
   /**
    * @return 3x3 determinant
    */
-  public float determinant3() {
+  public double determinant3() {
     return m00 * (m11 * m22 - m21 * m12) - m01 * (m10 * m22 - m20 * m12) + m02
         * (m10 * m21 - m20 * m11);
   }
@@ -414,14 +432,26 @@ public abstract class M34 implements JSONEncodable {
         "matrix column/row out of bounds");
   }
 
+  abstract double getElement(int row, int col);
+  abstract void setElement(int row, int col, double val);
+  
+  public void clean() {
+    for (int i = size; --i >= 0;)
+    for (int j = size; --j >= 0;)
+      setElement(i,  j, approx0(getElement(i, j)));
+  }
+
+  private double approx0(double v) {
+    return (v > 1e-15 || v < -1e-15 ? v : 0);
+  }
+
   @Override
   public String toJSON() {
     // M4 extends M3
     SB sb = new SB();
-    int len = (this instanceof M4 ? 4 : 3);
-    float[] x = new float[len];
+    double[] x = new double[size];
     sb.appendC('[');
-    for (int i = 0; i < len; i++) {
+    for (int i = 0; i < size; i++) {
       if (i > 0)
         sb.appendC(',');
       getRow(i, x);

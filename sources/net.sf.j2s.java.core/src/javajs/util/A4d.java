@@ -23,7 +23,7 @@ import javajs.api.JSONEncodable;
 
 
 /**
- * A 4 element axis angle represented by single precision floating point
+ * A 4 element axis angle represented by single precision doubleing point
  * x,y,z,angle components. An axis angle is a rotation of angle (radians) about
  * the vector (x,y,z).
  * 
@@ -35,7 +35,7 @@ import javajs.api.JSONEncodable;
  * for unique constructor and method names
  * for the optimization of compiled JavaScript using Java2Script
  */
-public class A4 implements JSONEncodable, Serializable {
+public class A4d implements JSONEncodable, Serializable {
 
   /*
    * I assumed that the length of the axis vector is not significant.
@@ -44,28 +44,28 @@ public class A4 implements JSONEncodable, Serializable {
   /**
    * The x coordinate.
    */
-  public float x;
+  public double x;
 
   /**
    * The y coordinate.
    */
-  public float y;
+  public double y;
 
   /**
    * The z coordinate.
    */
-  public float z;
+  public double z;
 
   /**
    * The angle.
    */
-  public float angle;
+  public double angle;
 
   /**
    * Constructs and initializes a AxisAngle4f to (0,0,1,0).
    */
-  public A4() {
-    z = 1.0f;
+  public A4d() {
+    z = 1.0d;
   }
 
   /**
@@ -82,8 +82,8 @@ public class A4 implements JSONEncodable, Serializable {
    *        the angle.
    * @return a
    */
-  public static A4 new4(float x, float y, float z, float angle) {
-    A4 a = new A4();
+  public static A4d new4(double x, double y, double z, double angle) {
+    A4d a = new A4d();
     a.set4(x, y, z, angle);
     return a;
   }
@@ -95,8 +95,8 @@ public class A4 implements JSONEncodable, Serializable {
    *        the AxisAngle4f containing the initialization x y z angle data
    * @return a
    */
-  public static A4 newAA(A4 a1) {
-    A4 a = new A4();
+  public static A4d newAA(A4d a1) {
+    A4d a = new A4d();
     a.set4(a1.x, a1.y, a1.z, a1.angle);
     return a;
   }
@@ -111,12 +111,12 @@ public class A4 implements JSONEncodable, Serializable {
    *        the angle
    * @return a
    */
-  public static A4 newVA(V3 axis, float angle) {
-    A4 a = new A4();
+  public static A4d newVA(V3d axis, double angle) {
+    A4d a = new A4d();
     a.setVA(axis, angle);
     return a;
   }
-  
+
   /**
    * Sets the value of this AxisAngle4f to the specified axis and angle.
    * 
@@ -126,7 +126,7 @@ public class A4 implements JSONEncodable, Serializable {
    *        the angle
    * @since Java 3D 1.2
    */
-  public final void setVA(V3 axis, float angle) {
+  public final void setVA(V3d axis, double angle) {
     x = axis.x;
     y = axis.y;
     z = axis.z;
@@ -145,7 +145,7 @@ public class A4 implements JSONEncodable, Serializable {
    * @param angle
    *        the angle
    */
-  public final void set4(float x, float y, float z, float angle) {
+  public final void set4(double x, double y, double z, double angle) {
     this.x = x;
     this.y = y;
     this.z = z;
@@ -158,7 +158,7 @@ public class A4 implements JSONEncodable, Serializable {
    * @param a
    *        the axis angle to be copied
    */
-  public final void setAA(A4 a) {
+  public final void setAA(A4d a) {
     x = a.x;
     y = a.y;
     z = a.z;
@@ -185,16 +185,16 @@ public class A4 implements JSONEncodable, Serializable {
     // assuming M is normalized.
 
     double cos = (m00 + m11 + m22 - 1.0) * 0.5;
-    x = (float) (m21 - m12);
-    y = (float) (m02 - m20);
-    z = (float) (m10 - m01);
+    x = (m21 - m12);
+    y = (m02 - m20);
+    z = (m10 - m01);
     double sin = 0.5 * Math.sqrt(x * x + y * y + z * z);
     if (sin == 0 && cos == 1) {
       x = y = 0;
       z = 1;
       angle = 0;
     } else {
-      angle = (float) Math.atan2(sin, cos);
+      angle = Math.atan2(sin, cos);
     }
 
     // no need to normalize
@@ -212,8 +212,8 @@ public class A4 implements JSONEncodable, Serializable {
    */
   @Override
   public int hashCode() {
-    return T3.floatToIntBits(x) ^ T3.floatToIntBits(y)
-        ^ T3.floatToIntBits(z) ^ T3.floatToIntBits(angle);
+    return T3d.doubleToIntBits(x) ^ T3d.doubleToIntBits(y)
+        ^ T3d.doubleToIntBits(z) ^ T3d.doubleToIntBits(angle);
   }
 
   /**
@@ -227,9 +227,9 @@ public class A4 implements JSONEncodable, Serializable {
    */
   @Override
   public boolean equals(Object o) {
-    if (!(o instanceof A4))
+    if (!(o instanceof A4d))
       return false;
-    A4 a1 = (A4) o;
+    A4d a1 = (A4d) o;
     return x == a1.x && y == a1.y && z == a1.z && angle == a1.angle;
   }
 
@@ -246,7 +246,10 @@ public class A4 implements JSONEncodable, Serializable {
 
   @Override
   public String toJSON() {
-    return "[" + x + "," + y + "," + z + "," + (float) (angle * 180.0 / Math.PI) + "]";
+    return "[" + x + "," + y + "," + z + "," + (angle * 180.0 / Math.PI) + "]";
   }
 
+  public void setM(M3d m3) {
+    setM(m3.toM3());
+  }
 }

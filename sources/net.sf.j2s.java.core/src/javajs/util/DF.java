@@ -36,14 +36,21 @@ public class DF {
       "0", "0.0", "0.00",
       "0.000", "0.0000", "0.00000", 
       "0.000000", "0.0000000", "0.00000000",
-      "0.000000000", "0.0000000000", "0.00000000000",  "0.000000000000", };
+      "0.000000000", 
+      "0.0000000000", 
+      "0.00000000000",  
+      "0.000000000000", 
+      "0.0000000000000",  
+      "0.00000000000000",  
+      "0.000000000000000", };
   private final static String zeros = "0000000000000000000000000000000000000000";
 
   private final static double[] formatAdds = { 
       0.5, 0.05, 0.005, 
       0.0005, 0.00005, 0.000005,
       0.0000005, 0.00000005, 0.000000005, 
-      0.0000000005, 0.00000000005 , 0.000000000005 , 0.0000000000005 };
+      0.0000000005, 0.00000000005 , 0.000000000005 , 0.0000000000005, 
+      0.00000000000005, 0.000000000000005, 0.0000000000000005};
 
   private final static Boolean[] useNumberLocalization = new Boolean[] { Boolean.TRUE };
 
@@ -66,19 +73,19 @@ public class DF {
    * 
    * @param value
    * @param decimalDigits
-   * @return formatted decimal
+   * @return  formatted decimal
    */
   public static String formatDecimal(double value, int decimalDigits) {
     if (value == Double.NEGATIVE_INFINITY || value == Double.POSITIVE_INFINITY || Double.isNaN(value))
-        return "" + value;
-      if (decimalDigits == Integer.MAX_VALUE)
-        return "" + (float) value;
+      return "" + value;
+    if (decimalDigits == Integer.MAX_VALUE)
+      return "" + (float) value;
     boolean isNeg = (value < 0);
     if (isNeg)
       value = -value;
     int n;
     if (decimalDigits < 0) {
-      decimalDigits = -decimalDigits;
+      decimalDigits = -1-decimalDigits;
       if (decimalDigits > formattingStrings.length)
         decimalDigits = formattingStrings.length;
       if (value == 0)
@@ -107,15 +114,15 @@ public class DF {
           n++;
         }
       }
-      return (isNeg ? "-" : "") + sf + "E" + (n >= 0 ? "+" : "") + n;
+      return (isNeg ? "-" : "") + sf  + "E" + (n >= 0 ? "+" : "") + n;
     }
-
+  
     if (decimalDigits >= formattingStrings.length)
       decimalDigits = formattingStrings.length - 1;
     String s1 = ("" + value).toUpperCase();
     int pt = s1.indexOf(".");
     if (pt < 0) // specifically JavaScript "-2" not "-2.0"
-      return s1 + formattingStrings[decimalDigits].substring(1);
+        return (isNeg ? "-" : "") + s1 + formattingStrings[decimalDigits].substring(1);
     int pt1 = s1.indexOf("E-");
     if (pt1 > 0) {
       n = PT.parseInt(s1.substring(pt1 + 1));
@@ -123,9 +130,9 @@ public class DF {
       // 0.03567
       // -0.0001
       s1 = "0." + zeros.substring(0, -n - 1) + s1.substring(0, 1) + s1.substring(2, pt1);
-      pt = 1;
+      pt = 1; 
     }
-
+  
     pt1 = s1.indexOf("E");
     // 3.5678E+3
     // 3567.800000000
@@ -135,16 +142,16 @@ public class DF {
       s1 = s1.substring(0, 1) + s1.substring(2, pt1) + zeros;
       s1 = s1.substring(0, n + 1) + "." + s1.substring(n + 1);
       pt = s1.indexOf(".");
-    }
+    } 
     // "234.345667  len == 10; pt = 3
     // "  0.0 "  decimalDigits = 1
-
+    
     int len = s1.length();
     int pt2 = decimalDigits + pt + 1;
     if (pt2 < len && s1.charAt(pt2) >= '5') {
       return formatDecimal((isNeg ? -1 : 1) * (value + formatAdds[decimalDigits]), decimalDigits);
     }
-
+  
     String s0 = s1.substring(0, (decimalDigits == 0 ? pt
         : ++pt));
     SB sb = SB.newS(s0);

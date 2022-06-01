@@ -42,4 +42,6 @@ public interface GenericCifDataParser {
 
   String fixKey(String key);
 
+  String skipNextToken() throws Exception;
+
 }

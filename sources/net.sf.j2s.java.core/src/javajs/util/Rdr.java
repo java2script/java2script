@@ -95,6 +95,7 @@ public class Rdr implements GenericLineReader {
 	 * 
 	 * @param is
 	 * @return a byte array
+	 * @throws IOException 
 	 */
 	public static byte[] streamToBytes(InputStream is) throws IOException {
 		byte[] bytes = getLimitedStreamBytes(is, -1);

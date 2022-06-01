@@ -206,116 +206,6 @@ public class PT {
         && checkTrailingText(str, next[0], ichMax) ? value : Float.NaN);
   }
 
-  public static double parseDoubleChecked(String str, int ichMax, int[] next,
-                                        boolean isStrict) {
-   boolean digitSeen = false;
-   int ich = next[0];
-   if (isStrict && str.indexOf('\n') != str.lastIndexOf('\n'))
-     return Double.NaN;
-   while (ich < ichMax && isWhiteSpace(str, ich))
-     ++ich;
-   boolean negative = false;
-   if (ich < ichMax && str.charAt(ich) == '-') {
-     ++ich;
-     negative = true;
-   }
-   // looks crazy, but if we don't do this, Google Closure Compiler will 
-   // write code that Safari will misinterpret in a VERY nasty way -- 
-   // getting totally confused as to long integers and double values
-   
-   // This is Safari figuring out the values of the numbers on the line (x, y, then z):
- 
-   //  ATOM 1241 CD1 LEU A 64 -2.206 36.532 31.576 1.00 60.60 C
-   //  e=1408749273
-   //  -e =-1408749273
-   //  ATOM 1241 CD1 LEU A 64 -2.206 36.532 31.576 1.00 60.60 C
-   //  e=-1821066134
-   //  e=36.532
-   //  ATOM 1241 CD1 LEU A 64 -2.206 36.532 31.576 1.00 60.60 C
-   //  e=-1133871366
-   //  e=31.576
-   //
-   //  "e" values are just before and after the "value = -value" statement.
-   
-   int ch = 0;
-   double ival = 0d;
-   double ival2 = 0d;
-   while (ich < ichMax && (ch = str.charAt(ich)) >= 48 && ch <= 57) {
-     ival = (ival * 10d) + (ch - 48)*1d;
-     ++ich;
-     digitSeen = true;
-   }
-   boolean isDecimal = false;
-   int iscale = 0;
-   int nzero = (ival == 0 ? -1 : 0);
-   if (ch == '.') {
-     isDecimal = true;
-     while (++ich < ichMax && (ch = str.charAt(ich)) >= 48 && ch <= 57) {
-       digitSeen = true;
-       if (nzero < 0) {
-         if (ch == 48) { 
-           nzero--;
-           continue;
-         }
-         nzero = -nzero;
-       } 
-       if (iscale  < decimalScaleD.length) {
-         ival2 = (ival2 * 10d) + (ch - 48)*1d;
-         iscale++;
-       }
-     }
-   }
-   double value;
-   
-   // Safari breaks here intermittently converting integers to doubles 
-   
-   if (!digitSeen) {
-     value = Double.NaN;
-   } else if (ival2 > 0) {
-     value = ival2 * decimalScaleD[iscale - 1];
-     if (nzero > 1) {
-       if (nzero - 2 < decimalScaleD.length) {
-         value *= decimalScaleD[nzero - 2];
-       } else {
-         value *= Math.pow(10, 1 - nzero);
-       }
-     } else {
-       value += ival;
-     }
-   } else {
-     value = ival;
-   }
-   boolean isExponent = false;
-   if (ich < ichMax && (ch == 69 || ch == 101 || ch == 68)) { // E e D
-     isExponent = true;
-     if (++ich >= ichMax)
-       return Double.NaN;
-     ch = str.charAt(ich);
-     if ((ch == '+') && (++ich >= ichMax))
-       return Double.NaN;
-     next[0] = ich;
-     int exponent = parseIntChecked(str, ichMax, next);
-     if (exponent == Integer.MIN_VALUE)
-       return Double.NaN;
-     if (exponent > 0 && exponent <= tensScale.length)
-       value *= tensScale[exponent - 1];
-     else if (exponent < 0 && -exponent <= decimalScale.length)
-       value *= decimalScale[-exponent - 1];
-     else if (exponent != 0)
-       value *= Math.pow(10, exponent);
-   } else {
-     next[0] = ich; // the exponent code finds its own ichNextParse
-   }
-   // believe it or not, Safari reports the long-equivalent of the 
-   // double value here, then later the double value, after no operation!
-   if (negative)
-     value = -value;
-   if (value == Double.POSITIVE_INFINITY)
-     value = Double.MAX_VALUE;
-   return (!isStrict || (!isExponent || isDecimal)
-       && checkTrailingText(str, next[0], ichMax) ? value : Double.NaN);
- }
-
   public final static float[] tensScale = { 10f, 100f, 1000f, 10000f, 100000f, 1000000f };
   public final static float[] decimalScale = { 
   0.1f, 
@@ -366,10 +256,6 @@ public class PT {
     return parseFloatArrayNext(str, new int[1], null, null, null);
   }
 
-  public static double[] parseDoubleArray(String str) {
-    return parseDoubleArrayNext(str, new int[1], null, null, null);
-  }
-
   public static int parseFloatArrayInfested(String[] tokens, float[] data) {
     int len = data.length;
     int nTokens = tokens.length;
@@ -381,24 +267,6 @@ public class PT {
           && n < nTokens) {
       }
       if (!Float.isNaN(f))
-        data[(max = i)] = f;
-      if (n == nTokens)
-        break;
-    }
-    return max + 1;
-  }
-
-  public static int parseDoubleArrayInfested(String[] tokens, double[] data) {
-    int len = data.length;
-    int nTokens = tokens.length;
-    int n = 0;
-    int max = 0;
-    for (int i = 0; i >= 0 && i < len && n < nTokens; i++) {
-      double f;
-      while (Double.isNaN(f = parseDouble(tokens[n++])) 
-          && n < nTokens) {
-      }
-      if (!Double.isNaN(f))
         data[(max = i)] = f;
       if (n == nTokens)
         break;
@@ -444,44 +312,6 @@ public class PT {
     return f;
   }
 
-  /**
-   * @param str
-   * @param next
-   * @param f
-   * @param strStart or null
-   * @param strEnd   or null
-   * @return array of double values
-   * 
-   */
-  public static double[] parseDoubleArrayNext(String str, int[] next, double[] f,
-                                            String strStart, String strEnd) {
-    int n = 0;
-    int pt = next[0];
-    if (pt >= 0) {
-      if (strStart != null) {
-        int p = str.indexOf(strStart, pt);
-        if (p >= 0)
-          next[0] = p + strStart.length();
-      }
-      str = str.substring(next[0]);
-      pt = (strEnd == null ? -1 : str.indexOf(strEnd));
-      if (pt < 0)
-        pt = str.length();
-      else
-        str = str.substring(0, pt);
-      next[0] += pt + 1;
-      String[] tokens = getTokens(str);
-      if (f == null)
-        f = new double[tokens.length];
-      n = parseDoubleArrayInfested(tokens, f);
-    }
-    if (f == null)
-      return new double[0];
-    for (int i = n; i < f.length; i++)
-      f[i] = Double.NaN;
-    return f;
-  }
-  
   public static float parseFloatRange(String str, int ichMax, int[] next) {
     int cch = str.length();
     if (ichMax > cch)
@@ -491,23 +321,9 @@ public class PT {
     return parseFloatChecked(str, ichMax, next, false);
   }
 
-  public static double parseDoubleRange(String str, int ichMax, int[] next) {
-    int cch = str.length();
-    if (ichMax > cch)
-      ichMax = cch;
-    if (next[0] < 0 || next[0] >= ichMax)
-      return Double.NaN;
-    return parseDoubleChecked(str, ichMax, next, false);
-  }
-
   public static float parseFloatNext(String str, int[] next) {
     int cch = (str == null ? -1 : str.length());
     return (next[0] < 0 || next[0] >= cch ? Float.NaN : parseFloatChecked(str, cch, next, false));
-  }
-
-  public static double parseDoubleNext(String str, int[] next) {
-    int cch = (str == null ? -1 : str.length());
-    return (next[0] < 0 || next[0] >= cch ? Float.NaN : parseDoubleChecked(str, cch, next, false));
   }
 
   public static float parseFloatStrict(String str) {
@@ -518,20 +334,8 @@ public class PT {
     return parseFloatChecked(str, cch, new int[] {0}, true);
   }
 
-  public static double parseDoubleStrict(String str) {
-    // checks trailing characters and does not allow "1E35" to be float
-    int cch = str.length();
-    if (cch == 0)
-      return Double.NaN;
-    return parseDoubleChecked(str, cch, new int[] {0}, true);
-  }
-
   public static float parseFloat(String str) {
     return parseFloatNext(str, new int[] {0});
-  }
-
-  public static double parseDouble(String str) {
-    return parseDoubleNext(str, new int[] {0});
   }
 
   public static int parseIntRadix(String s, int i) throws NumberFormatException {
@@ -693,10 +497,6 @@ public class PT {
     parseFloatArrayDataN(tokens, data, data.length);
   }
 
-  public static void parseDoubleArrayData(String[] tokens, double[] data) {
-    parseDoubleArrayDataN(tokens, data, data.length);
-  }
-
   /**
    * parses a string array for floats. Returns NaN for nonfloats or missing data.
    * 
@@ -707,11 +507,6 @@ public class PT {
   public static void parseFloatArrayDataN(String[] tokens, float[] data, int nData) {
     for (int i = nData; --i >= 0;)
       data[i] = (i >= tokens.length ? Float.NaN : parseFloat(tokens[i]));
-  }
-
-  public static void parseDoubleArrayDataN(String[] tokens, double[] data, int nData) {
-    for (int i = nData; --i >= 0;)
-      data[i] = (i >= tokens.length ? Double.NaN : parseDouble(tokens[i]));
   }
 
   /**
@@ -874,6 +669,10 @@ public class PT {
     return Math.round (f * n) / n;
   }
 
+  public static double approxD(double f, float n) {
+    return Math.round (f * n) / n;
+  }
+
   /**
    * Does a clean ITERATIVE replace of strFrom in str with strTo. 
    * Thus, rep("Testttt", "tt","t") becomes "Test".
@@ -895,14 +694,16 @@ public class PT {
 
   public static String formatF(float value, int width, int precision,
                               boolean alignLeft, boolean zeroPad) {
-    return formatS(DF.formatDecimal(toDouble(value), precision), width, 0, alignLeft, zeroPad);
+    return formatS(DF.formatDecimal(value, precision), width, 0, alignLeft, zeroPad);
   }
 
-  public static double toDouble(float value) {
-	return Double.valueOf("" + value).doubleValue();
-}
+  public static String formatD(double value, int width, int precision,
+                               boolean alignLeft, boolean zeroPad) {
+     return formatS(DF.formatDecimal(value, precision), width, 0, alignLeft, zeroPad);
+   }
 
-/**
+
+  /**
    * 
    * @param value
    * @param width
@@ -1407,13 +1208,13 @@ public class PT {
         }
         ich += len;
         if (!Float.isNaN(floatT)) // 'f'
-          strLabel += formatF(floatT, width, precision, alignLeft,
+          strLabel += formatF(floatT, width,  (st.equals("f") || st.equals("p") ? precision : -1 - precision), alignLeft,
               zeroPad);
         else if (strT != null)  // 'd' 'i' or 's'
           strLabel += formatS(strT, width, precision < 0 ? precision - 1 : precision, alignLeft,
               zeroPad);
-        else if (!Double.isNaN(doubleT)) // 'e'
-          strLabel += formatD(doubleT, width, precision - 1, alignLeft,
+        else if (!Double.isNaN(doubleT)) // 'e' or 'f'
+          strLabel += formatD(doubleT, width, (st.equals("e") || st.equals("P") ? precision : -1 - precision), alignLeft,
               zeroPad, true);
         if (doOne)
           break;
@@ -1443,7 +1244,7 @@ public class PT {
   /**
    * sprintf emulation uses (almost) c++ standard string formats
    * 
-   * 's' string 'i' or 'd' integer, 'e' double, 'f' float, 'p' point3f 'q'
+   * 's' string 'i' or 'd' integer, 'e' double, 'f' float, 'p' point3f, 'P' exponential point3f, 'q'
    * quaternion/plane/axisangle with added "i" (equal to the insipid "d" --
    * digits?)
    * 
@@ -1465,14 +1266,15 @@ public class PT {
         for (int o = 0; o < n; o++) {
           if (values[o] == null)
             continue;
-          switch (list.charAt(o)) {
+          char c;
+          switch (c = list.charAt(o)) {
           case 's':
             strFormat = formatString(strFormat, "s", (String) values[o],
                 Float.NaN, Double.NaN, true);
             break;
           case 'f':
-            strFormat = formatString(strFormat, "f", null, ((Float) values[o])
-                .floatValue(), Double.NaN, true);
+            strFormat = formatString(strFormat, "f", null,
+                ((Float) values[o]).floatValue(), Double.NaN, true);
             break;
           case 'i':
             strFormat = formatString(strFormat, "d", "" + values[o], Float.NaN,
@@ -1483,15 +1285,28 @@ public class PT {
           case 'd':
             strFormat = formatString(strFormat, "e", null, Float.NaN,
                 ((Double) values[o]).doubleValue(), true);
+            strFormat = formatString(strFormat, "f", null, Float.NaN,
+                ((Double) values[o]).doubleValue(), true);
             break;
           case 'p':
-            T3 pVal = (T3) values[o];
-            strFormat = formatString(strFormat, "p", null, pVal.x, Double.NaN,
-                true);
-            strFormat = formatString(strFormat, "p", null, pVal.y, Double.NaN,
-                true);
-            strFormat = formatString(strFormat, "p", null, pVal.z, Double.NaN,
-                true);
+          case 'P':
+            if (values[o] instanceof T3) {
+              T3 pVal = (T3) values[o];
+              strFormat = formatString(strFormat, (c == 'p' ? "p" : "P"), null, pVal.x, Double.NaN,
+                  true);
+              strFormat = formatString(strFormat, (c == 'p' ? "p" : "P"), null, pVal.y, Double.NaN,
+                  true);
+              strFormat = formatString(strFormat,  (c == 'p' ? "p" : "P"), null, pVal.z, Double.NaN,
+                  true);
+            } else {
+              T3d pVal = (T3d) values[o];
+              strFormat = formatString(strFormat,  (c == 'p' ? "p" : "P"), null, Float.NaN, pVal.x,
+                  true);
+              strFormat = formatString(strFormat,  (c == 'p' ? "p" : "P"), null, Float.NaN, pVal.y,
+                  true);
+              strFormat = formatString(strFormat,  (c == 'p' ? "p" : "P"), null, Float.NaN, pVal.z,
+                  true);
+            }
             break;
           case 'q':
             T4 qVal = (T4) values[o];
@@ -1528,10 +1343,10 @@ public class PT {
           case 'D':
             double[] dVal = (double[]) values[o];
             for (int i = 0; i < dVal.length; i++)
-              strFormat = formatString(strFormat, "e", null, Float.NaN,
-                  dVal[i], true);
+              strFormat = formatString(strFormat, "e", null, Float.NaN, dVal[i],
+                  true);
           }
-  
+
         }
         return rep(strFormat, "%%", "%");
       } catch (Exception e) {
@@ -1547,13 +1362,14 @@ public class PT {
    *               "%10.5p xxxx" ==> "%10.5p%10.5p%10.5p xxxx" 
    * 
    * @param strFormat
-   * @return    f or dupicated format
+   * @return    f or duplicated format
    */
   public static String formatCheck(String strFormat) {
-    if (strFormat == null || strFormat.indexOf('p') < 0 && strFormat.indexOf('q') < 0)
+    if (strFormat == null || strFormat.indexOf('p') < 0 && strFormat.indexOf('P') < 0 && strFormat.indexOf('q') < 0)
       return strFormat;
     strFormat = rep(strFormat, "%%", "\1");
     strFormat = rep(strFormat, "%p", "%6.2p");
+    strFormat = rep(strFormat, "%P", "%6.2P");
     strFormat = rep(strFormat, "%q", "%6.2q");
     String[] format = split(strFormat, "%");
     SB sb = new SB();
@@ -1562,7 +1378,7 @@ public class PT {
       String f = "%" + format[i];
       int pt;
       if (f.length() >= 3) {
-        if ((pt = f.indexOf('p')) >= 0)
+        if ((pt = f.indexOf('p')) >= 0 || (pt = f.indexOf('P')) >= 0)
           f = fdup(f, pt, 3);
         if ((pt = f.indexOf('q')) >= 0)
           f = fdup(f, pt, 4);
@@ -1748,16 +1564,16 @@ public class PT {
     return (c >= 0x1c && c <= 0x20 || c >= 0x9 && c <= 0xd);
   }
 
-  public static final float FRACTIONAL_PRECISION = 100000f;
-  public static final float CARTESIAN_PRECISION =  10000f;
-
-  public static void fixPtFloats(T3 pt, float f) {
-    //this will equate float and double as long as -256 <= x <= 256
-    pt.x = Math.round(pt.x * f) / f;
-    pt.y = Math.round(pt.y * f) / f;
-    pt.z = Math.round(pt.z * f) / f;
-  }
+  public static final double FRACTIONAL_PRECISION = 100000d;
+  public static final double CARTESIAN_PRECISION =  10000d;
   
+  public static void fixPtFloats(T3 pt, double d) {
+	    //this will equate float and double as long as -256 <= x <= 256
+	    pt.x = (float) (Math.round(pt.x * d) / d);
+	    pt.y = (float) (Math.round(pt.y * d) / d);
+	    pt.z = (float) (Math.round(pt.z * d) / d);
+	  }
+	  
   public static double fixDouble(double d, double f) {
     return Math.round(d * f) / f;
   }
@@ -1773,13 +1589,248 @@ public class PT {
           / parseFloat(s.substring(pt + 1)));
   }
 
+  public static double[] parseDoubleArray(String str) {
+    return parseDoubleArrayNext(str, new int[1], null, null, null);
+  }
+
+  public static int parseDoubleArrayInfested(String[] tokens, double[] data) {
+    int len = data.length;
+    int nTokens = tokens.length;
+    int n = 0;
+    int max = 0;
+    for (int i = 0; i >= 0 && i < len && n < nTokens; i++) {
+      double f;
+      while (Double.isNaN(f = parseDouble(tokens[n++])) 
+          && n < nTokens) {
+      }
+      if (!Double.isNaN(f))
+        data[(max = i)] = f;
+      if (n == nTokens)
+        break;
+    }
+    return max + 1;
+  }
+
+ /**
+   * @param str
+   * @param next
+   * @param f
+   * @param strStart or null
+   * @param strEnd   or null
+   * @return array of double values
+   * 
+   */
+  public static double[] parseDoubleArrayNext(String str, int[] next, double[] f,
+                                            String strStart, String strEnd) {
+    int n = 0;
+    int pt = next[0];
+    if (pt >= 0) {
+      if (strStart != null) {
+        int p = str.indexOf(strStart, pt);
+        if (p >= 0)
+          next[0] = p + strStart.length();
+      }
+      str = str.substring(next[0]);
+      pt = (strEnd == null ? -1 : str.indexOf(strEnd));
+      if (pt < 0)
+        pt = str.length();
+      else
+        str = str.substring(0, pt);
+      next[0] += pt + 1;
+      String[] tokens = getTokens(str);
+      if (f == null)
+        f = new double[tokens.length];
+      n = parseDoubleArrayInfested(tokens, f);
+    }
+    if (f == null)
+      return new double[0];
+    for (int i = n; i < f.length; i++)
+      f[i] = Double.NaN;
+    return f;
+  }
+  
+  public static double parseDoubleChecked(String str, int ichMax, int[] next,
+                                          boolean isStrict) {
+     boolean digitSeen = false;
+     int ich = next[0];
+     if (isStrict && str.indexOf('\n') != str.lastIndexOf('\n'))
+       return Double.NaN;
+     while (ich < ichMax && isWhiteSpace(str, ich))
+       ++ich;
+     boolean negative = false;
+     if (ich < ichMax && str.charAt(ich) == '-') {
+       ++ich;
+       negative = true;
+     }
+     // looks crazy, but if we don't do this, Google Closure Compiler will 
+     // write code that Safari will misinterpret in a VERY nasty way -- 
+     // getting totally confused as to long integers and double values
+     
+     // This is Safari figuring out the values of the numbers on the line (x, y, then z):
+   
+     //  ATOM 1241 CD1 LEU A 64 -2.206 36.532 31.576 1.00 60.60 C
+     //  e=1408749273
+     //  -e =-1408749273
+     //  ATOM 1241 CD1 LEU A 64 -2.206 36.532 31.576 1.00 60.60 C
+     //  e=-1821066134
+     //  e=36.532
+     //  ATOM 1241 CD1 LEU A 64 -2.206 36.532 31.576 1.00 60.60 C
+     //  e=-1133871366
+     //  e=31.576
+     //
+     //  "e" values are just before and after the "value = -value" statement.
+     
+     int ch = 0;
+     double ival = 0d;
+     double ival2 = 0d;
+     while (ich < ichMax && (ch = str.charAt(ich)) >= 48 && ch <= 57) {
+       ival = (ival * 10d) + (ch - 48)*1d;
+       ++ich;
+       digitSeen = true;
+     }
+     boolean isDecimal = false;
+     int iscale = 0;
+     int nzero = (ival == 0 ? -1 : 0);
+     if (ch == '.') {
+       isDecimal = true;
+       while (++ich < ichMax && (ch = str.charAt(ich)) >= 48 && ch <= 57) {
+         digitSeen = true;
+         if (nzero < 0) {
+           if (ch == 48) { 
+             nzero--;
+             continue;
+           }
+           nzero = -nzero;
+         } 
+         if (iscale  < decimalScaleD.length) {
+           ival2 = (ival2 * 10d) + (ch - 48)*1d;
+           iscale++;
+         }
+       }
+     }
+     double value;
+     
+     // Safari breaks here intermittently converting integers to doubles 
+     
+     if (!digitSeen) {
+       value = Double.NaN;
+     } else if (ival2 > 0) {
+       value = ival2 * decimalScaleD[iscale - 1];
+       if (nzero > 1) {
+         if (nzero - 2 < decimalScaleD.length) {
+           value *= decimalScaleD[nzero - 2];
+         } else {
+           value *= Math.pow(10, 1 - nzero);
+         }
+       } else {
+         value += ival;
+       }
+     } else {
+       value = ival;
+     }
+     boolean isExponent = false;
+     if (ich < ichMax && (ch == 69 || ch == 101 || ch == 68)) { // E e D
+       isExponent = true;
+       if (++ich >= ichMax)
+         return Double.NaN;
+       ch = str.charAt(ich);
+       if ((ch == '+') && (++ich >= ichMax))
+         return Double.NaN;
+       next[0] = ich;
+       int exponent = parseIntChecked(str, ichMax, next);
+       if (exponent == Integer.MIN_VALUE)
+         return Double.NaN;
+       if (exponent > 0 && exponent <= tensScale.length)
+         value *= tensScale[exponent - 1];
+       else if (exponent < 0 && -exponent <= decimalScale.length)
+         value *= decimalScale[-exponent - 1];
+       else if (exponent != 0)
+         value *= Math.pow(10, exponent);
+     } else {
+       next[0] = ich; // the exponent code finds its own ichNextParse
+     }
+     // believe it or not, Safari reports the long-equivalent of the 
+     // double value here, then later the double value, after no operation!
+     if (negative)
+       value = -value;
+     if (value == Double.POSITIVE_INFINITY)
+       value = Double.MAX_VALUE;
+     return (!isStrict || (!isExponent || isDecimal)
+         && checkTrailingText(str, next[0], ichMax) ? value : Double.NaN);
+   }
+
+  public static double parseDoubleRange(String str, int ichMax, int[] next) {
+    int cch = str.length();
+    if (ichMax > cch)
+      ichMax = cch;
+    if (next[0] < 0 || next[0] >= ichMax)
+      return Double.NaN;
+    return parseDoubleChecked(str, ichMax, next, false);
+  }
+
+  public static double parseDoubleNext(String str, int[] next) {
+    int cch = (str == null ? -1 : str.length());
+    return (next[0] < 0 || next[0] >= cch ? Float.NaN : parseDoubleChecked(str, cch, next, false));
+  }
+
+  public static double parseDoubleStrict(String str) {
+    // checks trailing characters and does not allow "1E35" to be float
+    int cch = str.length();
+    if (cch == 0)
+      return Double.NaN;
+    return parseDoubleChecked(str, cch, new int[] {0}, true);
+  }
+
+  public static double parseDouble(String str) {
+    return parseDoubleNext(str, new int[] {0});
+  }
+
+  public static void parseDoubleArrayData(String[] tokens, double[] data) {
+    parseDoubleArrayDataN(tokens, data, data.length);
+  }
+
+  public static void parseDoubleArrayDataN(String[] tokens, double[] data, int nData) {
+    for (int i = nData; --i >= 0;)
+      data[i] = (i >= tokens.length ? Double.NaN : parseDouble(tokens[i]));
+  }
+
   public static double parseDoubleFraction(String s) {
     int pt = s.indexOf("/");
     return (pt < 0 ? parseDouble(s) : parseDouble(s.substring(0, pt))
         / parseDouble(s.substring(pt + 1)));
-}
+  }
 
-//static {
+  /**
+   * The issue here is that a simple casting of (double) floatValue
+   * incorrectly "unrounds" the number rather than padding with 0s. 
+   * 
+   * The only solution I could come up with was to go through a String. 
+   * 
+   * This is not relevant in JavaScript
+   * 
+   * @param f
+   * @return true double value
+   */
+  
+  public static double toDouble(float f) {
+    /** 
+     * @j2sNative
+     * 
+     * return f;
+     */
+    {
+      return Double.valueOf("" + f).doubleValue();
+    }
+  }
+  
+  public static void fixPtDoubles(T3d pt, double f) {
+    //this will equate float and double as long as -256 <= x <= 256
+    pt.x = Math.round(pt.x * f) / f;
+    pt.y = Math.round(pt.y * f) / f;
+    pt.z = Math.round(pt.z * f) / f;
+  }
+
+  //static {
 //    
 //  double d = 790.8999998888;
 //  float x  = 790.8999998888f;

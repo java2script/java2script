@@ -19,7 +19,7 @@ package javajs.util;
 
 
 /**
- * A 4 element point that is represented by single precision floating point
+ * A 4 element point that is represented by double precision floating point
  * x,y,z,w coordinates.
  * 
  * @version specification 1.1, implementation $Revision: 1.9 $, $Date:
@@ -30,24 +30,19 @@ package javajs.util;
  * for unique constructor and method names
  * for the optimization of compiled JavaScript using Java2Script
  */
-public class P4 extends T4 {
+public class P4d extends T4d {
 
-  public P4() {
-    // skip T4() constructor
-  }
-
-  public static P4 new4(double x, double y, double z, double w) {
-    return new4( (float) x, (float) y, (float) z, (float) w);
+  public P4d() {
   }
   
-  public static P4 new4(float x, float y, float z, float w) {
-    P4 pt = new P4();
+  public static P4d new4(double x, double y, double z, double w) {
+    P4d pt = new P4d();
     pt.set4(x, y, z, w);
     return pt;
   }
 
-  public static P4 newPt(P4 value) {
-    P4 pt = new P4();
+  public static P4d newPt(P4d value) {
+    P4d pt = new P4d();
     pt.set4(value.x, value.y, value.z, value.w);    
     return pt;
   }
@@ -59,12 +54,12 @@ public class P4 extends T4 {
    *        the other point
    * @return the distance between these two points
    */
-  public final float distance4(P4 p1) {
+  public final double distance4(P4d p1) {
     double dx = x - p1.x;
     double dy = y - p1.y;
     double dz = z - p1.z;
     double dw = w - p1.w;
-    return (float) Math.sqrt(dx * dx + dy * dy + dz * dz + dw * dw);
+    return Math.sqrt(dx * dx + dy * dy + dz * dz + dw * dw);
   }
 
 }
