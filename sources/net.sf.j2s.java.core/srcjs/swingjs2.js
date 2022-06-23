@@ -10686,6 +10686,7 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// BH 2022.06.23 implements J2S._lastAppletID
 // BH 2022.01.12 adds pointer option
 // BH 2021.09.22 default file save as application/octet-stream, not text/plain
 // BH 2020.12.31 full 64-bit long
@@ -12746,10 +12747,12 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 		//who && who.focus();
 
-		if (!who || doSet)
+		if (!who || doSet) {
 			J2S._mouseOwner = who;
-		else if (J2S._mouseOwner == who)
+			who && who.applet && (J2S._lastAppletID = who.applet._id);			
+		} else if (J2S._mouseOwner == who) {
 			J2S._mouseOwner = who = null;
+		} 
 		if (target || !who)
 			J2S._mouseTarget = target || null;
 	}
@@ -14039,6 +14042,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2022.04.19 TypeError and ResourceError gain printStackTrace$() methods
 // BH 2022.03.19 String.valueOf(Double) does not add ".0"
 // BH 2022.01.17 fixes interface default method referencing own static fields
 // BH 2021.12.19 adds Double -0; fixes println(Double)
