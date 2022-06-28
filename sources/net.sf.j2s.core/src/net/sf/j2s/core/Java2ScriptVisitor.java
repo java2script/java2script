@@ -373,8 +373,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * list of annotations to ignore or null to ignore ALL
 	 * 
 	 */
-	private static String global_ignoredAnnotations = ";" + "CallerSensitive;" + "ConstructorProperties;"
-			+ "Deprecated;" + "Override;" + "SaveVarargs;" + "SuppressWarnings;";
+	private static String global_ignoredAnnotations = Java2ScriptCompiler.J2S_COMPILER_IGNORED_ANNOTATIONS_DEFAULT;
 
 	public static void setDebugging(boolean isDebugging) {
 		global_j2sFlag_isDebugging = isDebugging;
@@ -2457,6 +2456,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		List<EnumConstantDeclaration> enums = (isEnum ? new ArrayList<>() : null);
 		List<FieldDeclaration> fields = (haveFieldMethodAnnotations || isInterface || isLambda || isEnum ? null
 				: new ArrayList<>());
+		
+
 		List<IMethodBinding> methods = (haveFieldMethodAnnotations || isAnnotation || fields != null ? new ArrayList<>()
 				: null);
 
@@ -6312,9 +6313,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				if (obj instanceof Annotation) {
 					if (!addAnnotation((Annotation) obj, node, mode))
 						return false;
+					}
 				}
 			}
-		}
 		return true;
 	}
 
@@ -7111,7 +7112,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 							if (methods.contains(mBinding))
 								methods.remove(mBinding);
 						if (accessType != NOT_JAXB)
-							mBinding = getJAXBGetMethod(mBinding, methods, false);
+							mBinding =getJAXBGetMethod(accessType, mBinding, methods, false);
 						if (mBinding == null)
 							continue;
 						varName = "M:" + mBinding.getName();
@@ -7190,11 +7191,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			return str;
 		}
 
-		private static IMethodBinding getJAXBGetMethod(IMethodBinding v, List<IMethodBinding> methods,
+		private static IMethodBinding getJAXBGetMethod(int accessType, IMethodBinding v, List<IMethodBinding> methods,
 				boolean returnVar2) {
 			String varName = v.getName();
 			// check for matching get/is and set
-			if (varName.startsWith("create")) {
+			if (accessType == ANNOTATION_TYPE_UNKNOWN || varName.startsWith("create")) {
 				return v;
 			}
 			if (varName.startsWith("set")) {
@@ -7266,7 +7267,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				if (accessType != JAXB_TYPE_FIELD) {
 					for (int i = 0; i < methods.size(); i++) {
 						IMethodBinding m = methods.get(i);
-						IMethodBinding m2 = getJAXBGetMethod(m, methods, true);
+						IMethodBinding m2 = getJAXBGetMethod(-1, m, methods, true);
 						if (m2 == null)
 							continue;
 						boolean isPublic = (Modifier.isPublic(m.getModifiers())

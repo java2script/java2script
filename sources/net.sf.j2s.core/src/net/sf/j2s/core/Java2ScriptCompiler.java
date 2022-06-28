@@ -123,7 +123,7 @@ class Java2ScriptCompiler {
 	private static final String J2S_COMPILER_READ_ANNOTATIONS = "j2s.compiler.read.annotations";
 	private static final String J2S_COMPILER_READ_ANNOTATIONS_DEFAULT = "true";
 	private static final String J2S_COMPILER_IGNORED_ANNOTATIONS = "j2s.compiler.ignored.annotations";
-	private static final String J2S_COMPILER_IGNORED_ANNOTATIONS_DEFAULT = 
+	static final String J2S_COMPILER_IGNORED_ANNOTATIONS_DEFAULT = 
 			"CallerSensitive;"
 			+ "ConstructorProperties;"
 			+ "Deprecated;"
@@ -135,7 +135,8 @@ class Java2ScriptCompiler {
 			+ "Inherited;"
 			+ "Native;"
 			+ "Repeatable;"
-			+ "Retention;";
+			+ "Retention;"
+			+ "Transient;";
 
 	private static final String J2S_COMPILER_NONQUALIFIED_PACKAGES = "j2s.compiler.nonqualified.packages";
 	private static final String J2S_COMPILER_NONQUALIFIED_PACKAGES_DEFAULT = "<none>";
