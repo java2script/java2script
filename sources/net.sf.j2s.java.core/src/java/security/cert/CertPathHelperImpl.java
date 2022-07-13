@@ -63,4 +63,10 @@ class CertPathHelperImpl extends CertPathHelper {
     protected void implSetDateAndTime(X509CRLSelector sel, Date date, long skew) {
         sel.setDateAndTime(date, skew);
     }
+
+	@Override
+	protected boolean implIsJdkCA(TrustAnchor arg0) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

@@ -287,11 +287,7 @@ public class Random implements Serializable {
 	 * 
 	 */
 	public long nextLong() {
-		JSUtil.notImplemented(null);
-		return nextInt();
-//		{
-//		return ((long) next(32) << 32) + next(32);
-//		}
+		return ((long) next(32) << 32) + next(32);
 	}
 
 	/**

@@ -270,7 +270,7 @@ class JarVerifier {
                             }
 
                             sfv.setSignatureFile(bytes);
-                            sfv.process(sigFileSigners, manifestDigests);
+                            sfv.process(sigFileSigners, manifestDigests, null);
                         }
                     }
                     return;
@@ -313,7 +313,7 @@ class JarVerifier {
                         sfv.setSignatureFile(bytes);
                     }
                 }
-                sfv.process(sigFileSigners, manifestDigests);
+                sfv.process(sigFileSigners, manifestDigests, null);
 
             } catch (IOException ioe) {
                 // e.g. sun.security.pkcs.ParsingException
@@ -448,7 +448,7 @@ class JarVerifier {
         {
             this.is = is;
             this.jv = jv;
-            this.mev = new ManifestEntryVerifier(man);
+            this.mev = new ManifestEntryVerifier(man, null);
             this.jv.beginEntry(je, mev);
             this.numLeft = je.getSize();
             if (this.numLeft == 0)

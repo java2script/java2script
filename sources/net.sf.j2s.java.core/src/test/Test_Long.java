@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.PushbackInputStream;
 import java.util.BitSet;
+import java.util.Random;
 
 /**
  * test full 64-bit long/Long support in JavaScript. Also see Test_BigInt
@@ -29,7 +30,7 @@ public class Test_Long extends Test_ {
 	
 	public static void main(String[] args) {
 
-		
+
 		long j = Long.parseLong("2"), k = 10, l = 1, m = 12;
 		Long J = Long.valueOf(j);
 		assert(J == 2);
@@ -62,8 +63,17 @@ public class Test_Long extends Test_ {
 		testStatic();
 		testBoxed();
 		testExtended(j,k,l,m);		
+		testRandom();
 
 		System.out.println("Test_Long OK");
+	}
+
+	private static void testRandom() {
+			Random r = new Random();
+			for (int i = 0; i < 10; i++) {
+				long l = ((long) r.nextInt() << 32) + r.nextInt();
+				System.out.println("random long = " + l);
+			}
 	}
 
 	private static void testLongMath(long j, long k, long l) {

@@ -94,7 +94,7 @@ class FontStrikeDisposer
 
     public synchronized void dispose() {
         if (!disposed) {
-            font2D.removeFromCache(desc);
+//            font2D.removeFromCache(desc);
             StrikeCache.disposeStrike(this);
             disposed = true;
         }
