@@ -270,7 +270,7 @@ public class OutputStreamWriter extends Writer {
 		writer.flush();
 		String s = writer.getBuffer().toString();
 		if (s.length() > 0) {
-			byte[] buf = s.getBytes();
+			byte[] buf = s.getBytes(charsetName);
 			stream.write(buf, 0, buf.length);
 		}
 		writer = new StringWriter();

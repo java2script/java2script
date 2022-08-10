@@ -105,7 +105,7 @@ J2S.__makeComboBox = function() {
         		});
         
         if (this.options.items)
-        	this.add(this.options.items);
+        	this.add(this.options.items, 1);
         
         this.setSelectedIndex(this.options.selectedIndex)
         this._refresh();
@@ -115,7 +115,9 @@ J2S.__makeComboBox = function() {
       _destroy: function() {
         // remove generated elements
         this.cont.remove();
- 		this.popup.remove();
+        // must append to body, as otherwise it is not actually removed
+        $("body").append(this.popup);
+        this.popup.remove();
         this.element
           .removeClass( 'custom-j2sCB' )
           .enableSelection()
@@ -143,10 +145,23 @@ J2S.__makeComboBox = function() {
       update: function(andTrigger) {
    		 var sel = this._selectedItem();
    		 var all;
-   		 this.options.selectedIndex = (sel[0] ? sel[0].j2scbIndex : -1);
-   		 this.head.text(sel.length ==0 ? '' : 
-   			this.options.mode == 's' ? sel.text() : sel.length + ' of ' 
-   					+ (all = this.list.find('.j2scbopt').length) + ' selected option' + (all > 1 ? 's' :''));
+   		 var i = (sel[0] ? sel[0].j2scbIndex : -1);
+   		 this.options.selectedIndex = i;
+   		 if (sel.length == 0) {
+   			 this.head.text("");
+   		 } else if (this.options.mode == 's') {
+   			 var item = this.list["j2shead"+i];
+   			 if (item) {
+   				 this.head[0].removeChild(this.head[0].firstChild);
+   				 item.style.top="0px";
+   				 this.head[0].appendChild(item);
+   			 } else {
+   				 this.head.text(sel.text());
+   			 }
+   		 } else {
+   	   		 this.head.text(sel.length + ' of ' 
+   	   					+ (all = this.list.find('.j2scbopt').length) + ' selected option' + (all > 1 ? 's' :''));
+   		 }
    		 if (andTrigger)
  	      	this._trigger( 'change' , null, [this, "selected", sel[0].j2scbIndex]);
 // 	     else
@@ -154,9 +169,13 @@ J2S.__makeComboBox = function() {
        },  
       updateList: function(items) {
     	  this.list.children().detach();
-    	  this.add(items);
+    	  this.add(items, 1);
 	  },
-      add: function(items) {
+      updateList2: function(items) {
+    	  this.list.children().detach();
+    	  this.add(items, 2);
+	  },
+      add: function(items, step) {
       	  var y = 0;
     	  if (Array.isArray(items)) {
         	this.itemCount = 0;    		
@@ -164,11 +183,11 @@ J2S.__makeComboBox = function() {
     	  	this.list.children().each(function(a) {y += a.height()});
     		items = [items];  
     	  }
-    	  for (var i = 0; i < items.length; i++) {
+    	  for (var i = 0; i < items.length; i += step) {
     		var item = items[i];
     		if (!item)continue;
     		var opt = $('<li>', {'class':'j2scbopt j2scb-unsel', 'id': this.id() + '_opt' + this.itemCount});
-    		opt[0].j2scbIndex = this.itemCount++;    		
+    		var pt = opt[0].j2scbIndex = this.itemCount++;    		
     		this.list.append(opt);
 			if (typeof item == 'string') {
 				opt.text(item);
@@ -178,6 +197,8 @@ J2S.__makeComboBox = function() {
     			opt.append(item);
     			opt.css({height:ji.css("height")});
 	    		y += opt.height();
+	    		if (step == 2)
+	    			this.list["j2shead" + pt] = items[i + 1];
     		}
     		this.list.css({height: (y + 2) + "px"});
 	        this._on(opt, {mouseleave: '_close', mouseover: '_overOpt', click : '_clickOpt'});

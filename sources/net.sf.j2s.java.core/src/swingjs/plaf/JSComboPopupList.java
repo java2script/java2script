@@ -73,8 +73,7 @@ class JSComboPopupList extends JList {
 
 	@SuppressWarnings("unused")
 	void createJ2SCB() {
-		if (j2scb != null)
-			j2scb.j2sCB("destroy");
+		uninstallingUI();
 		j2scb = (api.js) cbui.$(cbui.domNode);
 		@SuppressWarnings("unused")
 		Object me = this;
@@ -140,6 +139,7 @@ class JSComboPopupList extends JList {
 	}
 
 	void updateCSS() {
+		秘getUI().allowPaintedBackground = false;
 		DOMNode.setSize(cbui.domNode, cbui.width, cbui.height);
 		if (j2scb != null) {
 			j2scb.j2sCB("updateCSS");
@@ -150,21 +150,28 @@ class JSComboPopupList extends JList {
 		if (j2scb == null)
 			return;
 		int n = cbui.comboBox.getItemCount();
-		DOMNode[] opts = new DOMNode[n];
+		DOMNode[] opts = new DOMNode[n*2];
 		JList l = this;
 		Dimension d = l.getPreferredSize();
 		int h = d.height;
 		int w = d.width;
 		JSListUI ui = (JSListUI) l.getUI();
-		for (int i = 0; i < n; i++) {
-			JComponent j = (JComponent) cbui.comboBox.getRenderer().getListCellRendererComponent(this,
-					getModel().getElementAt(i), i, true, false);
-			j.setSize(w, ui.getRowHeight(i));
-			opts[i] = j.秘getUI().getListNode();
+		for (int i = 0, p = 0; i < n; i++) {
+			opts[p++] = renderItem(i, w, ui);
+			opts[p++] = renderItem(i, w, ui);
 		}
-		j2scb.j2sCB("updateList", opts);
+		j2scb.j2sCB("updateList2", opts);
 		j2scb.j2sCB("setHeight", (h > JSComboBoxUI.MAX_HEIGHT ? JSComboBoxUI.MAX_HEIGHT : 0));
 		updateCSS();
+	}
+
+	private DOMNode renderItem(int i, int w, JSListUI ui) {
+		JComponent j = (JComponent) cbui.comboBox.getRenderer().getListCellRendererComponent(this,
+				getModel().getElementAt(i), i, true, false);
+		j.setSize(w, ui.getRowHeight(i));
+		JSComponentUI jui = j.秘getUI();
+		jui.c = jui.jc = j;
+		return jui.getListNode();
 	}
 
 	void updateSelectedIndex() {
@@ -241,6 +248,11 @@ class JSComboPopupList extends JList {
 		return null;
 	}
 
+	public void dispose() {
+		uninstallingUI();
+	}
+
+
 	// @Override
 	public void uninstallingUI() {
 		if (j2scb != null)
@@ -269,15 +281,18 @@ class JSComboPopupList extends JList {
 			cbui.comboBox.setSelectedIndex(i);
 			cbui.comboBox.秘setTrigger(false);
 			return;
+		case "pointerover":
 		case "mouseover":
 			return;
 		case "mouse":
 			JSEvent jqEvent = /** @j2sNative event.originalEvent || */
 					null;
 			switch (/** @j2sNative jqEvent.type || */"") {
+			case "pointermove":
 			case "mousemove":
 				JSMouse.retargetMouseEvent(jqEvent, null, cbui.comboBox, JSComboPopupList.this, 0);
 				break;
+			case "pointerup":
 			case "mouseup":
 				JSToolkit.dispatch(new Runnable() {
 					@Override

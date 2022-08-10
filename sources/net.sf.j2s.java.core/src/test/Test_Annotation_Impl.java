@@ -1,5 +1,6 @@
 package test;
 
+import java.beans.Transient;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -7,6 +8,8 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+
+import javax.xml.bind.annotation.XmlElement;
 
 @Test_Annotation(cl=Test_.class, btest = true, itype = 2, type = "im'pl", iitype = {4,5,6})
 @Test_Annotation.Test_Annotation1
@@ -69,13 +72,27 @@ class Test_Annotation_Impl extends Test_ {
 	  return "class_impl";
 	};
 	
-	public static void main(String[] args) {
+	  @Test_Annotation3(type = "1")
+	  public void annotated() {}
+
+	  public static void main(String[] args) {
+		
+//	    Method method;
+//		try {
+//			method = Test_Annotation_Impl.class.getMethod("annotated");
+//		    System.out.println(method.getAnnotations());  // contains annotation in java but empty array in js
+//		} catch (NoSuchMethodException | SecurityException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+
+		
+		
 		System.out.println(Test_Annotation_Impl.class.isAssignableFrom(Test_.class));//false
 		System.out.println(Test_.class.isAssignableFrom(Test_Annotation_Impl.class));//true
 		System.out.println(Test_.class.isAssignableFrom(Test_.class));//true
 		Test_Annotation_Impl impl = new Test_Annotation_Impl();
 		try {
-
 			Test_Annotation a = impl.getClass().getAnnotation(Test_Annotation.class);
 			System.out.println(a.annotationType().getName());
 			processAnnotation(a, "class");
@@ -94,6 +111,7 @@ class Test_Annotation_Impl extends Test_ {
 			Method[] methods = impl.getClass().getDeclaredMethods();
 			for (int i = 0; i < methods.length; i++) {
 				methods[i].setAccessible(true);
+				System.out.println("annotations:" + methods[i].getName() + " " + methods[i].getAnnotations());
 				if (methods[i].isAnnotationPresent(aclass)) {
 					//minor issue that Method.getName() returns the fully qualified 
 					// JavaScript method name, not the unqualified Java method name. 
@@ -111,7 +129,12 @@ class Test_Annotation_Impl extends Test_ {
 		}
 
 	}
-
+ 
+	@SafeVarargs
+	@Deprecated
+    @Transient
+	public final void test11(String... test) {}
+	
 	private static void processAnnotation(Annotation a, String name)
 			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		Method[] ma = a.getClass().getMethods();
@@ -133,4 +156,6 @@ class Test_Annotation_Impl extends Test_ {
 		}
 
 	}
+	
+
 }

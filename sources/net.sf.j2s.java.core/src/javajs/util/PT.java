@@ -216,8 +216,34 @@ public class PT {
   0.000001f, 
   0.0000001f, 
   0.00000001f, 
-  0.000000001f
+  0.000000001f,
+  // added for JavaScript to have full double precision if specified
+  0.0000000001f,
+  0.00000000001f,
+  0.000000000001f,
+  0.0000000000001f,
+  0.00000000000001f,
+  0.000000000000001f,
   };
+  public final static double[] decimalScaleD = { 
+  0.1d, 
+  0.01d, 
+  0.001d, 
+  0.0001d, 
+  0.00001d,
+  0.000001d, 
+  0.0000001d, 
+  0.00000001d, 
+  0.000000001d,
+  // added for JavaScript to have full double precision if specified
+  0.0000000001d,
+  0.00000000001d,
+  0.000000000001d,
+  0.0000000000001d,
+  0.00000000000001d,
+  0.000000000000001d,
+  };
+
   public static boolean checkTrailingText(String str, int ich, int ichMax) {
     //number must be pure -- no additional characters other than white space or ;
     char ch;
@@ -643,6 +669,10 @@ public class PT {
     return Math.round (f * n) / n;
   }
 
+  public static double approxD(double f, float n) {
+    return Math.round (f * n) / n;
+  }
+
   /**
    * Does a clean ITERATIVE replace of strFrom in str with strTo. 
    * Thus, rep("Testttt", "tt","t") becomes "Test".
@@ -667,6 +697,12 @@ public class PT {
     return formatS(DF.formatDecimal(value, precision), width, 0, alignLeft, zeroPad);
   }
 
+  public static String formatD(double value, int width, int precision,
+                               boolean alignLeft, boolean zeroPad) {
+     return formatS(DF.formatDecimal(value, precision), width, 0, alignLeft, zeroPad);
+   }
+
+
   /**
    * 
    * @param value
@@ -679,7 +715,7 @@ public class PT {
    */
   public static String formatD(double value, int width, int precision,
                               boolean alignLeft, boolean zeroPad, boolean allowOverflow) {
-    return formatS(DF.formatDecimal((float)value, -1 - precision), width, 0, alignLeft, zeroPad);
+    return formatS(DF.formatDecimal(value, -1 - precision), width, 0, alignLeft, zeroPad);
   }
 
   /**
@@ -786,110 +822,101 @@ public class PT {
     // because in JavaScript those would be false for unwrapped primitives
     // coming from equivalent of Array.get()
     // Strings will need their own escaped processing
-    
-    return info instanceof Number || info instanceof Boolean;
+    /**
+     * @j2sNative
+     * 
+     * if(typeof info == "number" || typeof info == "boolean") {
+     * return true;
+     * }
+     * 
+     * 
+     */
+    {}
+     return info instanceof Number || info instanceof Boolean;
   }
 
-//  private static Object arrayGet(Object info, int i) {
-//    /**
-//     * 
-//     * Note that info will be a primitive in JavaScript
-//     * but a wrapped primitive in Java.
-//     * 
-//     * @j2sNative
-//     * 
-//     *            return info[i];
-//     */
-//    {
-//      return Array.get(info, i);
-//    }
-//  }
-//  
-  @SuppressWarnings("unchecked")
-  public static String toJSON(String infoType, Object info) {
-    if (info == null)
-      return packageJSON(infoType, null);
-    if (isNonStringPrimitive(info))
-      return packageJSON(infoType, info.toString());
-    String s = null;
-    SB sb = null;
-    while (true) {
-      if (info instanceof String) {
-        s = (String) info;
+	@SuppressWarnings({ "unused", "unchecked", "null" })
+	public static String toJSON(String infoType, Object info) {
+		if (info == null)
+			return packageJSON(infoType, null);
+		if (isNonStringPrimitive(info))
+			return packageJSON(infoType, info.toString());
+		String s = null;
+		SB sb = null;
+		while (true) {
+			if (info instanceof String) {
+				s = (String) info;
 //        /**
 //         * @j2sNative
 //         * 
 //         * if (typeof s == "undefined") s = "null"
 //         * 
 //         */
-        
-        if (s.indexOf("{\"") != 0) {
-          //don't doubly fix JSON strings when retrieving status
-          // what about  \1 \2 \3 etc.?
-          s = esc(s);
-        }
-        break;
-      }
-      if (info instanceof JSONEncodable) {
-        // includes javajs.util.BS, org.jmol.script.SV
-        if ((s = ((JSONEncodable) info).toJSON()) == null)
-          s = "null"; // perhaps a list has a null value (group3List, for example)
-        break;
-      }
-      sb = new SB();
-      if (info instanceof Map) {
-        sb.append("{ ");
-        String sep = "";
-        for (String key : ((Map<String, ?>) info).keySet()) {
-          sb.append(sep).append(
-              packageJSON(key, toJSON(null, ((Map<?, ?>) info).get(key))));
-          sep = ",";
-        }
-        sb.append(" }");
-        break;
-      }
-      if (info instanceof Lst) {
-        sb.append("[ ");
-        int n = ((Lst<?>) info).size();
-        for (int i = 0; i < n; i++) {
-          if (i > 0)
-            sb.appendC(',');
-          sb.append(toJSON(null, ((Lst<?>) info).get(i)));
-        }
-        sb.append(" ]");
-        break;
-      }
-      if (info instanceof M34) {
-        // M4 extends M3
-        int len = (info instanceof M4 ? 4 : 3);
-        float[] x = new float[len];
-        M34 m = (M34) info;
-        sb.appendC('[');
-        for (int i = 0; i < len; i++) {
-          if (i > 0)
-            sb.appendC(',');
-          m.getRow(i, x);
-          sb.append(toJSON(null, x));
-        }
-        sb.appendC(']');
-        break;
-      }
-      s = nonArrayString(info);
-      if (s == null) {
-        sb.append("[");
-        int n = AU.getLength(info);
-        for (int i = 0; i < n; i++) {
-          if (i > 0)
-            sb.appendC(',');
-          sb.append(toJSON(null, Array.get(info, i)));
-        }
-        sb.append("]");
-        break;
-      }
-      info = info.toString();
-    }
-    return packageJSON(infoType, (s == null ? sb.toString() : s));
-  }
+
+				if (s.indexOf("{\"") != 0) {
+					// don't doubly fix JSON strings when retrieving status
+					// what about \1 \2 \3 etc.?
+					s = esc(s);
+				}
+				break;
+			}
+			if (info instanceof JSONEncodable) {
+				// includes javajs.util.BS, org.jmol.script.SV
+				if ((s = ((JSONEncodable) info).toJSON()) == null)
+					s = "null"; // perhaps a list has a null value (group3List, for example)
+				break;
+			}
+			sb = new SB();
+			if (info instanceof Map) {
+				sb.append("{ ");
+				String sep = "";
+				for (String key : ((Map<String, ?>) info).keySet()) {
+          if (key == null)
+            key = "null";
+					sb.append(sep).append(packageJSON(key, toJSON(null, ((Map<?, ?>) info).get(key))));
+					sep = ",";
+				}
+				sb.append(" }");
+				break;
+			}
+			if (info instanceof Lst) {
+				sb.append("[ ");
+				int n = ((Lst<?>) info).size();
+				for (int i = 0; i < n; i++) {
+					if (i > 0)
+						sb.appendC(',');
+					sb.append(toJSON(null, ((Lst<?>) info).get(i)));
+				}
+				sb.append(" ]");
+				break;
+			}
+			s = nonArrayString(info);
+			if (s == null) {
+				sb.append("[");
+				int n = AU.getLength(info);
+				Object o = null;
+        /** @j2sNative 
+         *  o = info[0];
+         *  typeof o != "number" && typeof 0 != "boolean" && (o = null);
+         */
+        {}
+        if (o != null) {
+					sb.appendO(info);
+				} else {
+					for (int i = 0; i < n; i++) {
+						if (i > 0)
+							sb.appendC(',');
+						sb.append(toJSON(null, Array.get(info, i)));
+					}
+				}
+				sb.append("]");
+				break;
+			}
+			info = info.toString();
+		}
+		return packageJSON(infoType, (s == null ? sb.toString() : s));
+	}
+
 
   /**
    * Checks to see if an object is an array (including typed arrays), and if it is, returns null;
@@ -1001,6 +1028,21 @@ public class PT {
     }
     return sf;
   }
+
+  public static String escD(double f) {
+    String sf = "" + f;
+    // NaN, Infinity
+    /**
+     * @j2sNative
+     * 
+     * if (sf.indexOf(".") < 0 && sf.indexOf("e") < 0 && sf.indexOf("N") < 0 && sf.indexOf("n") < 0)
+     *   sf += ".0";
+     */
+    {
+    }
+    return sf;
+  }
+
   public static String join(String[] s, char c, int i0) {
     if (s.length < i0)
       return null;
@@ -1150,6 +1192,10 @@ public class PT {
           if ((ch = strFormat.charAt(ich)) >= '0' && ch <= '9') {
             precision = ch - '0';
             ++ich;
+            if ((ch = strFormat.charAt(ich)) >= '0' && ch <= '9') {
+              precision = 10*precision + (ch - '0');
+              ++ich;
+            }
           }
           if (isExponential)
             precision = -precision;
@@ -1162,13 +1208,13 @@ public class PT {
         }
         ich += len;
         if (!Float.isNaN(floatT)) // 'f'
-          strLabel += formatF(floatT, width, precision, alignLeft,
+          strLabel += formatF(floatT, width,  (st.equals("f") || st.equals("p") ? precision : -1 - precision), alignLeft,
               zeroPad);
         else if (strT != null)  // 'd' 'i' or 's'
           strLabel += formatS(strT, width, precision < 0 ? precision - 1 : precision, alignLeft,
               zeroPad);
-        else if (!Double.isNaN(doubleT)) // 'e'
-          strLabel += formatD(doubleT, width, precision - 1, alignLeft,
+        else if (!Double.isNaN(doubleT)) // 'e' or 'f'
+          strLabel += formatD(doubleT, width, (st.equals("e") || st.equals("P") ? precision : -1 - precision), alignLeft,
               zeroPad, true);
         if (doOne)
           break;
@@ -1198,7 +1244,7 @@ public class PT {
   /**
    * sprintf emulation uses (almost) c++ standard string formats
    * 
-   * 's' string 'i' or 'd' integer, 'e' double, 'f' float, 'p' point3f 'q'
+   * 's' string 'i' or 'd' integer, 'e' double, 'f' float, 'p' point3f, 'P' exponential point3f, 'q'
    * quaternion/plane/axisangle with added "i" (equal to the insipid "d" --
    * digits?)
    * 
@@ -1220,14 +1266,15 @@ public class PT {
         for (int o = 0; o < n; o++) {
           if (values[o] == null)
             continue;
-          switch (list.charAt(o)) {
+          char c;
+          switch (c = list.charAt(o)) {
           case 's':
             strFormat = formatString(strFormat, "s", (String) values[o],
                 Float.NaN, Double.NaN, true);
             break;
           case 'f':
-            strFormat = formatString(strFormat, "f", null, ((Float) values[o])
-                .floatValue(), Double.NaN, true);
+            strFormat = formatString(strFormat, "f", null,
+                ((Float) values[o]).floatValue(), Double.NaN, true);
             break;
           case 'i':
             strFormat = formatString(strFormat, "d", "" + values[o], Float.NaN,
@@ -1238,15 +1285,28 @@ public class PT {
           case 'd':
             strFormat = formatString(strFormat, "e", null, Float.NaN,
                 ((Double) values[o]).doubleValue(), true);
+            strFormat = formatString(strFormat, "f", null, Float.NaN,
+                ((Double) values[o]).doubleValue(), true);
             break;
           case 'p':
-            T3 pVal = (T3) values[o];
-            strFormat = formatString(strFormat, "p", null, pVal.x, Double.NaN,
-                true);
-            strFormat = formatString(strFormat, "p", null, pVal.y, Double.NaN,
-                true);
-            strFormat = formatString(strFormat, "p", null, pVal.z, Double.NaN,
-                true);
+          case 'P':
+            if (values[o] instanceof T3) {
+              T3 pVal = (T3) values[o];
+              strFormat = formatString(strFormat, (c == 'p' ? "p" : "P"), null, pVal.x, Double.NaN,
+                  true);
+              strFormat = formatString(strFormat, (c == 'p' ? "p" : "P"), null, pVal.y, Double.NaN,
+                  true);
+              strFormat = formatString(strFormat,  (c == 'p' ? "p" : "P"), null, pVal.z, Double.NaN,
+                  true);
+            } else {
+              T3d pVal = (T3d) values[o];
+              strFormat = formatString(strFormat,  (c == 'p' ? "p" : "P"), null, Float.NaN, pVal.x,
+                  true);
+              strFormat = formatString(strFormat,  (c == 'p' ? "p" : "P"), null, Float.NaN, pVal.y,
+                  true);
+              strFormat = formatString(strFormat,  (c == 'p' ? "p" : "P"), null, Float.NaN, pVal.z,
+                  true);
+            }
             break;
           case 'q':
             T4 qVal = (T4) values[o];
@@ -1283,10 +1343,10 @@ public class PT {
           case 'D':
             double[] dVal = (double[]) values[o];
             for (int i = 0; i < dVal.length; i++)
-              strFormat = formatString(strFormat, "e", null, Float.NaN,
-                  dVal[i], true);
+              strFormat = formatString(strFormat, "e", null, Float.NaN, dVal[i],
+                  true);
           }
-  
+
         }
         return rep(strFormat, "%%", "%");
       } catch (Exception e) {
@@ -1302,13 +1362,14 @@ public class PT {
    *               "%10.5p xxxx" ==> "%10.5p%10.5p%10.5p xxxx" 
    * 
    * @param strFormat
-   * @return    f or dupicated format
+   * @return    f or duplicated format
    */
   public static String formatCheck(String strFormat) {
-    if (strFormat == null || strFormat.indexOf('p') < 0 && strFormat.indexOf('q') < 0)
+    if (strFormat == null || strFormat.indexOf('p') < 0 && strFormat.indexOf('P') < 0 && strFormat.indexOf('q') < 0)
       return strFormat;
     strFormat = rep(strFormat, "%%", "\1");
     strFormat = rep(strFormat, "%p", "%6.2p");
+    strFormat = rep(strFormat, "%P", "%6.2P");
     strFormat = rep(strFormat, "%q", "%6.2q");
     String[] format = split(strFormat, "%");
     SB sb = new SB();
@@ -1317,7 +1378,7 @@ public class PT {
       String f = "%" + format[i];
       int pt;
       if (f.length() >= 3) {
-        if ((pt = f.indexOf('p')) >= 0)
+        if ((pt = f.indexOf('p')) >= 0 || (pt = f.indexOf('P')) >= 0)
           f = fdup(f, pt, 3);
         if ((pt = f.indexOf('q')) >= 0)
           f = fdup(f, pt, 4);
@@ -1503,16 +1564,16 @@ public class PT {
     return (c >= 0x1c && c <= 0x20 || c >= 0x9 && c <= 0xd);
   }
 
-  public static final float FRACTIONAL_PRECISION = 100000f;
-  public static final float CARTESIAN_PRECISION =  10000f;
-
-  public static void fixPtFloats(T3 pt, float f) {
-    //this will equate float and double as long as -256 <= x <= 256
-    pt.x = Math.round(pt.x * f) / f;
-    pt.y = Math.round(pt.y * f) / f;
-    pt.z = Math.round(pt.z * f) / f;
-  }
+  public static final double FRACTIONAL_PRECISION = 100000d;
+  public static final double CARTESIAN_PRECISION =  10000d;
   
+  public static void fixPtFloats(T3 pt, double d) {
+	    //this will equate float and double as long as -256 <= x <= 256
+	    pt.x = (float) (Math.round(pt.x * d) / d);
+	    pt.y = (float) (Math.round(pt.y * d) / d);
+	    pt.z = (float) (Math.round(pt.z * d) / d);
+	  }
+	  
   public static double fixDouble(double d, double f) {
     return Math.round(d * f) / f;
   }
@@ -1528,7 +1589,248 @@ public class PT {
           / parseFloat(s.substring(pt + 1)));
   }
 
-//static {
+  public static double[] parseDoubleArray(String str) {
+    return parseDoubleArrayNext(str, new int[1], null, null, null);
+  }
+
+  public static int parseDoubleArrayInfested(String[] tokens, double[] data) {
+    int len = data.length;
+    int nTokens = tokens.length;
+    int n = 0;
+    int max = 0;
+    for (int i = 0; i >= 0 && i < len && n < nTokens; i++) {
+      double f;
+      while (Double.isNaN(f = parseDouble(tokens[n++])) 
+          && n < nTokens) {
+      }
+      if (!Double.isNaN(f))
+        data[(max = i)] = f;
+      if (n == nTokens)
+        break;
+    }
+    return max + 1;
+  }
+
+ /**
+   * @param str
+   * @param next
+   * @param f
+   * @param strStart or null
+   * @param strEnd   or null
+   * @return array of double values
+   * 
+   */
+  public static double[] parseDoubleArrayNext(String str, int[] next, double[] f,
+                                            String strStart, String strEnd) {
+    int n = 0;
+    int pt = next[0];
+    if (pt >= 0) {
+      if (strStart != null) {
+        int p = str.indexOf(strStart, pt);
+        if (p >= 0)
+          next[0] = p + strStart.length();
+      }
+      str = str.substring(next[0]);
+      pt = (strEnd == null ? -1 : str.indexOf(strEnd));
+      if (pt < 0)
+        pt = str.length();
+      else
+        str = str.substring(0, pt);
+      next[0] += pt + 1;
+      String[] tokens = getTokens(str);
+      if (f == null)
+        f = new double[tokens.length];
+      n = parseDoubleArrayInfested(tokens, f);
+    }
+    if (f == null)
+      return new double[0];
+    for (int i = n; i < f.length; i++)
+      f[i] = Double.NaN;
+    return f;
+  }
+  
+  public static double parseDoubleChecked(String str, int ichMax, int[] next,
+                                          boolean isStrict) {
+     boolean digitSeen = false;
+     int ich = next[0];
+     if (isStrict && str.indexOf('\n') != str.lastIndexOf('\n'))
+       return Double.NaN;
+     while (ich < ichMax && isWhiteSpace(str, ich))
+       ++ich;
+     boolean negative = false;
+     if (ich < ichMax && str.charAt(ich) == '-') {
+       ++ich;
+       negative = true;
+     }
+     // looks crazy, but if we don't do this, Google Closure Compiler will 
+     // write code that Safari will misinterpret in a VERY nasty way -- 
+     // getting totally confused as to long integers and double values
+     
+     // This is Safari figuring out the values of the numbers on the line (x, y, then z):
+   
+     //  ATOM 1241 CD1 LEU A 64 -2.206 36.532 31.576 1.00 60.60 C
+     //  e=1408749273
+     //  -e =-1408749273
+     //  ATOM 1241 CD1 LEU A 64 -2.206 36.532 31.576 1.00 60.60 C
+     //  e=-1821066134
+     //  e=36.532
+     //  ATOM 1241 CD1 LEU A 64 -2.206 36.532 31.576 1.00 60.60 C
+     //  e=-1133871366
+     //  e=31.576
+     //
+     //  "e" values are just before and after the "value = -value" statement.
+     
+     int ch = 0;
+     double ival = 0d;
+     double ival2 = 0d;
+     while (ich < ichMax && (ch = str.charAt(ich)) >= 48 && ch <= 57) {
+       ival = (ival * 10d) + (ch - 48)*1d;
+       ++ich;
+       digitSeen = true;
+     }
+     boolean isDecimal = false;
+     int iscale = 0;
+     int nzero = (ival == 0 ? -1 : 0);
+     if (ch == '.') {
+       isDecimal = true;
+       while (++ich < ichMax && (ch = str.charAt(ich)) >= 48 && ch <= 57) {
+         digitSeen = true;
+         if (nzero < 0) {
+           if (ch == 48) { 
+             nzero--;
+             continue;
+           }
+           nzero = -nzero;
+         } 
+         if (iscale  < decimalScaleD.length) {
+           ival2 = (ival2 * 10d) + (ch - 48)*1d;
+           iscale++;
+         }
+       }
+     }
+     double value;
+     
+     // Safari breaks here intermittently converting integers to doubles 
+     
+     if (!digitSeen) {
+       value = Double.NaN;
+     } else if (ival2 > 0) {
+       value = ival2 * decimalScaleD[iscale - 1];
+       if (nzero > 1) {
+         if (nzero - 2 < decimalScaleD.length) {
+           value *= decimalScaleD[nzero - 2];
+         } else {
+           value *= Math.pow(10, 1 - nzero);
+         }
+       } else {
+         value += ival;
+       }
+     } else {
+       value = ival;
+     }
+     boolean isExponent = false;
+     if (ich < ichMax && (ch == 69 || ch == 101 || ch == 68)) { // E e D
+       isExponent = true;
+       if (++ich >= ichMax)
+         return Double.NaN;
+       ch = str.charAt(ich);
+       if ((ch == '+') && (++ich >= ichMax))
+         return Double.NaN;
+       next[0] = ich;
+       int exponent = parseIntChecked(str, ichMax, next);
+       if (exponent == Integer.MIN_VALUE)
+         return Double.NaN;
+       if (exponent > 0 && exponent <= tensScale.length)
+         value *= tensScale[exponent - 1];
+       else if (exponent < 0 && -exponent <= decimalScale.length)
+         value *= decimalScale[-exponent - 1];
+       else if (exponent != 0)
+         value *= Math.pow(10, exponent);
+     } else {
+       next[0] = ich; // the exponent code finds its own ichNextParse
+     }
+     // believe it or not, Safari reports the long-equivalent of the 
+     // double value here, then later the double value, after no operation!
+     if (negative)
+       value = -value;
+     if (value == Double.POSITIVE_INFINITY)
+       value = Double.MAX_VALUE;
+     return (!isStrict || (!isExponent || isDecimal)
+         && checkTrailingText(str, next[0], ichMax) ? value : Double.NaN);
+   }
+
+  public static double parseDoubleRange(String str, int ichMax, int[] next) {
+    int cch = str.length();
+    if (ichMax > cch)
+      ichMax = cch;
+    if (next[0] < 0 || next[0] >= ichMax)
+      return Double.NaN;
+    return parseDoubleChecked(str, ichMax, next, false);
+  }
+
+  public static double parseDoubleNext(String str, int[] next) {
+    int cch = (str == null ? -1 : str.length());
+    return (next[0] < 0 || next[0] >= cch ? Float.NaN : parseDoubleChecked(str, cch, next, false));
+  }
+
+  public static double parseDoubleStrict(String str) {
+    // checks trailing characters and does not allow "1E35" to be float
+    int cch = str.length();
+    if (cch == 0)
+      return Double.NaN;
+    return parseDoubleChecked(str, cch, new int[] {0}, true);
+  }
+
+  public static double parseDouble(String str) {
+    return parseDoubleNext(str, new int[] {0});
+  }
+
+  public static void parseDoubleArrayData(String[] tokens, double[] data) {
+    parseDoubleArrayDataN(tokens, data, data.length);
+  }
+
+  public static void parseDoubleArrayDataN(String[] tokens, double[] data, int nData) {
+    for (int i = nData; --i >= 0;)
+      data[i] = (i >= tokens.length ? Double.NaN : parseDouble(tokens[i]));
+  }
+
+  public static double parseDoubleFraction(String s) {
+    int pt = s.indexOf("/");
+    return (pt < 0 ? parseDouble(s) : parseDouble(s.substring(0, pt))
+        / parseDouble(s.substring(pt + 1)));
+  }
+
+  /**
+   * The issue here is that a simple casting of (double) floatValue
+   * incorrectly "unrounds" the number rather than padding with 0s. 
+   * 
+   * The only solution I could come up with was to go through a String. 
+   * 
+   * This is not relevant in JavaScript
+   * 
+   * @param f
+   * @return true double value
+   */
+  
+  public static double toDouble(float f) {
+    /** 
+     * @j2sNative
+     * 
+     * return f;
+     */
+    {
+      return Double.valueOf("" + f).doubleValue();
+    }
+  }
+  
+  public static void fixPtDoubles(T3d pt, double f) {
+    //this will equate float and double as long as -256 <= x <= 256
+    pt.x = Math.round(pt.x * f) / f;
+    pt.y = Math.round(pt.y * f) / f;
+    pt.z = Math.round(pt.z * f) / f;
+  }
+
+  //static {
 //    
 //  double d = 790.8999998888;
 //  float x  = 790.8999998888f;

@@ -515,7 +515,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 			break;
 		case "componentOrientation":
 			calculateGeometry();
-			setTainted(true);// slider.repaint();
+			setTainted();// slider.repaint();
 //            InputMap km = getInputMap(JComponent.WHEN_FOCUSED, slider);
 //            SwingUtilities.replaceUIInputMap(slider,
 //                JComponent.WHEN_FOCUSED, km);
@@ -524,7 +524,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 			((BoundedRangeModel) e.getOldValue()).removeChangeListener(this);
 			((BoundedRangeModel) e.getNewValue()).addChangeListener(this);
 //            calculateThumbLocation();
-			setTainted(true);// slider.repaint();
+			setTainted();// slider.repaint();
 			break;
 		}
 		super.propertyChange(e);

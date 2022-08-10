@@ -32,6 +32,7 @@ import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.LayoutManager;
@@ -40,6 +41,9 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.awt.geom.Point2D.Double;
+import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -127,10 +131,46 @@ import swingjs.api.js.DOMNode;
  * JavaBeans<sup><font size="-2">TM</font></sup> has been added to the
  * <code>java.beans</code> package. Please see {@link java.beans.XMLEncoder}.
  * 
+ * In Java, this UI extends TextUI, but here we just mimic that.
+ * 
+ * 
  * @author Timothy Prinzing
  * @author Shannon Hickey (drag and drop)
  */
 public abstract class JSTextUI extends JSLightweightUI {
+	
+	
+//    /**
+//     * Causes the portion of the view responsible for the
+//     * given part of the model to be repainted.
+//     *
+//     * @param p0 the beginning of the range >= 0
+//     * @param p1 the end of the range >= p0
+//     */
+//    public abstract void damageRange(JTextComponent t, int p0, int p1);
+//
+//    /**
+//     * Causes the portion of the view responsible for the
+//     * given part of the model to be repainted.
+//     *
+//     * @param p0 the beginning of the range >= 0
+//     * @param p1 the end of the range >= p0
+//     */
+//    public abstract void damageRange(JTextComponent t, int p0, int p1,
+//                                     Position.Bias firstBias,
+//                                     Position.Bias secondBias);
+//
+
+	/**
+     * Returns the string to be used as the tooltip at the passed in location.
+     *
+     * @see javax.swing.text.JTextComponent#getToolTipText
+     * @since 1.4
+     */
+    public String getToolTipText(JTextComponent t, Point pt) {
+        return null;
+    }
+
 	
 	protected static EditorKit defaultKit = new DefaultEditorKit();
 	
@@ -150,6 +190,8 @@ public abstract class JSTextUI extends JSLightweightUI {
     TextListener textListener; // referred to in j2sApplet.js
 
 	protected boolean useRootView = false; // TextArea only?
+
+	private ArrayList<Double> charMap;
 
 	private static final Cursor textCursor = new Cursor(Cursor.TEXT_CURSOR);	
 	@Override
@@ -1064,9 +1106,10 @@ public abstract class JSTextUI extends JSLightweightUI {
 
 		@Override
 		public int viewToModel(float x, float y, Shape a, Bias[] biasReturn) {
-			// TODO Auto-generated method stub
 			return 0;
 		}
+		
+		
     }
     
 	/**
@@ -1178,6 +1221,7 @@ public abstract class JSTextUI extends JSLightweightUI {
 	}
 
 	void setJSText() {
+		charMap = null;
 		updateDOMNode();
 	}
 
@@ -1432,13 +1476,59 @@ public abstract class JSTextUI extends JSLightweightUI {
 	 */
     public int viewToModel(JTextComponent t, Point pt,
             Position.Bias[] biasReturn) {
-    	// from DefaultCursor mouse event
-    	pt.x = Integer.MAX_VALUE;
-    	getJSMarkAndDot(pt, 0);
-    	return pt.y;    	
+    	if (pt.x == Integer.MAX_VALUE) {
+        	// from DefaultCursor mouse event
+    		getJSMarkAndDot(pt, 0);
+    		return pt.y;
+    	}    	
+		if (charMap == null)
+			createCharMap();
+		for (int n = charMap.size(), i = n; --i >= 0;) {
+			Double p = charMap.get(i);
+			if (p.y < pt.y && p.x < pt.x)
+				return (i == n - 1 ? i - 1 : i);
+		}
+	    return 0;
     }
     
     /**
+     * This method does not account for line wrapping -- just for very simple strings
+     */
+    private void createCharMap() {
+    	charMap = new ArrayList<Double>();
+    	String s = editor.getText();
+    	double x = 0, y = 0;
+    	FontMetrics fm = editor.getFont().getFontMetrics();
+    	int tabWidth = fm.stringWidth("    ");
+    	int h = fm.getHeight();
+    	int line0 = 0;
+    	int ntab = 0;
+    	for (int i = 0; i < s.length(); i++) {
+    		charMap.add(new Double(x, y)); 
+    		char c = s.charAt(i);
+    		switch (c) {
+    		case '\n':
+    			y += h;
+    			x = 0;
+    			ntab = 0;
+    			line0 = i + 1;
+    			break;
+    		case '\t':
+    			x += tabWidth;
+    			ntab++;
+    			break;
+    			// todo
+    	    default:
+    	    	Rectangle2D r = fm.getStringBounds(s, line0, i + 1, null);
+    	    	x = r.getWidth() + ntab * tabWidth;
+    	    	break;
+    		}
+    	}
+		charMap.add(new Double(x, y)); 
+		charMap.add(new Double(0, y+h)); 
+	}
+
+	/**
      * transfer the mark and dot to the Java TextComponent
      * @param markDot
      */

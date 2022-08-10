@@ -54,7 +54,9 @@ public interface Test_Interface {
 
 	}
 
+    final static Integer myTest = -1;
+	
 	public default int isTestInterface() {
-		return 0;
+		return myTest;
 	}
 }

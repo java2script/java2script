@@ -21,7 +21,7 @@ public class Test_EPS extends Test_{
 			
 			String s = new Font(fonts[i], Font.PLAIN, 12).getPSName();
 			String s1 = fonts[i + 1];
-			System.out.println(i + " " + fonts[i] + " " + s + " " + s1);
+			System.out.println(i + " " + fonts[i] + " " + s + " == " + s1);
 			assert(s.equals(s1));
 		}
 		System.out.println("Test_EPS OK");

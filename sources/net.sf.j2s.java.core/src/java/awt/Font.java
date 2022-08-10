@@ -1271,6 +1271,8 @@ public class Font
 //    	Dialog	Dialog.plain	Dialog.bold	Dialog.italic
 //    	DialogInput	DialogInput.plain	DialogInput.bold	DialogInput.italic
 
+		// seems to have changed in Java 8+ 
+		// totally wrong to have Helvetica and TimesRoman become Dialog!
 		switch (name) {
 		case "TimesRoman":
 			name = SERIF;

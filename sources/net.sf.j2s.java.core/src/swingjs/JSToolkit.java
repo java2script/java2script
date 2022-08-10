@@ -688,6 +688,8 @@ public class JSToolkit extends SunToolkit
 			if (url.getProtocol() == "jar") {
 				return createVideo(JSUtil.getFileAsBytes(url));
 			}
+			if (url.getProtocol().equals("file"))
+				return getVideo(url.getFile());
 			return createVideo(Paths.get(url.toURI()));
 		} catch (URISyntaxException e) {
 			return null;
@@ -798,7 +800,7 @@ public class JSToolkit extends SunToolkit
 		case Cursor.TEXT_CURSOR:
 			return "text";
 		case Cursor.HAND_CURSOR:
-			return "grab";
+			return "pointer";
 		case Cursor.MOVE_CURSOR:
 			return "move";
 		case Cursor.N_RESIZE_CURSOR:

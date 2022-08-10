@@ -36,11 +36,11 @@ public class V3 extends T3 {
   }
   
   public static V3 newV(T3 t) {
-    return V3.new3(t.x, t.y, t.z);
+    return new3(t.x, t.y, t.z);
   }
 
   public static V3 newVsub(T3 t1, T3 t2) {
-    return V3.new3(t1.x - t2.x, t1.y - t2.y,t1.z - t2.z);
+    return new3(t1.x - t2.x, t1.y - t2.y,t1.z - t2.z);
   }
 
   public static V3 new3(float x, float y, float z) {

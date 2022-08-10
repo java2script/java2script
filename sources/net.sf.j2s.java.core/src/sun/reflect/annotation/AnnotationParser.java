@@ -397,11 +397,12 @@ public class AnnotationParser {
 					Annotation a = createAnnotation(qnames[i], atData[i]);
 					if (a != null) {
 						Class<? extends Annotation> klass = a.getClass();
-						if (
+//BH not implementing @retention						if (
 						// AnnotationType.getInstance(klass).retention() == RetentionPolicy.RUNTIME &&
-						result.put(klass, a) != null) {
-							throw new AnnotationFormatError("Duplicate annotation for class: " + klass + ": " + a);
-						}
+						result.put(klass, a);
+//						!= null) {
+//							throw new AnnotationFormatError("Duplicate annotation for class: " + klass + ": " + a);
+//						}
 					}
 				}
 			}

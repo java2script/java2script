@@ -88,7 +88,8 @@ var doMouseCapture = function(me, event, obj, isEndCheck) {
 
 	var that = me, o = me.options;
 	
-	if (o.disabled || event.type == "mousemove" && event.buttons == 0) {
+	if (o.disabled ||
+			(event.type == "mousemove" || event.type == "pointermove") && event.buttons == 0) {
 		return false;
 	}
 

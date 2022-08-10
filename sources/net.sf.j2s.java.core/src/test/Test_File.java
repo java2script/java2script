@@ -17,11 +17,8 @@ public class Test_File extends Test_ {
 
 	@SuppressWarnings("unused")
 	public static void main(String[] args) {
-
-		File fff = new File("jar:file:testing/here");
-		System.out.println(fff.getPath());
-		System.out.println(fff.getAbsolutePath());
 		
+
 		testTempDir();
 		
 		System.out.println(System.getProperty("jnlp.codebase"));

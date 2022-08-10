@@ -8,10 +8,14 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.json.simple.JSONObject;
+
+import javajs.util.PT;
 import javajs.util.Rdr;
 import swingjs.JSUtil;
 
@@ -20,6 +24,30 @@ public class Test_JSON extends Test_ {
 	@SuppressWarnings("unused")
 	public static void main(String[] args) {
 		try {
+			
+			int[] test = new int[] {1, 2, 3};
+			
+			String ss = PT.toJSON(null,  test);
+			System.out.println(ss);
+
+			Integer[] itest = new Integer[] {1, 2, 3};
+			
+			ss = PT.toJSON(null,  itest);
+			System.out.println(ss);
+
+			String[] stest = new String[] {"1", null, "3"};
+			
+			ss = PT.toJSON(null,  stest);
+			System.out.println(ss);
+
+			HashMap<String, String> m = new HashMap<String, String>();
+			m.put(null,  "a");
+			System.out.println(m.get(null));
+			System.out.println(PT.toJSON(null, m));
+			
+			JSONObject jo = new JSONObject(m);
+			System.out.println(jo.toJSONString());
+			
 //
 //			System.out.println(Double.valueOf(Double.MIN_NORMAL + "1"));
 //			System.out.println(Long.valueOf(Long.MAX_VALUE+"1"));

@@ -1,5 +1,8 @@
 package test;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -60,6 +63,18 @@ class Test_Char extends Test_ {
 		
 		// omega
 		s = new String("\u03a9");
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		try {
+			OutputStreamWriter os = new OutputStreamWriter(bos, "UTF-8");
+			os.write(s);
+			os.close();
+			bos.close();
+			String sa = Arrays.toString(bos.toByteArray());
+			System.out.println("testing UTF-8 OutputStreamWriter omega " + sa);
+			assert(sa.equals("[-50, -87]"));
+		} catch (IOException e) {
+		}
+		
 		c = s.charAt(0);
 		System.out.println(s.length() + " ? " + Character.charCount(s.codePointAt(0)) + " " + Character.getName(c));
 		assert(Character.getName(c).equals("GREEK CAPITAL LETTER OMEGA")); 

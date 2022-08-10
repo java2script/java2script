@@ -3,6 +3,8 @@ package test;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 
+import javajs.util.AU;
+
 class Test_Array extends Test_ {
 
 	static int[] i0 = new int[0];
@@ -144,6 +146,20 @@ class Test_Array extends Test_ {
 		System.out.println(da[iI]);
 		assert (ii3[2] == 1 && j == 1);
 		
+		float[] fa = new float[] {1.234456f};
+		
+		da = AU.asDoubleA(fa);
+
+		assert (da[0] == 1.234456);
+		
+		// this next will fail in Java and be OK in JavaScript
+		// assert(1.234456f == 1.234556);
+
+		assert (da instanceof double[]);
+
+		fa = AU.asFloatA(da);
+		
+		assert (fa instanceof float[]);
 
 		System.out.println("Test_Array OK");
 	}

@@ -19,7 +19,6 @@ package javajs.util;
 import java.io.Serializable;
 
 import javajs.api.JSONEncodable;
-import javajs.util.T3;
 
 
 
@@ -117,7 +116,7 @@ public class A4 implements JSONEncodable, Serializable {
     a.setVA(axis, angle);
     return a;
   }
-
+  
   /**
    * Sets the value of this AxisAngle4f to the specified axis and angle.
    * 
@@ -249,4 +248,5 @@ public class A4 implements JSONEncodable, Serializable {
   public String toJSON() {
     return "[" + x + "," + y + "," + z + "," + (float) (angle * 180.0 / Math.PI) + "]";
   }
+
 }
