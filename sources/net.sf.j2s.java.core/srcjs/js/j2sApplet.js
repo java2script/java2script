@@ -1,5 +1,6 @@
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// BH 2022.08.27 fix frame resizing for browsers reporting noninteger pageX, pageY
 // BH 2022.06.23 implements J2S._lastAppletID
 // BH 2022.01.12 adds pointer option
 // BH 2021.09.22 default file save as application/octet-stream, not text/plain
@@ -2166,8 +2167,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		oe.targetTouches && (oe = oe.targetTouches[0]);
 		ev.pageX || (ev.pageX = oe ? oe.pageX : J2S._mousePageX);
 		ev.pageY || (ev.pageY = oe ? oe.pageY : J2S._mousePageY);
-		x = J2S._mousePageX = ev.pageX;
-		y = J2S._mousePageY = ev.pageY;
+		x = J2S._mousePageX = Math.round(ev.pageX);
+		y = J2S._mousePageY = Math.round(ev.pageY);
 		return [ Math.round(x - offsets.left), Math.round(y - offsets.top), mods];
 	}
 	
@@ -3117,8 +3118,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			J2S._dmouseDrag = drag;
 
 			tag.isDragging = true; // used by J2S mouse event business
-			pageX = ev.pageX;
-			pageY = ev.pageY;
+			pageX = Math.round(ev.pageX);
+			pageY = Math.round(ev.pageY);
 			var xy = {
 				x : 0,
 				y : 0,
@@ -3132,8 +3133,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 				var o = $(target(501)).position();
 				if (!o) return false;
 				xy = {
-					x : o.left,
-					y : o.top
+					x : Math.round(o.left),
+					y : Math.round(o.top)
 				};
 			}
 			pageX0 = xy.x;
@@ -3147,8 +3148,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 				tag.isDragging = false;
 			var mode = (tag.isDragging ? 506 : 503);
 			if (!J2S._dmouseOwner || tag.isDragging && J2S._dmouseOwner == tag) {
-				x = pageX0 + (dx = ev.pageX - pageX);
-				y = pageY0 + (dy = ev.pageY - pageY);
+				x = pageX0 + (dx = Math.round(ev.pageX) - pageX);
+				y = pageY0 + (dy = Math.round(ev.pageY) - pageY);
 				if (isNaN(x))return;
 				if (fDrag) {
 					fDrag({

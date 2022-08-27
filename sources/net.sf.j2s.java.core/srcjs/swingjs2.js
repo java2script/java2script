@@ -1,5 +1,5 @@
 /*!
- 
+  
   // BH 2022.01.12 adds pointer option see BHTEST
 
  * jQuery JavaScript Library v1.11.0
@@ -10379,8 +10379,6 @@ return jQuery;
 
 }));
 // j2sQueryExt.js]
-
-// BH 2022.08.27 fix frame resize for ChromeBook/Chrome with non-integer event.pageX,pageY
 // BH 2022.01.12 adds pointer option
 // BH 7/13/2019 removing hook for J2S.unsetMouse
 // BH 7/21/2016 9:25:38 PM passing .pageX and  .pageY to jQuery event
@@ -10688,6 +10686,7 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// BH 2022.08.27 fix frame resizing for browsers reporting noninteger pageX, pageY
 // BH 2022.06.23 implements J2S._lastAppletID
 // BH 2022.01.12 adds pointer option
 // BH 2021.09.22 default file save as application/octet-stream, not text/plain
@@ -12854,8 +12853,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		oe.targetTouches && (oe = oe.targetTouches[0]);
 		ev.pageX || (ev.pageX = oe ? oe.pageX : J2S._mousePageX);
 		ev.pageY || (ev.pageY = oe ? oe.pageY : J2S._mousePageY);
-		x = J2S._mousePageX = ev.pageX;
-		y = J2S._mousePageY = ev.pageY;
+		x = J2S._mousePageX = Math.round(ev.pageX);
+		y = J2S._mousePageY = Math.round(ev.pageY);
 		return [ Math.round(x - offsets.left), Math.round(y - offsets.top), mods];
 	}
 	
