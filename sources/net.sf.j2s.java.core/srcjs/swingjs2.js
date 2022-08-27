@@ -13873,8 +13873,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 		var fixTouch = function(ev) {
 			if (ev.originalEvent.targetTouches) {
-				ev.pageX = ev.originalEvent.targetTouches[0].pageX;
-				ev.pageY = ev.originalEvent.targetTouches[0].pageY;
+				ev.pageX = Math.round(ev.originalEvent.targetTouches[0].pageX);
+				ev.pageY = Math.round(ev.originalEvent.targetTouches[0].pageY);
 			}
 			return ev;
 		}
