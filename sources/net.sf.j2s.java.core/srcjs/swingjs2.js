@@ -1,5 +1,5 @@
 /*!
-  
+ 
   // BH 2022.01.12 adds pointer option see BHTEST
 
  * jQuery JavaScript Library v1.11.0
@@ -10379,6 +10379,8 @@ return jQuery;
 
 }));
 // j2sQueryExt.js]
+
+// BH 2022.08.27 fix frame resize for ChromeBook/Chrome with non-integer event.pageX,pageY
 // BH 2022.01.12 adds pointer option
 // BH 7/13/2019 removing hook for J2S.unsetMouse
 // BH 7/21/2016 9:25:38 PM passing .pageX and  .pageY to jQuery event
@@ -13803,8 +13805,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			J2S._dmouseDrag = drag;
 
 			tag.isDragging = true; // used by J2S mouse event business
-			pageX = ev.pageX;
-			pageY = ev.pageY;
+			pageX = Math.round(ev.pageX);
+			pageY = Math.round(ev.pageY);
 			var xy = {
 				x : 0,
 				y : 0,
@@ -13818,8 +13820,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 				var o = $(target(501)).position();
 				if (!o) return false;
 				xy = {
-					x : o.left,
-					y : o.top
+					x : Math.round(o.left),
+					y : Math.round(o.top)
 				};
 			}
 			pageX0 = xy.x;
@@ -13833,8 +13835,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 				tag.isDragging = false;
 			var mode = (tag.isDragging ? 506 : 503);
 			if (!J2S._dmouseOwner || tag.isDragging && J2S._dmouseOwner == tag) {
-				x = pageX0 + (dx = ev.pageX - pageX);
-				y = pageY0 + (dy = ev.pageY - pageY);
+				x = pageX0 + (dx = Math.round(ev.pageX) - pageX);
+				y = pageY0 + (dy = Math.round(ev.pageY) - pageY);
 				if (isNaN(x))return;
 				if (fDrag) {
 					fDrag({
