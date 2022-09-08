@@ -35,9 +35,9 @@ public abstract class Test_Inner extends Test_ {
 		return "Test_Inner";
 	}
 	
-	class Test_Abstract_a extends Test_ {
+	public class Test_Abstract_a extends Test_ {
 	
-		void testing() {
+		public void testing() {
 			System.out.println("this is " + a);
 			assert (a == "a string");
 			System.out.println(showt2());
@@ -73,17 +73,38 @@ public abstract class Test_Inner extends Test_ {
 	}
 	 
 	
+	public void testDollar(Test_Abstract_a abs) {
+		
+	}
+	
 	public static void main(String[] args) {
 		Test_Inner inner = new Test_Inner(6) {};
+		try {
+			System.out.println(inner.getClass().getMethod("testDollar", new Class<?>[] {Test_Abstract_a.class}).getName());
+		} catch (NoSuchMethodException | SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		inner.showt2();
 		new Test_Inner(3) {}.showt2();
 		System.out.println(inner.t_test);
 		System.out.println("new Test_Inner(){}.t_test=" + new Test_Inner(7) {}.t_test);
 		Test_Abstract_a abs = inner.new Test_Abstract_a();
-		System.out.println(new Test_Abstract_a[] {abs}.getClass().getName());
-		abs.testing();
+		String s = abs.getClass().getName();
+		String s1 = new Test_Abstract_a[] {abs}.getClass().getName();
+		System.out.print("checking inner$");
+		assert(s.equals("test.Test_Inner$Test_Abstract_a"));
+		assert(s1.equals("[Ltest.Test_Inner$Test_Abstract_a;"));
+		System.out.println(" ok");
 		new Test_Inner(8) {}.new Test_Abstract_a().testing();
 
+		try {
+			System.out.println(abs.getClass().getMethod("testing", new Class<?>[] {}).getName());
+		} catch (NoSuchMethodException | SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		
 		System.out.println("Test_Inner OK");
 	}

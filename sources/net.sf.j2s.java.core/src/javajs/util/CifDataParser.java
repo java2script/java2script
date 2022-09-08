@@ -157,6 +157,8 @@ public class CifDataParser implements GenericCifDataParser {
   private SB fileHeader = new SB(); 
   private boolean isHeader = true;
 
+  private boolean skipToken;
+
 
   /**
    * Set the string value of what is returned for "." and "?"
@@ -644,7 +646,9 @@ public class CifDataParser implements GenericCifDataParser {
         }
         Integer iField = htFields.get(fixKey(key));
         i = (iField == null ? NONE : iField.intValue());
-        if ((col2key[pt] = i) != NONE) 
+        if ((col2key[pt] = i) == NONE)
+          columnData[pt] = "";
+        else
           columnData[key2col[i] = pt] = data;
         if ((o = peekToken()) == null || !(o instanceof String) ||  !((String) o).startsWith(str0))
           break;
@@ -786,8 +790,9 @@ public class CifDataParser implements GenericCifDataParser {
         str = str.substring(0, str.length() - 1)
           + '\1' + line.substring(1);
         break;
+      } else if (!skipToken) {
+        str += line + '\n';
       }
-      str += line + '\n';
     }
     return str;
   }
@@ -953,6 +958,15 @@ public class CifDataParser implements GenericCifDataParser {
     nullString = ns;
     return (asObject ? lst : "[" + str + "]");
   }
+
+  @Override
+  public String skipNextToken() throws Exception {
+    skipToken = true;
+    getNextToken();
+    skipToken = false;
+    return "<skipped>";
+  }
+
 
   
 }

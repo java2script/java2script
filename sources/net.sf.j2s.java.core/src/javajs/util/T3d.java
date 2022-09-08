@@ -18,6 +18,8 @@ package javajs.util;
 
 import java.io.Serializable;
 
+import javajs.api.JSONEncodable;
+
 /**
  * A generic 3 element tuple that is represented by double precision floating
  * point x,y and z coordinates.
@@ -30,7 +32,7 @@ import java.io.Serializable;
  * for unique constructor and method names
  * for the optimization of compiled JavaScript using Java2Script
  */
-public abstract class T3d implements Serializable {
+public abstract class T3d implements JSONEncodable, Serializable {
   /**
    * The x coordinate.
    */
@@ -110,13 +112,46 @@ public abstract class T3d implements Serializable {
   /**
    * Sets the value of this tuple to the vector sum of itself and tuple t1.
    * 
-   * @param t1
+   * @param t
    *        the other tuple
    */
-  public final void add(T3d t1) {
-    x += t1.x;
-    y += t1.y;
-    z += t1.z;
+  public final void add(T3d t) {
+    x += t.x;
+    y += t.y;
+    z += t.z;
+  }
+  
+  public void addF(T3 t) {
+    x += t.x;
+    y += t.y;
+    z += t.z;
+  }
+
+
+
+  /**
+   * Computes the square of the distance between this point and point p1.
+   * 
+   * @param p1
+   *        the other point
+   * @return the square of distance between these two points as a float
+   */
+  public final double distanceSquared(T3d p1) {
+    double dx = x - p1.x;
+    double dy = y - p1.y;
+    double dz = z - p1.z;
+    return (dx * dx + dy * dy + dz * dz);
+  }
+
+  /**
+   * Returns the distance between this point and point p1.
+   * 
+   * @param p1
+   *        the other point
+   * @return the distance between these two points
+   */
+  public final double distance(T3d p1) {
+    return Math.sqrt(distanceSquared(p1));
   }
 
   /**
@@ -160,6 +195,19 @@ public abstract class T3d implements Serializable {
   }
 
   /**
+   * Add {a b c}
+   * 
+   * @param a
+   * @param b
+   * @param c
+   */
+  public final void add3(double a, double b, double c) {
+    x += a;
+    y += b;
+    z += c;
+  }
+
+  /**
    * Sets the value of this tuple to the scalar multiplication of tuple t1 and
    * then adds tuple t2 (this = s*t1 + t2).
    * 
@@ -174,6 +222,92 @@ public abstract class T3d implements Serializable {
     x = s * t1.x + t2.x;
     y = s * t1.y + t2.y;
     z = s * t1.z + t2.z;
+  }
+
+  /**
+   * Sets the value of this tuple to the scalar multiplication of tuple t1 and
+   * then adds tuple t2 (this = s*t1 + t2).
+   * 
+   * @param s
+   *        the scalar value
+   * @param t1
+   *        the tuple to be multipled
+   * @param t2
+   *        the tuple to be added
+   */
+  public final void scaleAdd2(double s, T3d t1, T3d t2) {
+    x = s * t1.x + t2.x;
+    y = s * t1.y + t2.y;
+    z = s * t1.z + t2.z;
+  }
+
+  /**
+   * average of two tuples
+   * 
+   * @param a
+   * @param b
+   */
+  public void ave(T3d a, T3d b) {
+    x = (a.x + b.x) / 2f;
+    y = (a.y + b.y) / 2f;
+    z = (a.z + b.z) / 2f; 
+  }
+
+  /**
+   * Vector dot product. Was in Vector3f; more useful here, though.
+   * 
+   * @param v
+   *        the other vector
+   * @return this.dot.v
+   */
+  public final double dot(T3d v) {
+    return x * v.x + y * v.y + z * v.z;
+  }
+
+  /**
+   * Returns the squared length of this vector.
+   * Was in Vector3f; more useful here, though.
+   * 
+   * @return the squared length of this vector
+   */
+  public final double lengthSquared() {
+    return x * x + y * y + z * z;
+  }
+
+  /**
+   * Returns the length of this vector.
+   * Was in Vector3f; more useful here, though.
+   * 
+   * @return the length of this vector
+   */
+  public final double length() {
+    return Math.sqrt(lengthSquared());
+  }
+
+  /**
+   * Normalizes this vector in place.
+   * Was in Vector3f; more useful here, though.
+   */
+  public final void normalize() {
+    double d = length();
+
+    // zero-div may occur.
+    x /= d;
+    y /= d;
+    z /= d;
+  }
+
+  /**
+   * Sets this tuple to be the vector cross product of vectors v1 and v2.
+   * 
+   * @param v1
+   *        the first vector
+   * @param v2
+   *        the second vector
+   */
+  public final void cross(T3d v1, T3d v2) {
+    set(v1.y * v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z, v1.x * v2.y
+        - v1.y * v2.x);
   }
 
   /**
@@ -221,5 +355,26 @@ public abstract class T3d implements Serializable {
   public String toString() {
     return "{" + x + ", " + y + ", " + z + "}";
   }
+
+  public static int doubleToIntBits(double x) {
+    // close enough
+    return (x == 0 ? 0 : Float.floatToIntBits((float) x));
+  }
+
+  @Override
+  public String toJSON() {
+    return "[" + x + "," + y + "," + z + "]";
+  }
+
+  public T3d setP(T3 t) {
+    set(t.x, t.y, t.z);
+    return this;
+  }
+
+  public T3 putP(T3 t) {
+    t.set((float) x, (float) y, (float) z);
+    return t;
+  }
+  
 
 }

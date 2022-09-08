@@ -7,7 +7,7 @@ j2s.allow.sync.thread=true
 j2s.compiler.read.annotations=true
 
 # customizable list for what annotations to skip
-j2s.compiler.ignored.annotations=CallerSensitive;ConstructorProperties;Deprecated;Override;SaveVarargs;SuppressWarnings;
+j2s.compiler.ignored.annotations=CallerSensitive;ConstructorProperties;Deprecated;Override;SafeVarargs;SuppressWarnings;FunctionalInterface;Documented;Inherited;Native;Repeatable;Retention;Transient;
 
 #j2s.compiler.nonqualified.packages=org.w3c.dom
 

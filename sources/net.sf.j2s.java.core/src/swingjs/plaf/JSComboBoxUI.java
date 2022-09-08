@@ -7,6 +7,7 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.Insets;
+import java.awt.JSComponent;
 import java.awt.LayoutManager;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -138,6 +139,12 @@ public class JSComboBoxUI extends JSLightweightUI {
 		super.propertyChange(e);
 	}
 
+	@Override
+	public void dispose() {
+		popup.dispose();
+		super.dispose();
+	}
+
 //	private void disposeCB() {
 //		popup.uninstallingUI();
 //	}
@@ -175,6 +182,8 @@ public class JSComboBoxUI extends JSLightweightUI {
 		listBox = popup = (JSComboPopupList) createPopup();
 		listBox.setSelectionBackground(null);
 		listBox.addListSelectionListener(getHandler());
+		listBox.setBackground(jc.getBackground());
+
 		comboBox.add(listBox);
 		// Is this combo box a cell editor?
 		Boolean inTable = (Boolean) c.getClientProperty(IS_TABLE_CELL_EDITOR);
@@ -2121,6 +2130,14 @@ public class JSComboBoxUI extends JSLightweightUI {
 		// trouble is that moving focus to the dropdown 
 		if (focusGained)
 			super.handleJSFocus(jco, related, focusGained);
+	}
+
+
+	protected void setBackgroundImpl(Color color) {
+		if (domNode == null || isUIDisabled)
+			return;
+		backgroundColor = color;
+		setBackgroundDOM(this.domNode, color);
 	}
 
 }

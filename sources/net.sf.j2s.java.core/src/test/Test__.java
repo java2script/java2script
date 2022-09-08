@@ -52,7 +52,7 @@ public class Test__ {
 		Test_Double.main(args);
 		Test_Enum.main(args);
 		Test_Enum2.main(args);
-		Test_EPS.main(args);
+//		Test_EPS.main(args); Java bug -- returns Dialog for Helevetica and TimesRoman!???
 		Test_Extends_6.main(args);
 //		Test_Extends_7.main(args);
 		// Test_Extends_JButton.main(args);
@@ -85,6 +85,7 @@ public class Test__ {
 		//failing on unicode char in "somewhatComplex" Test_JAXB_ORDERED.main(args);
 //		Test_Map.main(args);
 		Test_Math.main(args);
+		Test_MyInterface.main(args);
 		Test_Native.main(args);
 		Test_NoAssert.main(args);
 		Test_NoHeadless_1.main(args);

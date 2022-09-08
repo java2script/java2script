@@ -551,21 +551,28 @@ public class JSMouse {
 			return KeyEvent.KEY_TYPED;
 		case "click":
 			return MouseEvent.MOUSE_CLICKED;
+		case "pointerdown":
 		case "mousedown":
 		case "touchstart":
 			return MouseEvent.MOUSE_PRESSED;
+		case "pointerup":
 		case "mouseup":
 		case "touchend":
 			return MouseEvent.MOUSE_RELEASED;
+		case "pointermove":
 		case "mousemove":
 			return MouseEvent.MOUSE_MOVED;
 		case "mousedrag":
 			return MouseEvent.MOUSE_DRAGGED;
 		case "mousewheel":
 			return MouseEvent.MOUSE_WHEEL;
+		case "pointerover":
+		case "pointerenter":
 		case "mouseover":
 		case "mouseenter":
 			return MouseEvent.MOUSE_ENTERED;
+		case "pointerout":
+		case "pointerleave":
 		case "mouseout":
 		case "mouseleave":
 			return MouseEvent.MOUSE_EXITED;
@@ -578,25 +585,26 @@ public class JSMouse {
 		if (id == 0)
 			id = fixEventType(jqevent, 0);
 		boolean isDirect = (base != null);
-		JSComponent c;
+		JSComponent c = null;
 		if (base == null) {
 			c = JSComponent.秘getTopInvokableAncestor(from, false);
+			if (c == null)
+				c = from;
 			base = c.秘getUI().getDOMNode();
 		} else {
 			c = from;
 		}
 		int[] xym = null;
 		/**
-		 * @j2sNative jqevent.j2sretarget = to; 
-		 *            xym = J2S._getEventXY(jqevent, J2S.$(base).offset());
+		 * @j2sNative jqevent.j2sretarget = to; xym = J2S._getEventXY(jqevent,
+		 *            J2S.$(base).offset());
 		 */
 		int modifiers = getModifiers(jqevent);
 		long time = System.currentTimeMillis();
 		if (isDirect) {
 			processMouseEvent(jqevent, from, id, time, xym[0], xym[1], 0, modifiers, 0);
 		} else {
-			c.getFrameViewer().processMouseEvent(id, xym[0], xym[1], modifiers, time, jqevent,
-					getScroll(jqevent));
+			c.getFrameViewer().processMouseEvent(id, xym[0], xym[1], modifiers, time, jqevent, getScroll(jqevent));
 		}
 	}
 

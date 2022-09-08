@@ -7,7 +7,13 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
-// BH 2021.08.16 fix for Interface initalizing its subclass with static initialization
+// BH 2022.09.08 Fix new Test_Inner().getClass().getMethod("testDollar", new Class<?>[] {Test_Abstract_a.class}).getName()
+// BH 2022.04.19 TypeError and ResourceError gain printStackTrace$() methods
+// BH 2022.03.19 String.valueOf(Double) does not add ".0"
+// BH 2022.01.17 fixes interface default method referencing own static fields
+// BH 2021.12.19 adds Double -0; fixes println(Double)
+// BH 2021.12.15 default encoding for String.getBytes() should be utf-8.
+// BH 2021.08.16 fix for Interface initializing its subclass with static initialization
 // BH 2021.07.28 String.instantialize upgraded to use TextDecoder() if possible (not in MSIE)
 // BH 2021.07.20 Date.toString() format yyyy moved to end, as in Java 
 // BH 2021.06.11 Number.compareTo(....) missing
@@ -36,6 +42,8 @@
 // encapsulating function
 
 ;(function(J2S, window, document) {
+
+TypeError.prototype.printStackTrace$ = ReferenceError.prototype.printStackTrace$ = function() { console.log(this) }
 
   if (J2S.clazzLoaded) return;
   J2S.clazzLoaded = true;
@@ -99,7 +107,10 @@ Clazz.array = function(baseClass, paramType, ndims, params, isClone) {
 
 var _array = function(baseClass, paramType, ndims, params, isClone) {
 	
+  // Object x = Array.newInstance(componentClass, nElements);
+  // var x=Clazz.array((Clazz.array(componentClass, 3);
 
+	
   // int[][].class Clazz.array(Integer.TYPE, -2)
   // new int[] {3, 4, 5} Clazz.array(Integer.TYPE, -1, [3, 4, 5])    
   // new int[][]{new int[] {3, 4, 5}, {new int[] {3, 4, 5}} 
@@ -148,8 +159,26 @@ var _array = function(baseClass, paramType, ndims, params, isClone) {
         // new int[] {3, 4, 5};
         return _array(baseClass, prim + "A", -1, vals);
       }
-      // Array.newInstance(int[][].class, 3);  
-      return _array(baseClass, prim + "A", (cl.__NDIM || 0) + 1, [ndims]);
+      // Array.newInstance(int[][].class, 3);
+      
+
+      var nElem = ndims;
+      cl = baseClass;
+
+      ndims = 0;
+      while ((cl = cl.getComponentType$()) != null) {
+    	  baseClass = cl;
+    	  ndims++;
+      }
+      if (ndims > 0) {
+    	  a = new Array(nElem);
+          setArray(a, baseClass, prim + "A", ndims + 1);
+    	  for (var i = nElem; --i >= 0;)
+    		  a[i] = null;
+      } else {
+    	  a = _array(baseClass, prim + "A", ndims + 1, [nElem]);
+      }
+	  return a;
     }      
     params = vals;
     paramType = prim;
@@ -171,22 +200,7 @@ var _array = function(baseClass, paramType, ndims, params, isClone) {
   } else {
     var initValue = null;
     if (ndims >= 1 && dofill) {
-      switch (prim) {
-      case "J":
-      case "B":
-      case "H": // short
-      case "I":
-      case "F":
-      case "D":
-        initValue = 0;
-        break;
-      case "C": 
-        initValue = '\0';
-        break;
-      case "Z":
-        initValue = false;
-        break;
-      }
+    	initValue = _initVal(prim);
     }
     var p = params; // an Int32Array
     var n = p.length;
@@ -216,6 +230,24 @@ var _array = function(baseClass, paramType, ndims, params, isClone) {
     }  
   }
   return newTypedA(baseClass, params, nbits, (dofill ? ndims : -ndims), isClone);
+}
+
+var _initVal = function(p) {
+    switch (p) {
+    case "J":
+    case "B":
+    case "H": // short
+    case "I":
+    case "F":
+    case "D":
+      return 0;
+    case "C": 
+      return  '\0';
+    case "Z":
+        return  false;
+    default:
+    	return null;
+    }
 }
 
 Clazz.assert = function(clazz, obj, tf, msg) {
@@ -1168,7 +1200,7 @@ var shiftArray = function(a, i0, k) {
 
 var getParamCode = Clazz._getParamCode = function(cl) {
   cl.$clazz$ && (cl = cl.$clazz$);
-  return cl.__PARAMCODE || (cl.__PARAMCODE = stripJavaLang(cl.__CLASS_NAME$__ || cl.__CLASS_NAME__).replace(/\./g, '_'));
+  return cl.__PARAMCODE || (cl.__PARAMCODE = stripJavaLang(cl.__CLASS_NAME__).replace(/\./g, '_'));
 }
 
 var newTypedA = function(baseClass, args, nBits, ndims, isClone) {
@@ -1493,6 +1525,7 @@ var copyStatics = function(clazzFrom, clazzThis, isInterface) {
     }
   }
   if (isInterface) {
+	clazzFrom.$static$ && (initStatics(clazzFrom), clazzFrom.$static$());
 	clazzThis.$defaults$ && clazzThis.$defaults$(clazzThis);
 	for (var o in clazzFrom.prototype) {
 	if (clazzThis.prototype[o] == undefined && !excludeSuper(o)) {
@@ -3240,37 +3273,46 @@ Sys.err = new Clazz._O ();
 Sys.err.__CLASS_NAME__ = "java.io.PrintStream";
 
 var checkTrace = function(s) {
-	if (J2S._nooutput || J2S._traceFilter && s.indexOf(J2S._traceFilter) < 0) return;
-	if (!J2S._traceFilter && J2S._traceOutput && s && 
-			(("" + s).indexOf(J2S._traceOutput) >= 0 || '"' + s + '"' == J2S._traceOutput)) {
+	if (J2S._nooutput || !J2S._traceFilter && !J2S._traceOutput) return;
+	if (J2S._traceFilter) {
+		if ((s= "" + s).indexOf(J2S._traceFilter) < 0) 
+			return;
+	} else if (!(s = "" + s) || s.indexOf(J2S._traceOutput) < 0 && '"' + s + '"' != J2S._traceOutput) {
+		return;
+	}
 	alert(s + "\n\n" + Clazz._getStackTrace());
 	doDebugger();
-	}
 }
 
 var setps = function(ps, f) {
 
-ps.print = ps.print$O = ps.print$Z = ps.print$I = ps.print$S = ps.print$C = function (s) { 
+ps.flush$ = function() {}
+
+ps.print = ps.print$ = ps.print$O = ps.print$Z = ps.print$I = ps.print$S = ps.print$C = function (s) { 
   checkTrace(s);
-  f(s);
+  f("" + s);
 };
 
 ps.print$J = function(l) {ps.print(Long.$s(l))}
+ps.print$F = ps.print$D = function(f) {
+	var s = "" + f; 
+	ps.println(s.indexOf(".") < 0 && s.indexOf("Inf") < 0 ? s + ".0" : s);
+}
+
 ps.printf = ps.printf$S$OA = ps.format = ps.format$S$OA = function (f, args) {
   ps.print(String.format$S$OA.apply(null, arguments));
 }
 
-ps.flush$ = function() {}
-
-ps.println = ps.println$ = ps.println$O = ps.println$Z = ps.println$I = ps.println$S = ps.println$C = function(s) {
- s = (typeof s == "undefined" ? "" : "" + s);
+ps.println = ps.println$ = ps.println$Z = ps.println$I = ps.println$S = ps.println$C = ps.println$O = function(s) {
  checkTrace(s);
- s = (typeof s == "undefined" ? "\r\n" : s == null ?  s = "null\r\n" : s + "\r\n");
-  f(s);
+ f((s && s.toString ? s.toString() : "" + s)  + "\r\n");
 };
 
 ps.println$J = function(l) {ps.println(Long.$s(l))}
-ps.println$F = ps.println$D = function(f) {var s = "" + f; ps.println(s.indexOf(".") < 0 && s.indexOf("Inf") < 0 ? s + ".0" : s)};
+ps.println$F = ps.println$D = function(f) {
+	var s = "" + f; 
+	ps.println(s.indexOf(".") < 0 && s.indexOf("Inf") < 0 ? s + ".0" : s);
+}
 
 ps.write$I = function(ch) {
   ps.print(String.fromCharCode(ch));	
@@ -3278,7 +3320,7 @@ ps.write$I = function(ch) {
 
 ps.write$BA = function (buf) {
 	ps.write$BA$I$I(buf, 0, buf.length);
-	};
+};
 
 ps.write$BA$I$I = function (buf, offset, len) {
   ps.print(String.instantialize(buf, offset, len));
@@ -5201,6 +5243,9 @@ function(n){
 }, 1);
 
 Clazz._floatToString = function(f) {
+	if (f === 0) {
+		return (1/f == -Infinity ? "-0.0" : "0.0");
+	}
  var check57 = (Math.abs(f) >= 1e-6 && Math.abs(f) < 1e-3);
  if (check57)
 	f/=1e7;
@@ -5228,7 +5273,7 @@ var maxFloat = 3.4028235E38;
 var minFloat = -3.4028235E38;
 
 m$(Float,"c$", function(v){
-	v || v == null || v != v || (v = 0);
+	v || v == null || v != v || (v == 0) || (v = 0);
 	if (typeof v != "number") 
 	v = Float.parseFloat$S(v);
 	this.valueOf=function(){return v;}
@@ -5244,6 +5289,7 @@ m$(Float, "c$$S", function(v){
 }, 1);
 
 m$(Float, "c$$D", function(v){
+	v || (v = 0);
   v = (v < minFloat ? -Infinity : v > maxFloat ? Infinity : v);
  this.valueOf=function(){return v;}
 }, 1);
@@ -5374,18 +5420,19 @@ return Clazz._floatToString(this.valueOf());
 };
 
 m$(Double, "c$$D", function(v){
+	v || (v = 0);
 	this.valueOf=function(){return v;};
 }, 1);
 
 m$(Double,"c$", function(v){
-v || v == null ||  v != v || (v = 0);
+  v || v == null || v != v || (v == 0) || (v = 0);
  if (typeof v != "number") 
   v = Double.parseDouble$S(v);
  this.valueOf=function(){return v;}
 }, 1);
 
 m$(Double, ["c$$S"], function(v){
-v || v == null || (v = 0);
+v || v == null || (v == 0) || (v = 0);
 if (typeof v != "number") 
 	v = Double.parseDouble$S(v);
 this.valueOf=function(){return v;};
@@ -5891,8 +5938,7 @@ sp.getBytes$I$I$BA$I=function(i0, i1, dst, dpt) {
 
 sp.getBytes$=sp.getBytes$S=sp.getBytes$java_nio_charset_Charset=function(){
 var s=this;
-if(arguments.length==1){
- var cs=arguments[0].toString().toLowerCase();
+var cs = (arguments.length == 1 ? arguments[0] : "utf-8").toString().toLowerCase();
  var simple=false;
  for(var i=0;i<charset.length;i++){
   if(charset[i]==cs){
@@ -5911,7 +5957,6 @@ if(arguments.length==1){
  if(cs=="utf-8"||cs=="utf8"){
   s=E.convert2UTF8(this);
  }
-}
 var arrs=[];
 for(var i=0, ii=0;i<s.length;i++){
 var c=s.charCodeAt(i);
@@ -5956,7 +6001,7 @@ oo[i]=o[off+i];
 return oo.join('');
 }
 }
-return""+o;
+return (o != null && o.toString ? o.toString() : ""+o);
 };
 
 sp.subSequence$I$I=function(beginIndex,endIndex){

@@ -1219,7 +1219,6 @@ public class JSUtil implements JSUtilI {
 
 	@Override
 	public Promise importModule(String resource, Function<Object, Object> resolve, Function<Object,Object> reject) {
-		Object o = DOMNode.class;
 		loadStaticResource("/_ES6/jsutil.js");
 		if (resource.startsWith("$J2S$/"))
 			resource = getJ2SPath() + resource.substring(5);
@@ -1228,7 +1227,6 @@ public class JSUtil implements JSUtilI {
 	}
 
 	public  Promise importModuleData(String resource, Function<Object, Object> resolve, Function<Object,Object> reject) {
-		Object o = DOMNode.class;
 		loadStaticResource("/_ES6/jsutil.js");
 		if (resource.startsWith("$J2S$/"))
 			resource = getJ2SPath() + resource.substring(5);

@@ -736,6 +736,7 @@ public class JSComponentUI extends ComponentUI
 	public DOMNode getListNode() {
 		DOMNode node = reInit(true);
 	    reInit(false);
+	    imagePersists = true;
 		return node;
 	}
 
@@ -1318,7 +1319,7 @@ public class JSComponentUI extends ComponentUI
 			updatePropertyAncestor(false);
 			if (value == null)
 				return;
-			if (isDisposed && c.visible && e.getNewValue() != null)
+			if ((isDisposed || isTainted) && c.visible)
 				setVisible(true);
 		}
 		propertyChangedCUI(e, prop);
@@ -1371,7 +1372,10 @@ public class JSComponentUI extends ComponentUI
 			if (cellComponent != null || e.getNewValue() == null)
 				return;
 			Container anc = JSComponent.秘getTopInvokableAncestor(c, false);
-			updatePropertyAncestor(anc != null && anc.isVisible());
+			boolean isVis = (anc != null && anc.isVisible());
+			updatePropertyAncestor(isVis);
+			if (isVis && isTainted)
+				setHTMLElement();
 			break;
 		}
 		propertyChangedCUI(e, prop);
@@ -1922,7 +1926,7 @@ public class JSComponentUI extends ComponentUI
 			return outerNode;
 
 		if (isDummyFrame) {
-			isTainted = false;
+			setTainted(false);
 			return (outerNode = DOMNode.createElement("div", "dummyFrame"));
 		}
 		
@@ -1980,7 +1984,7 @@ public class JSComponentUI extends ComponentUI
 		} else {
 			DOMNode.setStyle(outerNode, "overflow", "hidden");
 		}
-		isTainted = false;
+		setTainted(false);
 		
 		if (embeddingNode != null) {
 			// Note that detachAll leaves any previously attached nodes in limbo. 
@@ -2069,6 +2073,8 @@ public class JSComponentUI extends ComponentUI
 			return;
 		// called from JComponent.paintComponent
 		if (cellComponent == null) {
+			if (DOMNode.getParent(domNode) != outerNode)
+				setTainted();
 			setHTMLElement();
 			if (allowTextAlignment && centeringNode != null)
 				setAlignments((AbstractButton) jc, false);
@@ -2266,7 +2272,7 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	DOMNode getOuterNode() {
-		return (outerNode == null && !isUIDisabled ? setHTMLElement() : outerNode);
+		return ((outerNode == null || isTainted && !isTable) && !isUIDisabled ? setHTMLElement() : outerNode);
 	}
 
 	/**
@@ -3597,7 +3603,7 @@ public class JSComponentUI extends ComponentUI
 	protected void checkStopPopupMenuTimer(Object target, int eventType, Object jQueryEvent) {
 		if (target == domNode && eventType == -1) {
 			String type = (/** @j2sNative jQueryEvent.type || */"");
-			if (type.equals("mouseenter")) {
+			if (type.equals("mouseenter") || type.equals("pointerenter")) {
 				stopPopupMenuTimer();
 			}
 		}
@@ -3687,7 +3693,7 @@ public class JSComponentUI extends ComponentUI
 		setBackgroundImpl(c);
 	}
 	
-	private Color backgroundColor;
+	protected Color backgroundColor;
 
 	protected void setBackgroundImpl(Color color) {
 		// Don't allow color for Menu and MenuItem. This is taken care of by

@@ -1,4 +1,7 @@
 /*!
+  
+  // BH 2022.01.12 adds pointer option see BHTEST
+
  * jQuery JavaScript Library v1.11.0
  * http://jquery.com/
  *
@@ -13,6 +16,7 @@
  */
 
 // modified by Bob Hanson for local MSIE 11 reading remote files and skipping Opera test unless Opera
+// 2022.01.08 BHTEST adds pointer| to rmouseEvent
 
 (function( global, factory ) {
 
@@ -4248,7 +4252,7 @@ var rcheckableType = (/^(?:checkbox|radio)$/i);
 
 var rformElems = /^(?:input|select|textarea)$/i,
 	rkeyEvent = /^key/,
-	rmouseEvent = /^(?:mouse|contextmenu)|click/,
+	rmouseEvent = /^(?:mouse|pointer|contextmenu)|click/, // BHTEST
 	rfocusMorph = /^(?:focusinfocus|focusoutblur)$/,
 	rtypenamespace = /^([^.]*)(?:\.(.+)|)$/;
 
@@ -4992,6 +4996,8 @@ jQuery.Event.prototype = {
 
 // Create mouseenter/leave events using mouseover/out and event-time checks
 jQuery.each({
+	pointerenter: "pointerover",  // BHTEST
+	pointerleave: "pointerout",    // BHTEST
 	mouseenter: "mouseover",
 	mouseleave: "mouseout"
 }, function( orig, fix ) {

@@ -34,73 +34,67 @@ package javajs.util;
  */
 public class V3d extends T3d {
 
+  
+  public static V3d newV(T3d t) {
+    return new3(t.x, t.y, t.z);
+  }
+  public static V3d newV(T3 t) {
+    return new3(t.x, t.y, t.z);
+  }
+
+  public static V3d newVsub(T3d t1, T3d t2) {
+    return new3(t1.x - t2.x, t1.y - t2.y,t1.z - t2.z);
+  }
+
+  public static V3d newVsub(T3 t1, T3 t2) {
+    return new3(t1.x - t2.x, t1.y - t2.y,t1.z - t2.z);
+  }
+  
+
+  public static V3d new3(double x, double y, double z) {
+    V3d v = new V3d();
+    v.x = x;
+    v.y = y;
+    v.z = z;
+    return v;
+  }
+
+  public final double angle(V3d v1) {
+    // return (double)Math.acos(dot(v1)/v1.length()/v.length());
+    // Numerically, near 0 and PI are very bad condition for acos.
+    // In 3-space, |atan2(sin,cos)| is much stable.
+
+    double xx = y * v1.z - z * v1.y;
+    double yy = z * v1.x - x * v1.z;
+    double zz = x * v1.y - y * v1.x;
+    double cross = Math.sqrt(xx * xx + yy * yy + zz * zz);
+
+    return Math.abs(Math.atan2(cross, dot(v1)));
+  }
+  
   /**
-   * Sets this vector to be the vector cross product of vectors v1 and v2.
+   * Copy to float version. Avoid using this, as it will slow down JavaScript unnecessarily.
    * 
-   * @param v1
-   *        the first vector
-   * @param v2
-   *        the second vector
+   * @return new P3
    */
-  public final void cross(V3d v1, V3d v2) {
-    // store on stack once for aliasing-safty
-    // i.e. safe when a.cross(a, b)
-    set(v1.y * v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z, v1.x * v2.y
-        - v1.y * v2.x);
+  public V3 copyToV3() {
+    return V3.new3((float) x, (float) y, (float) z); 
   }
 
   /**
-   * Normalizes this vector in place.
-   */
-  public final void normalize() {
-    double d = length();
-
-    // zero-div may occur.
-    x /= d;
-    y /= d;
-    z /= d;
-  }
-
-  /**
-   * Computes the dot product of the this vector and vector v.
+   * Copy in Java; do nothing in JavaScript
    * 
-   * @param v
-   *        the other vector
-   * @return this.dot.v
+   * @return this in JavaScript, P3 copy in Java
    */
-  public final double dot(V3d v) {
-    return x * v.x + y * v.y + z * v.z;
+  public V3 asV3() {
+    /**
+     * @j2sNative
+     * return this;
+     */
+    {
+      return copyToV3();
+    }
   }
 
-  /**
-   * Returns the squared length of this vector.
-   * 
-   * @return the squared length of this vector
-   */
-  public final double lengthSquared() {
-    return x * x + y * y + z * z;
-  }
-
-  /**
-   * Returns the length of this vector.
-   * 
-   * @return the length of this vector
-   */
-  public final double length() {
-    return Math.sqrt(lengthSquared());
-  }
-
-	public final double angle(V3d v1) {
-		// return (double)Math.acos(dot(v1)/v1.length()/v.length());
-		// Numerically, near 0 and PI are very bad condition for acos.
-		// In 3-space, |atan2(sin,cos)| is much stable.
-
-		double xx = y * v1.z - z * v1.y;
-		double yy = z * v1.x - x * v1.z;
-		double zz = x * v1.y - y * v1.x;
-		double cross = Math.sqrt(xx * xx + yy * yy + zz * zz);
-
-		return Math.abs(Math.atan2(cross, dot(v1)));
-	}
 
 }

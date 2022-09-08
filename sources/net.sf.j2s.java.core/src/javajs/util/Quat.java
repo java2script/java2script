@@ -71,6 +71,12 @@ public class Quat {
     return q;
   }
 
+  public static Quat newM(M3d mat) {
+    Quat q = new Quat();
+    q.setM(M3d.newM3(mat));
+    return q;
+  }
+
   public static Quat newAA(A4 a) {
     Quat q = new Quat();
     q.setAA(a);
@@ -157,6 +163,10 @@ public class Quat {
     if (aa.angle == 0)
       aa.y = 1;
     setM(new M3().setAA(aa));
+  }
+  private void setM(M3d mat) {
+    // temporary only TODO
+    setM(mat.toM3());
   }
 
   private void setM(M3 mat) {
@@ -325,12 +335,31 @@ public class Quat {
    * or two vectors (vA, vB).
    * 
    * @param center  (null for vA/vB option)
-   * @param x
-   * @param xy
+   * @param t1
+   * @param t2
    * @return quaternion for frame
    */
-  public static final Quat getQuaternionFrame(P3 center, T3 x,
-                                                    T3 xy) {
+  public static final Quat getQuaternionFrame(P3 center, T3d t1,
+                                                    T3d t2) {
+    V3 vA = V3.new3((float) t1.x, (float) t1.y,(float)  t1.z);
+    V3 vB = V3.new3((float) t2.x, (float) t2.y, (float) t2.z);
+    if (center != null) {
+      vA.sub(center);
+      vB.sub(center);
+    }
+    return getQuaternionFrameV(vA, vB, null, false);
+  }
+
+  public static final Quat getQuaternionFrame(P3d center, T3d t1,
+                                              T3d t2) {
+     return getQuaternionFrame(center.asP3(), t1, t2);
+  }
+
+  public static final Quat getQuaternionFrame(P3d center, T3 x, T3 xy) {
+    return getQuaternionFrame(center.asP3(), x, xy);
+  }
+  
+  public static final Quat getQuaternionFrame(P3 center, T3 x, T3 xy) {
     V3 vA = V3.newV(x);
     V3 vB = V3.newV(xy);
     if (center != null) {
@@ -339,6 +368,7 @@ public class Quat {
     }
     return getQuaternionFrameV(vA, vB, null, false);
   }
+
 
   /**
    * Create a quaternion based on a frame
@@ -402,10 +432,14 @@ public class Quat {
     return q;
   }
 
-  public M3 getMatrix() {
+  private M3d m3d;
+  
+  public M3d getMatrix() {
     if (mat == null)
       setMatrix();
-    return mat;
+    if (m3d == null)
+      m3d = M3d.newM3(mat);
+    return m3d;
   }
 
   private void setMatrix() {
@@ -814,5 +848,6 @@ public class Quat {
     rG = Math.atan2( 2 * (q1 * q3 + q0 * q2), 2 * (-q2 * q3 + q0 * q1));
     return new float[]  {(float) (rA / RAD_PER_DEG), (float) (rB / RAD_PER_DEG), (float) (rG / RAD_PER_DEG)};
   }
+
 
 }

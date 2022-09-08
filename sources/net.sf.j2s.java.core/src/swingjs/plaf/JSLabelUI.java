@@ -112,6 +112,7 @@ public class JSLabelUI extends JSLightweightUI {
 
 	@Override
 	public Dimension getPreferredSize(JComponent jc) {
+		c = this.jc = jc; // renderer issue 
 		updateDOMNode();
 		return (isAWT ? getMinimumSizePeer(jc, label)
 				: label == null ? super.getPreferredSize(jc)

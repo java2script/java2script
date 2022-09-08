@@ -1,5 +1,7 @@
 package javajs.util;
 
+import javajs.api.JSONEncodable;
+
 /**
  * A base class for both M3 and M4 to conserve code size.
  * 
@@ -10,7 +12,7 @@ package javajs.util;
  *         JavaScript using Java2Script and for subclassing to M3 and M4
  * 
  */
-public abstract class M34 {
+public abstract class M34 implements JSONEncodable {
 
   /**
    * The first element of the first row
@@ -412,5 +414,21 @@ public abstract class M34 {
         "matrix column/row out of bounds");
   }
 
+  @Override
+  public String toJSON() {
+    // M4 extends M3
+    SB sb = new SB();
+    int len = (this instanceof M4 ? 4 : 3);
+    float[] x = new float[len];
+    sb.appendC('[');
+    for (int i = 0; i < len; i++) {
+      if (i > 0)
+        sb.appendC(',');
+      getRow(i, x);
+      sb.append(PT.toJSON(null, x));
+    }
+    sb.appendC(']');
+    return sb.toString();
+  }
 
 }

@@ -282,9 +282,11 @@ public class JSFrameUI extends JSWindowUI implements FramePeer, JSComponentUI.Em
 			case "click":
 				frameCloserAction();
 				return HANDLED;
+			case "pointerout":
 			case "mouseout":
 				DOMNode.setStyle(closerNode, "background-color", "#DDD");// toCSSString(c.getBackground()));
 				return HANDLED;
+			case "pointerenter":
 			case "mouseenter":
 				DOMNode.setStyle(closerNode, "background-color", "red");
 				return HANDLED;

@@ -42,10 +42,18 @@ public class JSTextPaneUI extends JSEditorPaneUI {
     
     
 
-	protected void enableNode(DOMNode node, boolean b) {
-		super.enableNode(node, b);
-	}
-
-
+//	protected void enableNode(DOMNode node, boolean b) {
+//		super.enableNode(node, b);
+//	}
+//
+//	
+//	public void setTainted(boolean tf) {
+//		super.setTainted(tf);
+//		if (!tf) {
+//			System.out.println("JSTP setTainted " + tf);
+//		}
+//	}
+//
+//
     
 }

@@ -119,7 +119,7 @@ public class JSTableHeaderUI extends JSLightweightUI {
 	@Override
 	public void setTainted() {
 		if (!working)
-			isTainted = true;
+			super.setTainted();
 	}
 
 	@Override
