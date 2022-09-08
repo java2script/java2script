@@ -14043,6 +14043,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2022.09.08 Fix new Test_Inner().getClass().getMethod("testDollar", new Class<?>[] {Test_Abstract_a.class}).getName()
 // BH 2022.04.19 TypeError and ResourceError gain printStackTrace$() methods
 // BH 2022.03.19 String.valueOf(Double) does not add ".0"
 // BH 2022.01.17 fixes interface default method referencing own static fields
@@ -15235,7 +15236,7 @@ var shiftArray = function(a, i0, k) {
 
 var getParamCode = Clazz._getParamCode = function(cl) {
   cl.$clazz$ && (cl = cl.$clazz$);
-  return cl.__PARAMCODE || (cl.__PARAMCODE = stripJavaLang(cl.__CLASS_NAME$__ || cl.__CLASS_NAME__).replace(/\./g, '_'));
+  return cl.__PARAMCODE || (cl.__PARAMCODE = stripJavaLang(cl.__CLASS_NAME__).replace(/\./g, '_'));
 }
 
 var newTypedA = function(baseClass, args, nBits, ndims, isClone) {
