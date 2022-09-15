@@ -12,7 +12,9 @@ public class Test_Error extends Test_{
 			 * @j2sNative asdlj()
 			 */
 		} catch (Throwable e) {
-			e.printStackTrace();			
+			e.printStackTrace();
+			boolean b = (e instanceof Error);
+			System.out.println(b);
 		}
 		System.out.println("Test_Error OK");
 	}
