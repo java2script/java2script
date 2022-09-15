@@ -39,6 +39,31 @@ strictfp class Test_Double extends Test_{
 		System.out.println((PT.toDouble(-0.999999f)) + " " + (1d-0.999999d)
 				+ " " + 0.000001d
 		+ " " + (double) -0.999999f);
+		System.out.println(DF.formatDecimal(123456f, -4));
+		System.out.println(DF.formatDecimal(999999f, -4));
+
+		System.out.println(PT.sprintf("%4.0e", "d", new Object[]{1.2345678e-4}));
+		System.out.println(DF.formatDecimal(0.123456f, -1));
+		System.out.println(DF.formatDecimal(0.999999f, -4));
+		System.out.println(String.format("%4.0e",0.12345));
+		System.out.println(String.format("%4.3e",0.12345));
+		System.out.println(String.format("%4.3f",0.12345));
+		System.out.println(DF.formatDecimal(0.12345, -4));
+		System.out.println(DF.formatDecimal(0.12345, 4));
+		
+
+		assert(DF.formatDecimal(123456f, -4).equals("1.235E+5"));
+		assert(DF.formatDecimal(999999f, -4).equals("1.000E+6"));
+
+		assert(PT.sprintf("%4.0e", "d", new Object[]{1.2345678e-4}).equals("1E-4"));
+		assert(DF.formatDecimal(0.123456f, -1).equals("1E-1"));
+		assert(DF.formatDecimal(0.999999f, -4).equals("1.000E+0"));
+		assert(String.format("%4.0e",0.12345).equals("1e-01"));
+		assert(String.format("%4.3e",0.12345).equals("1.235e-01"));
+		assert(String.format("%4.3f",0.12345).equals("0.123"));
+		assert(DF.formatDecimal(0.12345, -4).equals("1.235E-1"));
+		assert(DF.formatDecimal(0.12345, 4).equals("0.1235"));
+
 	    assert(DF.formatDecimal(-0.999999f, -4).equals("-1.000E+0"));
 	    assert(DF.formatDecimal(9.999999f, -4).equals("1.000E+1"));
 	    assert(DF.formatDecimal(9.999999f, 4).equals("10.0000"));

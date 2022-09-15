@@ -85,7 +85,7 @@ public class DF {
       value = -value;
     int n;
     if (decimalDigits < 0) {
-      decimalDigits = -1-decimalDigits;
+      decimalDigits = -decimalDigits;
       if (decimalDigits > formattingStrings.length)
         decimalDigits = formattingStrings.length;
       if (value == 0)
@@ -103,7 +103,7 @@ public class DF {
       String s = ("" + d).toUpperCase();
       int i1 = s.indexOf("E");
       String sf;
-      if (i1 < 0) {
+      if (i1 < 0) {  
         sf = "" + value;
       } else {
         n = PT.parseInt(s.substring(i1 + (s.indexOf("E+") == i1 ? 2 : 1))) + n;
