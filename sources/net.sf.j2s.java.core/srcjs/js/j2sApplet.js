@@ -2843,6 +2843,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			__nextExecution();
 		};
 
+		proto.__startAppletJS.j2sname = "__START_APPLET__";
+
 		if (!proto._restoreState)
 			proto._restoreState = function(clazzName, state) {
 				// applet-dependent
