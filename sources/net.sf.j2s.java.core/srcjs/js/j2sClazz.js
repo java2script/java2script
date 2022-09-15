@@ -7,7 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
-// BH 2022.09.14 fix for new Error() failing; just letting java.lang.Error subclass Throwable
+// BH 2022.09.15 fix for new Error() failing; just letting java.lang.Error subclass Throwable
 // BH 2022.09.08 Fix new Test_Inner().getClass().getMethod("testDollar", new Class<?>[] {Test_Abstract_a.class}).getName()
 // BH 2022.04.19 TypeError and ResourceError gain printStackTrace$() methods
 // BH 2022.03.19 String.valueOf(Double) does not add ".0"
@@ -1340,6 +1340,11 @@ var getClassName = function(obj, fAsClassName) {
         return "Boolean";
       if (obj instanceof Array || obj.__BYTESIZE)
         return "Array";
+      if (obj instanceof ReferenceError || obj instanceof TypeError) {
+          // note that this is not technically the case.
+    	  // we use this to ensure that try/catch delivers these as java.lang.Error instances
+       	  return "Error";   	  
+      }
       var s = obj.toString();
       // "[object Int32Array]"
       if (s.charAt(0) == '[')
