@@ -28,7 +28,14 @@ public class Test_InnerAo extends Test_ {
 		
 		x.run();
 	}
-     class Ai {
+	
+	public static class AiStat {
+		public AiStat() {
+			System.out.println("loaded " + getClass().getName());
+		}
+	}
+	
+    class Ai {
     	 
     	 public String atesti = "Ai";
     	 
