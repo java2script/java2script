@@ -1,5 +1,5 @@
 // j2sClazz.js 
-// NOTE: updates to this file should be copies to j2sjmol.js
+// NOTE: updates to this file should be copied to j2sjmol.js
 
 // latest author: Bob Hanson, St. Olaf College, hansonr@stolaf.edu
 
@@ -7,6 +7,8 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2022.09.20 fix for Class.forName not loading static inner classes directly
+// BH 2022.09.20 fix for default toString for classes using "." name not "$" name for inner classes
 // BH 2022.09.15 fix for new Error() failing; just letting java.lang.Error subclass Throwable
 // BH 2022.09.08 Fix new Test_Inner().getClass().getMethod("testDollar", new Class<?>[] {Test_Abstract_a.class}).getName()
 // BH 2022.04.19 TypeError and ResourceError gain printStackTrace$() methods
@@ -1493,7 +1495,7 @@ var _jsid = 0;
   addProto(proto, "notifyAll$", function () {});
   addProto(proto, "wait$", function () {alert("Object.wait was called!" + arguments.callee.caller.toString())});
   addProto(proto, "toString$", Object.prototype.toString);
-  addProto(proto, "toString", function () { return (this.__CLASS_NAME__ ? "[" + this.__CLASS_NAME__ + " object]" : this.toString$.apply(this, arguments)); });
+  addProto(proto, "toString", function () { return (this.__CLASS_NAME__ ? "[" + (this.__CLASS_NAME$__ || this.__CLASS_NAME__) + " object]" : this.toString$.apply(this, arguments)); });
 
 })(Clazz._O.prototype);
 
@@ -2632,7 +2634,8 @@ Clazz._4Name = function(clazzName, applet, state, asClazz, initialize, isQuiet) 
   } 
   if (!isok) {
     var name2 = null;
-    if (clazzName.indexOf("$") >= 0) {
+    var pt = clazzName.lastIndexOf("$");
+    if (pt >= 0) {
       // BH we allow Java's java.swing.JTable.$BooleanRenderer as a stand-in
 		// for java.swing.JTable.BooleanRenderer
       // when the static nested class is created using declareType
@@ -2640,6 +2643,8 @@ Clazz._4Name = function(clazzName, applet, state, asClazz, initialize, isQuiet) 
       if (Clazz._isClassDefined(name2)) {
         clazzName = name2;
       } else {
+        cl = Clazz._4Name(clazzName.substring(0, pt), applet, state, true, initialize, isQuiet);
+        cl && (clazzName = name2);	
         name2 = null;
       }
     }
@@ -6705,8 +6710,6 @@ var printStackTrace = function(e, ps) {
 	  }
 }
 
-TypeError.prototype.printStackTrace$ = ReferenceError.prototype.printStackTrace$ = function() { console.log(this);printStackTrace(this,System.err) }
-
 var C$ = Clazz.newClass(java.lang, "Throwable", function () {
 Clazz.newInstance(this, arguments);
 }, null, java.io.Serializable);
@@ -6735,7 +6738,7 @@ this.detailMessage = (cause == null ? this.stack : cause.toString ());
 this.cause = cause;
 }, 1);
 
-m$(C$, 'getMessage$', function () {return this.message || this.detailMessage});
+m$(C$, 'getMessage$', function () {return this.message || this.detailMessage || null});
 
 m$(C$, 'getLocalizedMessage$', function () {
 return this.getMessage$();
@@ -6917,11 +6920,17 @@ if(lineNum>=0){
 });
 
 
-TypeError.prototype.getMessage$ || (TypeError.prototype.getMessage$ = TypeError.prototype.getLocalizedMessage$ 
+TypeError.prototype.getMessage$ || (
+		
+ ReferenceError.prototype.getMessage$ = TypeError.prototype.getMessage$ 
+		= ReferenceError.prototype.getMessage$ = TypeError.prototype.getLocalizedMessage$ 
 			= function(){ return (this.stack ? this.stack : this.message || this.toString()) + (this.getStackTrace ? this.getStackTrace$() : Clazz._getStackTrace())});
-TypeError.prototype.printStackTrace$ = function(){System.out.println(this + "\n" + this.stack)};
-TypeError.prototype.printStackTrace$java_io_PrintStream = function(stream){stream.println$S(this + "\n" + this.stack);};
-TypeError.prototype.printStackTrace$java_io_PrintWriter = function(printer){printer.println$S(this + "\n" + this.stack);};
+
+TypeError.prototype.getStackTrace$ = ReferenceError.prototype.getStackTrace$ = function() { return Clazz._getStackTrace() }
+TypeError.prototype.printStackTrace$ = ReferenceError.prototype.printStackTrace$ = function() { printStackTrace(this,System.err) }
+ReferenceError.prototype.printStackTrace$java_io_PrintStream = TypeError.prototype.printStackTrace$java_io_PrintStream = function(stream){stream.println$S(this + "\n" + this.stack);};
+ReferenceError.prototype.printStackTrace$java_io_PrintWriter = TypeError.prototype.printStackTrace$java_io_PrintWriter = function(printer){printer.println$S(this + "\n" + this.stack);};
+
 Clazz.Error = Error;
 
 var declareType = function(prefix, name, clazzSuper, interfacez) {
