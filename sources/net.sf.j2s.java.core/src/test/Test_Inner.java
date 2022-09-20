@@ -78,6 +78,16 @@ public abstract class Test_Inner extends Test_ {
 	}
 	
 	public static void main(String[] args) {
+		try {
+			Class<?> t = Class.forName("test.Test_InnerAo$AiStat");
+			System.out.println(t.getName() + " loaded");
+			System.out.println(t.newInstance());
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			assert(false);
+		}
+		
 		Test_Inner inner = new Test_Inner(6) {};
 		try {
 			System.out.println(inner.getClass().getMethod("testDollar", new Class<?>[] {Test_Abstract_a.class}).getName());
