@@ -7,6 +7,8 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2022.12.03 fix for Double.isInfinite should not be true for NaN
+// BH 2022.12.03 fix for Double.parseDouble("") and new Double(NaN) should be NaN, not 0
 // BH 2022.09.20 fix for Class.forName not loading static inner classes directly
 // BH 2022.09.20 fix for default toString for classes using "." name not "$" name for inner classes
 // BH 2022.09.15 fix for new Error() failing; just letting java.lang.Error subclass Throwable
@@ -5353,7 +5355,7 @@ m$(Float, "c$$S", function(v){
 }, 1);
 
 m$(Float, "c$$D", function(v){
-	v || (v = 0);
+	  v || v != v || (v == 0) || (v = 0);
   v = (v < minFloat ? -Infinity : v > maxFloat ? Infinity : v);
  this.valueOf=function(){return v;}
 }, 1);
@@ -5444,12 +5446,13 @@ return isNaN(this.valueOf());
 
 m$(Float,"isInfinite$F",
 function(num){
-return !Number.isFinite(num);
+return num == num && !Number.isFinite(num);
 }, 1);
 
 m$(Float,"isInfinite$",
 function(){
-return !Number.isFinite(this.valueOf());
+	var v = this.valueOf();
+return v == v && !Number.isFinite(this.valueOf());
 });
 
 m$(Float,"equals$O",
@@ -5462,7 +5465,11 @@ m$(Float, "$box$", function(v) {
 });
 
 Clazz._setDeclared("Double", java.lang.Double=Double=function(){
-if (arguments[0] === null || typeof arguments[0] != "object")this.c$(arguments[0]);
+  if (typeof arguments[0] == "number") {
+	  this.c$$D(arguments[0]);
+  } else if (arguments[0] === null || typeof arguments[0] != "object") {
+	  this.c$(arguments[0]);
+  }
 });
 decorateAsNumber(Double,"Double", "double", "D");
 
@@ -5484,12 +5491,13 @@ return Clazz._floatToString(this.valueOf());
 };
 
 m$(Double, "c$$D", function(v){
-	v || (v = 0);
+    v || v != v || (v == 0) || (v = 0);
 	this.valueOf=function(){return v;};
 }, 1);
 
 m$(Double,"c$", function(v){
-  v || v == null || v != v || (v == 0) || (v = 0);
+	// -0 here becomes 0, from Double.valueOf(d)
+  v || v == null || v != v || (v = 0);
  if (typeof v != "number") 
   v = Double.parseDouble$S(v);
  this.valueOf=function(){return v;}
@@ -5512,8 +5520,11 @@ Double.prototype.isInfinite$ = Float.prototype.isInfinite$;
 
 m$(Double,"parseDouble$S",
 function(s){
-if(s==null){
+if(s == null) {
   throw Clazz.new_(NumberFormatException.c$$S, ["null"]);
+}
+if(s.length == 0) {
+	  throw Clazz.new_(NumberFormatException.c$$S, ["empty String"]);
 }
 if (s.indexOf("NaN") >= 0)
 	return NaN;
@@ -5537,7 +5548,7 @@ return Clazz.new_(Double.c$$S, [v]);
 
 m$(Double,"valueOf$D",
 function(v){
-return Clazz.new_(Double.c$$D, [v]);
+return Clazz.new_(Double.c$, [v]);
 }, 1);
 
 // Double.prototype.equals =

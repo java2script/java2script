@@ -7,9 +7,17 @@ strictfp class Test_Double extends Test_{
 	
 	public static void main(String[] args) {
 		
+		assert(Double.isNaN(new Double(Double.NaN)));
 		
-		Double d = new Double("-0");
-		Double d1 = Double.valueOf(-0);
+		try {
+		Double.isNaN(Double.parseDouble(""));
+		assert false;
+		} catch(NumberFormatException e) {
+			System.out.println(e);
+		}
+		
+		Double d = new Double("-0"); // will be -0
+		Double d1 = Double.valueOf(-0); // will be 0
 		System.out.println(d);
 		System.out.println(d1);
 		System.out.println("" + d);
