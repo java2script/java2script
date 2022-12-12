@@ -152,11 +152,9 @@ public class GifEncoder extends ImageEncoder {
       return;
     interlaced = false;
     capturing = true;
-    try {
-      byteCount = ((Integer) params.get("captureByteCount")).intValue();
-    } catch (Exception e) {
-      // ignore
-    }
+    Integer c = (Integer) params.get("captureByteCount");
+    if (c != null)
+      byteCount = c.intValue();
     switch ("maec"
         .indexOf(((String) params.get("captureMode")).substring(0, 1))) {
     case 0: //"movie"
