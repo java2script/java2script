@@ -4730,9 +4730,9 @@ public abstract class Component implements ImageObserver/*
 
 		// // if this is a lightweight component, enable mouse events
 		// // in the native container.
-		// if (peer instanceof LightweightPeer) {
-		// parent.proxyEnableEvents(AWTEvent.MOUSE_EVENT_MASK);
-		// }
+		 if (peer instanceof LightweightPeer && parent != null) {
+			 parent.proxyEnableEvents(AWTEvent.MOUSE_EVENT_MASK);
+		 }
 	}
 
 	/**
