@@ -106,10 +106,6 @@ public abstract class M34d implements JSONEncodable {
     rotate2(t, t);
   }
 
-  public void rotate(T3 t) {
-    rotate2(t, t);
-  }
-
   /**
    * Transform the vector vec using this Matrix3f and place the result into
    * vecOut.
@@ -124,15 +120,6 @@ public abstract class M34d implements JSONEncodable {
     result.set(m00 * t.x + m01 * t.y + m02 * t.z, m10 * t.x + m11 * t.y + m12
         * t.z, m20 * t.x + m21 * t.y + m22 * t.z);
   }
-
-  public void rotate2(T3 t, T3 result) {
-    // alias-safe
-    result.set((float) (m00 * t.x + m01 * t.y + m02 * t.z), 
-        (float) (m10 * t.x + m11 * t.y + m12
-        * t.z), 
-        (float) (m20 * t.x + m21 * t.y + m22 * t.z));
-  }
-
 
   /**
    * Sets the value of this matrix to the double value of the Matrix3f argument.
