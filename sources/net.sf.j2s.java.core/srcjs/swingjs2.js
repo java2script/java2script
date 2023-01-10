@@ -13901,7 +13901,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	J2S.setWindowZIndex = function(node, z) {
 		// on frame show or mouse-down, create a stack of frames and sort by
 		// z-order
-		if (!node || node.ui && node.ui.embeddedNode)
+		if (!node || !node.ui || node.ui.embeddedNode)
 			return 
 		var app = node.ui.jc.appContext.threadGroup.name + "_";
 		var a = [];
