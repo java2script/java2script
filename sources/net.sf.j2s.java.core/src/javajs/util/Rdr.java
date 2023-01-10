@@ -3,9 +3,6 @@
  * $Date: 2007-04-05 09:07:28 -0500 (Thu, 05 Apr 2007) $
  * $Revision: 7326 $
  *
- * Some portions of this file have been modified by Robert Hanson hansonr.at.stolaf.edu 2012-2017
- * for use in SwingJS via transpilation into JavaScript using Java2Script.
- *
  * Copyright (C) 2003-2005  The Jmol Development Team
  *
  * Contact: jmol-developers@lists.sf.net
@@ -78,6 +75,8 @@ public class Rdr implements GenericLineReader {
     }
 
   }
+
+  private static final int UNDERFLOW = 264;
 
   BufferedReader reader;
 
@@ -306,13 +305,14 @@ public class Rdr implements GenericLineReader {
   }
 
   public static byte[] getMagic(InputStream is, int n) {
-    byte[] abMagic = (n > 264 ? new byte[n] : b264 == null ? (b264 = new byte[264]) : b264);
+    byte[] abMagic = (n > 264 ? new byte[n] : b264 == null ? (b264 = new byte[265]) : b264);
     try {
+      abMagic[UNDERFLOW] = -1;
       is.mark(n + 1);
       int i = is.read(abMagic, 0, n);
       if (i < n) {
         // ensure 
-        abMagic[0] = abMagic[257] = 0;
+        abMagic[0] = abMagic[UNDERFLOW] = 0;
       }
     } catch (IOException e) {
     }
@@ -518,13 +518,29 @@ public class Rdr implements GenericLineReader {
   public static boolean isTar(BufferedInputStream bis) {
       byte[] bytes = getMagic(bis, 264);
       // check for ustar<00>
-      return (bytes[0] != 0 
+      return (bytes[UNDERFLOW] == -1
           && (bytes[257] & 0xFF) == 0x75
           && (bytes[258] & 0xFF) == 0x73
           && (bytes[259] & 0xFF) == 0x74
           && (bytes[260] & 0xFF) == 0x61
           && (bytes[261] & 0xFF) == 0x72
           );
+  }
+
+  /**
+   * Just looking for non-printable characters.
+   * 
+   * @param bis
+   * @param n length to scan
+   * @return true if non-printable characters found
+   */
+  public static boolean isBinary(BufferedInputStream bis, int n) {
+    byte[] bytes = getMagic(bis, n);
+    if (b264[UNDERFLOW] == -1)
+      for (int i = 0; i < n; i++)
+      if (bytes[i] < 9) // TAB
+        return true;
+    return false;
   }
 
 }
