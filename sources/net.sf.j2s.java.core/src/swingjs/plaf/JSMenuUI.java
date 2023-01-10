@@ -39,6 +39,7 @@ public class JSMenuUI extends JSMenuItemUI implements MenuListener {
 			domNode = createItem(isMenuBarMenu ? "_bar" : "_elem", null);
 			bindJQueryEvents(domNode, "mouseenter mouseleave", SOME_MOUSE_EVENT);
 		}
+		imagePersists = true;
 		allowTextAlignment = isMenuItem = !isMenuBarMenu;
 		containerNode = (isMenuBarMenu ? null : domNode);
 		addClass(domNode, isMenuBarMenu ? "j2s-menuBar-menu" : "j2s-popup-menu");
