@@ -1319,8 +1319,10 @@ public class JSComponentUI extends ComponentUI
 			updatePropertyAncestor(false);
 			if (value == null)
 				return;
-			if ((isDisposed || isTainted) && c.visible)
+			if ((isDisposed || isTainted) && c.isVisible()) {
+				// c.visible not the same as c.isVisible() for popup!!
 				setVisible(true);
+			}
 		}
 		propertyChangedCUI(e, prop);
 	}
@@ -2387,7 +2389,7 @@ public class JSComponentUI extends ComponentUI
 		if (isBounded && !boundsSet) {
 			// now we can set it to be visible, because its bounds have
 			// been explicitly set.
-			if (c.visible && cellComponent == null)
+			if (c.isVisible() && cellComponent == null)
 				setVisible(true);
 			boundsSet = true;
 		}

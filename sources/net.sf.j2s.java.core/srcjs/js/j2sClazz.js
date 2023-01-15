@@ -7,6 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2023.01.15 fix for int[2][3][] not initializing properly
 // BH 2022.12.03 fix for Double.isInfinite should not be true for NaN
 // BH 2022.12.03 fix for Double.parseDouble("") and new Double(NaN) should be NaN, not 0
 // BH 2022.09.20 fix for Class.forName not loading static inner classes directly
@@ -1232,17 +1233,21 @@ var newTypedA = function(baseClass, args, nBits, ndims, isClone) {
   var last = args.length - 1;
   var paramType = args[last];
   var val = args[last - 1];
-  if (ndims > 1) {
-     // array of arrays
+  if (ndims < -1 || Math.abs(ndims) > 1) {
+     //array of arrays;  -2: when x[30][]
     var xargs = new Array(last--); 
     for (var i = 0; i <= last; i++)
       xargs[i] = args[i + 1];
     // SAA -> SA
     xargs[last] = paramType.substring(0, paramType.length - 1);    
     var arr = new Array(dim);
-    for (var i = 0; i < dim; i++)
-      arr[i] = newTypedA(baseClass, xargs, nBits, ndims - 1); // Call
-																// recursively
+    if (args[1] != null) {
+        // arg[1] is null, we set the array type but do not fill in the array
+    	// otherwise, call recursively
+    	for (var i = 0; i < dim; i++) {    		 
+    		arr[i] = newTypedA(baseClass, xargs, nBits, ndims - (ndims < 0 ? -1 : 1)); 
+    	}
+    }
   } else {
     // Clazz.newIntA(new int[5][] val = null
     // Clazz.newA(5 ,null, "SA") new String[5] val = null
@@ -3308,6 +3313,7 @@ var fixAgent = function(agent) {return "" + ((agent = agent.split(";")[0]),
 			"java.vendor" : "java2script/SwingJS/OpenJDK",
 			"java.vendor.url" : "https://github.com/BobHanson/java2script",
 			"java.version" : "1.8",
+			"java.vm.name":"Java SwingJS",
 			"java.vm.version" : "1.8",
 			"java.specification.version" : "1.8",
 			"java.io.tmpdir" : J2S.getGlobal("j2s.tmpdir"),
