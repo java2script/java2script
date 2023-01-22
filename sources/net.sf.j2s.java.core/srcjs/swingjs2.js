@@ -14046,6 +14046,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2023.01.22 fix for Double.doubleToRawLongBits missing and Float.floatToIntBits failing on NaN
 // BH 2023.01.15 fix for int[2][3][] not initializing properly
 // BH 2022.12.03 fix for Double.isInfinite should not be true for NaN
 // BH 2022.12.03 fix for Double.parseDouble("") and new Double(NaN) should be NaN, not 0
@@ -15317,7 +15318,7 @@ var newTypedA = function(baseClass, args, nBits, ndims, isClone) {
       var arr = new Int32Array(dim);
       break;
     case 64:
-      var arr = (paramType != "JA" ? new Float64Array(dim) : typeof dim == "number" ? new Array(dim) : dim);
+      var arr = (paramType != "JA" ? new Float64Array(dim) : typeof dim == "number" ? new Array(dim).fill(0) : dim);
       break;
     default:
       nBits = 0;
@@ -15327,8 +15328,7 @@ var newTypedA = function(baseClass, args, nBits, ndims, isClone) {
       } else {
         arr = (dim < 0 ? val : new Array(dim));
         if (dim > 0 && val != null)
-          for (var i = dim; --i >= 0;)
-             arr[i] = val;
+        	arr.fill(val);
       }
       break;
     }  
@@ -19433,8 +19433,6 @@ geta64 = function() {
 }
 
 Float.floatToIntBits$F = function(f) {
-	if (isNaN(f))
-		return 
 	return Float.floatToRawIntBits$F(f);
 }
 
@@ -19580,7 +19578,7 @@ throw Clazz.new_(NumberFormatException.c$$S, ["Not a Number : "+s]);
 return v;
 }, 1);
 
-m$(Double,"doubleToLongBits$D",
+m$(Double,["doubleToRawLongBits$D", "doubleToLongBits$D"],
 function(d){
 	geta64()[0] = d;
 	return toLongI2(i64[0], i64[1]);
