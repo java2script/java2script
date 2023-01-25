@@ -67,14 +67,14 @@
 
 package javajs.img;
 
+import java.io.IOException;
+import java.util.Hashtable;
+import java.util.Map;
+
 import javajs.util.CU;
 import javajs.util.Lst;
 import javajs.util.M3;
 import javajs.util.P3;
-
-import java.util.Hashtable;
-import java.util.Map;
-import java.io.IOException;
 
 /**
  * 
@@ -152,11 +152,9 @@ public class GifEncoder extends ImageEncoder {
       return;
     interlaced = false;
     capturing = true;
-    try {
-      byteCount = ((Integer) params.get("captureByteCount")).intValue();
-    } catch (Exception e) {
-      // ignore
-    }
+    Integer c = (Integer) params.get("captureByteCount");
+    if (c != null)
+      byteCount = c.intValue();
     switch ("maec"
         .indexOf(((String) params.get("captureMode")).substring(0, 1))) {
     case 0: //"movie"
@@ -214,6 +212,7 @@ public class GifEncoder extends ImageEncoder {
    * a color point in normalized L*a*b space with a flag indicating whether it
    * is the background color
    */
+  @SuppressWarnings("serial")
   private class ColorItem extends P3 {
     /**
 	 * 
@@ -608,7 +607,7 @@ public class GifEncoder extends ImageEncoder {
   // these could be static, but that just makes for more JavaScript code
 
   protected P3 toLABnorm(int rgb) {
-    P3 lab = CU.colorPtFromInt(rgb, null);
+    P3 lab = P3.new3((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF);
     rgbToXyz(lab, lab);
     xyzToLab(lab, lab);
     // normalize to 0-100

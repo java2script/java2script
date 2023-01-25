@@ -82,9 +82,15 @@ final public class AU {
 		return arrayCopyObject(array, (array == null ? 16 : 2 * getLength(array)));
 	}
 
+
+	
 	public static String[] doubleLengthS(String[] array) {
 		return arrayCopyS(array, (array == null ? 16 : 2 * array.length));
 	}
+
+	public static double[] doubleLengthD(double[] array) {
+	    return arrayCopyD(array, (array == null ? 16 : 2 * array.length));
+    }
 
 	public static float[] doubleLengthF(float[] array) {
 		return arrayCopyF(array, (array == null ? 16 : 2 * array.length));

@@ -1319,8 +1319,10 @@ public class JSComponentUI extends ComponentUI
 			updatePropertyAncestor(false);
 			if (value == null)
 				return;
-			if ((isDisposed || isTainted) && c.visible)
+			if ((isDisposed || isTainted) && c.isVisible()) {
+				// c.visible not the same as c.isVisible() for popup!!
 				setVisible(true);
+			}
 		}
 		propertyChangedCUI(e, prop);
 	}
@@ -1457,8 +1459,16 @@ public class JSComponentUI extends ComponentUI
 			// it has a getIcon() method. JavaScript will not care if
 			// it is really a JLabel or JOptionPane, which also have icons
 			ImageIcon icon = getOrCreateIcon(c, null);
-			if (icon == null ? currentIcon != null : !icon.equals(currentIcon))
-				setIconAndText("icon", icon, currentGap, currentText);
+			if (icon == currentIcon && icon != null) {
+				BufferedImage bi = (BufferedImage) currentIcon.getImage();
+				if (bi.秘getImageNode(BufferedImage.GET_IMAGE_ALLOW_NULL) == imageNode) {
+					return;
+				}
+			}
+			if (menuAnchorNode != null) {
+				DOMNode.setStyle(menuAnchorNode, "min-width", "20px");
+			}
+			setIconAndText("icon", icon, currentGap, currentText);
 		}
 	}
 
@@ -2379,7 +2389,7 @@ public class JSComponentUI extends ComponentUI
 		if (isBounded && !boundsSet) {
 			// now we can set it to be visible, because its bounds have
 			// been explicitly set.
-			if (c.visible && cellComponent == null)
+			if (c.isVisible() && cellComponent == null)
 				setVisible(true);
 			boundsSet = true;
 		}
@@ -2563,6 +2573,7 @@ public class JSComponentUI extends ComponentUI
 						h = 20;
 					}
 					DOMNode.setStyles(iconNode, "height", h + "px", "width", w  + "px");
+					DOMNode.setStyles(imageNode, "height", h + "px", "width", w  + "px");
 					if (!imagePersists)
 						DOMNode.setStyle(imageNode, "visibility", "hidden");
 				}
@@ -2878,7 +2889,7 @@ public class JSComponentUI extends ComponentUI
 		isFullyCentered = (alignHCenter && alignVCenter && wIcon == 0 || wText == 0
 				&& (actionNode == null || this.cellComponent != null || isSimpleButton) && margins.left == margins.right
 				&& margins.top == margins.bottom && myInsets.left == myInsets.right && myInsets.top == myInsets.bottom);
-		if (isFullyCentered) {
+		if (isFullyCentered && !isMenuItem) {
 			// simple totally centered label or button
 			// can't have width or height here --- let the browser figure that out
 			fullyCenter(cssCtr, isSimpleButton || isLabel);
@@ -3040,7 +3051,7 @@ public class JSComponentUI extends ComponentUI
 					addJSKeyVal(cssAction, "top", "65%", "transform", "translateY(-100%) scale(0.6)");
 					addJSKeyVal(cssIcon, "top", "50%", "transform", "translateY(-80%)");
 				} else {
-					addJSKeyVal(cssIcon, "top", "50%", "transform", "translateY(-80%) scale(0.6)");
+					addJSKeyVal(cssIcon, "top", "50%", "transform", "translateY(-80%)");
 				}
 			}
 
@@ -3084,7 +3095,7 @@ public class JSComponentUI extends ComponentUI
 						"margin", "0px 5px", "transform", "translateY(15%)");
 			}
 		}
-		if (!isMenu || isMenuItem)
+		if (!isMenu || isMenuItem && currentText != null && currentText.length() > 0)
 			DOMNode.setStyle(menuAnchorNode, // "width", "90%",
 					"min-width", Math.max(75, (23 + 15 + wCtr + wAccel + margins.left + margins.right)) + "px"); // was
 	}

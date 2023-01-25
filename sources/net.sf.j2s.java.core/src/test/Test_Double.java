@@ -7,9 +7,17 @@ strictfp class Test_Double extends Test_{
 	
 	public static void main(String[] args) {
 		
+		assert(Double.isNaN(new Double(Double.NaN)));
 		
-		Double d = new Double("-0");
-		Double d1 = Double.valueOf(-0);
+		try {
+		Double.isNaN(Double.parseDouble(""));
+		assert false;
+		} catch(NumberFormatException e) {
+			System.out.println(e);
+		}
+		
+		Double d = new Double("-0"); // will be -0
+		Double d1 = Double.valueOf(-0); // will be 0
 		System.out.println(d);
 		System.out.println(d1);
 		System.out.println("" + d);
@@ -20,7 +28,14 @@ strictfp class Test_Double extends Test_{
 		System.out.println(d == Double.valueOf(0));	
 		System.out.println(d1 == Double.valueOf(-0));	
 		System.out.println(d1 == Double.valueOf(-0));	
-		
+		System.out.println(Long.toHexString(Double.doubleToLongBits(Double.NaN)));
+		System.out.println(Long.toHexString(Double.doubleToRawLongBits(Double.NaN)));
+		System.out.println(Long.toHexString(Double.doubleToLongBits(-0d)));
+		System.out.println(Long.toHexString(Double.doubleToRawLongBits(-0d)));
+		System.out.println(Integer.toHexString(Float.floatToRawIntBits(Float.NaN)));
+		System.out.println(Integer.toHexString(Float.floatToIntBits(Float.NaN)));
+		System.out.println(Integer.toHexString(Float.floatToRawIntBits(-0f)));
+		System.out.println(Integer.toHexString(Float.floatToIntBits(-0f)));
 		
 		
 		assert(("" + Double.valueOf(-0)).equals("0.0"));

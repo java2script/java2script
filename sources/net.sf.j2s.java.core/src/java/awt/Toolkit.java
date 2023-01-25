@@ -1493,66 +1493,66 @@ public abstract class Toolkit {
 //        }
     }
 
-//    /**
-//     * Returns the supported cursor dimension which is closest to the desired
-//     * sizes.  Systems which only support a single cursor size will return that
-//     * size regardless of the desired sizes.  Systems which don't support custom
-//     * cursors will return a dimension of 0, 0. <p>
-//     * Note:  if an image is used whose dimensions don't match a supported size
-//     * (as returned by this method), the Toolkit implementation will attempt to
-//     * resize the image to a supported size.
-//     * Since converting low-resolution images is difficult,
-//     * no guarantees are made as to the quality of a cursor image which isn't a
-//     * supported size.  It is therefore recommended that this method
-//     * be called and an appropriate image used so no image conversion is made.
-//     *
-//     * @param     preferredWidth the preferred cursor width the component would like
-//     * to use.
-//     * @param     preferredHeight the preferred cursor height the component would like
-//     * to use.
-//     * @return    the closest matching supported cursor size, or a dimension of 0,0 if
-//     * the Toolkit implementation doesn't support custom cursors.
-//     * @exception HeadlessException if GraphicsEnvironment.isHeadless()
-//     * returns true
-//     * @see       java.awt.GraphicsEnvironment#isHeadless
-//     * @since     1.2
-//     */
-//    public Dimension getBestCursorSize(int preferredWidth,
-//        int preferredHeight)  {
+    /**
+     * Returns the supported cursor dimension which is closest to the desired
+     * sizes.  Systems which only support a single cursor size will return that
+     * size regardless of the desired sizes.  Systems which don't support custom
+     * cursors will return a dimension of 0, 0. <p>
+     * Note:  if an image is used whose dimensions don't match a supported size
+     * (as returned by this method), the Toolkit implementation will attempt to
+     * resize the image to a supported size.
+     * Since converting low-resolution images is difficult,
+     * no guarantees are made as to the quality of a cursor image which isn't a
+     * supported size.  It is therefore recommended that this method
+     * be called and an appropriate image used so no image conversion is made.
+     *
+     * @param     preferredWidth the preferred cursor width the component would like
+     * to use.
+     * @param     preferredHeight the preferred cursor height the component would like
+     * to use.
+     * @return    the closest matching supported cursor size, or a dimension of 0,0 if
+     * the Toolkit implementation doesn't support custom cursors.
+     * @exception HeadlessException if GraphicsEnvironment.isHeadless()
+     * returns true
+     * @see       java.awt.GraphicsEnvironment#isHeadless
+     * @since     1.2
+     */
+    public Dimension getBestCursorSize(int preferredWidth,
+        int preferredHeight)  {
 //        // Override to implement custom cursor support.
 //        if (this != Toolkit.getDefaultToolkit()) {
 //            return Toolkit.getDefaultToolkit().
 //                getBestCursorSize(preferredWidth, preferredHeight);
 //        } else {
-//            return new Dimension(0, 0);
+            return new Dimension(0, 0);
 //        }
-//    }
+    }
 
-//    /**
-//     * Returns the maximum number of colors the Toolkit supports in a custom cursor
-//     * palette.<p>
-//     * Note: if an image is used which has more colors in its palette than
-//     * the supported maximum, the Toolkit implementation will attempt to flatten the
-//     * palette to the maximum.  Since converting low-resolution images is difficult,
-//     * no guarantees are made as to the quality of a cursor image which has more
-//     * colors than the system supports.  It is therefore recommended that this method
-//     * be called and an appropriate image used so no image conversion is made.
-//     *
-//     * @return    the maximum number of colors, or zero if custom cursors are not
-//     * supported by this Toolkit implementation.
-//     * @exception HeadlessException if GraphicsEnvironment.isHeadless()
-//     * returns true
-//     * @see       java.awt.GraphicsEnvironment#isHeadless
-//     * @since     1.2
-//     */
-//    public int getMaximumCursorColors()  {
-//        // Override to implement custom cursor support.
+    /**
+     * Returns the maximum number of colors the Toolkit supports in a custom cursor
+     * palette.<p>
+     * Note: if an image is used which has more colors in its palette than
+     * the supported maximum, the Toolkit implementation will attempt to flatten the
+     * palette to the maximum.  Since converting low-resolution images is difficult,
+     * no guarantees are made as to the quality of a cursor image which has more
+     * colors than the system supports.  It is therefore recommended that this method
+     * be called and an appropriate image used so no image conversion is made.
+     *
+     * @return    the maximum number of colors, or zero if custom cursors are not
+     * supported by this Toolkit implementation.
+     * @exception HeadlessException if GraphicsEnvironment.isHeadless()
+     * returns true
+     * @see       java.awt.GraphicsEnvironment#isHeadless
+     * @since     1.2
+     */
+    public int getMaximumCursorColors()  {
+        // Override to implement custom cursor support.
 //        if (this != Toolkit.getDefaultToolkit()) {
 //            return Toolkit.getDefaultToolkit().getMaximumCursorColors();
 //        } else {
-//            return 0;
+            return 0;
 //        }
-//    }
+    }
 
     /**
      * Returns whether Toolkit supports this state for

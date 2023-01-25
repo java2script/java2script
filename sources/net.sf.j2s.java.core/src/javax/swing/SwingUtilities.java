@@ -813,21 +813,21 @@ public class SwingUtilities implements SwingConstants
         return ((anEvent.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK);
     }
 
-//    /**
-//     * Compute the width of the string using a font with the specified
-//     * "metrics" (sizes).
-//     *
-//     * @param fm   a FontMetrics object to compute with
-//     * @param str  the String to compute
-//     * @return an int containing the string width
-//     */
-//    public static int computeStringWidth(FontMetrics fm,String str) {
-//        // You can't assume that a string's width is the sum of its
-//        // characters' widths in Java2D -- it may be smaller due to
-//        // kerning, etc.
-//        return SwingUtilities2.stringWidth(null, fm, str);
-//    }
-//
+    /**
+     * Compute the width of the string using a font with the specified
+     * "metrics" (sizes).
+     *
+     * @param fm   a FontMetrics object to compute with
+     * @param str  the String to compute
+     * @return an int containing the string width
+     */
+    public static int computeStringWidth(FontMetrics fm,String str) {
+        // You can't assume that a string's width is the sum of its
+        // characters' widths in Java2D -- it may be smaller due to
+        // kerning, etc.
+        return SwingUtilities2.stringWidth(null, fm, str);
+    }
+
     /**
      * Compute and return the location of the icons origin, the
      * location of origin of the text baseline, and a possibly clipped

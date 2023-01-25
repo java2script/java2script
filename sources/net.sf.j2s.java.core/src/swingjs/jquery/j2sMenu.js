@@ -551,7 +551,7 @@ Swing.__getMenuStyle = function(applet) { return '\
 	.swingjsPopupMenu .ui-icon-alt-y:after{content:"alt-Y"}\
 	.swingjsPopupMenu .ui-icon-alt-shift-x:{min-width:130ex;text-align:right;background-image:none;background-position:0 0}\
 	.swingjsPopupMenu .ui-icon-alt-shift-x:after{content:"alt-shift-X"}\
-	.swingjsPopupMenu .ui-icon-carat-1-e{min-width:10ex;text-align:right;background-image:none;background-position:0 0}\
+	.swingjsPopupMenu .ui-icon-carat-1-e{min-width:1ex;text-align:right;background-image:none;background-position:0 0}\
 	.swingjsPopupMenu .ui-icon-carat-1-e:after{content:"\\0025B6"}\
 	.swingjsPopupMenu .ui-state-default{border:1px solid #c5dbec;background:#dfeffc;color:#2e6e9e}\
 	.swingjsPopupMenu .ui-state-default .a{color:#2e6e9e;}\

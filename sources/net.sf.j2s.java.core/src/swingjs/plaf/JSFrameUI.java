@@ -33,12 +33,14 @@ import swingjs.api.js.JSFunction;
  * this.setName("myframe");
  * 
  * 
- * 3) On the web page somewhere, create a div with id (name + "-div") and styles
- * position:absolute, left, and right. If you wish, you can set the width and
- * height, but that is optional. All four of these values override whatever is
- * given in the constructor.
+ * 3) On the web page somewhere, create a div with id (appletname-name-div)
+ * where appletname is the applet name (e.g. "testApplet") and styles
+ * position:absolute;left:<nnn>px;top:<nnn>px.
  * 
- * &lt;div id="myframe-div"
+ * If you wish, you can set the width and height, but that is optional. All four
+ * of these values override whatever is given in the constructor.
+ * 
+ * &lt;div id="testApplet-myframe-div"
  * style="position:absolute;left:100px;top:200px;width:400px;height:300px"
  * &gt;&lt;/div&gt;
  * 

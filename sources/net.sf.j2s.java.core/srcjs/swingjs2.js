@@ -10686,6 +10686,7 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// BH 2023.01.10 j2sargs typo
 // BH 2022.08.27 fix frame resizing for browsers reporting noninteger pageX, pageY
 // BH 2022.06.23 implements J2S._lastAppletID
 // BH 2022.01.12 adds pointer option
@@ -13432,7 +13433,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			}
 			J2S._registerApplet(applet._id, applet);
 			if (J2S._appArgs || applet.__Info.args == "?") {
-				applet.__Info.args = (J2S._appArgs ? decodeURIComponent(J2S.appArgs).split("|") : []);
+				applet.__Info.args = (J2S._appArgs ? decodeURIComponent(J2S._appArgs).split("|") : []);
 			}
 			J2S._lang && (applet.__Info.language = J2S._lang);
 			var isApp = applet._isApp = !!applet.__Info.main; 
@@ -13901,7 +13902,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	J2S.setWindowZIndex = function(node, z) {
 		// on frame show or mouse-down, create a stack of frames and sort by
 		// z-order
-		if (!node || node.ui && node.ui.embeddedNode)
+		if (!node || !node.ui || node.ui.embeddedNode)
 			return 
 		var app = node.ui.jc.appContext.threadGroup.name + "_";
 		var a = [];
@@ -14037,7 +14038,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 })(self.J2S, self.jQuery, window, document);
 // j2sClazz.js 
-// NOTE: updates to this file should be copies to j2sjmol.js
+// NOTE: updates to this file should be copied to j2sjmol.js
 
 // latest author: Bob Hanson, St. Olaf College, hansonr@stolaf.edu
 
@@ -14045,6 +14046,10 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2023.01.22 fix for Double.doubleToRawLongBits missing and Float.floatToIntBits failing on NaN
+// BH 2023.01.15 fix for int[2][3][] not initializing properly
+// BH 2022.12.03 fix for Double.isInfinite should not be true for NaN
+// BH 2022.12.03 fix for Double.parseDouble("") and new Double(NaN) should be NaN, not 0
 // BH 2022.09.20 fix for Class.forName not loading static inner classes directly
 // BH 2022.09.20 fix for default toString for classes using "." name not "$" name for inner classes
 // BH 2022.09.15 fix for new Error() failing; just letting java.lang.Error subclass Throwable
@@ -15268,17 +15273,21 @@ var newTypedA = function(baseClass, args, nBits, ndims, isClone) {
   var last = args.length - 1;
   var paramType = args[last];
   var val = args[last - 1];
-  if (ndims > 1) {
-     // array of arrays
+  if (ndims < -1 || Math.abs(ndims) > 1) {
+     //array of arrays;  -2: when x[30][]
     var xargs = new Array(last--); 
     for (var i = 0; i <= last; i++)
       xargs[i] = args[i + 1];
     // SAA -> SA
     xargs[last] = paramType.substring(0, paramType.length - 1);    
     var arr = new Array(dim);
-    for (var i = 0; i < dim; i++)
-      arr[i] = newTypedA(baseClass, xargs, nBits, ndims - 1); // Call
-																// recursively
+    if (args[1] != null) {
+        // arg[1] is null, we set the array type but do not fill in the array
+    	// otherwise, call recursively
+    	for (var i = 0; i < dim; i++) {    		 
+    		arr[i] = newTypedA(baseClass, xargs, nBits, ndims - (ndims < 0 ? -1 : 1)); 
+    	}
+    }
   } else {
     // Clazz.newIntA(new int[5][] val = null
     // Clazz.newA(5 ,null, "SA") new String[5] val = null
@@ -15309,7 +15318,7 @@ var newTypedA = function(baseClass, args, nBits, ndims, isClone) {
       var arr = new Int32Array(dim);
       break;
     case 64:
-      var arr = (paramType != "JA" ? new Float64Array(dim) : typeof dim == "number" ? new Array(dim) : dim);
+      var arr = (paramType != "JA" ? new Float64Array(dim) : typeof dim == "number" ? new Array(dim).fill(0) : dim);
       break;
     default:
       nBits = 0;
@@ -15319,8 +15328,7 @@ var newTypedA = function(baseClass, args, nBits, ndims, isClone) {
       } else {
         arr = (dim < 0 ? val : new Array(dim));
         if (dim > 0 && val != null)
-          for (var i = dim; --i >= 0;)
-             arr[i] = val;
+        	arr.fill(val);
       }
       break;
     }  
@@ -17344,6 +17352,7 @@ var fixAgent = function(agent) {return "" + ((agent = agent.split(";")[0]),
 			"java.vendor" : "java2script/SwingJS/OpenJDK",
 			"java.vendor.url" : "https://github.com/BobHanson/java2script",
 			"java.version" : "1.8",
+			"java.vm.name":"Java SwingJS",
 			"java.vm.version" : "1.8",
 			"java.specification.version" : "1.8",
 			"java.io.tmpdir" : J2S.getGlobal("j2s.tmpdir"),
@@ -19391,7 +19400,7 @@ m$(Float, "c$$S", function(v){
 }, 1);
 
 m$(Float, "c$$D", function(v){
-	v || (v = 0);
+	  v || v != v || (v == 0) || (v = 0);
   v = (v < minFloat ? -Infinity : v > maxFloat ? Infinity : v);
  this.valueOf=function(){return v;}
 }, 1);
@@ -19424,8 +19433,6 @@ geta64 = function() {
 }
 
 Float.floatToIntBits$F = function(f) {
-	if (isNaN(f))
-		return 
 	return Float.floatToRawIntBits$F(f);
 }
 
@@ -19482,12 +19489,13 @@ return isNaN(this.valueOf());
 
 m$(Float,"isInfinite$F",
 function(num){
-return !Number.isFinite(num);
+return num == num && !Number.isFinite(num);
 }, 1);
 
 m$(Float,"isInfinite$",
 function(){
-return !Number.isFinite(this.valueOf());
+	var v = this.valueOf();
+return v == v && !Number.isFinite(this.valueOf());
 });
 
 m$(Float,"equals$O",
@@ -19500,7 +19508,11 @@ m$(Float, "$box$", function(v) {
 });
 
 Clazz._setDeclared("Double", java.lang.Double=Double=function(){
-if (arguments[0] === null || typeof arguments[0] != "object")this.c$(arguments[0]);
+  if (typeof arguments[0] == "number") {
+	  this.c$$D(arguments[0]);
+  } else if (arguments[0] === null || typeof arguments[0] != "object") {
+	  this.c$(arguments[0]);
+  }
 });
 decorateAsNumber(Double,"Double", "double", "D");
 
@@ -19522,12 +19534,13 @@ return Clazz._floatToString(this.valueOf());
 };
 
 m$(Double, "c$$D", function(v){
-	v || (v = 0);
+    v || v != v || (v == 0) || (v = 0);
 	this.valueOf=function(){return v;};
 }, 1);
 
 m$(Double,"c$", function(v){
-  v || v == null || v != v || (v == 0) || (v = 0);
+	// -0 here becomes 0, from Double.valueOf(d)
+  v || v == null || v != v || (v = 0);
  if (typeof v != "number") 
   v = Double.parseDouble$S(v);
  this.valueOf=function(){return v;}
@@ -19550,8 +19563,11 @@ Double.prototype.isInfinite$ = Float.prototype.isInfinite$;
 
 m$(Double,"parseDouble$S",
 function(s){
-if(s==null){
+if(s == null) {
   throw Clazz.new_(NumberFormatException.c$$S, ["null"]);
+}
+if(s.length == 0) {
+	  throw Clazz.new_(NumberFormatException.c$$S, ["empty String"]);
 }
 if (s.indexOf("NaN") >= 0)
 	return NaN;
@@ -19562,7 +19578,7 @@ throw Clazz.new_(NumberFormatException.c$$S, ["Not a Number : "+s]);
 return v;
 }, 1);
 
-m$(Double,"doubleToLongBits$D",
+m$(Double,["doubleToRawLongBits$D", "doubleToLongBits$D"],
 function(d){
 	geta64()[0] = d;
 	return toLongI2(i64[0], i64[1]);
@@ -19575,7 +19591,7 @@ return Clazz.new_(Double.c$$S, [v]);
 
 m$(Double,"valueOf$D",
 function(v){
-return Clazz.new_(Double.c$$D, [v]);
+return Clazz.new_(Double.c$, [v]);
 }, 1);
 
 // Double.prototype.equals =

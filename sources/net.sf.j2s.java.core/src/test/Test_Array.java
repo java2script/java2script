@@ -7,6 +7,10 @@ import javajs.util.AU;
 
 class Test_Array extends Test_ {
 
+	static Object ax1 =new int[2][];
+	static Object ax = new int[2][3][];
+
+
 	static int[] i0 = new int[0];
 	static Object ono = new Class<?>[0];
 
@@ -25,6 +29,8 @@ class Test_Array extends Test_ {
 		y = x;
 		Test_Array[] a = new Test_Array[3];
 	}
+	
+	
 	static Object oo = Array.newInstance(Test_Array[].class, 0);
 
 	static Object tType3__ = Array.newInstance(Test_Array[][].class, 3);
@@ -137,7 +143,10 @@ class Test_Array extends Test_ {
 		assert ((i33 instanceof int[][]));
 		assert ((iType3_ instanceof int[][]));
 		assert (!(i33 instanceof int[]));
-
+		assert ((new int[2][])[0] == null);
+		assert ((new int[2][3][])[0][0] == null);
+		assert(((int[][])i33)[0][0] == 0);
+		assert(((char[][][][])c33__)[0][0] == null);
 		int[] ii3 = new int[] { 1, 2, 3 };
 		ii3[Integer.valueOf(2)] = 1;
 		int j = ii3[Integer.valueOf(2)];

@@ -28,7 +28,9 @@
 package javajs.util;
 
 import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
 import javajs.api.JSONEncodable;
@@ -870,10 +872,14 @@ public class PT {
 			if (info instanceof Map) {
 				sb.append("{ ");
 				String sep = "";
-				for (String key : ((Map<String, ?>) info).keySet()) {
-          if (key == null)
-            key = "null";
-					sb.append(sep).append(packageJSON(key, toJSON(null, ((Map<?, ?>) info).get(key))));
+				Set<?> keys = ((Map<?, ?>) info).keySet();
+				Object[] okeys = keys.toArray();
+				Arrays.sort(okeys);
+				for (int i = 0, n = okeys.length; i < n; i++) {
+					String key = okeys[i].toString();
+					if (key == null)
+						key = "null";
+					sb.append(sep).append(packageJSON(key, toJSON(null, ((Map<?, ?>) info).get(okeys[i]))));
 					sep = ",";
 				}
 				sb.append(" }");
@@ -895,12 +901,13 @@ public class PT {
 				sb.append("[");
 				int n = AU.getLength(info);
 				Object o = null;
-        /** @j2sNative 
-         *  o = info[0];
-         *  typeof o != "number" && typeof 0 != "boolean" && (o = null);
-         */
-        {}
-        if (o != null) {
+				/**
+				 * @j2sNative o = info[0]; typeof o != "number" && typeof 0 != "boolean" && (o =
+				 *            null);
+				 */
+				{
+				}
+				if (o != null) {
 					sb.appendO(info);
 				} else {
 					for (int i = 0; i < n; i++) {
@@ -1567,13 +1574,6 @@ public class PT {
   public static final double FRACTIONAL_PRECISION = 100000d;
   public static final double CARTESIAN_PRECISION =  10000d;
   
-  public static void fixPtFloats(T3 pt, double d) {
-	    //this will equate float and double as long as -256 <= x <= 256
-	    pt.x = (float) (Math.round(pt.x * d) / d);
-	    pt.y = (float) (Math.round(pt.y * d) / d);
-	    pt.z = (float) (Math.round(pt.z * d) / d);
-	  }
-	  
   public static double fixDouble(double d, double f) {
     return Math.round(d * f) / f;
   }
@@ -1823,13 +1823,6 @@ public class PT {
     }
   }
   
-  public static void fixPtDoubles(T3d pt, double f) {
-    //this will equate float and double as long as -256 <= x <= 256
-    pt.x = Math.round(pt.x * f) / f;
-    pt.y = Math.round(pt.y * f) / f;
-    pt.z = Math.round(pt.z * f) / f;
-  }
-
   //static {
 //    
 //  double d = 790.8999998888;
