@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -49,6 +50,12 @@ public class Test_URL extends Test_ {
 	public static void main(String[] args) {
 
 		try {
+		    URL u = Test_URL.class.getResource("ctx_test.js");
+		    System.out.println(u);
+		    System.out.println(u.toURI());
+		    File file = new File(u.toURI());
+		    BufferedReader fr = new BufferedReader(new FileReader(file));
+		    fr.close();
 			String value = "this is a test+this";
 			String s = URLEncoder.encode(value.replace(' ', '\0'), "UTF-8").replaceAll("%00", "%20");
 			System.out.println(s);
@@ -62,7 +69,7 @@ public class Test_URL extends Test_ {
 			URL url;
 			URL jarURL;
 
-			String jarpath = /** @j2sNative "./test/test.xlsx" || */
+			String jarpath = /** @j2sNative "/test/test.xlsx" || */
 					"src/test/test.xlsx";
 			url = new URL("file", null, "C:/temp/car.trz");
 			jarURL = new URL("jar", null, url + "!/Car in a loop with friction.trk");// "!/xl/worksheets/sheet1.xml");
@@ -117,7 +124,7 @@ public class Test_URL extends Test_ {
 
 		} catch (Exception e2) {
 			// This error thrown in Java only
-			e2.printStackTrace();
+			assert(/** @j2sNative false && */true);
 		}
 
 		dumpHeaders("http://www.opensourcephysics.org");
@@ -136,7 +143,7 @@ public class Test_URL extends Test_ {
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			assert (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND);
 		} catch (Exception e1) {
-			e1.printStackTrace();
+			System.out.println(e1 + " OK");
 		}
 
 		try {
@@ -160,7 +167,7 @@ public class Test_URL extends Test_ {
 			String s = Rdr.streamToString(is);
 			is.close();
 			System.out.println(s);
-			assert (s.equals("{\"ping\":1}\n"));
+			assert (s.trim().equals("{\"ping\":1}"));
 
 			assert checkEnsembl();
 

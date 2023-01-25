@@ -1045,7 +1045,7 @@ public class JSUtil implements JSUtilI {
 	public URL getDocumentBase() {
 		JSFrameViewer ap = (JSFrameViewer) this.getAppletAttribute("_appletPanel");
 		try {
-			return new URL(ap.appletDocumentBase);
+			return (ap == null ? new URL("file://./"): new URL(ap.appletDocumentBase));
 		} catch (MalformedURLException e) {
 			return null;
 		}

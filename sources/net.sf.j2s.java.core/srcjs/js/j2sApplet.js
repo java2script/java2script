@@ -1,5 +1,6 @@
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// BH 2023.01.10 j2sargs typo
 // BH 2022.08.27 fix frame resizing for browsers reporting noninteger pageX, pageY
 // BH 2022.06.23 implements J2S._lastAppletID
 // BH 2022.01.12 adds pointer option
@@ -2746,7 +2747,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			}
 			J2S._registerApplet(applet._id, applet);
 			if (J2S._appArgs || applet.__Info.args == "?") {
-				applet.__Info.args = (J2S._appArgs ? decodeURIComponent(J2S.appArgs).split("|") : []);
+				applet.__Info.args = (J2S._appArgs ? decodeURIComponent(J2S._appArgs).split("|") : []);
 			}
 			J2S._lang && (applet.__Info.language = J2S._lang);
 			var isApp = applet._isApp = !!applet.__Info.main; 
@@ -3215,7 +3216,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	J2S.setWindowZIndex = function(node, z) {
 		// on frame show or mouse-down, create a stack of frames and sort by
 		// z-order
-		if (!node || node.ui && node.ui.embeddedNode)
+		if (!node || !node.ui || node.ui.embeddedNode)
 			return 
 		var app = node.ui.jc.appContext.threadGroup.name + "_";
 		var a = [];

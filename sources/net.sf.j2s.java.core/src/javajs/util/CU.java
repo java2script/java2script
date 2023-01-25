@@ -398,9 +398,9 @@ public class CU {
             .length() - 1), ",");
         if (tokens.length != 3)
           return 0;
-        float red = PT.parseFloat(tokens[0]);
-        float grn = PT.parseFloat(tokens[1]);
-        float blu = PT.parseFloat(tokens[2]);
+        double red = PT.parseDouble(tokens[0]);
+        double grn = PT.parseDouble(tokens[1]);
+        double blu = PT.parseDouble(tokens[2]);
         return colorTriadToFFRGB(red, grn, blu);
       }
       switch (len) {
@@ -429,7 +429,7 @@ public class CU {
     return (boxedArgb == null ? 0 : boxedArgb.intValue());
   }
 
-  public static int colorTriadToFFRGB(float x, float y, float z) {
+  public static int colorTriadToFFRGB(double x, double y, double z) {
     if (x <= 1 && y <= 1 && z <= 1) {
       if (x > 0)
         x = x * 256 - 1;
@@ -445,13 +445,13 @@ public class CU {
     return 0xFF000000 | (red << 16) | (grn << 8) | blu;
   }
 
-  public final static P3 colorPtFromString(String colorName) {
+  public final static P3d colorPtFromString(String colorName) {
     return colorPtFromInt(getArgbFromString(colorName), null);
   }
 
-  public final static P3 colorPtFromInt(int color, P3 pt) {
+  public final static P3d colorPtFromInt(int color, P3d pt) {
     if (pt == null)
-      pt = new P3();
+      pt = new P3d();
     pt.set((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF);
     return pt;
   }
@@ -460,7 +460,7 @@ public class CU {
     return colorTriadToFFRGB(pt.x, pt.y, pt.z);
   }
 
-  public static void toRGB3f(int c, float[] f) {
+  public static void toRGB3f(int c, double[] f) {
     f[0] = ((c >> 16) & 0xFF) / 255f; // red
     f[1] = ((c >> 8) & 0xFF) / 255f;
     f[2] = (c & 0xFF) / 255f;
@@ -492,62 +492,62 @@ public class CU {
    *        set to false when just using this for 
    *        for RGB -- HSL -- HSL' -- RGB' conversion
    * 
-   * @return the HSL as P3 range 360 100 100
+   * @return the HSL as P3d range 360 100 100
    * @author hansonr
    */
 
-  public static P3 rgbToHSL(P3 rgb, boolean doRound) {
+  public static P3d rgbToHSL(P3d rgb, boolean doRound) {
     // adapted from http://tips4java.wordpress.com/2009/07/05/hsl-color/
     // see http://en.wikipedia.org/wiki/HSL_color_space
-    float r = rgb.x / 255;
-    float g = rgb.y / 255;
-    float b = rgb.z / 255;
-    float min = Math.min(r, Math.min(g, b));
-    float max = Math.max(r, Math.max(g, b));
+    double r = rgb.x / 255;
+    double g = rgb.y / 255;
+    double b = rgb.z / 255;
+    double min = Math.min(r, Math.min(g, b));
+    double max = Math.max(r, Math.max(g, b));
 
     //  lightness is just p * 50
 
-    float p = (max + min);
-    float q = (max - min);
+    double p = (max + min);
+    double q = (max - min);
 
-    float h = (60 * ((q == 0 ? 0 : max == r ? ((g - b) / q + 6)
+    double h = (60 * ((q == 0 ? 0 : max == r ? ((g - b) / q + 6)
         : max == g ? (b - r) / q + 2 : (r - g) / q + 4))) % 360;
 
-    float s = q / (q == 0 ? 1 : p <= 1 ? p : 2 - p);
+    double s = q / (q == 0 ? 1 : p <= 1 ? p : 2 - p);
 
     // we round to tenths for HSL so that we can  return enough
     // precision to get back 1-255 in RGB
-    return (doRound ? P3.new3(Math.round(h*10)/10f, Math.round(s * 1000)/10f,
-        Math.round(p * 500)/10f) : P3.new3(h, s * 100, p * 50));
+    return (doRound ? P3d.new3(Math.round(h*10)/10f, Math.round(s * 1000)/10f,
+        Math.round(p * 500)/10f) : P3d.new3(h, s * 100, p * 50));
   }
 
   /**
    * Convert HSL (hue/saturation/luninance) values to RGB
    *
    * @param hsl in the range 360, 100, 100
-   * @return the RGB as P3 range 0 to 255
+   * @return the RGB as P3d range 0 to 255
    * @author hansonr
    */
-  public static P3 hslToRGB(P3 hsl) {
+  public static P3d hslToRGB(P3d hsl) {
     // adapted from http://tips4java.wordpress.com/2009/07/05/hsl-color/
     // see http://en.wikipedia.org/wiki/HSL_color_space
     
     // highly condensed
     
-    float h = Math.max(0,  Math.min(360, hsl.x)) / 60;
-    float s = Math.max(0,  Math.min(100, hsl.y)) / 100;
-    float l = Math.max(0,  Math.min(100, hsl.z)) / 100;
+    double h = Math.max(0,  Math.min(360, hsl.x)) / 60;
+    double s = Math.max(0,  Math.min(100, hsl.y)) / 100;
+    double l = Math.max(0,  Math.min(100, hsl.z)) / 100;
 
-    float p = l - (l < 0.5 ? l : 1 - l) * s;    
-    float q = 2 * (l - p); 
+    double p = l - (l < 0.5 ? l : 1 - l) * s;    
+    double q = 2 * (l - p); 
         
-    float r = toRGB(p, q, h + 2);
-    float g = toRGB(p, q, h);
-    float b = toRGB(p, q, h - 2);
-    return P3.new3(Math.round(r * 255), Math.round(g * 255), Math.round(b * 255));
+    double r = toRGB(p, q, h + 2);
+    double g = toRGB(p, q, h);
+    double b = toRGB(p, q, h - 2);
+    return P3d.new3(Math.round(r * 255), Math.round(g * 255), Math.round(b * 255));
   }
 
-  private static float toRGB(float p, float q, float h) {
+  private static double toRGB(double p, double q, double h) {
     return ((h = (h + (h < 0 ? 6 : h > 6 ? -6 : 0))) < 1 ? p + q * h
         : h < 3 ? p + q : h < 4 ? p + q * (4 - h) : p);
   }

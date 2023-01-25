@@ -391,6 +391,7 @@ public class File
 			this.path = //fs.normalize
 					(p);
 			this.prefixLength = fs.prefixLength(this.path);
+            秘bytes = uri.秘bytes;
 			return;
 		}
 		throw new IllegalArgumentException(err);
