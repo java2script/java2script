@@ -695,9 +695,12 @@ public class AWTKeyStroke {
 	}
 	
 	public String 秘toString() {
-		// SwingJS just the keycode, avoiding VKCollection.js
-		return getModifiersText(modifiers)
-				+ (onKeyRelease ? "released" : "pressed") + " " + keyCode;
+	        if (keyCode == KeyEvent.VK_UNDEFINED) {
+	            return getModifiersText(modifiers) + "typed " + keyChar;
+	        } else {
+	            return getModifiersText(modifiers) +
+	                (onKeyRelease ? "released" : "pressed") + " " + keyCode;
+	        }
 	}
 
 	static private String getModifiersText(int modifiers) {
