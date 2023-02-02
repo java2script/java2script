@@ -1244,124 +1244,118 @@ public class PT {
     return formatString(strFormat, key, null, floatT, Double.NaN, false);
   }
 
+  public static String formatStringD(String strFormat, String key, double doubleT) {
+	    return formatString(strFormat, key, null, Float.NaN, doubleT, false);
+  }
+
   public static String formatStringI(String strFormat, String key, int intT) {
     return formatString(strFormat, key, "" + intT, Float.NaN, Double.NaN, false);
   }
 
-  /**
-   * sprintf emulation uses (almost) c++ standard string formats
-   * 
-   * 's' string 'i' or 'd' integer, 'e' double, 'f' float, 'p' point3f, 'P' exponential point3f, 'q'
-   * quaternion/plane/axisangle with added "i" (equal to the insipid "d" --
-   * digits?)
-   * 
-   * @param strFormat
-   * @param list
-   *        a listing of what sort of data will be found in Object[] values, in
-   *        order: s string, f float, i integer, d double, p point3f, q
-   *        quaternion/point4f, S String[], F float[], I int[], and D double[]
-   * @param values
-   *        Object[] containing above types
-   * @return formatted string
-   */
-  public static String sprintf(String strFormat, String list, Object[] values) {
-    if (values == null)
-      return strFormat;
-    int n = list.length();
-    if (n == values.length)
-      try {
-        for (int o = 0; o < n; o++) {
-          if (values[o] == null)
-            continue;
-          char c;
-          switch (c = list.charAt(o)) {
-          case 's':
-            strFormat = formatString(strFormat, "s", (String) values[o],
-                Float.NaN, Double.NaN, true);
-            break;
-          case 'f':
-            strFormat = formatString(strFormat, "f", null,
-                ((Float) values[o]).floatValue(), Double.NaN, true);
-            break;
-          case 'i':
-            strFormat = formatString(strFormat, "d", "" + values[o], Float.NaN,
-                Double.NaN, true);
-            strFormat = formatString(strFormat, "i", "" + values[o], Float.NaN,
-                Double.NaN, true);
-            break;
-          case 'd':
-            strFormat = formatString(strFormat, "e", null, Float.NaN,
-                ((Double) values[o]).doubleValue(), true);
-            strFormat = formatString(strFormat, "f", null, Float.NaN,
-                ((Double) values[o]).doubleValue(), true);
-            break;
-          case 'p':
-          case 'P':
-            if (values[o] instanceof T3) {
-              T3 pVal = (T3) values[o];
-              strFormat = formatString(strFormat, (c == 'p' ? "p" : "P"), null, pVal.x, Double.NaN,
-                  true);
-              strFormat = formatString(strFormat, (c == 'p' ? "p" : "P"), null, pVal.y, Double.NaN,
-                  true);
-              strFormat = formatString(strFormat,  (c == 'p' ? "p" : "P"), null, pVal.z, Double.NaN,
-                  true);
-            } else {
-              T3d pVal = (T3d) values[o];
-              strFormat = formatString(strFormat,  (c == 'p' ? "p" : "P"), null, Float.NaN, pVal.x,
-                  true);
-              strFormat = formatString(strFormat,  (c == 'p' ? "p" : "P"), null, Float.NaN, pVal.y,
-                  true);
-              strFormat = formatString(strFormat,  (c == 'p' ? "p" : "P"), null, Float.NaN, pVal.z,
-                  true);
-            }
-            break;
-          case 'q':
-            T4 qVal = (T4) values[o];
-            strFormat = formatString(strFormat, "q", null, qVal.x, Double.NaN,
-                true);
-            strFormat = formatString(strFormat, "q", null, qVal.y, Double.NaN,
-                true);
-            strFormat = formatString(strFormat, "q", null, qVal.z, Double.NaN,
-                true);
-            strFormat = formatString(strFormat, "q", null, qVal.w, Double.NaN,
-                true);
-            break;
-          case 'S':
-            String[] sVal = (String[]) values[o];
-            for (int i = 0; i < sVal.length; i++)
-              strFormat = formatString(strFormat, "s", sVal[i], Float.NaN,
-                  Double.NaN, true);
-            break;
-          case 'F':
-            float[] fVal = (float[]) values[o];
-            for (int i = 0; i < fVal.length; i++)
-              strFormat = formatString(strFormat, "f", null, fVal[i],
-                  Double.NaN, true);
-            break;
-          case 'I':
-            int[] iVal = (int[]) values[o];
-            for (int i = 0; i < iVal.length; i++)
-              strFormat = formatString(strFormat, "d", "" + iVal[i], Float.NaN,
-                  Double.NaN, true);
-            for (int i = 0; i < iVal.length; i++)
-              strFormat = formatString(strFormat, "i", "" + iVal[i], Float.NaN,
-                  Double.NaN, true);
-            break;
-          case 'D':
-            double[] dVal = (double[]) values[o];
-            for (int i = 0; i < dVal.length; i++)
-              strFormat = formatString(strFormat, "e", null, Float.NaN, dVal[i],
-                  true);
-          }
+	/**
+	 * sprintf emulation uses (almost) c++ standard string formats
+	 * 
+	 * 's' string 'i' or 'd' integer, 'e' double, 'f' float, 'p' point3f, 'P'
+	 * exponential point3f, 'q' quaternion/plane/axisangle with added "i" (equal to
+	 * the insipid "d" -- digits?)
+	 * 
+	 * @param strFormat
+	 * @param list      a listing of what sort of data will be found in Object[]
+	 *                  values, in order: s string, f float, i integer, d double, p
+	 *                  point3f, q quaternion/point4f, S String[], F float[], I
+	 *                  int[], and D double[]
+	 * @param values    Object[] containing above types
+	 * @return formatted string
+	 */
+	public static String sprintf(String strFormat, String list, Object[] values) {
+		if (values == null)
+			return strFormat;
+		int n = list.length();
+		if (n == values.length)
+			try {
+				for (int o = 0; o < n; o++) {
+					if (values[o] == null)
+						continue;
+					char c;
+					switch (c = list.charAt(o)) {
+					case 's':
+						strFormat = formatString(strFormat, "s", (String) values[o], Float.NaN, Double.NaN, true);
+						break;
+					case 'f':
+						strFormat = formatString(strFormat, "f", null, ((Float) values[o]).floatValue(), Double.NaN,
+								true);
+						break;
+					case 'i':
+						strFormat = formatString(strFormat, "d", "" + values[o], Float.NaN, Double.NaN, true);
+						strFormat = formatString(strFormat, "i", "" + values[o], Float.NaN, Double.NaN, true);
+						break;
+					case 'd':
+						strFormat = formatString(strFormat, "e", null, Float.NaN, ((Double) values[o]).doubleValue(),
+								true);
+						strFormat = formatString(strFormat, "f", null, Float.NaN, ((Double) values[o]).doubleValue(),
+								true);
+						break;
+					case 'p':
+					case 'P':
+						if (values[o] instanceof T3) {
+							T3 pVal = (T3) values[o];
+							strFormat = formatString(strFormat, (c == 'p' ? "p" : "P"), null, pVal.x, Double.NaN, true);
+							strFormat = formatString(strFormat, (c == 'p' ? "p" : "P"), null, pVal.y, Double.NaN, true);
+							strFormat = formatString(strFormat, (c == 'p' ? "p" : "P"), null, pVal.z, Double.NaN, true);
+						} else {
+							T3d pVal = (T3d) values[o];
+							strFormat = formatString(strFormat, (c == 'p' ? "p" : "P"), null, Float.NaN, pVal.x, true);
+							strFormat = formatString(strFormat, (c == 'p' ? "p" : "P"), null, Float.NaN, pVal.y, true);
+							strFormat = formatString(strFormat, (c == 'p' ? "p" : "P"), null, Float.NaN, pVal.z, true);
+						}
+						break;
+					case 'q':
+						if (values[o] instanceof T4) {
+							T4 qVal = (T4) values[o];
+							strFormat = formatString(strFormat, "q", null, qVal.x, Double.NaN, true);
+							strFormat = formatString(strFormat, "q", null, qVal.y, Double.NaN, true);
+							strFormat = formatString(strFormat, "q", null, qVal.z, Double.NaN, true);
+							strFormat = formatString(strFormat, "q", null, qVal.w, Double.NaN, true);
+						} else {
+							T4d qVal = (T4d) values[o];
+							strFormat = formatString(strFormat, "q", null, Float.NaN, qVal.x, true);
+							strFormat = formatString(strFormat, "q", null, Float.NaN, qVal.y, true);
+							strFormat = formatString(strFormat, "q", null, Float.NaN, qVal.z, true);
+							strFormat = formatString(strFormat, "q", null, Float.NaN, qVal.w, true);
+						}
+						break;
 
-        }
-        return rep(strFormat, "%%", "%");
-      } catch (Exception e) {
-        //
-      }
-    System.out.println("TextFormat.sprintf error " + list + " " + strFormat);
-    return rep(strFormat, "%", "?");
-  }
+					case 'S':
+						String[] sVal = (String[]) values[o];
+						for (int i = 0; i < sVal.length; i++)
+							strFormat = formatString(strFormat, "s", sVal[i], Float.NaN, Double.NaN, true);
+						break;
+					case 'F':
+						float[] fVal = (float[]) values[o];
+						for (int i = 0; i < fVal.length; i++)
+							strFormat = formatString(strFormat, "f", null, fVal[i], Double.NaN, true);
+						break;
+					case 'I':
+						int[] iVal = (int[]) values[o];
+						for (int i = 0; i < iVal.length; i++)
+							strFormat = formatString(strFormat, "d", "" + iVal[i], Float.NaN, Double.NaN, true);
+						for (int i = 0; i < iVal.length; i++)
+							strFormat = formatString(strFormat, "i", "" + iVal[i], Float.NaN, Double.NaN, true);
+						break;
+					case 'D':
+						double[] dVal = (double[]) values[o];
+						for (int i = 0; i < dVal.length; i++)
+							strFormat = formatString(strFormat, "e", null, Float.NaN, dVal[i], true);
+					}
+
+				}
+				return rep(strFormat, "%%", "%");
+			} catch (Exception e) {
+				//
+			}
+		System.out.println("TextFormat.sprintf error " + list + " " + strFormat);
+		return rep(strFormat, "%", "?");
+	}
 
   /**
    * 
