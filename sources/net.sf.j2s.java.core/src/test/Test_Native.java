@@ -1,5 +1,10 @@
 package test;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
+import test.js.TestJS;
+
 /**
  * @j2sNative
  * 
@@ -29,9 +34,51 @@ class Test_Native extends Test_ {
 	 */
 	@Override
 	public void test123(int a, int b, int c) {
+	
+		PropertyChangeListener x = new PropertyChangeListener() {
+
+			/**
+			 * @j2sAlias TEST
+			 */
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		};
 		
+		// Note that the following is NOT JavaDoc, because JavaDoc must 
+		// "immediately precede a method declaration
+		TestJS tfails = new TestJS() {
+			
+			@Override
+			/**
+			 * @j2sAlias TESTJSFAILS
+			 */
+			public void test() { 
+				
+				System.out.println("Test_Native_test");
+			}
+			
+		};
+		
+		TestJS tok = new TestJS() {
+			
+			/**
+			 * @j2sAlias TESTJSOK
+			 */
+			@Override
+			public void test() { 
+				
+				System.out.println("Test_Native_test");
+			}
+			
+		};
+
 	}
 
+	
 	
 	void checkP(int i, Object obj, int j) {
 		
