@@ -39,30 +39,20 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import javajs.api.GenericZipInputStream;
-import javajs.api.ZInputStream;
-
-
 /**
  * Note the JSmol/HTML5 must use its own version of java.util.zip.ZipOutputStream.
  * 
  */
-public class ZipTools {//implements GenericZipTools {
+public class ZipTools {
 
-//  public ZipTools() {
-//    // for reflection
-//  }
-//  
   //@Override
-  public static ZInputStream newZipInputStream(InputStream is) {
+  public static ZipInputStream newZipInputStream(InputStream is) {
     return newZIS(is);
   }
 
-  @SuppressWarnings("resource")
-  private static ZInputStream newZIS(InputStream is) {
-    return (is instanceof ZInputStream ? (ZInputStream) is
-        : is instanceof BufferedInputStream ? new GenericZipInputStream(is)
-            : new GenericZipInputStream(new BufferedInputStream(is)));
+  private static ZipInputStream newZIS(InputStream is) {
+    return (is instanceof ZipInputStream ? (ZipInputStream) is
+        :  new ZipInputStream(is));
   }
 
   /**
@@ -91,9 +81,7 @@ public class ZipTools {//implements GenericZipTools {
     if (justDir)
       return getZipDirectoryAsStringAndClose(bis);
     bis = getPngZipStream(bis, true);
-    
-    
-    ZipInputStream zis = new ZipInputStream(bis);
+    ZipInputStream zis = newZIS(bis);
     ZipEntry ze;
     //System.out.println("fname=" + fileName);
     try {
@@ -173,7 +161,7 @@ public class ZipTools {//implements GenericZipTools {
       if (Rdr.isTar(bis))
         return getTarContents(bis, fileName, null);
       bis = getPngZipStream(bis, true);
-      ZipInputStream zis = new ZipInputStream(bis);
+      ZipInputStream zis = newZIS(bis);
       ZipEntry ze;
       while ((ze = zis.getNextEntry()) != null) {
         if (!fileName.equals(ze.getName()))
@@ -499,7 +487,7 @@ public class ZipTools {//implements GenericZipTools {
 	 */
   private static String cacheZipContentsStatic(BufferedInputStream bis,
 			String fileName, Map<String, Object> cache, boolean asByteArray) {
-    ZipInputStream zis = (ZipInputStream) newZIS(bis);
+    ZipInputStream zis = newZIS(bis);
     ZipEntry ze;
     SB listing = new SB();
     long n = 0;
@@ -621,6 +609,10 @@ public class ZipTools {//implements GenericZipTools {
     if (Rdr.isPngZipB(bytes))
       bytes[51] = 32;
     return bytes;
+  }
+
+  public static boolean isZipStream(Object br) {
+    return br instanceof ZipInputStream;
   }
 
 }
