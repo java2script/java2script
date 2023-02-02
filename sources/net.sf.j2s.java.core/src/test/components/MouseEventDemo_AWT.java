@@ -61,16 +61,17 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.DefaultKeyboardFocusManager;
 import java.awt.Dimension;
-import java.awt.Frame;
+import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.KeyboardFocusManager;
-import java.awt.Label;
-import java.awt.Panel;
 import java.awt.Toolkit;
 import java.awt.event.AWTEventListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.logging.ConsoleHandler;
@@ -80,10 +81,18 @@ import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.InputMap;
+import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.border.Border;
 
 
 
@@ -94,7 +103,7 @@ import javax.swing.SwingUtilities;
  * @see https
  *      ://docs.oracle.com/javase/tutorial/uiswing/events/mouselistener.html
  */
-public class MouseEventDemo_AWT extends Panel implements MouseListener {
+public class MouseEventDemo_AWT extends JPanel implements MouseListener {
 
 	
 	private static void logClass(String name) {
@@ -128,7 +137,7 @@ public class MouseEventDemo_AWT extends Panel implements MouseListener {
 	
 	
 	
-	private class BlankArea extends Label {
+	private class BlankArea extends JLabel {
 		Dimension minSize = new Dimension(200, 100);
 
 		public BlankArea(Color color) {
@@ -194,7 +203,7 @@ public class MouseEventDemo_AWT extends Panel implements MouseListener {
 	 */
 	private static void createAndShowGUI() {
 		// Create and set up the window.
-		Frame frame = new Frame("MouseEventDemo (C to clear)");
+		JFrame frame = new JFrame("MouseEventDemo (C to clear)");
 		//frame.setDefaultCloseOperation(Frame.DISPOSE_ON_CLOSE);
 
 		// Create and set up the content pane.
@@ -238,76 +247,76 @@ public class MouseEventDemo_AWT extends Panel implements MouseListener {
 
 		setFocusable(false); // in AWT now Frame
 		
-//		textArea = new JTextArea();
-//		textArea.setEditable(false);
-//		JScrollPane scrollPane = new JScrollPane(textArea);
-//		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-//		scrollPane.setPreferredSize(new Dimension(400, 75));
-//
-//		
-//		blankArea = new BlankArea(Color.YELLOW);
-//		JPanel panel = new JPanel() {
+		textArea = new JTextArea();
+		textArea.setEditable(false);
+		JScrollPane scrollPane = new JScrollPane(textArea);
+		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		scrollPane.setPreferredSize(new Dimension(400, 75));
+
+		
+		blankArea = new BlankArea(Color.YELLOW);
+		JPanel panel = new JPanel() {
+			protected void paintBorder(Graphics g) {
+				System.out.println("MED JPanel painting border " + getBorder());
+				super.paintBorder(g);
+			}
+			public void setBorder(Border b) {
+				super.setBorder(b);
+			}
+		};
+		
+		System.out.println(UIManager.getBorder("Panel.border") + " " + panel.getBorder());
+//		panel.setBorder(new BevelBorder(1));
+		panel.add(blankArea);
+		JButton btn = new JButton("clear");
+		btn.setMnemonic('l');
+		btn.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				textArea.setText("");
+				log("");
+			}
+			
+		});
+		
+		panel.add(btn);
+//		JPanel scrollPane = new JPanel() {
 //			protected void paintBorder(Graphics g) {
-//				System.out.println("MED JPanel painting border " + getBorder());
+//				System.out.println("MED.scrollPanePanel painting border " + getBorder());
 //				super.paintBorder(g);
 //			}
-//			public void setBorder(Border b) {
-//				super.setBorder(b);
-//			}
 //		};
-//		
-//		System.out.println(UIManager.getBorder("Panel.border") + " " + panel.getBorder());
-////		panel.setBorder(new BevelBorder(1));
-//		panel.add(blankArea);
-//		JButton btn = new JButton("clear");
-//		btn.setMnemonic('l');
-//		btn.addActionListener(new ActionListener() {
-//
-//			@Override
-//			public void actionPerformed(ActionEvent e) {
-//				textArea.setText("");
-//				log("");
-//			}
-//			
-//		});
-//		
-//		panel.add(btn);
-////		JPanel scrollPane = new JPanel() {
-////			protected void paintBorder(Graphics g) {
-////				System.out.println("MED.scrollPanePanel painting border " + getBorder());
-////				super.paintBorder(g);
-////			}
-////		};
-////		scrollPane.add(j);
-//		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, panel, scrollPane);
-//		splitPane.setVisible(true);
-//		splitPane.setDividerLocation(0.2d);
-//		splitPane.setResizeWeight(0.5d);
-//		add(splitPane);
-//
-//		addKeyBinding();
-//
-//		addKeyListener(new KeyListener() {
-//
-//			@Override
-//			public void keyTyped(KeyEvent e) {
-//				System.out.println(e);
-//			}
-//
-//			@Override
-//			public void keyPressed(KeyEvent e) {
-//			}
-//
-//			@Override
-//			public void keyReleased(KeyEvent e) {
-//				// TODO Auto-generated method stub
-//				
-//			}
-//			
-//		});
-//		blankArea.addMouseListener(this);
-//		addMouseListener(this);
-//		setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+//		scrollPane.add(j);
+		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, panel, scrollPane);
+		splitPane.setVisible(true);
+		splitPane.setDividerLocation(0.2d);
+		splitPane.setResizeWeight(0.5d);
+		add(splitPane);
+
+		addKeyBinding();
+
+		addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyTyped(KeyEvent e) {
+				System.out.println(e);
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
+		blankArea.addMouseListener(this);
+		addMouseListener(this);
+		setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 	}
 
 	private void addKeyBinding() {
@@ -339,7 +348,7 @@ public class MouseEventDemo_AWT extends Panel implements MouseListener {
 		this.getActionMap().put(ks, new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				textArea.setText("");
+				textArea.setText("" + e);
 				log("");
 			}
 		});
