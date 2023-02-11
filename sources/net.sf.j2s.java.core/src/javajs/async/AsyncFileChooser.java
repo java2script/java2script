@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.swing.JFileChooser;
@@ -16,8 +17,8 @@ import javax.swing.filechooser.FileSystemView;
 /**
  * A simple Asynchronous file chooser for JavaScript and Java.
  * 
- * Requires an OK runnable; JavaScript can return notification of cancel for
- * file reading only, not saving.
+ * Requires an onOK runnable; JavaScript can return notification of onCancel for
+ * file reading on all platforms, maybe not for saving on all; now using window.focus.
  * 
  * @author Bob Hanson
  */
@@ -25,9 +26,12 @@ import javax.swing.filechooser.FileSystemView;
 public class AsyncFileChooser extends JFileChooser implements PropertyChangeListener {
 
 	private int optionSelected;
-	private Runnable ok, cancel; // sorry, no CANCEL in JavaScript for file open
+	private Runnable onOK, onCancel; 
+	@SuppressWarnings("unused")
 	private boolean isAsyncSave = true;
-	private static boolean notified;
+	private Consumer<File> whenDone;
+
+	//	private static boolean notified; 
 
 	public AsyncFileChooser() {
 		super();
@@ -66,7 +70,7 @@ public class AsyncFileChooser extends JFileChooser implements PropertyChangeList
 	@Override
 	public int showSaveDialog(Component frame) {
 		isAsyncSave  = false;
-		ok = cancel = null;
+		onOK = onCancel = null;
 		return super.showSaveDialog(frame);
 	}
 
@@ -74,26 +78,55 @@ public class AsyncFileChooser extends JFileChooser implements PropertyChangeList
 	 * 
 	 * @param frame
 	 * @param btnLabel "open" or "save"
-	 * @param ok
-	 * @param cancel must be null; JavaScript cannot capture a cancel from a file dialog
+	 * @param onOK
+	 * @param onCancel if the dialog is onCanceled
 	 */
-	public void showDialog(Component frame, String btnLabel, Runnable ok, Runnable cancel) {
-		this.ok = ok;
-		if (getDialogType() != JFileChooser.SAVE_DIALOG && cancel != null)
-			notifyCancel();
+	public void showDialog(Component frame, String btnLabel, Runnable onOK, Runnable onCancel) {
+		this.onOK = onOK;
+		this.onCancel = onCancel;
+		process(super.showDialog(frame, btnLabel));
+	}
+
+	/**
+	 * Convenience function for single-file return. 
+	 * Note that in JavaScript "onCancel" is not guaranteed on all platforms, as it
+	 * relies on a JavaScript window.focus event that may not work on some devices.
+	 * 
+	 * 
+	 * @param frame
+	 * @param btnLabel "open" or "save"
+	 * @param whenDone will return with a File object or null
+	 */
+	public void showDialog(Component frame, String btnLabel, Consumer<File> whenDone) {
+		this.whenDone = whenDone;
+		setMultiSelectionEnabled(false);
 		process(super.showDialog(frame, btnLabel));
 	}
 
 	/**
 	 * 
 	 * @param frame
-	 * @param ok
-	 * @param cancel must be null; JavaScript cannot capture a cancel from a file dialog
+	 * @param onOK
+	 * @param onCancel must be null; JavaScript cannot capture a onCancel from a file dialog
 	 */
-	public void showOpenDialog(Component frame, Runnable ok, Runnable cancel) {
-		this.ok = ok;
-		if (cancel != null)
-			notifyCancel();
+	public void showOpenDialog(Component frame, Runnable onOK, Runnable onCancel) {
+		this.onOK = onOK;
+		this.onCancel = onCancel;
+		process(super.showOpenDialog(frame));
+	}
+
+	/**
+	 * Convenience function for single-file return. 
+	 * Note that a null return is not guaranteed on all platforms, as it
+	 * relies on a JavaScript window.focus event that may not work on some devices.
+	 * 
+	 * 
+	 * @param frame
+	 * @param whenDone will return with a File object or null
+	 */
+	public void showOpenDialog(Component frame, Consumer<File> whenDone) {
+		this.whenDone = whenDone;
+		setMultiSelectionEnabled(false);
 		process(super.showOpenDialog(frame));
 	}
 
@@ -103,18 +136,31 @@ public class AsyncFileChooser extends JFileChooser implements PropertyChangeList
 	 * will just throw up a simple modal OK/Cancel message anyway.
 	 * 
 	 * @param frame
-	 * @param ok
-	 * @param cancel must be null
+	 * @param onOK
+	 * @param onCancel must be null
 	 */
-	public void showSaveDialog(Component frame, Runnable ok, Runnable cancel) {
-		this.ok = ok;
-		this.cancel = cancel;
+	public void showSaveDialog(Component frame, Runnable onOK, Runnable onCancel) {
+		this.onOK = onOK;
+		this.onCancel = onCancel;
+		process(super.showSaveDialog(frame));
+	}
+
+	/**
+	 * 
+	 * This just completes the set. It is not necessary for JavaScript, because JavaScript
+	 * will just throw up a simple modal OK/Cancel message anyway.
+	 * 
+	 * @param frame
+	 * @param whenDone
+	 */
+	public void showSaveDialog(Component frame, Consumer<File> whenDone) {
+		this.whenDone = whenDone;
 		process(super.showSaveDialog(frame));
 	}
 
 	
 	/**
-	 * Locate a file for input or output. Note that JavaScript will not return on cancel for OPEN_DIALOG.
+	 * Locate a file for input or output. Note that JavaScript will not return on onCancel for OPEN_DIALOG.
 	 * 
 	 * @param title       The title for the dialog
 	 * @param mode        OPEN_DIALOG or SAVE_DIALOG
@@ -122,7 +168,7 @@ public class AsyncFileChooser extends JFileChooser implements PropertyChangeList
 	 */
 	  public static void getFileAsync(Component parent, String title, int mode, Function<File, Void> processFile) {
 		  // BH no references to this method. So changing its signature for asynchonous use
-		  // And it didn't do as advertised - ran System.exit(0) if canceled
+		  // And it didn't do as advertised - ran System.exit(0) if onCanceled
 	    // create and display a file dialog
 		AsyncFileChooser fc = new AsyncFileChooser();
 		fc.setDialogTitle(title);
@@ -176,12 +222,12 @@ public class AsyncFileChooser extends JFileChooser implements PropertyChangeList
 		
 		}
 
-	private void notifyCancel() {
-		if (!notified) {
-			System.err.println("developer note: JavaScript cannot fire a FileChooser CANCEL action");
-		}
-		notified = true;
-	}
+//	private void notifyCancel() {
+//		if (!notified) {
+//			System.err.println("developer note: JavaScript cannot fire a FileChooser CANCEL action");
+//		}
+//		notified = true;
+//	}
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
@@ -199,12 +245,14 @@ public class AsyncFileChooser extends JFileChooser implements PropertyChangeList
 			return; // initial JavaScript return is NaN
 		optionSelected = ret;
 		File f = getSelectedFile();
-		if (f == null) {
-			if (cancel != null)
-				cancel.run();
+		if (whenDone != null) {
+			whenDone.accept(f);
+		} else if (f == null) {
+			if (onCancel != null)
+				onCancel.run();
 		} else {
-			if (ok != null)
-				ok.run();
+			if (onOK != null)
+				onOK.run();
 		}
 	}
 
