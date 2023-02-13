@@ -10998,6 +10998,13 @@ window.J2S = J2S = (function() {
 		return $.ajax(info);
 	}
 
+	J2S.$getScriptAsync = function(file, whenDone) {
+		if (J2S._nozcore) {
+			file = file.replace(/\.z\.js/,".js");
+		}
+		return $.getScript(file, whenDone);
+	}
+
 	var fixProtocol = function(url) {
 		if (!J2S._isFile && url.indexOf("file://") >= 0)
 			url = "http" + url.substring(4);
@@ -12682,7 +12689,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		var xym = getXY(who, ev, 0);
 		if (!xym)
 			return false;
-		who.applet._processEvent(505, xym, ev);// MouseEvent.MOUSE_EXITED
+		who.applet._processEvent(505, xym, ev, who._frameViewer);// MouseEvent.MOUSE_EXITED
 		return false;
 	}
 	
@@ -16455,11 +16462,12 @@ _Loader.loadPackageClasspath = function (pkg, base, isIndex, fSuccess, mode, pt)
     // pkgRefCount++;
     if (pkg == "java")
       pkg = "core" // JSmol -- moves java/package.js to core/package.js
-    _Loader.loadClass(pkg + ".package", function () {
-          // if (--pkgRefCount == 0)
-            // runtimeLoaded();
-          // fSuccess && fSuccess();
-        }, true, true, 1);
+    	  
+    if (fSuccess) {
+      J2S.$getScriptAsync(_Loader.getClasspathFor(pkg + ".package"), fSuccess);
+      return;
+    }
+    _Loader.loadClass(pkg + ".package", null, true, true, 1);
     return;
   }
   fSuccess && fSuccess();
@@ -16682,6 +16690,7 @@ Clazz._getClassCount = function() {
 }
 
 Clazz._4Name = function(clazzName, applet, state, asClazz, initialize, isQuiet) {
+	// applet and state always null in SwingJS
   var cl;
   if (clazzName.indexOf("[") == 0) {
    cl = getArrayClass(clazzName);
@@ -16809,16 +16818,9 @@ _Loader.MODE_SCRIPT = 4;
 _Loader.MODE_XHR = 2;
 _Loader.MODE_SYNC = 1;
 
-/**
- * String mode: asynchronous modes: async(...).script, async(...).xhr,
- * async(...).xmlhttprequest, script.async(...), xhr.async(...),
- * xmlhttprequest.async(...), script
- * 
- * synchronous modes: sync(...).xhr, sync(...).xmlhttprequest, xhr.sync(...),
- * xmlhttprequest.sync(...), xmlhttprequest, xhr
- * 
- * Integer mode: Script 4; XHR 2; SYNC bit 1;
- */
+// Integer mode: Script 4; XHR 2; SYNC bit 1;
+// async is currently ignored
+
 /* public */
 _Loader.setLoadingMode = function (mode, timeLag) {
   var async = true;
@@ -16836,10 +16838,10 @@ _Loader.setLoadingMode = function (mode, timeLag) {
     else
       async = !(mode & _Loader.MODE_SYNC);
   }
-  isUsingXMLHttpRequest = ajax;
-  isAsynchronousLoading = async;
-  loadingTimeLag = (async && timeLag >= 0 ? timeLag: -1);
-  return async;
+  isUsingXMLHttpRequest = ajax;  // ignored
+  isAsynchronousLoading = async;  // ignored
+  loadingTimeLag = (async && timeLag >= 0 ? timeLag: -1); // ignored
+  return async; // will be false
 };
 
 /*
@@ -17459,7 +17461,7 @@ setps(Sys.err, function(s) {Con.consoleOutput(s, "red")});
 Clazz._Loader.registerPackages("java", [ "io", "lang", "lang.reflect", "util" ]);
 
 
-J2S.setGlobal("java.registered", true);
+// old J2S.setGlobal("java.registered", true);
 
 // /////////////// special definitions of standard Java class methods
 // ///////////

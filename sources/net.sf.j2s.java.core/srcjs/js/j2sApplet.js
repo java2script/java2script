@@ -312,6 +312,13 @@ window.J2S = J2S = (function() {
 		return $.ajax(info);
 	}
 
+	J2S.$getScriptAsync = function(file, whenDone) {
+		if (J2S._nozcore) {
+			file = file.replace(/\.z\.js/,".js");
+		}
+		return $.getScript(file, whenDone);
+	}
+
 	var fixProtocol = function(url) {
 		if (!J2S._isFile && url.indexOf("file://") >= 0)
 			url = "http" + url.substring(4);
@@ -1996,7 +2003,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		var xym = getXY(who, ev, 0);
 		if (!xym)
 			return false;
-		who.applet._processEvent(505, xym, ev);// MouseEvent.MOUSE_EXITED
+		who.applet._processEvent(505, xym, ev, who._frameViewer);// MouseEvent.MOUSE_EXITED
 		return false;
 	}
 	
