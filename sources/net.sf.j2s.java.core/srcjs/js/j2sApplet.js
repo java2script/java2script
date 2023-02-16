@@ -1,5 +1,6 @@
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// BH 2023.02.04 adds support for file load cancel
 // BH 2023.01.10 j2sargs typo
 // BH 2022.08.27 fix frame resizing for browsers reporting noninteger pageX, pageY
 // BH 2022.06.23 implements J2S._lastAppletID
@@ -1192,6 +1193,7 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 				if (--nfiles == 0) {
 					J2S.$remove(id);
 					J2S.$remove("_filereader_modalscreen");
+					reader = null;
 					fDone(data, file.name);
 				}
 			};
@@ -1202,13 +1204,25 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 		// These browers require that the user see and click the link.
 		if (J2S._canClickFileReader) {
 			var x = document.createElement("input");
+			x.value = x.text = "xxxx";
 			x.type = "file";
 			if (isMultiple)
 				x.setAttribute("multiple", "true");
-			x.onchange = function(ev) {
+			x.addEventListener("change", function(ev) {
+				J2S._fileReaderCancelListener = null;
+				window.removeEventListener("focus", J2S._fileReaderCancelListener);
 				(isMultiple ? readFiles(this.files) : readFile(this.files[0]));
-			};
+			}, false);			
 			x.click();
+			window.addEventListener("focus", J2S._fileReaderCancelListener = function(a){
+				setTimeout(function() {
+					window.removeEventListener("focus", J2S._fileReaderCancelListener);
+					if (J2S._fileReaderCancelListener != null) {
+						J2S._fileReaderCancelListener = null;
+						fDone(null, null);
+					}
+				},500)
+			});
 		} else {
 			var px = screen.width / 2 - 180; 
 			var py = screen.height / 2 - 40; 
@@ -1235,6 +1249,7 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 			J2S.$appEvent("#" + id + "_cancel", null, "click", function(evt) {
 				J2S.$remove(id);
 				J2S.$remove("_filereader_modalscreen");
+				fDone(null, null);
 			});
 			J2S.$css(J2S.$("#" + id), {
 				display : "block"
@@ -1981,7 +1996,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		var xym = getXY(who, ev, 0);
 		if (!xym)
 			return false;
-		who.applet._processEvent(505, xym, ev);// MouseEvent.MOUSE_EXITED
+		who.applet._processEvent(505, xym, ev, who._frameViewer);// MouseEvent.MOUSE_EXITED
 		return false;
 	}
 	

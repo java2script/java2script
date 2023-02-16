@@ -221,6 +221,58 @@ private	 void openFileDialog(java.awt.event.ActionEvent event) {
 		});
 	}
 
+	private static void checkData(Object data) {
+		double[] datae = data instanceof String[] ? Stream.of((String[]) data).mapToDouble(Double::parseDouble).toArray() :
+            IntStream.of((int[]) data).mapToDouble(i ->i).toArray();
+		System.out.println(Arrays.toString(datae));
+		
+	}
+	
+    public DoubleStream values() {
+        return IntStream.range(0, 4)
+                .mapToDouble(this::get);
+    }
+
+	
+    public double get(int row) {
+        return row;
+    }
+
+
+	private static void testToIntFunction(TestFunc tf, Function<TestFunc, Integer> f) {
+		int val = f.apply(tf);
+		System.out.println("testToIntFunction =" + val);
+	}
+
+	private static void testToIntFunction(Object tf) {
+		System.out.println("testToIntFunction = " + tf);
+	}
+
+	private static void testFunction(String function, int i) {
+
+		// Function
+
+		int[][][] a;
+
+		Function<Integer, int[][][]> ifi = new Function<Integer, int[][][]>() {
+
+			@Override
+			public int[][][] apply(Integer t) {
+				System.out.println(function);
+				return new int[t.intValue()][][];
+			}
+		};
+
+		a = ifi.apply(i);
+		System.out.println("a length is " + a.length);
+
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		// checking here that this is not qualified
+	}
+	
 	public static void main(String[] args) {
 		
 		Test_Java8 t8b = new Test_Java8();
@@ -415,55 +467,5 @@ private	 void openFileDialog(java.awt.event.ActionEvent event) {
 		System.out.println("Test_Java8 OK");
 	}
 
-	private static void checkData(Object data) {
-		double[] datae = data instanceof String[] ? Stream.of((String[]) data).mapToDouble(Double::parseDouble).toArray() :
-            IntStream.of((int[]) data).mapToDouble(i ->i).toArray();
-		System.out.println(Arrays.toString(datae));
-		
-	}
-	
-    public DoubleStream values() {
-        return IntStream.range(0, 4)
-                .mapToDouble(this::get);
-    }
 
-	
-    public double get(int row) {
-        return row;
-    }
-
-
-	private static void testToIntFunction(TestFunc tf, Function<TestFunc, Integer> f) {
-		int val = f.apply(tf);
-		System.out.println("testToIntFunction =" + val);
-	}
-
-	private static void testToIntFunction(Object tf) {
-		System.out.println("testToIntFunction = " + tf);
-	}
-
-	private static void testFunction(String function, int i) {
-
-		// Function
-
-		int[][][] a;
-
-		Function<Integer, int[][][]> ifi = new Function<Integer, int[][][]>() {
-
-			@Override
-			public int[][][] apply(Integer t) {
-				System.out.println(function);
-				return new int[t.intValue()][][];
-			}
-		};
-
-		a = ifi.apply(i);
-		System.out.println("a length is " + a.length);
-
-	}
-
-	@Override
-	public void propertyChange(PropertyChangeEvent evt) {
-		// checking here that this is not qualified
-	}
 }

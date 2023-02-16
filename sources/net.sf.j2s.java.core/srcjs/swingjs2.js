@@ -10686,6 +10686,7 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// BH 2023.02.04 adds support for file load cancel
 // BH 2023.01.10 j2sargs typo
 // BH 2022.08.27 fix frame resizing for browsers reporting noninteger pageX, pageY
 // BH 2022.06.23 implements J2S._lastAppletID
@@ -11878,6 +11879,7 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 				if (--nfiles == 0) {
 					J2S.$remove(id);
 					J2S.$remove("_filereader_modalscreen");
+					reader = null;
 					fDone(data, file.name);
 				}
 			};
@@ -11888,13 +11890,25 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 		// These browers require that the user see and click the link.
 		if (J2S._canClickFileReader) {
 			var x = document.createElement("input");
+			x.value = x.text = "xxxx";
 			x.type = "file";
 			if (isMultiple)
 				x.setAttribute("multiple", "true");
-			x.onchange = function(ev) {
+			x.addEventListener("change", function(ev) {
+				J2S._fileReaderCancelListener = null;
+				window.removeEventListener("focus", J2S._fileReaderCancelListener);
 				(isMultiple ? readFiles(this.files) : readFile(this.files[0]));
-			};
+			}, false);			
 			x.click();
+			window.addEventListener("focus", J2S._fileReaderCancelListener = function(a){
+				setTimeout(function() {
+					window.removeEventListener("focus", J2S._fileReaderCancelListener);
+					if (J2S._fileReaderCancelListener != null) {
+						J2S._fileReaderCancelListener = null;
+						fDone(null, null);
+					}
+				},500)
+			});
 		} else {
 			var px = screen.width / 2 - 180; 
 			var py = screen.height / 2 - 40; 
@@ -11921,6 +11935,7 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 			J2S.$appEvent("#" + id + "_cancel", null, "click", function(evt) {
 				J2S.$remove(id);
 				J2S.$remove("_filereader_modalscreen");
+				fDone(null, null);
 			});
 			J2S.$css(J2S.$("#" + id), {
 				display : "block"
@@ -12667,7 +12682,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		var xym = getXY(who, ev, 0);
 		if (!xym)
 			return false;
-		who.applet._processEvent(505, xym, ev);// MouseEvent.MOUSE_EXITED
+		who.applet._processEvent(505, xym, ev, who._frameViewer);// MouseEvent.MOUSE_EXITED
 		return false;
 	}
 	
@@ -16437,15 +16452,12 @@ _Loader.loadPackageClasspath = function (pkg, base, isIndex, fSuccess, mode, pt)
   if (base) // critical for multiple applets
     map["@" + pkg] = base;
   if (isIndex && !isPkgDeclared && !J2S.getGlobal(pkg + ".registered")) {
-    // pkgRefCount++;
+	  // the package idea has been deprecated
+	  // the only package is core/package.js
     if (pkg == "java")
       pkg = "core" // JSmol -- moves java/package.js to core/package.js
-    _Loader.loadClass(pkg + ".package", function () {
-          // if (--pkgRefCount == 0)
-            // runtimeLoaded();
-          // fSuccess && fSuccess();
-        }, true, true, 1);
-    return;
+    // not really asynchronous
+    _Loader.loadClass(pkg + ".package", null, true, true, 1);
   }
   fSuccess && fSuccess();
 };
@@ -16667,6 +16679,7 @@ Clazz._getClassCount = function() {
 }
 
 Clazz._4Name = function(clazzName, applet, state, asClazz, initialize, isQuiet) {
+	// applet and state always null in SwingJS
   var cl;
   if (clazzName.indexOf("[") == 0) {
    cl = getArrayClass(clazzName);
@@ -16794,16 +16807,9 @@ _Loader.MODE_SCRIPT = 4;
 _Loader.MODE_XHR = 2;
 _Loader.MODE_SYNC = 1;
 
-/**
- * String mode: asynchronous modes: async(...).script, async(...).xhr,
- * async(...).xmlhttprequest, script.async(...), xhr.async(...),
- * xmlhttprequest.async(...), script
- * 
- * synchronous modes: sync(...).xhr, sync(...).xmlhttprequest, xhr.sync(...),
- * xmlhttprequest.sync(...), xmlhttprequest, xhr
- * 
- * Integer mode: Script 4; XHR 2; SYNC bit 1;
- */
+// Integer mode: Script 4; XHR 2; SYNC bit 1;
+// async is currently ignored
+
 /* public */
 _Loader.setLoadingMode = function (mode, timeLag) {
   var async = true;
@@ -16821,10 +16827,10 @@ _Loader.setLoadingMode = function (mode, timeLag) {
     else
       async = !(mode & _Loader.MODE_SYNC);
   }
-  isUsingXMLHttpRequest = ajax;
-  isAsynchronousLoading = async;
-  loadingTimeLag = (async && timeLag >= 0 ? timeLag: -1);
-  return async;
+  isUsingXMLHttpRequest = ajax;  // ignored
+  isAsynchronousLoading = async;  // ignored
+  loadingTimeLag = (async && timeLag >= 0 ? timeLag: -1); // ignored
+  return async; // will be false
 };
 
 /*
@@ -17444,7 +17450,7 @@ setps(Sys.err, function(s) {Con.consoleOutput(s, "red")});
 Clazz._Loader.registerPackages("java", [ "io", "lang", "lang.reflect", "util" ]);
 
 
-J2S.setGlobal("java.registered", true);
+// old J2S.setGlobal("java.registered", true);
 
 // /////////////// special definitions of standard Java class methods
 // ///////////

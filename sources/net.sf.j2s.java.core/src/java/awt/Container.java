@@ -2447,7 +2447,8 @@ public class Container extends JSComponent {
 
         private DropTargetEventTargetFilter() {}
 
-        public boolean accept(final Component comp) {
+        @Override
+		public boolean accept(final Component comp) {
             DropTarget dt = comp.getDropTarget();
             return dt != null && dt.isActive();
         }
