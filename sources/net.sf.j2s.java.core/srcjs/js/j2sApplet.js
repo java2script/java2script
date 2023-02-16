@@ -313,11 +313,22 @@ window.J2S = J2S = (function() {
 	}
 
 	J2S.$getScriptAsync = function(file, whenDone) {
+		// bad news: if the file does not exist, this fails to call any error. apparently fixed in JQuery 2.0
+		
 		if (J2S._nozcore) {
 			file = file.replace(/\.z\.js/,".js");
 		}
-		return $.getScript(file, whenDone);
+		return J2S.$ajax({
+			url: file,
+			type: "GET",
+			dataType: "script",
+			cache: "NO",
+			statusCode: { 404: function() {alert("!")}},
+			success: whenDone,
+			error: whenDone
+		});
 	}
+
 
 	var fixProtocol = function(url) {
 		if (!J2S._isFile && url.indexOf("file://") >= 0)
