@@ -10998,13 +10998,6 @@ window.J2S = J2S = (function() {
 		return $.ajax(info);
 	}
 
-	J2S.$getScriptAsync = function(file, whenDone) {
-		if (J2S._nozcore) {
-			file = file.replace(/\.z\.js/,".js");
-		}
-		return $.getScript(file, whenDone);
-	}
-
 	var fixProtocol = function(url) {
 		if (!J2S._isFile && url.indexOf("file://") >= 0)
 			url = "http" + url.substring(4);
@@ -16459,16 +16452,12 @@ _Loader.loadPackageClasspath = function (pkg, base, isIndex, fSuccess, mode, pt)
   if (base) // critical for multiple applets
     map["@" + pkg] = base;
   if (isIndex && !isPkgDeclared && !J2S.getGlobal(pkg + ".registered")) {
-    // pkgRefCount++;
+	  // the package idea has been deprecated
+	  // the only package is core/package.js
     if (pkg == "java")
       pkg = "core" // JSmol -- moves java/package.js to core/package.js
-    	  
-    if (fSuccess) {
-      J2S.$getScriptAsync(_Loader.getClasspathFor(pkg + ".package"), fSuccess);
-      return;
-    }
+    // not really asynchronous
     _Loader.loadClass(pkg + ".package", null, true, true, 1);
-    return;
   }
   fSuccess && fSuccess();
 };

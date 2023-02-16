@@ -2398,16 +2398,12 @@ _Loader.loadPackageClasspath = function (pkg, base, isIndex, fSuccess, mode, pt)
   if (base) // critical for multiple applets
     map["@" + pkg] = base;
   if (isIndex && !isPkgDeclared && !J2S.getGlobal(pkg + ".registered")) {
-    // pkgRefCount++;
+	  // the package idea has been deprecated
+	  // the only package is core/package.js
     if (pkg == "java")
       pkg = "core" // JSmol -- moves java/package.js to core/package.js
-    	  
-    if (fSuccess) {
-      J2S.$getScriptAsync(_Loader.getClasspathFor(pkg + ".package"), fSuccess);
-      return;
-    }
+    // not really asynchronous
     _Loader.loadClass(pkg + ".package", null, true, true, 1);
-    return;
   }
   fSuccess && fSuccess();
 };
