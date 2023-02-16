@@ -428,10 +428,13 @@ class Java2ScriptCompiler {
 	}
 
 	boolean excludeFile(IFile javaSource) {
-		String filePath = javaSource.getFullPath().toString();
+		return excludeFile(javaSource.getFullPath().toString());
+	}
+
+	private boolean excludeFile(String filePath) {
 		if (lstExcludedPaths != null) {
 			for (int i = lstExcludedPaths.size(); --i >= 0;)
-				if (filePath.startsWith(lstExcludedPaths.get(i))) {
+				if (filePath.indexOf(lstExcludedPaths.get(i)) >= 0) {
 					return true;
 				}
 		}
@@ -745,6 +748,8 @@ class Java2ScriptCompiler {
 
 	private void copyNonclassFiles(File dir, File target) {
 		if (dir.equals(target))
+			return;
+		if (excludeFile(dir.getAbsolutePath().replace('\\','/') + "/"))
 			return;
 		File[] files = dir.listFiles(filter);
 		File f = null;

@@ -134,6 +134,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
 // TODO: superclass inheritance for JAXB XmlAccessorType
+// TODO: Transpiler bug allows static String name, but JavaScript function().name is read-only and will be "clazz"
 
 //BH 2022.01.17 -- 3.3.1-v4 fixes default interface methods referencing their own static fields
 //BH 2021.01.14 -- 3.3.1-v3 fixes missing finals for nested () -> {...}

@@ -187,7 +187,7 @@ public interface HTML5Video extends DOMNode {
 	 * @param key
 	 * @return value or value boxed as Double or Boolean
 	 */
-	@SuppressWarnings("unused")
+	@SuppressWarnings({ "unused", "null" })
 	public static Object getProperty(HTML5Video jsvideo, String key) {
 		Object val = (/** @j2sNative 1? jsvideo[key] : */
 		null);
@@ -253,7 +253,7 @@ public interface HTML5Video extends DOMNode {
 	 * Remove action listener
 	 * 
 	 * @param jsvideo   the HTML5 video element
-	 * @param listeners an array of event/listener epairs created by
+	 * @param listeners an array of event/listener pairs created by
 	 *                  addActionListener
 	 */
 	public static void removeActionListener(HTML5Video jsvideo, Object[] listeners) {
@@ -318,9 +318,17 @@ public interface HTML5Video extends DOMNode {
 		return createDialog(parent, source, maxWidth, true, whenReady);
 	}
 	
+	public static class HTML5VideoDialog extends JDialog {
+
+		public HTML5VideoDialog(Frame parent) {
+			super(parent);
+		}
+		public JPanel controls;
+		
+	}
 	public static JDialog createDialog(Frame parent, Object source, int maxWidth, boolean addControls,
 			Function<HTML5Video, Void> whenReady) {
-		JDialog dialog = new JDialog(parent);
+		HTML5VideoDialog dialog = new HTML5VideoDialog(parent);
 		Container p = dialog.getContentPane();
 		p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
 		JLabel label = (source instanceof JLabel ? (JLabel) source : createLabel(source));
@@ -328,13 +336,21 @@ public interface HTML5Video extends DOMNode {
 		// not in Java! dialog.putClientProperty("jsvideo", label);
 		p.add(label);
 		label.setVisible(false);
-		if (addControls)
-			p.add(getControls(label));
+		JPanel q = dialog.controls = getControls(label);
+			p.add(q);
+			q.setVisible(addControls);
+		label.putClientProperty("controls", q);
 		dialog.setModal(false);
 		dialog.pack();
 		dialog.setVisible(true);
 		dialog.setVisible(false);
 		HTML5Video jsvideo = (HTML5Video) label.getClientProperty("jsvideo");
+		/**
+		 * @j2sNative
+		 * 
+		 * jsvideo.dialog = dialog;
+		 * 
+		 */
 		Object[] j2sListener = HTML5Video.addActionListener(jsvideo, new ActionListener() {
 
 			@Override
@@ -437,6 +453,30 @@ public interface HTML5Video extends DOMNode {
 
 	public static int getFrameCount(HTML5Video jsvideo) {
 		return (int) (getDuration(jsvideo) / 0.033334);
+	}
+
+	public static void startVideo(HTML5Video jsvideo) {
+		@SuppressWarnings("unused")
+		HTML5VideoDialog d = /** @j2sNative jsvideo.dialog || */null;
+		try {
+			/**
+			 * @j2sNative
+			 * 
+			 * 			var promise = jsvideo.play();
+			 *            if (promise !== undefined) { promise["catch"](function(){
+			 *            d.controls.setVisible$Z(true);d.pack$();
+			 *            if (!d.t)
+			 *            d.t = setTimeout(function(){
+			 *            alert("Please press OK and then the play button.")}
+			 *            ,1000); }); }
+			 * 
+			 */
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+
+		// TODO Auto-generated method stub
+		
 	}
 
 // HTMLMediaElement properties
