@@ -40,8 +40,15 @@ public class Test_J8_Stream extends Test_J8_Stream0 {
 		String st = "test\ning\r\nnow";
 		String[] lines = st.split("\n");
 		int[] ptr = new int[1];
+		long n = 0;
 		if (/** @j2sNative true || */
 		false) {
+			String s = "\u0000test";
+			assert (s.trim().length() == 4);
+			n = (/** @j2sNative s.strip$().length || */0);
+			System.out.println("strip gives length " + n);
+			assert (n == 5);
+			
 			// this is Java 11, so JavaScript-only test here
 			Stream<String> o = /** @j2sNative st.lines$() || */
 					null;
@@ -89,7 +96,6 @@ public class Test_J8_Stream extends Test_J8_Stream0 {
 		Consumer<Integer> cc = param::set;
 		Supplier<Integer> sup = param::get;
 
-		long n;
 		StringBuffer sb = new StringBuffer("test");
 		System.out.println("below is 'test'? " + sb);
 		sb.chars().mapToObj(i -> (char) i).forEach(System.out::print);
