@@ -18,6 +18,7 @@
 package java.io;
 
 import java.nio.CharBuffer;
+import java.util.Objects;
 
 /**
  * Reader is an Abstract class for reading Character Streams. Subclasses of
@@ -27,6 +28,9 @@ import java.nio.CharBuffer;
  * @see Writer
  */
 public abstract class Reader implements Readable, Closeable {
+
+	private static final int TRANSFER_BUFFER_SIZE = 8192;
+
 	/**
 	 * The object used to synchronize access to the reader.
 	 */
@@ -64,6 +68,43 @@ public abstract class Reader implements Readable, Closeable {
 	 *             If an error occurs attempting to close this Reader.
 	 */
 	public abstract void close() throws IOException;
+
+    /**
+     * Reads all characters from this reader and writes the characters to the
+     * given writer in the order that they are read. On return, this reader
+     * will be at end of the stream. This method does not close either reader
+     * or writer.
+     * <p>
+     * This method may block indefinitely reading from the reader, or
+     * writing to the writer. The behavior for the case where the reader
+     * and/or writer is <i>asynchronously closed</i>, or the thread
+     * interrupted during the transfer, is highly reader and writer
+     * specific, and therefore not specified.
+     * <p>
+     * If an I/O error occurs reading from the reader or writing to the
+     * writer, then it may do so after some characters have been read or
+     * written. Consequently the reader may not be at end of the stream and
+     * one, or both, streams may be in an inconsistent state. It is strongly
+     * recommended that both streams be promptly closed if an I/O error occurs.
+     *
+     * @param  out the writer, non-null
+     * @return the number of characters transferred
+     * @throws IOException if an I/O error occurs when reading or writing
+     * @throws NullPointerException if {@code out} is {@code null}
+     *
+     * @since 10
+     */
+    public long transferTo(Writer out) throws IOException {
+        Objects.requireNonNull(out, "out");
+        long transferred = 0;
+        char[] buffer = new char[TRANSFER_BUFFER_SIZE];
+        int nRead;
+        while ((nRead = read(buffer, 0, TRANSFER_BUFFER_SIZE)) >= 0) {
+            out.write(buffer, 0, nRead);
+            transferred += nRead;
+        }
+        return transferred;
+    }
 
 	/**
 	 * Set a Mark position in this Reader. The parameter <code>readLimit</code>
