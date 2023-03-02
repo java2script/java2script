@@ -14061,6 +14061,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2023.03.01 upgrade for Java11 String, including String.isBlank() and CharSequence.lines(String) (in Java11 this is StringRoman1.lines(byte[])
+// BH 2023.02.12 upgrade for (asynchronous?) packaging
 // BH 2023.01.22 fix for Double.doubleToRawLongBits missing and Float.floatToIntBits failing on NaN
 // BH 2023.01.15 fix for int[2][3][] not initializing properly
 // BH 2022.12.03 fix for Double.isInfinite should not be true for NaN
@@ -16075,11 +16077,105 @@ Clazz.newInterface(java.lang,"Appendable");
 Clazz.newInterface(java.lang,"Comparable");
 Clazz.newInterface(java.lang,"Runnable");
 
+	
 
-
-;(function(){var P$=java.lang,I$=[[0,'java.util.stream.StreamSupport','java.util.Spliterators','java.lang.CharSequence$lambda1','java.lang.CharSequence$lambda2']],$I$=function(i){return I$[i]||(I$[i]=Clazz.load(I$[0][i]))};
+;(function(){var P$=java.lang,p$1={},I$=[[0,'java.util.stream.StreamSupport','java.util.Spliterators','java.lang.CharSequence$lambda1','java.lang.CharSequence$lambda2',['java.lang.CharSequence','.LinesSpliterator']]]
+,I$0=I$[0],$I$=function(i,n,m){return m?$I$(i)[n].apply(null,m):((i=(I$[i]||(I$[i]=Clazz.load(I$0[i])))),!n&&i.$load$&&Clazz.load(i,2),i)};
 
 var C$=Clazz.newInterface(P$, "CharSequence");
+
+C$.$classes$=[['LinesSpliterator',25]];
+
+Clazz.newMeth(C$, 'lines$S',  function (s) {
+	return $I$(1,"stream$java_util_Spliterator$Z",[Clazz.new_([s.getBytes$()],$I$(5,1).c$$BA), false]);
+	}, 1);
+
+;(function(){/*c*/var C$=Clazz.newClass(P$.CharSequence, "LinesSpliterator", function(){
+	Clazz.newInstance(this, arguments[0],false,C$);
+	}, null, 'java.util.Spliterator');
+
+	C$.$clinit$=2;
+
+	Clazz.newMeth(C$, '$init$', function () {
+	},1);
+
+	C$.$fields$=[['I',['index','fence'],'O',['value','byte[]']]]
+
+	Clazz.newMeth(C$, 'c$$BA',  function (value) {
+	C$.c$$BA$I$I.apply(this, [value, 0, value.length]);
+	}, 1);
+
+	Clazz.newMeth(C$, 'c$$BA$I$I',  function (value, start, length) {
+	;C$.$init$.apply(this);
+	this.value=value;
+	this.index=start;
+	this.fence=start + length;
+	}, 1);
+
+	Clazz.newMeth(C$, 'indexOfLineSeparator$I',  function (start) {
+	for (var current=start; current < this.fence; current++) {
+	var ch=this.value[current];
+	if (ch == 10  || ch == 13  ) {
+	return current;
+	}}
+	return this.fence;
+	}, p$1);
+
+	Clazz.newMeth(C$, 'skipLineSeparator$I',  function (start) {
+	if (start < this.fence) {
+	if (this.value[start] == 13 ) {
+	var next=start + 1;
+	if (next < this.fence && this.value[next] == 10  ) {
+	return next + 1;
+	}}return start + 1;
+	}return this.fence;
+	}, p$1);
+
+	Clazz.newMeth(C$, 'next',  function () {
+	var start=this.index;
+	var end=p$1.indexOfLineSeparator$I.apply(this, [start]);
+	this.index=p$1.skipLineSeparator$I.apply(this, [end]);
+	return  String.instantialize(this.value, start, end - start);
+	}, p$1);
+
+	Clazz.newMeth(C$, 'tryAdvance$java_util_function_Consumer',  function (action) {
+	if (action == null ) {
+	throw Clazz.new_(Clazz.load('NullPointerException').c$$S,["tryAdvance action missing"]);
+	}if (this.index != this.fence) {
+	action.accept$O(p$1.next.apply(this, []));
+	return true;
+	}return false;
+	});
+
+	Clazz.newMeth(C$, 'forEachRemaining$java_util_function_Consumer',  function (action) {
+	if (action == null ) {
+	throw Clazz.new_(Clazz.load('NullPointerException').c$$S,["forEachRemaining action missing"]);
+	}while (this.index != this.fence){
+	action.accept$O(p$1.next.apply(this, []));
+	}
+	});
+
+	Clazz.newMeth(C$, 'trySplit$',  function () {
+	var half=(this.fence + this.index) >>> 1;
+	var mid=p$1.skipLineSeparator$I.apply(this, [p$1.indexOfLineSeparator$I.apply(this, [half])]);
+	if (mid < this.fence) {
+	var start=this.index;
+	this.index=mid;
+	return Clazz.new_(C$.c$$BA$I$I,[this.value, start, mid - start]);
+	}return null;
+	});
+
+	Clazz.newMeth(C$, 'estimateSize$',  function () {
+	return this.fence - this.index + 1;
+	});
+
+	Clazz.newMeth(C$, 'characteristics$',  function () {
+	return 1296;
+	});
+
+	Clazz.newMeth(C$);
+	})()
+
 C$.$defaults$ = function(C$){
 
 Clazz.newMeth(C$, 'chars$', function () {
@@ -16143,6 +16239,7 @@ block.accept$I(this.b$['CharSequence'].charAt$I(this.cur).$c());
 
 Clazz.newMeth(C$);
 })()
+;
 ;
 (function(){var C$=Clazz.newClass(P$, "CharSequence$1CodePointIterator", function(){
 Clazz.newInstance(this, arguments[0],true,C$);
@@ -19879,6 +19976,48 @@ CharSequence.$defaults$(String);
  
 ;(function(sp) {
 
+	// Java-11
+
+sp.isBlank$ = function() {
+	return this.indexOfNonWhitespace$() == this.length$();	
+}
+
+sp.lines$ = function() {
+	return CharSequence.lines$S(this);
+}
+
+sp.indexOfNonWhitespace$ = function() {
+	return this.length - this.stripLeading$().length;
+}
+
+//sp.chars$ is implemented as CharSequence.prototype.chars$
+//sp.codePoints$ is implemented as = CharSequence.prototype.codePoints$
+
+sp.repeat$I = function(count) {
+    if (count < 0) {
+        throw new IllegalArgumentException("count is negative: " + count);
+    }
+    if (count == 1) {
+        return this;
+    }
+    var len = this.length;
+    if (len == 0 || count == 0) {
+        return "";
+    }
+    var s = this;
+    for (var i = 1; i < count; i++) {
+    	s += this;
+    }
+    return s;
+}
+
+sp.strip$ = function() { return this.trim(); }
+
+sp.stripLeading$ = function() { return this.trimStart ? this.trimStart() : this.trimLeft(); }
+
+sp.stripTrailing$ = function() { return this.trimEnd ? this.trimEnd() : this.trimRight(); }
+
+	//
 sp.compareToIgnoreCase$S = function(str) { return String.CASE_INSENSITIVE_ORDER.compare$S$S(this, str);}
 
 sp.replace$ = function(c1,c2){
@@ -20231,9 +20370,6 @@ sp.trim$ = function() {
   return s.substring(i, ++j);
 };
 
-
-// sp.chars$ = CharSequence.prototype.chars$;
-// sp.codePoints$ = CharSequence.prototype.codePoints$;
 
 // toString is always unqualified, and it is unnecessary for String
 

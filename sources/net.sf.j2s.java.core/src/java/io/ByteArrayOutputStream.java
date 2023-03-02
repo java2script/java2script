@@ -25,6 +25,7 @@
 
 package java.io;
 
+import java.nio.charset.Charset;
 import java.util.Arrays;
 
 /**
@@ -251,6 +252,10 @@ public class ByteArrayOutputStream extends OutputStream {
         throws UnsupportedEncodingException
     {
         return new String(buf, 0, count, charsetName);
+    }
+
+    public synchronized String toString(Charset charset) {
+        return new String(buf, 0, count, charset);
     }
 
     /**
