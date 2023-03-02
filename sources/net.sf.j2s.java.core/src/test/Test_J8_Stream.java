@@ -6,10 +6,15 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Spliterator;
+import java.util.Spliterator.OfInt;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 class J8_param<T> {
     T elem;
@@ -29,9 +34,32 @@ class J8_param<T> {
 
 public class Test_J8_Stream extends Test_J8_Stream0 {
 	
+	@SuppressWarnings("unused")
 	public static void main(String[] args) {
-				
-		
+
+		String st = "test\ning\r\nnow";
+		String[] lines = st.split("\n");
+		int[] ptr = new int[1];
+		if (/** @j2sNative true || */
+		false) {
+			// this is Java 11, so JavaScript-only test here
+			Stream<String> o = /** @j2sNative st.lines$() || */
+					null;
+			if (o != null) {
+				Spliterator<String> sp = o.spliterator();
+				sp.forEachRemaining(new Consumer<String>() {
+
+					@Override
+					public void accept(String value) {
+						// in JavaScript, assert does not work in anonymous classes
+						System.out.println(ptr[0] + " " + value + " " + lines[ptr[0]].trim());
+						doassert(value.equals(lines[ptr[0]++].trim()));
+					}
+
+				});
+			}
+		}
+
 		Test_J8_Stream j8 = new Test_J8_Stream("s3");
 		List<Test_J8_Stream> myList1 = new ArrayList<>();
 		myList1.add(new Test_J8_Stream("s1"));
@@ -64,9 +92,7 @@ public class Test_J8_Stream extends Test_J8_Stream0 {
 		long n;
 		StringBuffer sb = new StringBuffer("test");
 		System.out.println("below is 'test'? " + sb);
-		sb.chars()
-			.mapToObj(i -> (char) i)
-			.forEach(System.out::print);
+		sb.chars().mapToObj(i -> (char) i).forEach(System.out::print);
 		System.out.println("\nabove is 'test'? " + sb);
 		n = sb.chars().count();
 		assert (n == 4);
@@ -97,7 +123,7 @@ public class Test_J8_Stream extends Test_J8_Stream0 {
 			ntotal += (System.currentTimeMillis() - millis);
 		}
 
-		System.out.println("average time " + ntotal/ntimes);
+		System.out.println("average time " + ntotal / ntimes);
 		// http://www.javainuse.com/java/java8_method_References
 
 		List<String> myList = Arrays.asList("b1", "a2", "a1", "c2", "c1");
@@ -127,7 +153,21 @@ public class Test_J8_Stream extends Test_J8_Stream0 {
 
 		assert (n == 7);
 
+		OfInt x = "testing\ntest".chars().spliterator();
+		x.tryAdvance(new IntConsumer() {
+
+			@Override
+			public void accept(int value) {
+				System.out.println(value);
+			}
+
+		});
+
 		System.out.println("Test_J8_Stream OK");
+	}
+
+	protected static void doassert(boolean ok) {
+		assert(ok);
 	}
 
 	private PrintStream out = System.out;

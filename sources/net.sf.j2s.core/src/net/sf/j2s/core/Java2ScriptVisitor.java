@@ -1577,10 +1577,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		boolean isPrivateAndNotStatic = isPrivate && !isStatic;
 		String privateVar = (isPrivateAndNotStatic ? getPrivateVar(declaringClass, false) : null);
 		boolean doLogMethodCalled = (!isPrivate && global_htMethodsCalled != null);
-		boolean needBname = (!isStatic && lambdaArity < 0 && (expression == null
-				? !areEqual(declaringClass, class_typeBinding)
+		boolean needBname = (
+				
+				!isStatic && lambdaArity < 0 && (expression == null
+				    ? !areEqual(declaringClass, class_typeBinding)
 						&& !class_typeBinding.isAssignmentCompatible(declaringClass)
-				: expression instanceof ThisExpression && ((ThisExpression) expression).getQualifier() != null));
+				: expression instanceof ThisExpression && ((ThisExpression) expression).getQualifier() != null) || class_localType == LAMBDA_EXPRESSION);
 		String bname = (needBname ? getThisRefOrSyntheticReference(javaQualifier, declaringClass, null) : null);
 		// add the qualifier
 		int pt = buffer.length();
@@ -4016,7 +4018,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 		// xxxx.this.x
 		// xxxx.this.foo()
-		buffer.append(getThisRefOrSyntheticReference(node, node.resolveTypeBinding(), "this"));
+		String bthis = getThisRefOrSyntheticReference(node, node.resolveTypeBinding(), "this");
+		buffer.append(bthis);
 		return false;
 	}
 
