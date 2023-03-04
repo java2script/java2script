@@ -504,6 +504,8 @@ public class JSComponentUI extends ComponentUI
 	 * 
 	 */
 	protected boolean isSimpleButton, isLabel;
+	
+	protected boolean isMenuBarLabel;
 
 	protected int x, y;
 
@@ -1734,7 +1736,7 @@ public class JSComponentUI extends ComponentUI
 	}
 	
 	private Dimension getIconSize(AbstractButton b) {
-		
+		//
 		return (iconNode == null || imageNode == null || b.getIcon() == null ? null
 				: new Dimension(b.getIcon().getIconWidth(), b.getIcon().getIconHeight()));
 	}
@@ -3035,10 +3037,10 @@ public class JSComponentUI extends ComponentUI
 						itop = 70;
 						iscale = "scale(0.8,0.8)";
 					}
-
 					break;
 				}
 				if (itop >= 0) {
+					if (!isLabel || !isMenuBarLabel)
 					addJSKeyVal(cssTxt, "top", top + "%", "transform",
 							"translateY(" + (yoff == null ? "-" + top + "%" : yoff) + ")" + voff);
 					addJSKeyVal(cssIcon, "top", top + "%", "transform", "translateY(-" + itop + "%)" + voff + iscale);
@@ -3067,6 +3069,10 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	private void setMenuAnchorAndAccelerator(AbstractButton b, int wCtr, boolean ltr, Insets margins) {
+		if (isLabel) {
+			// allowing label here -- not nec AbstractButton
+			return;
+		}
 		int wAccel = 0;
 		if (isMenu) {
 			// Correct for dimText calc losing position:absolute
@@ -3847,5 +3853,40 @@ public class JSComponentUI extends ComponentUI
 		}
 	}
 	
+	public boolean createItemNode(String type, Icon icon, int gap, String text, DOMNode buttonNode) {
+			itemNode = newDOMObject("li", id);
+			if (text == null && icon == null)
+				return false;
+			DOMNode.setStyle(itemNode, "outline", "none");
+			menuAnchorNode = newDOMObject("div", id + "_a");// this needed? , "tabindex", "8");
+			if (type != "_bar") {
+				addClass(menuAnchorNode, "a");
+//				DOMNode.setStyles(menuAnchorNode, "margin", "1px 2px 1px 2px", "height", "1em");
+			}
+			itemNode.appendChild(menuAnchorNode);
+			setDoPropagate();
+			if (buttonNode == null) {
+				// not a radio or checkbox
+				addCentering(menuAnchorNode);
+				enableNode = itemNode;
+				setIconAndText("btn", icon, gap, text);
+			} else {
+				menuAnchorNode.appendChild(buttonNode);
+				setMenuItem(buttonNode);
+			}
+			setMenuItem(menuAnchorNode);
+			setMenuItem();
+			return true;
+	}
+
+	protected void setMenuItem() {
+		setMenuItem(itemNode);
+		setMenuItem(iconNode);
+		if (actionNode != null && actionNode != iconNode)
+			setMenuItem(actionNode);
+		setMenuItem(textNode);
+		setMenuItem(centeringNode);
+	}
+
 
 }

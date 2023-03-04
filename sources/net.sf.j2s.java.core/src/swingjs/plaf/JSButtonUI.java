@@ -149,44 +149,15 @@ public class JSButtonUI extends JSLightweightUI {
 			// separator masquerading as a menu item
 			text = null;
 		}
-		itemNode = newDOMObject("li", id);
-		if (text == null && icon == null)
-			return itemNode;
-		DOMNode.setStyle(itemNode, "outline", "none");
-		menuAnchorNode = newDOMObject("div", id + "_a");// this needed? , "tabindex", "8");
-		if (type != "_bar") {
-			addClass(menuAnchorNode, "a");
-//			DOMNode.setStyles(menuAnchorNode, "margin", "1px 2px 1px 2px", "height", "1em");
-		}
-		itemNode.appendChild(menuAnchorNode);
-		setDoPropagate();
-		if (buttonNode == null) {
-			// not a radio or checkbox
-			addCentering(menuAnchorNode);
-			enableNode = itemNode;
-			setIconAndText("btn", icon, gap, text);
-		} else {
-			menuAnchorNode.appendChild(buttonNode);
-			setMenuItem(buttonNode);
-		}
-		setMenuItem(menuAnchorNode);
-		setMenuItem();
+		if (createItemNode(type, icon, gap, text, buttonNode)) {
 		// j2sMenu.js will set the mouse-up event for the <a> tag with the
 		// role=menuitem
 		// attribute via j2sApplet.setMouse().
 		// That event will then fire handleJSEvent
 		setDataComponent(menuAnchorNode);
 		setDataComponent(itemNode);
+		}
 		return itemNode;
-	}
-
-	protected void setMenuItem() {
-		setMenuItem(itemNode);
-		setMenuItem(iconNode);
-		if (actionNode != null && actionNode != iconNode)
-			setMenuItem(actionNode);
-		setMenuItem(textNode);
-		setMenuItem(centeringNode);
 	}
 
 	@SuppressWarnings("unused")
