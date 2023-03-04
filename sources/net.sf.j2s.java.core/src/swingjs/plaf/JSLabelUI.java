@@ -9,6 +9,8 @@ import java.awt.Rectangle;
 import javax.swing.AbstractButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JMenuBar;
+import javax.swing.JPopupMenu;
 import javax.swing.LookAndFeel;
 
 import swingjs.api.js.DOMNode;
@@ -34,15 +36,26 @@ public class JSLabelUI extends JSLightweightUI {
 	public DOMNode updateDOMNode() {
 //		if (jc.getTopLevelAncestor() == null)
 //			return domNode;
+		isMenuItem = jc.getParent() instanceof JPopupMenu;
+		isMenuBarLabel = jc.getParent() instanceof JMenuBar;
 		if (domNode == null) {
-			enableNode = domNode = newDOMObject("label", id);
-			textNode = iconNode = null;
-			addCentering(domNode);
+			if (isMenuItem) {
+				createItemNode("_item", icon, 4, label.getText(), null);
+				domNode = itemNode;
+				// TODO -- still not positioned correctly
+			} else {
+				enableNode = domNode = newDOMObject("label", id);
+				textNode = iconNode = null;
+				addCentering(domNode);
+			}
 		}
 		getIconAndText(); // could be ToolTip
 		setIconAndText("label", icon, gap, text);
-		DOMNode.setStyles(domNode, "position", "absolute", "width", c.getWidth() + "px", "height",
-				c.getHeight() + "px");
+		if (isMenuItem) {
+		} else {
+			DOMNode.setStyles(domNode, "position", "absolute", "width", c.getWidth() + "px", "height",
+					c.getHeight() + "px");
+		}
 		updateCenteringNode();
 		if (allowTextAlignment) {
 			// not for JToolTip

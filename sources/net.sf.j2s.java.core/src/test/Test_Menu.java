@@ -42,6 +42,7 @@ import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -87,7 +88,7 @@ public class Test_Menu extends JFrame {
 	private JMenuBar getMenuBar() {
 		JMenuBar mb = new JMenuBar();
 		JMenu mb1 = new JMenu("Test1");
-		JMenu mb2 = new JMenu("Test2");
+		JMenu mb2 = new JMenu("Testing2");
 		JMenuItem mb1a = new JMenuItem("test-1");
 		mb1a.addActionListener((e)->{
 			System.out.println("test-1 clicked");
@@ -128,6 +129,10 @@ public class Test_Menu extends JFrame {
 
 		mb.add(mb1);
 		mb.add(mb2);
+		JLabel l = new JLabel("label1");
+		mb.add(l);
+		l = new JLabel("label2");
+		mb1.add(l);
 
 		ActionListener al = new ActionListener() {
 
