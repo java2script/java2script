@@ -1468,7 +1468,8 @@ Formatter/Regex limitations
 Some browsers cannot process Regex "look-behind" process such as (?<=\W)
 java.util.regex.Matcher and Pattern use JavaScript's RegExp object rather than
 the native Java object. These are not identical. Only flags /igm are supported.
-Matcher.start(groupID) is not supported.
+Matcher.start(groupID)/.end(groupID) is supported.
+(x*)? failure returns null, not empty string.
 
 java.util.Formatter will function correctly for all standard %... patterns.
 

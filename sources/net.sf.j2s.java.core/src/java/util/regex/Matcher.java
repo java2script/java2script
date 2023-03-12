@@ -25,6 +25,7 @@
 
 package java.util.regex;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 /**
@@ -143,11 +144,11 @@ public final class Matcher implements MatchResult {
 	 */
 	Pattern pat;
 
-//    /**
-//     * The storage used by groups. They may contain invalid values if
-//     * a group was skipped during the matching.
-//     */
-//    int[] groups;
+    /**
+     * The storage used by groups. They may contain invalid values if
+     * a group was skipped during the matching.
+     */
+    int[] groups;
 
 	/**
 	 * The range within the sequence that is to be matched. Anchors will match at
@@ -241,11 +242,23 @@ public final class Matcher implements MatchResult {
 
 	private Object[] replacementParts;
 
+	/**
+	 * the raw result from JavaScript regex execution 
+	 */
+	private String[] 秘results;
+	
 	private String[] results;
 
 	private String strString;
 
 	private int groupCount;
+	
+	/**
+	 * raw group count
+	 */
+	private int 秘groupCount;
+
+	private boolean 秘haveGroups;
 
 	/**
 	 * No default constructor.
@@ -273,8 +286,8 @@ public final class Matcher implements MatchResult {
 		Matcher result = new Matcher(pat, cs.toString());
 		result.first = first;
 		result.last = last;
-		result.groupCount = groupCount;
-		result.results = results.clone();
+		result.秘groupCount = 秘groupCount;
+		result.秘results = 秘results.clone();
 		return result;
 	}
 
@@ -297,9 +310,6 @@ public final class Matcher implements MatchResult {
 		if (newPattern == null)
 			throw new IllegalArgumentException("Pattern cannot be null");
 		pat = newPattern;
-
-//		int parentGroupCount = Math.max(newPattern.capturingGroupCount, 10);
-//        groups = new int[parentGroupCount * 2];
 		clearGroups();
 		return this;
 	}
@@ -342,7 +352,7 @@ public final class Matcher implements MatchResult {
 	public Matcher reset() {
 		first = -1;
 		last = 0;
-		groupCount = 0;
+		秘groupCount = 0;
 		oldLast = -1;
 		clearGroups();
 		appendPos = 0;
@@ -431,17 +441,15 @@ public final class Matcher implements MatchResult {
 		RegExp rg = pat.regexp;
 		rg.lastIndex = from;
 		acceptMode = (anchor == UNSPECIFIED ? NOANCHOR : anchor);
-		results = execRE(rg, s);
-		boolean result = checkRE(results, s);
+		秘results = execRE(rg, s);
+		boolean result = checkRE(秘results, s);
 		this.oldLast = last;
 		return result;
 	}
 
 	private void clearGroups() {
-//		for (int i = 0; i < groups.length; i++)
-//			groups[i] = -1;
-//		for (int i = 0; i < locals.length; i++)
-//			locals[i] = -1;
+		秘haveGroups = false;
+		groups = null;
 	}
 
 	/**
@@ -607,6 +615,8 @@ public final class Matcher implements MatchResult {
 					null);
 		}
 		this.replacement = replacement;
+		if (replacement != null && replacement.indexOf("$") >= 0)
+			秘updateGroups();
 		// Process substitution string to replace group references with groups
 		int index = 0;
 		int replacementPos = 0;
@@ -940,6 +950,7 @@ public final class Matcher implements MatchResult {
 		// this array is coming from JavaScript RegExp; some values may be "undefined"
 		// so we force them to be null. 
 		return results[group] == null ? null : results[group];
+// JavaScript does not need this
 //        if ((groups[group*2] == -1) || (groups[group*2+1] == -1))
 //            return null;
 //        return getSubSequence(groups[group * 2], groups[group * 2 + 1]).toString();
@@ -974,7 +985,7 @@ public final class Matcher implements MatchResult {
 	public String group(String name) {
 		int group = getMatchedGroupIndex(name);
 		return group < 0 || group >= results.length ? null : group(group);
-//        
+// JavaScript does not need this
 //        if ((groups[group*2] == -1) || (groups[group*2+1] == -1))
 //            return null;
 //        return getSubSequence(groups[group * 2], groups[group * 2 + 1]).toString();
@@ -996,7 +1007,33 @@ public final class Matcher implements MatchResult {
 	 */
 	@Override
 	public int groupCount() {
+		秘updateGroups();
 		return groupCount;
+	}
+
+	private void 秘updateGroups() {
+		if (秘haveGroups || 秘groupCount <= 0 || 秘results == null)
+			return;
+		秘haveGroups = true;
+		pat.秘setNameGroups();
+		ArrayList<String> names = pat.秘groupNames;
+		int pt = start();
+		groupCount = -1;
+		groups = new int[names.size() * 2];
+		results = new String[秘results.length];
+		for (int i = 0, gpt = 0, n = names.size(); i < n; i++) {
+			String name = names.get(i);
+			String r = 秘results[i];
+			int len = (r == null ? 0 : r.length());
+			if (name == null || !name.startsWith("秘")) {
+				groups[gpt++] = pt;
+				groups[gpt++] = pt + len;
+				pat.namedGroups().put(name, groupCount);
+				results[++groupCount] = r;
+			} else {
+				pt += len;
+			}
+		}
 	}
 
 	/**
@@ -1033,8 +1070,8 @@ public final class Matcher implements MatchResult {
 		return result;
 	}
 
-	private int indexRE(String[] results) {
-		return /** @j2sNative results.index || */
+	private int indexRE(String[] r) {
+		return /** @j2sNative r.index || */
 		0;
 	}
 
@@ -1050,7 +1087,7 @@ public final class Matcher implements MatchResult {
 			first = -1;
 			return false;
 		}
-		groupCount = r.length - 1;
+		秘groupCount = r.length - 1;
 		int f0 = this.first;
 		first = indexRE(r);
 		last = first + r[0].length();
@@ -1060,7 +1097,7 @@ public final class Matcher implements MatchResult {
 			// a longer string
 			return false;
 		}
-		if (groupCount < 0)
+		if (秘groupCount < 0)
 			return false;
 		switch (acceptMode) {
 		case STARTANCHOR:
@@ -1330,11 +1367,10 @@ public final class Matcher implements MatchResult {
 		Objects.requireNonNull(name, "Group name");
 		if (first < 0)
 			throw new IllegalStateException("No match found");
-		if (pat.namedGroups == null)
-			pat.秘setNameGroups();
+		秘updateGroups();
 		if (pat.namedGroups == null || !pat.namedGroups().containsKey(name))
 			throw new IllegalArgumentException("No group with name <" + name + ">");
-		return pat.namedGroups().get(name);
+		return pat.namedGroups().get(name).intValue() + 1;
 	}
 	/**
 	 * Returns the start index of the previous match.
@@ -1380,9 +1416,9 @@ public final class Matcher implements MatchResult {
 			throw new IllegalStateException("No match available");
 		if (group < 0 || group > groupCount())
 			throw new IndexOutOfBoundsException("No group " + group);
-		return NOT_AVAILABLE;
-//        
-//        return groups[group * 2];
+		if (group == 0)
+			return start();        
+        return groups[group * 2];
 	}
 
 	/**
@@ -1404,9 +1440,8 @@ public final class Matcher implements MatchResult {
 	 * @since 1.8
 	 */
 	public int start(String name) {
-		getMatchedGroupIndex(name);
-		return NOT_AVAILABLE;
-//        return groups[getMatchedGroupIndex(name) * 2];
+		int g = getMatchedGroupIndex(name);
+        return groups[g * 2];
 	}
 
 	/**
@@ -1452,9 +1487,10 @@ public final class Matcher implements MatchResult {
 			throw new IllegalStateException("No match available");
 		if (group < 0 || group > groupCount())
 			throw new IndexOutOfBoundsException("No group " + group);
-		return NOT_AVAILABLE;
+		if (group == 0)
+			return end();
+      return groups[group * 2 + 1];
 
-//        return groups[group * 2 + 1];
 	}
 
 	/**
@@ -1476,9 +1512,8 @@ public final class Matcher implements MatchResult {
 	 * @since 1.8
 	 */
 	public int end(String name) {
-		getMatchedGroupIndex(name);
-		return NOT_AVAILABLE;
-//        return groups[getMatchedGroupIndex(name) * 2 + 1];
+		int g = getMatchedGroupIndex(name);
+        return groups[g * 2 + 1];
 	}
 
 }
