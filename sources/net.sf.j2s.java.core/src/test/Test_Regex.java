@@ -3,6 +3,7 @@ package test;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -10,31 +11,117 @@ public class Test_Regex extends Test_ {
 
 	public static void main(String[] args) {
 
-
-		
-		
 		String st;
 		Pattern p;
 		Matcher m;
 
-		st = "NMR DATA/product/3a-C'.mnova";
-		p = Pattern.compile("^\\QNMR DATA/\\E[^|/]+\\Q/\\E(?<IFS0spec0nmr0representation0vendor0dataset>(?<IFS0spec0nmr0property0expt>(?<id>[^|/]+)\\Q-\\E[^|/]+)\\Q.mnova\\E)$");
-		m = p.matcher(st);
-		System.out.println(m.find());
-		for (int i = 1, n = m.groupCount(); i <= n; i++) {
-			System.out.println(i + "/" + n + ">"+m.group(i)+"<");
-		}
+		String s;
+
+		String formatSpecifier;
 		
+		// groups
+
 		
-		st = "...pre-20a-b/DEPT135/3/pdata/1/procs";
-		st = "...pre-20a-b/DEPT135|3/pdata/1/procs";
-		p = Pattern.compile("^(?<path>.+(?:/|\\|)(?<dir>[^/]+))/pdata/[^/]+/procs$");		
-		m = p.matcher(st);
-		System.out.println(m.find());
-		for (int i = 1, n = m.groupCount(); i <= n; i++) {
-			System.out.println(i + "/" + n + ">"+m.group(i)+"<");
+        formatSpecifier = "%(y?x*)?";
+		p = Pattern.compile(formatSpecifier);
+		m = p.matcher("%d");
+		m.find(0);
+		System.out.println(m.groupCount());
+		for (int i = 0; i <= m.groupCount();i++) {
+			s = m.group(i);
+			// note that in JavaScript (x*)? returns null, not (as in Java) ""
+			System.out.println(i + " " + s);
 		}
 
+		
+
+        formatSpecifier = "%(\\d+\\$)?([-#+ 0,(\\<]*)?(\\d+)?(\\.\\d+)?([tT])?([a-zA-Z%])";
+		p = Pattern.compile(formatSpecifier);
+		m = p.matcher("%d");
+		m.find(0);
+		System.out.println(m.groupCount());
+		for (int i = 0; i <= m.groupCount();i++) {
+			s = m.group(i);
+			// note that in JavaScript ([-#+ 0,(\\<]*)? returns null, not (as in Java) ""
+			System.out.println(i + " " + s);
+		}
+
+		String s0;
+		s0 = "x/2 is a very excellent 1/x or x";
+		s = (" " + s0 + " ").replaceAll("(\\W)x(\\W)", "$1y$2").trim();
+		System.out.println(s);
+		assert ("y/2 is a very excellent 1/y or y".equals(s));
+
+		s0 = "x/2 is a very excellent 1/x or x";
+		s = (" " + s0 + " ").replaceAll("(?<test1>\\W)x(?<test2>\\W)", "${test1}y${test2}").trim();
+		System.out.println(s);
+		assert ("y/2 is a very excellent 1/y or y".equals(s));
+
+
+		formatSpecifier = "%(x*)?";
+		p = Pattern.compile(formatSpecifier);
+		m = p.matcher("%d");
+		m.find();
+		System.out.println(m.groupCount());
+		for (int i = 0; i <= m.groupCount();i++) {
+			s = m.group(i);
+			System.out.println(i + " " + s);
+		}
+
+
+		
+
+		
+		
+		p = Pattern.compile("(\\W)y(\\W)");
+		m = p.matcher("(m*(@^2+~^2)/r+m*g*(1-y/r))*(1-y/r)");
+		s = m.replaceAll("$1`$2").trim();
+		assert (m.groupCount() == 2);
+		System.out.println(s);
+		assert ("(m*(@^2+~^2)/r+m*g*(1-`/r))*(1-`/r)".equals(s));
+
+		s = Pattern.compile("(\\W)y(\\W)").matcher(" y+ y*2 ").replaceAll("$1`$2").trim();
+		System.out.println(s);
+		assert ("`+ `*2".equals(s));
+
+		Map<String, Double> vars = new HashMap<>();
+		vars.put("a2", Double.valueOf(2));
+		vars.put("a3", Double.valueOf(3));
+		assert (eval("y+a2*x+a3", vars).equals("y+(2.0)*x+(3.0)"));
+		assert (eval("y + a2*x + a3", vars).equals("y+(2.0)*x+(3.0)"));
+		assert (eval("y + -a2*x + a3", vars).equals("y+-(2.0)*x+(3.0)"));
+
+
+		// testing without \Q \E 
+		s = Arrays.toString(splitUnquoted("this[a-z] is \"a[a-z]test\"", "[a-z]"));
+		System.out.println(s);
+		assert (s.equals("[, , , , [, -, ] , ,  \"a[a-z]test\"]"));
+
+		// testing \Q \E -- caveat that quoted \Q \E is not supported
+		s = Arrays.toString(splitUnquoted("this[a-z] is \"a[a-z]test\"", Pattern.quote("[a-z]")));
+		System.out.println(s);
+		assert (s.equals("[this,  is \"a[a-z]test\"]"));
+
+		// testing \Q \E -- nonspecial quote
+		s = Arrays.toString(splitUnquoted("this; is \"a;test\"", Pattern.quote(";")));
+		System.out.println(s);
+		assert (s.equals("[this,  is \"a;test\"]"));
+
+		
+		
+		Object[] o = new Object[] { new Float(3.5), Integer.valueOf(100)};
+	    s = String.format("val=%5.3f Completed %d%%.", o);
+	    System.out.println(s);
+	    assert(s.equals("val=3.500 Completed 100%."));
+
+
+		p = Pattern.compile("(this/(?:[^/]+/)*).+\\Q.pdf\\E$");//$");
+		m = p.matcher("this/is/a/test/testing.1.pdf");
+		System.out.println(m.find());
+		// note that go [1,n] here, not [0,n)
+		for (int i = 1, n = m.groupCount(); i <= n; i++) {
+			System.out.println(i + "/" + n + ">"+m.group(i)+"<");
+		}
 		
 		st = "FID for Publication/S6.zip|S6/HRMS.zip|HRMS/67563_hazh180_maxis_pos.pdf";
 		p = Pattern.compile("^\\QFID for Publication/\\E(?<id>[^|/]+)\\Q.zip"
@@ -45,6 +132,47 @@ public class Test_Regex extends Test_ {
 			System.out.println(i + "/" + n + ">"+m.group(i)+"<");
 		}
 
+
+		st = "...pre-20a-b/DEPT135/3/pdata/1/procs";
+		st = "...pre-20a-b/DEPT135|3/pdata/1/procs";
+		p = Pattern.compile("^(?<path>.+(?:/|\\|)(?<dir>[^/]+))/pdata/[^/]+/procs$");		
+		m = p.matcher(st);
+		System.out.println(m.find());
+		for (int i = 1, n = m.groupCount(); i <= n; i++) {
+			System.out.println(i + "/" + n + ">"+m.group(i)+"<");
+		}
+
+		
+		
+		st = "NMR DATA/product/3a-C'.mnova";
+		p = Pattern.compile("^\\QNMR DATA/\\E[^|/]+\\Q/\\E(?<IFS0spec0nmr0representation0vendor0dataset>(?<IFS0spec0nmr0property0expt>(?<id>[^|/]+)\\Q-\\E[^|/]+)\\Q.mnova\\E)$");
+		m = p.matcher(st);
+		System.out.println(m.find());
+		for (int i = 1, n = m.groupCount(); i <= n; i++) {
+			System.out.println(i + "/" + n + ">"+m.group(i)+"<");
+		}
+		
+		
+		
+		String lipsum = "Lorem ipsum dolor sit amet ipsum";
+		p = Pattern.compile("(?<g0>(?<g1>ip(?<g2>s)u)(?<g3>m))");
+		m = p.matcher(lipsum);
+		m.find();
+		MatchResult mr = m.toMatchResult();
+		m.find();
+		
+//		System.out.println("g0" + m.group("g0") + " " + m.start("g0") + " " + m.end("g0"));
+//		System.out.println("g1" + m.group("g1") + " " + m.start("g1") + " " + m.end("g1"));
+//		System.out.println("g2" + m.group("g2") + " " + m.start("g2") + " " + m.end("g2"));
+		System.out.println(m.group(0) + " " + m.start() + " " + m.end());
+		for (int i = 0;i <= m.groupCount(); i++) {
+			System.out.println(i + " " + m.group(i) + " " + m.start(i) + " " + m.end(i));
+
+		} 
+		for (int i = 0;i <= mr.groupCount(); i++) {
+			System.out.println(i + " " + mr.group(i) + " " + mr.start(i) + " " + mr.end(i));
+		} 
+		
 		st = "{abc::now {jkl::{def::and} {ghi::then}}}";
 		p = Pattern.compile("\\{([^:]+)::(.+)\\}");
 		m = p.matcher(st);
@@ -62,7 +190,7 @@ public class Test_Regex extends Test_ {
 		for (int i = 1, n = m.groupCount(); i <= n; i++) {
 			System.out.println(i + "/" + n + ">"+m.group(i)+"<");
 		}
-		assert(m.group("IFSnmr0param0expt").equals("test"));
+		assert(m.group("IFS0nmr0param0expt").equals("test"));
 
 		p = Pattern.compile("(?i)ID(?<id>.+) and this is id \\k<id>");
 		m = p.matcher("ID1 and this is id 1");
@@ -102,41 +230,11 @@ public class Test_Regex extends Test_ {
 			System.out.println(i + "/" + n + ">"+m.group(i)+"<");
 		}
 
-		p = Pattern.compile("this/([^/]+/)*(.+[.]pdf)$");//$");
-		m = p.matcher("this/is/a/test/testing.pdf");
-		m.find();
-		// note that go [1,n] here, not [0,n)
-		for (int i = 1, n = m.groupCount(); i <= n; i++) {
-			System.out.println(i + "/" + n + ">"+m.group(i)+"<");
-		}
 
-		p = Pattern.compile("(this/(?:[^/]+/)*).+\\Q.pdf\\E$");//$");
-		m = p.matcher("this/is/a/test/testing.1.pdf");
-		m.find();
-		// note that go [1,n] here, not [0,n)
-		for (int i = 1, n = m.groupCount(); i <= n; i++) {
-			System.out.println(i + "/" + n + ">"+m.group(i)+"<");
-		}
-
-		String s;
 		
-		Object[] o = new Object[] { new Float(3.5), Integer.valueOf(100)};
-	    s = String.format("val=%5.3f Completed %d%%.", o);
-	    System.out.println(s);
-	    assert(s.equals("val=3.500 Completed 100%."));
-
-		String formatSpecifier
-        = "%(\\d+\\$)?([-#+ 0,(\\<]*)?(\\d+)?(\\.\\d+)?([tT])?([a-zA-Z%])";
-		Pattern fsPattern = Pattern.compile(formatSpecifier);
-		Matcher fm = fsPattern.matcher("%d");
-		fm.find(0);
-		System.out.println(fm.groupCount());
-		for (int i = 0; i < fm.groupCount();i++) {
-			s = fm.group(i);
-			// note that in JavaScript ([-#+ 0,(\\<]*)? returns null, not (as in Java) ""
-			System.out.println(s);
-		}
-
+		
+		
+		
 		System.out.println("testRE pattern def");
 		s = Pattern.compile("''").matcher("ab'cd''ef'''gh''''").replaceAll("X");
 		System.out.println(s);
@@ -153,45 +251,8 @@ public class Test_Regex extends Test_ {
 		System.out.println(s);
 		assert (s.equals("XX"));
 
-		// groups
-		String s0 = "x/2 is a very excellent 1/x or x";
-		s = (" " + s0 + " ").replaceAll("(\\W)x(\\W)", "$1y$2").trim();
-		System.out.println(s);
-		assert ("y/2 is a very excellent 1/y or y".equals(s));
+		
 
-		p = Pattern.compile("(\\W)y(\\W)");
-		m = p.matcher("(m*(@^2+~^2)/r+m*g*(1-y/r))*(1-y/r)");
-		s = m.replaceAll("$1`$2").trim();
-		assert (m.groupCount() == 2);
-		System.out.println(s);
-		assert ("(m*(@^2+~^2)/r+m*g*(1-`/r))*(1-`/r)".equals(s));
-
-		s = Pattern.compile("(\\W)y(\\W)").matcher(" y+ y*2 ").replaceAll("$1`$2").trim();
-		System.out.println(s);
-		assert ("`+ `*2".equals(s));
-
-		Map<String, Double> vars = new HashMap<>();
-		vars.put("a2", Double.valueOf(2));
-		vars.put("a3", Double.valueOf(3));
-		assert (eval("y+a2*x+a3", vars).equals("y+(2.0)*x+(3.0)"));
-		assert (eval("y + a2*x + a3", vars).equals("y+(2.0)*x+(3.0)"));
-		assert (eval("y + -a2*x + a3", vars).equals("y+-(2.0)*x+(3.0)"));
-
-
-		// testing without \Q \E 
-		s = Arrays.toString(splitUnquoted("this[a-z] is \"a[a-z]test\"", "[a-z]"));
-		System.out.println(s);
-		assert (s.equals("[, , , , [, -, ] , ,  \"a[a-z]test\"]"));
-
-		// testing \Q \E -- caveat that quoted \Q \E is not supported
-		s = Arrays.toString(splitUnquoted("this[a-z] is \"a[a-z]test\"", Pattern.quote("[a-z]")));
-		System.out.println(s);
-		assert (s.equals("[this,  is \"a[a-z]test\"]"));
-
-		// testing \Q \E -- nonspecial quote
-		s = Arrays.toString(splitUnquoted("this; is \"a;test\"", Pattern.quote(";")));
-		System.out.println(s);
-		assert (s.equals("[this,  is \"a;test\"]"));
 
 		System.out.println("Test_Regex OK");
 	}
