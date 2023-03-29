@@ -1590,12 +1590,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				      	&& ((ThisExpression) expression).getQualifier() != null)
 				|| class_localType == LAMBDA_EXPRESSION)
 			);
-<<<<<<< HEAD
-=======
 		
-bufferDebug("needbname " + needBname + " " + methodName + " " + isStatic);
-		
->>>>>>> branch 'hanson1' of https://github.com/BobHanson/java2script
 		String bname = (needBname ? getThisRefOrSyntheticReference(javaQualifier, declaringClass, null) : null);
 		// add the qualifier
 		int pt = buffer.length();
