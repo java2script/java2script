@@ -25,11 +25,12 @@ public class CorePlugin extends Plugin {
 	 * "net.sf.j2s.core.jar" not "net.sf.j2s.core.3.2.5"
 	 * 
 	 */
-	public static String VERSION = "3.3.1-v6";
+	public static String VERSION = "3.3.1-v7";
 	
 	// if you change the x.x.x number, be sure to also indicate that in 
 	// j2sApplet.js and also (Bob only) update.bat, update-clean.bat
 
+	// BH 2023.03.29 -- 3.3.1-v7 fixes outer static method call from within lambda expression. 
 	// BH 2023.02.09 -- 3.3.1.v6 fixes j2s.excluded.paths needing /src/xxxx
 	// BH 2022.06.27 -- 3.3.1-v5 fixes missing method annotations
 	// BH 2022.01.17 -- 3.3.1-v4 fixes default interface methods referencing their own static fields

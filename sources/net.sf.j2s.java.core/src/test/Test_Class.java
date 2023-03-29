@@ -444,10 +444,12 @@ class Test_Class extends Test_Class2<Integer> {
 			e1.printStackTrace();
 		}
 
+		String whatever = "whatever";
+		
 		class LocalClass {
 
 			String hello() {
-				return "LocalClass says hello";
+				return "LocalClass says hello " + whatever;
 			}
 		}
 

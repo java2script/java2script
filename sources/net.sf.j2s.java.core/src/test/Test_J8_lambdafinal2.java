@@ -25,16 +25,15 @@ import javax.swing.Timer;
 import test.baeldung.doublecolon.Computer;
 import test.baeldung.doublecolon.MacbookPro;
 
-public class Test_J8_lambdafinal extends Test_ {
+public class Test_J8_lambdafinal2 extends Test_ {
 
 
 	public static void main(String args[]) {
 		
-		new Test_J8_lambdafinal().
 		testFinal();
 	}
 
-	private void testFinal() {
+	private static void testFinal() {
 
 		Runnable r = () -> {
 			for (String s : new String[] { "a", "b" }) {
