@@ -136,6 +136,9 @@ import org.eclipse.jdt.core.dom.WildcardType;
 // TODO: superclass inheritance for JAXB XmlAccessorType
 // TODO: Transpiler bug allows static String name, but JavaScript function().name is read-only and will be "clazz"
 
+//BH 2023.03.29 -- 3.3.1-v7 fixes outer static method call from within lambda expression. 
+//BH 2023.02.09 -- 3.3.1.v6 fixes j2s.excluded.paths needing /src/xxxx
+//BH 2022.06.27 -- 3.3.1-v5 fixes missing method annotations
 //BH 2022.01.17 -- 3.3.1-v4 fixes default interface methods referencing their own static fields
 //BH 2021.01.14 -- 3.3.1-v3 fixes missing finals for nested () -> {...}
 //BH 2021.01.03 -- 3.3.1-v2 adds @j2sAsync adds async for function - experimental
@@ -1578,11 +1581,18 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		String privateVar = (isPrivateAndNotStatic ? getPrivateVar(declaringClass, false) : null);
 		boolean doLogMethodCalled = (!isPrivate && global_htMethodsCalled != null);
 		boolean needBname = (
-				
-				!isStatic && lambdaArity < 0 && (expression == null
+				!isStatic 
+				&& (lambdaArity < 0 
+				&& (expression == null
 				    ? !areEqual(declaringClass, class_typeBinding)
 						&& !class_typeBinding.isAssignmentCompatible(declaringClass)
-				: expression instanceof ThisExpression && ((ThisExpression) expression).getQualifier() != null) || class_localType == LAMBDA_EXPRESSION);
+				      : expression instanceof ThisExpression 
+				      	&& ((ThisExpression) expression).getQualifier() != null)
+				|| class_localType == LAMBDA_EXPRESSION)
+			);
+		
+bufferDebug("needbname " + needBname + " " + methodName + " " + isStatic);
+		
 		String bname = (needBname ? getThisRefOrSyntheticReference(javaQualifier, declaringClass, null) : null);
 		// add the qualifier
 		int pt = buffer.length();
@@ -4879,7 +4889,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * 
 	 * For general fields, this will be "this.".
 	 * 
-	 * For fields in outer classes, we need a synthetic references,
+	 * For nonstatic fields in outer classes, we need a synthetic references,
 	 * this.b$[className] that points to the outer object, which may be one or more
 	 * levels higher than this one.
 	 * 
