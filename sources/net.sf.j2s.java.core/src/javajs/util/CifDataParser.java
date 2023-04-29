@@ -339,10 +339,11 @@ public class CifDataParser implements GenericCifDataParser {
       if (line == null)
         return null;
       if (isHeader) {
-        if (line.startsWith("#"))
+        if (line.startsWith("#")) {
           fileHeader.append(line).appendC('\n');
-        else
+        } else if (line.length() > 0) {
           isHeader = false;
+        }
       }
       return line;
     } catch (Exception e) {

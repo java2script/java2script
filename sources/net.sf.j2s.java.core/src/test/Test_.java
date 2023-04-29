@@ -95,6 +95,10 @@ public class Test_ {
 	
 	static boolean isBatch = false;
 
+	/**
+	 * static public j2sHeadless TRUE 
+	 * triggers headless operation in swingjs2.js
+	 */
 	static public boolean j2sHeadless = true;
 
 	static public int bhtest = 100;
