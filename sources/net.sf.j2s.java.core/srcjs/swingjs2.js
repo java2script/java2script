@@ -17188,18 +17188,18 @@ c160 += c160+c160+c160;
 
 Con.consoleOutput = function (s, color) {
   var con = consoleDiv;
+  if (con && typeof con == "string")
+    con = consoleDiv = document.getElementById(con)
   if (!con) {
     return false; // BH this just means we have turned off all console action
   }
    if (con == window.console) {
     if (color == "red")
-      con.err(s);
+      con.error(s);
     else
       con.log(s);
     return;
   }
-  if (con && typeof con == "string")
-    con = document.getElementById(con)
 
 	if (s == '\0') {
 	con.innerHTML = "";
@@ -17279,7 +17279,7 @@ Con.clear = function () {
   try {
     Con.metLineBreak = true;
     var console = consoleDiv;
-    if (!console || !(console = document.getElementById (console)))
+    if (console == window.console || !console || typeof console == "string" && !(console = document.getElementById (console)))
       return;
     console.innerHTML = "";
     Con.linesCount = 0;

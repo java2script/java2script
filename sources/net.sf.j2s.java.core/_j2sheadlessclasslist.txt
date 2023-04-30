@@ -1,0 +1,7 @@
+java/lang/Class.js
+java/lang/Runtime.js
+java/lang/Shutdown.js
+java/lang/Thread.js
+java/lang/ThreadGroup.js
+javajs/util/JSThread.js
+swingjs/JSThreadGroup.js
