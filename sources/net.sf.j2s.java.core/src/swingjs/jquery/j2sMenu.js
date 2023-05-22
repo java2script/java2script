@@ -413,6 +413,8 @@ $.widget("ui.j2smenu",{
 	 this._on({
 		 "click .ui-state-disabled > .a":	function(t){ t.preventDefault() },
 		 "click .ui-j2smenu-item:has(.a)":	function(t){ doCmd("onclick",this,t);},
+		 "pointerdown .ui-j2smenu-item > .a":	function(t){ doCmd("onpress",this,t) },
+		 "pointerup .ui-j2smenu-item > .a":	function(t){ doCmd("onrelease",this,t) },
 		 "mousedown .ui-j2smenu-item > .a":	function(t){ doCmd("onpress",this,t) },
 		 "mouseup .ui-j2smenu-item > .a":	function(t){ doCmd("onrelease",this,t) },
 		 "mousemove .swingjsPopupMenu ":	function(t){ doCmd("onmovep",this,t,0); },

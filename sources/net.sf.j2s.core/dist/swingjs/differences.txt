@@ -1,6 +1,7 @@
 java2script/SwingJS Notes
 =========================
 
+updated 3/11/2023 -- adds support for Java Regex Matcher.start/end(groupID) and .start/end(groupName)
 updated 12/31/2020 -- full support for 64-bit long
 updated 12/6/2020 -- note about restrictions on long, including BitSet and Scanner
 updated 3/21/2020 -- adds note about HashMap, Hashtable, and HashSet iterator ordering
