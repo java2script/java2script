@@ -1,3 +1,5 @@
+// BH 2023.06.06 no-move menu actuation; adds cursor:pointer to ui-j2s-menu to enable click; adds pointerdown/up; 
+//   see https://stackoverflow.com/questions/3025348/how-do-i-use-jquery-for-click-event-in-iphone-web-application/4910962#4910962
 // based on jQuery UI - v1.9.2 - 2012-12-17
 // NOTE: If you change this file, then you need to touch and save JQueryUI.java, as only then
 //       will the transpiler copy this file to site/swingjs/j2s/swingjs/jquery/
@@ -122,13 +124,16 @@ J2S.__makeMenu = function(){};
 		 me.setFocus(t,n);
 		 t = m;
 		 break;
-	 case "onrelease":
 	 case "onpress":
+		var n=myMenuItem(target);
+		me.setFocus(t,n);
+		me.elementPressed = n[0];
+	 case "onrelease":
 	 case "onclick":
 		var n=myMenuItem(target);
-		if (isDisabled(n))
+		if (isDisabled(n) || n[0] != me.elementPressed)
 			return;
-		if (isDisabled(n.first()) || trigger != "onclick")
+		if (isDisabled(n.first()))
 			break;
 		me.select(t);
 		var doOpen = isPopupMenu(n.first());
@@ -212,7 +217,7 @@ J2S.__makeMenu = function(){};
 		 // adds role=xxxx
 	 	 me.refresh("_openSubmenu",n);
 		 // adds mouse binding to role=menuitem
-	 	 ensureMouseSet(item._menu, li);
+	 	 ensureMouseSet(ui.menu, li);
 		 var v = me.element.find(".ui-j2smenu").not(t.parents(".ui-j2smenu"));
 		 doCmd("_hide", me, v);
 		 try {
@@ -413,8 +418,8 @@ $.widget("ui.j2smenu",{
 	 this._on({
 		 "click .ui-state-disabled > .a":	function(t){ t.preventDefault() },
 		 "click .ui-j2smenu-item:has(.a)":	function(t){ doCmd("onclick",this,t);},
-		 "pointerdown .ui-j2smenu-item > .a":	function(t){ doCmd("onpress",this,t) },
-		 "pointerup .ui-j2smenu-item > .a":	function(t){ doCmd("onrelease",this,t) },
+                 "pointerdown .ui-j2smenu-item > .a":   function(t){ doCmd("onpress",this,t) },
+                 "pointerup .ui-j2smenu-item > .a":     function(t){ doCmd("onrelease",this,t) },
 		 "mousedown .ui-j2smenu-item > .a":	function(t){ doCmd("onpress",this,t) },
 		 "mouseup .ui-j2smenu-item > .a":	function(t){ doCmd("onrelease",this,t) },
 		 "mousemove .swingjsPopupMenu ":	function(t){ doCmd("onmovep",this,t,0); },
@@ -540,7 +545,7 @@ Swing.__getMenuStyle = function(applet) { return '\
 	.swingjsPopupMenu input[type="checkbox"]{vertical-align:middle;}\
 	.swingjsPopupMenu,.swingjsPopupMenu .ui-j2smenu{list-style:none;padding:2px;margin:0;display:block;outline:none;box-shadow:1px 1px 5px rgba(50,50,50,0.75)}\
 	.swingjsPopupMenu .ui-j2s-menuBar-menu:focus{outline:none;background:#d0e5f5}\
-	.swingjsPopupMenu .ui-j2smenu{outline:none;margin-top:-3px;position:absolute}\
+	.swingjsPopupMenu .ui-j2smenu{cursor:pointer;outline:none;margin-top:-3px;position:absolute}\
 	.swingjsPopupMenu .ui-j2smenu-item{outline:none;cursor:pointer;margin:0 0 0 0;padding:0.1em;width:100%}\
 	.swingjsPopupMenu .a:focus{outline:none;cursor:pointer;margin:0 0 0 0;padding:0.1em}\
 	.swingjsPopupMenu .ui-j2smenu-divider{position:absolute;margin:3px 1px;height:0;transform:translateY(-0.2em);font-size:1;line-height:1px;border-width:1px 0 0 0;width:93%;}\
@@ -686,4 +691,4 @@ Swing.disposeMenu = function(menu) {
 })(J2S.Swing, J2S.__$);
 
 
-// end of j2sMenu.js 2020.06.09 2020.05.15  2020.01.25
+// end of j2sMenu.js 2023.06.04 2020.06.09 2020.05.15  2020.01.25

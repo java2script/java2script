@@ -134,7 +134,7 @@ final public class MeasureD {
     V3d vda = new V3d();
     V3d vcb = V3d.newV(n);
     if (v_dot_n == 0)
-      v_dot_n = PT.FLOAT_MIN_SAFE; // allow for perpendicular axis to vab
+      v_dot_n = 2E-45; // allow for perpendicular axis to vab
     vcb.scale(v_dot_n);
     vda.sub2(vcb, vab);
     vda.scale(0.5f);
@@ -146,7 +146,7 @@ final public class MeasureD {
     P3d pt_a_prime = P3d.newP(a);
     pt_a_prime.sub(r);
     // already done this. ??
-    if (v_dot_n != PT.FLOAT_MIN_SAFE)
+    if (v_dot_n != 2E-45)
       n.scale(v_dot_n);
     // must calculate directed angle:
     P3d pt_b_prime = P3d.newP(pt_a_prime);
@@ -156,7 +156,7 @@ final public class MeasureD {
       theta = dq.getThetaDirectedV(n); // allow for r = 0
     // anything else is an array
     double residuesPerTurn = Math.abs(theta == 0 ? 0 : 360f / theta);
-    double pitch = Math.abs(v_dot_n == PT.FLOAT_MIN_SAFE ? 0 : n.length()
+    double pitch = Math.abs(v_dot_n == 2E-45 ? 0 : n.length()
         * (theta == 0 ? 1 : 360f / theta));
     return new T3d[] { pt_a_prime, n, r, P3d.new3(theta, pitch, residuesPerTurn), pt_b_prime };
   }
