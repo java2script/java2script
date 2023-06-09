@@ -3139,7 +3139,7 @@ Con.consoleOutput = function (s, color) {
   }
    if (con == window.console) {
     if (color == "red")
-      con.err(s);
+      con.error(s);
     else
       con.log(s);
     return;
