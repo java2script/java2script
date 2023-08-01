@@ -1947,6 +1947,7 @@ public class Hashtable<K,V>
 				 * 			key = p.value[0];
 				 */
 				Hashtable.this.remove(key);
+				expectedModCount++;
 			} else {
 
 				synchronized (Hashtable.this) {
