@@ -531,6 +531,10 @@ final public class AU {
 		return x instanceof Float[];
 	}
 
+	public static boolean isADouble(Object x) {
+	    return x instanceof Double[];
+	}
+
 	public static boolean isAD(Object x) {
 		return x instanceof double[];
 	}

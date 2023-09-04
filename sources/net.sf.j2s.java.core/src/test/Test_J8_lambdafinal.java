@@ -30,10 +30,11 @@ public class Test_J8_lambdafinal extends Test_ {
 
 	public static void main(String args[]) {
 		
+		new Test_J8_lambdafinal().
 		testFinal();
 	}
 
-	private static void testFinal() {
+	private void testFinal() {
 
 		Runnable r = () -> {
 			for (String s : new String[] { "a", "b" }) {
@@ -41,12 +42,20 @@ public class Test_J8_lambdafinal extends Test_ {
 					for (int i : new int[] { 0, 1, 2 }) {
 						System.out.println(i + " " + s);
 					}
+					testDone(s);
 
 				};
 				r1.run();
 			}
+			testDone("");
 		};
 		r.run();
 	}
+	
+	private static void testDone(String s) {
+		System.out.println("DONE " + s);
+	}
+	
+	
 
 }

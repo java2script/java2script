@@ -26,7 +26,7 @@ public class JSDummyApplet extends JApplet {
 	   * @j2sNative
 	   * 
 	   * setTimeout(function(){
-	   *   theClass.$clazz$.main$SA.call(null, args || []);
+	   *   v.applet.app = theClass.$clazz$.main$SA.call(null, args || []) || null;
 	   */
 	   JSUtil.readyCallback(v.appletName, v.fullName, v.applet, v);
 	   /**
