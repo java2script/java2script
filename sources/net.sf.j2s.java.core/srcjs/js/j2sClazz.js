@@ -7,6 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2023.04.30 fixes issues when Info.console == window.console
 // BH 2023.03.01 upgrade for Java11 String, including String.isBlank() and CharSequence.lines(String) (in Java11 this is StringRoman1.lines(byte[])
 // BH 2023.02.12 upgrade for (asynchronous?) packaging
 // BH 2023.01.22 fix for Double.doubleToRawLongBits missing and Float.floatToIntBits failing on NaN
@@ -3134,18 +3135,18 @@ c160 += c160+c160+c160;
 
 Con.consoleOutput = function (s, color) {
   var con = consoleDiv;
+  if (con && typeof con == "string")
+    con = consoleDiv = document.getElementById(con)
   if (!con) {
     return false; // BH this just means we have turned off all console action
   }
    if (con == window.console) {
     if (color == "red")
-      con.err(s);
+      con.error(s);
     else
       con.log(s);
     return;
   }
-  if (con && typeof con == "string")
-    con = document.getElementById(con)
 
 	if (s == '\0') {
 	con.innerHTML = "";
@@ -3225,7 +3226,7 @@ Con.clear = function () {
   try {
     Con.metLineBreak = true;
     var console = consoleDiv;
-    if (!console || !(console = document.getElementById (console)))
+    if (console == window.console || !console || typeof console == "string" && !(console = document.getElementById (console)))
       return;
     console.innerHTML = "";
     Con.linesCount = 0;

@@ -113,8 +113,7 @@ final public class MeasureD {
     //         a'+---------a
     //                r 
 
-    V3d vab = new V3d();
-    vab.sub2(b, a);
+    V3d vab = V3d.newVsub(b, a);
     /*
      * testing here to see if directing the normal makes any difference -- oddly
      * enough, it does not. When n = -n and theta = -theta vab.n is reversed,
@@ -125,7 +124,7 @@ final public class MeasureD {
     double theta = dq.getTheta();
     V3d n = dq.getNormal();
     double v_dot_n = vab.dot(n);
-    if (Math.abs(v_dot_n) < 0.0001f)
+    if (Math.abs(v_dot_n) < 0.0001)
       v_dot_n = 0;
     V3d va_prime_d = new V3d();
     va_prime_d.cross(vab, n);
@@ -134,10 +133,10 @@ final public class MeasureD {
     V3d vda = new V3d();
     V3d vcb = V3d.newV(n);
     if (v_dot_n == 0)
-      v_dot_n = PT.FLOAT_MIN_SAFE; // allow for perpendicular axis to vab
+      v_dot_n = 2E-45; // allow for perpendicular axis to vab
     vcb.scale(v_dot_n);
     vda.sub2(vcb, vab);
-    vda.scale(0.5f);
+    vda.scale(0.5d);
     va_prime_d.scale(theta == 0 ? 0 : (vda.length() / Math.tan(theta
         / 2 / 180 * Math.PI)));
     V3d r = V3d.newV(va_prime_d);
@@ -146,18 +145,18 @@ final public class MeasureD {
     P3d pt_a_prime = P3d.newP(a);
     pt_a_prime.sub(r);
     // already done this. ??
-    if (v_dot_n != PT.FLOAT_MIN_SAFE)
+    if (v_dot_n != 2E-45)
       n.scale(v_dot_n);
     // must calculate directed angle:
     P3d pt_b_prime = P3d.newP(pt_a_prime);
     pt_b_prime.add(n);
     theta = computeTorsion(a, pt_a_prime, pt_b_prime, b, true);
-    if (Double.isNaN(theta) || r.length() < 0.0001f)
+    if (Double.isNaN(theta) || r.length() < 0.0001)
       theta = dq.getThetaDirectedV(n); // allow for r = 0
     // anything else is an array
     double residuesPerTurn = Math.abs(theta == 0 ? 0 : 360f / theta);
-    double pitch = Math.abs(v_dot_n == PT.FLOAT_MIN_SAFE ? 0 : n.length()
-        * (theta == 0 ? 1 : 360f / theta));
+    double pitch = Math.abs(v_dot_n == 2E-45 ? 0 : n.length()
+        * (theta == 0 ? 1 : 360.0 / theta));
     return new T3d[] { pt_a_prime, n, r, P3d.new3(theta, pitch, residuesPerTurn), pt_b_prime };
   }
 
@@ -1005,7 +1004,7 @@ final public class MeasureD {
       }
     }
     for (int i = n; --i >= 0;)
-      cpts.removeItemAt(i);
+      cpts.removeItemAt(0);
     return cpts;
   }
 
