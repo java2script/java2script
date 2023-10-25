@@ -371,7 +371,7 @@ public class PT {
     return (i < 0 ? null : getQuotedStringAt(info, i));
   }
 
-  public static double approxD(double f, int n) {
+  public static double approxD(double f, double n) {
     return Math.round (f * n) / n;
   }
 
