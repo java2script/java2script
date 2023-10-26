@@ -6650,7 +6650,7 @@ public abstract class Component implements ImageObserver/*
 		}
 
 		ComponentPeer peer = this.peer;
-		Component heavyweight = (peer instanceof LightweightPeer) ? getNativeContainer() : this;
+		Component heavyweight = (!((JSComponent)this).秘winOrApplet &&	 peer instanceof LightweightPeer) ? getNativeContainer() : this;
 		if (heavyweight == null || !heavyweight.isVisible()) {
 			return false;
 		}
