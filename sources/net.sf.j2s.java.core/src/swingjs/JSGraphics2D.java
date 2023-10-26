@@ -665,6 +665,10 @@ public class JSGraphics2D implements
 	}
 
 	private boolean drawImageXT(Image img, AffineTransform xform, ImageObserver obs) {
+		if (xform == null || xform.isIdentity()) {
+          return drawImage(img, 0, 0, obs);
+		}
+		
 		ctx.save();
 		transformCTX(xform);
 		boolean ret = drawImageFromPixelsOrRaster(img, 0, 0, obs);
