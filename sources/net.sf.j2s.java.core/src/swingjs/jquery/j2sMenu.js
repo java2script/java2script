@@ -217,7 +217,7 @@ J2S.__makeMenu = function(){};
 		 // adds role=xxxx
 	 	 me.refresh("_openSubmenu",n);
 		 // adds mouse binding to role=menuitem
-	 	 ensureMouseSet(ui.menu, li);
+	 	 ensureMouseSet(ui.popupMenu, li);
 		 var v = me.element.find(".ui-j2smenu").not(t.parents(".ui-j2smenu"));
 		 doCmd("_hide", me, v);
 		 try {
@@ -287,6 +287,7 @@ J2S.__makeMenu = function(){};
 		 }
 		 break;
 	 case "collapseAll":
+		 return; // fails for Tracker touch
 		 if (me.closed || me.clickoutDisabled) {
 			 return;
 		 }
@@ -388,7 +389,7 @@ J2S.__makeMenu = function(){};
 $.widget("ui.j2smenu",{
  version:"1.9.2",
  defaultElement:"<ul>",
- delay:30,
+ delay:300,
  options:{icons:{submenu:"ui-icon-carat-1-e"},
  menus:"ul",
  position:{my:"left top",at:"right top"},
@@ -406,8 +407,8 @@ $.widget("ui.j2smenu",{
 	 
 	 this.closed = false;
 	 
-	 if (typeof this.options.delay == "number")
-		 this.delay = this.options.delay;
+//	 if (typeof this.options.delay == "number")
+//		 this.delay = this.options.delay;
 	 
 	 this.activeMenu=this.element,
 	 this.element.uniqueId().addClass("ui-j2smenu ui-widget ui-widget-content ui-corner-all")
@@ -632,9 +633,13 @@ var ensureMouseSet = function(menu, node) {
 
 var setMouseMenuItem = function(menu, node) {
     J2S.unsetMouse(node);
-    node.applet = menu._applet;
-    node._frameViewer = menu.invoker.getFrameViewer$();
     node._menu = menu;
+    node.applet = menu._applet;
+    while (!node.applet && menu.invoker.parent != null) {
+    	menu = menu.invoker.parent;
+    node.applet = menu._applet;
+    }
+    node._frameViewer = menu.invoker.getFrameViewer$();
     J2S.setMouse(node, true);
 }
 

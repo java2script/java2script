@@ -219,8 +219,9 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 		setJ2sMouseHandler();
 		setDraggableEvents();
 		addJQueryFocusCallbacks();
+		// pointerup is more reliable than click
 		if (closerNode != null)
-			bindJQueryEvents(closerNode, "click mouseenter mouseout", SOME_MOUSE_EVENT);
+			bindJQueryEvents(closerNode, "click pointerup pointerenter pointerout mouseup mouseenter mouseout", SOME_MOUSE_EVENT);
 	}
 	
 	protected void setDraggableEvents() {

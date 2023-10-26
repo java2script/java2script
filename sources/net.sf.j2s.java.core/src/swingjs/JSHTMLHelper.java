@@ -79,7 +79,7 @@ public class JSHTMLHelper {
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
 		EventType type = null;
 		JQueryObject node = JSUtil.jQuery.$(/** @j2sNative jQueryEvent.target ||*/ null).closest("a");
-		String href = /** @j2sNative node && node[0].href || */
+		String href = /** @j2sNative target.id && target.id.indexOf("Menu" < 0) && node && node[0] && node[0].href || */
 				null;
 		if (href == null)
 			return JSComponentUI.HANDLED;

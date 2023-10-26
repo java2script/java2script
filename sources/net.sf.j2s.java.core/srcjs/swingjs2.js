@@ -10686,6 +10686,8 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// BH 2023.11.01 adds pointerup, pointerdown, and pointermove to J2S.setMouse
+// BH 2023.11.01 allows null applet in J2S.setMouse (?? should it ever be null?)
 // BH 2023.02.04 adds support for file load cancel
 // BH 2023.01.10 j2sargs typo
 // BH 2022.08.27 fix frame resizing for browsers reporting noninteger pageX, pageY
@@ -12427,11 +12429,11 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	J2S._haveMouse;
 	J2S._firstTouch; // three-position switch: undefined, true, false
 
-	J2S.$bind('body', 'mousedown mousemove mouseup', function(ev) {
+	J2S.$bind('body', 'pointerdown pointermove mousedown mousemove mouseup', function(ev) {
 		J2S._haveMouse = true;
 	});
 	
-	J2S.$bind('body', 'mouseup touchend', function(ev) {
+	J2S.$bind('body', 'pointerup mouseup touchend', function(ev) {
 		mouseUp(null, ev);
 		return true;
 	});
@@ -12465,6 +12467,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	};
 
 	var mouseEnter = function(who, ev) {
+		if (who.applet == null)
+			return;
 		if (J2S._traceMouse)
 			J2S.traceMouse(who,"ENTER", ev);
 
@@ -12484,6 +12488,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 	var mouseDown = function(who, ev) {
 		
+		if (who.applet == null)
+			return;
 		if (J2S._traceMouse)
 			J2S.traceMouse(who,"DOWN", ev);
 
@@ -12524,6 +12530,9 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 //				J2S.setWindowZIndex(who._frameViewer.top.ui.domNode,
 //						Integer.MAX_VALUE);
 			who.applet._processEvent(501, xym, ev, who._frameViewer); // MouseEvent.MOUSE_PRESSED
+			
+			
+			who.isDown = true;
 		}
 
 		return !!(ui || target);
@@ -12534,6 +12543,9 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	var mouseMove = function(who, ev) {
 		// ignore touchmove if J2S._haveMouse
 		
+		if (who.applet == null)
+			return;
+
 		if (ev.type == "touchmove" && 
 				(J2S._firstTouch || J2S._haveMouse)) {
 			return;
@@ -12569,6 +12581,9 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	}
 	
 	var mouseUp = function(who, ev) {
+		who.isDown = false;
+		if (who.applet == null)
+			return;
 		if (J2S._traceMouse)
 			J2S.traceMouse(who,"UP", ev);
 
@@ -12612,6 +12627,21 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	}
 	
 	var mouseClick = function(who, ev) {
+
+		if (who.applet == null) {
+			who.isDown = false;
+			return;
+		}
+		
+		if (who.isDown) {
+		  // this may happen with a pointer. In this case
+		  // we have to generate the down first. 
+			ev.type = "pointerup";
+			mouseUp(who, ev);
+			ev.type = "click";
+			ev.originalEvent.xhandled = false;
+		}
+
 		if (J2S._traceMouse)
 			J2S.traceMouse(who,"CLICK", ev);
 
@@ -12631,6 +12661,9 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	
 	var mouseWheel = function(who, ev) {
 		
+		if (who.applet == null) {
+			return;
+		}
 		// Zoom
 			// not for wheel event, or action will not take place on handle and
 			// track
@@ -12665,6 +12698,9 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	}
 	
 	var mouseLeave = function(who, ev) {
+		if (who.applet == null) {
+			return;
+		}
 		if (J2S._traceMouse)
 			J2S.traceMouse(who,"OUT", ev);
 
@@ -12705,22 +12741,22 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		// swingjs.api.J2SInterface
 
 
-		J2S.$bind(who, (J2S._haveMouse ? 'mousemove' : 'mousemove touchmove'), 
+		J2S.$bind(who, (J2S._haveMouse ? 'mousemove pointermove' : 'pointermove mousemove touchmove'), 
 				function(ev) { return mouseMove(who, ev) });
 
 		J2S.$bind(who, 'click', function(ev) { return mouseClick(who, ev) });
 		
 		J2S.$bind(who, 'DOMMouseScroll mousewheel', function(ev) { return mouseWheel(who, ev) });
 
-		J2S.$bind(who, (J2S._haveMouse ? 'mousedown' : 'mousedown touchstart'), 
+		J2S.$bind(who, (J2S._haveMouse ? 'mousedown pointerdown' : 'pointerdown mousedown touchstart'), 
 				function(ev) { return mouseDown(who, ev) });
 
-		J2S.$bind(who, (J2S._haveMouse ? 'mouseup' : 'mouseup touchend'), 
+		J2S.$bind(who, (J2S._haveMouse ? 'mouseup pointerup' : 'pointerup mouseup touchend'), 
 				function(ev) { return mouseUp(who, ev) });
 
-		J2S.$bind(who, 'mouseenter', function(ev) { return mouseEnter(who, ev) });
+		J2S.$bind(who, 'pointerenter mouseenter', function(ev) { return mouseEnter(who, ev) });
 
-		J2S.$bind(who, 'mouseleave', function(ev) { return mouseLeave(who, ev) });
+		J2S.$bind(who, 'pointerout mouseleave', function(ev) { return mouseLeave(who, ev) });
 
 		// context menu is fired on mouse down, not up, and it's handled already
 		// anyway.
@@ -12733,7 +12769,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		J2S.$bind(who, 'mouseupoutjsmol', 
 				function(evspecial, target, ev) { return mouseUpOut(who, ev) });
 
-		if (who.applet._is2D && !who.applet._isApp) {
+		if (who.applet && who.applet._is2D && !who.applet._isApp) {
 			J2S.$resize(function() {
 				if (!who.applet)
 					return;
@@ -12750,7 +12786,13 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		who.applet = null;
 		who._frameViewer = null;
 		J2S.$bind(who,
-				'mouseupoutjsmol click mousedown touchstart mousemove touchmove mouseup touchend DOMMouseScroll mousewheel contextmenu mouseleave mouseenter mousemoveoutjsmol',
+				'mouseupoutjsmol click touchoutjsmol pointerupoutjsmol '
+				+'mousedown pointerdown touchstart '
+				+'mousemove touchmove pointermove ' 
+				+'mouseup pointerup touchend '
+				+'DOMMouseScroll mousewheel contextmenu '
+				+'mouseleave mouseenter mousemoveoutjsmol '
+				+'pointerout pointerenter pointermoveoutjsmol ',
 				null);
 		J2S.setMouseOwner(null);
 	}
@@ -13766,14 +13808,15 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			$tag.unbind('touchmoveoutjsmol');
 			$tag.unbind('mouseupoutjsmol');
 			$tag.unbind('touchendoutjsmol');
+			$tag.unbind('pointeroutjsmol');
 			J2S._dmouseOwner = null;
 			tag.isDragging = false;
 			tag._isDragger = false;
 			if (isBind) {
-				$tag.bind('mousemoveoutjsmol touchmoveoutjsmol', function(ev) {
+				$tag.bind('mousemoveoutjsmol pointeroutjsmol touchmoveoutjsmol', function(ev) {
 					drag && drag(ev);
 				});
-				$tag.bind('mouseupoutjsmol touchendoutjsmol', function(ev) {
+				$tag.bind('mouseupoutjsmol pointeroutjsmol touchendoutjsmol', function(ev) {
 					up && up(ev);
 				});
 			}
@@ -13896,15 +13939,15 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			return ev;
 		}
 
-		$tag.bind('mousedown touchstart', function(ev) {
+		$tag.bind('pointerdown mousedown touchstart', function(ev) {
 			return down && down(fixTouch(ev));
 		});
 
-		$tag.bind('mousemove touchmove', function(ev) {
+		$tag.bind('pointermove mousemove touchmove', function(ev) {
 			return drag && drag(fixTouch(ev));
 		});
 
-		$tag.bind('mouseup touchend', function(ev) {
+		$tag.bind('pointerup mouseup touchend', function(ev) {
 			// touchend does not express a position, and we don't use it anyway
 			return up && up(ev);
 		});

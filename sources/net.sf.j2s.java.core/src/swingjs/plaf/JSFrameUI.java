@@ -282,6 +282,8 @@ public class JSFrameUI extends JSWindowUI implements FramePeer, JSComponentUI.Em
 			switch (/** @j2sNative jQueryEvent.type || */
 			"") {
 			case "click":
+			case "pointerup":
+			case "mouseup":
 				frameCloserAction();
 				return HANDLED;
 			case "pointerout":
