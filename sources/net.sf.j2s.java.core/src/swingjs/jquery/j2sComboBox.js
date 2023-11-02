@@ -7,6 +7,8 @@
  * 
  */
 
+// BH 2023.11.02 fixed touch issue not causing click -- hidePopup needed a 1-ms timeout
+
 // NOTE: If you change this file, then you need to touch and save JQueryUI.java, as only then
 //       will the transpiler copy this file to site/swingjs/j2s/swingjs/jquery/
 
@@ -91,7 +93,7 @@ J2S.__makeComboBox = function() {
         	display:'none'
         });
         this.list = $( '<ul>', {'class': 'j2scblist', 'id':id+'_list' });
-        this.on2(this.list, 'click mousedown touchstart mousemove touchmove mouseup touchend mousewheel mouseover mouseout mouseenter mouseexit'.split(' '), '_mouse');
+        this.on2(this.list, 'click pointerdown mousedown touchstart mousemove touchmove pointermove pointerup mouseup touchend mousewheel mouseover mouseout mouseenter mouseexit'.split(' '), '_mouse');
         this.popup.append(this.list);        
         this.element.append(this.cont);
         // important to add popup after body so that it does not take on any body attributes 
@@ -287,10 +289,14 @@ J2S.__makeComboBox = function() {
 	  	this.element.focus();
 	  },
   	  hidePopup: function() {
-   		 if (this.options.popupVisible) {
-   			this.options.popupVisible = false;
-   			this.popup.hide();
+  		  // we need a time click here
+  		 var me = this;
+  		 setTimeout(function(){
+   		 if (me.options.popupVisible) {
+   			me.options.popupVisible = false;
+   			me.popup.hide();
    		 }
+  		},1);
    	  },
       _overOpt: function(e) {
     	  this._stopT("_overOpt");
