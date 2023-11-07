@@ -10686,6 +10686,7 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// BH 2023.11.06 adds css touch-action none
 // BH 2023.11.01 adds pointerup, pointerdown, and pointermove to J2S.setMouse
 // BH 2023.11.01 allows null applet in J2S.setMouse (?? should it ever be null?)
 // BH 2023.02.04 adds support for file load cancel
@@ -10927,6 +10928,8 @@ window.J2S = J2S = (function() {
 																	// here --
 																	// untested
 		j._canClickFileReader = !j._isSafari && !j._isChrome; // and others?
+		
+		j.htmlOverflowOriginal = null; // delayed definition
 
 		window.requestAnimationFrame
 				|| (window.requestAnimationFrame = window.setTimeout);
@@ -12487,7 +12490,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	}
 
 	var mouseDown = function(who, ev) {
-		
+		// prevent touch dragging
 		if (who.applet == null)
 			return;
 		if (J2S._traceMouse)
@@ -12776,7 +12779,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 				who.applet._resize();
 			});
 		}
-
+		$(who).css({"touch-action":"none"}); // disable browser panning upon touch-drag
 	}
 
 	J2S.unsetMouse = function(who) {
