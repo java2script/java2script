@@ -72,6 +72,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 			 */
 			return ;
 		}
+		System.out.println("J2S loading file " + file);
 		Properties props = new Properties();
 		try {
 			props.load(new FileInputStream(file));
@@ -117,6 +118,9 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 			if (sourceUnit instanceof SourceFile) {
 				SourceFile unitSource = (SourceFile) sourceUnit;
 				String fileName = new String(unitSource.getFileName());
+				
+				System.out.println("J2S processing file " + fileName);
+
 				int idx = fileName.lastIndexOf('/');
 				String className = fileName.substring(idx + 1, fileName.lastIndexOf('.'));
 				StringBuffer path = new StringBuffer();
@@ -423,6 +427,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 		File jsFile = new File(folderPath, elementName + ".js"); //$NON-NLS-1$
 		try {
 			FileOutputStream fos = new FileOutputStream(jsFile);
+			System.out.println("J2S creating " + jsFile);
 			if (addUTF8Header) {
 				fos.write(new byte[] {(byte) 0xef, (byte) 0xbb, (byte) 0xbf}); // UTF-8 header!
 			}
