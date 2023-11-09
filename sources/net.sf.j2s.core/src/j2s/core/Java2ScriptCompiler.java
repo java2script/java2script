@@ -15,7 +15,9 @@ import java.util.List;
 import java.util.Properties;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTParser;
 
 import j2s.CorePlugin;
@@ -41,6 +43,9 @@ public abstract class Java2ScriptCompiler {
 
 	private final static String J2S_COMPILER_JAVA_VERSION = "j2s.compiler.java.version";
 	private final static String J2S_COMPILER_JAVA_VERSION_DEFAULT = "8";
+
+	private final static String J2S_OUTPUT_PATH = "j2s.output.path";
+	private final static String J2S_OUTPUT_PATH_DEFAULT = "bin";
 
 	protected static final String J2S_SITE_DIRECTORY = "j2s.site.directory";
 	protected static final String J2S_SITE_DIRECTORY_DEFAULT = "site";
@@ -91,8 +96,7 @@ public abstract class Java2ScriptCompiler {
 	protected Properties props;
 
 	protected String projectFolder;
-	protected String projectPath;
-	public String outputPath;
+	protected String outputPath;
 	protected String siteFolder;
 	protected String j2sPath;
 	protected String excludedPaths;
@@ -147,6 +151,7 @@ public abstract class Java2ScriptCompiler {
 	protected Java2ScriptCompiler(boolean isSwingJS, String j2sConfigFileName) {
 		this.isSwingJS = isSwingJS;
 		this.j2sConfigFileName = j2sConfigFileName;
+		System.out.println("Java2ScriptCompiler " + this + " " + isSwingJS + " " + j2sConfigFileName);
 		// initialized only once for SwingJS and once for legacy version
 	}
 
@@ -179,6 +184,7 @@ public abstract class Java2ScriptCompiler {
 			System.out.println("J2S Exception opening " + j2sFile + " " + e.getMessage());
 			props = this.props;
 		}
+		System.out.println("J2S properties in " + activeJ2SFile + " are " + props);
 		return props;
 	}
 
@@ -193,16 +199,16 @@ public abstract class Java2ScriptCompiler {
 	 * 
 	 */
 	protected boolean initializeProject(IJavaProject project, int javaLanguageLevel) {
-
 		this.project = project;
 		if (!j2sConfigFileName.equals(getJ2SConfigName(project))) {
 			// the file .j2s does not exist in the project directory -- skip this project
 			return false;
 		}
-		
-		projectPath = "/" + project.getProject().getName() + "/";
 		projectFolder = project.getProject().getLocation().toOSString();
 		File j2sFile = new File(projectFolder, j2sConfigFileName);
+		props = initializeUsing(j2sFile, 0);
+		if (props == null)
+			props = new Properties();
 		String status = getProperty(J2S_COMPILER_STATUS, J2S_COMPILER_STATUS_ENABLED);
 		if (!J2S_COMPILER_STATUS_ENABLE.equalsIgnoreCase(status)
 				&& !J2S_COMPILER_STATUS_ENABLED.equalsIgnoreCase(status)) {
@@ -213,50 +219,68 @@ public abstract class Java2ScriptCompiler {
 				return false;
 			}
 		}
+		int jslLevel = javaLanguageLevel;
+		if (jslLevel == 8) {
+			// SwingJS allows 8 or 11
+			try {
+				String ver = getProperty(J2S_COMPILER_JAVA_VERSION, J2S_COMPILER_JAVA_VERSION_DEFAULT);
+				jslLevel = Integer.parseInt(ver);
+			} catch (@SuppressWarnings("unused") Exception e) {
+				// ignore
+			}
+		}
+		try {
+			astParser = ASTParser.newParser(jslLevel);
+			System.out.println("J2S compiler version set to " + jslLevel);
+		} catch (@SuppressWarnings("unused") Exception e) {
+			System.out.println("J2S compiler version " + jslLevel + " could not be set; using 8");
+			astParser = ASTParser.newParser(jslLevel);
+		}
 
-		props = initializeUsing(j2sFile, 0);
-		if (props == null)
-			props = new Properties();
-			int jslLevel = javaLanguageLevel;
-			if (jslLevel == 8) {
-				// SwingJS allows 8 or 11
-				try {
-					String ver = getProperty(J2S_COMPILER_JAVA_VERSION, J2S_COMPILER_JAVA_VERSION_DEFAULT);
-					jslLevel = Integer.parseInt(ver);
-				} catch (@SuppressWarnings("unused") Exception e) {
-					// ignore
+		testing = "true".equalsIgnoreCase(getProperty(J2S_TESTING, J2S_TESTING_DEFAULT));
+
+		breakOnError = !"false".equalsIgnoreCase(getProperty(J2S_BREAK_ON_ERROR, J2S_BREAK_ON_ERROR_DEFAULT));
+
+		// includes @j2sDebug blocks
+		isDebugging = J2S_COMPILER_MODE_DEBUG
+				.equalsIgnoreCase(getProperty(J2S_COMPILER_MODE, J2S_COMPILER_MODE_DEFAULT));
+
+		siteFolder = getProperty(J2S_SITE_DIRECTORY, J2S_SITE_DIRECTORY_DEFAULT);
+		siteFolder = projectFolder + "/" + siteFolder;
+
+		outputPath = getProperty(J2S_OUTPUT_PATH, null);
+		if (outputPath == null) {
+	    outputPath = J2S_OUTPUT_PATH_DEFAULT; // bin
+			try {
+				IPath loc = project.getOutputLocation();
+				outputPath = loc.toString().substring(loc.toString().lastIndexOf('/') + 1);
+			} catch (JavaModelException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} 
+		}
+
+		if (isDebugging) {
+			System.out.println("J2S siteFolder=" + siteFolder + " outputPath=" + outputPath);
+		}
+		excludedPaths = getProperty(J2S_EXCLUDED_PATHS, J2S_EXCLUDED_PATHS_DEFAULT);
+		lstExcludedPaths = null;
+		if (excludedPaths != null) {
+			lstExcludedPaths = new ArrayList<String>();
+			String[] paths = excludedPaths.split(excludedPaths.indexOf(";") >= 0 ? ";" : ",");
+			for (int i = 0; i < paths.length; i++) {
+				String p = paths[i].trim();
+				if (p.length() > 0) {
+					lstExcludedPaths.add(p);
 				}
 			}
-			try {
-				astParser = ASTParser.newParser(jslLevel);
-				System.out.println("J2S compiler version set to " + jslLevel);
-			} catch (@SuppressWarnings("unused") Exception e) {
-				System.out.println("J2S compiler version " + jslLevel + " could not be set; using 8");
-				astParser = ASTParser.newParser(jslLevel);
-			}
-
-			testing = "true".equalsIgnoreCase(getProperty(J2S_TESTING, J2S_TESTING_DEFAULT));
-
-			breakOnError = !"false".equalsIgnoreCase(getProperty(J2S_BREAK_ON_ERROR, J2S_BREAK_ON_ERROR_DEFAULT));
-
-			// includes @j2sDebug blocks
-			isDebugging = J2S_COMPILER_MODE_DEBUG
-					.equalsIgnoreCase(getProperty(J2S_COMPILER_MODE, J2S_COMPILER_MODE_DEFAULT));
-
-			siteFolder = getProperty(J2S_SITE_DIRECTORY, J2S_SITE_DIRECTORY_DEFAULT);
-			siteFolder = projectFolder + "/" + siteFolder;
-			
-			excludedPaths = getProperty(J2S_EXCLUDED_PATHS, J2S_EXCLUDED_PATHS_DEFAULT);
-			lstExcludedPaths = null;
-			if (excludedPaths != null) {
-				lstExcludedPaths = new ArrayList<String>();
-				String[] paths = excludedPaths.split(";");
-				for (int i = 0; i < paths.length; i++)
-					if (paths[i].trim().length() > 0)
-						lstExcludedPaths.add(projectPath + paths[i].trim() + "/");
-				if (lstExcludedPaths.size() == 0)
-					lstExcludedPaths = null;
-			}
+			if (lstExcludedPaths.size() == 0)
+				lstExcludedPaths = null;
+		}
+		if (isDebugging && lstExcludedPaths != null) {
+			int n = lstExcludedPaths.size();
+			System.out.println("J2S found " + n + " excludedPath" + Java2ScriptCompilationParticipant.plural(n));
+		}
 		return true;
 	}
 
@@ -266,6 +290,8 @@ public abstract class Java2ScriptCompiler {
 
 	private boolean excludeFile(String filePath) {
 		if (lstExcludedPaths != null) {
+			if (filePath.indexOf('\\') >= 0)
+				filePath = filePath.replace('\\', '/');
 			for (int i = lstExcludedPaths.size(); --i >= 0;)
 				if (filePath.indexOf(lstExcludedPaths.get(i)) >= 0) {
 					return true;
@@ -296,7 +322,7 @@ public abstract class Java2ScriptCompiler {
 		}
 		File f = new File(j2sPath, elementName + ".js");
 		if (isDebugging)
-			System.out.println("J2S Compiler creating " + f);
+			System.out.println("J2S Compiler creating " + js.length() + " " + f);
 		writeToFile(f, js);
 	}
 

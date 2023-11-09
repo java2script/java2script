@@ -142,6 +142,7 @@ public class CorePlugin extends Plugin {
 	 * The constructor.
 	 */
 	public CorePlugin() {
+		System.out.println("j2s.core CorePlugin created");
 		plugin = this;
 	}
 
@@ -149,7 +150,7 @@ public class CorePlugin extends Plugin {
 	 * This method is called upon plug-in activation
 	 */
 	public void start(BundleContext context) throws Exception {
-		System.out.println(VERSION + " started");
+		System.out.println("J2S " + VERSION + " started");
 		super.start(context);
 	}
 
@@ -157,7 +158,7 @@ public class CorePlugin extends Plugin {
 	 * This method is called when the plug-in is stopped
 	 */
 	public void stop(BundleContext context) throws Exception {
-		System.out.println("J2S 4.2 stopped");
+		System.out.println("J2S " + VERSION + " stopped");
 		super.stop(context);
 		plugin = null;
 	}

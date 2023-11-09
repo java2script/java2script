@@ -4,7 +4,7 @@ Bundle-Name: Java2Script Core SwingJS and Legacy
 Bundle-SymbolicName: j2s.core;singleton:=true
 Bundle-Version: 5.0.1
 Bundle-Activator: j2s.CorePlugin
-Bundle-Vendor: j2s.sourceforge.net
+Bundle-Vendor: bobhanson.sourceforge.net
 Bundle-ActivationPolicy: lazy 
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jdt.core,

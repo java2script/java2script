@@ -168,6 +168,7 @@ public class Java2ScriptSwingJSCompiler extends Java2ScriptCompiler {
 		if (!super.initializeProject(project, AST.JLS8))
 			return false;
 
+		System.out.println("Swingjs initializeProject " + props);
 		nResources = nSources = nJS = nHTML = 0;
  
 		allowAsyncThread = "true".equalsIgnoreCase(getProperty(J2S_ALLOW_ASYNC_THREAD, J2S_ALLOW_ASYNC_THREAD_DEFAULT));

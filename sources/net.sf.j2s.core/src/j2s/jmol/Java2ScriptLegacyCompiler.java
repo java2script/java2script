@@ -32,7 +32,7 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 			return false;
 		}
 		j2sPath = siteFolder + "/j2s";
-		System.out.println("J2S site path is " + j2sPath);
+		System.out.println("J2S site folder is " + j2sPath);
 		return true;
 	}
 
@@ -67,9 +67,7 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 			e.printStackTrace();
 			errorOccurs = true;
 		}
-		if (!errorOccurs) {
-			// J2SDependencyCompiler.outputJavaScript(dvisitor, root, binFolder);
-		} else {
+		if (errorOccurs) {
 			String elementName = root.getJavaElement().getElementName();
 			// if (elementName.endsWith(".class") || elementName.endsWith(".java")) {
 			// //$NON-NLS-1$//$NON-NLS-2$
@@ -92,7 +90,6 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 		visitor.setSupportsObjectStaticFields(objectStaticFields);
 		isDebugging = "debug".equals(props.getProperty("j2s.compiler.mode"))
 				|| "debug".equals(props.getProperty("j2s.compiler.status"));
-
 		visitor.setDebugging(isDebugging);
 		dvisitor.setDebugging(isDebugging);
 		boolean toCompress = "release".equals(props.getProperty("j2s.compiler.mode"));
@@ -106,7 +103,7 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 			errorOccurs = true;
 		}
 		if (!errorOccurs) {
-			Java2ScriptLegacyCompiler.outputJavaScript(visitor, dvisitor, root, outputPath, props, trailer);
+			outputJavaScript(visitor, dvisitor, root, outputPath, trailer);
 			return true;
 		}
 		String folderPath = outputPath;
@@ -127,8 +124,8 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 		return false;
 	}
 
-	public static void outputJavaScript(ASTScriptVisitor visitor, DependencyASTVisitor dvisitor, CompilationUnit fRoot,
-			String outputPath, Properties props, String trailer) {
+	private void outputJavaScript(ASTScriptVisitor visitor, DependencyASTVisitor dvisitor, CompilationUnit fRoot,
+			String outputPath, String trailer) {
 		String js = dvisitor.getDependencyScript(visitor.getBuffer());
 		js = js.replaceAll("cla\\$\\$", "c\\$").replaceAll("innerThis", "i\\$").replaceAll("finalVars", "v\\$")
 				.replaceAll("\\.callbacks", "\\.b\\$").replaceAll("\\.\\$finals", "\\.f\\$");
@@ -148,7 +145,7 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 				}
 			}
 		}
-		File jsFile = new File(outputPath, elementName + ".js"); //$NON-NLS-1$
+		File jsFile = new File(outputPath, elementName + ".js"); //$NON-NLS-1
 		writeToFile(jsFile, js + ";//" + trailer);
 
 		String[] classNameSet = dvisitor.getClassNames();
@@ -219,7 +216,7 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 
 	@Override
 	public void finalizeProject() {
-		System.out.println("J2S Jmol finalized for " + projectPath);
+		System.out.println("J2S Jmol finalized for " + projectFolder);
 	}
 
 }
