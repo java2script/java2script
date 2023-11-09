@@ -1,7 +1,5 @@
 package j2s.jmol;
 
-import net.sf.j2s.core.hotspot.InnerHotspotServer;
-
 import org.eclipse.core.runtime.Plugin;
 import org.osgi.framework.BundleContext;
 
@@ -10,7 +8,7 @@ import org.osgi.framework.BundleContext;
  */
 public class CorePlugin extends Plugin {
 
-	public static final String VERSION = "J2S legacy 4.2_20231108";
+	public static final String VERSION = "J2S Jmol legacy 4.2_20231108";
 	//The shared instance.
 	private static CorePlugin plugin;
 	
@@ -27,9 +25,6 @@ public class CorePlugin extends Plugin {
 	public void start(BundleContext context) throws Exception {
 		System.out.println(VERSION + " started");
 		super.start(context);
-		if (!InnerHotspotServer.isServerStarted()) {
-			InnerHotspotServer.getSingletonServer().startServer();
-		}
 	}
 
 	/**
@@ -39,9 +34,6 @@ public class CorePlugin extends Plugin {
 		System.out.println("J2S 4.2 stopped");
 		super.stop(context);
 		plugin = null;
-		if (InnerHotspotServer.isServerStarted()) {
-			InnerHotspotServer.getSingletonServer().stopServer();
-		}
 	}
 
 	/**
