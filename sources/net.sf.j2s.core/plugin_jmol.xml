@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+ 	
+ 	<extension
+         point="org.eclipse.jdt.core.compilationParticipant">
+      <compilationParticipant
+            class="j2s.jmol.Java2ScriptCompilationParticipant"
+            createsProblems="false"
+            id="Legacy Jmol Java2Script CompilationParticipant"
+            modifiesEnvironment="false">
+      </compilationParticipant>
+   </extension>
+
+
+</plugin>

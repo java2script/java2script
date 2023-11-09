@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+
+<!-- =================================================================================== -->
+<!-- Extension Point: Extended Compiler                                           -->
+<!-- =================================================================================== -->
+<extension-point name="Extended Compiler" 
+	id="extendedCompiler" 
+	schema="schema/extendedCompiler.exsd"/>
+
+<!-- =================================================================================== -->
+<!-- Extension Point: Extended AST Script Visitor                                           -->
+<!-- =================================================================================== -->
+<extension-point name="Extended AST Script Visitor" 
+	id="extendedASTScriptVisitor" 
+	schema="schema/extendedASTScriptVisitor.exsd"/>
+	
+   <extension
+         id="net.sf.j2s.core.j2scompiler"
+         name="Java2Script Compiler"
+         point="net.sf.j2s.core.extendedCompiler">
+      <extendedCompiler
+            class="net.sf.j2s.core.compiler.Java2ScriptCompiler"
+            id="net.sf.j2s.j2scompiler"/>
+      <!--
+      <extendedCompiler
+            class="net.sf.j2s.core.compiler.J2SDependencyCompiler"
+            id="net.sf.j2s.dependencyCompiler"/>
+      -->
+   </extension>
+
+
+<!-- =================================================================================== -->
+<!-- Extension: Java Nature                                                              -->
+<!-- =================================================================================== -->
+
+<extension 
+	point="org.eclipse.core.resources.natures" 
+	id="java2scriptnature"
+	name="Java2Script Nature">
+	<runtime>
+		<run class="net.sf.j2s.core.Java2ScriptProjectNature">
+		</run>
+	</runtime>
+ <builder id="net.sf.j2s.core.java2scriptbuilder"/>
+</extension>
+
+
+	<!-- =================================================================================== -->
+	<!-- Extension: Java Builder                                                             -->
+	<!-- =================================================================================== -->
+	
+	<extension 
+		point="org.eclipse.core.resources.builders" 
+		id="java2scriptbuilder"
+		name="Java2Script Builder">
+		<builder>
+			<run class="net.sf.j2s.core.builder.Java2ScriptBuilder">
+			</run>
+		</builder>
+	</extension>
+
+ <extension
+       id="InternalASTScriptVisitor"
+       name="InternalASTScriptVisitor"
+       point="net.sf.j2s.core.extendedASTScriptVisitor">
+    <extendedASTScriptVisitor
+          class="net.sf.j2s.core.compiler.ASTExtendedVisitor"
+          id="BasicASTScriptVisitor"/>
+    <extendedASTScriptVisitor
+          class="net.sf.j2s.core.compiler.SWTExtendedVisitor"
+          id="SWTASTScriptVisitor"/>
+ </extension>
+
+</plugin>

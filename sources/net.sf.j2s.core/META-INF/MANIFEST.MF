@@ -1,16 +1,13 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Java2Script Core
-Bundle-SymbolicName: net.sf.j2s.core; singleton:=true
-Bundle-Version: 2.0.0
-Bundle-Activator: net.sf.j2s.core.CorePlugin
-Bundle-Vendor: j2s.sourceforge.net
+Bundle-Name: Java2Script Jmol
+Bundle-SymbolicName: j2s.jmol; singleton:=true
+Bundle-Version: 0.4.2
+Bundle-Activator: j2s.jmol.CorePlugin
+Bundle-Vendor: jmol.org
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jdt.core,
  org.eclipse.core.resources
 Eclipse-AutoStart: true
-Export-Package: net.sf.j2s.core.astvisitors,
- net.sf.j2s.core.compiler,
- net.sf.j2s.core.hotspot,
- net.sf.j2s.core
+Export-Package: j2s.jmol

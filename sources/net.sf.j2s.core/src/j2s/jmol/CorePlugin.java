@@ -1,4 +1,4 @@
-package j2s.common;
+package j2s.jmol;
 
 import net.sf.j2s.core.hotspot.InnerHotspotServer;
 
