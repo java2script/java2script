@@ -1,13 +1,10 @@
-package net.sf.j2s.core;
-
-//import net.sf.j2s.core.hotspot.InnerHotspotServer;
+package j2s;
 
 import org.eclipse.core.runtime.Plugin;
 import org.osgi.framework.BundleContext;
 
 /**
  * The main plugin class to be used in the desktop.
- * 
  */
 public class CorePlugin extends Plugin {
 
@@ -20,16 +17,17 @@ public class CorePlugin extends Plugin {
 	 * the actual "x.y.z" version is specified in plugin.xml.
 	 * 
 	 * Note that Eclipse must be started with the -clean flag if it is to register
-	 * the bundle version properly. So we use VERSION here instead, and
-	 * also we recommend the plugin added to Eclipse be given just the name
-	 * "net.sf.j2s.core.jar" not "net.sf.j2s.core.3.2.5"
+	 * the bundle version properly. So we use VERSION here instead
+	 * 
+	 * This version should be also placed in MANIFEST.MF for the bundle version
 	 * 
 	 */
-	public static String VERSION = "3.3.1-v7";
+	public static String VERSION = "5.0.1-v1";
 	
 	// if you change the x.x.x number, be sure to also indicate that in 
 	// j2sApplet.js and also (Bob only) update.bat, update-clean.bat
 
+	// BH 2023.11.09 -- 5.0.1-v1 merges Jmol legacy (.j2sjmol) with Java8//11 (.j2s)
 	// BH 2023.03.29 -- 3.3.1-v7 fixes outer static method call from within lambda expression. 
 	// BH 2023.02.09 -- 3.3.1.v6 fixes j2s.excluded.paths needing /src/xxxx
 	// BH 2022.06.27 -- 3.3.1-v5 fixes missing method annotations
@@ -151,22 +149,17 @@ public class CorePlugin extends Plugin {
 	 * This method is called upon plug-in activation
 	 */
 	public void start(BundleContext context) throws Exception {
+		System.out.println(VERSION + " started");
 		super.start(context);
-		System.out.println("net.sf.j2s.core." + context.getBundle().getVersion() + "/" + VERSION + " started");
-//		if (!InnerHotspotServer.isServerStarted()) {
-//			InnerHotspotServer.getSingletonServer().startServer();
-//		}
 	}
 
 	/**
 	 * This method is called when the plug-in is stopped
 	 */
 	public void stop(BundleContext context) throws Exception {
+		System.out.println("J2S 4.2 stopped");
 		super.stop(context);
 		plugin = null;
-//		if (InnerHotspotServer.isServerStarted()) {
-//			InnerHotspotServer.getSingletonServer().stopServer();
-//		}
 	}
 
 	/**

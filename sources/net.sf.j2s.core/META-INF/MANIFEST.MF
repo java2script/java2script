@@ -1,13 +1,14 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Java2Script Core
-Bundle-SymbolicName: net.sf.j2s.core;singleton:=true
-Bundle-Version: 3.3.1
-Bundle-Activator: net.sf.j2s.core.CorePlugin
+Bundle-Name: Java2Script Core SwingJS and Legacy
+Bundle-SymbolicName: j2s.core;singleton:=true
+Bundle-Version: 5.0.1
+Bundle-Activator: j2s.CorePlugin
 Bundle-Vendor: j2s.sourceforge.net
+Bundle-ActivationPolicy: lazy 
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jdt.core,
  org.eclipse.core.resources
-Eclipse-AutoStart: true
-Export-Package: net.sf.j2s.core
+Export-Package: j2s,j2s.core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Automatic-Module-Name: Java2ScriptCore 
