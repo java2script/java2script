@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 public class ReferenceASTVisitor extends ASTVisitor {
 
 	private boolean isReferenced = false;
+	private boolean isConstant = false;
 	
 	public ReferenceASTVisitor() {
 		super();
@@ -31,8 +32,14 @@ public class ReferenceASTVisitor extends ASTVisitor {
 		super(visitDocTags);
 	}
 
+	/**
+	 * @return true if the expression is not a constant or the constant
+	 * or the type is not a number nor a boolean primitive.
+	 * 
+	 */
 	public boolean visit(SimpleName node) {
 		Object constValue = node.resolveConstantExpressionValue();
+		isConstant = (constValue == null);
 		if (constValue != null && (constValue instanceof Number
 				|| constValue instanceof Boolean)) {
 			return false;
@@ -45,8 +52,13 @@ public class ReferenceASTVisitor extends ASTVisitor {
 		return isReferenced;
 	}
 
+	public boolean isConstant() {
+		return isConstant;
+	}
+
 	public void setReferenced(boolean isReferenced) {
 		this.isReferenced = isReferenced;
+		isConstant = false;
 	};
 	
 }

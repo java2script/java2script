@@ -283,7 +283,7 @@ public class Java2ScriptSwingJSCompiler extends Java2ScriptCompiler {
 			addHTML(visitor.getAppList(false), siteFolder, htmlTemplate, false);
 			String packageName = visitor.getMyPackageName();
 			if (packageName != null) {
-				nResources += checkCopiedResources(packageName, sourceLocation);
+				nResources += checkCopiedResources(packageName, sourceLocation, j2sPath);
 			}
 			return true;
 		} catch (Throwable e) {

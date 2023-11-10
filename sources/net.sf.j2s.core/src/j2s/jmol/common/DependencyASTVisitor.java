@@ -65,6 +65,9 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
  * 2006-5-2
  */
 public class DependencyASTVisitor extends ASTEmptyVisitor {
+
+	// BH 2023.11.10 interfaces as well must be ignored
+
 	
 	protected Set classNameSet = new HashSet();
 
@@ -208,7 +211,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 				optionals.remove(s);
 			}
 		}
-		
+
 		String js = mainJS.toString();
 		if (musts.size() == 0 && requires.size() == 0 && optionals.size() == 0) {
 			return js;
@@ -218,6 +221,39 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 			int index = js.indexOf("\r\n");
 			buf.append(js.substring(0, index + 2));
 			js = js.substring(index + 2);
+		}
+
+		if (ignores.size() > 0) {
+			// BH 2023.11.10 interfaces as well and remove javax.sound.sampled.LineListener in the following case:
+			//	Clazz.instantialize (this, arguments);
+			//}, org.jmol.util, "JmolAudio", null, [javax.sound.sampled.LineListener, org.jmol.api.JmolAudioPlayer]);
+	
+			
+			int pt = js.indexOf("Clazz.instantialize");
+			pt = (pt < 0 ? -1 : js.indexOf("},", pt));
+			int pt1 = (pt < 0 ? -1 : js.indexOf("\r\n", pt + 2));
+			if (pt1 > 0) {
+				String js1 = js.substring(0, pt1);
+				boolean fixed = false;
+				for (Iterator iter = ignores.iterator(); iter.hasNext();) {
+					String s = (String) iter.next();
+					pt = js1.indexOf(s);
+					if (pt > 2) {
+						fixed = true;
+						int len = s.length();
+						if (js1.charAt(pt + len) == ',') {
+							len += 2;
+						} else if (js1.charAt(pt - 2) == ',') {
+							len += 2;
+							pt -= 2;
+						}
+						js1 = js1.substring(0, pt) + js1.substring(pt + len);
+					}
+				}
+				if (fixed) {
+					js = js1 + js.substring(pt1);
+				}
+			}
 		}
 		buf.append("Clazz.load (");
 		if (musts.size() != 0 || requires.size() != 0) {

@@ -101,6 +101,8 @@ public abstract class Java2ScriptCompiler {
 	protected String j2sPath;
 	protected String excludedPaths;
 
+	protected String[] packageFixes;
+	
 	protected List<String> lstExcludedPaths;
 
 	protected boolean isCleanBuild;
@@ -148,10 +150,18 @@ public abstract class Java2ScriptCompiler {
 		}
 	}
 
+	public static Java2ScriptCompiler newCompiler(IJavaProject project) {
+		String j2stype = getJ2SConfigName(project);
+		return ( J2S_CONFIG_JMOL.equals(j2stype) ? 
+				new Java2ScriptLegacyCompiler()
+				: J2S_CONFIG_SWINGJS.equals(j2stype) ?
+						new Java2ScriptSwingJSCompiler() : null);
+	}
+
 	protected Java2ScriptCompiler(boolean isSwingJS, String j2sConfigFileName) {
 		this.isSwingJS = isSwingJS;
 		this.j2sConfigFileName = j2sConfigFileName;
-		System.out.println("Java2ScriptCompiler " + this + " " + isSwingJS + " " + j2sConfigFileName);
+		System.out.println("Java2ScriptCompiler " + this + " isSwingJS=" + isSwingJS + " " + j2sConfigFileName);
 		// initialized only once for SwingJS and once for legacy version
 	}
 
@@ -326,7 +336,7 @@ public abstract class Java2ScriptCompiler {
 		writeToFile(f, js);
 	}
 
-	protected String getFileContents(File file) {
+	protected static String getFileContents(File file) {
 		try {
 			StringBuilder sb = new StringBuilder();
 			FileInputStream is = new FileInputStream(file);
@@ -378,8 +388,15 @@ public abstract class Java2ScriptCompiler {
 		File f = null;
 		if (files != null)
 			try {
-				if (!target.exists())
-					Files.createDirectories(target.toPath());
+				File p;
+				if (packageFixes != null) {
+					p = new File(fixPackageName(target.toString().replace('\\','/')));
+				} else {
+					p = target;
+				}
+
+				if (!p.exists())
+					Files.createDirectories(p.toPath());
 				for (int i = 0; i < files.length; i++) {
 					f = files[i];
 					if (f == null) {
@@ -392,10 +409,11 @@ public abstract class Java2ScriptCompiler {
 							//
 							copiedResourcePackages.add(path);
 							n++;
-							Files.copy(f.toPath(), new File(target, f.getName()).toPath(),
+							File fnew = new File(p, f.getName());
+							Files.copy(f.toPath(), fnew.toPath(),
 									StandardCopyOption.REPLACE_EXISTING);
 							if (isDebugging)
-								System.out.println("J2S copied to site: " + path);
+								System.out.println("J2S copied to site: " + path + " as " + fnew.toPath());
 						}
 					}
 				}
@@ -406,7 +424,7 @@ public abstract class Java2ScriptCompiler {
 		return n;
 	}
 
-	protected int checkCopiedResources(String packageName, String sourceLocation) {
+	protected int checkCopiedResources(String packageName, String sourceLocation, String outputDir) {
 		int pt = packageName.indexOf(".");
 		if (pt >= 0)
 			packageName = packageName.substring(0, pt);
@@ -423,16 +441,19 @@ public abstract class Java2ScriptCompiler {
 		}
 		String sourceDir = sourceLocation.substring(0, pt);
 		File src = new File(sourceDir, packageName);
-		File dest = new File(j2sPath, packageName);
+		File dest = new File(outputDir, packageName);
 		return copySiteResources(src, dest);
 	}
 
-	public static Java2ScriptCompiler newCompiler(IJavaProject project) {
-		String j2stype = getJ2SConfigName(project);
-		return ( J2S_CONFIG_JMOL.equals(j2stype) ? 
-				new Java2ScriptLegacyCompiler()
-				: J2S_CONFIG_SWINGJS.equals(j2stype) ?
-						new Java2ScriptSwingJSCompiler() : null);
+	protected String fixPackageName(String name) {
+		if (packageFixes == null)
+			return name;
+		for (int i = 0; i < packageFixes.length; i++) {
+			name = name.replaceAll(packageFixes[i++], packageFixes[i]);
+		}
+		return name;
 	}
-		
+
+	
+			
 }

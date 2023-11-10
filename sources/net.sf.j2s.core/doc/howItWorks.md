@@ -1,5 +1,16 @@
 ***Java2Script: How It Works***
 
+**java2script/Jmol**
+
+Jmol was adapted for JavaScript between 2013 and 2015, before SwingJS was conceptualized. 
+As such, it use the "legacy" version of the transpiler created and formerly maintained 
+solely by Zhou Renjien. This code was the basis for SwingJS, and by careful adapting Jmol
+to fit it, we could make it work with this somewhat quirky code. (For example, there is no
+support for boxing and unboxing numbers -- int i = Integer.valueOf(3) is not properly turned
+into just the number 3. I got around this in those early days by just going through all 
+(and I mean ALL) of the Jmol code, making sure there were no implicit boxing or unboxing. 
+
+
 **java2script/SwingJS**
 
 The full java2script/SwingJS operation involves two parts: Creating the JavaScript from the abstract syntax tree (java2script), and running that within the browser (SwingJS). Both are discussed below.
@@ -9,11 +20,10 @@ The code for these two parts are well-separated:
 net.sf.j2s.core       java2script transpiler
 net.sf.j2s.java.core  SwingJS runtime
 
-[Note: You may notice that the java2script project includes several other net.sf.... projects. Frankly, I have no idea what they are for. My guess is that they don't work. I think perhaps they were early attempts to get all this working within Eclipse at runtime, with "hot" connections to code. But that never ever worked for me, and what we have now -- direct creation of a site directory that can be debugged in a standard external browser is way better, anyway. I have left them there just because I haven't taken the time to get rid of them.]
 
 **java2script transpiler**
 
-[Note: Changes in java2script should be necessary only when core Java syntax changes or is supplemented in the core Java. For example, Java 8 allows switch cases that are String constants, while Java 6 does not. When we went to Java 8, we had to modify Java2ScriptVisitor.java to account for that. If ever there is a need to fix something that the java2script compiler is doing wrong or to adapt to new Java syntax, as for Java 11, look in net.sf.j2s.core.Java2ScriptVisitor.]
+[Note: Changes in java2script should be necessary only when core Java syntax changes or is supplemented in the core Java. For example, Java 8 allows switch cases that are String constants, while Java 6 does not. When we went to Java 8, we had to modify Java2ScriptVisitor.java to account for that. If ever there is a need to fix something that the java2script compiler is doing wrong or to adapt to new Java syntax, as for Java 11, look in j2s.swingjs.Java2ScriptVisitor.]
 
 A compiler converts code in one computer language to another. Typically this is from a higher-level language to a lower-level "machine code" language. In the case of the Java compiler, this is from written Java code (*.java) to "Java byte code" (*.class). In the case of  of java2script, this is from Java to JavaScript. There are two basic requirements of a compiler: reading and writing. The reading process involves converting the written Java code to an <i>abstract syntax tree</i> [https://en.wikipedia.org/wiki/Abstract_syntax_tree]. The writing process involves scanning that tree, creating one or more output files from the original input file. 
 
