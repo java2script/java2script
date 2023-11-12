@@ -105,13 +105,10 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 		}
 
 		ASTScriptVisitor visitor = new ASTScriptVisitor();
-		
-		System.out.println("J2SL109 " + visitor.supportsObjectStaticFields);
-
-		
 		isDebugging = "debug".equals(props.getProperty("j2s.compiler.mode"));
  		visitor.setDebugging(isDebugging);
 		dvisitor.setDebugging(isDebugging);
+		dvisitor.setToCompileVariableName(false); // no compression
 		errorOccurs = false;
 		try {
 			root.accept(visitor);

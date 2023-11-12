@@ -24,7 +24,7 @@
 
    	<echo>creating dist/Jmol-j2s-site.zip </echo>
    	<zip destfile="dist/Jmol-j2s-site.zip" basedir="site_jmol" >
-   		<exclude name="swingjs/j2s/test/**"/>
+   		<exclude name="jsmol/j2s/test/**"/>
    		<exclude name="*.html"/>
    	</zip>
    	

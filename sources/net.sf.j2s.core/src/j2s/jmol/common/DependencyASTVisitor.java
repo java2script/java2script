@@ -87,7 +87,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 	
 	private ASTNode javadocRoot = null;
 
-	protected boolean toCompileVariableName = true;
+	protected boolean toCompileVariableName = false; // BH 2023.11.12
 	
 	public String discardGenericType(String name) {
 		return ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).discardGenericType(name);
@@ -1046,9 +1046,9 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		return toCompileVariableName;
 	}
 
-//	public void setToCompileVariableName(boolean toCompileVariableName) {
-//		this.toCompileVariableName = toCompileVariableName;
-//	}
+	public void setToCompileVariableName(boolean toCompileVariableName) {
+		this.toCompileVariableName = toCompileVariableName;
+	}
 	
 	public boolean visit(MethodDeclaration node) {
 		IMethodBinding mBinding = node.resolveBinding();
