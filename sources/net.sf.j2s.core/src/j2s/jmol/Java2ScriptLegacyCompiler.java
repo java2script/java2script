@@ -13,7 +13,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import j2s.CorePlugin;
 import j2s.core.Java2ScriptCompiler;
 import j2s.jmol.common.ASTScriptVisitor;
-import j2s.jmol.common.ASTVariableVisitor;
 import j2s.jmol.common.DependencyASTVisitor;
 
 public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
@@ -106,15 +105,13 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 		}
 
 		ASTScriptVisitor visitor = new ASTScriptVisitor();
-		boolean objectStaticFields = "enable".equals(props.getProperty("j2s.compiler.static.quirks"));
-		visitor.setSupportsObjectStaticFields(objectStaticFields);
-		isDebugging = "debug".equals(props.getProperty("j2s.compiler.mode"))
-				|| "debug".equals(props.getProperty("j2s.compiler.status"));
-		visitor.setDebugging(isDebugging);
+		
+		System.out.println("J2SL109 " + visitor.supportsObjectStaticFields);
+
+		
+		isDebugging = "debug".equals(props.getProperty("j2s.compiler.mode"));
+ 		visitor.setDebugging(isDebugging);
 		dvisitor.setDebugging(isDebugging);
-		boolean toCompress = "release".equals(props.getProperty("j2s.compiler.mode"));
-		((ASTVariableVisitor) visitor.getAdaptable(ASTVariableVisitor.class)).setToCompileVariableName(toCompress);
-		dvisitor.setToCompileVariableName(toCompress);
 		errorOccurs = false;
 		try {
 			root.accept(visitor);
@@ -246,8 +243,8 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 	@Override
 	protected String getDefaultJ2SFile() {
 		return "#j2sjmol default configuration file created by j2s.core plugin " + CorePlugin.VERSION + " " + new Date()
-				+ "\n\n" + "#enable the Java2Script transpiler -- comment out to disable\n"
-				+ "# default is \"enabled\".\n" + "j2s.compiler.status=enable\n\n"
+				+ "\n\n" + "#enable the Java2Script transpiler -- set to \"disabled\" to disable\n"
+				+ "# default is \"enabled\".\n" + "j2s.compiler.status=enabled\n\n"
 				+ "# destination directory for all JavaScript\n" + "j2s.site.directory=site\n\n"
 				+ "# uncomment j2s.* lines to process:\n\n"
 				+ "# a semicolon-separated list of package-level file paths to be excluded "

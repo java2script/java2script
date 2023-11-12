@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Properties;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -43,12 +42,13 @@ public abstract class Java2ScriptCompiler {
 	private final static String J2S_COMPILER_STATUS = "j2s.compiler.status";
 	private final static String J2S_COMPILER_STATUS_ENABLE = "enable";
 	private final static String J2S_COMPILER_STATUS_ENABLED = "enabled";
+	private final static String J2S_COMPILER_STATUS_DEFAULT = "enabled";
 
 	private final static String J2S_COMPILER_JAVA_VERSION = "j2s.compiler.java.version";
 
-	private final static String J2S_OUTPUT_PATH = "j2s.output.path";
-	private final static String J2S_OUTPUT_PATH_DEFAULT = "bin";
-
+//	private final static String J2S_OUTPUT_PATH = "j2s.output.path";
+//	private final static String J2S_OUTPUT_PATH_DEFAULT = "bin";
+//
 	protected static final String J2S_SITE_DIRECTORY = "j2s.site.directory";
 	protected static final String J2S_SITE_DIRECTORY_DEFAULT = "site";
 
@@ -99,7 +99,7 @@ public abstract class Java2ScriptCompiler {
 	protected Properties props;
 
 	protected String projectFolder;
-	protected String outputPath;
+//	protected String outputPath;
 	protected String siteFolder;
 	protected String j2sPath;
 	protected String excludedPaths;
@@ -138,7 +138,6 @@ public abstract class Java2ScriptCompiler {
 
 
 	static File checkJ2SDir(String dir) {
-		System.out.println("Checking for .j2s or .j2sjmol in " + dir);
 		File f;
 		return ((f = new File(dir, J2S_CONFIG_JMOL)).exists() ? f
 				: (f = new File(dir, J2S_CONFIG_SWINGJS)).exists() ? f
@@ -297,27 +296,23 @@ public abstract class Java2ScriptCompiler {
 
 		breakOnError = !"false".equalsIgnoreCase(getProperty(J2S_BREAK_ON_ERROR, J2S_BREAK_ON_ERROR_DEFAULT));
 
-		// includes @j2sDebug blocks
-		isDebugging = J2S_COMPILER_MODE_DEBUG
-				.equalsIgnoreCase(getProperty(J2S_COMPILER_MODE, J2S_COMPILER_MODE_DEFAULT));
-
 		siteFolder = getProperty(J2S_SITE_DIRECTORY, J2S_SITE_DIRECTORY_DEFAULT);
 		siteFolder = projectFolder + "/" + siteFolder;
 
-		outputPath = getProperty(J2S_OUTPUT_PATH, null);
-		if (outputPath == null) {
-			outputPath = J2S_OUTPUT_PATH_DEFAULT; // bin
-			try {
-				IPath loc = project.getOutputLocation();
-				outputPath = loc.toString().substring(loc.toString().lastIndexOf('/') + 1);
-			} catch (JavaModelException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		}
-
+//		outputPath = getProperty(J2S_OUTPUT_PATH, null);
+//		if (outputPath == null) {
+//			outputPath = J2S_OUTPUT_PATH_DEFAULT; // bin
+//			try {
+//				IPath loc = project.getOutputLocation();
+//				outputPath = loc.toString().substring(loc.toString().lastIndexOf('/') + 1);
+//			} catch (JavaModelException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			}
+//		}
+//
 		if (isDebugging) {
-			System.out.println("J2S siteFolder=" + siteFolder + " outputPath=" + outputPath);
+			System.out.println("J2S siteFolder=" + siteFolder);// + " outputPath=" + outputPath);
 		}
 		excludedPaths = getProperty(J2S_EXCLUDED_PATHS, J2S_EXCLUDED_PATHS_DEFAULT);
 		lstExcludedPaths = null;
@@ -341,7 +336,7 @@ public abstract class Java2ScriptCompiler {
 	}
 
 	private boolean isEnabled() {
-		String status = getProperty(J2S_COMPILER_STATUS, J2S_COMPILER_STATUS_ENABLED);
+		String status = getProperty(J2S_COMPILER_STATUS, J2S_COMPILER_STATUS_DEFAULT);
 		return (J2S_COMPILER_STATUS_ENABLE.equalsIgnoreCase(status)
 				 || J2S_COMPILER_STATUS_ENABLED.equalsIgnoreCase(status));
 	}

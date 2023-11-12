@@ -93,16 +93,19 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	
 	protected int currentBlockForVisit = -1;
 	
-	protected boolean supportsObjectStaticFields = false;
+	/**
+	 * this was for allowing vwr.isJS where vwr is not a class name and isJS is static
+	 */
+	public boolean supportsObjectStaticFields = false;
 	
-	public boolean isSupportsObjectStaticFields() {
-		return supportsObjectStaticFields;
-	}
-
-	public void setSupportsObjectStaticFields(boolean supportsObjectStaticFields) {
-		this.supportsObjectStaticFields = supportsObjectStaticFields;
-	}
-
+//	public boolean isSupportsObjectStaticFields() {
+//		return supportsObjectStaticFields;
+//	}
+//
+//	public void setSupportsObjectStaticFields(boolean supportsObjectStaticFields) {
+//		this.supportsObjectStaticFields = supportsObjectStaticFields;
+//	}
+//
 	protected void boxingNode(ASTNode element) {
 		((ASTTigerVisitor) getAdaptable(ASTTigerVisitor.class)).boxingNode(element);
 	}
@@ -255,9 +258,6 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	}
 
 	public boolean visit(ArrayInitializer node) {
-		/*
-		 * TODO: should be tested
-		 */
 		List expressions = node.expressions();
 		ITypeBinding arrType = node.resolveTypeBinding();
 		ITypeBinding elementType = null;

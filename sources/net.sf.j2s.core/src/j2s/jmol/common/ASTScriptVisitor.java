@@ -1281,7 +1281,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		return false;
 	}
 
-
 	public boolean visit(FieldAccess node) {
 		/*
 		 * TODO: more complicated rules should be considered.
@@ -1301,6 +1300,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			staticFields = true;
 		}
 		if (staticFields) {
+			buffer.append("/*ASTSV1304 */");
 			buffer.append('(');
 			expression.accept(this);
 			buffer.append(", ");

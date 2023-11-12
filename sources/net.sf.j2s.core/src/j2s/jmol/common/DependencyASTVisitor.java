@@ -1046,9 +1046,9 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		return toCompileVariableName;
 	}
 
-	public void setToCompileVariableName(boolean toCompileVariableName) {
-		this.toCompileVariableName = toCompileVariableName;
-	}
+//	public void setToCompileVariableName(boolean toCompileVariableName) {
+//		this.toCompileVariableName = toCompileVariableName;
+//	}
 	
 	public boolean visit(MethodDeclaration node) {
 		IMethodBinding mBinding = node.resolveBinding();

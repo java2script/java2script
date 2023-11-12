@@ -10,16 +10,16 @@ support for boxing and unboxing numbers -- int i = Integer.valueOf(3) is not pro
 into just the number 3. I got around this in those early days by just going through all 
 (and I mean ALL) of the Jmol code, making sure there were no implicit boxing or unboxing. 
 
+The primary issue with this transpiler is that it does not "qualify" method names. 
+Thus, BufferedWriter.write(char) and BufferedWriter.write(int) both run through the
+same method in JavaScript, and (a very complex and time-expensive) algorithm then
+sorts out based on the JavaScript parameter type what is the MOST LIKELY intended
+method target. I did a huge amount of refactoring in Jmol to ensure that it almost
+never calls overloaded methods like this. 
 
-**java2script/SwingJS**
+And various other issues. IT SHOULD NOT BE USED FOR ANY OTHER PURPOSE.
 
-The full java2script/SwingJS operation involves two parts: Creating the JavaScript from the abstract syntax tree (java2script), and running that within the browser (SwingJS). Both are discussed below.
-
-The code for these two parts are well-separated:
-
-net.sf.j2s.core       java2script transpiler
-net.sf.j2s.java.core  SwingJS runtime
-
+This transpiler is enabled using .j2sjmol configuration file.
 
 **java2script transpiler**
 
@@ -54,22 +54,56 @@ etc.
     write(b)
     write(b, 2, 3)
 
-will both point to the same function. A major task of the java2script transpiler is to sort this out before it becomes an issue at runtime. It does this by creating signature-specific function names in JavaScript, such as write$B and write$B$I$I.]
+will both point to the same function. A major task of the java2script SwingJS transpiler is to sort this out before it becomes an issue at runtime. It does this by creating signature-specific function names in JavaScript, such as write$B and write$B$I$I.]
+
+
+**java2script/SwingJS**
+
+The full java2script/SwingJS operation involves two parts: Creating the JavaScript from the abstract syntax tree (java2script), and running that within the browser (SwingJS). Both are discussed below.
+
+The code for these two parts are well-separated:
+
+net.sf.j2s.core       java2script transpiler
+net.sf.j2s.java.core  SwingJS runtime
 
 
 **Creating a New Transpiler**
 
-The transpiler is created in Eclipse by checking out the net.sf.j2s.core project from GitHub as a standard Java project and adjusting the code as necessary. When it is desired to create the transpiler (net.sf.j2s.core.jar):
+The transpiler is created in Eclipse by checking out the net.sf.j2s.core project from GitHub as a standard Java project and adjusting the code as necessary. The 
+parts that make this happen include:
+
+META-INF/MANIFEST.MF
+build.properties
+plugin.xml
+
+
+[note: 
+-bootclasspath not supported at compliance level 9 and above
+
+was fixed by adding
+
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+
+to MANIFEST.MF
+
+thank you https://bugs.eclipse.org/bugs/show_bug.cgi?id=525280
+
+]
+
+
+When it is desired to create the transpiler (net.sf.j2s.core.jar):
 
 1) Use File...Export...Deployable plug-ins and fragments
   (if you do not see this option, check that you are using Eclipse 
     Enterprise)
-2) Choose net.sf.j2s.core (Version 3.2.4), check the directory,
+2) Choose net.sf.j2s.core (Version x.x.x), check the directory,
    and press finish.
 3) Copy this file to the drop-ins directory, restart Eclipse, 
    and test.
 4) Copy this file to the project dist/swingjs folder and also
-   to the swingjs/ver/3.2.4 folder (or appropriate). 
+   to the swingjs/ver/x.x.x folder (or appropriate). 
+
+
 
 I do this with a DOS batch file, which also adds a timestamp. 
    

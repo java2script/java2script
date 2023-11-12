@@ -25,8 +25,6 @@
 
 package java.io;
 
-import javajs.util.SB;
-
 /**
  * Reads text from a character-input stream, buffering characters so as to
  * provide for the efficient reading of characters, arrays, and lines.
@@ -81,7 +79,8 @@ public class BufferedReader extends Reader {
   private boolean markedSkipLF = false;
 
   private final static int DEFAULT_CHAR_BUFFER_SIZE = 8192;
-  private final static int DEFAULT_EXPECTED_LINE_LENGTH = 80;
+  // BH 2023.11.12 just using String here. It is faster in JavaScript anyway.
+  //private final static int DEFAULT_EXPECTED_LINE_LENGTH = 80;
 
   /**
    * Creates a buffering character-input stream that uses an input buffer of the
@@ -332,7 +331,7 @@ public class BufferedReader extends Reader {
    *            If an I/O error occurs
    */
   private String readLine1(boolean ignoreLF) throws IOException {
-    SB s = null;
+    String s = null;
     int startChar;
 
     synchronized (lock) {
@@ -370,13 +369,11 @@ public class BufferedReader extends Reader {
         startChar = nextChar;
         nextChar = i;
 
+        String str = new String(cb, startChar, i - startChar);
         if (eol) {
-          String str;
-          if (s == null) {
-            str = new String(cb, startChar, i - startChar);
-          } else {
-            s.appendCB(cb, startChar, i - startChar);
-            str = s.toString();
+          if (s != null) {
+            s += str;
+            str = s;
           }
           nextChar++;
           if (c == '\r') {
@@ -384,10 +381,9 @@ public class BufferedReader extends Reader {
           }
           return str;
         }
-
         if (s == null)
-          s = SB.newN(DEFAULT_EXPECTED_LINE_LENGTH);
-        s.appendCB(cb, startChar, i - startChar);
+          s = "";
+        s += str;
       }
     }
   }

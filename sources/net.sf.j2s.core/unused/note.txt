@@ -1,0 +1,10 @@
+-bootclasspath not supported at compliance level 9 and above
+
+was fixed by adding
+
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+
+to MANIFEST.MF
+
+thank you https://bugs.eclipse.org/bugs/show_bug.cgi?id=525280
+
