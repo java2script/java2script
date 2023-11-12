@@ -263,7 +263,7 @@ public class Properties extends Hashtable<Object,Object> {
 
 		while (true) {
 			if (inbufPos == inbufCount) {
-				if ((inbufCount = in.read(inbuf)) == -1) {
+				if ((inbufCount = in.read(inbuf, 0, inbuf.length)) == -1) {
                     break;
                 }
 				inbufPos = 0;
@@ -336,7 +336,7 @@ public class Properties extends Hashtable<Object,Object> {
 					if (firstChar) {
 						while (true) {
 							if (inbufPos == inbufCount) {
-								if ((inbufCount = in.read(inbuf)) == -1) {
+								if ((inbufCount = in.read(inbuf, 0, inbuf.length)) == -1) {
 									inbufPos = -1;
 									break;
 								}

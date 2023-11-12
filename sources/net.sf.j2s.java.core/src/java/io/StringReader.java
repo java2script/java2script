@@ -1,231 +1,220 @@
 /*
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
+ * Copyright 1996-2005 Sun Microsystems, Inc.  All Rights Reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Sun designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Sun in the LICENSE file that accompanied this code.
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
+ * CA 95054 USA or visit www.sun.com if you need additional information or
+ * have any questions.
  */
 
 package java.io;
 
-
 /**
- * StringReader is used as a character input stream on a String.
+ * A character stream whose source is a string.
  * 
- * @see StringWriter
+ * @author Mark Reinhold
+ * @since JDK1.1
  */
+
 public class StringReader extends Reader {
-	private String str;
 
-	private int markpos = -1;
+  private String str;
+  private int length;
+  private int next = 0;
+  private int mark = 0;
 
-	private int pos;
+  /**
+   * Creates a new string reader.
+   * 
+   * @param s
+   *        String providing the character stream.
+   */
+  public StringReader(String s) {
+    super(s);
+    this.str = s;
+    this.length = s.length();
+  }
 
-	private int count;
+  /** Check to make sure that the stream has not been closed 
+   * @throws IOException */
+  private void ensureOpen() throws IOException {
+    if (str == null)
+      throw new IOException("Stream closed");
+  }
 
-	/**
-	 * Construct a StringReader on the String <code>str</code>. The size of
-	 * the reader is set to the <code>length()</code> of the String and the
-	 * Object to synchronize access through is set to <code>str</code>.
-	 * 
-	 * @param str
-	 *            the String to filter reads on.
-	 */
-	public StringReader(String str) {
-		super(str);
-		this.str = str;
-		this.count = str.length();
-	}
+//  /**
+//   * Reads a single character.
+//   * 
+//   * @return The character read, or -1 if the end of the stream has been reached
+//   * 
+//   * @exception IOException
+//   *            If an I/O error occurs
+//   */
+//  public int read() throws IOException {
+//      ensureOpen();
+//      if (next >= length)
+//        return -1;
+//      return str.charAt(next++);
+//  }
 
-	/**
-	 * This method closes this StringReader. Once it is closed, you can no
-	 * longer read from it. Only the first invocation of this method has any
-	 * effect.
-	 */
-	@Override
-    public void close() {
-		synchronized (lock) {
-			if (isOpen()) {
-                str = null;
-            }
-		}
-	}
+  /**
+   * Reads characters into a portion of an array.
+   * 
+   * @param cbuf
+   *        Destination buffer
+   * @param off
+   *        Offset at which to start writing characters
+   * @param len
+   *        Maximum number of characters to read
+   * 
+   * @return The number of characters read, or -1 if the end of the stream has
+   *         been reached
+   * 
+   * @exception IOException
+   *            If an I/O error occurs
+   */
+  @Override
+  public int read(char cbuf[], int off, int len) throws IOException {
+    synchronized (lock) {
+      ensureOpen();
+      if ((off < 0) || (off > cbuf.length) || (len < 0)
+          || ((off + len) > cbuf.length) || ((off + len) < 0)) {
+        throw new IndexOutOfBoundsException();
+      } else if (len == 0) {
+        return 0;
+      }
+      if (next >= length)
+        return -1;
+      int n = Math.min(length - next, len);
+      str.getChars(next, next + n, cbuf, off);
+      next += n;
+      return n;
+    }
+  }
 
-	/**
-	 * Answer a boolean indicating whether or not this StringReader is open.
-	 * @return <code>true</code> if open, otherwise <code>false</code>
-	 */
-	private boolean isOpen() {
-		return str != null;
-	}
+  /**
+   * Skips the specified number of characters in the stream. Returns the number
+   * of characters that were skipped.
+   * 
+   * <p>
+   * The <code>ns</code> parameter may be negative, even though the
+   * <code>skip</code> method of the {@link Reader} superclass throws an
+   * exception in this case. Negative values of <code>ns</code> cause the stream
+   * to skip backwards. Negative return values indicate a skip backwards. It is
+   * not possible to skip backwards past the beginning of the string.
+   * 
+   * <p>
+   * If the entire string has been read or skipped, then this method has no
+   * effect and always returns 0.
+   * @param ns 
+   * @return nBytes
+   * 
+   * @exception IOException
+   *            If an I/O error occurs
+   */
+  @Override
+  public long skip(long ns) throws IOException {
+    synchronized (lock) {
+      ensureOpen();
+      if (next >= length)
+        return 0;
+      // Bound skip by beginning and end of the source
+      long n = Math.min(length - next, ns);
+      n = Math.max(-next, n);
+      next += n;
+      return n;
+    }
+  }
 
-	/**
-	 * Set a Mark position in this Reader. The parameter <code>readLimit</code>
-	 * is ignored for StringReaders. Sending reset() will reposition the reader
-	 * back to the marked position provided the mark has not been invalidated.
-	 * 
-	 * @param readLimit
-	 *            ignored for StringReaders.
-	 * 
-	 * @throws IOException
-	 *             If an error occurs attempting mark this StringReader.
-	 */
-	@Override
-    public void mark(int readLimit) throws IOException {
-		if (readLimit >= 0) {
-			synchronized (lock) {
-				if (isOpen()) {
-                    markpos = pos;
-                } else {
-                    throw new IOException(org.apache.harmony.luni.util.Msg
-							.getString("K0083")); //$NON-NLS-1$
-                }
-			}
-		} else {
-            throw new IllegalArgumentException();
-        }
-	}
+  /**
+   * Tells whether this stream is ready to be read.
+   * 
+   * @return True if the next read() is guaranteed not to block for input
+   * 
+   * @exception IOException
+   *            If the stream is closed
+   */
+  @Override
+  public boolean ready() throws IOException {
+    synchronized (lock) {
+      ensureOpen();
+      return true;
+    }
+  }
 
-	/**
-	 * Answers a boolean indicating whether or not this StringReader supports
-	 * mark() and reset(). This method always returns true.
-	 * 
-	 * @return <code>true</code> if mark() and reset() are supported,
-	 *         <code>false</code> otherwise. This implementation always
-	 *         returns <code>true</code>.
-	 */
-	@Override
-    public boolean markSupported() {
-		return true;
-	}
+  /**
+   * Tells whether this stream supports the mark() operation, which it does.
+   */
+  @Override
+  public boolean markSupported() {
+    return true;
+  }
 
-	/**
-	 * Reads a single character from this StringReader and returns the result as
-	 * an int. The 2 higher-order bytes are set to 0. If the end of reader was
-	 * encountered then return -1.
-	 * 
-	 * @return the character read or -1 if end of reader.
-	 * 
-	 * @throws IOException
-	 *             If the StringReader is already closed.
-	 */
-	@Override
-    public int read() throws IOException {
-		synchronized (lock) {
-			if (isOpen()) {
-				if (pos != count) {
-					return str.charAt(pos++);
-				}
-				return -1;
-			}
-			throw new IOException(org.apache.harmony.luni.util.Msg.getString("K0083")); //$NON-NLS-1$
-		}
-	}
+  /**
+   * Marks the present position in the stream. Subsequent calls to reset() will
+   * reposition the stream to this point.
+   * 
+   * @param readAheadLimit
+   *        Limit on the number of characters that may be read while still
+   *        preserving the mark. Because the stream's input comes from a string,
+   *        there is no actual limit, so this argument must not be negative, but
+   *        is otherwise ignored.
+   * 
+   * @exception IllegalArgumentException
+   *            If readAheadLimit is < 0
+   * @exception IOException
+   *            If an I/O error occurs
+   */
+  @Override
+  public void mark(int readAheadLimit) throws IOException {
+    if (readAheadLimit < 0) {
+      throw new IllegalArgumentException("Read-ahead limit < 0");
+    }
+    synchronized (lock) {
+      ensureOpen();
+      mark = next;
+    }
+  }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.io.Reader#read(char[], int, int)
-	 */
-	@Override
-    public int read(char buf[], int offset, int len) throws IOException {
-		// avoid int overflow
-		if (0 <= offset && offset <= buf.length && 0 <= len
-				&& len <= buf.length - offset) {
-			synchronized (lock) {
-				if (isOpen()) {
-					if (pos == this.count) {
-						return -1;
-					}
-					int end = pos + len > this.count ? this.count : pos + len;
-					str.getChars(pos, end, buf, offset);
-					int read = end - pos;
-					pos = end;
-					return read;
-				}
-				throw new IOException(org.apache.harmony.luni.util.Msg.getString("K0083")); //$NON-NLS-1$
-			}
-		}
-		throw new ArrayIndexOutOfBoundsException();
-	}
+  /**
+   * Resets the stream to the most recent mark, or to the beginning of the
+   * string if it has never been marked.
+   * 
+   * @exception IOException
+   *            If an I/O error occurs
+   */
+  @Override
+  public void reset() throws IOException {
+    synchronized (lock) {
+      ensureOpen();
+      next = mark;
+    }
+  }
 
-	/**
-	 * Answers a <code>boolean</code> indicating whether or not this
-	 * StringReader is ready to be read without blocking. If the result is
-	 * <code>true</code>, the next <code>read()</code> will not block. If
-	 * the result is <code>false</code> this Reader may or may not block when
-	 * <code>read()</code> is sent. The implementation in StringReader always
-	 * returns <code>true</code> even when it has been closed.
-	 * 
-	 * @return <code>true</code> if the receiver will not block when
-	 *         <code>read()</code> is called, <code>false</code> if unknown
-	 *         or blocking will occur.
-	 * 
-	 * @throws IOException
-	 *             If an IO error occurs.
-	 */
-	@Override
-    public boolean ready() throws IOException {
-		synchronized (lock) {
-			if (isOpen()) {
-                return true;
-            }
-			throw new IOException(org.apache.harmony.luni.util.Msg.getString("K0083")); //$NON-NLS-1$
-		}
-	}
-
-	/**
-	 * Reset this StringReader's position to the last <code>mark()</code>
-	 * location. Invocations of <code>read()/skip()</code> will occur from
-	 * this new location. If this Reader was not marked, the StringReader is
-	 * reset to the beginning of the String.
-	 * 
-	 * @throws IOException
-	 *             If this StringReader has already been closed.
-	 */
-	@Override
-    public void reset() throws IOException {
-		synchronized (lock) {
-			if (isOpen()) {
-                pos = markpos != -1 ? markpos : 0;
-            } else {
-                throw new IOException(org.apache.harmony.luni.util.Msg.getString("K0083")); //$NON-NLS-1$
-            }
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.io.Reader#skip(long)
-	 */
-	@Override
-    public long skip(long ns) throws IOException {
-		synchronized (lock) {
-			if (isOpen()) {
-				if (ns <= 0) {
-					return 0;
-				}
-				long skipped = 0;
-				if (ns < this.count - pos) {
-					pos = pos + (int) ns;
-					skipped = ns;
-				} else {
-					skipped = this.count - pos;
-					pos = this.count;
-				}
-				return skipped;
-			}
-			throw new IOException(org.apache.harmony.luni.util.Msg.getString("K0083")); //$NON-NLS-1$
-		}
-	}
+  /**
+   * Closes the stream and releases any system resources associated with it.
+   * Once the stream has been closed, further read(), ready(), mark(), or
+   * reset() invocations will throw an IOException. Closing a previously closed
+   * stream has no effect.
+   */
+  @Override
+  public void close() {
+    str = null;
+  }
 }

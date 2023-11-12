@@ -156,4 +156,10 @@ public class StringBufferInputStream extends InputStream {
 		}
 		return numskipped;
 	}
+
+	@Override
+	public int readByteAsInt() throws IOException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

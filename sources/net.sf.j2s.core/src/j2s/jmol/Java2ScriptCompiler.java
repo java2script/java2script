@@ -247,7 +247,7 @@ public class Java2ScriptCompiler {
 
 	public void finalizeProject() {
 		System.out.println(
-				"J2S processed - finalizeProject");
+				"J2S processed - finalizeProject to " + outputPath);
 	}
 
 	public void startBuild(boolean isClean) {
@@ -328,36 +328,7 @@ public class Java2ScriptCompiler {
 					e1.printStackTrace();
 				} 
 			}
-//			siteFolder = getProperty(J2S_SITE_DIRECTORY, J2S_SITE_DIRECTORY_DEFAULT);
-//			siteFolder = projectFolder + "/" + siteFolder;
-//			j2sPath = siteFolder + "/swingjs/j2s";
-//			System.out.println("J2S writing to " + j2sPath);
-//			// method declarations and invocations are only logged
-//			// when the designated files are deleted prior to building
-//
-//			logDeclared = (isCompilationParticipant && !isCleanBuild ? null
-//					: getProperty(J2S_LOG_METHODS_DECLARED, J2S_LOG_METHODS_DECLARED_DEFAULT));
-//			File file;
-//			if (logDeclared != null) {
-//				if (!(file = new File(projectFolder, logDeclared)).exists()) {
-//					lstMethodsDeclared = new ArrayList();
-//					System.err.println("logging methods declared to " + file);
-//				}
-//				logDeclared = projectFolder + "/" + logDeclared;
-//			}
-//			logAllCalls = false;
-//
-//			logCalled = (isCompilationParticipant && !isCleanBuild ? null
-//					: getProperty(J2S_LOG_METHODS_CALLED, J2S_LOG_METHODS_CALLED_DEFAULT));
-//			if (logCalled != null) {
-//				if (!(file = new File(projectFolder, logCalled)).exists()) {
-//					htMethodsCalled = new Hashtable();
-//					System.err.println("logging methods called to " + file);
-//				}
-//				logCalled = projectFolder + "/" + logCalled;
-//				logAllCalls = "true".equalsIgnoreCase(getProperty(J2S_LOG_ALL_CALLS, J2S_LOG_ALL_CALLS_DEFAULT));
-//			}
-//
+			System.out.println("J2S output path set to " + outputPath);
 			excludedPaths = getProperty(J2S_EXCLUDED_PATHS, J2S_EXCLUDED_PATHS_DEFAULT);
 
 			lstExcludedPaths = null;

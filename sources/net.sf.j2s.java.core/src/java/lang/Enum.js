@@ -1,83 +1,81 @@
-Clazz.load (["java.io.Serializable", "java.lang.Comparable"], "java.lang.Enum", ["java.lang.ClassCastException", "$.CloneNotSupportedException", "$.IllegalArgumentException", "$.NullPointerException"], function () {
-c$ = java.lang.Enum = Enum = function () {
-this.$name = null;
-this.$ordinal = 0;
-Clazz.instantialize (this, arguments);
-};
-Clazz.decorateAsType (c$, "Enum", null, [Comparable, java.io.Serializable]);
-Clazz.defineMethod (c$, "name", 
-function () {
+// BH removed inner class 
+Clazz.load(null,"java.lang.Enum",["java.lang.CloneNotSupportedException","$.IllegalArgumentException","$.NullPointerException"],function(){
+c$=Clazz.decorateAsClass(function(){
+this.$name=null;
+this.$ordinal=0;
+Clazz.instantialize(this,arguments);
+},java.lang,"Enum",null,[java.io.Serializable,Comparable]);
+Clazz.makeConstructor(c$,
+function(name,ordinal){
+this.$name=name;
+this.$ordinal=ordinal;
+},"~S,~N");
+Clazz.defineMethod(c$,"name",
+function(){
 return this.$name;
 });
-Clazz.defineMethod (c$, "ordinal", 
-function () {
+Clazz.defineMethod(c$,"ordinal",
+function(){
 return this.$ordinal;
 });
-Clazz.makeConstructor (c$, 
-function (name, ordinal) {
-this.$name = name;
-this.$ordinal = ordinal;
-}, "String, Number");
-Clazz.defineMethod (c$, "toString", 
-function () {
+Clazz.overrideMethod(c$,"toString",
+function(){
 return this.$name;
 });
-Clazz.defineMethod (c$, "equals", 
-function (other) {
-return this == other;
-}, "Object");
-Clazz.defineMethod (c$, "hashCode", 
-function () {
-return System.identityHashCode (this);
+Clazz.overrideMethod(c$,"equals",
+function(other){
+return this===other;
+},"~O");
+Clazz.overrideMethod(c$,"hashCode",
+function(){
+return this.$ordinal+(this.$name==null?0:this.$name.hashCode());
 });
-Clazz.defineMethod (c$, "clone", 
-function () {
-throw  new CloneNotSupportedException ();
+Clazz.overrideMethod(c$,"clone",
+function(){
+throw new CloneNotSupportedException(("KA004"));
 });
-Clazz.defineMethod (c$, "compareTo", 
-function (o) {
-var other = o;
-var self = this;
-if (self.getClass () != other.getClass () && self.getDeclaringClass () != other.getDeclaringClass ()) throw  new ClassCastException ();
-return self.ordinal - other.ordinal;
-}, "E");
-Clazz.defineMethod (c$, "getDeclaringClass", 
-function () {
-var clazz = this.getClass ();
-var zuper = clazz.getSuperclass ();
-return (zuper == Enum) ? clazz : zuper;
+Clazz.overrideMethod(c$,"compareTo",
+function(o){
+return this.$ordinal-o.$ordinal;
+},"~O");
+Clazz.defineMethod(c$,"getDeclaringClass",
+function(){
+var myClass=this.getClass();
+var mySuperClass=myClass.getSuperclass();
+if(Enum===mySuperClass){
+return myClass;
+}return mySuperClass;
 });
-Clazz.defineMethod (Enum, "$valueOf", 
-function (enumType, name) {
-	return enumType.$valueOf (name);
-}, "Object, String"); /* "Class, String" */
-Clazz.defineMethod (Enum, "$valueOf", 
-function (name) {
-if (name == null) throw  new NullPointerException ("Name is null");
-var vals = this.values ();
-for (var i = 0; i < vals.length; i++) {
-	if (name == vals[i].name ()) {
-		return vals[i];
-	}
-}
-throw  new IllegalArgumentException ("No enum const " + enumType + "." + name);
-}, "String");
-Enum.$valueOf = Enum.prototype.$valueOf;
-Clazz.defineMethod (Enum, "values", 
-function () {
-	if (this.$ALL$ENUMS != null) {
-		return this.$ALL$ENUMS;
-	}
-	this.$ALL$ENUMS = new Array ();
-	var clazzThis = this.getClass ();
-	for (var e in clazzThis) {
-		if (clazzThis[e] != null && clazzThis[e].__CLASS_NAME__ != null 
-				&& e != "prototype"
-				&& Clazz.instanceOf (clazzThis[e], clazzThis)) {
-			this.$ALL$ENUMS[this.$ALL$ENUMS.length] = clazzThis[e];
-		}
-	}
-	return this.$ALL$ENUMS;
-});
-Enum.values = Enum.prototype.values;
+c$.$valueOf=Clazz.defineMethod(c$,"$valueOf",
+function(enumType,name){
+if((enumType==null)||(name==null)){
+throw new NullPointerException(("KA001"));
+}var values=Enum.getValues(enumType);
+if(values==null){
+throw new IllegalArgumentException(("KA005"));
+}for(var enumConst,$enumConst=0,$$enumConst=values;$enumConst<$$enumConst.length&&((enumConst=$$enumConst[$enumConst])||true);$enumConst++){
+if(enumConst.$name.equals(name)){
+return enumConst;
+}}
+throw new IllegalArgumentException(("KA006"));
+},"Class,~S");
+c$.getValues=Clazz.defineMethod(c$,"getValues",
+function(enumType){
+return enumType.values();
+},"Class");
+
+//c$.$Enum$1$=function(){
+//Clazz.pu$h(self.c$);
+
+//c$=Clazz.declareAnonymous(null,"Enum$1",null,java.security.PrivilegedExceptionAction);
+//Clazz.overrideMethod(c$,"run",
+//function(){
+//var valsMethod=this.f$.enumType.getMethod("values",null);
+//valsMethod.setAccessible(true);
+//return valsMethod;
+//});
+//c$=Clazz.p0p();
+//};
+
+
 });

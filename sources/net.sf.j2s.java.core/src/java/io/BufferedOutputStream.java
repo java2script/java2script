@@ -48,7 +48,7 @@ public class BufferedOutputStream extends FilterOutputStream {
      *            the OutputStream to buffer writes on.
      */
     public BufferedOutputStream(OutputStream out) {
-        super(out);
+    		jzSetFOS(out);
         buf = new byte[8192];
     }
 
@@ -65,7 +65,7 @@ public class BufferedOutputStream extends FilterOutputStream {
      *             the size is <= 0
      */
     public BufferedOutputStream(OutputStream out, int size) {
-        super(out);
+  		jzSetFOS(out);
         if (size <= 0) {
             // K0058=size must be > 0
             throw new IllegalArgumentException(Msg.getString("K0058")); //$NON-NLS-1$

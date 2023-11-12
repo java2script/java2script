@@ -145,6 +145,8 @@ public class CharArrayReader extends Reader {
 	}
 
 	/**
+	 * 
+	 *
 	 * Reads a single character from this CharArrayReader and returns the result
 	 * as an int. The 2 higher-order bytes are set to 0. If the end of reader
 	 * was encountered then return -1.
@@ -154,7 +156,6 @@ public class CharArrayReader extends Reader {
 	 * @throws IOException
 	 *             If the CharArrayReader is already closed.
 	 */
-	@Override
     public int read() throws IOException {
 		synchronized (lock) {
 			if (isOpen()) {
