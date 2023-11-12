@@ -15,9 +15,12 @@ import java.util.List;
 import java.util.Properties;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.BuildContext;
 import org.eclipse.jdt.core.dom.ASTParser;
 
 import j2s.CorePlugin;
@@ -42,7 +45,6 @@ public abstract class Java2ScriptCompiler {
 	private final static String J2S_COMPILER_STATUS_ENABLED = "enabled";
 
 	private final static String J2S_COMPILER_JAVA_VERSION = "j2s.compiler.java.version";
-	private final static String J2S_COMPILER_JAVA_VERSION_DEFAULT = "8";
 
 	private final static String J2S_OUTPUT_PATH = "j2s.output.path";
 	private final static String J2S_OUTPUT_PATH_DEFAULT = "bin";
@@ -74,10 +76,11 @@ public abstract class Java2ScriptCompiler {
 	 * 
 	 * process the source file into JavaScript using the JDT abstract syntax tree
 	 * parser and visitor
+	 * @param isCleanBuild2 
 	 * 
 	 * @param javaSource
 	 */
-	abstract public boolean initializeProject(IJavaProject project);
+	abstract public boolean initializeProject(IJavaProject project, boolean isCleanBuild2);
 
 	abstract public boolean compileToJavaScript(IFile javaSource, String trailer);
 
@@ -134,34 +137,84 @@ public abstract class Java2ScriptCompiler {
 	private final HashSet<String> copiedResourcePackages = new HashSet<String>();
 
 
+	static File checkJ2SDir(String dir) {
+		System.out.println("Checking for .j2s or .j2sjmol in " + dir);
+		File f;
+		return ((f = new File(dir, J2S_CONFIG_JMOL)).exists() ? f
+				: (f = new File(dir, J2S_CONFIG_SWINGJS)).exists() ? f
+					: null);
+	}
+
 	/**
-	 * Check to see if this project is what we need
+	 * Entry point from compilation participant when Java build is complete and it is our turn.
+	 * 
 	 * @param project
+	 * @param files
+	 * @return
+	 */
+	public static Java2ScriptCompiler newCompiler(IJavaProject project, BuildContext[] files) {
+		if (files.length == 0)
+			return null;
+		String j2stype;
+		File f = getJ2SConfigName(project, files[0]);
+		return ( f == null ? null 
+				: J2S_CONFIG_JMOL.equals(j2stype = f.getName()) ? 
+				new Java2ScriptLegacyCompiler(f)
+				: J2S_CONFIG_SWINGJS.equals(j2stype) ?
+						new Java2ScriptSwingJSCompiler(f) : null);
+	}
+
+	/**
+	 * Called by newCompiler only. Checks in the root of the classpath for this file
+	 * first, then in the project root directory.
+	 *  
+	 * Check to see if this project is what we need for the FIRST file being 
+	 * activated. Note that this means that if there are multiple classpath entries,
+	 * EACH should have this .j2smol file in it. 
+	 * 
+	 * @param project
+	 * @param files
+	 * @param retFile 
 	 * @return ".j2s" or ".j2sjmol" or null
 	 */
-	public static String getJ2SConfigName(IJavaProject project) {
+	private static File getJ2SConfigName(IJavaProject project, BuildContext files) {
+		
+		File f = null;
 		try {
-			String dir = project.getProject().getLocation().toOSString();
-			return (new File(dir, J2S_CONFIG_JMOL).exists() ? J2S_CONFIG_JMOL
-					: new File(dir, J2S_CONFIG_SWINGJS).exists() ? J2S_CONFIG_SWINGJS
-						: null);
-		} catch (@SuppressWarnings("unused") Exception e) {
-			return null;
+			if (files == null)
+				return null;
+			String projectDir = project.getProject().getLocation().toOSString();
+			IPath path = getFirstSourceClassPathEntry(project.getResolvedClasspath(true));
+			String dir = new File(projectDir).getParent() + path; // is relative to workspace, I guess.					
+			System.out.println("checking entry for " + dir);
+			f = checkJ2SDir(dir);
+			if (f == null) {
+				f = checkJ2SDir(projectDir);
+			}
+		} catch (@SuppressWarnings("unused") JavaModelException e1) {
+			// no matter;
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
+		return f;
 	}
 
-	public static Java2ScriptCompiler newCompiler(IJavaProject project) {
-		String j2stype = getJ2SConfigName(project);
-		return ( J2S_CONFIG_JMOL.equals(j2stype) ? 
-				new Java2ScriptLegacyCompiler()
-				: J2S_CONFIG_SWINGJS.equals(j2stype) ?
-						new Java2ScriptSwingJSCompiler() : null);
+	private static IPath getFirstSourceClassPathEntry(IClasspathEntry[] path) {
+		for (int i = 0; i < path.length; i++) {
+			IClasspathEntry e = path[i];
+			if (e.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+				System.out.println(i + " " + e + "\n" + e.getPath());
+				return e.getPath();
+			}
+		}
+		return null;
 	}
 
-	protected Java2ScriptCompiler(boolean isSwingJS, String j2sConfigFileName) {
+	protected Java2ScriptCompiler(boolean isSwingJS, File f) {
 		this.isSwingJS = isSwingJS;
-		this.j2sConfigFileName = j2sConfigFileName;
-		System.out.println("Java2ScriptCompiler " + this + " isSwingJS=" + isSwingJS + " " + j2sConfigFileName);
+		activeJ2SFile = f;
+		j2sConfigFileName = f.getName();
+		System.out.println("Java2ScriptCompiler " + this + " isSwingJS=" + f + " " + j2sConfigFileName);
 		// initialized only once for SwingJS and once for legacy version
 	}
 
@@ -183,9 +236,9 @@ public abstract class Java2ScriptCompiler {
 	 * @param j2sFile
 	 * @param altLevel
 	 */
-	protected Properties initializeUsing(File j2sFile, int altLevel) {
-		System.out.println("J2S using configuration file " + j2sFile);
-		Properties props = new Properties();
+	protected Properties getPropsForDir(String dir, String j2sConfigName, int altLevel) {
+		File j2sFile = new File(dir, j2sConfigName);
+		Properties props = new Properties();	
 		try (FileInputStream os = new FileInputStream(j2sFile)) {
 			props.load(os);
 			os.close();
@@ -204,38 +257,31 @@ public abstract class Java2ScriptCompiler {
 	 * get all necessary .j2s params for a build
 	 * 
 	 * @param project
+	 * @param isCleanBuild
 	 * @param jls4
 	 * @return true if this is a j2s project and is enabled
 	 * 
 	 */
-	protected boolean initializeProject(IJavaProject project, int javaLanguageLevel) {
+	protected boolean initializeProject(IJavaProject project, boolean isCleanBuild, int javaLanguageLevel) {
 		this.project = project;
-		if (!j2sConfigFileName.equals(getJ2SConfigName(project))) {
-			// the file .j2s does not exist in the project directory -- skip this project
+		projectFolder = project.getProject().getLocation().toOSString();
+		startBuild(isCleanBuild);
+		props = getPropsForDir(activeJ2SFile.getParent(), j2sConfigFileName, 0);
+		System.out.println(this.getClass().getName() + " " + activeJ2SFile + " " + props);
+		if (!isEnabled()) {
 			return false;
 		}
-		projectFolder = project.getProject().getLocation().toOSString();
-		File j2sFile = new File(projectFolder, j2sConfigFileName);
-		props = initializeUsing(j2sFile, 0);
-		if (props == null)
-			props = new Properties();
-		String status = getProperty(J2S_COMPILER_STATUS, J2S_COMPILER_STATUS_ENABLED);
-		if (!J2S_COMPILER_STATUS_ENABLE.equalsIgnoreCase(status)
-				&& !J2S_COMPILER_STATUS_ENABLED.equalsIgnoreCase(status)) {
-			if (getFileContents(j2sFile).trim().length() == 0) {
-				writeToFile(j2sFile, getDefaultJ2SFile());
-			} else {
-				// not enabled
-				return false;
-			}
+		if (getFileContents(activeJ2SFile).trim().length() == 0) {
+			writeToFile(activeJ2SFile, getDefaultJ2SFile());
 		}
 		int jslLevel = javaLanguageLevel;
 		if (jslLevel == 8) {
 			// SwingJS allows 8 or 11
 			try {
-				String ver = getProperty(J2S_COMPILER_JAVA_VERSION, J2S_COMPILER_JAVA_VERSION_DEFAULT);
+				String ver = getProperty(J2S_COMPILER_JAVA_VERSION, "" + jslLevel);
 				jslLevel = Integer.parseInt(ver);
 			} catch (@SuppressWarnings("unused") Exception e) {
+				System.out.println("j2s.compiler.java.version should be one of 4, 8, or 11");
 				// ignore
 			}
 		}
@@ -260,14 +306,14 @@ public abstract class Java2ScriptCompiler {
 
 		outputPath = getProperty(J2S_OUTPUT_PATH, null);
 		if (outputPath == null) {
-	    outputPath = J2S_OUTPUT_PATH_DEFAULT; // bin
+			outputPath = J2S_OUTPUT_PATH_DEFAULT; // bin
 			try {
 				IPath loc = project.getOutputLocation();
 				outputPath = loc.toString().substring(loc.toString().lastIndexOf('/') + 1);
 			} catch (JavaModelException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
-			} 
+			}
 		}
 
 		if (isDebugging) {
@@ -294,6 +340,12 @@ public abstract class Java2ScriptCompiler {
 		return true;
 	}
 
+	private boolean isEnabled() {
+		String status = getProperty(J2S_COMPILER_STATUS, J2S_COMPILER_STATUS_ENABLED);
+		return (J2S_COMPILER_STATUS_ENABLE.equalsIgnoreCase(status)
+				 || J2S_COMPILER_STATUS_ENABLED.equalsIgnoreCase(status));
+	}
+
 	boolean excludeFile(IFile javaSource) {
 		return excludeFile(javaSource.getFullPath().toString());
 	}
@@ -311,12 +363,16 @@ public abstract class Java2ScriptCompiler {
 	}
 
 	protected String getProperty(String key, String def) {
+		if (props == null) {
+			System.out.println("getting " + key  + " props is null");			
+			return null;
+		}		
 		String val = props.getProperty(key);
 		if (val == null)
 			val = def;
-		System.out.println(key + " = " + val);
 		if (val != null && val.indexOf("<") == 0)
 			val = null;
+		System.out.println("getting " + key + " = " + val);
 		return val;
 	}
 

@@ -105,8 +105,8 @@ public class Java2ScriptSwingJSCompiler extends Java2ScriptCompiler {
 		return breakOnError;
 	}
 
-	public Java2ScriptSwingJSCompiler() {
-		super(true, J2S_CONFIG_SWINGJS);
+	public Java2ScriptSwingJSCompiler(File f) {
+		super(true, f);
 	}
 
 	/**
@@ -128,11 +128,12 @@ public class Java2ScriptSwingJSCompiler extends Java2ScriptCompiler {
 	 * Iteratively look for a .j2s file to use for configuration information. Up to
 	 * five iterations are allowed.
 	 * 
+	 * 
 	 * @param j2sFile
 	 * @param level
 	 */
-	protected Properties initializeUsing(File j2sFile, int altLevel) {
-		Properties props = super.initializeUsing(j2sFile, altLevel);
+	protected Properties getPropsForDir(String dir, String configName, int altLevel) {
+		Properties props = super.getPropsForDir(dir, configName, altLevel);
 		if (++altLevel > 5) {
 			System.out.println("J2S maximum number of levels using " + J2S_OPTIONS_ALTFILEPROPERTY + " exceeded");
 			// in case these are self-referencing
@@ -147,7 +148,7 @@ public class Java2ScriptSwingJSCompiler extends Java2ScriptCompiler {
 			String j2sAltFileName = System.getProperty(j2sAltFileProperty);
 			System.out.println("J2S System.getProperty(\"" + j2sAltFileProperty + "\") = " + j2sAltFileName);
 			if (j2sAltFileName != null && j2sAltFileName.length() > 0) {
-				return initializeUsing(new File(projectFolder, j2sAltFileName), altLevel);
+				return getPropsForDir(dir, j2sAltFileName, altLevel);
 			}
 		}
 		return props;
@@ -163,11 +164,10 @@ public class Java2ScriptSwingJSCompiler extends Java2ScriptCompiler {
 	 * @return true if this is a j2s project and is enabled
 	 * 
 	 */
-	@SuppressWarnings({ "unused", "deprecation" })
-	public boolean initializeProject(IJavaProject project) {
-		if (!super.initializeProject(project, AST.JLS8))
+	@SuppressWarnings({ "deprecation" })
+	public boolean initializeProject(IJavaProject project, boolean isCleanBuild) {
+		if (!super.initializeProject(project, isCleanBuild, AST.JLS8))
 			return false;
-
 		System.out.println("Swingjs initializeProject " + props);
 		nResources = nSources = nJS = nHTML = 0;
  

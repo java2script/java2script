@@ -1,16 +1,19 @@
 package j2s.core;
 
 import j2s.CorePlugin;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.compiler.BuildContext;
 import org.eclipse.jdt.core.compiler.ReconcileContext;
 
 /**
- * New Java2Script compiler uses org.eclipse.jdt.core.compiler.CompilationParticipant instead of builder
+ * The entry point from Eclipse once the Plugin is running.
  * 
  * source: https://github.com/eclipse/org.aspectj.shadows/blob/master/org.eclipse.jdt.core/model/org/eclipse/jdt/core/compiler/CompilationParticipant.java
  * 
@@ -30,6 +33,8 @@ public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.comp
 	}
 
 	/**
+	 * Question from Eclipse...is this one of your projects?
+	 * 
 	 * Returns whether this participant is active for a given project.
 	 * <p>
 	 * Default is to return <code>false</code>.
@@ -45,18 +50,18 @@ public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.comp
 	 */
 	@Override
 	public boolean isActive(IJavaProject project) {
-		if (project.getProject().getLocation() == null) {
+		IPath path = project.getProject().getLocation();
+		if (path == null) {
 			// happens when comparing to team...show history item
 			return false;
 		}
-		String j2sFileName = Java2ScriptCompiler.getJ2SConfigName(project);
-		boolean isj2s = (j2sFileName != null);
+		File f = Java2ScriptCompiler.checkJ2SDir(path.toOSString());
+		boolean isj2s = (f != null);
  		String loc = " " + project.getProject().getLocation() + " ";
- 		// notify only if changed
- 		String key = j2sFileName + "," + isj2s + "," + loc + ";";
+ 		String key = f + "," + isj2s + "," + loc + ";";
  		if (isActiveNotified.indexOf(key) < 0) {
- 			System.out.println("J2S isActive " + (isj2s ? j2sFileName : "false") + loc);
- 			isActiveNotified = isActiveNotified.replace(j2sFileName + (!isj2s) + loc, "");
+ 	 		// notify only if changed
+ 			System.out.println("J2S isActive " + (isj2s ? f : "false") + loc);
  			isActiveNotified += key;
  		}
 		return isj2s;
@@ -130,18 +135,16 @@ public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.comp
 	 */
 	@Override
 	public void buildFinished(IJavaProject project) {
-		String projectName = project.getProject().getName();
-		
+		String projectName = project.getProject().getName();		
 		if (contexts != null && contexts.size() > 0) {
-			Java2ScriptCompiler j2sCompiler = Java2ScriptCompiler.newCompiler(project);
+			Java2ScriptCompiler j2sCompiler = Java2ScriptCompiler.newCompiler(project, contexts.get(0));
 			if (j2sCompiler == null) {
 				System.out.println("No .j2s or .j2sjmol file in project found for " + projectName);
 				return;
 			}
 			System.out.println("J2S using transpiler " + j2sCompiler.getClass().getName());
-			j2sCompiler.startBuild(isCleanBuild);			
-			if (!j2sCompiler.initializeProject(project)) {
-				System.out.println("J2S .j2s disabled");
+			if (!j2sCompiler.initializeProject(project, isCleanBuild)) {
+				System.out.println("J2S project disabled");
 				return;
 			}
 			boolean breakOnError = j2sCompiler.doBreakOnError();

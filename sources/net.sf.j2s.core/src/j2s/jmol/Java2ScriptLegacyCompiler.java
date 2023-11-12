@@ -26,13 +26,13 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 
 	private int nResources;
 
-	public Java2ScriptLegacyCompiler() {
-		super(false, J2S_CONFIG_JMOL);
+	public Java2ScriptLegacyCompiler(File f) {
+		super(false, f);
 	}
 
 	@SuppressWarnings("deprecation")
-	public boolean initializeProject(IJavaProject project) {
-		if (!super.initializeProject(project, AST.JLS4)) {
+	public boolean initializeProject(IJavaProject project, boolean isCleanBuild) {
+		if (!super.initializeProject(project, isCleanBuild, AST.JLS4)) {
 			return false;
 		}
 		

@@ -5,6 +5,15 @@ import org.osgi.framework.BundleContext;
 
 /**
  * The main plugin class to be used in the desktop.
+ * 
+ * Note that Eclipse must be started with the -clean flag if it is to register
+ * the bundle version properly. So we use VERSION here instead
+ * 
+ * This version should be also placed in MANIFEST.MF for the bundle version
+ * 
+ * This wrapper class does nothing in and of itself. See the 
+ * Java2ScriptCompilationParticipant for that.
+ * 
  */
 public class CorePlugin extends Plugin {
 
@@ -15,11 +24,6 @@ public class CorePlugin extends Plugin {
 	 * Version prerelease -xxx is for runtime use only.
 	 * 
 	 * the actual "x.y.z" version is specified in plugin.xml.
-	 * 
-	 * Note that Eclipse must be started with the -clean flag if it is to register
-	 * the bundle version properly. So we use VERSION here instead
-	 * 
-	 * This version should be also placed in MANIFEST.MF for the bundle version
 	 * 
 	 */
 	public static String VERSION = "5.0.1-v1";
