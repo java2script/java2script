@@ -25,3 +25,4 @@ j2s.compiler.nonqualified.packages=test.js
 #a semicolon-separated list of package-level file paths to be excluded
 #j2s.excluded.paths=test;testng
 
+j2s.compiler.mode=debug
