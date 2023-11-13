@@ -274,7 +274,7 @@ public class InputStreamReader extends Reader {
      */
     @Override
     public boolean ready() throws IOException {
-        return isOpen;
+        return isOpen && in.available() > 0;
     }
 
     @Override

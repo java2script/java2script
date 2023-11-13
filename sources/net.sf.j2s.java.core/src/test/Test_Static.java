@@ -33,9 +33,17 @@ class Test_Static extends Test_ implements Test_int3, Test_int2, Test_int1 {
 	private final static Integer iI1 = new Integer(13);
 	private final static Float fF2 = 12f;
 	private final static Float fF1 = new Float(12);
+	
+	private final static int testint = 33333;
+	
+	private final static String teststr = "mystring";
 
 	private final static String st = "testing";
+	
+	private final static String test2 = testint + teststr;
+	
 	static { 
+		assert (st == "testing");
 		assert (iI == 11);
 	}
 	private static String st1 = st;

@@ -1,4 +1,5 @@
-The net.sf.j2s.core Eclipse project creates the Java2Script transpiler for SwingJS. 
+The net.sf.j2s.core Eclipse project creates the Java2Script transpiler for 
+SwingJS as well as a "legacy" transpiler for legacy Jmol. 
 
 See the dist/dropins folder for the latest distribution and installation notes. 
 

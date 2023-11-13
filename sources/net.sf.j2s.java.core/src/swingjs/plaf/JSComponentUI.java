@@ -2351,7 +2351,8 @@ public class JSComponentUI extends ComponentUI
 		if (node == null || isUIDisabled)
 			return;
 		
-		DOMNode.setAttr(node, "disabled", (b ? NULL : TRUE));
+		DOMNode.setAttr(node, "disabled", b ? NULL : TRUE);
+		DOMNode.setStyle(node,  "pointer-events", b ? "auto" : "none");
 		if (!b && inactiveForeground == colorUNKNOWN)
 			getDisabledColors(buttonNode == null ? getPropertyPrefix() : "Button");
 		if (jc.isOpaque()) {

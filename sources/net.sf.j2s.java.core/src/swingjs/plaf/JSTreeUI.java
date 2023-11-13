@@ -97,7 +97,6 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import javax.swing.tree.VariableHeightLayoutCache;
 
-import sun.awt.AWTAccessor;
 import sun.swing.DefaultLookup;
 import sun.swing.SwingUtilities2;
 import sun.swing.UIAction;
@@ -2264,7 +2263,7 @@ public class JSTreeUI extends JSPanelUI {
 				tree.add(editingComponent);
 				editingComponent.setBounds(nodeBounds.x, nodeBounds.y, nodeBounds.width, nodeBounds.height);
 				editingPath = path;
-				AWTAccessor.getComponentAccessor().revalidateSynchronously(editingComponent);
+				editingComponent.validate();//revalidateSynchronously();
 				editingComponent.repaint();
 				if (cellEditor.shouldSelectCell(event)) {
 					stopEditingInCompleteEditing = false;

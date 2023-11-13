@@ -5,7 +5,7 @@
  	<extension
          point="org.eclipse.jdt.core.compilationParticipant">
       <compilationParticipant
-            class="net.sf.j2s.core.Java2ScriptCompilationParticipant"
+            class="j2s.core.Java2ScriptCompilationParticipant"
             createsProblems="false"
             id="Java2Script CompilationParticipant"
             modifiesEnvironment="false">

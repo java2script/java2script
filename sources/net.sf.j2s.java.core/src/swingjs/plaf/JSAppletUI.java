@@ -57,7 +57,9 @@ public class JSAppletUI extends JSLightweightUI {
 	}
 
 	public HTML5Canvas getCanvas() {
-		return (HTML5Canvas) c.getAppContext().getThreadGroup().秘html5Applet._getHtml5Canvas();
+		Object canvas = this.c.getAppContext().getThreadGroup().秘html5Applet._getHtml5Canvas();
+		focusNode = (DOMNode) canvas;
+		return (HTML5Canvas) canvas;
 	}
 
 
