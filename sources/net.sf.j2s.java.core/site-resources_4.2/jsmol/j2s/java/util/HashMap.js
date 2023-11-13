@@ -1,7 +1,7 @@
 // BH minor efficiencies only
 
 Clazz.load(["java.util.AbstractMap","$.AbstractSet","$.Iterator","$.Map","$.MapEntry"],"java.util.HashMap",["java.lang.IllegalArgumentException","$.IllegalStateException","java.util.AbstractCollection","$.Arrays","$.ConcurrentModificationException","java.util.MapEntry.Type","java.util.NoSuchElementException"],function(){
-c$=Clazz.decorateAsClass(function(){
+var $fz,c$=Clazz.decorateAsClass(function(){
 this.elementCount=0;
 this.elementData=null;
 this.loadFactor=0;
@@ -298,7 +298,8 @@ this.valuesCollection=((Clazz.isClassDefined("java.util.HashMap$2")?0:java.util.
 }return this.valuesCollection;
 });
 c$.$HashMap$1$=function(){
-Clazz.pu$h();
+/*if*/;(function(){ var 
+
 c$=Clazz.declareAnonymous(java.util,"HashMap$1",java.util.AbstractSet);
 Clazz.overrideMethod(c$,"contains",
 function(object){
@@ -323,19 +324,21 @@ Clazz.overrideMethod(c$,"iterator",
 function(){
 return new java.util.HashMap.HashMapIterator(((Clazz.isClassDefined("java.util.HashMap$1$1")?0:java.util.HashMap.$HashMap$1$1$()),Clazz.innerTypeInstance(java.util.HashMap$1$1,this,null)),this.b$["java.util.HashMap"]);
 });
-c$=Clazz.p0p();
+/*eoif*/})();
 };
 c$.$HashMap$1$1$=function(){
-Clazz.pu$h();
+/*if*/;(function(){ var 
+
 c$=Clazz.declareAnonymous(java.util,"HashMap$1$1",null,java.util.MapEntry.Type);
 Clazz.overrideMethod(c$,"get",
 function(entry){
 return entry.key;
 },"java.util.MapEntry");
-c$=Clazz.p0p();
+/*eoif*/})();
 };
 c$.$HashMap$2$=function(){
-Clazz.pu$h();
+	/*if*/;(function(){ var 
+
 c$=Clazz.declareAnonymous(java.util,"HashMap$2",java.util.AbstractCollection);
 Clazz.overrideMethod(c$,"contains",
 function(object){
@@ -353,18 +356,20 @@ Clazz.overrideMethod(c$,"iterator",
 function(){
 return new java.util.HashMap.HashMapIterator(((Clazz.isClassDefined("java.util.HashMap$2$1")?0:java.util.HashMap.$HashMap$2$1$()),Clazz.innerTypeInstance(java.util.HashMap$2$1,this,null)),this.b$["java.util.HashMap"]);
 });
-c$=Clazz.p0p();
+/*eoif*/})();
 };
 c$.$HashMap$2$1$=function(){
-Clazz.pu$h();
+/*if*/;(function(){ var 
+
 c$=Clazz.declareAnonymous(java.util,"HashMap$2$1",null,java.util.MapEntry.Type);
 Clazz.overrideMethod(c$,"get",
 function(entry){
 return entry.value;
 },"java.util.MapEntry");
-c$=Clazz.p0p();
+/*eoif*/})();
 };
-Clazz.pu$h();
+/*if*/;(function(){ var 
+
 c$=Clazz.decorateAsClass(function(){
 this.origKeyHash=0;
 this.next=null;
@@ -382,8 +387,9 @@ if(this.next!=null){
 a.next=this.next.clone();
 }return a;
 });
-c$=Clazz.p0p();
-Clazz.pu$h();
+/*eoif*/})();
+/*if*/;(function(){ var 
+
 c$=Clazz.decorateAsClass(function(){
 this.position=0;
 this.expectedModCount=0;
@@ -451,8 +457,9 @@ this.lastEntry.next=this.entry;
 }this.associatedMap.elementCount--;
 this.expectedModCount++;
 });
-c$=Clazz.p0p();
-Clazz.pu$h();
+/*eoif*/})();
+/*if*/;(function(){ var 
+
 c$=Clazz.decorateAsClass(function(){
 this.associatedMap=null;
 Clazz.instantialize(this,arguments);
@@ -493,15 +500,16 @@ function(){
 return new java.util.HashMap.HashMapIterator(((Clazz.isClassDefined("java.util.HashMap$HashMapEntrySet$1")?0:java.util.HashMap.HashMapEntrySet.$HashMap$HashMapEntrySet$1$()),Clazz.innerTypeInstance(java.util.HashMap$HashMapEntrySet$1,this,null)),this.associatedMap);
 });
 c$.$HashMap$HashMapEntrySet$1$=function(){
-Clazz.pu$h();
+/*if*/;(function(){ var 
+
 c$=Clazz.declareAnonymous(java.util,"HashMap$HashMapEntrySet$1",null,java.util.MapEntry.Type);
 Clazz.overrideMethod(c$,"get",
 function(a){
 return a;
 },"java.util.MapEntry");
-c$=Clazz.p0p();
+/*eoif*/})();
 };
-c$=Clazz.p0p();
-Clazz.defineStatics(c$,
-"DEFAULT_SIZE",16);
+/*eoif*/})();
+//Clazz.defineStatics(c$,
+//"DEFAULT_SIZE",16);
 });

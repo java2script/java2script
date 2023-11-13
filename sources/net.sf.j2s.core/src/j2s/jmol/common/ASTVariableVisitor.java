@@ -52,16 +52,16 @@ public class ASTVariableVisitor extends AbstractPluginVisitor {
 	/**
 	 * Whether to compile variable names into minimized names or not
 	 */
-	protected boolean toCompileVariableName = true;
+	protected boolean toCompileVariableName = false;
 
-	public boolean isToCompileVariableName() {
-		return toCompileVariableName;
-	}
-
-	public void setToCompileVariableName(boolean toCompileVariableName) {
-		this.toCompileVariableName = toCompileVariableName;
-	}
-
+//	public boolean isToCompileVariableName() {
+//		return toCompileVariableName;
+//	}
+//
+//	public void setToCompileVariableName(boolean toCompileVariableName) {
+//		this.toCompileVariableName = toCompileVariableName;
+//	}
+//
 	protected String getVariableName(String name) {
 		for (int i = normalVars.size() - 1; i >= 0; i--) {
 			ASTFinalVariable var = (ASTFinalVariable) normalVars.get(i);

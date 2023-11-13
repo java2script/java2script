@@ -1,7 +1,7 @@
 // BH 8/25/2014 1:10:59 AM  - removed indirect access/inner class business.
 
 Clazz.load(["java.util.AbstractCollection","$.Iterator","$.List","$.ListIterator","$.RandomAccess","$.NoSuchElementException"],"java.util.AbstractList",["java.lang.IllegalArgumentException","$.IllegalStateException","$.IndexOutOfBoundsException","$.UnsupportedOperationException","java.util.ConcurrentModificationException"],function(){
-c$=Clazz.decorateAsClass(function(){
+var $fz,c$=Clazz.decorateAsClass(function(){
 this.modCount=0;
 
 
@@ -141,7 +141,7 @@ return new java.util.AbstractList.SubAbstractListRandomAccess(this,start,end);
 
 //c$.$AbstractList$SimpleListIterator$=function(){
 
-Clazz.pu$h(self.c$);
+/*if*/;(function(){ var 
 
 c$=Clazz.decorateAsClass(function(){
 //Clazz.prepareCallback(this,arguments);
@@ -199,12 +199,12 @@ this.pos--;
 throw new java.util.ConcurrentModificationException();
 }});
 
-c$=Clazz.p0p();
+/*eoif*/})();
 //};
 
 
 //c$.$AbstractList$FullListIterator$=function(){
-Clazz.pu$h(self.c$);
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 //Clazz.prepareCallback(this,arguments);
 Clazz.instantialize(this,arguments);
@@ -283,20 +283,20 @@ throw e;
 }else{
 throw new java.util.ConcurrentModificationException();
 }},"~O");
-c$=Clazz.p0p();
+/*eoif*/})();
 //};
 
 
 
 
-Clazz.pu$h(self.c$);
+/*if*/;(function(){ var 
 c$=Clazz.declareType(java.util.AbstractList,"SubAbstractListRandomAccess",java.util.AbstractList.SubAbstractList,java.util.RandomAccess);
-c$=Clazz.p0p();
+/*eoif*/})();
 
 
 
 
-Clazz.pu$h(self.c$);
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 this.fullList=null;
 this.offset=0;
@@ -406,7 +406,7 @@ this.$size++;
 this.$size--;
 }this.modCount=this.fullList.modCount;
 },"~B");
-Clazz.pu$h(self.c$);
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 this.subList=null;
 this.iterator=null;
@@ -468,6 +468,6 @@ Clazz.defineMethod(c$,"set",
 function(a){
 this.iterator.set(a);
 },"~O");
-c$=Clazz.p0p();
-c$=Clazz.p0p();
+/*eoif*/})();
+/*eoif*/})();
 });

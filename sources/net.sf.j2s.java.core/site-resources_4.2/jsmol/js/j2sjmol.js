@@ -5413,6 +5413,7 @@ Con.clear = function () {
 /* public */
 Clazz.alert = function (s) {
 	Con.consoleOutput (s + "\r\n");
+	Jmol.clazzAlert(s);
 };
 
 

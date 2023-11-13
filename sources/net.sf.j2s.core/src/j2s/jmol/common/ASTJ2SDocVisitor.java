@@ -153,7 +153,7 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 						}
 					}
 				}
-				boolean toCompileVariableName = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).isToCompileVariableName();
+				boolean toCompileVariableName = false;//((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).isToCompileVariableName();
 				
 				if (!toCompileVariableName) {
 					for (Iterator iter = tags.iterator(); iter.hasNext();) {

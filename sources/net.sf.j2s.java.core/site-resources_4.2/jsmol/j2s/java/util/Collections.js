@@ -1,7 +1,7 @@
 //BH note: a declared static superclass must come before a static class referencing it
 
 Clazz.load(["java.util.AbstractList","$.AbstractMap","$.AbstractSet","$.Collection","$.Iterator","$.List","$.ListIterator","$.Map","$.RandomAccess","$.Set","$.SortedMap","$.SortedSet","java.lang.NullPointerException","$.UnsupportedOperationException","java.lang.reflect.Array"],"java.util.Collections",["java.lang.ArrayIndexOutOfBoundsException","$.ClassCastException","$.IllegalArgumentException","$.IndexOutOfBoundsException","java.util.ArrayList","$.Arrays","$.Enumeration","java.util.Map.Entry","java.util.NoSuchElementException","$.Random"],function(){
-c$=Clazz.declareType(java.util,"Collections");
+var $fz,c$=Clazz.declareType(java.util,"Collections");
 c$.binarySearch=Clazz.defineMethod(c$,"binarySearch",
 function(list,object){
 if(list==null){
@@ -516,7 +516,7 @@ throw new ClassCastException("Attempt to insert "+obj.getClass()+" element into 
 },"~O,Class");
 
 c$.$Collections$1$=function(c){
-Clazz.pu$h(self.c$);
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 Clazz.prepareCallback(this,arguments);
 this.it=null;
@@ -535,10 +535,10 @@ Clazz.defineMethod(c$,"nextElement",
 function(){
 return this.it.next();
 });
-c$=Clazz.p0p();
+/*eoif*/})();
 };
 
-Clazz.pu$h(self.c$);
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 this.n=0;
 this.element=null;
@@ -566,8 +566,8 @@ if(0<=a&&a<this.n){
 return this.element;
 }throw new IndexOutOfBoundsException();
 },"~N");
-c$=Clazz.p0p();
-Clazz.pu$h(self.c$);
+/*eoif*/})();
+/*if*/;(function(){ var 
 c$=Clazz.declareType(java.util.Collections,"EmptyList",java.util.AbstractList,java.io.Serializable);
 Clazz.overrideMethod(c$,"contains",
 function(a){
@@ -581,8 +581,8 @@ Clazz.overrideMethod(c$,"get",
 function(a){
 throw new IndexOutOfBoundsException();
 },"~N");
-c$=Clazz.p0p();
-Clazz.pu$h(self.c$);
+/*eoif*/})();
+/*if*/;(function(){ var 
 c$=Clazz.declareType(java.util.Collections,"EmptySet",java.util.AbstractSet,java.io.Serializable);
 Clazz.overrideMethod(c$,"contains",
 function(a){
@@ -597,7 +597,7 @@ function(){
 return((Clazz.isClassDefined("java.util.Collections$EmptySet$1")?0:java.util.Collections.EmptySet.$Collections$EmptySet$1$()),Clazz.innerTypeInstance(java.util.Collections$EmptySet$1,this,null));
 });
 c$.$Collections$EmptySet$1$=function(){
-Clazz.pu$h(self.c$);
+/*if*/;(function(){ var 
 c$=Clazz.declareAnonymous(java.util,"Collections$EmptySet$1",null,java.util.Iterator);
 Clazz.overrideMethod(c$,"hasNext",
 function(){
@@ -611,10 +611,10 @@ Clazz.overrideMethod(c$,"remove",
 function(){
 throw new UnsupportedOperationException();
 });
-c$=Clazz.p0p();
+/*eoif*/})();
 };
-c$=Clazz.p0p();
-Clazz.pu$h(self.c$);
+/*eoif*/})();
+/*if*/;(function(){ var 
 c$=Clazz.declareType(java.util.Collections,"EmptyMap",java.util.AbstractMap,java.io.Serializable);
 Clazz.overrideMethod(c$,"containsKey",
 function(a){
@@ -640,16 +640,16 @@ Clazz.overrideMethod(c$,"values",
 function(){
 return java.util.Collections.EMPTY_LIST;
 });
-c$=Clazz.p0p();
-Clazz.pu$h(self.c$);
+/*eoif*/})();
+/*if*/;(function(){ var 
 c$=Clazz.declareType(java.util.Collections,"ReverseComparator",null,[java.util.Comparator,java.io.Serializable]);
 Clazz.overrideMethod(c$,"compare",
 function(a,b){
 var c=b;
 return c.compareTo(a);
 },"~O,~O");
-c$=Clazz.p0p();
-Clazz.pu$h(self.c$);
+/*eoif*/})();
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 this.comparator=null;
 Clazz.instantialize(this,arguments);
@@ -662,8 +662,8 @@ Clazz.defineMethod(c$,"compare",
 function(a,b){
 return this.comparator.compare(b,a);
 },"~O,~O");
-c$=Clazz.p0p();
-Clazz.pu$h(self.c$);
+/*eoif*/})();
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 this.element=null;
 Clazz.instantialize(this,arguments);
@@ -686,7 +686,7 @@ function(){
 return((Clazz.isClassDefined("java.util.Collections$SingletonSet$1")?0:java.util.Collections.SingletonSet.$Collections$SingletonSet$1$()),Clazz.innerTypeInstance(java.util.Collections$SingletonSet$1,this,null));
 });
 c$.$Collections$SingletonSet$1$=function(){
-Clazz.pu$h(self.c$);
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 Clazz.prepareCallback(this,arguments);
 this.$hasNext=true;
@@ -707,10 +707,10 @@ Clazz.overrideMethod(c$,"remove",
 function(){
 throw new UnsupportedOperationException();
 });
-c$=Clazz.p0p();
+/*eoif*/})();
 };
-c$=Clazz.p0p();
-Clazz.pu$h(self.c$);
+/*eoif*/})();
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 this.element=null;
 Clazz.instantialize(this,arguments);
@@ -734,8 +734,8 @@ Clazz.overrideMethod(c$,"size",
 function(){
 return 1;
 });
-c$=Clazz.p0p();
-Clazz.pu$h(self.c$);
+/*eoif*/})();
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 this.k=null;
 this.v=null;
@@ -770,7 +770,7 @@ function(){
 return((Clazz.isClassDefined("java.util.Collections$SingletonMap$1")?0:java.util.Collections.SingletonMap.$Collections$SingletonMap$1$()),Clazz.innerTypeInstance(java.util.Collections$SingletonMap$1,this,null));
 });
 c$.$Collections$SingletonMap$1$=function(){
-Clazz.pu$h(self.c$);
+/*if*/;(function(){ var 
 c$=Clazz.declareAnonymous(java.util,"Collections$SingletonMap$1",java.util.AbstractSet);
 Clazz.overrideMethod(c$,"contains",
 function(a){
@@ -787,10 +787,10 @@ Clazz.overrideMethod(c$,"iterator",
 function(){
 return((Clazz.isClassDefined("java.util.Collections$SingletonMap$1$1")?0:java.util.Collections.$Collections$SingletonMap$1$1$()),Clazz.innerTypeInstance(java.util.Collections$SingletonMap$1$1,this,null));
 });
-c$=Clazz.p0p();
+/*eoif*/})();
 };
 c$.$Collections$SingletonMap$1$1$=function(){
-Clazz.pu$h(self.c$);
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 Clazz.prepareCallback(this,arguments);
 this.$hasNext=true;
@@ -811,10 +811,10 @@ Clazz.overrideMethod(c$,"remove",
 function(){
 throw new UnsupportedOperationException();
 });
-c$=Clazz.p0p();
+/*eoif*/})();
 };
 c$.$Collections$SingletonMap$1$1$1$=function(){
-Clazz.pu$h(self.c$);
+/*if*/;(function(){ var 
 c$=Clazz.declareAnonymous(java.util,"Collections$SingletonMap$1$1$1",null,java.util.Map.Entry);
 Clazz.overrideMethod(c$,"equals",
 function(a){
@@ -836,10 +836,10 @@ Clazz.overrideMethod(c$,"setValue",
 function(a){
 throw new UnsupportedOperationException();
 },"~O");
-c$=Clazz.p0p();
+/*eoif*/})();
 };
-c$=Clazz.p0p();
-Clazz.pu$h(self.c$);
+/*eoif*/})();
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 this.c=null;
 this.mutex=null;
@@ -925,10 +925,10 @@ function(a){
 {
 return this.c.toArray(a);
 }},"~A");
-c$=Clazz.p0p();
+/*eoif*/})();
 
 
-Clazz.pu$h(self.c$);
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 this.list=null;
 Clazz.instantialize(this,arguments);
@@ -1004,23 +1004,23 @@ function(a,b){
 {
 return new java.util.Collections.SynchronizedList(this.list.subList(a,b),this.mutex);
 }},"~N,~N");
-c$=Clazz.p0p();
+/*eoif*/})();
 
 
 
-Clazz.pu$h(self.c$);
+/*if*/;(function(){ var 
 c$=Clazz.declareType(java.util.Collections,"SynchronizedRandomAccessList",java.util.Collections.SynchronizedList,java.util.RandomAccess);
 Clazz.overrideMethod(c$,"subList",
 function(a,b){
 {
 return new java.util.Collections.SynchronizedRandomAccessList(this.list.subList(a,b),this.mutex);
 }},"~N,~N");
-c$=Clazz.p0p();
+/*eoif*/})();
 
 
 
 
-Clazz.pu$h(self.c$);
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 this.m=null;
 this.mutex=null;
@@ -1111,8 +1111,8 @@ function(){
 {
 return this.m.toString();
 }});
-c$=Clazz.p0p();
-Clazz.pu$h(self.c$);
+/*eoif*/})();
+/*if*/;(function(){ var 
 c$=Clazz.declareType(java.util.Collections,"SynchronizedSet",java.util.Collections.SynchronizedCollection,java.util.Set);
 Clazz.overrideMethod(c$,"equals",
 function(a){
@@ -1124,8 +1124,8 @@ function(){
 {
 return this.c.hashCode();
 }});
-c$=Clazz.p0p();
-Clazz.pu$h(self.c$);
+/*eoif*/})();
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 this.sm=null;
 Clazz.instantialize(this,arguments);
@@ -1170,8 +1170,8 @@ function(a){
 {
 return new java.util.Collections.SynchronizedSortedMap(this.sm.tailMap(a),this.mutex);
 }},"~O");
-c$=Clazz.p0p();
-Clazz.pu$h(self.c$);
+/*eoif*/})();
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 this.ss=null;
 Clazz.instantialize(this,arguments);
@@ -1216,8 +1216,8 @@ function(a){
 {
 return new java.util.Collections.SynchronizedSortedSet(this.ss.tailSet(a),this.mutex);
 }},"~O");
-c$=Clazz.p0p();
-Clazz.pu$h(self.c$);
+/*eoif*/})();
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 this.c=null;
 Clazz.instantialize(this,arguments);
@@ -1283,7 +1283,7 @@ function(){
 return this.c.toString();
 });
 c$.$Collections$UnmodifiableCollection$1$=function(){
-Clazz.pu$h(self.c$);
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 Clazz.prepareCallback(this,arguments);
 this.iterator=null;
@@ -1304,13 +1304,13 @@ Clazz.overrideMethod(c$,"remove",
 function(){
 throw new UnsupportedOperationException();
 });
-c$=Clazz.p0p();
+/*eoif*/})();
 };
-c$=Clazz.p0p();
+/*eoif*/})();
 
 //BH note: a declared static superclass must come before a static class referencing it
 
-Clazz.pu$h(self.c$);
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 this.list=null;
 Clazz.instantialize(this,arguments);
@@ -1370,7 +1370,7 @@ function(a,b){
 return new java.util.Collections.UnmodifiableList(this.list.subList(a,b));
 },"~N,~N");
 c$.$Collections$UnmodifiableList$1$=function(){
-Clazz.pu$h(self.c$);
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 Clazz.prepareCallback(this,arguments);
 this.iterator=null;
@@ -1415,23 +1415,23 @@ Clazz.overrideMethod(c$,"set",
 function(b){
 throw new UnsupportedOperationException();
 },"~O");
-c$=Clazz.p0p();
+/*eoif*/})();
 };
-c$=Clazz.p0p();
+/*eoif*/})();
 
 
 
 
-Clazz.pu$h(self.c$);
+/*if*/;(function(){ var 
 c$=Clazz.declareType(java.util.Collections,"UnmodifiableRandomAccessList",java.util.Collections.UnmodifiableList,java.util.RandomAccess);
 Clazz.overrideMethod(c$,"subList",
 function(a,b){
 return new java.util.Collections.UnmodifiableRandomAccessList(this.list.subList(a,b));
 },"~N,~N");
-c$=Clazz.p0p();
+/*eoif*/})();
 
 
-Clazz.pu$h(self.c$);
+/*if*/;(function(){ var 
 c$=Clazz.declareType(java.util.Collections,"UnmodifiableSet",java.util.Collections.UnmodifiableCollection,java.util.Set);
 Clazz.overrideMethod(c$,"equals",
 function(a){
@@ -1441,10 +1441,10 @@ Clazz.overrideMethod(c$,"hashCode",
 function(){
 return this.c.hashCode();
 });
-c$=Clazz.p0p();
+/*eoif*/})();
 
 
-Clazz.pu$h(self.c$);
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 this.m=null;
 Clazz.instantialize(this,arguments);
@@ -1520,7 +1520,7 @@ return this.m.toString();
 
 
 
-Clazz.pu$h(self.c$);
+/*if*/;(function(){ var 
 c$=Clazz.declareType(java.util.Collections.UnmodifiableMap,"UnmodifiableEntrySet",java.util.Collections.UnmodifiableSet);
 Clazz.overrideMethod(c$,"iterator",
 function(){
@@ -1552,7 +1552,7 @@ a[c]=null;
 }return a;
 },"~A");
 c$.$Collections$UnmodifiableMap$UnmodifiableEntrySet$1$=function(){
-Clazz.pu$h(self.c$);
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 Clazz.prepareCallback(this,arguments);
 this.iterator=null;
@@ -1573,9 +1573,9 @@ Clazz.overrideMethod(c$,"remove",
 function(){
 throw new UnsupportedOperationException();
 });
-c$=Clazz.p0p();
+/*eoif*/})();
 };
-Clazz.pu$h(self.c$);
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 this.mapEntry=null;
 Clazz.instantialize(this,arguments);
@@ -1608,13 +1608,13 @@ Clazz.defineMethod(c$,"toString",
 function(){
 return this.mapEntry.toString();
 });
-c$=Clazz.p0p();
-c$=Clazz.p0p();
-c$=Clazz.p0p();
+/*eoif*/})();
+/*eoif*/})();
+/*eoif*/})();
 
 
 
-Clazz.pu$h(self.c$);
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 this.sm=null;
 Clazz.instantialize(this,arguments);
@@ -1648,8 +1648,8 @@ Clazz.defineMethod(c$,"tailMap",
 function(a){
 return new java.util.Collections.UnmodifiableSortedMap(this.sm.tailMap(a));
 },"~O");
-c$=Clazz.p0p();
-Clazz.pu$h(self.c$);
+/*eoif*/})();
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 this.ss=null;
 Clazz.instantialize(this,arguments);
@@ -1683,8 +1683,8 @@ Clazz.defineMethod(c$,"tailSet",
 function(a){
 return new java.util.Collections.UnmodifiableSortedSet(this.ss.tailSet(a));
 },"~O");
-c$=Clazz.p0p();
-Clazz.pu$h(self.c$);
+/*eoif*/})();
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 this.c=null;
 this.type=null;
@@ -1768,8 +1768,8 @@ Clazz.defineMethod(c$,"toString",
 function(){
 return this.c.toString();
 });
-c$=Clazz.p0p();
-Clazz.pu$h(self.c$);
+/*eoif*/})();
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 this.i=null;
 this.type=null;
@@ -1816,10 +1816,10 @@ Clazz.defineMethod(c$,"add",
 function(a){
 this.i.add(java.util.Collections.checkType(a,this.type));
 },"~O");
-c$=Clazz.p0p();
+/*eoif*/})();
 
 
-Clazz.pu$h(self.c$);
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 this.l=null;
 Clazz.instantialize(this,arguments);
@@ -1886,15 +1886,15 @@ Clazz.overrideMethod(c$,"hashcode",
 function(){
 return this.l.hashCode();
 });
-c$=Clazz.p0p();
+/*eoif*/})();
 
 
-Clazz.pu$h(self.c$);
+/*if*/;(function(){ var 
 c$=Clazz.declareType(java.util.Collections,"CheckedRandomAccessList",java.util.Collections.CheckedList,java.util.RandomAccess);
-c$=Clazz.p0p();
+/*eoif*/})();
 
 
-Clazz.pu$h(self.c$);
+/*if*/;(function(){ var 
 c$=Clazz.declareType(java.util.Collections,"CheckedSet",java.util.Collections.CheckedCollection,java.util.Set);
 Clazz.overrideMethod(c$,"equals",
 function(a){
@@ -1904,8 +1904,8 @@ Clazz.overrideMethod(c$,"hashCode",
 function(){
 return this.c.hashCode();
 });
-c$=Clazz.p0p();
-Clazz.pu$h(self.c$);
+/*eoif*/})();
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 this.m=null;
 this.keyType=null;
@@ -1993,7 +1993,7 @@ Clazz.defineMethod(c$,"toString",
 function(){
 return this.m.toString();
 });
-Clazz.pu$h(self.c$);
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 this.e=null;
 this.valueType=null;
@@ -2026,8 +2026,8 @@ Clazz.overrideMethod(c$,"hashcode",
 function(){
 return this.e.hashCode();
 });
-c$=Clazz.p0p();
-Clazz.pu$h(self.c$);
+/*eoif*/})();
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 this.s=null;
 this.valueType=null;
@@ -2114,7 +2114,7 @@ Clazz.overrideMethod(c$,"equals",
 function(a){
 return this.s.equals(a);
 },"~O");
-Clazz.pu$h(self.c$);
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 this.i=null;
 this.valueType=null;
@@ -2137,10 +2137,10 @@ Clazz.defineMethod(c$,"next",
 function(){
 return new java.util.Collections.CheckedMap.CheckedEntry(this.i.next(),this.valueType);
 });
-c$=Clazz.p0p();
-c$=Clazz.p0p();
-c$=Clazz.p0p();
-Clazz.pu$h(self.c$);
+/*eoif*/})();
+/*eoif*/})();
+/*eoif*/})();
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 this.ss=null;
 Clazz.instantialize(this,arguments);
@@ -2174,8 +2174,8 @@ Clazz.defineMethod(c$,"last",
 function(){
 return this.ss.last();
 });
-c$=Clazz.p0p();
-Clazz.pu$h(self.c$);
+/*eoif*/})();
+/*if*/;(function(){ var 
 c$=Clazz.decorateAsClass(function(){
 this.sm=null;
 Clazz.instantialize(this,arguments);
@@ -2209,7 +2209,7 @@ Clazz.defineMethod(c$,"lastKey",
 function(){
 return this.sm.lastKey();
 });
-c$=Clazz.p0p();
+/*eoif*/})();
 c$.EMPTY_LIST=c$.prototype.EMPTY_LIST=new java.util.Collections.EmptyList();
 c$.EMPTY_SET=c$.prototype.EMPTY_SET=new java.util.Collections.EmptySet();
 c$.EMPTY_MAP=c$.prototype.EMPTY_MAP=new java.util.Collections.EmptyMap();

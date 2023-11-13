@@ -2,7 +2,7 @@
 //BH 7/4/2016 3:16:31 PM adding _removeItemAt and _removeObject
 
 Clazz.load(["java.util.AbstractList","$.List","$.RandomAccess"],"java.util.ArrayList",["java.lang.IllegalArgumentException","$.IndexOutOfBoundsException","java.lang.reflect.Array","java.util.Arrays"],function(){
-c$=Clazz.decorateAsClass(function(){
+var $fz,c$=Clazz.decorateAsClass(function(){
 this.firstIndex=0;
 this.lastIndex=0;
 this.array=null;

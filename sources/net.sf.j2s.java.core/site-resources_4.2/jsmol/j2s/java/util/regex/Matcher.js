@@ -6,7 +6,7 @@
 
 Clazz.declarePackage("java.util.regex");
 Clazz.load(["java.util.regex.MatchResult"],"java.util.regex.Matcher",["java.lang.IllegalArgumentException","$.IndexOutOfBoundsException","$.NullPointerException","$.StringBuffer"],function(){
-c$=Clazz.decorateAsClass(function(){
+var $fz,c$=Clazz.decorateAsClass(function(){
 this.pat=null;
 this.string=null;
 this.strString=null;
@@ -328,7 +328,9 @@ this.leftBound=0;
 this.rightBound=this.string.length();
 },"java.util.regex.Pattern,CharSequence");
 c$.$Matcher$1$=function(){
-Clazz.pu$h(c$);
+
+/*if*/;(function(){ var 
+
 c$=Clazz.decorateAsClass(function(){
 Clazz.prepareCallback(this,arguments);
 this.grN=0;
@@ -341,9 +343,9 @@ Clazz.overrideMethod(c$,"toString",
 function(){
 return this.b$["java.util.regex.Matcher"].group(this.grN);
 });
-c$=Clazz.p0p();
+/*eoif*/})();
 };
-Clazz.defineStatics(c$,
-"MODE_FIND",1,
-"MODE_MATCH",2);
+//Clazz.defineStatics(c$,
+//"MODE_FIND",1,
+//"MODE_MATCH",2);
 });

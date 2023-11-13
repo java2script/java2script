@@ -240,8 +240,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		buffer.append(shortClassName);
 		buffer.append("$ = function () {\r\n");
 		
-		buffer.append("Clazz.pu$h(self.c$);\r\n");
-		buffer.append("cla$$ = ");
+		buffer.append("/*if*/;(function(){\r\n//Clazz.pu$h(self.c$);\r\n");
+		buffer.append("var cla$$ = ");
 		//buffer.append("Clazz.decorateAsType (");
 		buffer.append("Clazz.decorateAsClass (");
 //		buffer.append(JavaLangUtil.ripJavaLang(fullClassName));
@@ -427,7 +427,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			}
 		}
 		
-		buffer.append("cla$$ = Clazz.p0p ();\r\n");
+		buffer.append("/*eoif*/})();\r\n//cla$$ = Clazz.p0p ();\r\n");
 		
 		typeVisitor.setClassName(oldClassName);
 		
@@ -1187,12 +1187,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			node.accept(visitor);
 			if ((node.getModifiers() & Modifier.STATIC) != 0) {
 				String str = visitor.getBuffer().toString();
-				if (!str.startsWith("cla$$")) {
+				if (!str.startsWith("var cla$$")) {
 					laterBuffer.append(str);
 				} else {
-					laterBuffer.append("Clazz.pu$h(self.c$);\r\n");
-					laterBuffer.append(str);
-					laterBuffer.append("cla$$ = Clazz.p0p ();\r\n");
+				  laterBuffer.append("/*if*/;(function(){\r\n//Clazz.pu$h(self.c$);\r\n");
+				  laterBuffer.append(str);
+			   	  laterBuffer.append("/*eoif*/})();\r\n//cla$$ = Clazz.p0p ();\r\n");
 				}
 			} else {
 				/*
@@ -1219,9 +1219,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 //					methodBuffer.append("$" + binding.getName());
 //				}
 //				methodBuffer.append("$ = function () {\r\n");
-				methodBuffer.append("Clazz.pu$h(self.c$);\r\n");
+				methodBuffer.append("/*if*/;(function(){\r\n//Clazz.pu$h(self.c$);\r\n");
 				methodBuffer.append(visitor.getBuffer().toString());
-				methodBuffer.append("cla$$ = Clazz.p0p ();\r\n");
+				methodBuffer.append("/*eoif*/})();\r\n//cla$$ = Clazz.p0p ();\r\n");
 //				methodBuffer.append("};\r\n");
 //
 //				String pkgName = visitor.getPackageName();
@@ -1242,7 +1242,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			}
 			return false;
 		}
-		buffer.append("cla$$ = ");
+		buffer.append("var cla$$ = ");
 		
 		buffer.append("Clazz.decorateAsClass (");
 		
@@ -2047,7 +2047,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			read = readSources(node, "@j2sDebug", prefix, suffix, false);
 		}
 		if (!read) {
-			boolean toCompileVariableName = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).isToCompileVariableName();
+			boolean toCompileVariableName = false;//((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).isToCompileVariableName();
 			if (!toCompileVariableName) {
 				read = readSources(node, "@j2sNativeSrc", prefix, suffix, false);
 			}
@@ -2703,7 +2703,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				}
 			}
 			if (needReturn) {
-				buffer.append("cla$$ = ");
+				buffer.append("var cla$$ = ");
 			}
 			buffer.append("Clazz.declareInterface (");
 			int lastIndexOf = fullClassName.lastIndexOf('.');
@@ -3369,12 +3369,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					|| (node.getParent() instanceof TypeDeclaration 
 							&& ((TypeDeclaration) node.getParent()).isInterface())) {
 				String str = visitor.getBuffer().toString();
-				if (!str.startsWith("cla$$")) {
+				if (!str.startsWith("var cla$$")) {
 					laterBuffer.append(str);
 				} else {
-					laterBuffer.append("Clazz.pu$h(self.c$);\r\n");
+					laterBuffer.append("/*if*/;(function(){\r\n//Clazz.pu$h(self.c$);\r\n");
 					laterBuffer.append(str);
-					laterBuffer.append("cla$$ = Clazz.p0p ();\r\n");
+					laterBuffer.append("/*eoif*/})();\r\n//cla$$ = Clazz.p0p ();\r\n");
 				}
 			} else {
 				/*
@@ -3418,9 +3418,9 @@ public class CB extends CA {
 				targetClassName = targetClassName.replace('.', '$');
 				methodBuffer.append(targetClassName);
 				methodBuffer.append("$ = function () {\r\n");
-				methodBuffer.append("Clazz.pu$h(self.c$);\r\n");
+				methodBuffer.append("/*if*/;(function(){\r\n//Clazz.pu$h(self.c$);\r\n");
 				methodBuffer.append(visitor.getBuffer().toString());
-				methodBuffer.append("cla$$ = Clazz.p0p ();\r\n");
+				methodBuffer.append("/*eoif*/})();\r\n//cla$$ = Clazz.p0p ();\r\n");
 				methodBuffer.append("};\r\n");
 
 				String pkgName = visitor.getPackageName();
@@ -3442,7 +3442,7 @@ public class CB extends CA {
 			return false;
 		}
 		readSources(node, "@j2sPrefix", "", " ", true);
-		buffer.append("cla$$ = ");
+		buffer.append("var cla$$ = ");
 		
 		buffer.append("Clazz.decorateAsClass (");
 		

@@ -1,5 +1,5 @@
 Clazz.load(["java.util.Map"],"java.util.AbstractMap",["java.lang.StringBuilder","$.UnsupportedOperationException","java.util.AbstractCollection","$.AbstractSet","$.Iterator"],function(){
-c$=Clazz.decorateAsClass(function(){
+var $fz,c$=Clazz.decorateAsClass(function(){
 this.$keySet=null;
 this.valuesCollection=null;
 Clazz.instantialize(this,arguments);
@@ -179,7 +179,8 @@ return result;
 });
 
 c$.$AbstractMap$1$=function(){
-Clazz.pu$h();
+/*if*/;(function(){ var 
+
 c$=Clazz.declareAnonymous(java.util,"AbstractMap$1",java.util.AbstractSet);
 Clazz.overrideMethod(c$,"contains",
 function(object){
@@ -193,10 +194,11 @@ Clazz.overrideMethod(c$,"iterator",
 function(){
 return((Clazz.isClassDefined("java.util.AbstractMap$1$1")?0:java.util.AbstractMap.$AbstractMap$1$1$()),Clazz.innerTypeInstance(java.util.AbstractMap$1$1,this,null));
 });
-c$=Clazz.p0p();
+/*eoif*/})();
 };
 c$.$AbstractMap$1$1$=function(){
-Clazz.pu$h();
+/*if*/;(function(){ var 
+
 c$=Clazz.decorateAsClass(function(){
 Clazz.prepareCallback(this,arguments);
 this.setIterator=null;
@@ -217,10 +219,11 @@ Clazz.overrideMethod(c$,"remove",
 function(){
 this.setIterator.remove();
 });
-c$=Clazz.p0p();
+/*eoif*/})();
 };
 c$.$AbstractMap$2$=function(){
-Clazz.pu$h();
+/*if*/;(function(){ var 
+
 c$=Clazz.declareAnonymous(java.util,"AbstractMap$2",java.util.AbstractCollection);
 Clazz.overrideMethod(c$,"size",
 function(){
@@ -234,10 +237,11 @@ Clazz.overrideMethod(c$,"iterator",
 function(){
 return((Clazz.isClassDefined("java.util.AbstractMap$2$1")?0:java.util.AbstractMap.$AbstractMap$2$1$()),Clazz.innerTypeInstance(java.util.AbstractMap$2$1,this,null));
 });
-c$=Clazz.p0p();
+/*eoif*/})();
 };
 c$.$AbstractMap$2$1$=function(){
-Clazz.pu$h();
+	/*if*/;(function(){ var 
+
 c$=Clazz.decorateAsClass(function(){
 Clazz.prepareCallback(this,arguments);
 this.setIterator=null;
@@ -258,6 +262,6 @@ Clazz.overrideMethod(c$,"remove",
 function(){
 this.setIterator.remove();
 });
-c$=Clazz.p0p();
+/*eoif*/})();
 };
 });

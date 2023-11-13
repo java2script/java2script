@@ -6,7 +6,7 @@
 
 
 Clazz.load([],"java.util.HashtableIterator",[],function(){
-c$=Clazz.decorateAsClass(function(){
+var $fz,c$=Clazz.decorateAsClass(function(){
 this.position=0;
 this.expectedModCount=0;
 this.type=null;

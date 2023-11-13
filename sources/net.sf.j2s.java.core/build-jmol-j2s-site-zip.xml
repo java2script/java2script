@@ -1,17 +1,15 @@
 <project name="JSmol" default="toJs-jmol" basedir=".">
  
 	   <property name="site.dir" value="site_jmol" />
-       <property name="site.path" value="site_jmol/jsmol" />
-       <property name="site-resource.dir" value="site-resources_4.2" />  	  	
+       <property name="site-resources.dir" value="site-resources_4.2" />  	  	
 
   <target name="toJs-jmol" id="toJs-jmol">
  		
-	  	
 	  	<!-- non-Java resources to copy to site/ -->
 	
-		<echo> Copying ${site-resource.dir} files into ${site.dir} </echo>
-		<copy todir="${site.dir}">
-	  		<fileset dir="${site-resource.dir}" erroronmissingdir="false" >
+		<echo> Copying ${site-resources.dir} files into ${site.dir} </echo>
+		<copy todir="${site.dir}" overwrite="true">
+	  		<fileset dir="${site-resources.dir}" erroronmissingdir="false" >
 	  			<include name="**/*"/>
 			</fileset>
 		</copy>

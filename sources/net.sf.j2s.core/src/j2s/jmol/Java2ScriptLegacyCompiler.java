@@ -108,7 +108,9 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 		isDebugging = "debug".equals(props.getProperty("j2s.compiler.mode"));
  		visitor.setDebugging(isDebugging);
 		dvisitor.setDebugging(isDebugging);
-		dvisitor.setToCompileVariableName(false); // no compression
+//		boolean toCompress = "release".equals(props.getProperty("j2s.compiler.mode"));
+//		((ASTVariableVisitor) visitor.getAdaptable(ASTVariableVisitor.class)).setToCompileVariableName(toCompress);
+//		dvisitor.setToCompileVariableName(false);
 		errorOccurs = false;
 		try {
 			root.accept(visitor);
@@ -142,10 +144,7 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 			String outputPath, String trailer, String sourceLocation) {
 		String js = finalFixes(dvisitor.getDependencyScript(visitor.getBuffer()));
 		String elementName = fRoot.getJavaElement().getElementName();
-		// if (elementName.endsWith(".class") || elementName.endsWith(".java")) {
-		// //$NON-NLS-1$//$NON-NLS-2$
 		elementName = elementName.substring(0, elementName.lastIndexOf('.'));
-		// } /* maybe ended with other customized extension
 		String packageName = visitor.getPackageName();
 		if (packageName != null) {
 			String dir = packageName.replace('.', '/');
@@ -161,68 +160,12 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 		}
 		elementName = fixPackageName(elementName);
 		File jsFile = new File(outputPath, elementName + ".js"); // $NON-NLS-1
-		writeToFile(jsFile, js + ";//" + trailer);
+		writeToFile(jsFile, js + ";//" + trailer + "\r\n");
 		
 		if (packageName != null) {
 			nResources += checkCopiedResources(packageName, sourceLocation, j2sPath);
 		}
-
-		// this was for class files with multiple non-private additional classes.
-		// specifically StateManager.Connections, ActionManager.Gesture, and Int2IntHash.Int2IntHashEntry
-		// these should have been private to those classes.
-//		String[] classNameSet = dvisitor.getClassNames();
-//		if (classNameSet.length > 1) {
-//			addPackageJS(packageName, elementName, classNameSet, outputPath);
-//		}
 	}
-
-//	private void addPackageJS(String packageName, String elementName, String[] classNameSet, String outputPath) {
-//		StringBuffer buffer = new StringBuffer();
-//		String key = "ClazzLoader.jarClasspath (path + \"" + elementName + ".js\", [";
-//		buffer.append(key + "\r\n");
-//		DependencyASTVisitor.joinArrayClasses(buffer, classNameSet, null, ",\r\n");
-//
-//		buffer.append("]);\r\n");
-//		String s = props.getProperty("package.js");
-//		if (s == null || s.length() == 0) {
-//			s = "package.js";
-//		}
-//		File f = new File(outputPath, s);
-//		String source = null;
-//		if (f.exists()) {
-//			source = FileUtil.readSource(f);
-//			int index = source.indexOf(key);
-//			boolean updated = false;
-//			if (index != -1) {
-//				int index2 = source.indexOf("]);", index + key.length());
-//				if (index2 != -1) {
-//					source = source.substring(0, index) + buffer.toString() + source.substring(index2 + 5);
-//					updated = true;
-//				}
-//			}
-//			if (!updated) {
-//				source += buffer.toString();
-//			}
-//		}
-//		if (source == null) {
-//			String pkgName = null;
-//			if (packageName == null || packageName.length() == 0) {
-//				pkgName = "package";
-//			} else {
-//				pkgName = packageName + ".package";
-//			}
-//			source = "var path = ClazzLoader.getClasspathFor (\"" + pkgName + "\");\r\n"
-//					+ "path = path.substring (0, path.lastIndexOf (\"package.js\"));\r\n";
-//			source += buffer.toString();
-//		}
-//		try {
-//			FileOutputStream fos = new FileOutputStream(f);
-//			fos.write(source.getBytes());
-//			fos.close();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//	}
 
 	private String finalFixes(String js) {
 		js = js.replaceAll("cla\\$\\$", "c\\$").replaceAll("innerThis", "i\\$").replaceAll("finalVars", "v\\$")

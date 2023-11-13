@@ -1042,14 +1042,14 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		this.isDebugging = isDebugging;
 	}
 
-	public boolean isToCompileVariableName() {
-		return toCompileVariableName;
-	}
-
-	public void setToCompileVariableName(boolean toCompileVariableName) {
-		this.toCompileVariableName = toCompileVariableName;
-	}
-	
+//	public boolean isToCompileVariableName() {
+//		return toCompileVariableName;
+//	}
+//
+//	public void setToCompileVariableName(boolean toCompileVariableName) {
+//		this.toCompileVariableName = toCompileVariableName;
+//	}
+//	
 	public boolean visit(MethodDeclaration node) {
 		IMethodBinding mBinding = node.resolveBinding();
 		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimplePipeRunnable", "deal")) {

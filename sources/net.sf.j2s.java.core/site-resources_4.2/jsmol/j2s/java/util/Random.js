@@ -1,5 +1,5 @@
 Clazz.load(null,"java.util.Random",["java.lang.IllegalArgumentException"],function(){
-c$=Clazz.decorateAsClass(function(){
+var $fz,c$=Clazz.decorateAsClass(function(){
 this.haveNextNextGaussian=false;
 this.seed=0;
 this.nextNextGaussian=0;
@@ -91,8 +91,8 @@ Math.seedrandom(seed);
 //this.seed=(seed^25214903917)&(281474976710655);
 //this.haveNextNextGaussian=false;
 },"~N");
-Clazz.defineStatics(c$,
-"multiplier",0x5deece66d);
+//Clazz.defineStatics(c$,
+//"multiplier",0x5deece66d);
 });
 
 // seedrandom.js

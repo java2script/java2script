@@ -2,7 +2,7 @@
 // BH 4/7/2017 1:49:45 PM fixing "instanceof Comparable"
 // BH adding copyOf 7/12/2016 10:35:01 AM
 Clazz.load(["java.util.AbstractList","$.RandomAccess"],"java.util.Arrays",["java.lang.ArrayIndexOutOfBoundsException","$.IllegalArgumentException","$.NullPointerException"],function(){
-c$=Clazz.declareType(java.util,"Arrays");
+var $fz,c$=Clazz.declareType(java.util,"Arrays");
 
 c$.sort=Clazz.overrideMethod(c$,"sort",
 function(a,c,d,e){
@@ -157,7 +157,8 @@ c$.asList=Clazz.defineMethod(c$,"asList",
 function(a){
 return new java.util.Arrays.ArrayList(arguments.length == 1 && Clazz.getClassName(a) == "Array" ? a : arguments); // BH must be T...
 },"~A");
-Clazz.pu$h();
+/*if*/;(function(){ var 
+
 c$=Clazz.decorateAsClass(function(){
 this.a=null;
 Clazz.instantialize(this,arguments);
@@ -200,7 +201,7 @@ Clazz.overrideMethod(c$,"contains",
 function(a){
 return this.indexOf(a)!=-1;
 },"~O");
-c$=Clazz.p0p();
-Clazz.defineStatics(c$,
-"INSERTIONSORT_THRESHOLD",7);
+/*eoif*/})();
+//Clazz.defineStatics(c$,
+//"INSERTIONSORT_THRESHOLD",7);
 });
