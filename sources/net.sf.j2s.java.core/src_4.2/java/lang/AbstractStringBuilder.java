@@ -21,7 +21,7 @@ import java.io.InvalidObjectException;
 //import java.util.Arrays;
 
 import org.apache.harmony.luni.util.Msg;
-
+ 
 /**
  * <p>
  * A modifiable {@link CharSequence sequence of characters} for use in creating

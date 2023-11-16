@@ -103,7 +103,7 @@ public class ASTEmptyVisitor extends ASTVisitor {
 
 	/**
 	 * Buffer that keep all compiled *.js.
-	 * @see ASTScriptVisitor#laterBuffer
+	 * @see Java2ScriptScriptVisitor#laterBuffer
 	 */
 	protected StringBuffer buffer = new StringBuffer();
 
@@ -117,7 +117,7 @@ public class ASTEmptyVisitor extends ASTVisitor {
 
 	/**
 	 * Buffer may be set to other buffer.
-	 * @see ASTScriptVisitor#visit(TypeDeclaration) 
+	 * @see Java2ScriptScriptVisitor#visit(TypeDeclaration) 
 	 * @param buffer
 	 */
 	public void setBuffer(StringBuffer buffer) {
