@@ -146,7 +146,7 @@ public abstract class Java2ScriptCompiler {
 
 	/**
 	 * Entry point from compilation participant when Java build is complete and it is our turn.
-	 * 
+	 * e
 	 * @param project
 	 * @param files
 	 * @return
@@ -500,10 +500,31 @@ public abstract class Java2ScriptCompiler {
 		if (packageFixes == null)
 			return name;
 		for (int i = 0; i < packageFixes.length; i++) {
-			name = name.replaceAll(packageFixes[i++], packageFixes[i]);
+			name = rep(name, packageFixes[i++], packageFixes[i]);
 		}
 		return name;
 	}
+
+	
+	  /**
+	   * Does a clean ITERATIVE replace of strFrom in str with strTo. 
+	   * Thus, rep("Testttt", "tt","t") becomes "Test".
+	   * 
+	   * @param str
+	   * @param strFrom
+	   * @param strTo
+	   * @return replaced string
+	   */
+	  protected static String rep(String str, String strFrom, String strTo) {
+	    if (str == null || strFrom.length() == 0 || str.indexOf(strFrom) < 0)
+	      return str;
+	    boolean isOnce = (strTo.indexOf(strFrom) >= 0);
+	    do {
+	      str = str.replace(strFrom, strTo);
+	    } while (!isOnce && str.indexOf(strFrom) >= 0);
+	    return str;
+	  }
+
 
 	
 			

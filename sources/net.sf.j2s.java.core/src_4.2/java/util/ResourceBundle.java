@@ -617,16 +617,11 @@ return r.join ('');
 						String[] m = this.map;
 						String[] k = this.keys;
 						/**
-						 * @j2sNativeSrc
+						 * @j2sNative
 						 * if (m[key] == null) {
 						 * k[k.length] = key;
 						 * }
 						 * m[key] = value;
-						 * @j2sNative
-						 * if (i[g] == null) {
-						 * j[j.length] = g;
-						 * }
-						 * i[g] = h;
 						 */
 						{
 							//keys[keys.length] = key;
@@ -662,11 +657,10 @@ return r.join ('');
 			}
 			String[] m = this.map; 
 			/**
-			 * @j2sNativeSrc
-			return m[key];
 			 * @j2sNative
-			return b[a];
-			 */ {}
+			return m[key];
+			 */ 
+			{}
 			//return map.get(key);
 			return m; // Should never reach here in JS
 		}

@@ -12,8 +12,8 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import j2s.CorePlugin;
 import j2s.core.Java2ScriptCompiler;
-import j2s.jmol.common.ASTScriptVisitor;
-import j2s.jmol.common.DependencyASTVisitor;
+import j2s.jmol.common.Java2ScriptScriptVisitor;
+import j2s.jmol.common.Java2ScriptDependencyVisitor;
 
 public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 
@@ -25,6 +25,15 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 
 	private int nResources;
 
+	private static String[] myStringFixes = { //
+			"cla$$", "c$" //
+			,"innerThis", "i$" //
+			,"finalVars", "v$" //
+			,".callbacks", ".b$" //
+			,".$finals", ".f$" //
+			,"Class.forName", "Clazz._4Name"//
+	};
+
 	public Java2ScriptLegacyCompiler(File f) {
 		super(false, f);
 	}
@@ -33,18 +42,13 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 	public boolean initializeProject(IJavaProject project, boolean isCleanBuild) {
 		if (!super.initializeProject(project, isCleanBuild, AST.JLS4)) {
 			return false;
-		}
-		
+		}		
 		String s = getProperty(J2S_STRING_FIXES, null);
-		if (s != null) {
-			stringFixes = s.split(",");
-			fixRegex(stringFixes);
-			System.out.println(stringFixes.length + " string fixes");
-		}
+		stringFixes = getFixes(s, myStringFixes);
+		System.out.println(stringFixes.length + " string fixes");
 		s = getProperty(J2S_PACKAGE_FIXES, null);
 		if (s != null) {
-			packageFixes = s.split(",");
-			fixRegex(packageFixes);
+			packageFixes = getFixes(s, null);
 			System.out.println(packageFixes.length + " package fixes");
 		}
 		nResources = 0;
@@ -53,10 +57,22 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 		return true;
 	}
 
-	private void fixRegex(String[] a) {
-		for (int i = 0; i < a.length; i++) {
-		      a[i] = a[i].replaceAll("\\.", "\\\\.");
+	@SuppressWarnings("null")
+	private String[] getFixes(String s, String[] myFixes) {
+		String[] a = (s == null || s.length() == 0 ? new String[0] : rep(s, "\\,", "\1").split(","));
+		int pt = (myFixes == null ? 0 : myFixes.length);
+		if (pt == 0 && a.length == 0)
+			return null;
+		String[] b = new String[pt + a.length];
+		for (int i = 0; i < pt; i++) {
+			b[i] = myFixes[i]; // no escaped commas here
+			System.out.print((i%2) == 0 ? b[i] : " -> " + b[i] + "\n");
 		}
+		for (int i = 0; i < a.length; i++) {
+			System.out.print((i%2) == 0 ? a[i] : " -> " + a[i] + "\n");
+			b[pt++] = a[i].replace('\1', ',');
+		}
+		return b;
 	}
 
 	public void startBuild(boolean isClean) {
@@ -78,7 +94,7 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 		astParser.setResolveBindings(true);
 		astParser.setSource(createdUnit);
 		CompilationUnit root = (CompilationUnit) astParser.createAST(null);
-		DependencyASTVisitor dvisitor = new DependencyASTVisitor();
+		Java2ScriptDependencyVisitor dvisitor = new Java2ScriptDependencyVisitor(this);
 		boolean errorOccurs = false;
 		try {
 			root.accept(dvisitor);
@@ -95,8 +111,7 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 			String packageName = dvisitor.getPackageName();
 			if (packageName != null) {
 				File folder = new File(outputPath, packageName.replace('.', File.separatorChar));
-				outputPath = folder.getAbsolutePath();
-				File jsFile = new File(outputPath, elementName + ".js"); //$NON-NLS-1$
+				File jsFile = new File(folder, elementName + ".js"); //$NON-NLS-1$
 				if (jsFile.exists()) {
 					jsFile.delete();
 				}
@@ -104,13 +119,10 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 			return false;
 		}
 
-		ASTScriptVisitor visitor = new ASTScriptVisitor();
+		Java2ScriptScriptVisitor visitor = new Java2ScriptScriptVisitor();
 		isDebugging = "debug".equals(props.getProperty("j2s.compiler.mode"));
  		visitor.setDebugging(isDebugging);
 		dvisitor.setDebugging(isDebugging);
-//		boolean toCompress = "release".equals(props.getProperty("j2s.compiler.mode"));
-//		((ASTVariableVisitor) visitor.getAdaptable(ASTVariableVisitor.class)).setToCompileVariableName(toCompress);
-//		dvisitor.setToCompileVariableName(false);
 		errorOccurs = false;
 		try {
 			root.accept(visitor);
@@ -122,17 +134,12 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 			outputJavaScript(visitor, dvisitor, root, outputPath, trailer, sourceLocation);
 			return true;
 		}
-		String folderPath = outputPath;
 		String elementName = root.getJavaElement().getElementName();
-		// if (elementName.endsWith(".class") || elementName.endsWith(".java")) {
-		// //$NON-NLS-1$//$NON-NLS-2$
 		elementName = elementName.substring(0, elementName.lastIndexOf('.'));
-		// } /* maybe ended with other customized extension
 		String packageName = visitor.getPackageName();
 		if (packageName != null) {
-			File folder = new File(folderPath, packageName.replace('.', File.separatorChar));
-			folderPath = folder.getAbsolutePath();
-			File jsFile = new File(folderPath, elementName + ".js"); //$NON-NLS-1$
+			File folder = new File(outputPath, packageName.replace('.', File.separatorChar));
+			File jsFile = new File(folder.getAbsolutePath(), elementName + ".js"); //$NON-NLS-1$
 			if (jsFile.exists()) {
 				jsFile.delete();
 			}
@@ -140,7 +147,7 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 		return false;
 	}
 
-	private void outputJavaScript(ASTScriptVisitor visitor, DependencyASTVisitor dvisitor, CompilationUnit fRoot,
+	private void outputJavaScript(Java2ScriptScriptVisitor visitor, Java2ScriptDependencyVisitor dvisitor, CompilationUnit fRoot,
 			String outputPath, String trailer, String sourceLocation) {
 		String js = finalFixes(dvisitor.getDependencyScript(visitor.getBuffer()));
 		String elementName = fRoot.getJavaElement().getElementName();
@@ -168,14 +175,8 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 	}
 
 	private String finalFixes(String js) {
-		js = js.replaceAll("cla\\$\\$", "c\\$").replaceAll("innerThis", "i\\$").replaceAll("finalVars", "v\\$")
-				.replaceAll("\\.callbacks", "\\.b\\$").replaceAll("\\.\\$finals", "\\.f\\$")
-				// BH 2023.11.10 added
-				.replaceAll("Class\\.forName", "Clazz\\._4Name");
-		if (stringFixes != null) {
-			for (int i = 0; i < stringFixes.length; i++) {
-				js = js.replaceAll(stringFixes[i++], stringFixes[i]);
-			}
+		for (int i = 0; i < stringFixes.length; i++) {
+			js = rep(js, stringFixes[i++], stringFixes[i]);
 		}
 		return js;
 	}

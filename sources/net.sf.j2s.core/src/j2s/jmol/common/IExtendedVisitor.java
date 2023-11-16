@@ -11,8 +11,8 @@
 
 package j2s.jmol.common;
 
-import j2s.jmol.common.ASTScriptVisitor;
-import j2s.jmol.common.DependencyASTVisitor;
+import j2s.jmol.common.Java2ScriptScriptVisitor;
+import j2s.jmol.common.Java2ScriptDependencyVisitor;
 
 /**
  * @author zhou renjian
@@ -24,11 +24,11 @@ public interface IExtendedVisitor {
 	 * Return visitor that generate scripts.
 	 * @return
 	 */
-	public ASTScriptVisitor getScriptVisitor();
+	public Java2ScriptScriptVisitor getScriptVisitor();
 	
 	/**
 	 * Return visitor for class dependencies.
 	 * @return
 	 */
-	public DependencyASTVisitor getDependencyVisitor();
+	public Java2ScriptDependencyVisitor getDependencyVisitor();
 }
