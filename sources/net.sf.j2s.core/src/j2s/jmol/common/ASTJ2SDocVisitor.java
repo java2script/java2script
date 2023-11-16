@@ -153,18 +153,18 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 						}
 					}
 				}
-				boolean toCompileVariableName = false;//((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).isToCompileVariableName();
-				
-				if (!toCompileVariableName) {
-					for (Iterator iter = tags.iterator(); iter.hasNext();) {
-						TagElement tagEl = (TagElement) iter.next();
-						if ("@j2sNativeSrc".equals(tagEl.getTagName())) {
-							if (superVisit) super.visit(node);
-							visitJavadocJ2SSource(tagEl);
-							return false;
-						}
-					}
-				}
+//				boolean toCompileVariableName = false;//((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).isToCompileVariableName();
+//				
+//				if (!toCompileVariableName) {
+//					for (Iterator iter = tags.iterator(); iter.hasNext();) {
+//						TagElement tagEl = (TagElement) iter.next();
+//						if ("@j2sNativeSrc".equals(tagEl.getTagName())) {
+//							if (superVisit) super.visit(node);
+//							visitJavadocJ2SSource(tagEl);
+//							return false;
+//						}
+//					}
+//				}
 				for (Iterator iter = tags.iterator(); iter.hasNext();) {
 					TagElement tagEl = (TagElement) iter.next();
 					if ("@j2sNative".equals(tagEl.getTagName())) {

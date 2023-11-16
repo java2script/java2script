@@ -6,6 +6,7 @@
  * A relatively simple ComboBox that supports actual objects, not just strings
  * 
  */
+// BH 2023.11.15 adjusted close delays for phone touch and uses mouseup/touchend for "click" action
 
 // BH 2023.11.02 fixed touch issue not causing click -- hidePopup needed a 1-ms timeout
 
@@ -203,7 +204,7 @@ J2S.__makeComboBox = function() {
 	    			this.list["j2shead" + pt] = items[i + 1];
     		}
     		this.list.css({height: (y + 2) + "px"});
-	        this._on(opt, {mouseleave: '_close', mouseover: '_overOpt', click : '_clickOpt'});
+	        this._on(opt, {mouseleave: '_close', mouseover: '_overOpt', click : '_clickOpt', touchend : '_clickOpt', pointerup : '_clickOpt', mouseup : '_clickOpt'});
     	  }
       },
       updateCSS: function() {
@@ -296,7 +297,7 @@ J2S.__makeComboBox = function() {
    			me.options.popupVisible = false;
    			me.popup.hide();
    		 }
-  		},1);
+  		},10);
    	  },
       _overOpt: function(e) {
     	  this._stopT("_overOpt");

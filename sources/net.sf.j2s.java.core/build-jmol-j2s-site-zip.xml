@@ -2,6 +2,7 @@
  
 	   <property name="site.dir" value="site_jmol" />
        <property name="site-resources.dir" value="site-resources_4.2" />  	  	
+	   <property name="dist.dir" value="dist_to_jsmol" />
 
   <target name="toJs-jmol" id="toJs-jmol">
  		
@@ -21,7 +22,7 @@
    	<echo>creating and compressing core files - warnings are OK; "does not exist" is trouble</echo>
 
    	<echo>creating dist/Jmol-j2s-site.zip </echo>
-   	<zip destfile="dist/Jmol-j2s-site.zip" basedir="site_jmol" >
+   	<zip destfile="${dist.dir}/Jmol-j2s-site.zip" basedir="${site.dir}" >
    		<exclude name="jsmol/j2s/test/**"/>
    		<exclude name="*.html"/>
    	</zip>
