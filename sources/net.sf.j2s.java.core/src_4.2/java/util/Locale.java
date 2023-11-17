@@ -22,11 +22,7 @@
 
 package java.util;
 
-import java.io.*;
-// import java.security.AccessController;
-import java.text.MessageFormat;
-// import sun.security.action.GetPropertyAction;
-// import sun.text.resources.LocaleData;
+import java.io.Serializable;
 
 /**
  *
@@ -312,42 +308,43 @@ public final class Locale implements Cloneable, Serializable {
         // do not synchronize this method - see 4071298
         // it's OK if more than one default locale happens to be created
         if (defaultLocale == null)
-        /**
-         * @j2sNative
-         * var language = "en";
-         * var country = "US";
-         * var variant = "";
-         * navigator.userAgent.replace (/;\s*([a-zA-Z]{2,})[-_]([a-zA-Z]{2,});/, function ($0, $1, $2) {
-         * 	language = $1;
-         * 	country = $2;
-         * });
-         * java.util.Locale.defaultLocale = new java.util.Locale (language, country, variant);
-         */
         {
-            String language, region, country, variant;
-            language = null; /* (String) AccessController.doPrivileged(
-                            new GetPropertyAction("user.language", "en")); */
-            // for compatibility, check for old user.region property
-            region = null; /* (String) AccessController.doPrivileged(
-                            new GetPropertyAction("user.region")); */
-            if (region != null) {
-                // region can be of form country, country_variant, or _variant
-                int i = region.indexOf('_');
-                if (i >= 0) {
-                    country = region.substring(0, i);
-                    variant = region.substring(i + 1);
-                } else {
-                    country = region;
-                    variant = "";
-                }
-            } else {
-                country = null; /* (String) AccessController.doPrivileged(
-                                new GetPropertyAction("user.country", "")); */
-                variant = null; /* (String) AccessController.doPrivileged(
-                                new GetPropertyAction("user.variant", "")); */
-            }
+          String language = "en", country = "US", variant = ""; //region, 
+
+            /**
+             * @j2sNative
+             * navigator.userAgent.replace (/;\s*([a-zA-Z]{2,})[-_]([a-zA-Z]{2,});/, function ($0, $1, $2) {
+             * 	language = $1;
+             * 	country = $2;
+             * });
+             */
+        	{
+//            String language, country, variant; //region, 
+//            language = null; /* (String) AccessController.doPrivileged(
+//                            new GetPropertyAction("user.language", "en")); */
+//            // for compatibility, check for old user.region property
+//            //region = null; /* (String) AccessController.doPrivileged(
+//              //              new GetPropertyAction("user.region")); */
+//            if (region != null) {
+//                // region can be of form country, country_variant, or _variant
+//                int i = region.indexOf('_');
+//                if (i >= 0) {
+//                    country = region.substring(0, i);
+//                    variant = region.substring(i + 1);
+//                } else {
+//                    country = region;
+//                    variant = "";
+//                }
+//            } else 
+//            {
+//                country = null; /* (String) AccessController.doPrivileged(
+//                                new GetPropertyAction("user.country", "")); */
+//                variant = null; /* (String) AccessController.doPrivileged(
+//                                new GetPropertyAction("user.variant", "")); */
+//            }
+        	}
             defaultLocale = new Locale(language, country, variant);
-        }
+       }
         return defaultLocale;
     }
 
@@ -504,19 +501,20 @@ return [
      * Examples: "en", "de_DE", "_GB", "en_US_WIN", "de__POSIX", "fr__MAC"
      * @see #getDisplayName
      */
-    public final String toString() {
+    @Override
+	public final String toString() {
         boolean l = language.length() != 0;
         boolean c = country.length() != 0;
         boolean v = variant.length() != 0;
         /*
         StringBuffer result = new StringBuffer(language);
         if (c||(l&&v)) {
-            result.append('_').append(country); // This may just append '_'
+            result += ('_') += (country); // This may just append '_'
         }
         if (v&&(l||c)) {
-            result.append('_').append(variant);
+            result += ('_') += (variant);
         }
-        return result.toString();
+        return result;
         */
         String result = language;
         if (c||(l&&v)) {
@@ -607,57 +605,57 @@ return [
      * return inLocale.language;
      */
     public String getDisplayLanguage(Locale inLocale) {
-        String  langCode = language;
-        if (langCode.length() == 0)
-            return "";
-
-        Locale  workingLocale = (Locale)inLocale.clone();
-        String  result = null;
-        int     phase = 0;
-        boolean done = false;
-
-        if (workingLocale.variant.length() == 0)
-            phase = 1;
-        if (workingLocale.country.length() == 0)
-            phase = 2;
-
-        while (!done) {
-            try {
-                ResourceBundle bundle = null; // LocaleData.getLocaleElements(workingLocale);
-                result = findStringMatch((String[][])bundle.getObject("Languages"),
-                                    langCode, langCode);
-                if (result.length() != 0)
-                    done = true;
-            }
-            catch (Exception e) {
-                // just fall through
-            }
-
-            if (!done) {
-                switch (phase) {
-                    case 0:
-                        workingLocale.variant = "";
-                        break;
-
-                    case 1:
-                        workingLocale.country = "";
-                        break;
-
-                    case 2:
-                        workingLocale = getDefault();
-                        break;
-
-                    case 3:
-                        workingLocale = new Locale("", "", "");
-                        break;
-
-                    default:
-                        return langCode;
-                }
-                phase++;
-            }
-        }
-        return result;
+//        String  langCode = language;
+//        if (langCode.length() == 0)
+//            return "";
+//
+//        Locale  workingLocale = (Locale)inLocale.clone();
+//        String  result = null;
+//        int     phase = 0;
+//        boolean done = false;
+//
+//        if (workingLocale.variant.length() == 0)
+//            phase = 1;
+//        if (workingLocale.country.length() == 0)
+//            phase = 2;
+//
+//        while (!done) {
+//            try {
+//                ResourceBundle bundle = null; // LocaleData.getLocaleElements(workingLocale);
+//                result = findStringMatch((String[][])bundle.getObject("Languages"),
+//                                    langCode, langCode);
+//                if (result.length() != 0)
+//                    done = true;
+//            }
+//            catch (Exception e) {
+//                // just fall through
+//            }
+//
+//            if (!done) {
+//                switch (phase) {
+//                    case 0:
+//                        workingLocale.variant = "";
+//                        break;
+//
+//                    case 1:
+//                        workingLocale.country = "";
+//                        break;
+//
+//                    case 2:
+//                        workingLocale = getDefault();
+//                        break;
+//
+//                    case 3:
+//                        workingLocale = new Locale("", "", "");
+//                        break;
+//
+//                    default:
+//                        return langCode;
+//                }
+//                phase++;
+//            }
+//        }
+        return null;
     }
 
     /**
@@ -693,57 +691,57 @@ return [
      * return inLocale.country;
      */
     public String getDisplayCountry(Locale inLocale) {
-        String  ctryCode = country;
-        if (ctryCode.length() == 0)
-            return "";
-
-        Locale  workingLocale = (Locale)inLocale.clone();
-        String  result = null;
-        int     phase = 0;
-        boolean done = false;
-
-        if (workingLocale.variant.length() == 0)
-            phase = 1;
-        if (workingLocale.country.length() == 0)
-            phase = 2;
-
-        while (!done) {
-            try {
-                ResourceBundle bundle = null; // LocaleData.getLocaleElements(workingLocale);
-                result = findStringMatch((String[][])bundle.getObject("Countries"),
-                                    ctryCode, ctryCode);
-                if (result.length() != 0)
-                    done = true;
-            }
-            catch (Exception e) {
-                // just fall through
-            }
-
-            if (!done) {
-                switch (phase) {
-                    case 0:
-                        workingLocale.variant = "";
-                        break;
-
-                    case 1:
-                        workingLocale.country = "";
-                        break;
-
-                    case 2:
-                        workingLocale = getDefault();
-                        break;
-
-                    case 3:
-                        workingLocale = new Locale("", "", "");
-                        break;
-
-                    default:
-                        return ctryCode;
-                }
-                phase++;
-            }
-        }
-        return result;
+//        String  ctryCode = country;
+//        if (ctryCode.length() == 0)
+//            return "";
+//
+//        Locale  workingLocale = (Locale)inLocale.clone();
+//        String  result = null;
+//        int     phase = 0;
+//        boolean done = false;
+//
+//        if (workingLocale.variant.length() == 0)
+//            phase = 1;
+//        if (workingLocale.country.length() == 0)
+//            phase = 2;
+//
+//        while (!done) {
+//            try {
+//                ResourceBundle bundle = null; // LocaleData.getLocaleElements(workingLocale);
+//                result = findStringMatch((String[][])bundle.getObject("Countries"),
+//                                    ctryCode, ctryCode);
+//                if (result.length() != 0)
+//                    done = true;
+//            }
+//            catch (Exception e) {
+//                // just fall through
+//            }
+//
+//            if (!done) {
+//                switch (phase) {
+//                    case 0:
+//                        workingLocale.variant = "";
+//                        break;
+//
+//                    case 1:
+//                        workingLocale.country = "";
+//                        break;
+//
+//                    case 2:
+//                        workingLocale = getDefault();
+//                        break;
+//
+//                    case 3:
+//                        workingLocale = new Locale("", "", "");
+//                        break;
+//
+//                    default:
+//                        return ctryCode;
+//                }
+//                phase++;
+//            }
+//        }
+        return null;
     }
 
     /**
@@ -764,23 +762,23 @@ return [
      * return inLocale.variant;
      */
     public String getDisplayVariant(Locale inLocale) {
-        if (variant.length() == 0)
+//        if (variant.length() == 0)
             return "";
-
-        ResourceBundle bundle = null; // LocaleData.getLocaleElements(inLocale);
-
-        String names[] = getDisplayVariantArray(bundle);
-
-        // Get the localized patterns for formatting a list, and use
-        // them to format the list.
-        String[] patterns;
-        try {
-            patterns = (String[])bundle.getObject("LocaleNamePatterns");
-        }
-        catch (MissingResourceException e) {
-            patterns = null;
-        }
-        return formatList(patterns, names);
+//
+//        ResourceBundle bundle = null; // LocaleData.getLocaleElements(inLocale);
+//
+//        String names[] = getDisplayVariantArray(bundle);
+//
+//        // Get the localized patterns for formatting a list, and use
+//        // them to format the list.
+//        String[] patterns;
+//        try {
+//            patterns = (String[])bundle.getObject("LocaleNamePatterns");
+//        }
+//        catch (MissingResourceException e) {
+//            patterns = null;
+//        }
+//        return formatList(patterns, names);
     }
 
     /**
@@ -827,84 +825,86 @@ return [
      * }
      */
     public String getDisplayName(Locale inLocale) {
-        ResourceBundle bundle = null; // LocaleData.getLocaleElements(inLocale);
-
-        String languageName = getDisplayLanguage(inLocale);
-        String countryName = getDisplayCountry(inLocale);
-        String[] variantNames = getDisplayVariantArray(bundle);
-
-        // Get the localized patterns for formatting a display name.
-        String[] patterns;
-        try {
-            patterns = (String[])bundle.getObject("LocaleNamePatterns");
-        }
-        catch (MissingResourceException e) {
-            patterns = null;
-        }
-
-        // The display name consists of a main name, followed by qualifiers.
-        // Typically, the format is "MainName (Qualifier, Qualifier)" but this
-        // depends on what pattern is stored in the display locale.
-        String   mainName       = null;
-        String[] qualifierNames = null;
-
-        // The main name is the language, or if there is no language, the country.
-        // If there is neither language nor country (an anomalous situation) then
-        // the display name is simply the variant's display name.
-        if (languageName.length() != 0) {
-            mainName = languageName;
-            if (countryName.length() != 0) {
-                qualifierNames = new String[variantNames.length + 1];
-                System.arraycopy(variantNames, 0, qualifierNames, 1, variantNames.length);
-                qualifierNames[0] = countryName;
-            }
-            else qualifierNames = variantNames;
-        }
-        else if (countryName.length() != 0) {
-            mainName = countryName;
-            qualifierNames = variantNames;
-        }
-        else {
-            return formatList(patterns, variantNames);
-        }
-
-        // Create an array whose first element is the number of remaining
-        // elements.  This serves as a selector into a ChoiceFormat pattern from
-        // the resource.  The second and third elements are the main name and
-        // the qualifier; if there are no qualifiers, the third element is
-        // unused by the format pattern.
-        Object[] displayNames = {
-            new Integer(qualifierNames.length != 0 ? 2 : 1),
-            mainName,
-            // We could also just call formatList() and have it handle the empty
-            // list case, but this is more efficient, and we want it to be
-            // efficient since all the language-only locales will not have any
-            // qualifiers.
-            qualifierNames.length != 0 ? formatList(patterns, qualifierNames) : null
-        };
-
-        if (patterns != null) {
-            return new MessageFormat(patterns[0]).format(displayNames);
-        }
-        else {
-            // If we cannot get the message format pattern, then we use a simple
-            // hard-coded pattern.  This should not occur in practice unless the
-            // installation is missing some core files (LocaleElements etc.).
-            StringBuffer result = new StringBuffer();
-            result.append((String)displayNames[1]);
-            if (displayNames.length > 2) {
-                result.append(" (");
-                result.append((String)displayNames[2]);
-                result.append(")");
-            }
-            return result.toString();
-        }
+//        ResourceBundle bundle = null; // LocaleData.getLocaleElements(inLocale);
+//
+//        String languageName = getDisplayLanguage(inLocale);
+//        String countryName = getDisplayCountry(inLocale);
+//        String[] variantNames = getDisplayVariantArray(bundle);
+//
+//        // Get the localized patterns for formatting a display name.
+//        String[] patterns;
+//        try {
+//            patterns = (String[])bundle.getObject("LocaleNamePatterns");
+//        }
+//        catch (MissingResourceException e) {
+//            patterns = null;
+//        }
+//
+//        // The display name consists of a main name, followed by qualifiers.
+//        // Typically, the format is "MainName (Qualifier, Qualifier)" but this
+//        // depends on what pattern is stored in the display locale.
+//        String   mainName       = null;
+//        String[] qualifierNames = null;
+//
+//        // The main name is the language, or if there is no language, the country.
+//        // If there is neither language nor country (an anomalous situation) then
+//        // the display name is simply the variant's display name.
+//        if (languageName.length() != 0) {
+//            mainName = languageName;
+//            if (countryName.length() != 0) {
+//                qualifierNames = new String[variantNames.length + 1];
+//                System.arraycopy(variantNames, 0, qualifierNames, 1, variantNames.length);
+//                qualifierNames[0] = countryName;
+//            }
+//            else qualifierNames = variantNames;
+//        }
+//        else if (countryName.length() != 0) {
+//            mainName = countryName;
+//            qualifierNames = variantNames;
+//        }
+//        else {
+//            return formatList(patterns, variantNames);
+//        }
+//
+//        // Create an array whose first element is the number of remaining
+//        // elements.  This serves as a selector into a ChoiceFormat pattern from
+//        // the resource.  The second and third elements are the main name and
+//        // the qualifier; if there are no qualifiers, the third element is
+//        // unused by the format pattern.
+//        Object[] displayNames = {
+//            new Integer(qualifierNames.length != 0 ? 2 : 1),
+//            mainName,
+//            // We could also just call formatList() and have it handle the empty
+//            // list case, but this is more efficient, and we want it to be
+//            // efficient since all the language-only locales will not have any
+//            // qualifiers.
+//            qualifierNames.length != 0 ? formatList(patterns, qualifierNames) : null
+//        };
+//
+//        if (patterns != null) {
+//            return new MessageFormat(patterns[0]).format(displayNames);
+//        }
+//        else {
+//            // If we cannot get the message format pattern, then we use a simple
+//            // hard-coded pattern.  This should not occur in practice unless the
+//            // installation is missing some core files (LocaleElements etc.).
+//            String result = "";
+//            result += ((String)displayNames[1]);
+//            if (displayNames.length > 2) {
+//                result += (" (");
+//                result += ((String)displayNames[2]);
+//                result += (")");
+//            }
+//            return result;
+//        }
+    	return null;
     }
 
     /**
      * Overrides Cloneable
      */
-    public Object clone()
+    @Override
+	public Object clone()
     {
         try {
             Locale that = (Locale)super.clone();
@@ -921,7 +921,8 @@ return [
      */
       // XXX Depending on performance of synchronized, may want to
       // XXX just compute in constructor.
-    public synchronized int hashCode() {
+    @Override
+	public synchronized int hashCode() {
         if (hashcode == -1) {
             hashcode =
         language.hashCode() ^
@@ -941,7 +942,8 @@ return [
      * @return true if this Locale is equal to the specified object.
      */
 
-    public boolean equals(Object obj) {
+    @Override
+	public boolean equals(Object obj) {
         if (this == obj)                      // quick check
             return true;
         if (!(obj instanceof Locale))         // (1) same object?
@@ -987,153 +989,152 @@ return [
 
     private static Locale defaultLocale = null;
 
-    /**
-     * Return an array of the display names of the variant.
-     * @param bundle the ResourceBundle to use to get the display names
-     * @return an array of display names, possible of zero length.
-     * 
-     * @j2sIgnore
-     */
-    private String[] getDisplayVariantArray(ResourceBundle bundle) {
-        // Split the variant name into tokens separated by '_'.
-        StringTokenizer tokenizer = new StringTokenizer(variant, "_");
-        String[] names = new String[tokenizer.countTokens()];
-
-        // For each variant token, lookup the display name.  If
-        // not found, use the variant name itself.
-        for (int i=0; i<names.length; ++i) {
-            String token = tokenizer.nextToken();
-            try {
-                names[i] = (String)bundle.getObject("%%" + token);
-            }
-            catch (MissingResourceException e) {
-                names[i] = token;
-            }
-        }
-
-        return names;
-    }
-
-    /**
-     * Format a list with an array of patterns.
-     * @param patterns an array of three patterns. The first pattern is not
-     * used. The second pattern should create a MessageFormat taking 0-3 arguments
-     * and formatting them into a list. The third pattern should take 2 arguments
-     * and is used by composeList. If patterns is null, then a the list is
-     * formatted by concatenation with the delimiter ','.
-     * @param stringList the list of strings to be formatted.
-     * @return a string representing the list.
-     * 
-     * @j2sIgnore
-     */
-    private static String formatList(String[] patterns, String[] stringList) {
-        // If we have no list patterns, compose the list in a simple,
-        // non-localized way.
-        if (patterns == null) {
-            StringBuffer result = new StringBuffer();
-            for (int i=0; i<stringList.length; ++i) {
-                if (i>0) result.append(',');
-                result.append(stringList[i]);
-            }
-            return result.toString();
-        }
-
-        // Compose the list down to three elements if necessary
-        if (stringList.length > 3) {
-            MessageFormat format = new MessageFormat(patterns[2]);
-            stringList = composeList(format, stringList);
-        }
-
-        // Rebuild the argument list with the list length as the first element
-        Object[] args = new Object[stringList.length + 1];
-        System.arraycopy(stringList, 0, args, 1, stringList.length);
-        args[0] = new Integer(stringList.length);
-
-        // Format it using the pattern in the resource
-        MessageFormat format = new MessageFormat(patterns[1]);
-        return format.format(args);
-    }
-
-    /**
-     * Given a list of strings, return a list shortened to three elements.
-     * Shorten it by applying the given format to the first two elements
-     * recursively.
-     * @param format a format which takes two arguments
-     * @param list a list of strings
-     * @return if the list is three elements or shorter, the same list;
-     * otherwise, a new list of three elements.
-     * 
-     * @j2sIgnore
-     */
-    private static String[] composeList(MessageFormat format, String[] list) {
-        if (list.length <= 3) return list;
-
-        // Use the given format to compose the first two elements into one
-        String[] listItems = { list[0], list[1] };
-        String newItem = format.format(listItems);
-
-        // Form a new list one element shorter
-        String[] newList = new String[list.length-1];
-        System.arraycopy(list, 2, newList, 1, newList.length-1);
-        newList[0] = newItem;
-
-        // Recurse
-        return composeList(format, newList);
-    }
-
-    /**
-     * @serialData The first three fields are three <code>String</code> objects:
-     * the first is a 2-letter ISO 639 code representing the locale's language,
-     * the second is a 2-letter ISO 3166 code representing the locale's region or
-     * country, and the third is an optional chain of variant codes defined by this
-     * library.  Any of the fields may be the empty string.  The fourth field is an
-     * <code>int</code> whose value is always -1.  This is a sentinel value indicating
-     * the <code>Locale</code>'s hash code must be recomputed.
-     * 
-     * @j2sIgnore
-     */
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        // hashcode is semantically transient.  We couldn't define it as transient
-        // because versions of this class that DIDN'T declare it as transient have
-        // already shipped.  What we're doing here is making sure that the written-out
-        // version of hashcode is always -1, regardless of what's really stored there
-        // (we hold onto the original value just in case someone might want it again).
-        // Writing -1 ensures that version 1.1 Locales will always recalculate their
-        // hash codes after being streamed back in.  This is necessary because
-        // String.hashCode() calculates its hash code differently in 1.2 than it did
-        // in 1.1.
-        int temp = hashcode;
-        hashcode = -1;
-        out.defaultWriteObject();
-        hashcode = temp;
-    }
-
-    /**
-     * @serialData The first three fields are three <code>String</code> objects:
-     * the first is a 2-letter ISO 639 code representing the locale's language,
-     * the second is a 2-letter ISO 3166 code representing the locale's region or
-     * country, and the third is an optional chain of variant codes defined by this
-     * library.  Any of the fields may be the empty string.  The fourth field is an
-     * <code>int</code>representing the locale's hash code, but is ignored by
-     * <code>readObject()</code>.  Whatever this field's value, the hash code is
-     * initialized to -1, a sentinel value that indicates the hash code must be
-     * recomputed.
-     * 
-     * @j2sIgnore
-     */
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        // hashcode is semantically transient.  We couldn't define it as transient
-        // because versions of this class that DIDN'T declare is as transient have
-        // already shipped.  This code makes sure that whatever value for hashcode
-        // was written on the stream, we ignore it and recalculate it on demand.  This
-        // is necessary because String.hashCode() calculates is hash code differently
-        // in version 1.2 than it did in 1.1.
-        in.defaultReadObject();
-        hashcode = -1;
-        language = convertOldISOCodes(language);
-        country = country.intern();
-        variant = variant.intern();
-    }
+//    /**
+//     * Return an array of the display names of the variant.
+//     * @param bundle the ResourceBundle to use to get the display names
+//     * @return an array of display names, possible of zero length.
+//     * 
+//     * @j2sIgnore
+//     */
+//    private String[] getDisplayVariantArray(ResourceBundle bundle) {
+//        // Split the variant name into tokens separated by '_'.
+//        StringTokenizer tokenizer = new StringTokenizer(variant, "_");
+//        String[] names = new String[tokenizer.countTokens()];
+//
+//        // For each variant token, lookup the display name.  If
+//        // not found, use the variant name itself.
+//        for (int i=0; i<names.length; ++i) {
+//            String token = tokenizer.nextToken();
+//            try {
+//                names[i] = (String)bundle.getObject("%%" + token);
+//            }
+//            catch (MissingResourceException e) {
+//                names[i] = token;
+//            }
+//        }
+//        return names;
+//    }
+//
+//    /**
+//     * Format a list with an array of patterns.
+//     * @param patterns an array of three patterns. The first pattern is not
+//     * used. The second pattern should create a MessageFormat taking 0-3 arguments
+//     * and formatting them into a list. The third pattern should take 2 arguments
+//     * and is used by composeList. If patterns is null, then a the list is
+//     * formatted by concatenation with the delimiter ','.
+//     * @param stringList the list of strings to be formatted.
+//     * @return a string representing the list.
+//     * 
+//     * @j2sIgnore
+//     */
+//    private static String formatList(String[] patterns, String[] stringList) {
+//        // If we have no list patterns, compose the list in a simple,
+//        // non-localized way.
+//        if (patterns == null) {
+//            String result = "";
+//            for (int i=0; i<stringList.length; ++i) {
+//                if (i>0) result += (',');
+//                result += (stringList[i]);
+//            }
+//            return result;
+//        }
+//
+//        // Compose the list down to three elements if necessary
+//        if (stringList.length > 3) {
+//            MessageFormat format = new MessageFormat(patterns[2]);
+//            stringList = composeList(format, stringList);
+//        }
+//
+//        // Rebuild the argument list with the list length as the first element
+//        Object[] args = new Object[stringList.length + 1];
+//        System.arraycopy(stringList, 0, args, 1, stringList.length);
+//        args[0] = new Integer(stringList.length);
+//
+//        // Format it using the pattern in the resource
+//        MessageFormat format = new MessageFormat(patterns[1]);
+//        return format.format(args);
+//    }
+//
+//    /**
+//     * Given a list of strings, return a list shortened to three elements.
+//     * Shorten it by applying the given format to the first two elements
+//     * recursively.
+//     * @param format a format which takes two arguments
+//     * @param list a list of strings
+//     * @return if the list is three elements or shorter, the same list;
+//     * otherwise, a new list of three elements.
+//     * 
+//     * @j2sIgnore
+//     */
+//    private static String[] composeList(MessageFormat format, String[] list) {
+//        if (list.length <= 3) return list;
+//
+//        // Use the given format to compose the first two elements into one
+//        String[] listItems = { list[0], list[1] };
+//        String newItem = format.format(listItems);
+//
+//        // Form a new list one element shorter
+//        String[] newList = new String[list.length-1];
+//        System.arraycopy(list, 2, newList, 1, newList.length-1);
+//        newList[0] = newItem;
+//
+//        // Recurse
+//        return composeList(format, newList);
+//    }
+//
+//    /**
+//     * @serialData The first three fields are three <code>String</code> objects:
+//     * the first is a 2-letter ISO 639 code representing the locale's language,
+//     * the second is a 2-letter ISO 3166 code representing the locale's region or
+//     * country, and the third is an optional chain of variant codes defined by this
+//     * library.  Any of the fields may be the empty string.  The fourth field is an
+//     * <code>int</code> whose value is always -1.  This is a sentinel value indicating
+//     * the <code>Locale</code>'s hash code must be recomputed.
+//     * 
+//     * @j2sIgnore
+//     */
+//    private void writeObject(ObjectOutputStream out) throws IOException {
+//        // hashcode is semantically transient.  We couldn't define it as transient
+//        // because versions of this class that DIDN'T declare it as transient have
+//        // already shipped.  What we're doing here is making sure that the written-out
+//        // version of hashcode is always -1, regardless of what's really stored there
+//        // (we hold onto the original value just in case someone might want it again).
+//        // Writing -1 ensures that version 1.1 Locales will always recalculate their
+//        // hash codes after being streamed back in.  This is necessary because
+//        // String.hashCode() calculates its hash code differently in 1.2 than it did
+//        // in 1.1.
+//        int temp = hashcode;
+//        hashcode = -1;
+//        out.defaultWriteObject();
+//        hashcode = temp;
+//    }
+//
+//    /**
+//     * @serialData The first three fields are three <code>String</code> objects:
+//     * the first is a 2-letter ISO 639 code representing the locale's language,
+//     * the second is a 2-letter ISO 3166 code representing the locale's region or
+//     * country, and the third is an optional chain of variant codes defined by this
+//     * library.  Any of the fields may be the empty string.  The fourth field is an
+//     * <code>int</code>representing the locale's hash code, but is ignored by
+//     * <code>readObject()</code>.  Whatever this field's value, the hash code is
+//     * initialized to -1, a sentinel value that indicates the hash code must be
+//     * recomputed.
+//     * 
+//     * @j2sIgnore
+//     */
+//    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+//        // hashcode is semantically transient.  We couldn't define it as transient
+//        // because versions of this class that DIDN'T declare is as transient have
+//        // already shipped.  This code makes sure that whatever value for hashcode
+//        // was written on the stream, we ignore it and recalculate it on demand.  This
+//        // is necessary because String.hashCode() calculates is hash code differently
+//        // in version 1.2 than it did in 1.1.
+//        in.defaultReadObject();
+//        hashcode = -1;
+//        language = convertOldISOCodes(language);
+//        country = country.intern();
+//        variant = variant.intern();
+//    }
 
     /**
      * List of all 2-letter language codes currently defined in ISO 639.
@@ -1147,7 +1148,7 @@ return [
      * the 2-letter code.]
      */
     private static String[] isoLanguages = null;
-    private static final String compressedIsoLanguages =
+    private static String compressedIsoLanguages =
         ",aaaar,ababk,afafr,amamh,arara,asasm,ayaym,azaze,babak,bebel,bgbul,bhbih,bibis,bnben,"
         + "bobod,brbre,cacat,cocos,csces,cycym,dadan,dedeu,dzdzo,elell,eneng,eoepo,esspa,"
         + "etest,eueus,fafas,fifin,fjfij,fofao,frfra,fyfry,gagai,gdgdh,glglg,gngrn,guguj,"
@@ -1172,7 +1173,7 @@ return [
      * the 2-letter code.]
      */
     private static String[] isoCountries = null;
-    private static final String compressedIsoCountries =
+    private static String compressedIsoCountries =
         ",ADAND,AEARE,AFAFG,AGATG,AIAIA,ALALB,AMARM,ANANT,AOAGO,AQATA,ARARG,ASASM,ATAUT,"
         + "AUAUS,AWABW,AZAZE,BABIH,BBBRB,BDBGD,BEBEL,BFBFA,BGBGR,BHBHR,BIBDI,BJBEN,BMBMU,"
         + "BNBRN,BOBOL,BRBRA,BSBHS,BTBTN,BVBVT,BWBWA,BYBLR,BZBLZ,CACAN,CCCCK,CFCAF,CGCOG,"
@@ -1192,56 +1193,56 @@ return [
         + "TMTKM,TNTUN,TOTON,TPTMP,TRTUR,TTTTO,TVTUV,TWTWN,TZTZA,UAUKR,UGUGA,UMUMI,USUSA,"
         + "UYURY,UZUZB,VAVAT,VCVCT,VEVEN,VGVGB,VIVIR,VNVNM,VUVUT,WFWLF,WSWSM,YEYEM,YTMYT,"
         + "YUYUG,ZAZAF,ZMZMB,ZRZAR,ZWZWE";
-
-    /*
-     * Locale needs its own, locale insenitive version of toLowerCase to
-     * avoid circularity problems between Locale and String.
-     * The most straightforward algorithm is used. Look at optimizations later.
-     */
-    /*
-    private String toLowerCase(String str) {
-        char[] buf = str.toCharArray();
-        for (int i = 0; i < buf.length; i++) {
-            buf[i] = Character.toLowerCase( buf[i] );
-        }
-        return new String( buf );
-    }
-    */
-
-    /*
-     * Locale needs its own, locale insensitive version of toUpperCase to
-     * avoid circularity problems between Locale and String.
-     * The most straightforward algorithm is used. Look at optimizations later.
-     */
-    /*
-    private String toUpperCase(String str) {
-        char[] buf = str.toCharArray();
-        for (int i = 0; i < buf.length; i++) {
-            buf[i] = Character.toUpperCase( buf[i] );
-        }
-        return new String( buf );
-    }
-    */
-
-    /**
-     * @j2sIgnore
-     */
-    private String findStringMatch(String[][] languages,
-                                   String desiredLanguage, String fallbackLanguage)
-    {
-        for (int i = 0; i < languages.length; ++i)
-            if (desiredLanguage.equals(languages[i][0]))
-                return languages[i][1];
-        if (!fallbackLanguage.equals(desiredLanguage))
-            for (int i = 0; i < languages.length; ++i)
-                if (fallbackLanguage.equals(languages[i][0]))
-                    return languages[i][1];
-        if (!"EN".equals(desiredLanguage) && "EN".equals(fallbackLanguage))
-            for (int i = 0; i < languages.length; ++i)
-                if ("EN".equals(languages[i][0]))
-                    return languages[i][1];
-        return "";
-    }
+//
+//    /*
+//     * Locale needs its own, locale insenitive version of toLowerCase to
+//     * avoid circularity problems between Locale and String.
+//     * The most straightforward algorithm is used. Look at optimizations later.
+//     */
+//    /*
+//    private String toLowerCase(String str) {
+//        char[] buf = str.toCharArray();
+//        for (int i = 0; i < buf.length; i++) {
+//            buf[i] = Character.toLowerCase( buf[i] );
+//        }
+//        return new String( buf );
+//    }
+//    */
+//
+//    /*
+//     * Locale needs its own, locale insensitive version of toUpperCase to
+//     * avoid circularity problems between Locale and String.
+//     * The most straightforward algorithm is used. Look at optimizations later.
+//     */
+//    /*
+//    private String toUpperCase(String str) {
+//        char[] buf = str.toCharArray();
+//        for (int i = 0; i < buf.length; i++) {
+//            buf[i] = Character.toUpperCase( buf[i] );
+//        }
+//        return new String( buf );
+//    }
+//    */
+//
+//    /**
+//     * @j2sIgnore
+//     */
+//    private String findStringMatch(String[][] languages,
+//                                   String desiredLanguage, String fallbackLanguage)
+//    {
+//        for (int i = 0; i < languages.length; ++i)
+//            if (desiredLanguage.equals(languages[i][0]))
+//                return languages[i][1];
+//        if (!fallbackLanguage.equals(desiredLanguage))
+//            for (int i = 0; i < languages.length; ++i)
+//                if (fallbackLanguage.equals(languages[i][0]))
+//                    return languages[i][1];
+//        if (!"EN".equals(desiredLanguage) && "EN".equals(fallbackLanguage))
+//            for (int i = 0; i < languages.length; ++i)
+//                if ("EN".equals(languages[i][0]))
+//                    return languages[i][1];
+//        return "";
+//    }
 
     private String convertOldISOCodes(String language) {
         // we accept both the old and the new ISO codes for the languages whose ISO

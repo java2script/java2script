@@ -1,11 +1,12 @@
 //Udo Borkowski 6/13/2016 12:39:12 AM "matches"
+// BH 2023.11.17 Jmol only uses public find(), start() ,end(), and group()
 //BH 12/25/2016 7:28:07 AM fix for find() not updating this.leftBound
 //BH fix for String not having .length() or .subSequence()
 //BH fix for not reinitializing correctly
 //BH note that start(groupIndex) is not implemented for groupIndex > 0
 
 Clazz.declarePackage("java.util.regex");
-Clazz.load(["java.util.regex.MatchResult"],"java.util.regex.Matcher",["java.lang.IllegalArgumentException","$.IndexOutOfBoundsException","$.NullPointerException","$.StringBuffer"],function(){
+Clazz.load(["java.util.regex.MatchResult"],"java.util.regex.Matcher",["java.lang.IllegalArgumentException","$.IndexOutOfBoundsException","$.NullPointerException"],function(){
 var $fz,c$=Clazz.decorateAsClass(function(){
 this.pat=null;
 this.string=null;

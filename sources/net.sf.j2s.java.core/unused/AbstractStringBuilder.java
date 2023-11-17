@@ -19,8 +19,6 @@ package java.lang;
 
 import java.io.InvalidObjectException;
 //import java.util.Arrays;
-
-import org.apache.harmony.luni.util.Msg;
  
 /**
  * <p>
@@ -66,7 +64,7 @@ abstract class AbstractStringBuilder {
         if (val == null)
             val = new char[0];
         if (val.length < len)
-            throw new InvalidObjectException(Msg.getString("K0199"));
+            throw new InvalidObjectException(("K0199"));
 
         shared = false;
         value = val;

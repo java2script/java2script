@@ -804,31 +804,30 @@ public class Hashtable<K,V> extends Dictionary<K,V> implements Map<K,V>, Cloneab
             return "{}";
         }
 
-		StringBuilder buffer = new StringBuilder(size() * 28);
-		buffer.append('{');
+        String buffer = "{";
 		for (int i = lastSlot; i >= firstSlot; i--) {
 			Entry<K, V> entry = elementData[i];
 			while (entry != null) {
 				if (entry.key != this) {
-					buffer.append(entry.key);
+					buffer += (entry.key);
 				} else {
-					buffer.append("(this Map)");
+					buffer += ("(this Map)");
 				}
-				buffer.append('=');
+				buffer += ('=');
 				if (entry.value != this) {
-					buffer.append(entry.value);
+					buffer += (entry.value);
 				} else {
-					buffer.append("(this Map)");
+					buffer += ("(this Map)");
 				}
-				buffer.append(", ");
+				buffer += (", ");
 				entry = entry.next;
 			}
 		}
 		// Remove the last ", "
 		if (elementCount > 0) {
-            buffer.setLength(buffer.length() - 2);
+            buffer = buffer.substring(0, buffer.length() - 2);
         }
-		buffer.append('}');
+		buffer += ('}');
 		return buffer.toString();
 	}
 

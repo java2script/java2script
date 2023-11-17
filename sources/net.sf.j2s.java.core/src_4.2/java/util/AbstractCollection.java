@@ -351,21 +351,21 @@ public abstract class AbstractCollection<E> implements Collection<E> {
             return "[]"; //$NON-NLS-1$
         }
 
-		StringBuilder buffer = new StringBuilder(size() * 16);
-		buffer.append('[');
+		String buffer = "[";//new String(size() * 16);
+		//buffer.append('[');
 		Iterator<?> it = iterator();
 		while (it.hasNext()) {
 			Object next = it.next();
 			if (next != this) {
-				buffer.append(next);
+				buffer += next;
 			} else {
-				buffer.append("(this Collection)"); //$NON-NLS-1$
+				buffer += ("(this Collection)"); //$NON-NLS-1$
 			}
             if(it.hasNext()) {
-                buffer.append(", "); //$NON-NLS-1$
+                buffer += (", "); //$NON-NLS-1$
             }
 		}
-		buffer.append(']');
-		return buffer.toString();
+		buffer += (']');
+		return buffer;
 	}
 }

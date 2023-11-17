@@ -37,7 +37,6 @@ import java.lang.reflect.Array;
  * capacity of the Vector is exceeded, the capacity is increased, doubling by
  * default.
  * 
- * @see java.lang.StringBuffer
  */
 public class Vector<E> extends AbstractList<E> implements List<E>, RandomAccess,
 		Cloneable, Serializable {
@@ -1012,23 +1011,23 @@ public class Vector<E> extends AbstractList<E> implements List<E>, RandomAccess,
             return "[]";
         }
 		int length = elementCount - 1;
-		StringBuffer buffer = new StringBuffer(size() * 16);
-		buffer.append('[');
+		String buffer = "";
+		buffer += ('[');
 		for (int i = 0; i < length; i++) {
 			if (elementData[i] == this) {
-				buffer.append("(this Collection)");
+				buffer += ("(this Collection)");
 			} else {
-				buffer.append(elementData[i]);
+				buffer += (elementData[i]);
 			}
-			buffer.append(", ");
+			buffer += (", ");
 		}
 		if (elementData[length] == this) {
-			buffer.append("(this Collection)");
+			buffer += ("(this Collection)");
 		} else {
-			buffer.append(elementData[length]);
+			buffer += (elementData[length]);
 		}
-		buffer.append(']');
-		return buffer.toString();
+		buffer += (']');
+		return buffer;
 	}
 
 	/**

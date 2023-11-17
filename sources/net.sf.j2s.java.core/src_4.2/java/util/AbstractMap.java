@@ -46,7 +46,8 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
      * @see #isEmpty
      * @see #size
      */
-    public void clear() {
+    @Override
+	public void clear() {
         entrySet().clear();
     }
 
@@ -57,7 +58,8 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
      *            the object to search for
      * @return true if <code>key</code> is a key of this Map, false otherwise
      */
-    public boolean containsKey(Object key) {
+    @Override
+	public boolean containsKey(Object key) {
         Iterator<Map.Entry<K, V>> it = entrySet().iterator();
         if (key != null) {
             while (it.hasNext()) {
@@ -83,7 +85,8 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
      * @return true if <code>value</code> is a value of this Map, false
      *         otherwise
      */
-    public boolean containsValue(Object value) {
+    @Override
+	public boolean containsValue(Object value) {
         Iterator<Map.Entry<K, V>> it = entrySet().iterator();
         if (value != null) {
             while (it.hasNext()) {
@@ -111,7 +114,8 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
      * 
      * @return a set of the mappings contained in this map
      */
-    public abstract Set<Map.Entry<K, V>> entrySet();
+    @Override
+	public abstract Set<Map.Entry<K, V>> entrySet();
 
     /**
      * Compares the specified object to this Map and answer if they are equal.
@@ -155,7 +159,8 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
      *            the key
      * @return the value of the mapping with the specified key
      */
-    public V get(Object key) {
+    @Override
+	public V get(Object key) {
         Iterator<Map.Entry<K, V>> it = entrySet().iterator();
         if (key != null) {
             while (it.hasNext()) {
@@ -200,7 +205,8 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
      * 
      * @see #size
      */
-    public boolean isEmpty() {
+    @Override
+	public boolean isEmpty() {
         return size() == 0;
     }
 
@@ -211,7 +217,8 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
      * 
      * @return a Set of the keys
      */
-    public Set<K> keySet() {
+    @Override
+	public Set<K> keySet() {
         if (keySet == null) {
             keySet = new AbstractSet<K>() {
                 @Override
@@ -230,15 +237,18 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
                         Iterator<Map.Entry<K, V>> setIterator = entrySet()
                                 .iterator();
 
-                        public boolean hasNext() {
+                        @Override
+						public boolean hasNext() {
                             return setIterator.hasNext();
                         }
 
-                        public K next() {
+                        @Override
+						public K next() {
                             return setIterator.next().getKey();
                         }
 
-                        public void remove() {
+                        @Override
+						public void remove() {
                             setIterator.remove();
                         }
                     };
@@ -269,7 +279,8 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
      *                when the key or value is null and this Map does not
      *                support null keys or values
      */
-    public V put(K key, V value) {
+    @Override
+	public V put(K key, V value) {
         throw new UnsupportedOperationException();
     }
 
@@ -290,7 +301,17 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
      *                when a key or value is null and this Map does not support
      *                null keys or values
      */
-    public void putAll(Map<? extends K, ? extends V> map) {
+    @Override
+	public void putAll(Map<? extends K, ? extends V> map) {
+    	putAllAM(map);
+    }
+
+    /**
+     * BH SAEM
+     * 
+     * @param map
+     */
+	protected void putAllAM(Map<? extends K, ? extends V> map) {
         for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
             put(entry.getKey(), entry.getValue());
         }
@@ -307,7 +328,8 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
      * @exception UnsupportedOperationException
      *                when removing from this Map is not supported
      */
-    public V remove(Object key) {
+    @Override
+	public V remove(Object key) {
         Iterator<Map.Entry<K, V>> it = entrySet().iterator();
         if (key != null) {
             while (it.hasNext()) {
@@ -334,7 +356,8 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
      * 
      * @return the number of elements in this Map
      */
-    public int size() {
+    @Override
+	public int size() {
         return entrySet().size();
     }
 
@@ -349,30 +372,29 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
             return "{}"; //$NON-NLS-1$
         }
 
-        StringBuilder buffer = new StringBuilder(size() * 28);
-        buffer.append('{');
+        String buffer = "{";
         Iterator<Map.Entry<K, V>> it = entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<K, V> entry = it.next();
             Object key = entry.getKey();
             if (key != this) {
-                buffer.append(key);
+                buffer += (key);
             } else {
-                buffer.append("(this Map)"); //$NON-NLS-1$
+                buffer += ("(this Map)"); //$NON-NLS-1$
             }
-            buffer.append('=');
+            buffer += ('=');
             Object value = entry.getValue();
             if (value != this) {
-                buffer.append(value);
+                buffer += (value);
             } else {
-                buffer.append("(this Map)"); //$NON-NLS-1$
+                buffer += ("(this Map)"); //$NON-NLS-1$
             }
             if(it.hasNext()) {
-                buffer.append(", "); //$NON-NLS-1$
+                buffer += (", "); //$NON-NLS-1$
             }
         }
-        buffer.append('}');
-        return buffer.toString();
+        buffer += ('}');
+        return buffer;
     }
 
     /**
@@ -395,7 +417,8 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
      * @return a collection of the values contained in this map
      * 
      */
-    public Collection<V> values() {
+    @Override
+	public Collection<V> values() {
         if (valuesCollection == null) {
             valuesCollection = new AbstractCollection<V>() {
                 @Override
@@ -413,15 +436,18 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
                     return new Iterator<V>() {
                         Iterator<Map.Entry<K, V>> setIterator = entrySet().iterator();
 
-                        public boolean hasNext() {
+                        @Override
+						public boolean hasNext() {
                             return setIterator.hasNext();
                         }
 
-                        public V next() {
+                        @Override
+						public V next() {
                             return setIterator.next().getValue();
                         }
 
-                        public void remove() {
+                        @Override
+						public void remove() {
                             setIterator.remove();
                         }
                     };
@@ -443,9 +469,25 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
     @Override
     @SuppressWarnings("unchecked")
     protected Object clone() throws CloneNotSupportedException {
-        AbstractMap<K, V> result = (AbstractMap<K, V>) super.clone();
+    	return  this.cloneAM();
+    }
+
+    /**
+     * BH SAEM
+     * @return
+     * @throws CloneNotSupportedException
+     */
+	protected Object cloneAM() throws CloneNotSupportedException {
+        AbstractMap<K, V> result;
+        /**
+         * @j2sNative
+         *   result = Clazz.clone(this);
+         */
+        {
+            result = (AbstractMap<K, V>) super.clone();
+        }
         result.keySet = null;
         result.valuesCollection = null;
         return result;
-    }
+	}
 }

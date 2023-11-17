@@ -17,7 +17,7 @@
 
 package java.io;
 
-import org.apache.harmony.luni.util.Msg;
+
 
 /**
  * BufferedWriter is for writing buffered character output. Characters written
@@ -69,7 +69,7 @@ public class BufferedWriter extends Writer {
             this.out = out;
             this.buf = new char[size];
         } else {
-            throw new IllegalArgumentException(Msg.getString("K0058")); //$NON-NLS-1$
+            throw new IllegalArgumentException(("K0058")); //$NON-NLS-1$
         }
     }
 
@@ -110,7 +110,7 @@ public class BufferedWriter extends Writer {
                 pos = 0;
                 out.flush();
             } else {
-                throw new IOException(Msg.getString("K005d")); //$NON-NLS-1$
+                throw new IOException(("K005d")); //$NON-NLS-1$
             }
         }
     }
@@ -160,7 +160,7 @@ public class BufferedWriter extends Writer {
     public void write(char[] cbuf, int offset, int count) throws IOException {
         synchronized (lock) {
             if (!isOpen()) {
-                throw new IOException(Msg.getString("K005d")); //$NON-NLS-1$
+                throw new IOException(("K005d")); //$NON-NLS-1$
             }
             if (offset < 0 || offset > cbuf.length - count || count < 0) {
                 throw new IndexOutOfBoundsException();
@@ -217,7 +217,7 @@ public class BufferedWriter extends Writer {
                 }
                 buf[pos++] = (char) oneChar;
             } else {
-                throw new IOException(Msg.getString("K005d")); //$NON-NLS-1$
+                throw new IOException(("K005d")); //$NON-NLS-1$
             }
         }
     }
@@ -245,8 +245,7 @@ public class BufferedWriter extends Writer {
     public void write(String str, int offset, int count) throws IOException {
         synchronized (lock) {
             if (!isOpen()) {
-                throw new IOException(org.apache.harmony.luni.util.Msg
-                        .getString("K005d")); //$NON-NLS-1$
+                throw new IOException(("K005d")); //$NON-NLS-1$
             }
             if (count <= 0) {
                 return;

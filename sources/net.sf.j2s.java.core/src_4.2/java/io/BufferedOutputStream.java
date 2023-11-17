@@ -17,7 +17,7 @@
 
 package java.io;
 
-import org.apache.harmony.luni.util.Msg;
+
 
 /**
  * BufferedOutputStream is a class which takes an output stream and
@@ -68,7 +68,7 @@ public class BufferedOutputStream extends FilterOutputStream {
   		jzSetFOS(out);
         if (size <= 0) {
             // K0058=size must be > 0
-            throw new IllegalArgumentException(Msg.getString("K0058")); //$NON-NLS-1$
+            throw new IllegalArgumentException(("K0058")); //$NON-NLS-1$
         }
         buf = new byte[size];
     }
@@ -119,11 +119,11 @@ public class BufferedOutputStream extends FilterOutputStream {
             throws IOException {
         if (buffer == null) {
             // K0047=buffer is null
-            throw new NullPointerException(Msg.getString("K0047")); //$NON-NLS-1$
+            throw new NullPointerException(("K0047")); //$NON-NLS-1$
         }
         if (offset < 0 || offset > buffer.length - length || length < 0) {
             // K002f=Arguments out of bounds
-            throw new ArrayIndexOutOfBoundsException(Msg.getString("K002f")); //$NON-NLS-1$
+            throw new ArrayIndexOutOfBoundsException(("K002f")); //$NON-NLS-1$
         }
         if (count == 0 && length >= buf.length) {
             out.write(buffer, offset, length);
