@@ -1,4 +1,4 @@
-Clazz.load(["java.util.Map"],"java.util.AbstractMap",["java.lang.StringBuilder","$.UnsupportedOperationException","java.util.AbstractCollection","$.AbstractSet","$.Iterator"],function(){
+Clazz.load(["java.util.Map"],"java.util.AbstractMap",["java.lang.UnsupportedOperationException","java.util.AbstractCollection","$.AbstractSet","$.Iterator"],function(){
 var $fz,c$=Clazz.decorateAsClass(function(){
 this.$keySet=null;
 this.valuesCollection=null;
@@ -137,27 +137,26 @@ Clazz.overrideMethod(c$,"toString",
 function(){
 if(this.isEmpty()){
 return"{}";
-}var buffer=new StringBuilder(this.size()*28);
-buffer.append('{');
+}var buffer='{';
 var it=this.entrySet().iterator();
 while(it.hasNext()){
 var entry=it.next();
 var key=entry.getKey();
 if(key!==this){
-buffer.append(key);
+buffer += (key);
 }else{
-buffer.append("(this Map)");
-}buffer.append('=');
+buffer += ("(this Map)");
+}buffer += ('=');
 var value=entry.getValue();
 if(value!==this){
-buffer.append(value);
+buffer += (value);
 }else{
-buffer.append("(this Map)");
+buffer += ("(this Map)");
 }if(it.hasNext()){
-buffer.append(", ");
+buffer += (", ");
 }}
-buffer.append('}');
-return buffer.toString();
+buffer += ('}');
+return buffer;
 });
 Clazz.overrideMethod(c$,"values",
 function(){

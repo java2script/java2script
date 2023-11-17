@@ -294,7 +294,7 @@ return this.key+"="+this.value;
 ////////////////////////////
 
 
-Clazz.load(["java.util.Dictionary","$.Enumeration","$.HashtableEnumerator","$.Iterator","$.Map","$.MapEntry","$.NoSuchElementException"],"java.util.Hashtable",["java.lang.IllegalArgumentException","$.IllegalStateException","$.NullPointerException","$.StringBuilder","java.util.AbstractCollection","$.AbstractSet","$.Arrays","$.Collections","$.ConcurrentModificationException","java.util.MapEntry.Type","java.util.HashtableEntry"],function(){
+Clazz.load(["java.util.Dictionary","$.Enumeration","$.HashtableEnumerator","$.Iterator","$.Map","$.MapEntry","$.NoSuchElementException"],"java.util.Hashtable",["java.lang.IllegalArgumentException","$.IllegalStateException","$.NullPointerException","java.util.AbstractCollection","$.AbstractSet","$.Arrays","$.Collections","$.ConcurrentModificationException","java.util.MapEntry.Type","java.util.HashtableEntry"],function(){
 c$=Clazz.decorateAsClass(function(){
 this.elementCount=0;
 this.elementData=null;
@@ -558,28 +558,27 @@ Clazz.overrideMethod(c$,"toString",
 function(){
 if(this.isEmpty()){
 return"{}";
-}var buffer=new StringBuilder(this.size()*28);
-buffer.append('{');
+}var buffer='{';
 for(var i=this.lastSlot;i>=this.firstSlot;i--){
 var entry=this.elementData[i];
 while(entry!=null){
 if(entry.key!==this){
-buffer.append(entry.key);
+buffer += (entry.key);
 }else{
-buffer.append("(this Map)");
-}buffer.append('=');
+buffer += ("(this Map)");
+}buffer += ('=');
 if(entry.value!==this){
-buffer.append(entry.value);
+buffer += (entry.value);
 }else{
-buffer.append("(this Map)");
-}buffer.append(", ");
+buffer += ("(this Map)");
+}buffer += (", ");
 entry=entry.next;
 }
 }
 if(this.elementCount>0){
 buffer.setLength(buffer.length()-2);
-}buffer.append('}');
-return buffer.toString();
+}buffer += ('}');
+return buffer;
 });
 Clazz.overrideMethod(c$,"values",
 function(){
