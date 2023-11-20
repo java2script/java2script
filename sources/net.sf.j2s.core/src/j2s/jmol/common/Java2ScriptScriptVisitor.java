@@ -61,6 +61,10 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+
+import j2s.core.Java2ScriptCompiler;
+import j2s.jmol.Java2ScriptLegacyCompiler;
+
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 
 /**
@@ -124,7 +128,6 @@ public class Java2ScriptScriptVisitor extends ASTJ2SDocVisitor {
 	//private boolean isInnerClass = false;
 
 	protected AbstractTypeDeclaration rootTypeNode;
-
 
 	public boolean isMethodRegistered(String methodName) {
 		return ((ASTMethodVisitor) getAdaptable(ASTMethodVisitor.class)).isMethodRegistered(methodName);
@@ -196,7 +199,11 @@ public class Java2ScriptScriptVisitor extends ASTJ2SDocVisitor {
 	protected boolean canAutoOverride(MethodDeclaration node) {
 		return ((ASTMethodVisitor) getAdaptable(ASTMethodVisitor.class)).canAutoOverride(node);
 	}
-	
+
+	private final static String emptyFunction = 
+			"Clazz.decorateAsClass (function () {\r\n" 
+			+ "Clazz.instantialize (this, arguments);\r\n}, ";
+
 	public boolean visit(AnonymousClassDeclaration node) {
 		ITypeBinding binding = node.resolveBinding();
 		ASTTypeVisitor typeVisitor = ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class));
@@ -256,7 +263,7 @@ public class Java2ScriptScriptVisitor extends ASTJ2SDocVisitor {
 		
 		buffer.append("/*if*/;(function(){\r\n//Clazz.pu$h(self.c$);\r\n");
 		buffer.append("var cla$$ = ");
-		//buffer.append("Clazz.decorateAsType (");
+		//buffer.append("Clazz.decorateAsType (");		
 		buffer.append("Clazz.decorateAsClass (");
 //		buffer.append(JavaLangUtil.ripJavaLang(fullClassName));
 		String oldClassName = className;
@@ -322,12 +329,8 @@ public class Java2ScriptScriptVisitor extends ASTJ2SDocVisitor {
 		
 		buffer.append("}, ");
 
-		
-		String emptyFun = "Clazz.decorateAsClass (function () {\r\n" +
-				"Clazz.instantialize (this, arguments);\r\n" +
-				"}, ";
+		String emptyFun = emptyFunction;
 		idx = buffer.lastIndexOf(emptyFun);
-		
 		if (idx != -1 && idx == buffer.length() - emptyFun.length()) {
 			buffer.replace(idx, buffer.length(), "Clazz.declareType (");
 		} else {
@@ -947,9 +950,7 @@ public class Java2ScriptScriptVisitor extends ASTJ2SDocVisitor {
 		buffer.append("}, ");
 		
 		
-		String emptyFun = "Clazz.decorateAsClass (function () {\r\n" +
-				"Clazz.instantialize (this, arguments);\r\n" +
-				"}, ";
+		String emptyFun = emptyFunction;
 		int idx = buffer.lastIndexOf(emptyFun);
 		
 		if (idx != -1 && idx == buffer.length() - emptyFun.length()) {
@@ -1257,9 +1258,7 @@ public class Java2ScriptScriptVisitor extends ASTJ2SDocVisitor {
 			return false;
 		}
 		buffer.append("var cla$$ = ");
-		
-		buffer.append("Clazz.decorateAsClass (");
-		
+		buffer.append("Clazz.decorateAsClass (");	
 		buffer.append("function () {\r\n");
 		
 		List bodyDeclarations = node.bodyDeclarations();
@@ -2674,8 +2673,7 @@ public class Java2ScriptScriptVisitor extends ASTJ2SDocVisitor {
 			buffer.append("}, ");
 		}
 
-		String emptyFun = "Clazz.decorateAsClass (function () {\r\n" + "Clazz.instantialize (this, arguments);\r\n"
-				+ "}, ";
+		String emptyFun = emptyFunction;
 		int idx = buffer.lastIndexOf(emptyFun);
 
 		if (idx != -1 && idx == buffer.length() - emptyFun.length()) {
@@ -3457,9 +3455,7 @@ public class CB extends CA {
 		}
 		readSources(node, "@j2sPrefix", "", " ", true);
 		buffer.append("var cla$$ = ");
-		
 		buffer.append("Clazz.decorateAsClass (");
-		
 		buffer.append("function () {\r\n");
 		if (node == rootTypeNode && (node.getModifiers() & Modifier.STATIC) == 0 
 				&& ((node.getParent() instanceof TypeDeclaration 

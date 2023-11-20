@@ -1445,15 +1445,15 @@ case 1:
 	if(typeof x=="string"||x instanceof String){
 		return new String(x);
 	}
-	if(x.__CLASS_NAME__=="StringBuffer"||x.__CLASS_NAME__=="java.lang.StringBuffer"){
-		var value=x.shareValue();
-		var length=x.length();
-		var valueCopy=new Array(length);
-		for(var i=0;i<length;i++){
-			valueCopy[i]=value[i];
-		}
-		return valueCopy.join('')
-	}
+//	if(x.__CLASS_NAME__=="StringBuffer"||x.__CLASS_NAME__=="java.lang.StringBuffer"){
+//		var value=x.shareValue();
+//		var length=x.length();
+//		var valueCopy=new Array(length);
+//		for(var i=0;i<length;i++){
+//			valueCopy[i]=value[i];
+//		}
+//		return valueCopy.join('')
+//	}
 	return""+x;
 case 2:	
 	var x=arguments[0];
@@ -1962,25 +1962,22 @@ return this.lineNumber==-2;
 });
 Clazz.overrideMethod(c$,"toString",
 function(){
-var buf=new StringBuilder(80);
-buf.append(this.getClassName());
-buf.append('.');
-buf.append(this.getMethodName());
+var buf = this.getClassName() + "." + this.getMethodName();
 if(this.isNativeMethod()){
-buf.append("(Native Method)");
+buf += ("(Native Method)");
 }else{
 var fName=this.getFileName();
 if(fName==null){
-buf.append("(Unknown Source)");
+buf += ("(Unknown Source)");
 }else{
 var lineNum=this.getLineNumber();
-buf.append('(');
-buf.append(fName);
+buf += ('(');
+buf += (fName);
 if(lineNum>=0){
-buf.append(':');
-buf.append(lineNum);
-}buf.append(')');
-}}return buf.toString();
+buf += (':');
+buf = buf + lineNum;
+}buf += (')');
+}}return buf;
 });
 TypeError.prototype.getMessage || (TypeError.prototype.getMessage = function(){ return (this.message || this.toString()) + (this.getStackTrace ? this.getStackTrace() : Clazz.getStackTrace())});
 

@@ -2046,11 +2046,12 @@ Clazz.declareInterface (java.io,"DataOutput");
 Clazz.declareInterface (java.io,"Externalizable");
 Clazz.declareInterface (java.io,"Flushable");
 Clazz.declareInterface (java.io,"Serializable");
-Clazz.declareInterface (java.lang,"Iterable");
+Clazz.declareInterface (java.lang,"Appendable");
+Clazz.declareInterface (java.lang,"AutoCloseable");// BH 2023.11.19
 Clazz.declareInterface (java.lang,"CharSequence");
 Clazz.declareInterface (java.lang,"Cloneable");
-Clazz.declareInterface (java.lang,"Appendable");
 Clazz.declareInterface (java.lang,"Comparable");
+Clazz.declareInterface (java.lang,"Iterable");
 Clazz.declareInterface (java.lang,"Runnable");
 Clazz.declareInterface (java.util,"Comparator");
 

@@ -186,32 +186,7 @@ public class ASTVariableVisitor extends AbstractPluginVisitor {
 			StringBuffer buffer = new StringBuffer();
 			if (constValue instanceof Character) {
 				buffer.append('\'');
-				char charValue = ((Character)constValue).charValue();
-				if (charValue < 32 || charValue > 127) {
-					buffer.append("\\u");
-					String hexStr = Integer.toHexString(charValue);
-					int zeroLen = 4 - hexStr.length();
-					for (int i = 0; i < zeroLen; i++) {
-						buffer.append('0');
-					}
-					buffer.append(hexStr);
-				} else {
-					char c = charValue;
-					if (c == '\\' || c == '\'' || c == '\"') {
-						buffer.append('\\');
-						buffer.append(c);
-					} else if (c == '\r') {
-						buffer.append("\\r");
-					} else if (c == '\n') {
-						buffer.append("\\n");
-					} else if (c == '\t') {
-						buffer.append("\\t");
-					} else if (c == '\f') {
-						buffer.append("\\f");
-					} else {
-						buffer.append(constValue);
-					}
-				}
+				buffer.append(escapeChar(((Character) constValue).charValue()));
 				buffer.append('\'');
 			} else {
 				buffer.append(constValue);
@@ -228,33 +203,95 @@ public class ASTVariableVisitor extends AbstractPluginVisitor {
 			}*/
 			buffer.append("\"");
 			for (int i = 0; i < length; i++) {
-				char c = str.charAt(i);
-				if (c == '\\' || c == '\'' || c == '\"') {
-					buffer.append('\\');
-					buffer.append(c);
-				} else if (c == '\r') {
-					buffer.append("\\r");
-				} else if (c == '\n') {
-					buffer.append("\\n");
-				} else if (c == '\t') {
-					buffer.append("\\t");
-				} else if (c == '\f') {
-					buffer.append("\\f");
-				} else if (c < 32 || c > 127) {
-					buffer.append("\\u");
-					String hexStr = Integer.toHexString(c);
-					int zeroLen = 4 - hexStr.length();
-					for (int k = 0; k < zeroLen; k++) {
-						buffer.append('0');
-					}
-					buffer.append(hexStr);
-				} else {
-					buffer.append(c);
-				}
+				buffer.append(escapeChar(str.charAt(i)));
 			}
 			buffer.append("\"");
-			return buffer.toString();
+ 			return buffer.toString();
 		}
 		return null;
 	}
+
+
+	public static String escapeChar(char charValue) {
+		String out = "";
+		switch (charValue) {
+		case '\\':
+		case '\'':
+		case '\"':
+			out = "\\" + charValue;
+			break;
+		case '\r':
+			out = "\\r";
+			break;
+		case '\n':
+			out = "\\n";
+			break;
+		case '\t':
+			out = "\\t";
+			break;
+		case '\f':
+			out = "\\f";
+			break;
+		default:
+			if (charValue < 32 || charValue > 127) {
+				String hexStr = "0000" + Integer.toHexString(charValue);
+				out = "\\u" + hexStr.substring(hexStr.length() - 4);
+			} else {
+				out = "" + charValue;
+			}
+			break;
+		}
+		return out;
+	}
+	
+	static int unescapeChar(String s) {
+		// pt to 'xxx'<eob>
+		int len = s.length();
+		int rep;
+		switch (len) {
+		case 1:
+			// 'x';
+			rep = s.charAt(0);
+			break;
+		case 2:
+			// '\x';
+			switch (s.charAt(1)) {
+			case 'r':
+				rep = '\r';
+				break;
+			case 'n':
+				rep = '\n';
+				break;
+			case 't':
+				rep = '\t';
+				break;
+			case 'f':
+				rep = '\f';
+				break;
+			default:
+				// single quote, double quote, backslash
+				rep = s.charAt(1);
+			}
+			break;
+		default:
+			// '\u0000':
+			rep = Integer.parseInt(s.substring(2, 6), 16);
+			break;
+		}
+		return rep;
+	}
+	
+	public static void main(String[] args) {
+		String s = "\t\f\r\n\'\"\\\1\u0FF0";
+		for (int i = 0; i < s.length(); i++) {
+			String e = escapeChar(s.charAt(i));
+			int ie = unescapeChar(e);
+			System.out.println("" + ((int) s.charAt(i) + " " + e + " " + ie));
+			assert(s.charAt(i) == ie);
+		}
+		// \t\f\r\n\'\"\\\u0001\u0ff0
+	}
+
 }
+
+

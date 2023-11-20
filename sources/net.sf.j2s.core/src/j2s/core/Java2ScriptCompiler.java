@@ -274,7 +274,7 @@ public abstract class Java2ScriptCompiler {
 			writeToFile(activeJ2SFile, getDefaultJ2SFile());
 		}
 		int jslLevel = javaLanguageLevel;
-		if (jslLevel == 8) {
+		if (isSwingJS) {
 			// SwingJS allows 8 or 11
 			try {
 				String ver = getProperty(J2S_COMPILER_JAVA_VERSION, "" + jslLevel);
@@ -345,14 +345,17 @@ public abstract class Java2ScriptCompiler {
 		return excludeFile(javaSource.getFullPath().toString());
 	}
 
-	private boolean excludeFile(String filePath) {
+	public boolean excludeFile(String filePath) {
 		if (lstExcludedPaths != null) {
+			if (filePath == null)
+				return true;
 			if (filePath.indexOf('\\') >= 0)
 				filePath = filePath.replace('\\', '/');
-			for (int i = lstExcludedPaths.size(); --i >= 0;)
+			for (int i = lstExcludedPaths.size(); --i >= 0;) {
 				if (filePath.indexOf(lstExcludedPaths.get(i)) >= 0) {
 					return true;
 				}
+			}
 		}
 		return false;
 	}

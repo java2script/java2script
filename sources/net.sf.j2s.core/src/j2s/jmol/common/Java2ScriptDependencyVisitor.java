@@ -11,13 +11,13 @@
 
 package j2s.jmol.common;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
@@ -94,14 +94,26 @@ public class Java2ScriptDependencyVisitor extends ASTEmptyVisitor {
 		}
 	}
 
-	private Java2ScriptCompiler compiler;
-
 	// BH 2023.11.10 interfaces as well must be ignored
 
-	public Java2ScriptDependencyVisitor(Java2ScriptCompiler compiler) {
-		this.compiler = compiler;
+	private Java2ScriptCompiler compiler;
+
+	public Java2ScriptDependencyVisitor() {
 	}
 	
+	public Java2ScriptDependencyVisitor(Java2ScriptCompiler compiler) {
+		setCompiler(compiler);
+	}
+	
+	
+	
+	private Java2ScriptDependencyVisitor setCompiler(Java2ScriptCompiler compiler) {
+		this.compiler = compiler;
+		return this;
+	}
+
+
+
 	protected Set classNameSet = new HashSet();
 
 	protected Set classBindingSet = new HashSet();
@@ -715,43 +727,6 @@ public class Java2ScriptDependencyVisitor extends ASTEmptyVisitor {
 		return null;
 	}
 
-	public static void main(String[] args) {
-		Set set = new HashSet();
-		set.add ("java.lang.UnsupportedOperationException");
-		set.add ("java.lang.CloneNotSupportedException");
-		set.add ("java.io.ObjectOutputStream");
-		set.add ("java.lang.ClassNotFoundException");
-		set.add ("java.io.ObjectInputStream");
-		set.add ("java.lang.IllegalStateException");
-		set.add ("java.lang.IllegalArgumentException");
-		set.add ("java.lang.CloneNotSupportedException");
-		set.add ("java.io.IOException");
-		set.add ("java.io.PrintWriter");
-		set.add ("java.util.NoSuchElementException");
-		set.add ("java.lang.Float");
-		set.add ("java.util.ConcurrentModificationException");
-		set.add ("java.lang.ClassCastException");
-		set.add ("java.lang.NullPointerException");
-		set.add ("java.lang.StringIndexOutOfBoundsException");
-		String[] s = new String[] {
-				"java.lang.Character", "java.lang.InternalError", "java.util.Collections", "java.io.FileInputStream", "java.lang.InterruptedException", "java.lang.IndexOutOfBoundsException", "java.lang.ArrayIndexOutOfBoundsException"
-		};
-		for (int i = 0; i < s.length; i++) {
-			set.add(s[i]);
-		}
-		s = new String[] {
-				"java.io.ObjectOutputStream", "java.text.SimpleDateFormat", "java.util.TimeZone", "java.lang.ClassNotFoundException", "java.io.ObjectInputStream", "java.lang.CloneNotSupportedException", "java.lang.IllegalArgumentException", "java.util.Locale", "java.io.IOException", "java.text.DateFormat", "java.util.GregorianCalendar", "java.util.Calendar", "java.lang.ref.SoftReference"
-		};
-		for (int i = 0; i < s.length; i++) {
-			set.add(s[i]);
-		}
-		String[] ss = (String[]) set.toArray(new String[0]);
-		StringBuffer buf = new StringBuffer();
-		Arrays.sort(ss);
-		joinArrayClasses(buf, ss, null);
-		System.out.println(buf.toString().replaceAll(", ", ",\r\n\t"));
-	}
-
 	protected void readClasses(Annotation annotation, Set set) {
 		StringBuffer buf = new StringBuffer();
 		IAnnotationBinding annotationBinding = annotation.resolveAnnotationBinding();
@@ -1034,19 +1009,9 @@ public class Java2ScriptDependencyVisitor extends ASTEmptyVisitor {
 	
 	private Java2ScriptDependencyVisitor getSelfVisitor() {
 		try {
-			Object obj = this.getClass().getConstructor(new Class[0]).newInstance(new Object[0]);
-			return (Java2ScriptDependencyVisitor) obj;
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
+			Java2ScriptDependencyVisitor newVisitor = ((Java2ScriptDependencyVisitor) this.getClass().getConstructor(new Class[0]).newInstance(new Object[0])).setCompiler(compiler);
+			return newVisitor;
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
@@ -1190,11 +1155,6 @@ public class Java2ScriptDependencyVisitor extends ASTEmptyVisitor {
 				j2sOptionalImport.remove(s);
 			}
 		}
-
-		removeExcluded(j2sIgnoreImport);
-		removeExcluded(j2sRequireImport);
-		removeExcluded(j2sOptionalImport);
-		
 		String js = mainJS.toString();
 		if (imports.size() == 0 && j2sRequireImport.size() == 0 && j2sOptionalImport.size() == 0) {
 			return js;
@@ -1239,17 +1199,19 @@ public class Java2ScriptDependencyVisitor extends ASTEmptyVisitor {
 			}
 		}
 		buf.append("Clazz.load (");
+		boolean haveExclusions = compiler.excludeFile(null);
+		// clazz.load([imports],name,[interfaces],[??])
 		if (imports.size() != 0 || j2sRequireImport.size() != 0) {
 			buf.append("[");
 			String[] ss = (String[]) imports.toArray(new String[0]);
 			Arrays.sort(ss);
-			String lastClassName = joinArrayClasses(buf, ss, null);
+			String lastClassName = joinArrayClasses("imports",buf, ss, null);
 			if (imports.size() != 0 && j2sRequireImport.size() != 0) {
 				buf.append(", ");
 			}
 			ss = (String[]) j2sRequireImport.toArray(new String[0]);
 			Arrays.sort(ss);
-			joinArrayClasses(buf, ss, lastClassName);
+			joinArrayClasses("requireImports", buf, ss, lastClassName);
 			buf.append("], ");
 		} else {
 			buf.append("null, ");
@@ -1257,7 +1219,7 @@ public class Java2ScriptDependencyVisitor extends ASTEmptyVisitor {
 		if (classNameSet.size() > 1) {
 			buf.append("[");
 		}
-		joinArrayClasses(buf, getClassNames(), null);
+		joinArrayClasses("getClassNames()", buf, getClassNames(), null);
 		if (classNameSet.size() > 1) {
 			buf.append("]");
 		}
@@ -1266,7 +1228,7 @@ public class Java2ScriptDependencyVisitor extends ASTEmptyVisitor {
 			buf.append("[");
 			String[] ss = (String[]) j2sOptionalImport.toArray(new String[0]);
 			Arrays.sort(ss);
-			joinArrayClasses(buf, ss, null);
+			joinArrayClasses("optional", buf, ss, null);
 			buf.append("], ");
 		} else {
 			buf.append("null, ");
@@ -1277,43 +1239,43 @@ public class Java2ScriptDependencyVisitor extends ASTEmptyVisitor {
 		return buf.toString();
 	}
 
-	public static String joinArrayClasses(StringBuffer buf, String[] ss, String last) {
-		return joinArrayClasses(buf, ss, last, ", ");
+	private String joinArrayClasses(String why, StringBuffer buf, String[] ss, String last) {
+		return joinArrayClasses(why, buf, ss, last, ", ");
 	}
 	
-	public static String joinArrayClasses(StringBuffer buf, String[] ss, String last, String seperator) {
+	private String joinArrayClasses(String why, StringBuffer buf, String[] ss, String last, String seperator) {
 		String lastClassName = last;
 		for (int i = 0; i < ss.length; i++) {
+			String s = ss[i];
+			String sf = s.replace('.', '/');
+			boolean doExclude = compiler.excludeFile(sf);
+			if (doExclude) {
+				continue;
+			}
 			buf.append("\"");
 			boolean dollared = true;
 			if (lastClassName == null) {
 				dollared = false;
 			} else {
 				int idx1 = lastClassName.lastIndexOf('.');
-				int idx2 = ss[i].lastIndexOf('.');
+				int idx2 = s.lastIndexOf('.');
 				if (idx1 == -1 || idx2 == -1 || idx1 != idx2) {
 					dollared = false;
 				} else {
-					if (lastClassName.subSequence(0, idx1).equals(ss[i].subSequence(0, idx2))) {
+					if (lastClassName.subSequence(0, idx1).equals(s.subSequence(0, idx2))) {
 						buf.append("$");
-						buf.append(ss[i].substring(idx2));
+						buf.append(s.substring(idx2));
 					} else {
 						dollared = false;
 					}
 				}
 			}
 			if (!dollared) {
-				String key = "org.eclipse.swt.";
-				if (ss[i].startsWith(key)) {
-					buf.append("$wt.");
-					buf.append(ss[i].substring(key.length()));;
-				} else {
-					buf.append(ss[i]);
-				}
+				buf.append(s);
 			}
-			lastClassName = ss[i];
+			lastClassName = s;
 			buf.append("\"");
-			if (i != ss.length - 1) {
+			if (i < ss.length - 1) {
 				buf.append(seperator);
 			}
 		}

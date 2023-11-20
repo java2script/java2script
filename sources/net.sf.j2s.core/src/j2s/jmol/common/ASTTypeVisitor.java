@@ -128,49 +128,8 @@ public class ASTTypeVisitor extends AbstractPluginVisitor {
 		if (index == 0 
 				&& (name.indexOf('.', 10) == -1 || ((ch = name
 						.charAt(10)) >= 'A' && ch <= 'Z'))) {
-			// java.lang.String or java.lang.String.Xxx but not java.lang.xxx....
-//			if (!name.startsWith("java.lang.ref") // as in "reflection"
-//							&& !name.startsWith("java.lang.annotaion") // spelled wrong?
-//							&& !name.startsWith("java.lang.instrument")
-//							&& !name.startsWith("java.lang.management")) {
 				name = name.substring(10);
-//			}
 		}
-//		String swt = "org.eclipse.swt.SWT";
-//		index = name.indexOf(swt);
-//		if (index != -1) {
-//			String after = name.substring(swt.length());
-//			if (after.length() == 0 || after.startsWith(".")) {
-//				name = "$WT" + after;
-//			}
-//		} else {
-//			String os = "org.eclipse.swt.internal.browser.OS";
-//			index = name.indexOf(os);
-//			if (index != -1) {
-//				String after = name.substring(os.length());
-//				if (after.length() == 0 || after.startsWith(".")) {
-//					name = "O$" + after;
-//				}
-//			}
-//		}
-//		String xhtml = "org.eclipse.swt.internal.xhtml.";
-//		index = name.indexOf(xhtml);
-//		if (index != -1) {
-//			String after = name.substring(xhtml.length());
-//			name = after;
-//		}
-//		xhtml = "net.sf.j2s.html.";
-//		index = name.indexOf(xhtml);
-//		if (index != -1) {
-//			String after = name.substring(xhtml.length());
-//			name = after;
-//		}
-//		swt = "org.eclipse.swt";
-//		index = name.indexOf(swt);
-//		if (index != -1) {
-//			String after = name.substring(swt.length());
-//			name = "$wt" + after;
-//		}
 		return name;
 	}
 

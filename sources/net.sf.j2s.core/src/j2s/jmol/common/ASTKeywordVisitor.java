@@ -10,6 +10,7 @@
  *******************************************************************************/
 package j2s.jmol.common;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
@@ -38,7 +39,6 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
-//import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
@@ -53,12 +53,15 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
@@ -71,6 +74,7 @@ import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -1427,18 +1431,32 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 
 	public boolean visit(SwitchCase node) {
 		if (node.isDefault()) {
-			buffer.append("default");
+			buffer.append("default:\r\n");
 		} else {
 			buffer.append("case ");
+			int pt = buffer.length();
 			node.getExpression().accept(this);
+			if (buffer.charAt(pt) == '\'') {
+				int rep = ASTVariableVisitor.unescapeChar(buffer.substring(pt + 1, buffer.length() - 1));
+				buffer.replace(pt, buffer.length(), "" + rep);
+			}
+			buffer.append(":\r\n");
 		}
-		buffer.append(":\r\n");
 		return false;
 	}
 
 	public boolean visit(SwitchStatement node) {
 		buffer.append("switch (");
-		node.getExpression().accept(this);
+		
+		Expression exp= node.getExpression();
+		boolean isCharSwitch = exp.resolveTypeBinding().getName().equals("char");
+		if (isCharSwitch) {
+			buffer.append("(");
+			exp.accept(this);
+			buffer.append(").charCodeAt(0)");
+		} else {
+			exp.accept(this);
+		}
 		buffer.append(") {\r\n");
 		visitList(node.statements(), "");
 		buffer.append("}\r\n");
@@ -1446,9 +1464,6 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	}
 
 	public boolean visit(SynchronizedStatement node) {
-		/*
-		 * TODO: synchronized keyword should be implemented in JS
-		 */
 		node.getBody().accept(this);
 		return false;
 	}
@@ -1460,15 +1475,55 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		return false;
 	}
 
+	@SuppressWarnings("unchecked")
 	public boolean visit(TryStatement node) {
+		List<CatchClause> catchClauses = node.catchClauses();
+		int nCatch = catchClauses.size();
+		Block finallyBlock = node.getFinally();
+		List<ASTNode> resources = node.resources();
+
+		// try(resourceDefs) {
+		// block code
+		// } optional catch/finally{}
+		// same as
+		//
+		// try { resourceDefs;
+		// try {
+		// block code
+		// } finally {resourceDefs.close();}
+		// } nonOptional catch/finally{}
+
+		// same rules apply in terms of catch
+
+		// Returns the live ordered list of resources for this try statement (added in
+		// JLS4 API).
+		// [ooh...JSL9 change...]
+		// A resource is either a VariableDeclarationExpression or (since JLS9) a Name.
+		int pt = -1;
+		boolean haveResources = (resources != null && resources.size() > 0);
+		boolean haveCatchOrFinal = (nCatch > 0 || finallyBlock != null);
+		String closing = "";
+		if (haveResources) {
+			buffer.append("try {\r\n");
+			for (int i = 0; i < resources.size(); i++) {
+				ASTNode resource = resources.get(i);
+				pt = buffer.length();
+				resource.accept(this);
+				buffer.append(";\r\n");
+				closing = getResourceClosing(pt) + closing;
+			}
+		}
 		buffer.append("try ");
 		node.getBody().accept(this);
-		List catchClauses = node.catchClauses();
-		int size = catchClauses.size();
-		if (size > 0) {
+		if (haveResources) {
+			pt = buffer.lastIndexOf("}");
+			buffer.setLength(pt);
+			buffer.append("\r\n}finally{/*res*/").append(closing).append("}\r\n}");
+		}
+		if (nCatch > 0) {
 			String catchEName = "e$$";
-			if (size == 1) {
-				CatchClause element = (CatchClause) catchClauses.get(0);
+			if (nCatch == 1) {
+				CatchClause element = catchClauses.get(0);
 				SimpleName exName = element.getException().getName();
 				catchEName = exName.getIdentifier();
 			}
@@ -1477,28 +1532,37 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			boolean endedWithThrowable = false;
 			for (Iterator iter = catchClauses.iterator(); iter.hasNext();) {
 				CatchClause element = (CatchClause) iter.next();
+				List<Type> types;
 				Type type = element.getException().getType();
-				String typeName = type.toString();
-				if (!"Throwable".equals(typeName) && !"java.lang.Throwable".equals(typeName)) {
-					if (!scopeAdded) {
-						buffer.append("{\r\n");
-						scopeAdded = true;
-					}
-					buffer.append("if (Clazz.exceptionOf (" + catchEName + ", ");//sgurin : isExceptionOf compiler support.
-					//old code was: buffer.append("if (Clazz.instanceOf (" + catchEName + ", ");
-					type.accept(this);
-					buffer.append(")) ");
+				if (type instanceof UnionType) {
+					types = ((UnionType) type).types();
 				} else {
-					endedWithThrowable = true;
+					(types = new ArrayList<Type>()).add(type);
 				}
+				boolean haveType = false;
+				for (int j = 0; j < types.size(); j++) {
+					type = types.get(j);
+					if ("java.lang.Throwable".equals(type.resolveBinding().getQualifiedName())) {
+						endedWithThrowable = true;
+					} else {
+						if (!scopeAdded) {
+							buffer.append("{\r\n");
+							scopeAdded = true;
+						}
+						buffer.append(haveType ? " || " : "if (");
+						buffer.append("Clazz.exceptionOf(" + catchEName + ",\"");
+						buffer.append(getFinalJ2SClassName(getClassJavaNameForType(type)));
+						buffer.append("\")");
+						haveType = true;
+					}
+				}
+				if (haveType)
+					buffer.append(")");
 				SimpleName exName = element.getException().getName();
 				String eName = exName.getIdentifier();
 				boolean notEName = false;
 				if (!catchEName.equals(eName)) {
-					buffer.append("{\r\n");
-					buffer.append("var ");
-					buffer.append(eName);
-					buffer.append(" = " + catchEName + ";\r\n");
+					buffer.append("{\r\nvar " + eName + " = " + catchEName + ";\r\n");
 					notEName = true;
 				}
 				element.getBody().accept(this);
@@ -1516,13 +1580,115 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				buffer.append("\r\n}");
 			}
 		}
-		Block finallys = node.getFinally();
-		if (finallys != null) {
+		if (finallyBlock != null) {
 			buffer.append(" finally ");
-			finallys.accept(this);
-		}
+			finallyBlock.accept(this);
+		} else if (!haveCatchOrFinal) {
+			buffer.append("finally{}");
+		} 
 		buffer.append("\r\n");
 		return false;
+	}
+
+	private String getFinalJ2SClassName(String javaClassName) {
+		if (javaClassName == null)
+			return null;
+		String name = javaClassName;
+		name = removeBracketsAndFixNullPackageName(name);
+		name = stripJavaLang(name);
+		return name;
+	}
+
+	static String stripJavaLang(String name) {
+		// shorten java.lang.XXX.YYY but not java.lang.xxx.YYY
+		return (!name.startsWith("java.lang.") || name.equals("java.lang.Object")
+				|| name.length() > 10 && !Character.isUpperCase(name.charAt(10)) ? name : name.substring(10));
+	}
+
+	static String removeBracketsAndFixNullPackageName(String qName) {
+		if (qName == null)
+			return null;
+		return removeBrackets(qName);
+	}
+
+	private static String removeBrackets(String qName) {
+		if (qName.indexOf('<') < 0)
+			return qName;
+		StringBuffer buf = new StringBuffer();
+		int ltCount = 0;
+		char c;
+		for (int i = 0, len = qName.length(); i < len; i++) {
+			switch (c = qName.charAt(i)) {
+			case '<':
+				ltCount++;
+				continue;
+			case '>':
+				ltCount--;
+				continue;
+			default:
+				if (ltCount == 0)
+					buf.append(c);
+				continue;
+			}
+		}
+		return buf.toString().trim();
+	}
+
+	private String getClassJavaNameForType(Type type) {
+		if (type instanceof QualifiedType) {
+			QualifiedType qualType = (QualifiedType) type;
+			return getClassJavaNameForType(qualType.getQualifier()) + "." + qualType.getName().getIdentifier();
+		}
+		if (type instanceof ArrayType)
+			return getClassJavaNameForType(((ArrayType) type).getElementType());
+		if (type instanceof ParameterizedType)
+			return getClassJavaNameForType(((ParameterizedType) type).getType());
+		if (type instanceof SimpleType) {
+			ITypeBinding binding = ((SimpleType) type).resolveBinding();
+			return getUnreplacedJavaClassNameQualified(binding);
+		}
+		return null;
+	}
+	
+	private String getUnreplacedJavaClassNameQualified(ITypeBinding binding) {
+		if (binding == null) {
+			return null;
+		}
+		if (isTypeOrArrayType(binding))
+			return binding.toString();
+		binding = binding.getErasure();
+		String name = null, bindingKey;
+		if ((binding.isAnonymous() || binding.isLocal()) && (name = binding.getBinaryName()) == null
+				&& (bindingKey = binding.getKey()) != null)
+			name = bindingKey.substring(1, bindingKey.length() - 1).replace('/', '.');
+		if (name == null) {
+			name = binding.getQualifiedName();
+			if (name.length() == 0) {
+				name = binding.getBinaryName();
+				if (name == null) {
+					// no binary name, no qualified name,
+					name = ""; // <? extends Byte>
+				}
+			}
+		}
+		return name;
+	}
+
+	private static boolean isTypeOrArrayType(ITypeBinding binding) {
+		return binding.isTypeVariable() || binding.isArray() && binding.getComponentType().isTypeVariable();
+	}
+
+
+
+	private String getResourceClosing(int pt) {
+		String name = buffer.substring(pt);
+		// Java 9 try(res) or Java 8 try(OutputStream os = ....)
+		if ((pt = name.indexOf("=")) >= 0 || (pt = name.indexOf(";")) >= 0) {
+			name = name.substring(0, pt);
+		}
+		if (name.startsWith("var"))
+			name = name.substring(4);
+		return name + "&&" + name + ".close&&" + name + ".close();";
 	}
 
 	public boolean visit(VariableDeclarationExpression node) {
@@ -1571,35 +1737,35 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 						buffer.append(0 + cl.charValue());
 					}
 					return false;
-				} else {
-					if (nameType != null && !"char".equals(nameType) && nameType.indexOf("String") == -1) {
-						int idx1 = buffer.length();
-						buffer.append("(");
-						initializer.accept(this);
-						buffer.append(")");
-						boolean appendingCode = true;
-						int length = buffer.length();
-						if (initializer instanceof MethodInvocation) {
-							MethodInvocation m = (MethodInvocation) initializer;
-							if ("charAt".equals(m.getName().toString())) {
-								int idx2 = buffer.indexOf(".charAt ", idx1);
-								if (idx2 != -1) {
-									StringBuffer newMethodBuffer = new StringBuffer();
-									newMethodBuffer.append(buffer.substring(idx1 + 1, idx2));
-									newMethodBuffer.append(".charCodeAt ");
-									newMethodBuffer.append(buffer.substring(idx2 + 8, length - 1));
-									buffer.delete(idx1, length);
-									buffer.append(newMethodBuffer.toString());
-									appendingCode = false;
-								}
+				}
+				if (nameType != null && !"char".equals(nameType) && nameType.indexOf("String") == -1) {
+					int idx1 = buffer.length();
+					buffer.append("(");
+					initializer.accept(this);
+					buffer.append(")");
+					boolean appendingCode = true;
+					int length = buffer.length();
+					if (initializer instanceof MethodInvocation) {
+						MethodInvocation m = (MethodInvocation) initializer;
+						if ("charAt".equals(m.getName().toString())) {
+							int idx2 = buffer.indexOf(".charAt ", idx1);
+							if (idx2 != -1) {
+								StringBuffer newMethodBuffer = new StringBuffer();
+								newMethodBuffer.append(buffer.substring(idx1 + 1, idx2));
+								newMethodBuffer.append(".charCodeAt ");
+								newMethodBuffer.append(buffer.substring(idx2 + 8, length - 1));
+								buffer.delete(idx1, length);
+								buffer.append(newMethodBuffer.toString());
+								appendingCode = false;
 							}
 						}
-						if (appendingCode) {
-							buffer.append(".charCodeAt (0)");
-						}
-						return false;
 					}
+					if (appendingCode) {
+						buffer.append(".charCodeAt (0)");
+					}
+					return false;
 				}
+
 			}
 			ITypeBinding nameTypeBinding = name.resolveTypeBinding();
 			if (nameTypeBinding != null) {

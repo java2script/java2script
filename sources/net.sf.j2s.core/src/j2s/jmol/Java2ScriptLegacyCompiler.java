@@ -40,7 +40,7 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 
 	@SuppressWarnings("deprecation")
 	public boolean initializeProject(IJavaProject project, boolean isCleanBuild) {
-		if (!super.initializeProject(project, isCleanBuild, AST.JLS4)) {
+		if (!super.initializeProject(project, isCleanBuild, AST.JLS8)) {
 			return false;
 		}		
 		String s = getProperty(J2S_STRING_FIXES, null);
