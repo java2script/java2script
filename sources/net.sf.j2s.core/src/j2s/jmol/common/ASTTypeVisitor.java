@@ -25,7 +25,7 @@ import org.eclipse.jdt.core.dom.WildcardType;
  *
  * 2006-12-3
  */
-public class ASTTypeVisitor extends AbstractPluginVisitor {
+public class ASTTypeVisitor extends ASTVisitor {
 
 	protected String thisClassName = "";
 	
@@ -66,11 +66,8 @@ public class ASTTypeVisitor extends AbstractPluginVisitor {
 	 * @param name
 	 * @return
 	 */
-	public String discardGenericType(String name) {
-		if (name == null) {
-			return null;
-		}
-		return Bindings.removeBrackets(name);
+	public static String discardGenericType(String name) {
+		return (name == null ? null : Bindings.removeBrackets(name));
 	}
 
 	/**
@@ -86,7 +83,7 @@ public class ASTTypeVisitor extends AbstractPluginVisitor {
 	 * @param name
 	 * @return
 	 */
-	public boolean isInheritedClassName(ITypeBinding binding, String name) {
+	private static boolean isInheritedClassName(ITypeBinding binding, String name) {
 		if (binding == null) {
 			return false;
 		}
@@ -121,7 +118,7 @@ public class ASTTypeVisitor extends AbstractPluginVisitor {
 	 * @param name
 	 * @return
 	 */
-	public String shortenQualifiedName(String name) {
+	static String shortenQualifiedName(String name) {
 		name = Bindings.removeBrackets(name);
 		int index = name.indexOf("java.lang.");
 		char ch = 0;
@@ -133,7 +130,7 @@ public class ASTTypeVisitor extends AbstractPluginVisitor {
 		return name;
 	}
 
-	public String shortenPackageName(String fullName) {
+	static String shortenPackageName(String fullName) {
 		String name = fullName.substring(0, fullName.lastIndexOf('.'));
 		name = Bindings.removeBrackets(name);
 		int index = name.indexOf("java.lang.");
@@ -148,33 +145,10 @@ public class ASTTypeVisitor extends AbstractPluginVisitor {
 				name = name.substring(10);
 			}
 		}
-		String swt = "org.eclipse.swt.SWT";
-		index = name.indexOf(swt);
-		if (index != -1) {
-			String after = name.substring(swt.length());
-			if (after.length() == 0 || after.startsWith(".")) {
-				name = "$WT" + after;
-			}
-		} else {
-			String os = "org.eclipse.swt.internal.browser.OS";
-			index = name.indexOf(os);
-			if (index != -1) {
-				String after = name.substring(os.length());
-				if (after.length() == 0 || after.startsWith(".")) {
-					name = "O$" + after;
-				}
-			}
-		}
-		swt = "org.eclipse.swt";
-		index = name.indexOf(swt);
-		if (index != -1) {
-			String after = name.substring(swt.length());
-			name = "$wt" + after;
-		}
 		return name;
 	}
 
-	public String getTypeStringName(Type type) {
+	static String getTypeStringName(Type type) {
 		if (type == null) {
 			return null;
 		}
@@ -200,11 +174,11 @@ public class ASTTypeVisitor extends AbstractPluginVisitor {
 		return null;
 	}
 
-	public String assureQualifiedName(String name) {
+	static String assureQualifiedName(String name) {
 		if (name == null || name.length() == 0) {
 			return name;
 		}
-		String[] keywords = ASTFieldVisitor.keywods;
+		String[] keywords = ASTFieldVisitor.keywords;
 		String[] packages = null;
 		boolean existedKeyword = false;
 		for (int i = 0; i < keywords.length; i++) {
@@ -220,28 +194,26 @@ public class ASTTypeVisitor extends AbstractPluginVisitor {
 				}
 			}
 		}
-		if (existedKeyword) {
-			StringBuffer sb = new StringBuffer();
-			for (int i = 0; i < packages.length; i++) {
-				if (packages[i].charAt(0) == '[') {
-					if (i == 0) {
-						sb.append("window");
-					}
-					sb.append(packages[i]);
-				} else {
-					if (i != 0) {
-						sb.append('.');
-					}
-					sb.append(packages[i]);
-				}
-			}
-			return sb.toString();
-		} else {
+		if (!existedKeyword || packages == null)
 			return name;
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < packages.length; i++) {
+			if (packages[i].charAt(0) == '[') {
+				if (i == 0) {
+					sb.append("window");
+				}
+				sb.append(packages[i]);
+			} else {
+				if (i != 0) {
+					sb.append('.');
+				}
+				sb.append(packages[i]);
+			}
 		}
+		return sb.toString();
 	}
 
-	public boolean isIntegerType(String type) {
+	static boolean isIntegerType(String type) {
 		if ("int".equals(type)
 				|| "long".equals(type)
 				|| "byte".equals(type)

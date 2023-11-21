@@ -99,8 +99,11 @@ import org.eclipse.jdt.core.dom.WildcardType;
  * 
  * @author zhou renjian
  */
-public class ASTEmptyVisitor extends ASTVisitor {
+public abstract class J2SASTVisitor extends ASTVisitor {
 
+	public J2SASTVisitor() {
+		super();
+	}
 	/**
 	 * Buffer that keep all compiled *.js.
 	 * @see Java2ScriptScriptVisitor#laterBuffer
@@ -124,10 +127,10 @@ public class ASTEmptyVisitor extends ASTVisitor {
 		this.buffer = buffer;
 	}
 
-	protected Map visitorMap = new HashMap();
+	protected Map<Class<? extends IVisitor>, IVisitor> visitorMap = new HashMap<Class<? extends IVisitor>, IVisitor>();
 	
-	public Object getAdaptable(Class clazz) {
-		if (clazz == ASTEmptyVisitor.class) {
+	public Object getAdaptable(Class<?> clazz) {
+		if (clazz == J2SASTVisitor.class) {
 			return this;
 		}
 		Object visitor = visitorMap.get(clazz);
@@ -136,8 +139,8 @@ public class ASTEmptyVisitor extends ASTVisitor {
 		}
 		try {
 			Object newInstance = clazz.newInstance();
-			if (newInstance instanceof IPluginVisitor) {
-				registerPluginVisitor((IPluginVisitor) newInstance);
+			if (newInstance instanceof IVisitor) {
+				registerPluginVisitor((IVisitor) newInstance);
 				return newInstance;
 			}
 		} catch (InstantiationException e) {
@@ -148,7 +151,7 @@ public class ASTEmptyVisitor extends ASTVisitor {
 		return null;
 	}
 
-	public void registerPluginVisitor(IPluginVisitor visitor) {
+	public void registerPluginVisitor(IVisitor visitor) {
 		//visitor.setBuffer(buffer);
 		visitor.setVisitor(this);
 		visitorMap.put(visitor.getClass(), visitor);

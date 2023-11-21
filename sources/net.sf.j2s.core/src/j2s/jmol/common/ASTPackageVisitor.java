@@ -17,7 +17,7 @@ package j2s.jmol.common;
  *
  * 2006-12-3
  */
-public class ASTPackageVisitor extends AbstractPluginVisitor {
+public class ASTPackageVisitor extends ASTVisitor {
 
 	protected String thisPackageName = "";
 	

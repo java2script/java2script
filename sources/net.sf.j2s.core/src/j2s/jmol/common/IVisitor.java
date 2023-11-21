@@ -17,9 +17,8 @@ package j2s.jmol.common;
  *
  * 2006-12-27
  */
-public interface IPluginVisitor {
+public interface IVisitor {
 	public StringBuffer getBuffer();
-	//public void setBuffer(StringBuffer buffer);
-	public ASTEmptyVisitor getVisitor();
-	public void setVisitor(ASTEmptyVisitor visitor);
+	public J2SASTVisitor getVisitor();
+	public void setVisitor(J2SASTVisitor visitor);
 }

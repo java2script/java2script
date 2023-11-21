@@ -24,7 +24,7 @@ import org.eclipse.jdt.core.dom.PrimitiveType.Code;
  *
  * 2006-12-6
  */
-public class ASTTigerVisitor extends AbstractPluginVisitor {
+public class ASTTigerVisitor extends ASTVisitor {
 
 	protected void boxingNode(ASTNode element) {
 		if (element instanceof Expression) {

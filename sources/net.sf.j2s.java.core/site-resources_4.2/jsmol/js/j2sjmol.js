@@ -617,6 +617,17 @@ Clazz.getInheritedLevel = function (clazzTarget, clazzBase) {
 };
 
 
+Clazz._setDeclared = function(name, func) {
+	  (name.indexOf(".") < 0) && (name = "java.lang." + name);
+	   Clazz.allClasses[name] = func;
+	}
+
+Clazz._getDeclared = function(name) { 
+	(name.indexOf(".") < 0) && (name = "java.lang." + name);
+	return Clazz.allClasses[name] 
+}
+
+
 /**
  * Implements Java's keyword "instanceof" in JavaScript's way.
  * As in JavaScript part of the object inheritance is implemented in only-
@@ -628,6 +639,16 @@ Clazz.getInheritedLevel = function (clazzTarget, clazzBase) {
  */
 /* public */
 Clazz.instanceOf = function (obj, clazz) {
+  if (obj == null)
+	return false;
+  if (typeof clazz == "string") {
+	clazz = Clazz._getDeclared(clazz);
+  } 
+  if (!clazz)
+	return false;
+  if (clazz == String)
+	  return typeof obj == "string";
+
   // allows obj to be a class already, from arrayX.getClass().isInstance(y)
 	return (obj != null && clazz && (obj == clazz || obj instanceof clazz || Clazz.getInheritedLevel(Clazz.getClassName(obj), clazz) >= 0));
 };
@@ -2258,7 +2279,7 @@ Clazz.isClassDefined = Clazz.isDefinedClass = function(clazzName) {
 		if (!(pkg = (pkg ? pkg[pkgFrags[i]] : Clazz.allPackage[pkgFrags[0]]))) {
 			return false;
     }
-  return (pkg && (Clazz.allClasses[clazzName] = true));
+  return (pkg && !!(Clazz.allClasses[clazzName] = pkg));
 };
 /**
  * Define the enum constant.

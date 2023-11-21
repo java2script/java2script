@@ -151,9 +151,9 @@ public class MethodReferenceASTVisitor extends ASTVisitor {
 	protected Object getJ2STag(BodyDeclaration node, String tagName) {
 		Javadoc javadoc = node.getJavadoc();
 		if (javadoc != null) {
-			List tags = javadoc.tags();
+			List<?> tags = javadoc.tags();
 			if (tags.size() != 0) {
-				for (Iterator iter = tags.iterator(); iter.hasNext();) {
+				for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
 					TagElement tagEl = (TagElement) iter.next();
 					if (tagName.equals(tagEl.getTagName())) {
 						return tagEl;
@@ -161,9 +161,9 @@ public class MethodReferenceASTVisitor extends ASTVisitor {
 				}
 			}
 		}
-		List modifiers = node.modifiers();
-		for (Iterator iter = modifiers.iterator(); iter.hasNext();) {
-			Object obj = (Object) iter.next();
+		List<?> modifiers = node.modifiers();
+		for (Iterator<?> iter = modifiers.iterator(); iter.hasNext();) {
+			Object obj = iter.next();
 			if (obj instanceof Annotation) {
 				Annotation annotation = (Annotation) obj;
 				String qName = annotation.getTypeName().getFullyQualifiedName();

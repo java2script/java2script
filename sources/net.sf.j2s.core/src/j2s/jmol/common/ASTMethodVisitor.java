@@ -27,10 +27,10 @@ import org.eclipse.jdt.core.dom.Modifier;
  *
  * 2006-12-3
  */
-public class ASTMethodVisitor extends AbstractPluginVisitor {
+public class ASTMethodVisitor extends ASTVisitor {
 
-	private static Set methodSet;
-	private static Map pmMap;
+	private static Set<String> methodSet;
+	private static Map<String, String> pmMap;
 	public static final String PACKAGE_PREFIX;
 	public static String[] mapDocument;
 	public static String[] mapNode;
@@ -125,8 +125,8 @@ public class ASTMethodVisitor extends AbstractPluginVisitor {
 	}
 
 	public static void init() {
-		pmMap = new HashMap();
-		methodSet = new HashSet();
+		pmMap = new HashMap<String, String>();
+		methodSet = new HashSet<String>();
 		register("java.lang.String", "length", "length");
 		register("java.lang.CharSequence", "length", "length");//sgurin: fix for bug: CharSequence cs = "123"; cs.length();
 		register("java.lang.String", "replace", "~replace");
@@ -144,7 +144,7 @@ public class ASTMethodVisitor extends AbstractPluginVisitor {
 	}
 
 	public String translate(String className, String methodName) {
-		return (String) pmMap.get(className + "." + methodName);
+		return pmMap.get(className + "." + methodName);
 	}
 
 	protected static void registerMap(String[] map) {

@@ -27,7 +27,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
  *
  * 2006-12-3
  */
-public class ASTFieldVisitor extends AbstractPluginVisitor {
+public class ASTFieldVisitor extends ASTVisitor {
 
 	/*
 	 * IE passes the following: 
@@ -57,7 +57,7 @@ public class ASTFieldVisitor extends AbstractPluginVisitor {
 	 * volatile,		while,			with,
 	 *  
 	 */
-	public static String[] keywods = new String[] {
+	public static String[] keywords = new String[] {
 		"class", /*"java", "javax", "sun", */"for", "while", "do", "in", "return", "function", "var", 
 		"class", "pubic", "protected", "private", "new", "delete",
 		"static", "package", "import", "extends", "implements",
@@ -71,8 +71,8 @@ public class ASTFieldVisitor extends AbstractPluginVisitor {
 
 	
 	boolean checkKeyworkViolation(String name) {
-		for (int i = 0; i < keywods.length; i++) {
-			if (keywods[i].equals(name)) {
+		for (int i = 0; i < keywords.length; i++) {
+			if (keywords[i].equals(name)) {
 				return true;
 			}
 		}
@@ -101,25 +101,22 @@ public class ASTFieldVisitor extends AbstractPluginVisitor {
 			return false;
 		}
 
-		List fragments = node.fragments();
-		for (Iterator iter = fragments.iterator(); iter.hasNext();) {
+		List<?> fragments = node.fragments();
+		for (Iterator<?> iter = fragments.iterator(); iter.hasNext();) {
 			VariableDeclarationFragment element = (VariableDeclarationFragment) iter.next();
 			Expression initializer = element.getInitializer();
 			if (initializer != null) {
 				Object constValue = initializer.resolveConstantExpressionValue();
-				if (constValue != null && (constValue instanceof Number
-						|| constValue instanceof Character
-						|| constValue instanceof Boolean
-						|| constValue instanceof String)) {
-					return false;
+				if (constValue != null && (constValue instanceof Number || constValue instanceof Character
+						|| constValue instanceof Boolean || constValue instanceof String)) {
+					break;
 				}
 				if (initializer instanceof NullLiteral) {
-					return false;
+					break;
 				}
 				return true;
-			} else {
-				return false;
 			}
+			break;
 		}
 		return false;
 	}

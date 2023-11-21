@@ -13,29 +13,24 @@ package j2s.jmol.common;
 
 
 /**
+ * super class to 
  * @author zhou renjian
  *
  * 2006-12-27
  */
-public class AbstractPluginVisitor implements IPluginVisitor {
+public abstract class ASTVisitor implements IVisitor {
 
-	protected ASTEmptyVisitor visitor;
+	protected J2SASTVisitor visitor;
 	
-//	protected StringBuffer buffer;
-
 	public StringBuffer getBuffer() {
 		return visitor.getBuffer();
 	}
 
-//	public void setBuffer(StringBuffer buffer) {
-//		this.buffer = buffer;
-//	}
-
-	public ASTEmptyVisitor getVisitor() {
+	public J2SASTVisitor getVisitor() {
 		return visitor;
 	}
 
-	public void setVisitor(ASTEmptyVisitor visitor) {
+	public void setVisitor(J2SASTVisitor visitor) {
 		this.visitor = visitor;
 	}
 	
