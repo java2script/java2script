@@ -37,6 +37,8 @@ import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
 
 /**
+ * 
+ * 
  * This level of Visitor will try to focus on dealing with those
  * j2s* Javadoc tags.
  * 
@@ -50,17 +52,10 @@ public abstract class J2SDocVisitor extends J2SKeywordVisitor {
 	
 	private ASTNode javadocRoot = null;
 	
-	private boolean isDebugging = false;
-
+	protected J2SDocVisitor() {
+		super();
+	}
 	
-	public boolean isDebugging() {
-		return isDebugging;
-	}
-
-	public void setDebugging(boolean isDebugging) {
-		this.isDebugging = isDebugging;
-	}
-
 	public boolean visit(Block node) {
 		blockLevel++;
 		buffer.append("{\r\n");
@@ -198,7 +193,7 @@ public abstract class J2SDocVisitor extends J2SKeywordVisitor {
 	}
 
 	/*
-	 * Read JavaScript sources from @j2sNative, @J2SPrefix or others
+	 * Read JavaScript sources from @j2sNative, @J2SIgnore
 	 */
 	boolean readSources(BodyDeclaration node, String tagName, String prefix, String suffix, boolean both) {
 		boolean existed = false;
@@ -355,47 +350,9 @@ public abstract class J2SDocVisitor extends J2SKeywordVisitor {
 		}
 		return previousStart;
 	}
-
-	/**
-	 * Method with "j2s*" tag.
-	 * 
-	 * @param node
-	 * @return
-	 */
-	protected Object getJ2STag(BodyDeclaration node, String tagName) {
-		Javadoc javadoc = node.getJavadoc();
-		if (javadoc != null) {
-			List<?> tags = javadoc.tags();
-			if (tags.size() != 0) {
-				for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
-					TagElement tagEl = (TagElement) iter.next();
-					if (tagName.equals(tagEl.getTagName())) {
-						return tagEl;
-					}
-				}
-			}
-		}
-		List<?> modifiers = node.modifiers();
-		if (modifiers != null && modifiers.size() > 0) {
-			for (Iterator<?> iter = modifiers.iterator(); iter.hasNext();) {
-				Object obj = iter.next();
-				if (obj instanceof Annotation) {
-					Annotation annotation = (Annotation) obj;
-					String qName = annotation.getTypeName().getFullyQualifiedName();
-					int idx = qName.indexOf("J2S");
-					if (idx != -1) {
-						String annName = qName.substring(idx);
-						annName = annName.replaceFirst("J2S", "@j2s");
-						if (annName.startsWith(tagName)) {
-							return annotation;
-						}
-					}
-				}
-			}
-		}
-		return null;
-	}
 	
+	
+
 	/**
 	 * Native method without "j2sDebug" or "j2sNative" tag should be ignored
 	 * directly.
@@ -411,9 +368,49 @@ public abstract class J2SDocVisitor extends J2SKeywordVisitor {
 			if (getJ2STag(node, "@j2sNative") != null) {
 				return false;
 			}
-			return true;
 		}
 		return true; // interface!
 	}
+
+
+	/**
+	 * Method with "j2s*" tag.
+	 * 
+	 * @param node
+	 * @return
+	 */
+	static Object getJ2STag(BodyDeclaration node, String tagName) {
+		Javadoc javadoc = node.getJavadoc();
+		if (javadoc != null) {
+			List<?> tags = javadoc.tags();
+			if (tags.size() != 0) {
+				for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
+					TagElement tagEl = (TagElement) iter.next();
+					if (tagName.equals(tagEl.getTagName())) {
+						return tagEl;
+					}
+				}
+			}
+		}
+		List<?> modifiers = node.modifiers();
+		String tag = null;
+		for (Iterator<?> iter = modifiers.iterator(); iter.hasNext();) {
+			Object obj = iter.next();
+			if (obj instanceof Annotation) {
+				Annotation annotation = (Annotation) obj;
+				String qName = annotation.getTypeName().getFullyQualifiedName();
+				int idx = qName.indexOf("J2S");
+				if (idx >= 0) {
+					if (tag == null)
+						tag = tagName.substring(4); // drop @j2s
+					if (qName.indexOf(tag, idx) == idx + 3) {
+						return annotation;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
 
 }

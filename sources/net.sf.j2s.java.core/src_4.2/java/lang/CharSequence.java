@@ -60,5 +60,6 @@ public interface CharSequence {
 	 * 
 	 * @return a String based on the CharSequence
 	 */
+	@Override
 	public String toString();
 }

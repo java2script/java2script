@@ -185,7 +185,8 @@ public class LinkedHashMap<K, V> extends HashMap<K, V> {
         @Override
         public Iterator<Map.Entry<KT,VT>> iterator() {
             return new LinkedHashIterator<Map.Entry<KT,VT>,KT,VT>(new MapEntry.Type<Map.Entry<KT,VT>, KT, VT>() {
-                public Map.Entry<KT,VT> get(MapEntry<KT,VT> entry) {
+                @Override
+				public Map.Entry<KT,VT> get(MapEntry<KT,VT> entry) {
                     return entry;
                 }
             }, (LinkedHashMap<KT, VT>) hashMap());
@@ -416,7 +417,8 @@ public class LinkedHashMap<K, V> extends HashMap<K, V> {
                 @Override
                 public Iterator<K> iterator() {
                     return new LinkedHashIterator<K,K,V>(new MapEntry.Type<K,K,V>() {
-                        public K get(MapEntry<K,V> entry) {
+                        @Override
+						public K get(MapEntry<K,V> entry) {
                             return entry.key;
                         }
                     }, LinkedHashMap.this);
@@ -455,7 +457,8 @@ public class LinkedHashMap<K, V> extends HashMap<K, V> {
                 @Override
                 public Iterator<V> iterator() {
                     return new LinkedHashIterator<V,K,V>(new MapEntry.Type<V,K,V>() {
-                        public V get(MapEntry<K,V> entry) {
+                        @Override
+						public V get(MapEntry<K,V> entry) {
                             return entry.value;
                         }
                     }, LinkedHashMap.this);

@@ -259,6 +259,7 @@ public abstract class Reader implements /*Readable,*/ Closeable {
      *
      * @exception  IOException  If an I/O error occurs
      */
-     abstract public void close() throws IOException;
+     @Override
+	abstract public void close() throws IOException;
 
 }

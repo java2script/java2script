@@ -173,6 +173,7 @@ public class TreeSet<E> extends AbstractSet<E> implements SortedSet<E>, Cloneabl
      * 
      * @return a Comparator or null if the natural ordering is used
      */
+	@Override
 	public Comparator<? super E> comparator() {
 		return backingMap.comparator();
 	}
@@ -205,6 +206,7 @@ public class TreeSet<E> extends AbstractSet<E> implements SortedSet<E>, Cloneabl
 	 * @exception NoSuchElementException
 	 *                when this TreeSet is empty
 	 */
+	@Override
 	public E first() {
 		return backingMap.firstKey();
 	}
@@ -225,6 +227,7 @@ public class TreeSet<E> extends AbstractSet<E> implements SortedSet<E>, Cloneabl
 	 *                when the end object is null and the comparator cannot
 	 *                handle null
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
     public SortedSet<E> headSet(E end) {
 	    // Check for errors
@@ -269,6 +272,7 @@ public class TreeSet<E> extends AbstractSet<E> implements SortedSet<E>, Cloneabl
 	 * @exception NoSuchElementException
 	 *                when this TreeSet is empty
 	 */
+	@Override
 	public E last() {
 		return backingMap.lastKey();
 	}
@@ -322,6 +326,7 @@ public class TreeSet<E> extends AbstractSet<E> implements SortedSet<E>, Cloneabl
 	 *                when the start or end object is null and the comparator
 	 *                cannot handle null
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
     public SortedSet<E> subSet(E start, E end) {
         Comparator<? super E> c = backingMap.comparator();
@@ -355,6 +360,7 @@ public class TreeSet<E> extends AbstractSet<E> implements SortedSet<E>, Cloneabl
 	 *                when the start object is null and the comparator cannot
 	 *                handle null
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
     public SortedSet<E> tailSet(E start) {
 		// Check for errors

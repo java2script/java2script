@@ -110,39 +110,39 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 //		this.supportsObjectStaticFields = supportsObjectStaticFields;
 //	}
 //
-	public J2SKeywordVisitor() {
+	protected J2SKeywordVisitor() {
 		super();
 	}
 
 	protected String assureQualifiedName(String name) {
-		return ASTTypeVisitor.assureQualifiedName(name);
+		return J2STypeHelper.assureQualifiedName(name);
 	}
 	
 	protected String shortenQualifiedName(String name) {
-		return ASTTypeVisitor.shortenQualifiedName(name);
+		return J2STypeHelper.shortenQualifiedName(name);
 	}
 	
 	protected String shortenPackageName(String name) {
-		return ASTTypeVisitor.shortenPackageName(name);
+		return J2STypeHelper.shortenPackageName(name);
 	}
 
 	protected String checkConstantValue(Expression node) {
-		return ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).checkConstantValue(node);
+		return ((J2SVariableHelper) getHelper(J2SVariableHelper.class)).checkConstantValue(node);
 	}
 	
 	protected String[] skipDeclarePackages() {
-		return ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).skipDeclarePackages();
+		return ((J2SPackageHelper) getHelper(J2SPackageHelper.class)).skipDeclarePackages();
 	}
 	protected boolean isSimpleQualified(QualifiedName node) {
-		return ((ASTFieldVisitor) getAdaptable(ASTFieldVisitor.class)).isSimpleQualified(node);
+		return ((J2SFieldHelper) getHelper(J2SFieldHelper.class)).isSimpleQualified(node);
 	}
 
 	protected boolean isFieldNeedPreparation(FieldDeclaration node) {
-		return ((ASTFieldVisitor) getAdaptable(ASTFieldVisitor.class)).isFieldNeedPreparation(node);
+		return ((J2SFieldHelper) getHelper(J2SFieldHelper.class)).isFieldNeedPreparation(node);
 	}
 	
 	protected String getIndexedVarName(String name, int i) {
-		return ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).getIndexedVarName(name, i);
+		return ((J2SVariableHelper) getHelper(J2SVariableHelper.class)).getIndexedVarName(name, i);
 	}
 
 	protected void visitList(List<?> list, String seperator) {
@@ -617,16 +617,16 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 
 	public void endVisit(Block node) {
 		buffer.append("}");
-		List<ASTFinalVariable> finalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).finalVars;
-		List<ASTFinalVariable> normalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).normalVars;
+		List<FinalVariable> finalVars = ((J2SVariableHelper) getHelper(J2SVariableHelper.class)).finalVars;
+		List<FinalVariable> normalVars = ((J2SVariableHelper) getHelper(J2SVariableHelper.class)).normalVars;
 		for (int i = finalVars.size() - 1; i >= 0; i--) {
-			ASTFinalVariable var = finalVars.get(i);
+			FinalVariable var = finalVars.get(i);
 			if (var.blockLevel >= blockLevel) {
 				finalVars.remove(i);
 			}
 		}
 		for (int i = normalVars.size() - 1; i >= 0; i--) {
-			ASTFinalVariable var = normalVars.get(i);
+			FinalVariable var = normalVars.get(i);
 			if (var.blockLevel >= blockLevel) {
 				normalVars.remove(i);
 			}
@@ -636,9 +636,9 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 	}
 
 	public void endVisit(MethodDeclaration node) {
-		List<ASTFinalVariable> finalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).finalVars;
-		List<?> visitedVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).visitedVars;
-		List<ASTFinalVariable> normalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).normalVars;
+		List<FinalVariable> finalVars = ((J2SVariableHelper) getHelper(J2SVariableHelper.class)).finalVars;
+		List<?> visitedVars = ((J2SVariableHelper) getHelper(J2SVariableHelper.class)).visitedVars;
+		List<FinalVariable> normalVars = ((J2SVariableHelper) getHelper(J2SVariableHelper.class)).normalVars;
 		List<?> parameters = node.parameters();
 		String methodSig = null;
 		IMethodBinding resolveBinding = node.resolveBinding();
@@ -652,7 +652,7 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 			IBinding binding = name.resolveBinding();
 			if (binding != null) {
 				String identifier = name.getIdentifier();
-				ASTFinalVariable f = new ASTFinalVariable(blockLevel + 1, identifier, methodSig);
+				FinalVariable f = new FinalVariable(blockLevel + 1, identifier, methodSig);
 				f.toVariableName = getIndexedVarName(identifier, normalVars.size());
 				normalVars.remove(f);
 				if ((binding.getModifiers() & Modifier.FINAL) != 0) {
@@ -836,7 +836,7 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 		int pt = buffer.length();
 		buffer.append("Clazz.instanceOf (");
 		node.getLeftOperand().accept(this);
-		buffer.append(", ");
+		buffer.append(",");
 		if (right instanceof ArrayType) {
 			buffer.append("Array");
 		} else {
@@ -847,6 +847,9 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 				buffer.setLength(pt2 - 3); //, "
 				buffer.append("=='string'");
 				buffer.replace(pt,  pt + 18, "(typeof ");
+			} else if (buffer.indexOf(".",pt2) < 0) {
+			  // Integer, Exception, etc.
+			  buffer.setCharAt(pt2 - 1, ' ');
 			} else {
 				buffer.append("\"");
 			}
@@ -894,7 +897,7 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 	}
 
 	public boolean visit(PackageDeclaration node) {
-		ASTPackageVisitor packageVisitor = ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class));
+		J2SPackageHelper packageVisitor = ((J2SPackageHelper) getHelper(J2SPackageHelper.class));
 		packageVisitor.setPackageName("" + node.getName());
 		String[] swtInnerPackages = skipDeclarePackages();
 		/*
@@ -1437,7 +1440,7 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 			int pt = buffer.length();
 			node.getExpression().accept(this);
 			if (buffer.charAt(pt) == '\'') {
-				int rep = ASTVariableVisitor.unescapeChar(buffer.substring(pt + 1, buffer.length() - 1));
+				int rep = J2SVariableHelper.unescapeChar(buffer.substring(pt + 1, buffer.length() - 1));
 				buffer.replace(pt, buffer.length(), "" + rep);
 			}
 			buffer.append(":\r\n");
@@ -1550,9 +1553,22 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 							scopeAdded = true;
 						}
 						buffer.append(haveType ? " || " : "if (");
-						buffer.append("Clazz.exceptionOf(" + catchEName + ",\"");
+						buffer.append("Clazz.exceptionOf(" + catchEName + ", ");
+						int pte = buffer.length();
 						type.accept(this);
-						buffer.append("\")");
+						// no quotes for these four - see j2sjmol.js Clazz.exceptionOf BH 2023.11.21
+						switch (buffer.substring(pte)) {
+						case "Error":
+						case "Exception":
+						case "Throwable":
+						case "NullPointerException":
+							break;
+						default:
+							buffer.setCharAt(pte - 1, '"');
+							buffer.append('"');
+							break;
+						}
+						buffer.append(")");
 						haveType = true;
 					}
 				}
@@ -1585,7 +1601,7 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 			finallyBlock.accept(this);
 		} else if (!haveCatchOrFinal) {
 			buffer.append("finally{}");
-		} 
+		}
 		buffer.append("\r\n");
 		return false;
 	}
@@ -1615,15 +1631,15 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 		IBinding binding = name.resolveBinding();
 		if (binding != null) {
 			String identifier = name.getIdentifier();
-			ASTFinalVariable f = null;
+			FinalVariable f = null;
 			if (methodDeclareStack.size() == 0) {
-				f = new ASTFinalVariable(blockLevel, identifier, null);
+				f = new FinalVariable(blockLevel, identifier, null);
 			} else {
 				String methodSig = methodDeclareStack.peek();
-				f = new ASTFinalVariable(blockLevel, identifier, methodSig);
+				f = new FinalVariable(blockLevel, identifier, methodSig);
 			}
-			List<ASTFinalVariable> finalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).finalVars;
-			List<ASTFinalVariable> normalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).normalVars;
+			List<FinalVariable> finalVars = ((J2SVariableHelper) getHelper(J2SVariableHelper.class)).finalVars;
+			List<FinalVariable> normalVars = ((J2SVariableHelper) getHelper(J2SVariableHelper.class)).normalVars;
 			f.toVariableName = getIndexedVarName(identifier, normalVars.size());
 			normalVars.add(f);
 			if ((binding.getModifiers() & Modifier.FINAL) != 0) {

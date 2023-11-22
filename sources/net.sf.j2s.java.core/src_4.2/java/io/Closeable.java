@@ -29,5 +29,6 @@ public interface Closeable extends AutoCloseable {
 	 * @throws IOException
 	 *             if any error raises when closing the object.
 	 */
+	@Override
 	public void close() throws IOException;
 }

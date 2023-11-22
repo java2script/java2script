@@ -66,7 +66,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 /**
  * 
- * ASTVisitor > ASTEmptyVisitor  > ASTKeywordVisitor > ASTJ2SDocVisitor > Java2ScriptScriptVisitor
+ * ASTVisitor > J2SASTVisitor  > J2SKeywordVisitor > J2SDocVisitor > Java2ScriptScriptVisitor
  * 
  * Formerly ASTScriptVisitor
  *   
@@ -131,35 +131,36 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 	protected AbstractTypeDeclaration rootTypeNode;
 
 	public boolean isMethodRegistered(String methodName) {
-		return ((ASTMethodVisitor) getAdaptable(ASTMethodVisitor.class)).isMethodRegistered(methodName);
+		return ((J2SMethodHelper) getHelper(J2SMethodHelper.class)).isMethodRegistered(methodName);
 	}
 	
 	public String translate(String className, String methodName) {
-		return ((ASTMethodVisitor) getAdaptable(ASTMethodVisitor.class)).translate(className, methodName);
+		return ((J2SMethodHelper) getHelper(J2SMethodHelper.class)).translate(className, methodName);
 	}
 	
 	public String getPackageName() {
-		return ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).getPackageName();
+		return ((J2SPackageHelper) getHelper(J2SPackageHelper.class)).getPackageName();
 	}
 	
 	public String discardGenericType(String name) {
-		return ASTTypeVisitor.discardGenericType(name);
+		return J2STypeHelper.discardGenericType(name);
 	}
 	
-	private ASTVariableVisitor getVariableVisitor() {
-		return ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class));
+	private J2SVariableHelper getVariableVisitor() {
+		return ((J2SVariableHelper) getHelper(J2SVariableHelper.class));
 	}
 
-	protected String listFinalVariables(List<ASTFinalVariable> list, String seperator, String scope) {
+	protected String listFinalVariables(List<FinalVariable> list, String seperator, String scope) {
 		return getVariableVisitor().listFinalVariables(list, seperator, scope);
 	}
 	
 	protected String getFullClassName() {
-		return ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).getFullClassName();
+		String thisPackageName = ((J2SPackageHelper) getHelper(J2SPackageHelper.class)).getPackageName();
+		return ((J2STypeHelper) getHelper(J2STypeHelper.class)).getFullClassName(thisPackageName);
 	}
 	
 	public String getTypeStringName(Type type) {
-		return ASTTypeVisitor.getTypeStringName(type);
+		return J2STypeHelper.getTypeStringName(type);
 	}
 	
 	protected String getFieldName(ITypeBinding binding, String name) {
@@ -182,7 +183,7 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 	}
 	
 	protected boolean checkKeyworkViolation(String name) {
-		return ((ASTFieldVisitor) getAdaptable(ASTFieldVisitor.class)).checkKeyworkViolation(name);
+		return ((J2SFieldHelper) getHelper(J2SFieldHelper.class)).checkKeyworkViolation(name);
 	}
 	
 	protected boolean checkSameName(ITypeBinding binding, String name) {
@@ -190,11 +191,11 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 	}
 	
 	public boolean isIntegerType(String type) {
-		return ASTTypeVisitor.isIntegerType(type);
+		return J2STypeHelper.isIntegerType(type);
 	}
 	
 	public String getClassName() {
-		return ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).getClassName();
+		return ((J2STypeHelper) getHelper(J2STypeHelper.class)).getClassName();
 	}
 	
 	protected String getVariableName(String name) {
@@ -202,7 +203,7 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 	}
 	
 	protected boolean canAutoOverride(MethodDeclaration node) {
-		return ((ASTMethodVisitor) getAdaptable(ASTMethodVisitor.class)).canAutoOverride(node);
+		return ((J2SMethodHelper) getHelper(J2SMethodHelper.class)).canAutoOverride(node);
 	}
 
 	private final static String emptyFunction = 
@@ -211,7 +212,7 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 
 	public boolean visit(AnonymousClassDeclaration node) {
 		ITypeBinding binding = node.resolveBinding();
-		ASTTypeVisitor typeVisitor = ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class));
+		J2STypeHelper typeVisitor = ((J2STypeHelper) getHelper(J2STypeHelper.class));
 		
 		String anonClassName = null;
 		if (binding.isAnonymous() || binding.isLocal()) {
@@ -235,7 +236,7 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 		}
 		String className = typeVisitor.getClassName();
 		String fullClassName = anonClassName;
-		String packageName = ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).getPackageName();
+		String packageName = ((J2SPackageHelper) getHelper(J2SPackageHelper.class)).getPackageName();
 		buffer.append("(Clazz.isClassDefined (\"");
 		buffer.append(fullClassName);
 		buffer.append("\") ? 0 : ");
@@ -646,19 +647,19 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 //			buffer.append(shortClassName);
 //			buffer.append("$ = function () {\r\n");
 			
-			ASTVariableVisitor variableVisitor = getVariableVisitor();
+			J2SVariableHelper variableVisitor = getVariableVisitor();
 			variableVisitor.isFinalSensible = true;
 			
 			int lastCurrentBlock = currentBlockForVisit;
-			List<ASTFinalVariable> finalVars = variableVisitor.finalVars;
-			List<ASTFinalVariable> visitedVars = variableVisitor.visitedVars;
-			List<ASTFinalVariable> normalVars = variableVisitor.normalVars;
-			List<ASTFinalVariable> lastVisitedVars = visitedVars;
-			List<ASTFinalVariable> lastNormalVars = normalVars;
+			List<FinalVariable> finalVars = variableVisitor.finalVars;
+			List<FinalVariable> visitedVars = variableVisitor.visitedVars;
+			List<FinalVariable> normalVars = variableVisitor.normalVars;
+			List<FinalVariable> lastVisitedVars = visitedVars;
+			List<FinalVariable> lastNormalVars = normalVars;
 			currentBlockForVisit = blockLevel;
-			variableVisitor.visitedVars = new ArrayList<ASTFinalVariable>();
+			variableVisitor.visitedVars = new ArrayList<FinalVariable>();
 			visitedVars = variableVisitor.visitedVars;
-			variableVisitor.normalVars = new ArrayList<ASTFinalVariable>();
+			variableVisitor.normalVars = new ArrayList<FinalVariable>();
 			methodDeclareStack.push(binding.getKey());
 			anonDeclare.accept(this);
 			methodDeclareStack.pop();
@@ -684,10 +685,10 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 			if (lastCurrentBlock != -1) {
 				/* add the visited variables into last visited variables */
 				for (int j = 0; j < visitedVars.size(); j++) {
-					ASTFinalVariable fv = visitedVars.get(j);
+					FinalVariable fv = visitedVars.get(j);
 					int size = finalVars.size();
 					for (int i = 0; i < size; i++) {
-						ASTFinalVariable vv = finalVars.get(size - i - 1);
+						FinalVariable vv = finalVars.get(size - i - 1);
 						if (vv.variableName.equals(fv.variableName)
 								&& vv.blockLevel <= lastCurrentBlock
 								&& !lastVisitedVars.contains(vv)) {
@@ -925,8 +926,8 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 		
 		ASTNode parent = node.getParent();
 		if (parent != null && parent instanceof AbstractTypeDeclaration) {
-			String packageName = ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).getPackageName();
-			String className = ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).getClassName();
+			String packageName = ((J2SPackageHelper) getHelper(J2SPackageHelper.class)).getPackageName();
+			String className = ((J2STypeHelper) getHelper(J2STypeHelper.class)).getClassName();
 			//String className = ((AbstractTypeDeclaration) parent).getName().getFullyQualifiedName();
 			String fullClassName = null;
 			if (packageName != null && packageName.length() != 0) {
@@ -941,8 +942,8 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 		} else {
 			
 			String fullClassName = null;//getFullClassName();
-			String packageName = ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).getPackageName();
-			String className = ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).getClassName();
+			String packageName = ((J2SPackageHelper) getHelper(J2SPackageHelper.class)).getPackageName();
+			String className = ((J2STypeHelper) getHelper(J2STypeHelper.class)).getClassName();
 			if (packageName != null && packageName.length() != 0) {
 				fullClassName = packageName + '.' + className;
 			} else {
@@ -1144,7 +1145,7 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 
 	public boolean visit(EnumDeclaration node) {
 		ITypeBinding binding = node.resolveBinding();
-		ASTTypeVisitor typeVisitor = ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class));
+		J2STypeHelper typeVisitor = ((J2STypeHelper) getHelper(J2STypeHelper.class));
 		if (binding != null && binding.isTopLevel()) {
 			typeVisitor.setClassName(binding.getName());
 		}
@@ -1157,8 +1158,8 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 				visitor = new Java2ScriptScriptVisitor(); // Default visitor
 			}
 			visitor.rootTypeNode = node;
-			((ASTTypeVisitor) visitor.getAdaptable(ASTTypeVisitor.class)).setClassName(((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).getClassName());
-			((ASTPackageVisitor) visitor.getAdaptable(ASTPackageVisitor.class)).setPackageName(((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).getPackageName());
+			((J2STypeHelper) visitor.getHelper(J2STypeHelper.class)).setClassName(((J2STypeHelper) getHelper(J2STypeHelper.class)).getClassName());
+			((J2SPackageHelper) visitor.getHelper(J2SPackageHelper.class)).setPackageName(((J2SPackageHelper) getHelper(J2SPackageHelper.class)).getPackageName());
 
 			node.accept(visitor);
 			if ((node.getModifiers() & Modifier.STATIC) != 0) {
@@ -1578,53 +1579,54 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 
 	public void endVisit(MethodDeclaration node) {
 		if (getJ2STag(node, "@j2sIgnore") != null) {
-			addAnonymousClassDeclarationMethods();
+//			addAnonymousClassDeclarationMethods();
 			return;
-		}
+	 	}
 
 		IMethodBinding mBinding = node.resolveBinding();
-		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimpleRPCRunnable", "ajaxRun")) {
-			if (getJ2STag(node, "@j2sKeep") == null) {
-				addAnonymousClassDeclarationMethods();
-				return;
-			}
-		}
-		String[] pipeMethods = new String[] {
-				"pipeSetup", 
-				"pipeThrough", 
-				"through",
-				"pipeMonitoring",
-				"pipeMonitoringInterval",
-				"pipeWaitClosingInterval",
-				"setPipeHelper"
-		};
-		for (int i = 0; i < pipeMethods.length; i++) {
-			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimplePipeRunnable", pipeMethods[i])) {
-				if (getJ2STag(node, "@j2sKeep") == null) {
-					addAnonymousClassDeclarationMethods();
-					return;
-				}
-			}
-		}
-		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.CompoundPipeSession", "convert")) {
-			if (getJ2STag(node, "@j2sKeep") == null) {
-				addAnonymousClassDeclarationMethods();
-				return;
-			}
-		}
+//		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimpleRPCRunnable", "ajaxRun")) {
+//			if (getJ2STag(node, "@j2sKeep") == null) {
+//				addAnonymousClassDeclarationMethods();
+//				return;
+//			}
+//		}
+//		String[] pipeMethods = new String[] {
+//				"pipeSetup", 
+//				"pipeThrough", 
+//				"through",
+//				"pipeMonitoring",
+//				"pipeMonitoringInterval",
+//				"pipeWaitClosingInterval",
+//				"setPipeHelper"
+//		};
+//		for (int i = 0; i < pipeMethods.length; i++) {
+//			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimplePipeRunnable", pipeMethods[i])) {
+//				if (getJ2STag(node, "@j2sKeep") == null) {
+//					addAnonymousClassDeclarationMethods();
+//					return;
+//				}
+//			}
+//		}
+//		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.CompoundPipeSession", "convert")) {
+//			if (getJ2STag(node, "@j2sKeep") == null) {
+//				addAnonymousClassDeclarationMethods();
+//				return;
+//			}
+//		}
 		if (mBinding != null) {
 			methodDeclareStack.pop();
 		}
 		super.endVisit(node);
-		addAnonymousClassDeclarationMethods();
+//		addAnonymousClassDeclarationMethods();
 	}
 	
-	protected void addAnonymousClassDeclarationMethods() {
+//	protected void addAnonymousClassDeclarationMethods() {
 //		if (methodBuffer != null && methodBuffer.length() != 0) {
 //			buffer.append(methodBuffer.toString());
 //			methodBuffer = null;
 //		}
-	}
+//	}
+	
 	protected String[] getFilterMethods() {
 		return new String[0];
 	}
@@ -1636,25 +1638,25 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 		}
 
 		IMethodBinding mBinding = node.resolveBinding();
-		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimpleRPCRunnable", "ajaxRun")) {
-			if (getJ2STag(node, "@j2sKeep") == null) {
-				return false;
-			}
-		}
-		String[] pipeMethods = new String[] { "pipeSetup", "pipeThrough", "through", "pipeMonitoring",
-				"pipeMonitoringInterval", "pipeWaitClosingInterval", "setPipeHelper" };
-		for (int i = 0; i < pipeMethods.length; i++) {
-			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimplePipeRunnable", pipeMethods[i])) {
-				if (getJ2STag(node, "@j2sKeep") == null) {
-					return false;
-				}
-			}
-		}
-		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.CompoundPipeSession", "convert")) {
-			if (getJ2STag(node, "@j2sKeep") == null) {
-				return false;
-			}
-		}
+//		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimpleRPCRunnable", "ajaxRun")) {
+//			if (getJ2STag(node, "@j2sKeep") == null) {
+//				return false;
+//			}
+//		}
+//		String[] pipeMethods = new String[] { "pipeSetup", "pipeThrough", "through", "pipeMonitoring",
+//				"pipeMonitoringInterval", "pipeWaitClosingInterval", "setPipeHelper" };
+//		for (int i = 0; i < pipeMethods.length; i++) {
+//			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimplePipeRunnable", pipeMethods[i])) {
+//				if (getJ2STag(node, "@j2sKeep") == null) {
+//					return false;
+//				}
+//			}
+//		}
+//		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.CompoundPipeSession", "convert")) {
+//			if (getJ2STag(node, "@j2sKeep") == null) {
+//				return false;
+//			}
+//		}
 		if (mBinding != null) {
 			methodDeclareStack.push(mBinding.getKey());
 		}
@@ -1740,7 +1742,7 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 						break;
 					}
 				}
-				if (isOnlySuper && getJ2STag(node, "@j2sKeep") == null) {
+				if (isOnlySuper) {
 					return false;
 				}
 			}
@@ -1748,7 +1750,8 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 		if ((node.getModifiers() & Modifier.PRIVATE) != 0) {
 			if (mBinding != null) {
 				boolean isReferenced = MethodReferenceASTVisitor.checkReference(node.getRoot(), mBinding.getKey());
-				if (!isReferenced && getJ2STag(node, "@j2sKeep") == null) {
+				if (!isReferenced) {					
+					System.out.println("J2SV1753 reference skipping " + node);
 					return false;
 				}
 			}
@@ -1861,9 +1864,9 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 				visitNativeJavadoc(node.getJavadoc(), null, false);
 				buffer.append("}");
 			}
-			List<ASTFinalVariable> normalVars = getVariableVisitor().normalVars;
+			List<FinalVariable> normalVars = getVariableVisitor().normalVars;
 			for (int i = normalVars.size() - 1; i >= 0; i--) {
-				ASTFinalVariable var = normalVars.get(i);
+				FinalVariable var = normalVars.get(i);
 				if (var.blockLevel >= blockLevel) {
 					normalVars.remove(i);
 				}
@@ -2282,11 +2285,11 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 				if (methodDeclareStack.size() == 0 || !key.equals(methodDeclareStack.peek())) {
 					buffer.append("this.$finals.");
 					if (currentBlockForVisit != -1) {
-						List<ASTFinalVariable> finalVars = getVariableVisitor().finalVars;
-						List<ASTFinalVariable> visitedVars = getVariableVisitor().visitedVars;
+						List<FinalVariable> finalVars = getVariableVisitor().finalVars;
+						List<FinalVariable> visitedVars = getVariableVisitor().visitedVars;
 						int size = finalVars.size();
 						for (int i = 0; i < size; i++) {
-							ASTFinalVariable vv = finalVars.get(size - i - 1);
+							FinalVariable vv = finalVars.get(size - i - 1);
 							if (vv.variableName.equals(varBinding.getName())
 									&& vv.blockLevel <= currentBlockForVisit) {
 								if (!visitedVars.contains(vv)) {
@@ -2458,15 +2461,15 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 		IBinding binding = name.resolveBinding();
 		if (binding != null) {
 			String identifier = name.getIdentifier();
-			ASTFinalVariable f = null;
+			FinalVariable f = null;
 			if (methodDeclareStack.size() == 0) {
-				f = new ASTFinalVariable(blockLevel + 1, identifier, null);
+				f = new FinalVariable(blockLevel + 1, identifier, null);
 			} else {
 				String methodSig = methodDeclareStack.peek();
-				f = new ASTFinalVariable(blockLevel + 1, identifier, methodSig);
+				f = new FinalVariable(blockLevel + 1, identifier, methodSig);
 			}
-			List<ASTFinalVariable> finalVars = getVariableVisitor().finalVars;
-			List<ASTFinalVariable> normalVars = getVariableVisitor().normalVars;
+			List<FinalVariable> finalVars = getVariableVisitor().finalVars;
+			List<FinalVariable> normalVars = getVariableVisitor().normalVars;
 			f.toVariableName = getIndexedVarName(identifier, normalVars.size());
 			normalVars.add(f);
 			if ((binding.getModifiers() & Modifier.FINAL) != 0) {
@@ -2613,8 +2616,8 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 		}
 
 		String fullClassName = null;
-		String packageName = ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).getPackageName();
-		String className = ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).getClassName();
+		String packageName = ((J2SPackageHelper) getHelper(J2SPackageHelper.class)).getPackageName();
+		String className = ((J2STypeHelper) getHelper(J2STypeHelper.class)).getClassName();
 		if (packageName != null && packageName.length() != 0) {
 			fullClassName = packageName + '.' + className;
 		} else {
@@ -3262,7 +3265,7 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 
 	public boolean visit(TypeDeclaration node) {
 		ITypeBinding binding = node.resolveBinding();
-		ASTTypeVisitor typeVisitor = ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class));
+		J2STypeHelper typeVisitor = ((J2STypeHelper) getHelper(J2STypeHelper.class));
 		if (binding != null && binding.isTopLevel()) {
 			typeVisitor.setClassName(binding.getName());
 		}
@@ -3294,9 +3297,9 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 			} else {
 				visitorClassName = className + "." + node.getName();
 			}
-			((ASTTypeVisitor) visitor.getAdaptable(ASTTypeVisitor.class)).setClassName(visitorClassName);
-			((ASTPackageVisitor) visitor.getAdaptable(ASTPackageVisitor.class))
-					.setPackageName(((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).getPackageName());
+			((J2STypeHelper) visitor.getHelper(J2STypeHelper.class)).setClassName(visitorClassName);
+			((J2SPackageHelper) visitor.getHelper(J2SPackageHelper.class))
+					.setPackageName(((J2SPackageHelper) getHelper(J2SPackageHelper.class)).getPackageName());
 			node.accept(visitor);
 			if (node.isInterface() || (node.getModifiers() & Modifier.STATIC) != 0
 					|| (node.getParent() instanceof TypeDeclaration

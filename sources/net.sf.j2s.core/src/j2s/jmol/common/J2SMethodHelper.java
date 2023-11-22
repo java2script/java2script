@@ -27,7 +27,7 @@ import org.eclipse.jdt.core.dom.Modifier;
  *
  * 2006-12-3
  */
-public class ASTMethodVisitor extends ASTVisitor {
+public class J2SMethodHelper extends J2SHelper {
 
 	private static Set<String> methodSet;
 	private static Map<String, String> pmMap;
@@ -131,7 +131,7 @@ public class ASTMethodVisitor extends ASTVisitor {
 		register("java.lang.CharSequence", "length", "length");//sgurin: fix for bug: CharSequence cs = "123"; cs.length();
 		register("java.lang.String", "replace", "~replace");
 		register("java.lang.String", "split", "~plit");
-		ASTMethodVisitor.registerAllMaps();
+		J2SMethodHelper.registerAllMaps();
 	}
 
 	public boolean isMethodRegistered(String methodName) {
@@ -187,14 +187,10 @@ public class ASTMethodVisitor extends ASTVisitor {
 					superMethod = methods[i];
 				}
 			}
-			if (count > 1) {
+			if (count > 1 || count == 1  && superMethod != null 
+				&& (!Bindings.isSubsignature(method, superMethod)
+						||(superMethod.getModifiers() & Modifier.PRIVATE) != 0)) {
 				return false;
-			} else if (count == 1) {
-				if (!Bindings.isSubsignature(method, superMethod)) {
-					return false;
-				} else if ((superMethod.getModifiers() & Modifier.PRIVATE) != 0) {
-					return false;
-				}
 			}
 			classInHierarchy = classInHierarchy.getSuperclass();
 		} while (classInHierarchy != null);

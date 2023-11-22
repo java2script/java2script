@@ -80,6 +80,7 @@ public class LinkedList<E> extends AbstractSequentialList<E> implements
             }
 		}
 
+		@Override
 		public void add(ET object) {
 			if (expectedModCount == list.modCount) {
 				Link<ET> next = link.next;
@@ -97,14 +98,17 @@ public class LinkedList<E> extends AbstractSequentialList<E> implements
             }
 		}
 
+		@Override
 		public boolean hasNext() {
 			return link.next != list.voidLink;
 		}
 
+		@Override
 		public boolean hasPrevious() {
 			return link != list.voidLink;
 		}
 
+		@Override
 		public ET next() {
 			if (expectedModCount == list.modCount) {
 				LinkedList.Link<ET> next = link.next;
@@ -118,10 +122,12 @@ public class LinkedList<E> extends AbstractSequentialList<E> implements
             throw new ConcurrentModificationException();
 		}
 
+		@Override
 		public int nextIndex() {
 			return pos + 1;
 		}
 
+		@Override
 		public ET previous() {
 			if (expectedModCount == list.modCount) {
 				if (link != list.voidLink) {
@@ -135,10 +141,12 @@ public class LinkedList<E> extends AbstractSequentialList<E> implements
             throw new ConcurrentModificationException();
 		}
 
+		@Override
 		public int previousIndex() {
 			return pos;
 		}
 
+		@Override
 		public void remove() {
 			if (expectedModCount == list.modCount) {
 				if (lastLink != null) {
@@ -162,6 +170,7 @@ public class LinkedList<E> extends AbstractSequentialList<E> implements
             }
 		}
 
+		@Override
 		public void set(ET object) {
 			if (expectedModCount == list.modCount) {
 				if (lastLink != null) {
@@ -691,25 +700,30 @@ public class LinkedList<E> extends AbstractSequentialList<E> implements
 		return size;
 	}
     
-    public boolean offer(E o) {
+    @Override
+	public boolean offer(E o) {
         add(o);
         return true;
     }
 
-    public E poll() {
+    @Override
+	public E poll() {
         return size == 0 ? null : removeFirst();
     }
 
-    public E remove() {
+    @Override
+	public E remove() {
         return removeFirst();
     }
 
-    public E peek() {
+    @Override
+	public E peek() {
         Link<E> first = voidLink.next;
         return first == voidLink ? null : first.data;
     }
 
-    public E element() {
+    @Override
+	public E element() {
         return getFirst();
     }
 

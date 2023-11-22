@@ -559,9 +559,11 @@ function(){
 if(this.isEmpty()){
 return"{}";
 }var buffer='{';
+var sep = "";
 for(var i=this.lastSlot;i>=this.firstSlot;i--){
 var entry=this.elementData[i];
 while(entry!=null){
+	buffer += sep;
 if(entry.key!==this){
 buffer += (entry.key);
 }else{
@@ -571,14 +573,12 @@ if(entry.value!==this){
 buffer += (entry.value);
 }else{
 buffer += ("(this Map)");
-}buffer += (", ");
+}
+sep = ", ";
 entry=entry.next;
 }
 }
-if(this.elementCount>0){
-buffer.setLength(buffer.length()-2);
-}buffer += ('}');
-return buffer;
+return buffer + "}";
 });
 Clazz.overrideMethod(c$,"values",
 function(){

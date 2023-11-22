@@ -17,11 +17,10 @@ package j2s.jmol.common;
  *
  * 2006-12-3
  */
-public class ASTPackageVisitor extends ASTVisitor {
+public class J2SPackageHelper extends J2SHelper {
 
 	protected String thisPackageName = "";
 	
-
 	protected String[] skipDeclarePackages() {
 		return new String[] {
 				"java.lang", 

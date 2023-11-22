@@ -2490,25 +2490,30 @@ public class Arrays {
 	    a = array;
 	}
 
+	@Override
 	public int size() {
 	    return a.length;
 	}
 
+	@Override
 	public Object[] toArray() {
 	    return (Object[]) a.clone();
 	}
 
+	@Override
 	public Object get(int index) {
 	    return a[index];
 	}
 
+	@Override
 	public Object set(int index, Object element) {
 	    Object oldValue = a[index];
 	    a[index] = element;
 	    return oldValue;
 	}
 
-        public int indexOf(Object o) {
+        @Override
+		public int indexOf(Object o) {
             if (o==null) {
                 for (int i=0; i<a.length; i++)
                     if (a[i]==null)
@@ -2521,7 +2526,8 @@ public class Arrays {
             return -1;
         }
 
-        public boolean contains(Object o) {
+        @Override
+		public boolean contains(Object o) {
             return indexOf(o) != -1;
         }
     }

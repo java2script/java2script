@@ -39,6 +39,7 @@ public interface Set<E> extends Collection<E> {
 	 * @exception IllegalArgumentException
 	 *                when the object cannot be added to this Set
 	 */
+	@Override
 	public boolean add(E object);
 
 	/**
@@ -56,6 +57,7 @@ public interface Set<E> extends Collection<E> {
 	 * @exception IllegalArgumentException
 	 *                when an object cannot be added to this Set
 	 */
+	@Override
 	public boolean addAll(Collection<? extends E> collection);
 
 	/**
@@ -67,6 +69,7 @@ public interface Set<E> extends Collection<E> {
 	 * @see #isEmpty
 	 * @see #size
 	 */
+	@Override
 	public void clear();
 
 	/**
@@ -76,6 +79,7 @@ public interface Set<E> extends Collection<E> {
 	 *            the object to search for
 	 * @return true if object is an element of this Set, false otherwise
 	 */
+	@Override
 	public boolean contains(Object object);
 
 	/**
@@ -86,6 +90,7 @@ public interface Set<E> extends Collection<E> {
 	 * @return true if all objects in the specified Collection are elements of
 	 *         this Set, false otherwise
 	 */
+	@Override
 	public boolean containsAll(Collection<?> collection);
 
 	/**
@@ -98,6 +103,7 @@ public interface Set<E> extends Collection<E> {
 	 *         object <code>false</code> if it is different from this object.
 	 * @see #hashCode
 	 */
+	@Override
 	public boolean equals(Object object);
 
 	/**
@@ -108,6 +114,7 @@ public interface Set<E> extends Collection<E> {
 	 * 
 	 * @see #equals
 	 */
+	@Override
 	public int hashCode();
 
 	/**
@@ -117,6 +124,7 @@ public interface Set<E> extends Collection<E> {
 	 * 
 	 * @see #size
 	 */
+	@Override
 	public boolean isEmpty();
 
 	/**
@@ -126,6 +134,7 @@ public interface Set<E> extends Collection<E> {
 	 * 
 	 * @see Iterator
 	 */
+	@Override
 	public Iterator<E> iterator();
 
 	/**
@@ -138,6 +147,7 @@ public interface Set<E> extends Collection<E> {
 	 * @exception UnsupportedOperationException
 	 *                when removing from this Set is not supported
 	 */
+	@Override
 	public boolean remove(Object object);
 
 	/**
@@ -150,6 +160,7 @@ public interface Set<E> extends Collection<E> {
 	 * @exception UnsupportedOperationException
 	 *                when removing from this Set is not supported
 	 */
+	@Override
 	public boolean removeAll(Collection<?> collection);
 
 	/**
@@ -163,6 +174,7 @@ public interface Set<E> extends Collection<E> {
 	 * @exception UnsupportedOperationException
 	 *                when removing from this Set is not supported
 	 */
+	@Override
 	public boolean retainAll(Collection<?> collection);
 
 	/**
@@ -170,6 +182,7 @@ public interface Set<E> extends Collection<E> {
 	 * 
 	 * @return the number of elements in this Set
 	 */
+	@Override
 	public int size();
 
 	/**
@@ -177,6 +190,7 @@ public interface Set<E> extends Collection<E> {
 	 * 
 	 * @return an array of the elements from this Set
 	 */
+	@Override
 	public Object[] toArray();
 
 	/**
@@ -194,5 +208,6 @@ public interface Set<E> extends Collection<E> {
 	 *                when the type of an element in this Set cannot be stored
 	 *                in the type of the specified array
 	 */
+	@Override
 	public <T> T[] toArray(T[] array);
 }

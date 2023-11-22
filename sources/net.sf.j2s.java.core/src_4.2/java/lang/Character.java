@@ -111,7 +111,8 @@ public final class Character implements Serializable, Comparable<Character> {
      * Returns a hash code for this <code>Character</code>.
      * @return  a hash code value for this object.
      */
-    public int hashCode() {
+    @Override
+	public int hashCode() {
         return (int)value;
     }
 
@@ -125,7 +126,8 @@ public final class Character implements Serializable, Comparable<Character> {
      * @return  <code>true</code> if the objects are the same;
      *          <code>false</code> otherwise.
      */
-    public boolean equals(Object obj) {
+    @Override
+	public boolean equals(Object obj) {
         if (obj instanceof Character) {
             return value == ((Character)obj).charValue();
         }
@@ -145,7 +147,8 @@ public final class Character implements Serializable, Comparable<Character> {
      *             if <code>c</code> is <code>null</code>.
      * @since 1.2
      */
-    public int compareTo(Character c) {
+    @Override
+	public int compareTo(Character c) {
         return value - c.value;
     }
     
@@ -439,7 +442,8 @@ public final class Character implements Serializable, Comparable<Character> {
      *
      * @return  a string representation of this object.
      */
-    public String toString() {
+    @Override
+	public String toString() {
         char buf[] = {value};
         return String.valueOf(buf);
     }

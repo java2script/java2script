@@ -72,15 +72,18 @@ public class WeakHashMap<K, V> extends AbstractMap<K, V> implements Map<K, V> {
             value = object;
         }
 
-        public K getKey() {
+        @Override
+		public K getKey() {
             return super.get();
         }
 
-        public V getValue() {
+        @Override
+		public V getValue() {
             return value;
         }
 
-        public V setValue(V object) {
+        @Override
+		public V setValue(V object) {
             V result = value;
             value = object;
             return result;
@@ -124,7 +127,8 @@ public class WeakHashMap<K, V> extends AbstractMap<K, V> implements Map<K, V> {
             expectedModCount = modCount;
         }
 
-        public boolean hasNext() {
+        @Override
+		public boolean hasNext() {
             if (nextEntry != null) {
                 return true;
             }
@@ -148,7 +152,8 @@ public class WeakHashMap<K, V> extends AbstractMap<K, V> implements Map<K, V> {
             }
         }
 
-        public R next() {
+        @Override
+		public R next() {
             if (expectedModCount == modCount) {
                 if (hasNext()) {
                     currentEntry = nextEntry;
@@ -163,7 +168,8 @@ public class WeakHashMap<K, V> extends AbstractMap<K, V> implements Map<K, V> {
             throw new ConcurrentModificationException();
         }
 
-        public void remove() {
+        @Override
+		public void remove() {
             if (expectedModCount == modCount) {
                 if (currentEntry != null) {
                     removeEntry(currentEntry);
@@ -327,7 +333,8 @@ public class WeakHashMap<K, V> extends AbstractMap<K, V> implements Map<K, V> {
             @Override
             public Iterator<Map.Entry<K, V>> iterator() {
                 return new HashIterator<Map.Entry<K, V>>(new Entry.Type<Map.Entry<K, V>, K, V>() {
-                    public Map.Entry<K, V> get(Map.Entry<K, V> entry) {
+                    @Override
+					public Map.Entry<K, V> get(Map.Entry<K, V> entry) {
                         return entry;
                     }
                 });
@@ -374,7 +381,8 @@ public class WeakHashMap<K, V> extends AbstractMap<K, V> implements Map<K, V> {
                 @Override
                 public Iterator<K> iterator() {
                     return new HashIterator<K>(new Entry.Type<K, K, V>() {
-                        public K get(Map.Entry<K, V> entry) {
+                        @Override
+						public K get(Map.Entry<K, V> entry) {
                             return entry.getKey();
                         }
                     });
@@ -414,7 +422,8 @@ public class WeakHashMap<K, V> extends AbstractMap<K, V> implements Map<K, V> {
                 @Override
                 public Iterator<V> iterator() {
                     return new HashIterator<V>(new Entry.Type<V, K, V>() {
-                        public V get(Map.Entry<K, V> entry) {
+                        @Override
+						public V get(Map.Entry<K, V> entry) {
                             return entry.getValue();
                         }
                     });

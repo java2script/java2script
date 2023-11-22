@@ -23,7 +23,9 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
@@ -35,6 +37,7 @@ import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.Javadoc;
@@ -46,6 +49,7 @@ import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.Type;
@@ -57,7 +61,7 @@ import j2s.core.Java2ScriptCompiler;
 
 /**
  * 
- * ASTVisitor > ASTEmptyVisitor > ASTKeywordVisitor > Java2ScriptDependencyVisitor
+ * ASTVisitor > J2SASTVisitor > J2SKeywordVisitor > Java2ScriptDependencyVisitor
  * 
  * This class is called by root.accept(me) in the first pass of the
  * transpiler to catalog all the references to classes and then later
@@ -74,7 +78,6 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 		ITypeBinding binding;
 		
 		public QNTypeBinding() {
-			// TODO Auto-generated constructor stub
 		}
 
 		public boolean equals(Object obj) {
@@ -117,6 +120,12 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 	}
 
 
+		
+	protected Set<Object> j2sRequireImport = new HashSet<>();
+	
+	protected Set<Object> j2sOptionalImport = new HashSet<>();
+	
+	protected Set<Object> j2sIgnoreImport = new HashSet<>();
 
 	protected Set<String> classNameSet = new HashSet<String>();
 
@@ -124,26 +133,15 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 
 	protected Set<Object> imports = new HashSet<Object>();
 	
-	protected Set<Object> j2sRequireImport = new HashSet<Object>();
+	private Javadoc[] nativeJavadoc = null;
 	
-	protected Set<Object> j2sOptionalImport = new HashSet<Object>();
+	private ASTNode javadocRoot = null;
 	
-	protected Set<Object> j2sIgnoreImport = new HashSet<Object>();
-
-	private boolean isDebugging = false;
-	
-	public boolean isDebugging() {
-		return isDebugging;
-	}
-
-	public void setDebugging(boolean isDebugging) {
-		this.isDebugging = isDebugging;
-	}
 
 	///////// initialization methods - from root.accept(me) ////////////
 	
 	public boolean visit(PackageDeclaration node) {
-		ASTPackageVisitor packageVisitor = ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class));
+		J2SPackageHelper packageVisitor = ((J2SPackageHelper) getHelper(J2SPackageHelper.class));
 		packageVisitor.setPackageName("" + node.getName());
 		return false;
 	}
@@ -547,6 +545,50 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 		return super.visit(node);
 	}
 	
+	public boolean visit(Block node) {
+		ASTNode parent = node.getParent();
+		if (parent instanceof MethodDeclaration) {
+			MethodDeclaration method = (MethodDeclaration) parent;
+			Javadoc javadoc = method.getJavadoc();
+			/*
+			 * if comment contains "@j2sNative", then output the given native 
+			 * JavaScript codes directly. 
+			 */
+			if (visitNativeJavadoc(javadoc, node, true) == false) {
+				return false;
+			}
+		} else if (parent instanceof Initializer) {
+			Initializer initializer = (Initializer) parent;
+			Javadoc javadoc = initializer.getJavadoc();
+			/*
+			 * if comment contains "@j2sNative", then output the given native 
+			 * JavaScript codes directly. 
+			 */
+			if (visitNativeJavadoc(javadoc, node, true) == false) {
+				return false;
+			}
+		}
+		int blockStart = node.getStartPosition();
+		int previousStart = getPreviousStartPosition(node);
+		ASTNode root = node.getRoot();
+		checkJavadocs(root);
+		//for (int i = 0; i < nativeJavadoc.length; i++) {
+		for (int i = nativeJavadoc.length - 1; i >= 0; i--) {
+			Javadoc javadoc = nativeJavadoc[i];
+			int commentStart = javadoc.getStartPosition();
+			if (commentStart > previousStart && commentStart < blockStart) {
+				/*
+				 * if the block's leading comment contains "@j2sNative", 
+				 * then output the given native JavaScript codes directly. 
+				 */
+				if (visitNativeJavadoc(javadoc, node, true) == false) {
+					return false;
+				}
+			}
+		}
+		return super.visit(node);
+	}
+	
 	boolean visitNativeJavadoc(Javadoc javadoc, Block node, boolean superVisit) {
 		if (javadoc != null) {
 			List<?> tags = javadoc.tags();
@@ -588,76 +630,76 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 		return true;
 	}
 
-//	private void checkJavadocs(ASTNode root) {
-//		if (root != javadocRoot) {
-//			nativeJavadoc = null;
-//			javadocRoot = root;
-//		}
-//		if (nativeJavadoc == null) {
-//			nativeJavadoc = new Javadoc[0];
-//			if (root instanceof CompilationUnit) {
-//				CompilationUnit unit = (CompilationUnit) root;
-//				List<?> commentList = unit.getCommentList();
-//				ArrayList<Comment> list = new ArrayList<Comment>();
-//				for (Iterator<?> iter = commentList.iterator(); iter.hasNext();) {
-//					Comment comment = (Comment) iter.next();
-//					if (comment instanceof Javadoc) {
-//						Javadoc javadoc = (Javadoc) comment;
-//						List<?> tags = javadoc.tags();
-//						if (tags.size() != 0) {
-//							for (Iterator<?> itr = tags.iterator(); itr.hasNext();) {
-//								TagElement tagEl = (TagElement) itr.next();
-//								String tagName = tagEl.getTagName();
-//								if ("@j2sIgnore".equals(tagName)
-//										|| "@j2sDebug".equals(tagName)
-//										|| "@j2sNative".equals(tagName)) {
-//									list.add(comment);
-//								}
-//							}
-//						}
-//					}
-//				}
-//				nativeJavadoc = (Javadoc[]) list.toArray(nativeJavadoc);
-//			}
-//		}
-//	}
-//
-//	private int getPreviousStartPosition(Block node) {
-//		int previousStart = 0;
-//		ASTNode blockParent = node.getParent();
-//		if (blockParent != null) {
-//			if (blockParent instanceof Statement) {
-//				Statement sttmt = (Statement) blockParent;
-//				previousStart = sttmt.getStartPosition();
-//				if (sttmt instanceof Block) {
-//					Block parentBlock = (Block) sttmt;
-//					for (Iterator iter = parentBlock.statements().iterator(); iter.hasNext();) {
-//						Statement element = (Statement) iter.next();
-//						if (element == node) {
-//							break;
-//						}
-//						previousStart = element.getStartPosition() + element.getLength();
-//					}
-//				} else if (sttmt instanceof IfStatement) {
-//					IfStatement ifSttmt = (IfStatement) sttmt;
-//					if (ifSttmt.getElseStatement() == node) {
-//						Statement thenSttmt = ifSttmt.getThenStatement();
-//						previousStart = thenSttmt.getStartPosition() + thenSttmt.getLength();
-//					}
-//				}
-//			} else if (blockParent instanceof MethodDeclaration) {
-//				MethodDeclaration method = (MethodDeclaration) blockParent;
-//				previousStart = method.getStartPosition();
-//			} else if (blockParent instanceof Initializer) {
-//				Initializer initializer = (Initializer) blockParent;
-//				previousStart = initializer.getStartPosition();
-//			} else if (blockParent instanceof CatchClause) {
-//				CatchClause catchClause = (CatchClause) blockParent;
-//				previousStart = catchClause.getStartPosition();
-//			}
-//		}
-//		return previousStart;
-//	}
+	private void checkJavadocs(ASTNode root) {
+		if (root != javadocRoot) {
+			nativeJavadoc = null;
+			javadocRoot = root;
+		}
+		if (nativeJavadoc == null) {
+			nativeJavadoc = new Javadoc[0];
+			if (root instanceof CompilationUnit) {
+				CompilationUnit unit = (CompilationUnit) root;
+				List<?> commentList = unit.getCommentList();
+				ArrayList<Comment> list = new ArrayList<Comment>();
+				for (Iterator<?> iter = commentList.iterator(); iter.hasNext();) {
+					Comment comment = (Comment) iter.next();
+					if (comment instanceof Javadoc) {
+						Javadoc javadoc = (Javadoc) comment;
+						List<?> tags = javadoc.tags();
+						if (tags.size() != 0) {
+							for (Iterator<?> itr = tags.iterator(); itr.hasNext();) {
+								TagElement tagEl = (TagElement) itr.next();
+								String tagName = tagEl.getTagName();
+								if ("@j2sIgnore".equals(tagName)
+										|| "@j2sDebug".equals(tagName)
+										|| "@j2sNative".equals(tagName)) {
+									list.add(comment);
+								}
+							}
+						}
+					}
+				}
+				nativeJavadoc = list.toArray(nativeJavadoc);
+			}
+		}
+	}
+
+	private int getPreviousStartPosition(Block node) {
+		int previousStart = 0;
+		ASTNode blockParent = node.getParent();
+		if (blockParent != null) {
+			if (blockParent instanceof Statement) {
+				Statement sttmt = (Statement) blockParent;
+				previousStart = sttmt.getStartPosition();
+				if (sttmt instanceof Block) {
+					Block parentBlock = (Block) sttmt;
+					for (Iterator<?> iter = parentBlock.statements().iterator(); iter.hasNext();) {
+						Statement element = (Statement) iter.next();
+						if (element == node) {
+							break;
+						}
+						previousStart = element.getStartPosition() + element.getLength();
+					}
+				} else if (sttmt instanceof IfStatement) {
+					IfStatement ifSttmt = (IfStatement) sttmt;
+					if (ifSttmt.getElseStatement() == node) {
+						Statement thenSttmt = ifSttmt.getThenStatement();
+						previousStart = thenSttmt.getStartPosition() + thenSttmt.getLength();
+					}
+				}
+			} else if (blockParent instanceof MethodDeclaration) {
+				MethodDeclaration method = (MethodDeclaration) blockParent;
+				previousStart = method.getStartPosition();
+			} else if (blockParent instanceof Initializer) {
+				Initializer initializer = (Initializer) blockParent;
+				previousStart = initializer.getStartPosition();
+			} else if (blockParent instanceof CatchClause) {
+				CatchClause catchClause = (CatchClause) blockParent;
+				previousStart = catchClause.getStartPosition();
+			}
+		}
+		return previousStart;
+	}
 	
 	/**
 	 * Method with "j2s*" tag.
@@ -665,38 +707,10 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 	 * @param node
 	 * @return
 	 */
-	protected Object getJ2STag(BodyDeclaration node, String tagName) {
-		List<?> modifiers = node.modifiers();
-		for (Iterator<?> iter = modifiers.iterator(); iter.hasNext();) {
-			Object obj = iter.next();
-			if (obj instanceof Annotation) {
-				Annotation annotation = (Annotation) obj;
-				String qName = annotation.getTypeName().getFullyQualifiedName();
-				int idx = qName.indexOf("J2S");
-				if (idx != -1) {
-					String annName = qName.substring(idx);
-					annName = annName.replaceFirst("J2S", "@j2s");
-					if (annName.startsWith(tagName)) {
-						return annotation;
-					}
-				}
-			}
-		}
-		Javadoc javadoc = node.getJavadoc();
-		if (javadoc != null) {
-			List<?> tags = javadoc.tags();
-			if (tags.size() != 0) {
-				for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
-					TagElement tagEl = (TagElement) iter.next();
-					if (tagName.equals(tagEl.getTagName())) {
-						return tagEl;
-					}
-				}
-			}
-		}
-		return null;
+	private static Object getJ2STag(BodyDeclaration node, String tagName) {
+		return J2SDocVisitor.getJ2STag(node, tagName);
 	}
-
+	
 	protected void readClasses(Annotation annotation, Set<Object> set) {
 		StringBuffer buf = new StringBuffer();
 		IAnnotationBinding annotationBinding = annotation.resolveAnnotationBinding();
@@ -1004,11 +1018,11 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 ///////// delivery section -- from ASTScriptVisitor ///////////////
 	
 	public String discardGenericType(String name) {
-		return  ASTTypeVisitor.discardGenericType(name);
+		return  J2STypeHelper.discardGenericType(name);
 	}
 	
 	public String getPackageName() {
-		return ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).getPackageName();
+		return ((J2SPackageHelper) getHelper(J2SPackageHelper.class)).getPackageName();
 	}
 	/**
 	 * @return Returns the thisClassName.

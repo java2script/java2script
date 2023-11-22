@@ -18,7 +18,7 @@ package j2s.jmol.common;
  *
  * 2006-12-27
  */
-public abstract class ASTVisitor implements IVisitor {
+public abstract class J2SHelper implements IHelper {
 
 	protected J2SASTVisitor visitor;
 	

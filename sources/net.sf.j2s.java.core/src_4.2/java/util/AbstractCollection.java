@@ -64,6 +64,7 @@ public abstract class AbstractCollection<E> implements Collection<E> {
      *                if limitations of this collection prevent the specified
      *                element from being added
      */
+	@Override
 	public boolean add(E object) {
 		throw new UnsupportedOperationException();
 	}
@@ -80,6 +81,7 @@ public abstract class AbstractCollection<E> implements Collection<E> {
 	 * @throws NullPointerException
 	 *                if null is used to invoke this method
 	 */
+	@Override
 	public boolean addAll(Collection<? extends E> collection) {
 		boolean result = false;
 		Iterator<? extends E> it = collection.iterator();
@@ -103,6 +105,7 @@ public abstract class AbstractCollection<E> implements Collection<E> {
      * @throws UnsupportedOperationException 
      *                  if this operation is not implemented.
      */
+	@Override
 	public void clear() {
 		Iterator<E> it = iterator();
 		while (it.hasNext()) {
@@ -119,6 +122,7 @@ public abstract class AbstractCollection<E> implements Collection<E> {
 	 * @return true if <code>object</code> is an element of this Collection,
 	 *         false otherwise
 	 */
+	@Override
 	public boolean contains(Object object) {
 		Iterator<E> it = iterator();
 		if (object != null) {
@@ -147,6 +151,7 @@ public abstract class AbstractCollection<E> implements Collection<E> {
      * @throws NullPointerException
      *                if null is used to invoke this method
 	 */
+	@Override
 	public boolean containsAll(Collection<?> collection) {
 		Iterator<?> it = collection.iterator();
 		while (it.hasNext()) {
@@ -162,6 +167,7 @@ public abstract class AbstractCollection<E> implements Collection<E> {
      * 
      * @return true if the collection has no element.
      */
+	@Override
 	public boolean isEmpty() {
 		return size() == 0;
 	}
@@ -174,6 +180,7 @@ public abstract class AbstractCollection<E> implements Collection<E> {
 	 * 
 	 * @see Iterator
 	 */
+	@Override
 	public abstract Iterator<E> iterator();
 
 	/**
@@ -193,6 +200,7 @@ public abstract class AbstractCollection<E> implements Collection<E> {
 	 * @throws UnsupportedOperationException
 	 *                when removing from this Collection is not supported
 	 */
+	@Override
 	public boolean remove(Object object) {
 		Iterator<?> it = iterator();
 		if (object != null) {
@@ -234,6 +242,7 @@ public abstract class AbstractCollection<E> implements Collection<E> {
      * @throws NullPointerException
      *                if null is used to invoke this method
 	 */
+	@Override
 	public boolean removeAll(Collection<?> collection) {
 		boolean result = false;
 		Iterator<?> it = iterator();
@@ -267,6 +276,7 @@ public abstract class AbstractCollection<E> implements Collection<E> {
      * @throws NullPointerException
      *                if null is used to invoke this method
 	 */
+	@Override
 	public boolean retainAll(Collection<?> collection) {
 		boolean result = false;
 		Iterator<?> it = iterator();
@@ -284,6 +294,7 @@ public abstract class AbstractCollection<E> implements Collection<E> {
 	 * 
 	 * @return the number of elements in this Collection
 	 */
+	@Override
 	public abstract int size();
 
 	/**
@@ -295,6 +306,7 @@ public abstract class AbstractCollection<E> implements Collection<E> {
 	 * 
 	 * @return an array of the elements from this Collection
 	 */
+	@Override
 	public Object[] toArray() {
 		int size = size(), index = 0;
 		Iterator<?> it = iterator();
@@ -322,6 +334,7 @@ public abstract class AbstractCollection<E> implements Collection<E> {
      * @throws NullPointerException
      *                if null is used to invoke this method
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
     public <T> T[] toArray(T[] contents) {
 		int size = size(), index = 0;

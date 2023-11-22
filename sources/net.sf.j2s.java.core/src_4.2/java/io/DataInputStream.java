@@ -201,7 +201,8 @@ public class DataInputStream extends FilterInputStream implements DataInput {
    *            not support reading after close, or another I/O error occurs.
    * @see java.io.FilterInputStream#in
    */
-  public final void readFully(byte b[], int off, int len) throws IOException {
+  @Override
+public final void readFully(byte b[], int off, int len) throws IOException {
     if (len < 0)
       throw new IndexOutOfBoundsException();
     int n = 0;
@@ -227,7 +228,8 @@ public class DataInputStream extends FilterInputStream implements DataInput {
    *            stream has been closed and the contained input stream does not
    *            support reading after close, or another I/O error occurs.
    */
-  public final int skipBytes(int n) throws IOException {
+  @Override
+public final int skipBytes(int n) throws IOException {
     int total = 0;
     int cur = 0;
 
@@ -252,7 +254,8 @@ public class DataInputStream extends FilterInputStream implements DataInput {
    *            not support reading after close, or another I/O error occurs.
    * @see java.io.FilterInputStream#in
    */
-  public final boolean readBoolean() throws IOException {
+  @Override
+public final boolean readBoolean() throws IOException {
     int ch = in.readByteAsInt();
     if (ch < 0)
       throw new EOFException();
@@ -274,7 +277,8 @@ public class DataInputStream extends FilterInputStream implements DataInput {
    *            not support reading after close, or another I/O error occurs.
    * @see java.io.FilterInputStream#in
    */
-  public final byte readByte() throws IOException {
+  @Override
+public final byte readByte() throws IOException {
     int ch = in.readByteAsInt();
     if (ch < 0)
       throw new EOFException();
@@ -296,7 +300,8 @@ public class DataInputStream extends FilterInputStream implements DataInput {
    *            not support reading after close, or another I/O error occurs.
    * @see java.io.FilterInputStream#in
    */
-  public final int readUnsignedByte() throws IOException {
+  @Override
+public final int readUnsignedByte() throws IOException {
     int ch = in.readByteAsInt();
     if (ch < 0)
       throw new EOFException();
@@ -318,7 +323,8 @@ public class DataInputStream extends FilterInputStream implements DataInput {
    *            not support reading after close, or another I/O error occurs.
    * @see java.io.FilterInputStream#in
    */
-  public final short readShort() throws IOException {
+  @Override
+public final short readShort() throws IOException {
     int ch1 = in.readByteAsInt();
     int ch2 = in.readByteAsInt();
     if ((ch1 | ch2) < 0)
@@ -349,7 +355,8 @@ public class DataInputStream extends FilterInputStream implements DataInput {
    *            not support reading after close, or another I/O error occurs.
    * @see java.io.FilterInputStream#in
    */
-  public final int readUnsignedShort() throws IOException {
+  @Override
+public final int readUnsignedShort() throws IOException {
     int ch1 = in.readByteAsInt();
     int ch2 = in.readByteAsInt();
     if ((ch1 | ch2) < 0)
@@ -372,7 +379,8 @@ public class DataInputStream extends FilterInputStream implements DataInput {
    *            not support reading after close, or another I/O error occurs.
    * @see java.io.FilterInputStream#in
    */
-  public final char readChar() throws IOException {
+  @Override
+public final char readChar() throws IOException {
     int ch1 = in.readByteAsInt();
     int ch2 = in.readByteAsInt();
     if ((ch1 | ch2) < 0)
@@ -395,7 +403,8 @@ public class DataInputStream extends FilterInputStream implements DataInput {
    *            not support reading after close, or another I/O error occurs.
    * @see java.io.FilterInputStream#in
    */
-  public final int readInt() throws IOException {
+  @Override
+public final int readInt() throws IOException {
     int ch1 = in.readByteAsInt();
     int ch2 = in.readByteAsInt();
     int ch3 = in.readByteAsInt();
@@ -430,7 +439,8 @@ public class DataInputStream extends FilterInputStream implements DataInput {
    *            not support reading after close, or another I/O error occurs.
    * @see java.io.FilterInputStream#in
    */
-  public final long readLong() throws IOException {
+  @Override
+public final long readLong() throws IOException {
     // fails in JavaScript - can't shift bits so far
     readFully(readBuffer, 0, 8);
     return (((long) readBuffer[0] << 56) + ((long) (readBuffer[1] & 255) << 48)
@@ -456,7 +466,8 @@ public class DataInputStream extends FilterInputStream implements DataInput {
    * @see java.io.DataInputStream#readInt()
    * @see java.lang.Float#intBitsToFloat(int)
    */
-  public final float readFloat() throws IOException {
+  @Override
+public final float readFloat() throws IOException {
     // fails in JavaScript because we are missing a native method
     return Float.intBitsToFloat(readInt());
   }
@@ -477,7 +488,8 @@ public class DataInputStream extends FilterInputStream implements DataInput {
    * @see java.io.DataInputStream#readLong()
    * @see java.lang.Double#longBitsToDouble(long)
    */
-  public final double readDouble() throws IOException {
+  @Override
+public final double readDouble() throws IOException {
     // fails in JavaScript because we are missing a native method
     return Double.longBitsToDouble(readLong());
   }
@@ -515,7 +527,8 @@ public class DataInputStream extends FilterInputStream implements DataInput {
    * @see java.io.BufferedReader#readLine()
    * @see java.io.FilterInputStream#in
    */
-  @Deprecated
+  @Override
+@Deprecated
   public final String readLine() throws IOException {
     char buf[] = lineBuffer;
 
@@ -578,7 +591,8 @@ public class DataInputStream extends FilterInputStream implements DataInput {
    *            a string.
    * see java.io.DataInputStream#readUTF(java.io.DataInput)
    */
-  public final String readUTF() throws IOException {
+  @Override
+public final String readUTF() throws IOException {
     return readUTFBytes(this, -1);
   }
 

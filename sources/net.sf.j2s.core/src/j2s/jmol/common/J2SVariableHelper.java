@@ -25,12 +25,12 @@ import org.eclipse.jdt.core.dom.Expression;
  *
  * 2006-12-3
  */
-public class ASTVariableVisitor extends ASTVisitor {
+public class J2SVariableHelper extends J2SHelper {
 	
 	/**
 	 * List of variables that are declared as final.
 	 */
-	protected List<ASTFinalVariable> finalVars = new ArrayList<>();
+	protected List<FinalVariable> finalVars = new ArrayList<>();
 	
 	/**
 	 * Final variables only make senses (need "this.f$[...]") inside anonymous
@@ -41,13 +41,13 @@ public class ASTVariableVisitor extends ASTVisitor {
 	/**
 	 * Normal (non-final) variables may be affected by final variable names.
 	 */
-	protected List<ASTFinalVariable> normalVars = new ArrayList<>();
+	protected List<FinalVariable> normalVars = new ArrayList<>();
 
 	/**
 	 * Only those final variables that are referenced inside anonymous class
 	 * need to be passed into anonymous class.
 	 */
-	protected List<ASTFinalVariable> visitedVars = new ArrayList<>();
+	protected List<FinalVariable> visitedVars = new ArrayList<>();
 	
 	/**
 	 * Whether to compile variable names into minimized names or not
@@ -64,7 +64,7 @@ public class ASTVariableVisitor extends ASTVisitor {
 //
 	protected String getVariableName(String name) {
 		for (int i = normalVars.size() - 1; i >= 0; i--) {
-			ASTFinalVariable var = normalVars.get(i);
+			FinalVariable var = normalVars.get(i);
 			if (name.equals(var.variableName)) {
 				//return getIndexedVarName(name, i);
 				return var.toVariableName;
@@ -99,8 +99,8 @@ public class ASTVariableVisitor extends ASTVisitor {
 				int l = i % 26;
 				newName = String.valueOf((char) ('a' + h)) + String.valueOf((char) ('a' + l));
 			}
-			for (Iterator<ASTFinalVariable> iter = finalVars.iterator(); iter.hasNext();) {
-				ASTFinalVariable f = iter.next();
+			for (Iterator<FinalVariable> iter = finalVars.iterator(); iter.hasNext();) {
+				FinalVariable f = iter.next();
 				if (newName.equals(f.toVariableName)) {
 					newName = null;
 					i++;
@@ -108,8 +108,8 @@ public class ASTVariableVisitor extends ASTVisitor {
 				}
 			}
 			if (newName != null) {
-				for (Iterator<ASTFinalVariable> iter = normalVars.iterator(); iter.hasNext();) {
-					ASTFinalVariable f = iter.next();
+				for (Iterator<FinalVariable> iter = normalVars.iterator(); iter.hasNext();) {
+					FinalVariable f = iter.next();
 					if (newName.equals(f.toVariableName)) {
 						newName = null;
 						i++;
@@ -145,7 +145,7 @@ public class ASTVariableVisitor extends ASTVisitor {
 		StringBuffer buf = new StringBuffer();
 		buf.append("Clazz.cloneFinals (");
 		for (Iterator<?> iter = list.iterator(); iter.hasNext();) {
-			ASTFinalVariable fv = (ASTFinalVariable) iter.next();
+			FinalVariable fv = (FinalVariable) iter.next();
 			String name = fv.variableName;
 			if (fv.toVariableName != null) {
 				name = fv.toVariableName;

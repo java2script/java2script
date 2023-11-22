@@ -135,7 +135,8 @@ public final class StringBuilder extends AbstractStringBuilder implements
      * 
      * @see String#valueOf(char)
      */
-    public StringBuilder append(char c) {
+    @Override
+	public StringBuilder append(char c) {
         append0(c);
         return this;
     }
@@ -312,7 +313,8 @@ public final class StringBuilder extends AbstractStringBuilder implements
      *        object.
      * @return A reference to this object.
      */
-    public StringBuilder append(CharSequence csq) {
+    @Override
+	public StringBuilder append(CharSequence csq) {
         if (csq == null) {
             appendNull();
         } else {
@@ -335,7 +337,8 @@ public final class StringBuilder extends AbstractStringBuilder implements
      * @param end The ending index of the subsequence.
      * @return A reference to this object.
      */
-    public StringBuilder append(CharSequence csq, int start, int end) {
+    @Override
+	public StringBuilder append(CharSequence csq, int start, int end) {
         append0(csq, start, end);
         return this;
     }

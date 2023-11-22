@@ -39,6 +39,7 @@ public interface Map<K,V> {
 		 * 
 		 * @see #hashCode
 		 */
+		@Override
 		public boolean equals(Object object);
 
 		/**
@@ -63,6 +64,7 @@ public interface Map<K,V> {
 		 * 
 		 * @see #equals
 		 */
+		@Override
 		public int hashCode();
 
 		/**
@@ -127,6 +129,7 @@ public interface Map<K,V> {
 	 *         object <code>false</code> if it is different from this object.
 	 * @see #hashCode
 	 */
+	@Override
 	public boolean equals(Object object);
 
 	/**
@@ -146,6 +149,7 @@ public interface Map<K,V> {
 	 * 
 	 * @see #equals
 	 */
+	@Override
 	public int hashCode();
 
 	/**

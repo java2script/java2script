@@ -74,6 +74,7 @@ public class InvalidClassException extends ObjectStreamException {
 	 * @return The receiver's message, possibly concatenated with the name of
 	 *         the class that caused the problem.
 	 */
+	@Override
 	public String getMessage() {
 		String msg = super.getMessage();
 		if (classname != null) {

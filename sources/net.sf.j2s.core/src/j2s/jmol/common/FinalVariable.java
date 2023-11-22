@@ -8,7 +8,7 @@ package j2s.jmol.common;
  *
  * 2006-12-6
  */
-public class ASTFinalVariable {
+public class FinalVariable {
 
 	/**
 	 * Level of the block
@@ -30,7 +30,7 @@ public class ASTFinalVariable {
 	 */
 	String toVariableName;
 	
-	public ASTFinalVariable(int blockLevel, String variableName, String methodScope) {
+	public FinalVariable(int blockLevel, String variableName, String methodScope) {
 		super();
 		this.blockLevel = blockLevel;
 		this.variableName = variableName;
@@ -61,7 +61,7 @@ public class ASTFinalVariable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		final ASTFinalVariable other = (ASTFinalVariable) obj;
+		final FinalVariable other = (FinalVariable) obj;
 		if (blockLevel != other.blockLevel)
 			return false;
 		if (methodScope == null) {

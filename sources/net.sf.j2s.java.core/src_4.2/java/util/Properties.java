@@ -551,21 +551,25 @@ public class Properties extends Hashtable<Object,Object> {
             }
             
             builder.setErrorHandler(new ErrorHandler() {
-                public void warning(SAXParseException e) throws SAXException {
+                @Override
+				public void warning(SAXParseException e) throws SAXException {
                     throw e;
                 }
 
-                public void error(SAXParseException e) throws SAXException {
+                @Override
+				public void error(SAXParseException e) throws SAXException {
                     throw e;
                 }
 
-                public void fatalError(SAXParseException e) throws SAXException {
+                @Override
+				public void fatalError(SAXParseException e) throws SAXException {
                     throw e;
                 }
             });
             
             builder.setEntityResolver(new EntityResolver() {
-                public InputSource resolveEntity(String publicId, String systemId)
+                @Override
+				public InputSource resolveEntity(String publicId, String systemId)
                         throws SAXException, IOException {
                     if (systemId.equals(PROP_DTD_NAME)) {
                         InputSource result = new InputSource(new StringReader(

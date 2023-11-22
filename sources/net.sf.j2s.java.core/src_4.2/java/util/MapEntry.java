@@ -63,10 +63,12 @@ class MapEntry<K,V> implements Map.Entry<K,V>, Cloneable {
         return false;
 	}
 
+	@Override
 	public K getKey() {
 		return key;
 	}
 
+	@Override
 	public V getValue() {
 		return value;
 	}
@@ -77,6 +79,7 @@ class MapEntry<K,V> implements Map.Entry<K,V>, Cloneable {
 				^ (value == null ? 0 : value.hashCode());
 	}
 
+	@Override
 	public V setValue(V object) {
 		V result = value;
 		value = object;

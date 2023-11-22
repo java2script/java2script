@@ -34,6 +34,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package com.jcraft.jzlib;
 
+@SuppressWarnings("serial")
 public class GZIPException extends java.io.IOException {
   public GZIPException() {
     super();

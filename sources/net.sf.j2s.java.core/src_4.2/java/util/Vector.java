@@ -340,10 +340,12 @@ public class Vector<E> extends AbstractList<E> implements List<E>, RandomAccess,
 		return new Enumeration<E>() {
 			int pos = 0;
 
+			@Override
 			public boolean hasMoreElements() {
 				return pos < elementCount;
 			}
 
+			@Override
 			public E nextElement() {
 				synchronized (Vector.this) {
 					if (pos < elementCount) {

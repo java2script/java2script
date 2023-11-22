@@ -286,7 +286,8 @@ public abstract class InputStream implements Closeable {
      *
      * @exception  IOException  if an I/O error occurs.
      */
-    public void close() throws IOException {}
+    @Override
+	public void close() throws IOException {}
 
     /**
      * Marks the current position in this input stream. A subsequent call to
