@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.dom.TextElement;
 
 /**
  * 
+ * ASTVisitor > J2SASTVisitor > J2SKeywordVisitor > J2SDocVisitor > Java2ScriptScriptVisitor
  * 
  * This level of Visitor will try to focus on dealing with those
  * j2s* Javadoc tags.
@@ -148,18 +149,6 @@ public abstract class J2SDocVisitor extends J2SKeywordVisitor {
 						}
 					}
 				}
-//				boolean toCompileVariableName = false;//((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).isToCompileVariableName();
-//				
-//				if (!toCompileVariableName) {
-//					for (Iterator iter = tags.iterator(); iter.hasNext();) {
-//						TagElement tagEl = (TagElement) iter.next();
-//						if ("@j2sNativeSrc".equals(tagEl.getTagName())) {
-//							if (superVisit) super.visit(node);
-//							visitJavadocJ2SSource(tagEl);
-//							return false;
-//						}
-//					}
-//				}
 				for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
 					TagElement tagEl = (TagElement) iter.next();
 					if ("@j2sNative".equals(tagEl.getTagName())) {

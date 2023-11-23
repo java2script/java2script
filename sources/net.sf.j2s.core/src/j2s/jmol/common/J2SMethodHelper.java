@@ -188,7 +188,7 @@ public class J2SMethodHelper extends J2SHelper {
 				}
 			}
 			if (count > 1 || count == 1  && superMethod != null 
-				&& (!Bindings.isSubsignature(method, superMethod)
+				&& (!BindingHelper.isSubsignature(method, superMethod)
 						||(superMethod.getModifiers() & Modifier.PRIVATE) != 0)) {
 				return false;
 			}
@@ -206,7 +206,7 @@ public class J2SMethodHelper extends J2SHelper {
 		boolean isOK2AutoOverriding = false;
 		IMethodBinding methodBinding = node.resolveBinding();
 		if (methodBinding != null && testForceOverriding(methodBinding)) {
-			IMethodBinding superMethod = Bindings.findMethodDeclarationInHierarchy(methodBinding.getDeclaringClass(), methodBinding);
+			IMethodBinding superMethod = BindingHelper.findMethodDeclarationInHierarchy(methodBinding.getDeclaringClass(), methodBinding);
 			if (superMethod != null) {
 				ASTNode parentRoot = node.getParent();
 				while (parentRoot != null && !(parentRoot instanceof AbstractTypeDeclaration)) {

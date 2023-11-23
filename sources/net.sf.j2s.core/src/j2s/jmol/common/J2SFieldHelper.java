@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2007 java2script.org and others.
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
@@ -57,7 +57,7 @@ class J2SFieldHelper extends J2SHelper {
 	 * volatile,		while,			with,
 	 *  
 	 */
-	public static String[] keywords = new String[] {
+	static String[] keywords = new String[] {
 		"class", /*"java", "javax", "sun", */"for", "while", "do", "in", "return", "function", "var", 
 		"class", "pubic", "protected", "private", "new", "delete",
 		"static", "package", "import", "extends", "implements",

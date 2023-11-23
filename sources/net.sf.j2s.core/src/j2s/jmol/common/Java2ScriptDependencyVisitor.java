@@ -61,7 +61,7 @@ import j2s.core.Java2ScriptCompiler;
 
 /**
  * 
- * ASTVisitor > J2SASTVisitor > J2SKeywordVisitor > Java2ScriptDependencyVisitor
+ * ASTVisitor > J2SASTVisitor > Java2ScriptDependencyVisitor
  * 
  * This class is called by root.accept(me) in the first pass of the
  * transpiler to catalog all the references to classes and then later
@@ -105,6 +105,7 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 
 	public Java2ScriptDependencyVisitor() {
 		super();
+		// for reflection only
 	}
 	
 	public Java2ScriptDependencyVisitor(Java2ScriptCompiler compiler) {
@@ -112,26 +113,33 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 		setCompiler(compiler);
 	}
 	
-	
+	private Java2ScriptDependencyVisitor getSelfVisitor() {
+		try {
+			Java2ScriptDependencyVisitor newVisitor = ((Java2ScriptDependencyVisitor) this.getClass().getConstructor(new Class[0]).newInstance(new Object[0])).setCompiler(compiler);
+			return newVisitor;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 	
 	private Java2ScriptDependencyVisitor setCompiler(Java2ScriptCompiler compiler) {
 		this.compiler = compiler;
 		return this;
 	}
 
-
 		
-	protected Set<Object> j2sRequireImport = new HashSet<>();
+	private Set<Object> j2sRequireImport = new HashSet<>();
 	
-	protected Set<Object> j2sOptionalImport = new HashSet<>();
+	private Set<Object> j2sOptionalImport = new HashSet<>();
 	
-	protected Set<Object> j2sIgnoreImport = new HashSet<>();
+	private Set<Object> j2sIgnoreImport = new HashSet<>();
 
-	protected Set<String> classNameSet = new HashSet<String>();
+	private Set<String> allClassNames = new HashSet<String>();
 
-	protected Set<ITypeBinding> classBindingSet = new HashSet<ITypeBinding>();
+	private Set<ITypeBinding> allClassBindings = new HashSet<ITypeBinding>();
 
-	protected Set<Object> imports = new HashSet<Object>();
+	private Set<Object> imports = new HashSet<Object>();
 	
 	private Javadoc[] nativeJavadoc = null;
 	
@@ -141,8 +149,7 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 	///////// initialization methods - from root.accept(me) ////////////
 	
 	public boolean visit(PackageDeclaration node) {
-		J2SPackageHelper packageVisitor = ((J2SPackageHelper) getHelper(J2SPackageHelper.class));
-		packageVisitor.setPackageName("" + node.getName());
+		getPackageHelper().setPackageName("" + node.getName());
 		return false;
 	}
 
@@ -163,50 +170,40 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.TypeDeclaration)
+	/**
+	 * Includes Interfaces
 	 */
 	public boolean visit(TypeDeclaration node) {
 		ITypeBinding resolveBinding = node.resolveBinding();
 		if (resolveBinding != null && resolveBinding.isTopLevel()) {
 			String thisClassName = resolveBinding.getQualifiedName();
-			classNameSet.add(thisClassName);
-			classBindingSet.add(resolveBinding);
+			allClassNames.add(thisClassName);
+			allClassBindings.add(resolveBinding);
 		}
-		readTags(node);
+		readJ2sImportTags(node);
 
-		visitForMusts(node);
-		visitForRequires(node);
+		processImports(node);
+		processJ2SRequireImport(node);
 		//visitForOptionals(node);
 		return super.visit(node);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.TypeDeclaration)
-	 */
 	public boolean visit(EnumDeclaration node) {
 		ITypeBinding resolveBinding = node.resolveBinding();
 		if (resolveBinding.isTopLevel()) {
 			String thisClassName = resolveBinding.getQualifiedName();
-			classNameSet.add(thisClassName);
-			classBindingSet.add(resolveBinding);
+			allClassNames.add(thisClassName);
+			allClassBindings.add(resolveBinding);
 		}
-		readTags(node);
+		readJ2sImportTags(node);
 
 		imports.add("java.lang.Enum");
-		visitForMusts(node);
-		visitForRequires(node);
+		processImports(node);
+		processJ2SRequireImport(node);
 		//visitForOptionals(node);
 		return super.visit(node);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ClassInstanceCreation)
-	 */
 	public boolean visit(ClassInstanceCreation node) {
 		ITypeBinding resolveTypeBinding = node.resolveTypeBinding();
 		QNTypeBinding qn = new QNTypeBinding();
@@ -240,11 +237,8 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 		return super.visit(node);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.TypeLiteral)
-	 * 
+	/**
 	 * Foo.class
-	 * 
 	 */
 	public boolean visit(TypeLiteral node) {
 		ITypeBinding resolveTypeBinding = node.getType().resolveBinding();
@@ -272,8 +266,7 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 		return false;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.FieldAccess)
+	/**
 	 * 
 	 * xxxx.Foo
 	 * 
@@ -321,6 +314,9 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 		return super.visit(node);
 	}
 	
+	/**
+	 * this.xxx
+	 */
 	public boolean visit(FieldDeclaration node) {
 		if (getJ2STag(node, "@j2sIgnore") != null) {
 			return false;
@@ -328,17 +324,7 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 		return super.visit(node);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.
-	 * MethodInvocation)
-	 */
 	public boolean visit(MethodInvocation node) {
-		/*
-		 * sgurin: last fix: returning to original version of the method because
-		 * a bug was introduced in my last modifications.
-		 */
 		IMethodBinding resolveMethodBinding = node.resolveMethodBinding();
 		if (resolveMethodBinding != null
 				&& Modifier.isStatic(resolveMethodBinding.getModifiers())) {
@@ -487,7 +473,9 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 		}
 		return super.visit(node);
 	}
-	
+
+// BH 2023.11.23 No! this is unnecessary
+// we never need to declare imports for instanceOf
 //	public boolean visit(InstanceofExpression node) {
 //		Type type = node.getRightOperand();
 //		ITypeBinding resolveTypeBinding = type.resolveBinding();
@@ -505,37 +493,15 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 //	}
 //	
 	public boolean visit(MethodDeclaration node) {
-		IMethodBinding mBinding = node.resolveBinding();
-		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimplePipeRunnable", "deal")) {
-			ITypeBinding[] parameterTypes = mBinding.getParameterTypes();
-			if (parameterTypes != null && parameterTypes.length == 1) {
-				ITypeBinding paramType = parameterTypes[0];
-				ITypeBinding declaringClass = paramType.getDeclaringClass();
-				QNTypeBinding qn = new QNTypeBinding();
-				String qualifiedName = null;
-				if (declaringClass != null) {
-					qn.binding = declaringClass;
-					qualifiedName = declaringClass.getQualifiedName();
-				} else {
-					qn.binding = paramType;
-					qualifiedName = paramType.getQualifiedName();
-				}
-				qn.qualifiedName = discardGenericType(qualifiedName);
-				j2sOptionalImport.add(qn);
-			}
-		}
-		
 		if (getJ2STag(node, "@j2sNativeSrc") != null) {
 			return false;
-		}
-		
+		}		
 		if (getJ2STag(node, "@j2sNative") != null) {
 			return false;
 		}
 		if (getJ2STag(node, "@j2sIgnore") != null) {
 			return false;
 		}
-		
 		if (node.getBody() == null) {
 			/*
 			 * Abstract or native method
@@ -554,7 +520,7 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 			 * if comment contains "@j2sNative", then output the given native 
 			 * JavaScript codes directly. 
 			 */
-			if (visitNativeJavadoc(javadoc, node, true) == false) {
+			if (processJ2SNativeJavadoc(javadoc, node, true) == false) {
 				return false;
 			}
 		} else if (parent instanceof Initializer) {
@@ -564,7 +530,7 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 			 * if comment contains "@j2sNative", then output the given native 
 			 * JavaScript codes directly. 
 			 */
-			if (visitNativeJavadoc(javadoc, node, true) == false) {
+			if (processJ2SNativeJavadoc(javadoc, node, true) == false) {
 				return false;
 			}
 		}
@@ -581,7 +547,7 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 				 * if the block's leading comment contains "@j2sNative", 
 				 * then output the given native JavaScript codes directly. 
 				 */
-				if (visitNativeJavadoc(javadoc, node, true) == false) {
+				if (processJ2SNativeJavadoc(javadoc, node, true) == false) {
 					return false;
 				}
 			}
@@ -589,7 +555,7 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 		return super.visit(node);
 	}
 	
-	boolean visitNativeJavadoc(Javadoc javadoc, Block node, boolean superVisit) {
+	private boolean processJ2SNativeJavadoc(Javadoc javadoc, Block node, boolean superVisit) {
 		if (javadoc != null) {
 			List<?> tags = javadoc.tags();
 			if (tags.size() != 0) {
@@ -609,15 +575,6 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 						}
 					}
 				}
-//				if (!toCompileVariableName) {
-//					for (Iterator iter = tags.iterator(); iter.hasNext();) {
-//						TagElement tagEl = (TagElement) iter.next();
-//						if ("@j2sNativeSrc".equals(tagEl.getTagName())) {
-//							if (superVisit) super.visit(node);
-//							return false;
-//						}
-//					}
-//				}
 				for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
 					TagElement tagEl = (TagElement) iter.next();
 					if ("@j2sNative".equals(tagEl.getTagName())) {
@@ -711,7 +668,7 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 		return J2SDocVisitor.getJ2STag(node, tagName);
 	}
 	
-	protected void readClasses(Annotation annotation, Set<Object> set) {
+	private static void readClasses(Annotation annotation, Set<Object> set) {
 		StringBuffer buf = new StringBuffer();
 		IAnnotationBinding annotationBinding = annotation.resolveAnnotationBinding();
 		if (annotationBinding != null) {
@@ -749,7 +706,7 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 		}
 	}
 
-	protected void readClasses(TagElement tagEl, Set<Object> set) {
+	private static void readClasses(TagElement tagEl, Set<Object> set) {
 		List<?> fragments = tagEl.fragments();
 		StringBuffer buf = new StringBuffer();
 		boolean isFirstLine = true;
@@ -773,7 +730,7 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 			}
 		}
 	}
-	private void readTags(AbstractTypeDeclaration node) {
+	private void readJ2sImportTags(AbstractTypeDeclaration node) {
 		Javadoc javadoc = node.getJavadoc();
 		if (javadoc != null) {
 			List<?> tags = javadoc.tags();
@@ -813,24 +770,24 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 		}
 	}
 
-	public boolean isClassKnown(String qualifiedName) {
-		String[] knownClasses = new String[] {
-				"java.lang.Object",
-				"java.lang.Class",
-				"java.lang.String",
-				"java.io.Serializable",
-				"java.lang.Iterable",
-				"java.lang.CharSequence",
-				"java.lang.Cloneable",
-				"java.lang.Comparable",
-				"java.lang.Runnable",
-				"java.util.Comparator",
-				"java.lang.System",
-				"java.io.PrintStream",
-				"java.lang.Math",
-				"java.lang.Integer"
-		};
-		
+	private static String[] knownClasses = new String[] {
+			"java.lang.Object",
+			"java.lang.Class",
+			"java.lang.String",
+			"java.io.Serializable",
+			"java.lang.Iterable",
+			"java.lang.CharSequence",
+			"java.lang.Cloneable",
+			"java.lang.Comparable",
+			"java.lang.Runnable",
+			"java.util.Comparator",
+			"java.lang.System",
+			"java.io.PrintStream",
+			"java.lang.Math",
+			"java.lang.Integer"
+	};	
+
+	private static boolean isClassKnown(String qualifiedName) {
 		for (int i = 0; i < knownClasses.length; i++) {
 			if (knownClasses[i].equals(qualifiedName)) {
 				return true;
@@ -838,10 +795,11 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 		}
 		return false;
 	}
-	public boolean isQualifiedNameOK(String qualifiedName, ASTNode node) {
+	
+	private static boolean isQualifiedNameOK(String qualifiedName, ASTNode node) {
 		if (qualifiedName != null 
 				&& !isClassKnown(qualifiedName)
-				&& qualifiedName.indexOf('[') == -1
+				&& qualifiedName.indexOf('[') < 0
 				&& !"int".equals(qualifiedName)
 				&& !"float".equals(qualifiedName)
 				&& !"double".equals(qualifiedName)
@@ -852,8 +810,7 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 				&& !"boolean".equals(qualifiedName)
 				&& !"void".equals(qualifiedName)
 				&& !qualifiedName.startsWith("org.w3c.dom.")
-				&& !qualifiedName.startsWith("org.eclipse.swt.internal.xhtml.")
-				&& !qualifiedName.startsWith("net.sf.j2s.html.")) {
+				) {
 			ASTNode root = node.getRoot();
 			if (root instanceof CompilationUnit) {
 				CompilationUnit type = (CompilationUnit) root;
@@ -873,7 +830,8 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 		}
 		return false;
 	}
-	protected void visitForMusts(AbstractTypeDeclaration node) {
+	
+	private void processImports(AbstractTypeDeclaration node) {
 		Type superclassType = null;
 		if (node instanceof TypeDeclaration) {
 			superclassType = ((TypeDeclaration) node).getSuperclassType();
@@ -943,7 +901,7 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 		}
 	}
 
-	protected void visitForRequires(AbstractTypeDeclaration node) {
+	private void processJ2SRequireImport(AbstractTypeDeclaration node) {
 		for (Iterator<?> iter = node.bodyDeclarations().iterator(); iter.hasNext();) {
 			ASTNode element = (ASTNode) iter.next();
 			if (element instanceof TypeDeclaration) {
@@ -991,21 +949,7 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 		}
 	}
 	
-	private Java2ScriptDependencyVisitor getSelfVisitor() {
-		try {
-			Java2ScriptDependencyVisitor newVisitor = ((Java2ScriptDependencyVisitor) this.getClass().getConstructor(new Class[0]).newInstance(new Object[0])).setCompiler(compiler);
-			return newVisitor;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-//	protected void visitForOptionals(AbstractTypeDeclaration node) {
-//
-//	}
-
-	protected boolean isSimpleQualified(QualifiedName node) {
+	private static boolean isSimpleQualified(QualifiedName node) {
 		Name qualifier = node.getQualifier();
 		if (qualifier instanceof SimpleName) {
 			return true;
@@ -1015,92 +959,19 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 		return false;
 	}
 	
-///////// delivery section -- from ASTScriptVisitor ///////////////
-	
-	public String discardGenericType(String name) {
+	private String discardGenericType(String name) {
 		return  J2STypeHelper.discardGenericType(name);
 	}
 	
-	public String getPackageName() {
-		return ((J2SPackageHelper) getHelper(J2SPackageHelper.class)).getPackageName();
-	}
+///////// delivery section -- from ASTScriptVisitor ///////////////
+
 	/**
-	 * @return Returns the thisClassName.
+	 * Adjust Clazz._load calls to only include the necessary class dependencies.
+	 * 
+	 * @param visitorJS
+	 * @return
 	 */
-	public String[] getClassNames() {
-		return classNameSet.toArray(new String[0]);
-	}
-	
-	protected void checkSuperType(Set<Object> set) {
-		Set<QNTypeBinding> removed = new HashSet<QNTypeBinding>();
-		Set<QNTypeBinding> reseted = new HashSet<QNTypeBinding>();
-		for (Iterator<Object> iter = set.iterator(); iter.hasNext();) {
-			Object n = iter.next();
-			if (n instanceof QNTypeBinding) {
-				QNTypeBinding qn = (QNTypeBinding) n;
-				boolean isRemoved = false;
-				for (Iterator<ITypeBinding> iterator = classBindingSet.iterator(); iterator
-						.hasNext();) {
-					ITypeBinding binding = iterator.next();
-					if (qn.binding != null && Bindings.isSuperType(binding, qn.binding)) {
-						removed.add(qn);
-						isRemoved = true;
-						break;
-					}
-				}
-				if (!isRemoved) {
-					reseted.add(qn);
-				}
-			}
-		}
-		set.removeAll(removed);
-		set.removeAll(reseted);
-		for (Iterator<QNTypeBinding> i = reseted.iterator(); i.hasNext();) {
-			QNTypeBinding qn = i.next();
-			set.add(qn.qualifiedName);
-		}
-	}
-	
-
-	protected void remedyDependency(Set<Object> set) {
-		String[] classNames = getClassNames();
-		for (int i = 0; i < classNames.length; i++) {
-			if ("net.sf.j2s.ajax.ASWTClass".equals(classNames[i])) {
-				return;
-			}
-		}
-		List<Object> toRemoveList = new ArrayList<Object>();
-		boolean needRemedy = false;
-		for (Iterator<Object> iterator = set.iterator(); iterator.hasNext();) {
-			Object next = iterator.next();
-			String name = null;
-			if (next instanceof QNTypeBinding) {
-				QNTypeBinding qn = (QNTypeBinding) next;
-				name = qn.qualifiedName;
-			} else {
-				name = (String) next;
-			}
-			if ("net.sf.j2s.ajax.AClass".equals(name)
-					|| "net.sf.j2s.ajax.ASWTClass".equals(name)) {
-				needRemedy = true;
-				//break;
-			}
-			for (Iterator<String> itr = classNameSet.iterator(); itr.hasNext();) {
-				String className = itr.next();
-				if (name.startsWith(className + ".")) { // inner class dependency
-					toRemoveList.add(next);
-				}
-			}
-		}
-		if (needRemedy) {
-			set.add("java.lang.reflect.Constructor");
-		}
-		for (Iterator<Object> iterator = toRemoveList.iterator(); iterator.hasNext();) {
-			set.remove(iterator.next());
-		}
-	}
-
-	public String getDependencyScript(StringBuffer mainJS) {
+	public String cleanLoadCalls(StringBuffer visitorJS) {
 		checkSuperType(imports);
 		checkSuperType(j2sRequireImport);
 		checkSuperType(j2sOptionalImport);
@@ -1139,7 +1010,7 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 				j2sOptionalImport.remove(s);
 			}
 		}
-		String js = mainJS.toString();
+		String js = visitorJS.toString();
 		if (imports.size() == 0 && j2sRequireImport.size() == 0 && j2sOptionalImport.size() == 0) {
 			return js;
 		}
@@ -1182,6 +1053,9 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 				}
 			}
 		}
+		
+		// one of these per class
+		
 		buf.append("Clazz.load (");
 		// clazz.load([imports],name,[interfaces],[??])
 		if (imports.size() != 0 || j2sRequireImport.size() != 0) {
@@ -1199,11 +1073,12 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 		} else {
 			buf.append("null, ");
 		}
-		if (classNameSet.size() > 1) {
+		if (allClassNames.size() > 1) {
 			buf.append("[");
 		}
-		joinArrayClasses("getClassNames()", buf, getClassNames(), null);
-		if (classNameSet.size() > 1) {
+		joinArrayClasses("getClassNames()", buf, 
+				allClassNames.toArray(new String[allClassNames.size()]), null);
+		if (allClassNames.size() > 1) {
 			buf.append("]");
 		}
 		buf.append(", ");
@@ -1222,12 +1097,56 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 		return buf.toString();
 	}
 
+	private void checkSuperType(Set<Object> set) {
+		Set<QNTypeBinding> reseted = new HashSet<QNTypeBinding>();
+		for (Iterator<Object> setIterator = set.iterator(); setIterator.hasNext();) {
+			Object classNameOrBinding = setIterator.next();
+			if (!(classNameOrBinding instanceof QNTypeBinding)) {
+				continue;
+			}
+			QNTypeBinding qn = (QNTypeBinding) classNameOrBinding;
+			boolean isRemoved = false;
+			for (Iterator<ITypeBinding> classBindingIterator = allClassBindings.iterator(); classBindingIterator
+					.hasNext();) {
+				ITypeBinding binding = classBindingIterator.next();
+				if (qn.binding != null && BindingHelper.isSuperType(binding, qn.binding)) {
+					setIterator.remove();
+					isRemoved = true;
+					break;
+				}
+			}
+			if (!isRemoved) {
+				reseted.add(qn);
+			}
+		}
+		set.removeAll(reseted);
+		for (Iterator<QNTypeBinding> iter = reseted.iterator(); iter.hasNext();) {
+			set.add(iter.next().qualifiedName);
+		}
+	}
+	
+	private void remedyDependency(Set<Object> set) {
+		for (Iterator<Object> setIterator = set.iterator(); setIterator.hasNext();) {
+			Object classNameOrBinding = setIterator.next();
+			String setItemName = (classNameOrBinding instanceof QNTypeBinding 
+					? ((QNTypeBinding) classNameOrBinding).qualifiedName
+							: (String) classNameOrBinding);
+			for (Iterator<String> classNameIterator = allClassNames.iterator(); classNameIterator.hasNext();) {
+				if (setItemName.startsWith(classNameIterator.next() + ".")) { 
+					// inner class dependency
+					setIterator.remove();
+					break;
+				}
+			}
+		}
+	}
+
 	private String joinArrayClasses(String why, StringBuffer buf, String[] ss, String last) {
 		return joinArrayClasses(why, buf, ss, last, ", ");
 	}
 	
 	/**
-	 * @param why  
+	 * @param why  for debugging only 
 	 */
 	private String joinArrayClasses(String why, StringBuffer buf, String[] ss, String last, String seperator) {
 		String lastClassName = last;

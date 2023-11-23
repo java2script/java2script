@@ -8,7 +8,7 @@ package j2s.jmol.common;
  *
  * 2006-12-6
  */
-public class FinalVariable {
+class FinalVariable {
 
 	/**
 	 * Level of the block

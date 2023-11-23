@@ -81,6 +81,9 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 
 /**
+ * 
+ * ASTVisitor > J2SASTVisitor > J2SKeywordVisitor > J2SDocVisitor > Java2ScriptScriptVisitor
+ * 
  * This class will traverse most of the common keyword and
  * common expression.
  * 
@@ -127,22 +130,22 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 	}
 
 	protected String checkConstantValue(Expression node) {
-		return ((J2SVariableHelper) getHelper(J2SVariableHelper.class)).checkConstantValue(node);
+		return getVariableHelper().checkConstantValue(node);
 	}
 	
 	protected String[] skipDeclarePackages() {
-		return ((J2SPackageHelper) getHelper(J2SPackageHelper.class)).skipDeclarePackages();
+		return getPackageHelper().skipDeclarePackages();
 	}
 	protected boolean isSimpleQualified(QualifiedName node) {
-		return ((J2SFieldHelper) getHelper(J2SFieldHelper.class)).isSimpleQualified(node);
+		return getFieldHelper().isSimpleQualified(node);
 	}
 
 	protected boolean isFieldNeedPreparation(FieldDeclaration node) {
-		return ((J2SFieldHelper) getHelper(J2SFieldHelper.class)).isFieldNeedPreparation(node);
+		return getFieldHelper().isFieldNeedPreparation(node);
 	}
 	
 	protected String getIndexedVarName(String name, int i) {
-		return ((J2SVariableHelper) getHelper(J2SVariableHelper.class)).getIndexedVarName(name, i);
+		return getVariableHelper().getIndexedVarName(name, i);
 	}
 
 	protected void visitList(List<?> list, String seperator) {
@@ -617,8 +620,8 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 
 	public void endVisit(Block node) {
 		buffer.append("}");
-		List<FinalVariable> finalVars = ((J2SVariableHelper) getHelper(J2SVariableHelper.class)).finalVars;
-		List<FinalVariable> normalVars = ((J2SVariableHelper) getHelper(J2SVariableHelper.class)).normalVars;
+		List<FinalVariable> finalVars = getVariableHelper().finalVars;
+		List<FinalVariable> normalVars = getVariableHelper().normalVars;
 		for (int i = finalVars.size() - 1; i >= 0; i--) {
 			FinalVariable var = finalVars.get(i);
 			if (var.blockLevel >= blockLevel) {
@@ -636,9 +639,9 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 	}
 
 	public void endVisit(MethodDeclaration node) {
-		List<FinalVariable> finalVars = ((J2SVariableHelper) getHelper(J2SVariableHelper.class)).finalVars;
-		List<?> visitedVars = ((J2SVariableHelper) getHelper(J2SVariableHelper.class)).visitedVars;
-		List<FinalVariable> normalVars = ((J2SVariableHelper) getHelper(J2SVariableHelper.class)).normalVars;
+		List<FinalVariable> finalVars = getVariableHelper().finalVars;
+		List<?> visitedVars = getVariableHelper().visitedVars;
+		List<FinalVariable> normalVars = getVariableHelper().normalVars;
 		List<?> parameters = node.parameters();
 		String methodSig = null;
 		IMethodBinding resolveBinding = node.resolveBinding();
@@ -844,9 +847,9 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 			int pt2 = buffer.length();
 			right.accept(this);
 			if (buffer.substring(pt2).equals("String")) {
-				buffer.setLength(pt2 - 3); //, "
-				buffer.append("=='string'");
-				buffer.replace(pt,  pt + 18, "(typeof ");
+				buffer.setLength(pt2 - 2); //, "
+				buffer.append(")=='string'");
+				buffer.replace(pt,  pt + 18, "(typeof(");
 			} else if (buffer.indexOf(".",pt2) < 0) {
 			  // Integer, Exception, etc.
 			  buffer.setCharAt(pt2 - 1, ' ');
@@ -897,7 +900,7 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 	}
 
 	public boolean visit(PackageDeclaration node) {
-		J2SPackageHelper packageVisitor = ((J2SPackageHelper) getHelper(J2SPackageHelper.class));
+		J2SPackageHelper packageVisitor = getPackageHelper();
 		packageVisitor.setPackageName("" + node.getName());
 		String[] swtInnerPackages = skipDeclarePackages();
 		/*
@@ -1638,8 +1641,8 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 				String methodSig = methodDeclareStack.peek();
 				f = new FinalVariable(blockLevel, identifier, methodSig);
 			}
-			List<FinalVariable> finalVars = ((J2SVariableHelper) getHelper(J2SVariableHelper.class)).finalVars;
-			List<FinalVariable> normalVars = ((J2SVariableHelper) getHelper(J2SVariableHelper.class)).normalVars;
+			List<FinalVariable> finalVars = getVariableHelper().finalVars;
+			List<FinalVariable> normalVars = getVariableHelper().normalVars;
 			f.toVariableName = getIndexedVarName(identifier, normalVars.size());
 			normalVars.add(f);
 			if ((binding.getModifiers() & Modifier.FINAL) != 0) {

@@ -24,11 +24,11 @@ public class ReferenceASTVisitor extends ASTVisitor {
 	private boolean isReferenced = false;
 	private boolean isConstant = false;
 	
-	public ReferenceASTVisitor() {
+	ReferenceASTVisitor() {
 		super();
 	}
 
-	public ReferenceASTVisitor(boolean visitDocTags) {
+	ReferenceASTVisitor(boolean visitDocTags) {
 		super(visitDocTags);
 	}
 
@@ -48,15 +48,15 @@ public class ReferenceASTVisitor extends ASTVisitor {
 		return false;
 	}
 
-	public boolean isReferenced() {
+	boolean isReferenced() {
 		return isReferenced;
 	}
 
-	public boolean isConstant() {
+	boolean isConstant() {
 		return isConstant;
 	}
 
-	public void setReferenced(boolean isReferenced) {
+	void setReferenced(boolean isReferenced) {
 		this.isReferenced = isReferenced;
 		isConstant = false;
 	}

@@ -183,30 +183,30 @@ public class J2SVariableHelper extends J2SHelper {
 		if (constValue != null && (constValue instanceof Number
 				|| constValue instanceof Character
 				|| constValue instanceof Boolean)) {
-			StringBuffer buffer = new StringBuffer();
+			StringBuffer buf = new StringBuffer();
 			if (constValue instanceof Character) {
-				buffer.append('\'');
-				buffer.append(escapeChar(((Character) constValue).charValue()));
-				buffer.append('\'');
+				buf.append('\'');
+				buf.append(escapeChar(((Character) constValue).charValue()));
+				buf.append('\'');
 			} else {
-				buffer.append(constValue);
+				buf.append(constValue);
 			}
-			return buffer.toString();
+			return buf.toString();
 		}
 		if (constValue != null && (constValue instanceof String)) {
-			StringBuffer buffer = new StringBuffer();
+			StringBuffer buf = new StringBuffer();
 			String str = (String) constValue;
 			int length = str.length();
 			/*
 			if (length > 20) {
 				return null;
 			}*/
-			buffer.append("\"");
+			buf.append("\"");
 			for (int i = 0; i < length; i++) {
-				buffer.append(escapeChar(str.charAt(i)));
+				buf.append(escapeChar(str.charAt(i)));
 			}
-			buffer.append("\"");
- 			return buffer.toString();
+			buf.append("\"");
+ 			return buf.toString();
 		}
 		return null;
 	}

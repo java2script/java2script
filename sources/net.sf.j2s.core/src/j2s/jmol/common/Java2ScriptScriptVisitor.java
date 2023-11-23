@@ -18,7 +18,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
-import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
@@ -121,98 +120,89 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 
 	// BH 2023.11.10   JavaObject --> Clazz._O 
 	
+
 	private StringBuffer laterBuffer = new StringBuffer();
 
 	/* for anonymous classes */
 	private StringBuffer methodBuffer = new StringBuffer();
-	
-	//private boolean isInnerClass = false;
 
-	protected AbstractTypeDeclaration rootTypeNode;
+	private AbstractTypeDeclaration rootTypeNode;
 
-	public boolean isMethodRegistered(String methodName) {
-		return ((J2SMethodHelper) getHelper(J2SMethodHelper.class)).isMethodRegistered(methodName);
+	private boolean canAutoOverride(MethodDeclaration node) {
+		return getMethodHelper().canAutoOverride(node);
+	}
+
+	private boolean isMethodRegistered(String methodName) {
+		return getMethodHelper().isMethodRegistered(methodName);
 	}
 	
-	public String translate(String className, String methodName) {
-		return ((J2SMethodHelper) getHelper(J2SMethodHelper.class)).translate(className, methodName);
+	private String translate(String className, String methodName) {
+		return getMethodHelper().translate(className, methodName);
 	}
 	
-	public String getPackageName() {
-		return ((J2SPackageHelper) getHelper(J2SPackageHelper.class)).getPackageName();
-	}
-	
-	public String discardGenericType(String name) {
+	private String discardGenericType(String name) {
 		return J2STypeHelper.discardGenericType(name);
 	}
 	
-	private J2SVariableHelper getVariableVisitor() {
-		return ((J2SVariableHelper) getHelper(J2SVariableHelper.class));
-	}
-
-	protected String listFinalVariables(List<FinalVariable> list, String seperator, String scope) {
-		return getVariableVisitor().listFinalVariables(list, seperator, scope);
+	private String listFinalVariables(List<FinalVariable> list, String seperator, String scope) {
+		return getVariableHelper().listFinalVariables(list, seperator, scope);
 	}
 	
-	protected String getFullClassName() {
-		String thisPackageName = ((J2SPackageHelper) getHelper(J2SPackageHelper.class)).getPackageName();
-		return ((J2STypeHelper) getHelper(J2STypeHelper.class)).getFullClassName(thisPackageName);
+	private String getFullClassName() {
+		String thisPackageName = getPackageHelper().getPackageName();
+		return getTypeHelper().getFullClassName(thisPackageName);
 	}
 	
-	public String getTypeStringName(Type type) {
+	private String getTypeStringName(Type type) {
 		return J2STypeHelper.getTypeStringName(type);
 	}
 	
-	protected String getFieldName(ITypeBinding binding, String name) {
+	private String getFieldName(ITypeBinding binding, String name) {
 		return NameInheritanceChecker.getFieldName(binding, name);
 	}
 	
-	protected String getJ2SName(SimpleName node) {
+	private String getJ2SName(SimpleName node) {
 		IBinding binding = node.resolveBinding();
 		return (binding instanceof IVariableBinding || binding instanceof IMethodBinding ? binding.getName() : node.getIdentifier());
 //		return NameInheritanceChecker.getJ2SName(node);
 	}
 
-	protected String getJ2SName(IVariableBinding binding) {
+	private String getJ2SName(IVariableBinding binding) {
 		return binding.getName();
 //		return NameInheritanceChecker.getJ2SName(binding);
 	}
 	
-	protected boolean isInheritedFieldName(ITypeBinding binding, String name) {
+	private boolean isInheritedFieldName(ITypeBinding binding, String name) {
 		return NameInheritanceChecker.isInheritedFieldName(binding, name);
 	}
 	
-	protected boolean checkKeyworkViolation(String name) {
-		return ((J2SFieldHelper) getHelper(J2SFieldHelper.class)).checkKeyworkViolation(name);
+	private boolean checkKeyworkViolation(String name) {
+		return getFieldHelper().checkKeyworkViolation(name);
 	}
 	
-	protected boolean checkSameName(ITypeBinding binding, String name) {
+	private boolean checkSameName(ITypeBinding binding, String name) {
 		return NameInheritanceChecker.checkSameName(binding, name);
 	}
 	
-	public boolean isIntegerType(String type) {
+	private boolean isIntegerType(String type) {
 		return J2STypeHelper.isIntegerType(type);
 	}
 	
-	public String getClassName() {
-		return ((J2STypeHelper) getHelper(J2STypeHelper.class)).getClassName();
+	private String getClassName() {
+		return getTypeHelper().getClassName();
 	}
 	
-	protected String getVariableName(String name) {
-		return getVariableVisitor().getVariableName(name);
+	private String getVariableName(String name) {
+		return getVariableHelper().getVariableName(name);
 	}
 	
-	protected boolean canAutoOverride(MethodDeclaration node) {
-		return ((J2SMethodHelper) getHelper(J2SMethodHelper.class)).canAutoOverride(node);
-	}
-
 	private final static String emptyFunction = 
 			"Clazz.decorateAsClass (function () {\r\n" 
 			+ "Clazz.instantialize (this, arguments);\r\n}, ";
 
 	public boolean visit(AnonymousClassDeclaration node) {
 		ITypeBinding binding = node.resolveBinding();
-		J2STypeHelper typeVisitor = ((J2STypeHelper) getHelper(J2STypeHelper.class));
+		J2STypeHelper typeVisitor = getTypeHelper();
 		
 		String anonClassName = null;
 		if (binding.isAnonymous() || binding.isLocal()) {
@@ -236,7 +226,7 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 		}
 		String className = typeVisitor.getClassName();
 		String fullClassName = anonClassName;
-		String packageName = ((J2SPackageHelper) getHelper(J2SPackageHelper.class)).getPackageName();
+		String packageName = getPackageHelper().getPackageName();
 		buffer.append("(Clazz.isClassDefined (\"");
 		buffer.append(fullClassName);
 		buffer.append("\") ? 0 : ");
@@ -647,7 +637,7 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 //			buffer.append(shortClassName);
 //			buffer.append("$ = function () {\r\n");
 			
-			J2SVariableHelper variableVisitor = getVariableVisitor();
+			J2SVariableHelper variableVisitor = getVariableHelper();
 			variableVisitor.isFinalSensible = true;
 			
 			int lastCurrentBlock = currentBlockForVisit;
@@ -709,7 +699,7 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 		return false;
 	}
 
-	protected void visitMethodParameterList(List<?> arguments, IMethodBinding methodDeclaration, boolean isConstructor, String prefix, String suffix) {
+	private void visitMethodParameterList(List<?> arguments, IMethodBinding methodDeclaration, boolean isConstructor, String prefix, String suffix) {
 		if (methodDeclaration == null) {
 			return;
 		}
@@ -849,7 +839,7 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 				// Keep String#indexOf(int) and String#lastIndexOf(int)'s first char argument
 				ignored = (position == 0 
 						&& (/*"append".equals(methodName) || */"indexOf".equals(methodName) || "lastIndexOf".equals(methodName))
-						&& ("java.lang.String".equals(Bindings.removeBrackets(clazzName))));
+						&& ("java.lang.String".equals(BindingHelper.removeBrackets(clazzName))));
 				
 				if (!ignored && exp instanceof CharacterLiteral) {
 					CharacterLiteral cl = (CharacterLiteral) exp;
@@ -926,8 +916,8 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 		
 		ASTNode parent = node.getParent();
 		if (parent != null && parent instanceof AbstractTypeDeclaration) {
-			String packageName = ((J2SPackageHelper) getHelper(J2SPackageHelper.class)).getPackageName();
-			String className = ((J2STypeHelper) getHelper(J2STypeHelper.class)).getClassName();
+			String packageName = getPackageHelper().getPackageName();
+			String className = getTypeHelper().getClassName();
 			//String className = ((AbstractTypeDeclaration) parent).getName().getFullyQualifiedName();
 			String fullClassName = null;
 			if (packageName != null && packageName.length() != 0) {
@@ -942,8 +932,8 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 		} else {
 			
 			String fullClassName = null;//getFullClassName();
-			String packageName = ((J2SPackageHelper) getHelper(J2SPackageHelper.class)).getPackageName();
-			String className = ((J2STypeHelper) getHelper(J2STypeHelper.class)).getClassName();
+			String packageName = getPackageHelper().getPackageName();
+			String className = getTypeHelper().getClassName();
 			if (packageName != null && packageName.length() != 0) {
 				fullClassName = packageName + '.' + className;
 			} else {
@@ -1120,20 +1110,16 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 				} else {
 					anonClassName = assureQualifiedName(shortenQualifiedName(binding.getQualifiedName()));
 				}
-				//int anonCount = ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).getAnonymousCount() + 1;
 				anonDeclare.accept(this);
 
 				buffer.append("Clazz.defineEnumConstant (");
 				/* replace full class name with short variable name */
 				buffer.append("cla$$");
-				//buffer.append(fullClassName);
 				buffer.append(", \"");
 				enumConst.getName().accept(this);
 				buffer.append("\", " + i + ", [");
 				visitList(enumConst.arguments(), ", ");
 				buffer.append("], ");
-//				buffer.append(getFullClassName());
-//				buffer.append("$" + anonCount + ");\r\n");
 				buffer.append(anonClassName);
 				buffer.append(");\r\n");
 
@@ -1145,7 +1131,7 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 
 	public boolean visit(EnumDeclaration node) {
 		ITypeBinding binding = node.resolveBinding();
-		J2STypeHelper typeVisitor = ((J2STypeHelper) getHelper(J2STypeHelper.class));
+		J2STypeHelper typeVisitor = getTypeHelper();
 		if (binding != null && binding.isTopLevel()) {
 			typeVisitor.setClassName(binding.getName());
 		}
@@ -1158,64 +1144,24 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 				visitor = new Java2ScriptScriptVisitor(); // Default visitor
 			}
 			visitor.rootTypeNode = node;
-			((J2STypeHelper) visitor.getHelper(J2STypeHelper.class)).setClassName(((J2STypeHelper) getHelper(J2STypeHelper.class)).getClassName());
-			((J2SPackageHelper) visitor.getHelper(J2SPackageHelper.class)).setPackageName(((J2SPackageHelper) getHelper(J2SPackageHelper.class)).getPackageName());
+			visitor.getTypeHelper().setClassName(this.getTypeHelper().getClassName());
+			visitor.getPackageHelper().setPackageName(this.getPackageHelper().getPackageName());
 
 			node.accept(visitor);
+			String str = visitor.getBuffer().toString();
 			if ((node.getModifiers() & Modifier.STATIC) != 0) {
-				String str = visitor.getBuffer().toString();
 				if (!str.startsWith("var cla$$")) {
 					laterBuffer.append(str);
 				} else {
-				  laterBuffer.append("/*if*/;(function(){\r\n//Clazz.pu$h(self.c$);\r\n");
+				  laterBuffer.append("/*if1*/;(function(){\r\n//was Clazz.pu$h(self.c$);\r\n");
 				  laterBuffer.append(str);
-			   	  laterBuffer.append("/*eoif*/})();\r\n//cla$$ = Clazz.p0p ();\r\n");
+			   	  laterBuffer.append("/*eoif1*/})();\r\n//was cla$$ = Clazz.p0p ();\r\n");
 				}
 			} else {
-				/*
-				 * Never reach here!
-				 * March 17, 2006
-				 */
-//				buffer.append("if (!Clazz.isClassDefined (\"");
-//				buffer.append(visitor.getFullClassName());
-//				if (binding != null && !binding.isTopLevel()) {
-//					buffer.append("." + binding.getName());
-//				}
-//				buffer.append("\")) {\r\n");
-				
-				//String className = typeVisitor.getClassName();
-//				methodBuffer.append("cla$$.$");
-//				String targetClassName = visitor.getClassName();
-//				//String prefixKey = className + ".";
-//				//if (targetClassName.startsWith(prefixKey)) {
-//				//	targetClassName = targetClassName.substring(prefixKey.length());
-//				//}
-//				targetClassName = targetClassName.replace('.', '$');
-//				methodBuffer.append(targetClassName);
-//				if (binding != null && !binding.isTopLevel()) {
-//					methodBuffer.append("$" + binding.getName());
-//				}
-//				methodBuffer.append("$ = function () {\r\n");
-				methodBuffer.append("/*if*/;(function(){\r\n//Clazz.pu$h(self.c$);\r\n");
-				methodBuffer.append(visitor.getBuffer().toString());
-				methodBuffer.append("/*eoif*/})();\r\n//cla$$ = Clazz.p0p ();\r\n");
-//				methodBuffer.append("};\r\n");
-//
-//				String pkgName = visitor.getPackageName();
-//				if (pkgName != null && pkgName.length() > 0) {
-//					buffer.append(pkgName);
-//					buffer.append(".");
-//				}
-//				buffer.append(targetClassName);
-//				buffer.append(".$");
-//				buffer.append(visitor.getClassName());
-//				buffer.append("$");
-//				if (binding != null && !binding.isTopLevel()) {
-//					buffer.append(binding.getName());
-//				}
-//				buffer.append("$ ();\r\n");
-//				
-//				buffer.append("}\r\n");
+				// never found?
+				methodBuffer.append("/*if2*/;(function(){\r\n//was Clazz.pu$h(self.c$);\r\n");
+				methodBuffer.append(str);
+				methodBuffer.append("/*eoif2*/})();\r\n//was cla$$ = Clazz.p0p ();\r\n");
 			}
 			return false;
 		}
@@ -1579,84 +1525,26 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 
 	public void endVisit(MethodDeclaration node) {
 		if (getJ2STag(node, "@j2sIgnore") != null) {
-//			addAnonymousClassDeclarationMethods();
 			return;
 	 	}
 
 		IMethodBinding mBinding = node.resolveBinding();
-//		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimpleRPCRunnable", "ajaxRun")) {
-//			if (getJ2STag(node, "@j2sKeep") == null) {
-//				addAnonymousClassDeclarationMethods();
-//				return;
-//			}
-//		}
-//		String[] pipeMethods = new String[] {
-//				"pipeSetup", 
-//				"pipeThrough", 
-//				"through",
-//				"pipeMonitoring",
-//				"pipeMonitoringInterval",
-//				"pipeWaitClosingInterval",
-//				"setPipeHelper"
-//		};
-//		for (int i = 0; i < pipeMethods.length; i++) {
-//			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimplePipeRunnable", pipeMethods[i])) {
-//				if (getJ2STag(node, "@j2sKeep") == null) {
-//					addAnonymousClassDeclarationMethods();
-//					return;
-//				}
-//			}
-//		}
-//		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.CompoundPipeSession", "convert")) {
-//			if (getJ2STag(node, "@j2sKeep") == null) {
-//				addAnonymousClassDeclarationMethods();
-//				return;
-//			}
-//		}
 		if (mBinding != null) {
 			methodDeclareStack.pop();
 		}
 		super.endVisit(node);
-//		addAnonymousClassDeclarationMethods();
 	}
 	
-//	protected void addAnonymousClassDeclarationMethods() {
-//		if (methodBuffer != null && methodBuffer.length() != 0) {
-//			buffer.append(methodBuffer.toString());
-//			methodBuffer = null;
-//		}
-//	}
-	
-	protected String[] getFilterMethods() {
+	private String[] getFilterMethods() {
 		return new String[0];
 	}
 
 	public boolean visit(MethodDeclaration node) {
-//		methodBuffer = new StringBuffer();
 		if (getJ2STag(node, "@j2sIgnore") != null) {
 			return false;
 		}
 
 		IMethodBinding mBinding = node.resolveBinding();
-//		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimpleRPCRunnable", "ajaxRun")) {
-//			if (getJ2STag(node, "@j2sKeep") == null) {
-//				return false;
-//			}
-//		}
-//		String[] pipeMethods = new String[] { "pipeSetup", "pipeThrough", "through", "pipeMonitoring",
-//				"pipeMonitoringInterval", "pipeWaitClosingInterval", "setPipeHelper" };
-//		for (int i = 0; i < pipeMethods.length; i++) {
-//			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimplePipeRunnable", pipeMethods[i])) {
-//				if (getJ2STag(node, "@j2sKeep") == null) {
-//					return false;
-//				}
-//			}
-//		}
-//		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.CompoundPipeSession", "convert")) {
-//			if (getJ2STag(node, "@j2sKeep") == null) {
-//				return false;
-//			}
-//		}
 		if (mBinding != null) {
 			methodDeclareStack.push(mBinding.getKey());
 		}
@@ -1799,10 +1687,6 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 			buffer.append("\", ");
 		}
 		buffer.append("\r\n");
-//		boolean isPrivate = (node.getModifiers() & Modifier.PRIVATE) != 0;
-//		if (isPrivate && indicatePrivateF$) {
-//			buffer.append("($fz = ");
-//		}		
 		buffer.append("function (");
 		List<?> parameters = node.parameters();
 		visitList(parameters, ", ");
@@ -1864,7 +1748,7 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 				visitNativeJavadoc(node.getJavadoc(), null, false);
 				buffer.append("}");
 			}
-			List<FinalVariable> normalVars = getVariableVisitor().normalVars;
+			List<FinalVariable> normalVars = getVariableHelper().normalVars;
 			for (int i = normalVars.size() - 1; i >= 0; i--) {
 				FinalVariable var = normalVars.get(i);
 				if (var.blockLevel >= blockLevel) {
@@ -2009,12 +1893,6 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 		if (isDebugging()) {
 			read = readSources(node, "@j2sDebug", prefix, suffix, false);
 		}
-//		if (!read) {
-//			boolean toCompileVariableName = false;//getVariableVisitor().isToCompileVariableName();
-//			if (!toCompileVariableName) {
-//				read = readSources(node, "@j2sNativeSrc", prefix, suffix, false);
-//			}
-//		}
 		if (!read) {
 			read = readSources(node, "@j2sNative", prefix, suffix, false);
 		}
@@ -2086,7 +1964,7 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 											isFiltered = true;
 											break;
 										}
-									} else if (Bindings.isMethodInvoking(methodBinding, filterMethods[j], filterMethods[j + 1])) {
+									} else if (BindingHelper.isMethodInvoking(methodBinding, filterMethods[j], filterMethods[j + 1])) {
 										isFiltered = true;
 										break;
 									}
@@ -2278,15 +2156,15 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 			}
 			
 			String fieldVar = null;
-			if (getVariableVisitor().isFinalSensible 
+			if (getVariableHelper().isFinalSensible 
 					&& (varBinding.getModifiers() & Modifier.FINAL) != 0 
 					&& varBinding.getDeclaringMethod() != null) {
 				String key = varBinding.getDeclaringMethod().getKey();
 				if (methodDeclareStack.size() == 0 || !key.equals(methodDeclareStack.peek())) {
 					buffer.append("this.$finals.");
 					if (currentBlockForVisit != -1) {
-						List<FinalVariable> finalVars = getVariableVisitor().finalVars;
-						List<FinalVariable> visitedVars = getVariableVisitor().visitedVars;
+						List<FinalVariable> finalVars = getVariableHelper().finalVars;
+						List<FinalVariable> visitedVars = getVariableHelper().visitedVars;
 						int size = finalVars.size();
 						for (int i = 0; i < size; i++) {
 							FinalVariable vv = finalVars.get(size - i - 1);
@@ -2387,7 +2265,7 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 				AbstractTypeDeclaration type = (AbstractTypeDeclaration) parent;
 				ITypeBinding typeBinding = type.resolveBinding();
 				superLevel++;
-				if (Bindings.isSuperType(declaringClass, typeBinding)) {
+				if (BindingHelper.isSuperType(declaringClass, typeBinding)) {
 					if (superLevel == 1) {
 						buffer.append("this.");
 						isThis = true;
@@ -2400,7 +2278,7 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 				AnonymousClassDeclaration type = (AnonymousClassDeclaration) parent;
 				ITypeBinding typeBinding = type.resolveBinding();
 				superLevel++;
-				if (Bindings.isSuperType(declaringClass, typeBinding)) {
+				if (BindingHelper.isSuperType(declaringClass, typeBinding)) {
 					if (superLevel == 1) {
 						buffer.append("this.");
 						isThis = true;
@@ -2468,8 +2346,8 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 				String methodSig = methodDeclareStack.peek();
 				f = new FinalVariable(blockLevel + 1, identifier, methodSig);
 			}
-			List<FinalVariable> finalVars = getVariableVisitor().finalVars;
-			List<FinalVariable> normalVars = getVariableVisitor().normalVars;
+			List<FinalVariable> finalVars = getVariableHelper().finalVars;
+			List<FinalVariable> normalVars = getVariableHelper().normalVars;
 			f.toVariableName = getIndexedVarName(identifier, normalVars.size());
 			normalVars.add(f);
 			if ((binding.getModifiers() & Modifier.FINAL) != 0) {
@@ -2616,8 +2494,8 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 		}
 
 		String fullClassName = null;
-		String packageName = ((J2SPackageHelper) getHelper(J2SPackageHelper.class)).getPackageName();
-		String className = ((J2STypeHelper) getHelper(J2STypeHelper.class)).getClassName();
+		String packageName = getPackageHelper().getPackageName();
+		String className = getTypeHelper().getClassName();
 		if (packageName != null && packageName.length() != 0) {
 			fullClassName = packageName + '.' + className;
 		} else {
@@ -3119,14 +2997,14 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 			}
 		}
 
-		String fieldsSerializables = prepareSimpleSerializable(node, bodyDeclarations);
-		if (fieldsSerializables.length() > 0) {
-			buffer.append("Clazz.registerSerializableFields(cla$$, ");
-			buffer.append(fieldsSerializables.toString());
-			buffer.append(");\r\n");
-		}
-
-		readSources(node, "@j2sSuffix", "\r\n", "\r\n", true);
+//		String fieldsSerializables = prepareSimpleSerializable(node, bodyDeclarations);
+//		if (fieldsSerializables.length() > 0) {
+//			buffer.append("Clazz.registerSerializableFields(cla$$, ");
+//			buffer.append(fieldsSerializables.toString());
+//			buffer.append(");\r\n");
+//		}
+//
+//		readSources(node, "@j2sSuffix", "\r\n", "\r\n", true);
 		laterBuffer = new StringBuffer();
 		super.endVisit(node);
 	}
@@ -3137,135 +3015,135 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 		return ("String".equals(fqName) || "java.lang.String".equals(fqName));
 	}
 
-	@SuppressWarnings("deprecation")
-	private String prepareSimpleSerializable(TypeDeclaration node, List<?> bodyDeclarations) {
-		StringBuffer fieldsSerializables = new StringBuffer();
-		ITypeBinding binding = node.resolveBinding();
-		boolean isSimpleSerializable = binding != null
-				&& (Bindings.findTypeInHierarchy(binding, "net.sf.j2s.ajax.SimpleSerializable") != null);
-		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
-			ASTNode element = (ASTNode) iter.next();
-			if (element instanceof FieldDeclaration) {
-				if (node.isInterface()) {
-					/*
-					 * As members of interface should be treated
-					 * as final and for javascript interface won't
-					 * get instantiated, so the member will be
-					 * treated specially. 
-					 */
-					continue;
-				}
-				FieldDeclaration fieldDeclaration = (FieldDeclaration) element;
-				
-				if (isSimpleSerializable) {
-					List<?> fragments = fieldDeclaration.fragments();
-					int modifiers = fieldDeclaration.getModifiers();
-					if ((Modifier.isPublic(modifiers)/* || Modifier.isProtected(modifiers)*/) 
-							&& !Modifier.isStatic(modifiers) && !Modifier.isTransient(modifiers)) {
-						Type type = fieldDeclaration.getType();
-						int dims = 0;
-						if (type.isArrayType()) {
-							dims = 1;
-							type = ((ArrayType) type).getComponentType();
-						}
-						String mark = null;
-						if (type.isPrimitiveType()) {
-							PrimitiveType pType = (PrimitiveType) type;
-							Code code = pType.getPrimitiveTypeCode();
-							if (code == PrimitiveType.FLOAT) {
-								mark = "F";
-							} else if (code == PrimitiveType.DOUBLE) {
-								mark = "D";
-							} else if (code == PrimitiveType.INT) {
-								mark = "I";
-							} else if (code == PrimitiveType.LONG) {
-								mark = "L";
-							} else if (code == PrimitiveType.SHORT) {
-								mark = "S";
-							} else if (code == PrimitiveType.BYTE) {
-								mark = "B";
-							} else if (code == PrimitiveType.CHAR) {
-								mark = "C";
-							} else if (code == PrimitiveType.BOOLEAN) {
-								mark = "b";
-							} 
-						}
-						ITypeBinding resolveBinding = type.resolveBinding();
-						if ("java.lang.String".equals(resolveBinding.getQualifiedName())) {
-							mark = "s";
-						} else {
-							ITypeBinding t = resolveBinding;
-							do {
-								String typeName = t.getQualifiedName();
-								if ("java.lang.Object".equals(typeName)) {
-									break;
-								}
-								if ("net.sf.j2s.ajax.SimpleSerializable".equals(typeName)) {
-									mark = "O";
-									break;
-								}
-								t = t.getSuperclass();
-								if (t == null) {
-									break;
-								}
-							} while (true);
-						}
-						if (mark != null) {
-							for (Iterator<?> xiter = fragments.iterator(); xiter.hasNext();) {
-								VariableDeclarationFragment var = (VariableDeclarationFragment) xiter.next();
-								int curDim = dims + var.getExtraDimensions();
-								if (curDim <= 1) {
-									if (fieldsSerializables.length() > 0) {
-										fieldsSerializables.append(", ");
-									}
-									/*
-									 * Fixed bug for the following scenario:
-									 * class NT extends ... {
-									 * 	public boolean typing;
-									 * 	public void typing() {
-									 * 	}
-									 * }
-									 */
-									String fieldName = var.getName().toString();
-									if (checkKeyworkViolation(fieldName)) {
-									    fieldName = "$" + fieldName;
-									}
-									String prefix = null;
-									if (binding != null 
-						                    && checkSameName(binding, fieldName)) {
-										prefix = "$";
-						            }
-									if (binding != null 
-											&& isInheritedFieldName(binding, fieldName)) {
-										fieldName = getFieldName(binding, fieldName);
-									}
-									if (prefix != null) {
-										fieldName = prefix + fieldName;
-									}
-
-									fieldsSerializables.append("\"" + fieldName + "\", \"");
-									if (mark.charAt(0) == 's' && curDim == 1) {
-										fieldsSerializables.append("AX");
-									} else if (curDim == 1) {
-										fieldsSerializables.append("A");
-										fieldsSerializables.append(mark);
-									} else {
-										fieldsSerializables.append(mark);
-									}
-									fieldsSerializables.append("\"");
-								}
-							}					
-						}
-					}
-				}
-			}
-		}
-		return fieldsSerializables.toString();
-	}
+//	@SuppressWarnings("deprecation")
+//	private String prepareSimpleSerializable(TypeDeclaration node, List<?> bodyDeclarations) {
+//		StringBuffer fieldsSerializables = new StringBuffer();
+//		ITypeBinding binding = node.resolveBinding();
+//		boolean isSimpleSerializable = binding != null
+//				&& (BindingHelper.findTypeInHierarchy(binding, "net.sf.j2s.ajax.SimpleSerializable") != null);
+//		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
+//			ASTNode element = (ASTNode) iter.next();
+//			if (element instanceof FieldDeclaration) {
+//				if (node.isInterface()) {
+//					/*
+//					 * As members of interface should be treated
+//					 * as final and for javascript interface won't
+//					 * get instantiated, so the member will be
+//					 * treated specially. 
+//					 */
+//					continue;
+//				}
+//				FieldDeclaration fieldDeclaration = (FieldDeclaration) element;
+//				
+//				if (isSimpleSerializable) {
+//					List<?> fragments = fieldDeclaration.fragments();
+//					int modifiers = fieldDeclaration.getModifiers();
+//					if ((Modifier.isPublic(modifiers)/* || Modifier.isProtected(modifiers)*/) 
+//							&& !Modifier.isStatic(modifiers) && !Modifier.isTransient(modifiers)) {
+//						Type type = fieldDeclaration.getType();
+//						int dims = 0;
+//						if (type.isArrayType()) {
+//							dims = 1;
+//							type = ((ArrayType) type).getComponentType();
+//						}
+//						String mark = null;
+//						if (type.isPrimitiveType()) {
+//							PrimitiveType pType = (PrimitiveType) type;
+//							Code code = pType.getPrimitiveTypeCode();
+//							if (code == PrimitiveType.FLOAT) {
+//								mark = "F";
+//							} else if (code == PrimitiveType.DOUBLE) {
+//								mark = "D";
+//							} else if (code == PrimitiveType.INT) {
+//								mark = "I";
+//							} else if (code == PrimitiveType.LONG) {
+//								mark = "L";
+//							} else if (code == PrimitiveType.SHORT) {
+//								mark = "S";
+//							} else if (code == PrimitiveType.BYTE) {
+//								mark = "B";
+//							} else if (code == PrimitiveType.CHAR) {
+//								mark = "C";
+//							} else if (code == PrimitiveType.BOOLEAN) {
+//								mark = "b";
+//							} 
+//						}
+//						ITypeBinding resolveBinding = type.resolveBinding();
+//						if ("java.lang.String".equals(resolveBinding.getQualifiedName())) {
+//							mark = "s";
+//						} else {
+//							ITypeBinding t = resolveBinding;
+//							do {
+//								String typeName = t.getQualifiedName();
+//								if ("java.lang.Object".equals(typeName)) {
+//									break;
+//								}
+//								if ("net.sf.j2s.ajax.SimpleSerializable".equals(typeName)) {
+//									mark = "O";
+//									break;
+//								}
+//								t = t.getSuperclass();
+//								if (t == null) {
+//									break;
+//								}
+//							} while (true);
+//						}
+//						if (mark != null) {
+//							for (Iterator<?> xiter = fragments.iterator(); xiter.hasNext();) {
+//								VariableDeclarationFragment var = (VariableDeclarationFragment) xiter.next();
+//								int curDim = dims + var.getExtraDimensions();
+//								if (curDim <= 1) {
+//									if (fieldsSerializables.length() > 0) {
+//										fieldsSerializables.append(", ");
+//									}
+//									/*
+//									 * Fixed bug for the following scenario:
+//									 * class NT extends ... {
+//									 * 	public boolean typing;
+//									 * 	public void typing() {
+//									 * 	}
+//									 * }
+//									 */
+//									String fieldName = var.getName().toString();
+//									if (checkKeyworkViolation(fieldName)) {
+//									    fieldName = "$" + fieldName;
+//									}
+//									String prefix = null;
+//									if (binding != null 
+//						                    && checkSameName(binding, fieldName)) {
+//										prefix = "$";
+//						            }
+//									if (binding != null 
+//											&& isInheritedFieldName(binding, fieldName)) {
+//										fieldName = getFieldName(binding, fieldName);
+//									}
+//									if (prefix != null) {
+//										fieldName = prefix + fieldName;
+//									}
+//
+//									fieldsSerializables.append("\"" + fieldName + "\", \"");
+//									if (mark.charAt(0) == 's' && curDim == 1) {
+//										fieldsSerializables.append("AX");
+//									} else if (curDim == 1) {
+//										fieldsSerializables.append("A");
+//										fieldsSerializables.append(mark);
+//									} else {
+//										fieldsSerializables.append(mark);
+//									}
+//									fieldsSerializables.append("\"");
+//								}
+//							}					
+//						}
+//					}
+//				}
+//			}
+//		}
+//		return fieldsSerializables.toString();
+//	}
 
 	public boolean visit(TypeDeclaration node) {
 		ITypeBinding binding = node.resolveBinding();
-		J2STypeHelper typeVisitor = ((J2STypeHelper) getHelper(J2STypeHelper.class));
+		J2STypeHelper typeVisitor = getTypeHelper();
 		if (binding != null && binding.isTopLevel()) {
 			typeVisitor.setClassName(binding.getName());
 		}
@@ -3297,9 +3175,8 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 			} else {
 				visitorClassName = className + "." + node.getName();
 			}
-			((J2STypeHelper) visitor.getHelper(J2STypeHelper.class)).setClassName(visitorClassName);
-			((J2SPackageHelper) visitor.getHelper(J2SPackageHelper.class))
-					.setPackageName(((J2SPackageHelper) getHelper(J2SPackageHelper.class)).getPackageName());
+			visitor.getTypeHelper().setClassName(visitorClassName);
+			visitor.getPackageHelper().setPackageName(getPackageHelper().getPackageName());
 			node.accept(visitor);
 			if (node.isInterface() || (node.getModifiers() & Modifier.STATIC) != 0
 					|| (node.getParent() instanceof TypeDeclaration
@@ -3345,7 +3222,7 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 		if (node.isInterface()) {
 			return false;
 		}
-		readSources(node, "@j2sPrefix", "", " ", true);
+		//readSources(node, "@j2sPrefix", "", " ", true);
 		buffer.append("var cla$$ = ");
 		buffer.append("Clazz.decorateAsClass (");
 		buffer.append("function () {\r\n");
@@ -3543,16 +3420,16 @@ public class Java2ScriptScriptVisitor extends J2SDocVisitor {
 			if (binding != null) {
 				ITypeBinding superclass = binding.getSuperclass();
 				if (superclass != null) {
-					StringBuffer buffer = new StringBuffer();
+					StringBuffer buf = new StringBuffer();
 					IVariableBinding[] declaredFields = superclass.getDeclaredFields();
 					for (int i = 0; i < declaredFields.length; i++) {
 						//String fieldName = getJ2SName(declaredFields[i]);
 						if (name.equals(declaredFields[i].getName())) {
-							buffer.append("$");
+							buf.append("$");
 						}
 					}
-					buffer.append(getFieldName(superclass, name));
-					return buffer.toString();
+					buf.append(getFieldName(superclass, name));
+					return buf.toString();
 				}
 			}
 			return name;

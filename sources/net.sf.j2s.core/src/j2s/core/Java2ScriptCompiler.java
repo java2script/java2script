@@ -84,9 +84,12 @@ public abstract class Java2ScriptCompiler {
 
 	abstract public boolean compileToJavaScript(IFile javaSource, String trailer);
 
-	abstract protected String getDefaultJ2SFile();
-
 	abstract public void finalizeProject();
+
+	/*
+	 * To save a default file with comments specific to this transpiler.
+	 */
+	abstract protected String getDefaultJ2SFileContents();
 
 	/**
 	 * The name of the J2S options file, aka as the "Dot-j2s" file. Please do not
@@ -99,7 +102,6 @@ public abstract class Java2ScriptCompiler {
 	protected Properties props;
 
 	protected String projectFolder;
-//	protected String outputPath;
 	protected String siteFolder;
 	protected String j2sPath;
 	protected String excludedPaths;
@@ -271,7 +273,7 @@ public abstract class Java2ScriptCompiler {
 			return false;
 		}
 		if (getFileContents(activeJ2SFile).trim().length() == 0) {
-			writeToFile(activeJ2SFile, getDefaultJ2SFile());
+			writeToFile(activeJ2SFile, getDefaultJ2SFileContents());
 		}
 		int jslLevel = javaLanguageLevel;
 		if (isSwingJS) {

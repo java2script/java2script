@@ -359,7 +359,7 @@ public class Java2ScriptSwingJSCompiler extends Java2ScriptCompiler {
 	 */
 
 	@Override
-	protected String getDefaultJ2SFile() {
+	protected String getDefaultJ2SFileContents() {
 
 		return "#j2s default configuration file created by net.sf.java2script_" + CorePlugin.VERSION + " " + new Date()
 				+ "\n\n" + "#enable the Java2Script transpiler -- comment out to disable\n"

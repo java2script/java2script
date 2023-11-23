@@ -40,7 +40,7 @@ public class MethodReferenceASTVisitor extends ASTVisitor {
 		this.methodSignature = methodSignature.replaceAll("%?<[^>]+>", "");
 	}
 	
-	public static boolean checkReference(ASTNode node, String methodSignature) {
+	static boolean checkReference(ASTNode node, String methodSignature) {
 		MethodReferenceASTVisitor methodRefVisitor = new MethodReferenceASTVisitor(methodSignature);
 		methodRefVisitor.isReferenced = false;
 		node.accept(methodRefVisitor);

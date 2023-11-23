@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2007 java2script.org and others.
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
@@ -17,7 +17,7 @@ package j2s.jmol.common;
  *
  * 2006-12-3
  */
-public class J2SPackageHelper extends J2SHelper {
+class J2SPackageHelper extends J2SHelper {
 
 	protected String thisPackageName = "";
 	
@@ -34,11 +34,11 @@ public class J2SPackageHelper extends J2SHelper {
 				"java.util"};
 	}
 
-	public String getPackageName() {
+	String getPackageName() {
 		return thisPackageName;
 	}
 
-	public void setPackageName(String thisPackageName) {
+	void setPackageName(String thisPackageName) {
 		this.thisPackageName = thisPackageName;
 	}
 

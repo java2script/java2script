@@ -149,7 +149,7 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 
 	private void outputJavaScript(Java2ScriptScriptVisitor visitor, Java2ScriptDependencyVisitor dvisitor, CompilationUnit fRoot,
 			String outputPath, String trailer, String sourceLocation) {
-		String js = finalFixes(dvisitor.getDependencyScript(visitor.getBuffer()));
+		String js = finalFixes(dvisitor.cleanLoadCalls(visitor.getBuffer()));
 		String elementName = fRoot.getJavaElement().getElementName();
 		elementName = elementName.substring(0, elementName.lastIndexOf('.'));
 		String packageName = visitor.getPackageName();
@@ -182,7 +182,7 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 	}
 	
 	@Override
-	protected String getDefaultJ2SFile() {
+	protected String getDefaultJ2SFileContents() {
 		return "#j2sjmol default configuration file created by j2s.core plugin " + CorePlugin.VERSION + " " + new Date()
 				+ "\n\n" + "#enable the Java2Script transpiler -- set to \"disabled\" to disable\n"
 				+ "# default is \"enabled\".\n" + "j2s.compiler.status=enabled\n\n"

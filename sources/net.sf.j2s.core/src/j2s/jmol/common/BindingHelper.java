@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
@@ -42,13 +42,10 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 
-public class Bindings {
-	
-	/**
-	 * Static access only 
-	 */
-	public static final String ARRAY_LENGTH_FIELD_BINDING_STRING= "(array type):length";//$NON-NLS-1$
-	private Bindings() {
+class BindingHelper {
+
+	private static final String ARRAY_LENGTH_FIELD_BINDING_STRING= "(array type):length";//$NON-NLS-1$
+	private BindingHelper() {
 		// No instance
 	}
 //	
@@ -76,7 +73,7 @@ public class Bindings {
 	 * @param b2 the second binding.
 	 * @return boolean
 	 */
-	public static boolean equals(IBinding b1, IBinding b2) {
+	static boolean equals(IBinding b1, IBinding b2) {
 		boolean isEqualTo= b1.isEqualTo(b2);
 		if (!isEqualTo 
 				&& b1 instanceof ITypeBinding 
@@ -125,7 +122,7 @@ public class Bindings {
 	 * @param b2 the second array of bindings.
 	 * @return boolean
 	 */
-	public static boolean equals(IBinding[] b1, IBinding[] b2) {
+	static boolean equals(IBinding[] b1, IBinding[] b2) {
 		Assert.isNotNull(b1);
 		if (b1 == b2)
 			return true;
@@ -134,13 +131,13 @@ public class Bindings {
 		if (b1.length != b2.length)
 			return false;
 		for (int i= 0; i < b1.length; i++) {
-			if (! Bindings.equals(b1[i], b2[i]))
+			if (! BindingHelper.equals(b1[i], b2[i]))
 				return false;
 		}
 		return true;
 	}
 	
-	public static int hashCode(IBinding binding){
+	static int hashCode(IBinding binding){
 		Assert.isNotNull(binding);
 		String key= binding.getKey();
 		if (key == null)
@@ -153,7 +150,7 @@ public class Bindings {
 	 * There are tests whose pre-computed test results rely on the returned String's format.
 	 * @see org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider
 	 */
-	public static String asString(IBinding binding) {
+	static String asString(IBinding binding) {
 		if (binding instanceof IMethodBinding)
 			return asString((IMethodBinding)binding);
 		else if (binding instanceof ITypeBinding)
@@ -199,18 +196,18 @@ public class Bindings {
 		return result.toString();
 	}
 	
-	public static String getTypeQualifiedName(ITypeBinding type) {
+	static String getTypeQualifiedName(ITypeBinding type) {
 		List<String> result= new ArrayList<String>(5);
 		createName(type, false, result);
 		
-		StringBuffer buffer= new StringBuffer();
+		StringBuffer buf= new StringBuffer();
 		for (int i= 0; i < result.size(); i++) {
 			if (i > 0) {
-				buffer.append('.');
+				buf.append('.');
 			}
-			buffer.append((result.get(i)));
+			buf.append((result.get(i)));
 		}
-		return buffer.toString();
+		return buf.toString();
 	}
 
 	/**
@@ -221,7 +218,7 @@ public class Bindings {
 	 * @param type the type binding to get its fully qualified name
 	 * @return the fully qualified name
 	 */
-	public static String getFullyQualifiedName(ITypeBinding type) {
+	static String getFullyQualifiedName(ITypeBinding type) {
 		String name= type.getQualifiedName();
 		// TODO: ?
 		// return removeBrackets(name);
@@ -231,7 +228,7 @@ public class Bindings {
 		return name;
 	}	
 
-//	public static String getImportName(IBinding binding) {
+//	static String getImportName(IBinding binding) {
 //		ITypeBinding declaring= null;
 //		switch (binding.getKind()) {
 //			case IBinding.TYPE:
@@ -279,19 +276,19 @@ public class Bindings {
 	}	
 	
 	
-	public static String[] getNameComponents(ITypeBinding type) {
+	static String[] getNameComponents(ITypeBinding type) {
 		List<String> result= new ArrayList<String>(5);
 		createName(type, false, result);
 		return result.toArray(new String[result.size()]);
 	}
 	
-	public static String[] getAllNameComponents(ITypeBinding type) {
+	static String[] getAllNameComponents(ITypeBinding type) {
 		List<String> result= new ArrayList<String>(5);
 		createName(type, true, result);
 		return result.toArray(new String[result.size()]);
 	}
 	
-	public static ITypeBinding getTopLevelType(ITypeBinding type) {
+	static ITypeBinding getTopLevelType(ITypeBinding type) {
 		ITypeBinding parent= type.getDeclaringClass();
 		while (parent != null) {
 			type= parent;
@@ -308,7 +305,7 @@ public class Bindings {
 	 * @return <code>true</code> if the passed type binding is a runtime exception;
 	 * 	otherwise <code>false</code> is returned
 	 */
-	public static boolean isRuntimeException(ITypeBinding thrownException) {
+	static boolean isRuntimeException(ITypeBinding thrownException) {
 		if (thrownException == null || thrownException.isPrimitive() || thrownException.isArray())
 			return false;
 		return findTypeInHierarchy(thrownException, "java.lang.RuntimeException") != null; //$NON-NLS-1$
@@ -321,7 +318,7 @@ public class Bindings {
 	 * @param fieldName the field name
 	 * @return the binding representing the field or <code>null</code>
 	 */
-	public static IVariableBinding findFieldInType(ITypeBinding type, String fieldName) {
+	static IVariableBinding findFieldInType(ITypeBinding type, String fieldName) {
 		if (type.isPrimitive())
 			return null;
 		IVariableBinding[] fields= type.getDeclaredFields();
@@ -344,7 +341,7 @@ public class Bindings {
 	 * 
 	 * @deprecated use {@link #findOverriddenMethodInType(ITypeBinding, IMethodBinding)}
 	 */
-	public static IMethodBinding findMethodInType(ITypeBinding type, String methodName, ITypeBinding[] parameters) {
+	static IMethodBinding findMethodInType(ITypeBinding type, String methodName, ITypeBinding[] parameters) {
 		if (type.isPrimitive())
 			return null;
 		IMethodBinding[] methods= type.getDeclaredMethods();
@@ -368,7 +365,7 @@ public class Bindings {
 	 * @param parameters The parameter types of the method to find. If <code>null</code> is passed, only the name is matched and parameters are ignored.
 	 * @return the method binding representing the method
 	 */
-	public static IMethodBinding findMethodInType(ITypeBinding type, String methodName, String[] parameters) {
+	static IMethodBinding findMethodInType(ITypeBinding type, String methodName, String[] parameters) {
 		if (type.isPrimitive())
 			return null;
 		IMethodBinding[] methods= type.getDeclaredMethods();
@@ -391,7 +388,7 @@ public class Bindings {
 	 * @param method The specified method that would override the result
 	 * @return the method binding of the method that is overridden by the specified <code>method<code>, or <code>null</code>
 	 */
-	public static IMethodBinding findOverriddenMethodInType(ITypeBinding type, IMethodBinding method) {
+	static IMethodBinding findOverriddenMethodInType(ITypeBinding type, IMethodBinding method) {
 		if (type.isPrimitive())
 			return null;
 		IMethodBinding[] methods= type.getDeclaredMethods();
@@ -418,7 +415,7 @@ public class Bindings {
 	 * @param method The specified method that would override the result
 	 * @return the method binding of the method that is overridden by the specified <code>method<code>, or <code>null</code>
 	 */
-	public static IMethodBinding findConstructorInType(ITypeBinding type, IMethodBinding method) {
+	static IMethodBinding findConstructorInType(ITypeBinding type, IMethodBinding method) {
 		if (type.isPrimitive())
 			return null;
 		ITypeBinding[] types = method.getParameterTypes();
@@ -462,7 +459,7 @@ public class Bindings {
 	 * @param fieldName The name of the field to find
 	 * @return the variable binding representing the field
 	 */
-	public static IVariableBinding findFieldInHierarchy(ITypeBinding type, String fieldName) {
+	static IVariableBinding findFieldInHierarchy(ITypeBinding type, String fieldName) {
 		IVariableBinding field= findFieldInType(type, fieldName);
 		if (field != null)
 			return field;
@@ -492,7 +489,7 @@ public class Bindings {
 	 * @param parameters The parameter types of the method to find. If <code>null</code> is passed, only the name is matched and parameters are ignored.
 	 * @return the method binding representing the method
 	 */
-	public static IMethodBinding findMethodInHierarchy(ITypeBinding type, String methodName, ITypeBinding parameters[]) {
+	static IMethodBinding findMethodInHierarchy(ITypeBinding type, String methodName, ITypeBinding parameters[]) {
 		IMethodBinding method= findMethodInType(type, methodName, parameters);
 		if (method != null)
 			return method;
@@ -523,7 +520,7 @@ public class Bindings {
 	 * @param parameters The parameter types of the method to find. If <code>null</code> is passed, only the name is matched and parameters are ignored.
 	 * @return the method binding representing the method
 	 */
-	public static IMethodBinding findMethodInHierarchy(ITypeBinding typeObject, ITypeBinding type, String methodName, String parameters[]) {
+	static IMethodBinding findMethodInHierarchy(ITypeBinding typeObject, ITypeBinding type, String methodName, String parameters[]) {
 		IMethodBinding method= findMethodInType(type, methodName, parameters);
 		if (method != null)
 			return method;
@@ -552,7 +549,7 @@ public class Bindings {
 	 * @param binding The method that overrides
 	 * @return the method binding overridden the method
 	 */
-	public static IMethodBinding findOverriddenMethodInHierarchy(ITypeBinding type, IMethodBinding binding) {
+	static IMethodBinding findOverriddenMethodInHierarchy(ITypeBinding type, IMethodBinding binding) {
 		IMethodBinding method= findOverriddenMethodInType(type, binding);
 		if (method != null)
 			return method;
@@ -578,7 +575,7 @@ public class Bindings {
 	 * @param testVisibility If true the result is tested on visibility. Null is returned if the method is not visible.
 	 * @return the method binding representing the method
 	 */
-	public static IMethodBinding findMethodDefininition(IMethodBinding method, boolean testVisibility) {
+	static IMethodBinding findMethodDefininition(IMethodBinding method, boolean testVisibility) {
 		int modifiers= method.getModifiers();
 		if (Modifier.isPrivate(modifiers) || Modifier.isStatic(modifiers) || method.isConstructor()) {
 			return null;
@@ -601,7 +598,7 @@ public class Bindings {
 		for (int i= 0; i < interfaces.length; i++) {
 			IMethodBinding res= findOverriddenMethodInHierarchy(interfaces[i], method);
 			if (res != null) {
-				return res; // methods from interfaces are always public and therefore visible
+				return res; // methods from interfaces are always and therefore visible
 			}
 		}
 		return null;
@@ -613,7 +610,7 @@ public class Bindings {
  	 * @param testVisibility If true the result is tested on visibility. Null is returned if the method is not visible.
 	 * @return the method binding representing the method
 	 */
-	public static IMethodBinding findMethodImplementation(IMethodBinding method, boolean testVisibility) {
+	static IMethodBinding findMethodImplementation(IMethodBinding method, boolean testVisibility) {
 		ITypeBinding superClass= method.getDeclaringClass().getSuperclass();
 		
 		while (superClass != null) {
@@ -630,7 +627,7 @@ public class Bindings {
 	}
 	
 	@SuppressWarnings("null")
-	public static boolean isVisibleInHierarchy(IMethodBinding member, IPackageBinding pack) {
+	static boolean isVisibleInHierarchy(IMethodBinding member, IPackageBinding pack) {
 		int otherflags= member.getModifiers();
 		ITypeBinding declaringType= member.getDeclaringClass();
 		if (Modifier.isPublic(otherflags) || Modifier.isProtected(otherflags) || (declaringType != null && declaringType.isInterface())) {
@@ -650,7 +647,7 @@ public class Bindings {
 	 * @param methodBinding The binding of the method to find
 	 * @return the method binding representing the overridden method, or <code>null</code>
 	 */
-	public static IMethodBinding findMethodDeclarationInHierarchy(ITypeBinding type, IMethodBinding methodBinding) {
+	static IMethodBinding findMethodDeclarationInHierarchy(ITypeBinding type, IMethodBinding methodBinding) {
 		ITypeBinding[] interfaces= type.getInterfaces();
 		for (int i= 0; i < interfaces.length; i++) {
 			ITypeBinding curr= interfaces[i];
@@ -683,7 +680,7 @@ public class Bindings {
 	 * @param methodBinding The binding of the method to find
 	 * @return the method binding representing the overridden method, or <code>null</code>
 	 */
-	public static IMethodBinding findConstructorInHierarchy(ITypeBinding type, IMethodBinding methodBinding) {
+	static IMethodBinding findConstructorInHierarchy(ITypeBinding type, IMethodBinding methodBinding) {
 		ITypeBinding superClass= type.getSuperclass();
 		if (superClass != null) {
 			IMethodBinding method= findConstructorInType(superClass, methodBinding);
@@ -702,7 +699,7 @@ public class Bindings {
 	 * @param type The type to get the supertypes of.
 	 * @return all super types (excluding <code>type</code>)
 	 */
-	public static ITypeBinding[] getAllSuperTypes(ITypeBinding type) {
+	static ITypeBinding[] getAllSuperTypes(ITypeBinding type) {
 		Set<ITypeBinding> result= new HashSet<ITypeBinding>();
 		collectSuperTypes(type, result);
 		result.remove(type);
@@ -729,7 +726,7 @@ public class Bindings {
 	 * @param visitor the visitor
 	 * @return <code>false</code> if the visiting got interrupted
 	 */
-//	public static boolean visitHierarchy(ITypeBinding type, TypeBindingVisitor visitor) {
+//	static boolean visitHierarchy(ITypeBinding type, TypeBindingVisitor visitor) {
 //		boolean result= visitSuperclasses(type, visitor);
 //		if(result) {
 //			result= visitInterfaces(type, visitor);
@@ -744,7 +741,7 @@ public class Bindings {
 	 * @param visitor the visitor
 	 * @return <code>false</code> if the visiting got interrupted
 	 */
-//	public static boolean visitInterfaces(ITypeBinding type, TypeBindingVisitor visitor) {
+//	static boolean visitInterfaces(ITypeBinding type, TypeBindingVisitor visitor) {
 //		ITypeBinding[] interfaces= type.getInterfaces();
 //		for (int i= 0; i < interfaces.length; i++) {
 //			if (!visitor.visit(interfaces[i])) {
@@ -761,7 +758,7 @@ public class Bindings {
 	 * @param visitor the visitor
 	 * @return <code>false</code> if the visiting got interrupted
 	 */
-//	public static boolean visitSuperclasses(ITypeBinding type, TypeBindingVisitor visitor) {
+//	static boolean visitSuperclasses(ITypeBinding type, TypeBindingVisitor visitor) {
 //		while ((type= type.getSuperclass()) != null) {
 //			if (!visitor.visit(type)) {
 //				return false;
@@ -775,7 +772,7 @@ public class Bindings {
 	 * @deprecated use {@link #isSubsignature(IMethodBinding, IMethodBinding)}
 	 */
 	//TODO: rename to isErasureEquivalentMethod and change to two IMethodBinding parameters
-	public static boolean isEqualMethod(IMethodBinding method, String methodName, ITypeBinding[] parameters) {
+	static boolean isEqualMethod(IMethodBinding method, String methodName, ITypeBinding[] parameters) {
 		if (!method.getName().equals(methodName))
 			return false;
 			
@@ -812,7 +809,7 @@ public class Bindings {
 	 *         override m2. Accessibility and return types are not taken into
 	 *         account. Note that subsignature is <em>not</em> symmetric!
 	 */
-	public static boolean isSubsignature(IMethodBinding overriding, IMethodBinding overridden) {
+	static boolean isSubsignature(IMethodBinding overriding, IMethodBinding overridden) {
 		// TODO: use IMethodBinding#isSubsignature(..) once it is tested and fixed (only
 		// erasure of m1's parameter types, considering type variable counts, doing type
 		// variable substitution
@@ -925,7 +922,7 @@ public class Bindings {
 	 * 		m1 (with name <code>methodName</code> and method parameters <code>parameters</code>)
 	 * 		is a subsignature of the method <code>m2</code>. Accessibility and return types are not taken into account.
 	 */
-	public static boolean isEqualMethod(IMethodBinding method, String methodName, String[] parameters) {
+	static boolean isEqualMethod(IMethodBinding method, String methodName, String[] parameters) {
 		if (!method.getName().equals(methodName))
 			return false;
 
@@ -960,7 +957,7 @@ public class Bindings {
 	 * @param fullyQualifiedTypeName the fully qualified name to search for
 	 * @return the type binding
 	 */
-	public static ITypeBinding findTypeInHierarchy(ITypeBinding hierarchyType, String fullyQualifiedTypeName) {
+	static ITypeBinding findTypeInHierarchy(ITypeBinding hierarchyType, String fullyQualifiedTypeName) {
 		if (hierarchyType == null || hierarchyType.isArray() || hierarchyType.isPrimitive()) {
 			return null;
 		}
@@ -989,7 +986,7 @@ public class Bindings {
 	 * @param assignment The assignment 
 	 * @return The binding or <code>null</code> if no bindings are available.
 	 */
-	public static IVariableBinding getAssignedVariable(Assignment assignment) {
+	static IVariableBinding getAssignedVariable(Assignment assignment) {
 		Expression leftHand = assignment.getLeftHandSide();
 		switch (leftHand.getNodeType()) {
 			case ASTNode.SIMPLE_NAME:
@@ -1013,11 +1010,11 @@ public class Bindings {
 	 * @return <code>true</code> iff <code>possibleSuperType</code> is
 	 * 		a super type of <code>type</code> or is equal to it
 	 */
-	public static boolean isSuperType(ITypeBinding possibleSuperType, ITypeBinding type) {
+	static boolean isSuperType(ITypeBinding possibleSuperType, ITypeBinding type) {
 		if (type.isArray() || type.isPrimitive()) {
 			return false;
 		}
-		if (Bindings.equals(type, possibleSuperType)) {
+		if (BindingHelper.equals(type, possibleSuperType)) {
 			return true;
 		}
 		ITypeBinding superClass= type.getSuperclass();
@@ -1047,7 +1044,7 @@ public class Bindings {
 	 * @return the compilation unit containing the type
 	 * @throws JavaModelException if an errors occurs in the Java model
 	 */
-//	public static ICompilationUnit findCompilationUnit(ITypeBinding typeBinding, IJavaProject project) throws JavaModelException {
+//	static ICompilationUnit findCompilationUnit(ITypeBinding typeBinding, IJavaProject project) throws JavaModelException {
 //		IJavaElement type= typeBinding.getJavaElement();
 //		if (type instanceof IType)
 //			return ((IType) type).getCompilationUnit();
@@ -1065,7 +1062,7 @@ public class Bindings {
 	 * @throws JavaModelException if an error occurs in the Java model
 	 * @deprecated Use {@link #findMethodInHierarchy(ITypeBinding, String, String[])} or {@link JavaModelUtil}
 	 */
-	public static IMethod findMethod(IMethodBinding method, IType type) throws JavaModelException {
+	static IMethod findMethod(IMethodBinding method, IType type) throws JavaModelException {
 		method= method.getMethodDeclaration();
 		
 		IMethod[] candidates= type.getMethods();
@@ -1117,7 +1114,7 @@ public class Bindings {
 		type= type.getErasure();
 		
 		if (candidate.charAt(Signature.getArrayCount(candidate)) == Signature.C_RESOLVED) {
-			return Signature.toString(candidate).equals(Bindings.getFullyQualifiedName(type));
+			return Signature.toString(candidate).equals(BindingHelper.getFullyQualifiedName(type));
 		}
 		String[][] qualifiedCandidates= scope.resolveType(Signature.toString(candidate));
 		if (qualifiedCandidates == null || qualifiedCandidates.length == 0)
@@ -1151,7 +1148,7 @@ public class Bindings {
 	 * @param binding the binding to normalize
 	 * @return the normalized binding
 	 */
-	public static ITypeBinding normalizeTypeBinding(ITypeBinding binding) {
+	static ITypeBinding normalizeTypeBinding(ITypeBinding binding) {
 		if (binding != null && !binding.isNullType() && !isVoidType(binding)) {
 			if (binding.isAnonymous()) {
 				ITypeBinding[] baseBindings= binding.getInterfaces();
@@ -1168,7 +1165,7 @@ public class Bindings {
 		return null;
 	}
 	
-	public static boolean isVoidType(ITypeBinding binding) {
+	static boolean isVoidType(ITypeBinding binding) {
 		return "void".equals(binding.getName()); //$NON-NLS-1$
 	}
 	
@@ -1182,7 +1179,7 @@ public class Bindings {
 	 * 
 	 * @return the normalized type to be used in declarations
 	 */
-	public static ITypeBinding normalizeForDeclarationUse(ITypeBinding binding, AST ast) {
+	static ITypeBinding normalizeForDeclarationUse(ITypeBinding binding, AST ast) {
 		if (binding.isNullType())
 			return ast.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 		if (binding.isPrimitive())
@@ -1201,7 +1198,7 @@ public class Bindings {
 	 * @param node
 	 * @return the type binding of the node's parent type declaration
 	 */
-	public static ITypeBinding getBindingOfParentType(ASTNode node) {
+	static ITypeBinding getBindingOfParentType(ASTNode node) {
 		while (node != null) {
 			if (node instanceof AbstractTypeDeclaration) {
 				return ((AbstractTypeDeclaration) node).resolveBinding();
@@ -1214,7 +1211,7 @@ public class Bindings {
 	}				
 
 	
-	public static String getRawName(ITypeBinding binding) {
+	static String getRawName(ITypeBinding binding) {
 		String name= binding.getName();
 		if (binding.isParameterizedType() || binding.isGenericType()) {
 			// TODO: ?
@@ -1228,7 +1225,7 @@ public class Bindings {
 	}
 	
 
-	public static String getRawQualifiedName(ITypeBinding binding) {
+	static String getRawQualifiedName(ITypeBinding binding) {
 		final String EMPTY= ""; //$NON-NLS-1$
 		
 		if (binding.isAnonymous() || binding.isLocal()) {
@@ -1249,20 +1246,20 @@ public class Bindings {
 		} else if (binding.isMember()) {
 			String outerName= getRawQualifiedName(binding.getDeclaringClass());
 			if (outerName.length() > 0) {
-				StringBuffer buffer= new StringBuffer();
-				buffer.append(outerName);
-				buffer.append('.');
-				buffer.append(getRawName(binding));
-				return buffer.toString();
+				StringBuffer buf= new StringBuffer();
+				buf.append(outerName);
+				buf.append('.');
+				buf.append(getRawName(binding));
+				return buf.toString();
 			}
 		} else if (binding.isTopLevel()) {
 			IPackageBinding packageBinding= binding.getPackage();
-			StringBuffer buffer= new StringBuffer();
+			StringBuffer buf= new StringBuffer();
 			if (packageBinding != null && packageBinding.getName().length() > 0) {
-				buffer.append(packageBinding.getName()).append('.');
+				buf.append(packageBinding.getName()).append('.');
 			}
-			buffer.append(getRawName(binding));
-			return buffer.toString();
+			buf.append(getRawName(binding));
+			return buf.toString();
 		}
 		return EMPTY;
 	}
@@ -1271,7 +1268,7 @@ public class Bindings {
 	/**
 	 * Get field declaration. See bug 83100
 	 */
-	public static IVariableBinding getVariableDeclaration(IVariableBinding var) {
+	static IVariableBinding getVariableDeclaration(IVariableBinding var) {
 		ITypeBinding declaringClass= var.getDeclaringClass();
 		if (declaringClass == null) {
 			return var;
@@ -1295,7 +1292,7 @@ public class Bindings {
 	 * method or field. Declarations can be found in AST with
 	 * CompilationUnit.findDeclaringNode
 	 */
-	public static boolean isDeclarationBinding(IBinding binding) {
+	static boolean isDeclarationBinding(IBinding binding) {
 		switch (binding.getKind()) {
 		case IBinding.TYPE:
 			return ((ITypeBinding) binding).getTypeDeclaration() == binding;
@@ -1309,7 +1306,7 @@ public class Bindings {
 		}
 	}
 
-	public static boolean containsOverridingMethod(IMethodBinding[] candidates, IMethodBinding overridable) {
+	static boolean containsOverridingMethod(IMethodBinding[] candidates, IMethodBinding overridable) {
 		for (int index= 0; index < candidates.length; index++) {
 			if (areOverriddenMethods(candidates[index], overridable))
 				return true;
@@ -1323,7 +1320,7 @@ public class Bindings {
 	 * are in the same hierarchy (directly overrides each other), or {@link #findMethodInHierarchy(ITypeBinding, String, ITypeBinding[])}
 	 * else.
 	 */
-	public static boolean containsSignatureEquivalentConstructor(IMethodBinding[] candidates, IMethodBinding overridable) {
+	static boolean containsSignatureEquivalentConstructor(IMethodBinding[] candidates, IMethodBinding overridable) {
 		for (int index= 0; index < candidates.length; index++) {
 			if (isSignatureEquivalentConstructor(candidates[index], overridable))
 				return true;
@@ -1331,7 +1328,7 @@ public class Bindings {
 		return false;
 	}
 
-	public static boolean isSignatureEquivalentConstructor(IMethodBinding overridden, IMethodBinding overridable) {
+	static boolean isSignatureEquivalentConstructor(IMethodBinding overridden, IMethodBinding overridable) {
 
 		if (!overridden.isConstructor() || !overridable.isConstructor())
 			return false;
@@ -1347,7 +1344,7 @@ public class Bindings {
 	 * are in the same hierarchy (directly overrides each other), or {@link #findMethodInHierarchy(ITypeBinding, String, ITypeBinding[])}
 	 * else.
 	 */
-	public static boolean areOverriddenMethods(IMethodBinding overridden, IMethodBinding overridable) {
+	static boolean areOverriddenMethods(IMethodBinding overridden, IMethodBinding overridable) {
 
 		if (!overridden.getName().equals(overridable.getName()))
 			return false;
@@ -1392,9 +1389,9 @@ public class Bindings {
 		return true;
 	}
 	
-	public static boolean isMethodInvoking(IMethodBinding methodBinding, String className, String methodName) {
+	static boolean isMethodInvoking(IMethodBinding methodBinding, String className, String methodName) {
 		if (methodBinding != null && methodName.equals(methodBinding.getName())) {
-			IMethodBinding findMethodInHierarchy = Bindings.findMethodInHierarchy(methodBinding.getDeclaringClass(), methodName, null);
+			IMethodBinding findMethodInHierarchy = BindingHelper.findMethodInHierarchy(methodBinding.getDeclaringClass(), methodName, null);
 			IMethodBinding last = findMethodInHierarchy;
 			int count = 0;
 			while (findMethodInHierarchy != null && (count++) < 10) {
@@ -1404,7 +1401,7 @@ public class Bindings {
 					break;
 				}
 				findMethodInHierarchy = 
-					Bindings.findMethodInHierarchy(superclass, methodName, null);
+					BindingHelper.findMethodInHierarchy(superclass, methodName, null);
 			}
 			if (last == null) {
 				last = methodBinding;
@@ -1416,7 +1413,7 @@ public class Bindings {
 		return false;
 	}
 	
-	public static boolean isMethodInvoking(Expression exp, String className, String methodName) {
+	static boolean isMethodInvoking(Expression exp, String className, String methodName) {
 		if (exp instanceof MethodInvocation) {
 			MethodInvocation method = (MethodInvocation) exp;
 			IMethodBinding methodBinding = method.resolveMethodBinding();
@@ -1427,7 +1424,7 @@ public class Bindings {
 		return false;
 	}
 
-	public static String removeBrackets(String qName) {
+	static String removeBrackets(String qName) {
 		if (qName == null) {
 			return qName;
 		}

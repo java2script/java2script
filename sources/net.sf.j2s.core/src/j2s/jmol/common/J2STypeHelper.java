@@ -49,7 +49,7 @@ public class J2STypeHelper extends J2SHelper {
 	public void setClassName(String className) {
 		thisClassName = className;
 	}
-
+	
 	public String getFullClassName(String thisPackageName) {
 		return (thisPackageName != null && thisPackageName.length() != 0 
 				&& !"java.lang".equals(thisPackageName)
@@ -64,7 +64,7 @@ public class J2STypeHelper extends J2SHelper {
 	 * @return
 	 */
 	public static String discardGenericType(String name) {
-		return (name == null ? null : Bindings.removeBrackets(name));
+		return (name == null ? null : BindingHelper.removeBrackets(name));
 	}
 
 	/**
@@ -78,7 +78,7 @@ public class J2STypeHelper extends J2SHelper {
 	 * @return
 	 */
 	static String shortenQualifiedName(String name) {
-		name = Bindings.removeBrackets(name);
+		name = BindingHelper.removeBrackets(name);
 		int index = name.indexOf("java.lang.");
 		char ch = 0;
 		if (index == 0 && (name.indexOf('.', 10) == -1 || ((ch = name.charAt(10)) >= 'A' && ch <= 'Z'))) {
@@ -89,7 +89,7 @@ public class J2STypeHelper extends J2SHelper {
 
 	static String shortenPackageName(String fullName) {
 		String name = fullName.substring(0, fullName.lastIndexOf('.'));
-		name = Bindings.removeBrackets(name);
+		name = BindingHelper.removeBrackets(name);
 		int index = name.indexOf("java.lang.");
 		char ch = 0;
 		if (index == 0
