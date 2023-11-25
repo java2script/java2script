@@ -11,7 +11,7 @@
  *       bug "inline method - doesn't handle implicit cast" (see
  *       https://bugs.eclipse.org/bugs/show_bug.cgi?id=24941).
  *******************************************************************************/
-package j2s.jmol.common;
+package j2s.jmol;
 
 import java.util.ArrayList;
 import java.util.Collections;

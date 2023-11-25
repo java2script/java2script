@@ -8,7 +8,7 @@
  * Contributors:
  *     Zhou Renjian - initial API and implementation
  *******************************************************************************/
-package j2s.jmol.common;
+package j2s.jmol;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -50,6 +50,11 @@ import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
+
+import j2s.jmol.J2SKeywordVisitor.FinalVariable;
+import j2s.jmol.J2SKeywordVisitor.MethodReferenceASTVisitor;
+import j2s.jmol.J2SKeywordVisitor.VariableHelper;
+
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
@@ -99,7 +104,7 @@ import org.eclipse.jdt.core.dom.WildcardType;
  *
  *         2006-12-3
  */
-public class Java2ScriptPrimaryVisitor extends J2SKeywordVisitor {
+public class Java2ScriptLegacyVisitor extends J2SKeywordVisitor {
 
 	// UNFIXED bugs left here because not an issue in Jmol.
 	//
@@ -1029,11 +1034,11 @@ public class Java2ScriptPrimaryVisitor extends J2SKeywordVisitor {
 		}
 		if ((node != rootTypeNode) && node.getParent() != null && node.getParent() instanceof AbstractTypeDeclaration) {
 			/* inner static class */
-			Java2ScriptPrimaryVisitor visitor = null;
+			Java2ScriptLegacyVisitor visitor = null;
 			try {
 				visitor = this.getClass().newInstance();
 			} catch (@SuppressWarnings("unused") Exception e) {
-				visitor = new Java2ScriptPrimaryVisitor(); // Default visitor
+				visitor = new Java2ScriptLegacyVisitor(); // Default visitor
 			}
 			visitor.rootTypeNode = node;
 			visitor.typeHelper.setClassName(this.typeHelper.getClassName());
@@ -2805,11 +2810,11 @@ public class Java2ScriptPrimaryVisitor extends J2SKeywordVisitor {
 		if ((node != rootTypeNode) && node.getParent() != null && (node.getParent() instanceof AbstractTypeDeclaration
 				|| node.getParent() instanceof TypeDeclarationStatement)) {
 			/* inner static class */
-			Java2ScriptPrimaryVisitor visitor = null;
+			Java2ScriptLegacyVisitor visitor = null;
 			try {
 				visitor = this.getClass().newInstance();
 			} catch (@SuppressWarnings("unused") Exception e) {
-				visitor = new Java2ScriptPrimaryVisitor(); // Default visitor
+				visitor = new Java2ScriptLegacyVisitor(); // Default visitor
 			}
 			visitor.rootTypeNode = node;
 			String className = typeVisitor.getClassName();

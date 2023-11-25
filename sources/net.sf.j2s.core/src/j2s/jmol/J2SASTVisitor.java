@@ -8,7 +8,7 @@
  * Contributors:
  *     Zhou Renjian - initial API and implementation
  *******************************************************************************/
-package j2s.jmol.common;
+package j2s.jmol;
 
 import java.util.ArrayList;
 import java.util.Iterator;

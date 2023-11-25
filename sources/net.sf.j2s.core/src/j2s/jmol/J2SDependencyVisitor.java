@@ -9,7 +9,7 @@
  *     Zhou Renjian - initial API and implementation
  *******************************************************************************/
 
-package j2s.jmol.common;
+package j2s.jmol;
 
 import java.util.Arrays;
 import java.util.HashSet;

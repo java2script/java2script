@@ -12,8 +12,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import j2s.CorePlugin;
 import j2s.core.Java2ScriptCompiler;
-import j2s.jmol.common.Java2ScriptPrimaryVisitor;
-import j2s.jmol.common.J2SDependencyVisitor;
 
 public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 
@@ -119,7 +117,7 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 			return false;
 		}
 
-		Java2ScriptPrimaryVisitor visitor = new Java2ScriptPrimaryVisitor();
+		Java2ScriptLegacyVisitor visitor = new Java2ScriptLegacyVisitor();
 		isDebugging = "debug".equals(props.getProperty("j2s.compiler.mode"));
 		errorOccurs = false;
 		try {
@@ -145,7 +143,7 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 		return false;
 	}
 
-	private void outputJavaScript(Java2ScriptPrimaryVisitor visitor, J2SDependencyVisitor dvisitor, CompilationUnit fRoot,
+	private void outputJavaScript(Java2ScriptLegacyVisitor visitor, J2SDependencyVisitor dvisitor, CompilationUnit fRoot,
 			String outputPath, String trailer, String sourceLocation) {
 		String js = finalFixes(dvisitor.cleanLoadCalls(visitor));
 		String elementName = fRoot.getJavaElement().getElementName();
