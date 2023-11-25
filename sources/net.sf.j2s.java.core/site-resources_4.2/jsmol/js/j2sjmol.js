@@ -1892,9 +1892,6 @@ Number.prototype._numberToString=Number.prototype.toString;
 
 Clazz.declarePackage ("java.io");
 //Clazz.declarePackage ("java.lang");
-Clazz.declarePackage ("java.lang.annotation"); // java.lang
-Clazz.declarePackage ("java.lang.instrument"); // java.lang
-Clazz.declarePackage ("java.lang.management"); // java.lang
 Clazz.declarePackage ("java.lang.reflect"); // java.lang
 Clazz.declarePackage ("java.lang.ref");  // java.lang.ref
 java.lang.ref.reflect = java.lang.reflect;
@@ -2916,24 +2913,6 @@ _Loader.loadPackageClasspath = function (pkg, base, isIndex, fSuccess, mode, pt)
 		pkg = "java";
 		// fall through
 	case "java":
-		if (base) {
-			// support ajax for default
-			var key = "@net.sf.j2s.ajax";
-			if (!map[key])
-				map[key] = base;
-			key = "@net.sf.j2s";
-			if (!map[key])
-				map[key] = base;
-		}		
-		break;
-	case "swt":
-		pkg = "org.eclipse.swt";
-		break;
-	case "ajax":
-		pkg = "net.sf.j2s.ajax";
-		break;
-	case "j2s":
-		pkg = "net.sf.j2s";
 		break;
 	default:
 		if (pkg.lastIndexOf(".*") == pkg.length - 2)
@@ -2992,19 +2971,6 @@ _Loader.loadClass = function (name, onLoaded, forced, async, mode) {
 		_Loader.loadPackage("java");
   }
     
-// BH unnecessary	
-// if (needPackage("core")) {
-//		_Loader.loadPackage("core");
-//    }	
-
-//	var swtPkg = "org.eclipse.swt";
-//	if (name.indexOf (swtPkg) == 0 || name.indexOf ("$wt") == 0) {
-//		_Loader.assurePackageClasspath (swtPkg);
-//	}
-//	if (name.indexOf ("junit") == 0) {
-//		_Loader.assurePackageClasspath ("junit");
-//	}
-
 	// Any _Loader#loadClass calls will be queued until java.* core classes are loaded.
 
 	_Loader.keepOnLoading = true;
@@ -3015,7 +2981,7 @@ _Loader.loadClass = function (name, onLoaded, forced, async, mode) {
 		queueBe4KeyClazz.push([name, onLoaded]);
     
     
-  System.out.println("loadclass-queuing" + name+ runtimeKeyClass + " "+ isClassDefined(runtimeKeyClass))
+  //System.out.println("loadclass-queuing" + name+ runtimeKeyClass + " "+ isClassDefined(runtimeKeyClass))
 
 		return;    
 	}

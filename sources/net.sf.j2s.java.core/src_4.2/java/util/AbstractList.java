@@ -24,6 +24,7 @@ package java.util;
  * not support adding or replacing. A subclass must implement the abstract
  * methods get() and size().
  * @since 1.2
+ * 
  */
 public abstract class AbstractList<E> extends AbstractCollection<E> implements List<E> {
 

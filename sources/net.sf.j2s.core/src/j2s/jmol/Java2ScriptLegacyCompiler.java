@@ -12,8 +12,8 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import j2s.CorePlugin;
 import j2s.core.Java2ScriptCompiler;
-import j2s.jmol.common.Java2ScriptScriptVisitor;
-import j2s.jmol.common.Java2ScriptDependencyVisitor;
+import j2s.jmol.common.Java2ScriptPrimaryVisitor;
+import j2s.jmol.common.J2SDependencyVisitor;
 
 public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 
@@ -94,7 +94,7 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 		astParser.setResolveBindings(true);
 		astParser.setSource(createdUnit);
 		CompilationUnit root = (CompilationUnit) astParser.createAST(null);
-		Java2ScriptDependencyVisitor dvisitor = new Java2ScriptDependencyVisitor(this);
+		J2SDependencyVisitor dvisitor = new J2SDependencyVisitor(this);
 		boolean errorOccurs = false;
 		try {
 			root.accept(dvisitor);
@@ -119,10 +119,8 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 			return false;
 		}
 
-		Java2ScriptScriptVisitor visitor = new Java2ScriptScriptVisitor();
+		Java2ScriptPrimaryVisitor visitor = new Java2ScriptPrimaryVisitor();
 		isDebugging = "debug".equals(props.getProperty("j2s.compiler.mode"));
- 		visitor.setDebugging(isDebugging);
-		dvisitor.setDebugging(isDebugging);
 		errorOccurs = false;
 		try {
 			root.accept(visitor);
@@ -147,9 +145,9 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 		return false;
 	}
 
-	private void outputJavaScript(Java2ScriptScriptVisitor visitor, Java2ScriptDependencyVisitor dvisitor, CompilationUnit fRoot,
+	private void outputJavaScript(Java2ScriptPrimaryVisitor visitor, J2SDependencyVisitor dvisitor, CompilationUnit fRoot,
 			String outputPath, String trailer, String sourceLocation) {
-		String js = finalFixes(dvisitor.cleanLoadCalls(visitor.getBuffer()));
+		String js = finalFixes(dvisitor.cleanLoadCalls(visitor));
 		String elementName = fRoot.getJavaElement().getElementName();
 		elementName = elementName.substring(0, elementName.lastIndexOf('.'));
 		String packageName = visitor.getPackageName();

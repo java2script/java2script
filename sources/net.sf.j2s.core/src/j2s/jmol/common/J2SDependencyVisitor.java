@@ -11,7 +11,6 @@
 
 package j2s.jmol.common;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -21,11 +20,7 @@ import java.util.Set;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
-import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
-import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
@@ -37,7 +32,6 @@ import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.Javadoc;
@@ -45,11 +39,9 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.Type;
@@ -61,7 +53,7 @@ import j2s.core.Java2ScriptCompiler;
 
 /**
  * 
- * ASTVisitor > J2SASTVisitor > Java2ScriptDependencyVisitor
+ * ASTVisitor > Java2ScriptASTVisitor > Java2ScriptDependencyVisitor
  * 
  * This class is called by root.accept(me) in the first pass of the
  * transpiler to catalog all the references to classes and then later
@@ -71,7 +63,7 @@ import j2s.core.Java2ScriptCompiler;
  * 
  * 2006-5-2
  */
-public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
+public class J2SDependencyVisitor extends J2SASTVisitor {
 
 	private static class QNTypeBinding {
 		String qualifiedName;
@@ -103,32 +95,15 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 
 	private Java2ScriptCompiler compiler;
 
-	public Java2ScriptDependencyVisitor() {
-		super();
-		// for reflection only
-	}
-	
-	public Java2ScriptDependencyVisitor(Java2ScriptCompiler compiler) {
-		super();
-		setCompiler(compiler);
-	}
-	
-	private Java2ScriptDependencyVisitor getSelfVisitor() {
-		try {
-			Java2ScriptDependencyVisitor newVisitor = ((Java2ScriptDependencyVisitor) this.getClass().getConstructor(new Class[0]).newInstance(new Object[0])).setCompiler(compiler);
-			return newVisitor;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
-	private Java2ScriptDependencyVisitor setCompiler(Java2ScriptCompiler compiler) {
+	public J2SDependencyVisitor(Java2ScriptCompiler compiler) {
+		super(false);
 		this.compiler = compiler;
-		return this;
 	}
-
-		
+	
+	private J2SDependencyVisitor getSelfVisitor() {
+		return new J2SDependencyVisitor(compiler);
+	}
+	
 	private Set<Object> j2sRequireImport = new HashSet<>();
 	
 	private Set<Object> j2sOptionalImport = new HashSet<>();
@@ -141,18 +116,8 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 
 	private Set<Object> imports = new HashSet<Object>();
 	
-	private Javadoc[] nativeJavadoc = null;
-	
-	private ASTNode javadocRoot = null;
-	
-
 	///////// initialization methods - from root.accept(me) ////////////
 	
-	public boolean visit(PackageDeclaration node) {
-		getPackageHelper().setPackageName("" + node.getName());
-		return false;
-	}
-
 
 	public boolean visit(ImportDeclaration node) {
 		return false;
@@ -511,163 +476,117 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 		return super.visit(node);
 	}
 	
-	public boolean visit(Block node) {
-		ASTNode parent = node.getParent();
-		if (parent instanceof MethodDeclaration) {
-			MethodDeclaration method = (MethodDeclaration) parent;
-			Javadoc javadoc = method.getJavadoc();
-			/*
-			 * if comment contains "@j2sNative", then output the given native 
-			 * JavaScript codes directly. 
-			 */
-			if (processJ2SNativeJavadoc(javadoc, node, true) == false) {
-				return false;
-			}
-		} else if (parent instanceof Initializer) {
-			Initializer initializer = (Initializer) parent;
-			Javadoc javadoc = initializer.getJavadoc();
-			/*
-			 * if comment contains "@j2sNative", then output the given native 
-			 * JavaScript codes directly. 
-			 */
-			if (processJ2SNativeJavadoc(javadoc, node, true) == false) {
-				return false;
-			}
-		}
-		int blockStart = node.getStartPosition();
-		int previousStart = getPreviousStartPosition(node);
-		ASTNode root = node.getRoot();
-		checkJavadocs(root);
-		//for (int i = 0; i < nativeJavadoc.length; i++) {
-		for (int i = nativeJavadoc.length - 1; i >= 0; i--) {
-			Javadoc javadoc = nativeJavadoc[i];
-			int commentStart = javadoc.getStartPosition();
-			if (commentStart > previousStart && commentStart < blockStart) {
-				/*
-				 * if the block's leading comment contains "@j2sNative", 
-				 * then output the given native JavaScript codes directly. 
-				 */
-				if (processJ2SNativeJavadoc(javadoc, node, true) == false) {
-					return false;
-				}
-			}
-		}
-		return super.visit(node);
-	}
+//	public boolean visit(Block node) {
+//
+//
+//		
+//		
+//		
+//		
+//		ASTNode parent = node.getParent();
+//		if (parent instanceof MethodDeclaration) {
+//			MethodDeclaration method = (MethodDeclaration) parent;
+//			Javadoc javadoc = method.getJavadoc();
+//			/*
+//			 * if comment contains "@j2sNative", then output the given native 
+//			 * JavaScript codes directly. 
+//			 */
+//			if (processJ2STags(javadoc, node, true) == false) {
+//				return false;
+//			}
+//			
+//			
+//			
+//			
+//			
+//			
+//			
+//			
+//			
+//			
+//			
+//			
+//			
+//			
+//			
+//			
+//			
+//			
+//			
+//			
+//			
+//			
+//		} else if (parent instanceof Initializer) {
+//			Initializer initializer = (Initializer) parent;
+//			Javadoc javadoc = initializer.getJavadoc();
+//			/*
+//			 * if comment contains "@j2sNative", then output the given native 
+//			 * JavaScript codes directly. 
+//			 */
+//			if (processJ2STags(javadoc, node, true) == false) {
+//				return false;
+//			}
+//		}
+//		int blockStart = node.getStartPosition();
+//		int previousStart = getPreviousStartPosition(node);
+//		ASTNode root = node.getRoot();
+//		checkJavadocs(root);
+//		for (int i = nativeJavadoc.length - 1; i >= 0; i--) {
+//			Javadoc javadoc = nativeJavadoc[i];
+//			int commentStart = javadoc.getStartPosition();
+//			if (commentStart > previousStart && commentStart < blockStart) {
+//				/*
+//				 * if the block's leading comment contains "@j2sNative", 
+//				 * then output the given native JavaScript codes directly. 
+//				 */
+//				if (!processJ2STags(javadoc, node, true)) {
+//					return false;
+//				}
+//			}
+//		}
+//		return super.visit(node);
+//	}
 	
-	private boolean processJ2SNativeJavadoc(Javadoc javadoc, Block node, boolean superVisit) {
+	private void readJ2sImportTags(AbstractTypeDeclaration node) {
+		Javadoc javadoc = node.getJavadoc();
 		if (javadoc != null) {
 			List<?> tags = javadoc.tags();
 			if (tags.size() != 0) {
 				for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
 					TagElement tagEl = (TagElement) iter.next();
-					if ("@j2sIgnore".equals(tagEl.getTagName())) {
-						if (superVisit) super.visit(node);
-						return false;
-					}
-				}
-				if (isDebugging) {
-					for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
-						TagElement tagEl = (TagElement) iter.next();
-						if ("@j2sDebug".equals(tagEl.getTagName())) {
-							if (superVisit) super.visit(node);
-							return false;
-						}
-					}
-				}
-				for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
-					TagElement tagEl = (TagElement) iter.next();
-					if ("@j2sNative".equals(tagEl.getTagName())) {
-						if (superVisit) super.visit(node);
-						return false;
-					}
+					String tagName = tagEl.getTagName();
+					if ("@j2sRequireImport".equals(tagName)) {
+						readClasses(tagEl, j2sRequireImport);
+					} else if ("@j2sOptionalImport".equals(tagName)) {
+						readClasses(tagEl, j2sOptionalImport);
+					} else if ("@j2sIgnoreImport".equals(tagName)) {
+						readClasses(tagEl, j2sIgnoreImport);
+					} 
 				}
 			}
 		}
-		return true;
-	}
-
-	private void checkJavadocs(ASTNode root) {
-		if (root != javadocRoot) {
-			nativeJavadoc = null;
-			javadocRoot = root;
-		}
-		if (nativeJavadoc == null) {
-			nativeJavadoc = new Javadoc[0];
-			if (root instanceof CompilationUnit) {
-				CompilationUnit unit = (CompilationUnit) root;
-				List<?> commentList = unit.getCommentList();
-				ArrayList<Comment> list = new ArrayList<Comment>();
-				for (Iterator<?> iter = commentList.iterator(); iter.hasNext();) {
-					Comment comment = (Comment) iter.next();
-					if (comment instanceof Javadoc) {
-						Javadoc javadoc = (Javadoc) comment;
-						List<?> tags = javadoc.tags();
-						if (tags.size() != 0) {
-							for (Iterator<?> itr = tags.iterator(); itr.hasNext();) {
-								TagElement tagEl = (TagElement) itr.next();
-								String tagName = tagEl.getTagName();
-								if ("@j2sIgnore".equals(tagName)
-										|| "@j2sDebug".equals(tagName)
-										|| "@j2sNative".equals(tagName)) {
-									list.add(comment);
-								}
-							}
-						}
+		List<?> modifiers = node.modifiers();
+		for (Iterator<?> iter = modifiers.iterator(); iter.hasNext();) {
+			Object obj = iter.next();
+			if (obj instanceof Annotation) {
+				Annotation annotation = (Annotation) obj;
+				String qName = annotation.getTypeName().getFullyQualifiedName();
+				int idx = qName.indexOf("J2S");
+				if (idx != -1) {
+					String annName = qName.substring(idx);
+					annName = annName.replaceFirst("J2S", "@j2s");
+					if (annName.startsWith("@j2sRequireImport")) {
+						readClasses(annotation, j2sRequireImport);
+					} else if (annName.startsWith("@j2sOptionalImport")) {
+						readClasses(annotation, j2sOptionalImport);
+					} else if (annName.startsWith("@j2sIgnoreImport")) {
+						readClasses(annotation, j2sIgnoreImport);
 					}
 				}
-				nativeJavadoc = list.toArray(nativeJavadoc);
 			}
 		}
 	}
 
-	private int getPreviousStartPosition(Block node) {
-		int previousStart = 0;
-		ASTNode blockParent = node.getParent();
-		if (blockParent != null) {
-			if (blockParent instanceof Statement) {
-				Statement sttmt = (Statement) blockParent;
-				previousStart = sttmt.getStartPosition();
-				if (sttmt instanceof Block) {
-					Block parentBlock = (Block) sttmt;
-					for (Iterator<?> iter = parentBlock.statements().iterator(); iter.hasNext();) {
-						Statement element = (Statement) iter.next();
-						if (element == node) {
-							break;
-						}
-						previousStart = element.getStartPosition() + element.getLength();
-					}
-				} else if (sttmt instanceof IfStatement) {
-					IfStatement ifSttmt = (IfStatement) sttmt;
-					if (ifSttmt.getElseStatement() == node) {
-						Statement thenSttmt = ifSttmt.getThenStatement();
-						previousStart = thenSttmt.getStartPosition() + thenSttmt.getLength();
-					}
-				}
-			} else if (blockParent instanceof MethodDeclaration) {
-				MethodDeclaration method = (MethodDeclaration) blockParent;
-				previousStart = method.getStartPosition();
-			} else if (blockParent instanceof Initializer) {
-				Initializer initializer = (Initializer) blockParent;
-				previousStart = initializer.getStartPosition();
-			} else if (blockParent instanceof CatchClause) {
-				CatchClause catchClause = (CatchClause) blockParent;
-				previousStart = catchClause.getStartPosition();
-			}
-		}
-		return previousStart;
-	}
-	
-	/**
-	 * Method with "j2s*" tag.
-	 * 
-	 * @param node
-	 * @return
-	 */
-	private static Object getJ2STag(BodyDeclaration node, String tagName) {
-		return J2SDocVisitor.getJ2STag(node, tagName);
-	}
-	
 	private static void readClasses(Annotation annotation, Set<Object> set) {
 		StringBuffer buf = new StringBuffer();
 		IAnnotationBinding annotationBinding = annotation.resolveAnnotationBinding();
@@ -730,46 +649,7 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 			}
 		}
 	}
-	private void readJ2sImportTags(AbstractTypeDeclaration node) {
-		Javadoc javadoc = node.getJavadoc();
-		if (javadoc != null) {
-			List<?> tags = javadoc.tags();
-			if (tags.size() != 0) {
-				for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
-					TagElement tagEl = (TagElement) iter.next();
-					String tagName = tagEl.getTagName();
-					if ("@j2sRequireImport".equals(tagName)) {
-						readClasses(tagEl, j2sRequireImport);
-					} else if ("@j2sOptionalImport".equals(tagName)) {
-						readClasses(tagEl, j2sOptionalImport);
-					} else if ("@j2sIgnoreImport".equals(tagName)) {
-						readClasses(tagEl, j2sIgnoreImport);
-					} 
-				}
-			}
-		}
-		List<?> modifiers = node.modifiers();
-		for (Iterator<?> iter = modifiers.iterator(); iter.hasNext();) {
-			Object obj = iter.next();
-			if (obj instanceof Annotation) {
-				Annotation annotation = (Annotation) obj;
-				String qName = annotation.getTypeName().getFullyQualifiedName();
-				int idx = qName.indexOf("J2S");
-				if (idx != -1) {
-					String annName = qName.substring(idx);
-					annName = annName.replaceFirst("J2S", "@j2s");
-					if (annName.startsWith("@j2sRequireImport")) {
-						readClasses(annotation, j2sRequireImport);
-					} else if (annName.startsWith("@j2sOptionalImport")) {
-						readClasses(annotation, j2sOptionalImport);
-					} else if (annName.startsWith("@j2sIgnoreImport")) {
-						readClasses(annotation, j2sIgnoreImport);
-					}
-				}
-			}
-		}
-	}
-
+	
 	private static String[] knownClasses = new String[] {
 			"java.lang.Object",
 			"java.lang.Class",
@@ -912,7 +792,7 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 					isInteface = false;
 				}
 				if (isInteface || (node.getModifiers() & Modifier.STATIC) != 0) {
-					Java2ScriptDependencyVisitor visitor = getSelfVisitor();
+					J2SDependencyVisitor visitor = getSelfVisitor();
 					element.accept(visitor);
 					j2sRequireImport.addAll(visitor.imports);
 					j2sRequireImport.addAll(visitor.j2sRequireImport);
@@ -922,7 +802,7 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 				if (getJ2STag((Initializer) element, "@j2sIgnore") != null) {
 					continue;
 				}
-				Java2ScriptDependencyVisitor visitor = getSelfVisitor();
+				J2SDependencyVisitor visitor = getSelfVisitor();
 				element.accept(this);
 				j2sRequireImport.addAll(visitor.imports);
 				j2sRequireImport.addAll(visitor.j2sRequireImport);
@@ -937,7 +817,7 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 						VariableDeclarationFragment vdf = (VariableDeclarationFragment) fragments
 								.get(j);
 						Expression initializer = vdf.getInitializer();
-						Java2ScriptDependencyVisitor visitor = getSelfVisitor();
+						J2SDependencyVisitor visitor = getSelfVisitor();
 						if (initializer != null) {
 							initializer.accept(visitor);
 						}
@@ -960,18 +840,20 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 	}
 	
 	private String discardGenericType(String name) {
-		return  J2STypeHelper.discardGenericType(name);
+		return  BindingHelper.discardGenericType(name);
 	}
 	
-///////// delivery section -- from ASTScriptVisitor ///////////////
+///////// delivery section -- from Java2ScriptLegayCompiler ///////////////
 
 	/**
 	 * Adjust Clazz._load calls to only include the necessary class dependencies.
 	 * 
-	 * @param visitorJS
+	 * The only nonprivate method here.
+	 * 
+	 * @param visitor
 	 * @return
 	 */
-	public String cleanLoadCalls(StringBuffer visitorJS) {
+	public String cleanLoadCalls(J2SASTVisitor visitor) {
 		checkSuperType(imports);
 		checkSuperType(j2sRequireImport);
 		checkSuperType(j2sOptionalImport);
@@ -1010,7 +892,7 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 				j2sOptionalImport.remove(s);
 			}
 		}
-		String js = visitorJS.toString();
+		String js = visitor.buffer.toString();
 		if (imports.size() == 0 && j2sRequireImport.size() == 0 && j2sOptionalImport.size() == 0) {
 			return js;
 		}
@@ -1025,8 +907,6 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 			// BH 2023.11.10 interfaces as well and remove javax.sound.sampled.LineListener in the following case:
 			//	Clazz.instantialize (this, arguments);
 			//}, org.jmol.util, "JmolAudio", null, [javax.sound.sampled.LineListener, org.jmol.api.JmolAudioPlayer]);
-	
-			
 			int pt = js.indexOf("Clazz.instantialize");
 			pt = (pt < 0 ? -1 : js.indexOf("},", pt));
 			int pt1 = (pt < 0 ? -1 : js.indexOf("\r\n", pt + 2));
@@ -1062,13 +942,13 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 			buf.append("[");
 			String[] ss = imports.toArray(new String[0]);
 			Arrays.sort(ss);
-			String lastClassName = joinArrayClasses("imports",buf, ss, null);
+			String lastClassName = joinArrayClasses(buf,ss, null);
 			if (imports.size() != 0 && j2sRequireImport.size() != 0) {
 				buf.append(", ");
 			}
 			ss = j2sRequireImport.toArray(new String[0]);
 			Arrays.sort(ss);
-			joinArrayClasses("requireImports", buf, ss, lastClassName);
+			joinArrayClasses(buf, ss, lastClassName);
 			buf.append("], ");
 		} else {
 			buf.append("null, ");
@@ -1076,8 +956,8 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 		if (allClassNames.size() > 1) {
 			buf.append("[");
 		}
-		joinArrayClasses("getClassNames()", buf, 
-				allClassNames.toArray(new String[allClassNames.size()]), null);
+		joinArrayClasses(buf, allClassNames.toArray(new String[allClassNames.size()]), 
+				null);
 		if (allClassNames.size() > 1) {
 			buf.append("]");
 		}
@@ -1086,7 +966,7 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 			buf.append("[");
 			String[] ss = j2sOptionalImport.toArray(new String[0]);
 			Arrays.sort(ss);
-			joinArrayClasses("optional", buf, ss, null);
+			joinArrayClasses(buf, ss, null);
 			buf.append("], ");
 		} else {
 			buf.append("null, ");
@@ -1141,14 +1021,8 @@ public class Java2ScriptDependencyVisitor extends J2SASTVisitor {
 		}
 	}
 
-	private String joinArrayClasses(String why, StringBuffer buf, String[] ss, String last) {
-		return joinArrayClasses(why, buf, ss, last, ", ");
-	}
-	
-	/**
-	 * @param why  for debugging only 
-	 */
-	private String joinArrayClasses(String why, StringBuffer buf, String[] ss, String last, String seperator) {
+	private String joinArrayClasses(StringBuffer buf, String[] ss, String last) {
+		String seperator = ", ";
 		String lastClassName = last;
 		boolean haveExclusions = compiler.excludeFile(null);
 		for (int i = 0; i < ss.length; i++) {

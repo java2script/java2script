@@ -17,7 +17,7 @@ package j2s.jmol.common;
  *
  * 2006-12-3
  */
-class J2SPackageHelper extends J2SHelper {
+class J2SPackageHelper {
 
 	protected String thisPackageName = "";
 	

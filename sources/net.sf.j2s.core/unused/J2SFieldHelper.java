@@ -27,7 +27,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
  *
  * 2006-12-3
  */
-class J2SFieldHelper extends J2SHelper {
+class J2SFieldHelper {
 
 	/*
 	 * IE passes the following: 
@@ -57,7 +57,7 @@ class J2SFieldHelper extends J2SHelper {
 	 * volatile,		while,			with,
 	 *  
 	 */
-	static String[] keywords = new String[] {
+	final static String[] keywords = new String[] {
 		"class", /*"java", "javax", "sun", */"for", "while", "do", "in", "return", "function", "var", 
 		"class", "pubic", "protected", "private", "new", "delete",
 		"static", "package", "import", "extends", "implements",
@@ -70,7 +70,7 @@ class J2SFieldHelper extends J2SHelper {
 	};
 
 	
-	boolean checkKeyworkViolation(String name) {
+	static boolean checkKeyworkViolation(String name) {
 		for (int i = 0; i < keywords.length; i++) {
 			if (keywords[i].equals(name)) {
 				return true;
@@ -86,7 +86,7 @@ class J2SFieldHelper extends J2SHelper {
 	 * @param node
 	 * @return
 	 */
-	protected boolean isSimpleQualified(QualifiedName node) {
+	protected static boolean isSimpleQualified(QualifiedName node) {
 		Name qualifier = node.getQualifier();
 		if (qualifier instanceof SimpleName) {
 			return true;
@@ -96,11 +96,10 @@ class J2SFieldHelper extends J2SHelper {
 		return false;
 	}
 
-	protected boolean isFieldNeedPreparation(FieldDeclaration node) {
+	protected static boolean isFieldNeedPreparation(FieldDeclaration node) {
 		if ((node.getModifiers() & Modifier.STATIC) != 0) {
 			return false;
 		}
-
 		List<?> fragments = node.fragments();
 		for (Iterator<?> iter = fragments.iterator(); iter.hasNext();) {
 			VariableDeclarationFragment element = (VariableDeclarationFragment) iter.next();

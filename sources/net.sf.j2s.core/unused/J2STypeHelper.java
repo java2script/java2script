@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.dom.WildcardType;
  *
  *         2006-12-3
  */
-public class J2STypeHelper extends J2SHelper {
+public class J2STypeHelper {
 
 	protected String thisClassName = "";
 
@@ -125,45 +125,6 @@ public class J2STypeHelper extends J2SHelper {
 			}
 		}
 		return null;
-	}
-
-	static String assureQualifiedName(String name) {
-		if (name == null || name.length() == 0) {
-			return name;
-		}
-		String[] keywords = J2SFieldHelper.keywords;
-		String[] packages = null;
-		boolean existedKeyword = false;
-		for (int i = 0; i < keywords.length; i++) {
-			if (name.indexOf(keywords[i]) != -1) {
-				if (packages == null) {
-					packages = name.split("\\.");
-				}
-				for (int j = 0; j < packages.length; j++) {
-					if (keywords[i].equals(packages[j])) {
-						packages[j] = "[\"" + packages[j] + "\"]";
-						existedKeyword = true;
-					}
-				}
-			}
-		}
-		if (!existedKeyword || packages == null)
-			return name;
-		StringBuffer sb = new StringBuffer();
-		for (int i = 0; i < packages.length; i++) {
-			if (packages[i].charAt(0) == '[') {
-				if (i == 0) {
-					sb.append("window");
-				}
-				sb.append(packages[i]);
-			} else {
-				if (i != 0) {
-					sb.append('.');
-				}
-				sb.append(packages[i]);
-			}
-		}
-		return sb.toString();
 	}
 
 	static boolean isIntegerType(String type) {

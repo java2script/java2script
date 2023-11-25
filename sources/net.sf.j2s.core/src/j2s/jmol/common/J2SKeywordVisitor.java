@@ -11,11 +11,17 @@
 package j2s.jmol.common;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
@@ -28,11 +34,14 @@ import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EmptyStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -58,6 +67,7 @@ import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -78,11 +88,10 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
-import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 
 /**
  * 
- * ASTVisitor > J2SASTVisitor > J2SKeywordVisitor > J2SDocVisitor > Java2ScriptScriptVisitor
+ * ASTVisitor > Java2ScriptASTVisitor > J2SKeywordVisitor > Java2ScriptPrimaryVisitor
  * 
  * This class will traverse most of the common keyword and
  * common expression.
@@ -94,78 +103,316 @@ import org.eclipse.jdt.core.dom.PrimitiveType.Code;
  */
 public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 	
-	protected int blockLevel = 0;
+	/**
+	 * FinalVariable that is used to record variable state, which will provide
+	 * information for compiler to decide the generated name in *.js. 
+	 * 
+	 * @author zhou renjian
+	 *
+	 * 2006-12-6
+	 */
+	static class FinalVariable {
+
+		/**
+		 * Level of the block
+		 */
+		int blockLevel;
+		
+		/**
+		 * Final variable may be in a very deep anonymous class 
+		 */
+		String methodScope;
+		
+		/**
+		 * Variable name that is defined in Java sources
+		 */
+		String variableName;
+		
+		/**
+		 * Variable name that is to be generated in the compiled *.js
+		 */
+		String toVariableName;
+		
+		public FinalVariable(int blockLevel, String variableName, String methodScope) {
+			super();
+			this.blockLevel = blockLevel;
+			this.variableName = variableName;
+			this.methodScope = methodScope;
+		}
+		
+		public String toString() {
+			return variableName + ":" + variableName;
+		}
+
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + blockLevel;
+			result = prime * result
+					+ ((methodScope == null) ? 0 : methodScope.hashCode());
+			result = prime * result
+					+ ((toVariableName == null) ? 0 : toVariableName.hashCode());
+			result = prime * result
+					+ ((variableName == null) ? 0 : variableName.hashCode());
+			return result;
+		}
+
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			final FinalVariable other = (FinalVariable) obj;
+			if (blockLevel != other.blockLevel)
+				return false;
+			if (methodScope == null) {
+				if (other.methodScope != null)
+					return false;
+			} else if (!methodScope.equals(other.methodScope))
+				return false;
+			if (toVariableName == null) {
+				if (other.toVariableName != null)
+					return false;
+			} else if (!toVariableName.equals(other.toVariableName))
+				return false;
+			if (variableName == null) {
+				if (other.variableName != null)
+					return false;
+			} else if (!variableName.equals(other.variableName))
+				return false;
+			return true;
+		}	
+	}
 	
+	static class VariableHelper {
+
+		/**
+		 * List of variables that are declared as final.
+		 */
+		protected List<FinalVariable> finalVars = new ArrayList<>();
+
+		/**
+		 * Final variables only make senses (need "this.f$[...]") inside anonymous
+		 * class.
+		 */
+		protected boolean isFinalSensible = true;
+
+		/**
+		 * Normal (non-final) variables may be affected by final variable names.
+		 */
+		protected List<FinalVariable> normalVars = new ArrayList<>();
+
+		/**
+		 * Only those final variables that are referenced inside anonymous class need to
+		 * be passed into anonymous class.
+		 */
+		protected List<FinalVariable> visitedVars = new ArrayList<>();
+
+		protected String getVariableName(String name) {
+			for (int i = normalVars.size() - 1; i >= 0; i--) {
+				FinalVariable var = normalVars.get(i);
+				if (name.equals(var.variableName)) {
+					return var.toVariableName;
+				}
+			}
+			return name;
+		}
+
+	}
+	
+	/**
+	 * The MethodRferenceASTVisitor is used to find out those private methods that
+	 * are never referenced.
+	 * 
+	 * BH removed j2sKeep because it is not used in 4.2 Java or Jmol
+	 * 
+	 * @author zhou renjian 2006-5-1
+	 */
+	public static class MethodReferenceASTVisitor extends ASTVisitor {
+
+		private boolean isReferenced;
+		private String methodSignature;
+
+		private MethodReferenceASTVisitor(String methodSignature) {
+			this.methodSignature = methodSignature.replaceAll("%?<[^>]+>", "");
+		}
+
+		private static Set<String> methodSet;
+		private static Map<String, String> pmMap;
+		static {
+			pmMap = new HashMap<String, String>();
+			methodSet = new HashSet<String>();
+			register("java.lang.String", "length", "length");
+			register("java.lang.CharSequence", "length", "length");
+			register("java.lang.String", "replace", "~replace");
+			register("java.lang.String", "split", "~plit");
+		}
+
+		public static boolean isMethodRegistered(String methodName) {
+			return methodSet.contains(methodName);
+		}
+
+		public static void register(String className, String methodName, String propertyName) {
+			pmMap.put(className + "." + methodName, propertyName);
+			methodSet.add(methodName);
+		}
+
+		public static String translate(String className, String methodName) {
+			return pmMap.get(className + "." + methodName);
+		}
+
+		/**
+		 * Check whether the given method can be defined by "Clazz.overrideMethod" or not.
+		 * @param node
+		 * @return
+		 */
+		protected static boolean canAutoOverride(MethodDeclaration node) {
+			boolean isOK2AutoOverriding = false;
+			IMethodBinding methodBinding = node.resolveBinding();
+			if (methodBinding != null && testForceOverriding(methodBinding)) {
+				IMethodBinding superMethod = BindingHelper.findMethodDeclarationInHierarchy(methodBinding.getDeclaringClass(), methodBinding);
+				if (superMethod != null) {
+					ASTNode parentRoot = node.getParent();
+					while (parentRoot != null && !(parentRoot instanceof AbstractTypeDeclaration)) {
+						parentRoot = parentRoot.getParent();
+					}
+					if (parentRoot != null) {
+						isOK2AutoOverriding = !MethodReferenceASTVisitor.checkReference(parentRoot, superMethod.getKey());
+					}
+				}
+			}
+			return isOK2AutoOverriding;
+		}
+
+		private static boolean testForceOverriding(IMethodBinding method) {
+			if(method == null){
+				return true;
+			}
+			String methodName = method.getName();
+			ITypeBinding classInHierarchy = method.getDeclaringClass();
+			do {
+				IMethodBinding[] methods = classInHierarchy.getDeclaredMethods();
+				int count = 0;
+				IMethodBinding superMethod = null;
+				for (int i= 0; i < methods.length; i++) {
+					if (methodName.equals(methods[i].getName())) {
+						count++;
+						superMethod = methods[i];
+					}
+				}
+				if (count > 1 || count == 1  && superMethod != null 
+					&& (!BindingHelper.isSubsignature(method, superMethod)
+							||(superMethod.getModifiers() & Modifier.PRIVATE) != 0)) {
+					return false;
+				}
+				classInHierarchy = classInHierarchy.getSuperclass();
+			} while (classInHierarchy != null);
+			return true;
+		}
+
+		static boolean checkReference(ASTNode node, String methodSignature) {
+			MethodReferenceASTVisitor methodRefVisitor = new MethodReferenceASTVisitor(methodSignature);
+			methodRefVisitor.isReferenced = false;
+			node.accept(methodRefVisitor);
+			return methodRefVisitor.isReferenced;
+		}
+
+		public boolean visit(MethodDeclaration node) {
+			if (J2SASTVisitor.getJ2STag(node, "@j2sIgnore") != null) {
+				return false;
+			}
+			return super.visit(node);
+		}
+
+		public boolean visit(ClassInstanceCreation node) {
+			IMethodBinding constructorBinding = node.resolveConstructorBinding();
+			if (constructorBinding != null) {
+				String key = constructorBinding.getKey();
+				if (key != null) {
+					key = key.replaceAll("%?<[^>]+>", "");
+				}
+				if (methodSignature.equals(key)) {
+					isReferenced = true;
+					return false;
+				}
+			}
+			return super.visit(node);
+		}
+
+		public boolean visit(ConstructorInvocation node) {
+			IMethodBinding constructorBinding = node.resolveConstructorBinding();
+			String key = constructorBinding.getKey();
+			if (key != null) {
+				key = key.replaceAll("%?<[^>]+>", "");
+			}
+			if (methodSignature.equals(key)) {
+				isReferenced = true;
+				return false;
+			}
+			return super.visit(node);
+		}
+
+		public boolean visit(EnumConstantDeclaration node) {
+			IMethodBinding constructorBinding = node.resolveConstructorBinding();
+			String key = constructorBinding.getKey();
+			if (key != null) {
+				key = key.replaceAll("%?<[^>]+>", "");
+			}
+			if (methodSignature.equals(key)) {
+				isReferenced = true;
+				return false;
+			}
+			return super.visit(node);
+		}
+
+		public boolean visit(MethodInvocation node) {
+			IMethodBinding methodBinding = node.resolveMethodBinding();
+			if (methodBinding != null) {
+				String key = methodBinding.getKey();
+				if (key != null) {
+					key = key.replaceAll("%?<[^>]+>", "");
+				}
+				if (methodSignature.equals(key)) {
+					isReferenced = true;
+					return false;
+				}
+			}
+			return super.visit(node);
+		}
+
+		public boolean visit(SuperMethodInvocation node) {
+			IMethodBinding methodBinding = node.resolveMethodBinding();
+			String key = null;
+			if (methodBinding != null) {
+				key = methodBinding.getKey();
+				if (key != null) {
+					key = key.replaceAll("%?<[^>]+>", "");
+				}
+			}
+			if (methodSignature.equals(key)) {
+				isReferenced = true;
+				return false;
+			}
+			return super.visit(node);
+		}
+
+	}
+
+	VariableHelper variableHelper = new VariableHelper();
+
 	protected Stack<String> methodDeclareStack = new Stack<>();
-	
-	protected int currentBlockForVisit = -1;
 	
 	/**
 	 * this was for allowing vwr.isJS where vwr is not a class name and isJS is static
+	 * 
+	 * But in Jmol we do not allow this.
 	 */
-	public boolean supportsObjectStaticFields = false;
+	protected boolean supportsObjectStaticFields = false;
 	
-//	public boolean isSupportsObjectStaticFields() {
-//		return supportsObjectStaticFields;
-//	}
-//
-//	public void setSupportsObjectStaticFields(boolean supportsObjectStaticFields) {
-//		this.supportsObjectStaticFields = supportsObjectStaticFields;
-//	}
-//
 	protected J2SKeywordVisitor() {
-		super();
-	}
-
-	protected String assureQualifiedName(String name) {
-		return J2STypeHelper.assureQualifiedName(name);
-	}
-	
-	protected String shortenQualifiedName(String name) {
-		return J2STypeHelper.shortenQualifiedName(name);
-	}
-	
-	protected String shortenPackageName(String name) {
-		return J2STypeHelper.shortenPackageName(name);
-	}
-
-	protected String checkConstantValue(Expression node) {
-		return getVariableHelper().checkConstantValue(node);
-	}
-	
-	protected String[] skipDeclarePackages() {
-		return getPackageHelper().skipDeclarePackages();
-	}
-	protected boolean isSimpleQualified(QualifiedName node) {
-		return getFieldHelper().isSimpleQualified(node);
-	}
-
-	protected boolean isFieldNeedPreparation(FieldDeclaration node) {
-		return getFieldHelper().isFieldNeedPreparation(node);
-	}
-	
-	protected String getIndexedVarName(String name, int i) {
-		return getVariableHelper().getIndexedVarName(name, i);
-	}
-
-	protected void visitList(List<?> list, String seperator) {
-		for (Iterator<?> iter = list.iterator(); iter.hasNext();) {
-			ASTNode element = (ASTNode) iter.next();
-			boxingNode(element);
-			if (iter.hasNext()) {
-				buffer.append(seperator);
-			}
-		}
-	}
-
-	protected void visitList(List<?> list, String seperator, int begin, int end) {
-		for (int i = begin; i < end; i++) {
-			ASTNode element = (ASTNode) list.get(i);
-			boxingNode(element);
-			if (i < end - 1) {
-				buffer.append(seperator);
-			}
-		}
+		super(true);
 	}
 
 	public boolean visit(ArrayAccess node) {
@@ -225,37 +472,37 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 						buffer.append(typeCode.substring(0, 1).toUpperCase());
 						buffer.append(typeCode.substring(1));
 						buffer.append("Array (");
-						visitList(dim, ", ");
+						boxList(dim, ", ");
 						buffer.append(", 0)");
 					} else if ("char".equals(typeCode)) {
 						//buffer.append(" Clazz.newArray (");
 						buffer.append(" Clazz.newCharArray (");
-						visitList(dim, ", ");
+						boxList(dim, ", ");
 						buffer.append(", '\\0')");
 					} else if ("boolean".equals(typeCode)) {
 						//buffer.append(" Clazz.newArray (");
 						buffer.append(" Clazz.newBooleanArray (");
-						visitList(dim, ", ");
+						boxList(dim, ", ");
 						buffer.append(", false)");
 					} else {
 						if (dim != null && dim.size() > 1) {
 							buffer.append(" Clazz.newArray (");
-							visitList(dim, ", ");
+							boxList(dim, ", ");
 							buffer.append(", null)");
 						} else {
 							buffer.append(" new Array (");
-							visitList(dim, "");
+							boxList(dim, "");
 							buffer.append(")");
 						}
 					}
 				} else {
 					if (dim != null && dim.size() > 1) {
 						buffer.append(" Clazz.newArray (");
-						visitList(dim, ", ");
+						boxList(dim, ", ");
 						buffer.append(", null)");
 					} else {
 						buffer.append(" new Array (");
-						visitList(dim, "");
+						boxList(dim, "");
 						buffer.append(")");
 					}
 				}
@@ -273,7 +520,7 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 		}
 		if (elementType == null) {
 			buffer.append("[");
-			visitList(expressions, ", ");
+			boxList(expressions, ", ");
 			buffer.append("]");
 			return false;
 		}
@@ -291,30 +538,30 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 				buffer.append(typeCode.substring(1));
 				buffer.append("Array (-1, ");
 				buffer.append("[");
-				visitList(expressions, ", ");
+				boxList(expressions, ", ");
 				buffer.append("])");
 			} else if ("char".equals(typeCode)) {
 				//buffer.append(" Clazz.newArray (");
 				buffer.append(" Clazz.newCharArray (-1, ");
 				buffer.append("[");
-				visitList(expressions, ", ");
+				boxList(expressions, ", ");
 				buffer.append("])");
 			} else if ("boolean".equals(typeCode)) {
 				//buffer.append(" Clazz.newArray (");
 				buffer.append(" Clazz.newBooleanArray (-1, ");
 				buffer.append("[");
-				visitList(expressions, ", ");
+				boxList(expressions, ", ");
 				buffer.append("])");
 			} else {
 				buffer.append(" Clazz.newArray (-1, ");
 				buffer.append("[");
-				visitList(expressions, ", ");
+				boxList(expressions, ", ");
 				buffer.append("])");
 			}
 		} else {
 			buffer.append(" Clazz.newArray (-1, ");
 			buffer.append("[");
-			visitList(expressions, ", ");
+			boxList(expressions, ", ");
 			buffer.append("])");
 		}
 		return false;
@@ -530,7 +777,7 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 					}
 					buffer.append(' ');
 					if (right instanceof InfixExpression) {
-						String constValue = checkConstantValue(right);
+						String constValue = getConstantValue(right);
 						if (constValue != null) {
 							buffer.append(constValue);
 						} else {
@@ -576,7 +823,7 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 			if (right instanceof CharacterLiteral) {
 				CharacterLiteral cl = (CharacterLiteral) right;
 				if ("char".equals(typeBindingName) || typeBindingName.indexOf("String") != -1) {
-					String constValue = checkConstantValue(right);
+					String constValue = getConstantValue(right);
 					buffer.append(constValue);
 				} else {
 					buffer.append(0 + cl.charValue());
@@ -620,8 +867,8 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 
 	public void endVisit(Block node) {
 		buffer.append("}");
-		List<FinalVariable> finalVars = getVariableHelper().finalVars;
-		List<FinalVariable> normalVars = getVariableHelper().normalVars;
+		List<FinalVariable> finalVars = variableHelper.finalVars;
+		List<FinalVariable> normalVars = variableHelper.normalVars;
 		for (int i = finalVars.size() - 1; i >= 0; i--) {
 			FinalVariable var = finalVars.get(i);
 			if (var.blockLevel >= blockLevel) {
@@ -634,14 +881,13 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 				normalVars.remove(i);
 			}
 		}
-		blockLevel--;
 		super.endVisit(node);
 	}
 
 	public void endVisit(MethodDeclaration node) {
-		List<FinalVariable> finalVars = getVariableHelper().finalVars;
-		List<?> visitedVars = getVariableHelper().visitedVars;
-		List<FinalVariable> normalVars = getVariableHelper().normalVars;
+		List<FinalVariable> finalVars = variableHelper.finalVars;
+		List<?> visitedVars = variableHelper.visitedVars;
+		List<FinalVariable> normalVars = variableHelper.normalVars;
 		List<?> parameters = node.parameters();
 		String methodSig = null;
 		IMethodBinding resolveBinding = node.resolveBinding();
@@ -656,7 +902,7 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 			if (binding != null) {
 				String identifier = name.getIdentifier();
 				FinalVariable f = new FinalVariable(blockLevel + 1, identifier, methodSig);
-				f.toVariableName = getIndexedVarName(identifier, normalVars.size());
+				f.toVariableName = identifier;
 				normalVars.remove(f);
 				if ((binding.getModifiers() & Modifier.FINAL) != 0) {
 					finalVars.remove(f);
@@ -793,14 +1039,14 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 
 	public boolean visit(ForStatement node) {
 		buffer.append("for (");
-		visitList(node.initializers(), ", ");
+		boxList(node.initializers(), ", ");
 		buffer.append("; ");
 		Expression expression = node.getExpression();
 		if (expression != null) {
 			expression.accept(this);
 		}
 		buffer.append("; ");
-		visitList(node.updaters(), ", ");
+		boxList(node.updaters(), ", ");
 		buffer.append(") ");
 		node.getBody().accept(this);
 		buffer.append("\r\n");
@@ -900,14 +1146,9 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 	}
 
 	public boolean visit(PackageDeclaration node) {
-		J2SPackageHelper packageVisitor = getPackageHelper();
-		packageVisitor.setPackageName("" + node.getName());
-		String[] swtInnerPackages = skipDeclarePackages();
-		/*
-		 * All the SWT package will be declared manually.
-		 */
-		for (int i = 0; i < swtInnerPackages.length; i++) {
-			if (packageVisitor.getPackageName().equals(swtInnerPackages[i])) {
+		super.visit(node);
+		for (int i = preDeclaredPackages.length; --i >= 0;) {
+			if (thisPackageName.equals(preDeclaredPackages[i])) {
 				return false;
 			}
 		}
@@ -1139,11 +1380,8 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 	}
 
 	public boolean visit(PrefixExpression node) {
-		String constValue = checkConstantValue(node);
-		if (constValue != null) {
-			buffer.append(constValue);
+		if (writeConstantValue(node))
 			return false;
-		}
 		String op = node.getOperator().toString();
 		if ("~".equals(op) || "!".equals(op)) {
 			buffer.append(op);
@@ -1286,12 +1524,8 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 	}
 
 	public boolean visit(QualifiedName node) {
-		if (isSimpleQualified(node)) {
-			String constValue = checkConstantValue(node);
-			if (constValue != null) {
-				buffer.append(constValue);
-				return false;
-			}
+		if (isSimpleQualified(node) && writeConstantValue(node)) {
+			return false;
 		}
 		boolean staticFields = false;
 		IVariableBinding varBinding = null;
@@ -1443,7 +1677,7 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 			int pt = buffer.length();
 			node.getExpression().accept(this);
 			if (buffer.charAt(pt) == '\'') {
-				int rep = J2SVariableHelper.unescapeChar(buffer.substring(pt + 1, buffer.length() - 1));
+				int rep = escapedCharToInt(buffer.substring(pt + 1, buffer.length() - 1));
 				buffer.replace(pt, buffer.length(), "" + rep);
 			}
 			buffer.append(":\r\n");
@@ -1464,7 +1698,7 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 			exp.accept(this);
 		}
 		buffer.append(") {\r\n");
-		visitList(node.statements(), "");
+		boxList(node.statements(), "");
 		buffer.append("}\r\n");
 		return false;
 	}
@@ -1625,31 +1859,13 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 		 * TODO: Confirm that whether "var" is necessary or not
 		 */
 		buffer.append("var ");
-		visitList(node.fragments(), ", ");
+		boxList(node.fragments(), ", ");
 		return false;
 	}
 	
 	public boolean visit(VariableDeclarationFragment node) {
 		SimpleName name = node.getName();
-		IBinding binding = name.resolveBinding();
-		if (binding != null) {
-			String identifier = name.getIdentifier();
-			FinalVariable f = null;
-			if (methodDeclareStack.size() == 0) {
-				f = new FinalVariable(blockLevel, identifier, null);
-			} else {
-				String methodSig = methodDeclareStack.peek();
-				f = new FinalVariable(blockLevel, identifier, methodSig);
-			}
-			List<FinalVariable> finalVars = getVariableHelper().finalVars;
-			List<FinalVariable> normalVars = getVariableHelper().normalVars;
-			f.toVariableName = getIndexedVarName(identifier, normalVars.size());
-			normalVars.add(f);
-			if ((binding.getModifiers() & Modifier.FINAL) != 0) {
-				finalVars.add(f);
-			}
-		}
-		name.accept(this);
+		declareVariable(name, blockLevel);
 		Expression initializer = node.getInitializer();
 		if (initializer != null) {
 			buffer.append(" = ");
@@ -1660,12 +1876,12 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 				if (initializer instanceof CharacterLiteral) {
 					CharacterLiteral cl = (CharacterLiteral) initializer;
 					if ("char".equals(nameType)) {
-						String constValue = checkConstantValue(initializer);
-						buffer.append(constValue);
+						if (writeConstantValue(initializer))
+							return false;
 					} else {
 						buffer.append(0 + cl.charValue());
+						return false;
 					}
-					return false;
 				}
 				if (nameType != null && !"char".equals(nameType) && nameType.indexOf("String") == -1) {
 					int idx1 = buffer.length();
@@ -1713,6 +1929,28 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 		return false;
 	}
 
+	protected void declareVariable(SimpleName name, int blockLevel) {
+		IBinding binding = name.resolveBinding();
+		if (binding != null) {
+			String identifier = name.getIdentifier();
+			FinalVariable f = null;
+			if (methodDeclareStack.size() == 0) {
+				f = new FinalVariable(blockLevel, identifier, null);
+			} else {
+				String methodSig = methodDeclareStack.peek();
+				f = new FinalVariable(blockLevel, identifier, methodSig);
+			}
+			List<FinalVariable> finalVars = variableHelper.finalVars;
+			List<FinalVariable> normalVars = variableHelper.normalVars;
+			f.toVariableName = identifier;
+			normalVars.add(f);
+			if ((binding.getModifiers() & Modifier.FINAL) != 0) {
+				finalVars.add(f);
+			}
+		}
+		name.accept(this);
+	}
+
 	public boolean visit(VariableDeclarationStatement node) {
 		List<?> fragments = node.fragments();
 		for (Iterator<?> iter = fragments.iterator(); iter.hasNext();) {
@@ -1731,6 +1969,16 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 		node.getBody().accept(this);
 		buffer.append("\r\n");
 		return false;
+	}
+
+	protected void boxList(List<?> list, String seperator) {
+		for (Iterator<?> iter = list.iterator(); iter.hasNext();) {
+			ASTNode element = (ASTNode) iter.next();
+			boxingNode(element);
+			if (iter.hasNext()) {
+				buffer.append(seperator);
+			}
+		}
 	}
 
     void boxingNode(ASTNode element) {
@@ -1800,6 +2048,327 @@ public abstract class J2SKeywordVisitor extends J2SASTVisitor {
 		}
 		element.accept(this);
 	}
+    
+    // was J2sFieldHelper
+    
+	/*
+	 * IE passes the following: 
+	 * pubic,protected,private,static,package,
+	 * implements,prototype,fasle,throws,label
+	 * 
+	 * Firefox passes the following:
+	 * pubic,prototype,fasle,label
+	 * 
+	 * The following does not contains all the reserved keywords:
+	 * http://developer.mozilla.org/en/docs/Core_JavaScript_1.5_Reference:Reserved_Words
+	 * 
+	 * abstract,		boolean,		break,			byte,
+	 * case,			catch,			char,			class,
+	 * const,			continue,		debugger,		default, 
+	 * delete,			do,				double,			else, 
+	 * enum,			export,			extends,		false, 
+	 * final,			finally,		float,			for, 
+	 * function,		goto,			if,				implements, 
+	 * import,			in,				instanceof,		int, 
+	 * interface,		long,			native,			new, 
+	 * null,			package,		private,		protected, 
+	 * public,			return,			short,			static, 
+	 * super,			switch,			synchronized,	this, 
+	 * throw,			throws,			transient,		true, 
+	 * try,				typeof,			var,			void, 
+	 * volatile,		while,			with,
+	 *  
+	 */
+	final static String[] keywords = new String[] {
+		"class", /*"java", "javax", "sun", */"for", "while", "do", "in", "return", "function", "var", 
+		"class", "pubic", "protected", "private", "new", "delete",
+		"static", "package", "import", "extends", "implements",
+		"instanceof", "typeof", "void", "if", "this", "super",
+		"prototype", "else", "break", "true", "fasle", "try",
+		"catch", "throw", "throws", "continue", "switch", "default",
+		"case", "export", "import", "const", /*"label", */"with",
+		"arguments",
+		"valueOf"
+	};
+
 	
+	static boolean checkKeywordViolation(String name) {
+		for (int i = 0; i < keywords.length; i++) {
+			if (keywords[i].equals(name)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Check whether the given QualifiedName is just simple or not.
+	 * The "just simple" means only "*.*" format.
+	 * 
+	 * @param node
+	 * @return
+	 */
+	protected static boolean isSimpleQualified(QualifiedName node) {
+		Name qualifier = node.getQualifier();
+		if (qualifier instanceof SimpleName) {
+			return true;
+		} else if (qualifier instanceof QualifiedName) {
+			return isSimpleQualified((QualifiedName) qualifier);
+		}
+		return false;
+	}
+	
+	protected static boolean isFieldNeedPreparation(FieldDeclaration node) {
+		if ((node.getModifiers() & Modifier.STATIC) != 0) {
+			return false;
+		}
+		List<?> fragments = node.fragments();
+		for (Iterator<?> iter = fragments.iterator(); iter.hasNext();) {
+			VariableDeclarationFragment element = (VariableDeclarationFragment) iter.next();
+			Expression initializer = element.getInitializer();
+			if (initializer != null) {
+				Object constValue = initializer.resolveConstantExpressionValue();
+				if (constValue != null && (constValue instanceof Number || constValue instanceof Character
+						|| constValue instanceof Boolean || constValue instanceof String)) {
+					break;
+				}
+				if (initializer instanceof NullLiteral) {
+					break;
+				}
+				return true;
+			}
+			break;
+		}
+		return false;
+	}
+
+	protected String assureQualifiedName(String name) {
+		if (name == null || name.length() == 0) {
+			return name;
+		}
+		String[] packages = null;
+		boolean existedKeyword = false;
+		for (int i = 0; i < keywords.length; i++) {
+			if (name.indexOf(keywords[i]) != -1) {
+				if (packages == null) {
+					packages = name.split("\\.");
+				}
+				for (int j = 0; j < packages.length; j++) {
+					if (keywords[i].equals(packages[j])) {
+						packages[j] = "[\"" + packages[j] + "\"]";
+						existedKeyword = true;
+					}
+				}
+			}
+		}
+		if (!existedKeyword || packages == null)
+			return name;
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < packages.length; i++) {
+			if (packages[i].charAt(0) == '[') {
+				if (i == 0) {
+					sb.append("window");
+				}
+				sb.append(packages[i]);
+			} else {
+				if (i != 0) {
+					sb.append('.');
+				}
+				sb.append(packages[i]);
+			}
+		}
+		return sb.toString();
+	}
+
+	/**
+	 * Check for a constant value and write it if that is what we have.
+	 * 
+	 * @param node
+	 * @return true if this was a constant value
+	 */
+	protected boolean writeConstantValue(Expression node) {
+		String constValue = getConstantValue(node);
+		if (constValue == null)
+			return false;
+		buffer.append(constValue);
+		return true;
+	}
+
+	/**
+	 * If given expression is constant value expression, return its value string; or
+	 * return null.
+	 * 
+	 * @param node
+	 * @return
+	 */
+	protected static String getConstantValue(Expression node) {
+		Object constValue = node.resolveConstantExpressionValue();
+		if (constValue != null
+				&& (constValue instanceof Number || constValue instanceof Character || constValue instanceof Boolean)) {
+			StringBuffer buf = new StringBuffer();
+			if (constValue instanceof Character) {
+				buf.append('\'');
+				buf.append(escapeChar(((Character) constValue).charValue()));
+				buf.append('\'');
+			} else {
+				buf.append(constValue);
+			}
+			return buf.toString();
+		}
+		if (constValue != null && (constValue instanceof String)) {
+			StringBuffer buf = new StringBuffer();
+			String str = (String) constValue;
+			int length = str.length();
+			/*
+			 * if (length > 20) { return null; }
+			 */
+			buf.append("\"");
+			for (int i = 0; i < length; i++) {
+				buf.append(escapeChar(str.charAt(i)));
+			}
+			buf.append("\"");
+			return buf.toString();
+		}
+		return null;
+	}
+
+	private static String escapeChar(char charValue) {
+		String out = "";
+		switch (charValue) {
+		case '\\':
+		case '\'':
+		case '\"':
+			out = "\\" + charValue;
+			break;
+		case '\r':
+			out = "\\r";
+			break;
+		case '\n':
+			out = "\\n";
+			break;
+		case '\t':
+			out = "\\t";
+			break;
+		case '\f':
+			out = "\\f";
+			break;
+		default:
+			if (charValue < 32 || charValue > 127) {
+				String hexStr = "0000" + Integer.toHexString(charValue);
+				out = "\\u" + hexStr.substring(hexStr.length() - 4);
+			} else {
+				out = "" + charValue;
+			}
+			break;
+		}
+		return out;
+	}
+
+	private static int escapedCharToInt(String s) {
+		// pt to xxx of 'xxx'<eob>
+		int len = s.length();
+		if (len == 1)
+			return s.charAt(0);
+		// '\x';
+		switch (s.charAt(1)) {
+		case 'r':
+			return '\r';
+		case 'n':
+			return '\n';
+		case 't':
+			return '\t';
+		case 'f':
+			return '\f';
+		case '\\':
+		case '\'':
+		case '\"':
+			return s.charAt(1);
+		default:
+			return (s.charAt(1) == 'u' ? Integer.parseInt(s.substring(2), 16) : Integer.parseInt(s.substring(1), 8));
+		}
+	}
+
+	/**
+	 * Generated final variable list for anonymous class creation.
+	 * <ol>
+	 * <li>Generate "null" if there are no referenced final variales inside
+	 * anonymous class</li>
+	 * <li>Generate "Clazz.cloneFinals (...)" if there are referenced final
+	 * variable</li>
+	 * </ol>
+	 * 
+	 * @param list
+	 * @param seperator
+	 * @param scope
+	 * @return
+	 */
+	protected static String listFinalVariables(List<?> list, String seperator, String scope) {
+		if (list.size() == 0) {
+			return "null";
+		}
+		StringBuffer buf = new StringBuffer();
+		buf.append("Clazz.cloneFinals (");
+		for (Iterator<?> iter = list.iterator(); iter.hasNext();) {
+			FinalVariable fv = (FinalVariable) iter.next();
+			String name = fv.variableName;
+			if (fv.toVariableName != null) {
+				name = fv.toVariableName;
+			}
+			buf.append("\"");
+			buf.append(name);
+			buf.append("\", ");
+			String methodScope = fv.methodScope;
+			if (methodScope == null && scope == null) {
+				buf.append(name);
+			} else if (methodScope == null || scope == null) {
+				buf.append("this.$finals." + name);
+			} else if (methodScope.equals(scope)) {
+				buf.append(name);
+			} else {
+				buf.append("this.$finals." + name);
+			}
+			if (iter.hasNext()) {
+				buf.append(seperator);
+			}
+		}
+		buf.append(")");
+		return buf.toString();
+	}
+
+	/**
+	 * Shorten full qualified class names.
+	 * 
+	 * Here are the situations: 1. No needs for "java.lang." 2.
+	 * "org.eclipse.swt.SWT" to "$WT" 3. "org.eclipse.swt.internal.browser.OS" to
+	 * "O$" 4. "org.eclipse.swt." to "$wt."
+	 * 
+	 * @param name
+	 * @return
+	 */
+	protected static String shortenQualifiedName(String name) {
+		name = BindingHelper.removeBrackets(name);
+		int index = name.indexOf("java.lang.");
+		char ch = 0;
+		if (index == 0 && (name.indexOf('.', 10) == -1 || ((ch = name.charAt(10)) >= 'A' && ch <= 'Z'))) {
+			name = name.substring(10);
+		}
+		return name;
+	}
+
+	protected static String shortenPackageName(String fullName) {
+		String name = fullName.substring(0, fullName.lastIndexOf('.'));
+		name = BindingHelper.removeBrackets(name);
+		int index = name.indexOf("java.lang.");
+		char ch = 0;
+		if (index == 0
+				&& (name.indexOf('.', index + 10) == -1 || ((ch = name.charAt(index + 10)) >= 'A' && ch <= 'Z'))) {
+			if (!fullName.startsWith("java.lang.ref") && !fullName.startsWith("java.lang.annotation")
+					&& !fullName.startsWith("java.lang.instrument") && !fullName.startsWith("java.lang.management")) {
+				name = name.substring(10);
+			}
+		}
+		return name;
+	}
+
 
 }

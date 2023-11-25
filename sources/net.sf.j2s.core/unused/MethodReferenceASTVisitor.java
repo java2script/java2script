@@ -22,13 +22,12 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 
 /**
- * This visitor is used to find out those private methods that are never 
+ * This visitor is used to find out those private methods that are never
  * referenced.
  * 
  * BH removed j2sKeep because it is not used in 4.2 Java or Jmol
  * 
- * @author zhou renjian
- * 2006-5-1
+ * @author zhou renjian 2006-5-1
  */
 public class MethodReferenceASTVisitor extends ASTVisitor {
 
@@ -39,7 +38,7 @@ public class MethodReferenceASTVisitor extends ASTVisitor {
 		super();
 		this.methodSignature = methodSignature.replaceAll("%?<[^>]+>", "");
 	}
-	
+
 	static boolean checkReference(ASTNode node, String methodSignature) {
 		MethodReferenceASTVisitor methodRefVisitor = new MethodReferenceASTVisitor(methodSignature);
 		methodRefVisitor.isReferenced = false;
@@ -48,14 +47,17 @@ public class MethodReferenceASTVisitor extends ASTVisitor {
 	}
 
 	public boolean visit(MethodDeclaration node) {
-		if (J2SDocVisitor.getJ2STag(node, "@j2sIgnore") != null) {
+		if (Java2ScriptASTVisitor.getJ2STag(node, "@j2sIgnore") != null) {
 			return false;
 		}
 		return super.visit(node);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ClassInstanceCreation)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.
+	 * ClassInstanceCreation)
 	 */
 	public boolean visit(ClassInstanceCreation node) {
 		IMethodBinding constructorBinding = node.resolveConstructorBinding();
@@ -71,7 +73,7 @@ public class MethodReferenceASTVisitor extends ASTVisitor {
 		}
 		return super.visit(node);
 	}
-	
+
 	public boolean visit(ConstructorInvocation node) {
 		IMethodBinding constructorBinding = node.resolveConstructorBinding();
 		String key = constructorBinding.getKey();
@@ -84,7 +86,7 @@ public class MethodReferenceASTVisitor extends ASTVisitor {
 		}
 		return super.visit(node);
 	}
-	
+
 	public boolean visit(EnumConstantDeclaration node) {
 		IMethodBinding constructorBinding = node.resolveConstructorBinding();
 		String key = constructorBinding.getKey();
@@ -97,7 +99,7 @@ public class MethodReferenceASTVisitor extends ASTVisitor {
 		}
 		return super.visit(node);
 	}
-	
+
 	public boolean visit(MethodInvocation node) {
 		IMethodBinding methodBinding = node.resolveMethodBinding();
 		if (methodBinding != null) {
@@ -112,7 +114,7 @@ public class MethodReferenceASTVisitor extends ASTVisitor {
 		}
 		return super.visit(node);
 	}
-	
+
 	public boolean visit(SuperMethodInvocation node) {
 		IMethodBinding methodBinding = node.resolveMethodBinding();
 		String key = null;
@@ -129,4 +131,4 @@ public class MethodReferenceASTVisitor extends ASTVisitor {
 		return super.visit(node);
 	}
 
-	}
+}

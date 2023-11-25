@@ -1445,4 +1445,15 @@ class BindingHelper {
 		qName = buf.toString().trim();
 		return qName;
 	}
+
+	/**
+	 * Discard generic type from the given full class name. There are no generic
+	 * types in JavaScript.
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public static String discardGenericType(String name) {
+		return (name == null ? null : removeBrackets(name));
+	}
 }

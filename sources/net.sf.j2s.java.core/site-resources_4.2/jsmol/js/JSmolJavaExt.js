@@ -1667,11 +1667,13 @@ var a = Clazz.newArray(size);
 return a;
 },"Class,~N");
 
+c$.getLength = function(o){return o.length};
+c$.get = function(o, i){return o[i]};
+
 javautil.Date=Date;
 Date.TYPE="javautil.Date";
 Date.__CLASS_NAME__="Date";
 Clazz.implementOf(Date,[java.io.Serializable,java.lang.Comparable]);
-
 Clazz.defineMethod(javautil.Date,"clone",
 function(){
 return new Date(this.getTime());
@@ -2252,55 +2254,14 @@ this.bytesTransferred=0;
 Clazz.instantialize(this,arguments);
 },java.io,"InterruptedIOException",java.io.IOException);
 
-c$=Clazz.declareType(java.io,"ObjectStreamException",java.io.IOException);
-
-c$=Clazz.decorateAsClass(function(){
-this.classname=null;
-Clazz.instantialize(this,arguments);
-},java.io,"InvalidClassException",java.io.ObjectStreamException);
-Clazz.makeConstructor(c$,
-function(className,detailMessage){
-Clazz.superConstructor(this,java.io.InvalidClassException,[detailMessage]);
-this.classname=className;
-},"~S,~S");
-Clazz.defineMethod(c$,"getMessage",
-function(){
-var msg=Clazz.superCall(this,java.io.InvalidClassException,"getMessage",[]);
-if(this.classname!=null){
-msg=this.classname+';' + ' '+msg;
-}return msg;
-});
-
-c$=Clazz.declareType(java.io,"InvalidObjectException",java.io.ObjectStreamException);
-
-c$=Clazz.declareType(java.io,"NotActiveException",java.io.ObjectStreamException);
-
-c$=Clazz.declareType(java.io,"NotSerializableException",java.io.ObjectStreamException);
-
-c$=Clazz.decorateAsClass(function(){
-this.eof=false;
-this.length=0;
-Clazz.instantialize(this,arguments);
-},java.io,"OptionalDataException",java.io.ObjectStreamException);
-
-c$=Clazz.declareType(java.io,"StreamCorruptedException",java.io.ObjectStreamException);
-
 c$=Clazz.declareType(java.io,"SyncFailedException",java.io.IOException);
 
 c$=Clazz.declareType(java.io,"UnsupportedEncodingException",java.io.IOException);
 
 c$=Clazz.declareType(java.io,"UTFDataFormatException",java.io.IOException);
 
-c$=Clazz.decorateAsClass(function(){
-this.detail=null;
-Clazz.instantialize(this,arguments);
-},java.io,"WriteAbortedException",java.io.ObjectStreamException);
-Clazz.makeConstructor(c$,
-function(detailMessage,rootCause){
-Clazz.superConstructor(this,java.io.WriteAbortedException,[detailMessage]);
-this.detail=rootCause;
-this.initCause(rootCause);
-},"~S,Exception");
+// ignore ObjectStream exceptions
+
 Clazz.defineMethod(c$,"getMessage",
 function(){
 var msg=Clazz.superCall(this,java.io.WriteAbortedException,"getMessage",[]);
