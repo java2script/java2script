@@ -36,7 +36,6 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -50,18 +49,12 @@ import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
-
-import j2s.jmol.J2SKeywordVisitor.FinalVariable;
-import j2s.jmol.J2SKeywordVisitor.MethodReferenceASTVisitor;
-import j2s.jmol.J2SKeywordVisitor.VariableHelper;
-
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
@@ -75,7 +68,7 @@ import org.eclipse.jdt.core.dom.WildcardType;
 
 /**
  * 
- * ASTVisitor > Java2ScriptASTVisitor > J2SKeywordVisitor > Java2ScriptPrimaryVisitor
+ * ASTVisitor > J2SASTVisitor > J2SKeywordVisitor > J2SLegacyVisitor
  * 
  * Formerly ASTScriptVisitor
  * 
@@ -104,7 +97,7 @@ import org.eclipse.jdt.core.dom.WildcardType;
  *
  *         2006-12-3
  */
-public class Java2ScriptLegacyVisitor extends J2SKeywordVisitor {
+class J2SLegacyVisitor extends J2SKeywordVisitor {
 
 	// UNFIXED bugs left here because not an issue in Jmol.
 	//
@@ -1034,11 +1027,11 @@ public class Java2ScriptLegacyVisitor extends J2SKeywordVisitor {
 		}
 		if ((node != rootTypeNode) && node.getParent() != null && node.getParent() instanceof AbstractTypeDeclaration) {
 			/* inner static class */
-			Java2ScriptLegacyVisitor visitor = null;
+			J2SLegacyVisitor visitor = null;
 			try {
 				visitor = this.getClass().newInstance();
 			} catch (@SuppressWarnings("unused") Exception e) {
-				visitor = new Java2ScriptLegacyVisitor(); // Default visitor
+				visitor = new J2SLegacyVisitor(); // Default visitor
 			}
 			visitor.rootTypeNode = node;
 			visitor.typeHelper.setClassName(this.typeHelper.getClassName());
@@ -1157,7 +1150,7 @@ public class Java2ScriptLegacyVisitor extends J2SKeywordVisitor {
 			if (checkKeywordViolation(fieldName)) {
 				ext += "$";
 			}
-			if (typeBinding != null && checkSameName(typeBinding, fieldName)) {
+			if (typeBinding != null && isSameName(typeBinding, fieldName)) {
 				ext += "$";
 			}
 			buffer.append("this.");
@@ -1904,8 +1897,8 @@ public class Java2ScriptLegacyVisitor extends J2SKeywordVisitor {
 		if (writeConstantValue(node))
 			return false;
 		IBinding binding = node.resolveBinding();
-		ASTNode xparent = node.getParent();
-		if (xparent == null) {
+		ASTNode parent = node.getParent();
+		if (parent == null) {
 			buffer.append(node);
 			return false;
 		}
@@ -1913,13 +1906,13 @@ public class Java2ScriptLegacyVisitor extends J2SKeywordVisitor {
 		if (buffer.length() > 0) {
 			ch = buffer.charAt(buffer.length() - 1);
 		}
-		if (ch == '.' && xparent instanceof QualifiedName) {
+		if (ch == '.' && parent instanceof QualifiedName) {
 			if (binding != null && binding instanceof IVariableBinding) {
 				IVariableBinding varBinding = (IVariableBinding) binding;
 				IVariableBinding variableDeclaration = varBinding.getVariableDeclaration();
 				ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
 				String fieldName = getJ2SName(node);
-				if (checkSameName(declaringClass, fieldName)) {
+				if (isSameName(declaringClass, fieldName)) {
 					buffer.append('$');
 				}
 				if (checkKeywordViolation(fieldName)) {
@@ -1934,7 +1927,7 @@ public class Java2ScriptLegacyVisitor extends J2SKeywordVisitor {
 			buffer.append(node);
 			return false;
 		}
-		if (xparent instanceof ClassInstanceCreation && !(binding instanceof IVariableBinding)) {
+		if (parent instanceof ClassInstanceCreation && !(binding instanceof IVariableBinding)) {
 			ITypeBinding binding2 = node.resolveTypeBinding();
 			if (binding != null) {
 				String name = binding2.getQualifiedName();
@@ -1963,20 +1956,7 @@ public class Java2ScriptLegacyVisitor extends J2SKeywordVisitor {
 			processSimpleNameInMethodBinding(node, ch, mthBinding);
 		} else {
 			ITypeBinding typeBinding = node.resolveTypeBinding();
-			if (typeBinding != null) {
-				String name = typeBinding.getQualifiedName();
-				name = assureQualifiedName(shortenQualifiedName(name));
-				if (checkKeywordViolation(name)) {
-					buffer.append('$');
-				}
-				buffer.append(name);
-			} else {
-				String name = node.getFullyQualifiedName();
-				if (checkKeywordViolation(name)) {
-					buffer.append('$');
-				}
-				buffer.append(name);
-			}
+			processSimpleNameInTypeBinding(node, typeBinding);
 		}
 		return false;
 	}
@@ -1998,7 +1978,7 @@ public class Java2ScriptLegacyVisitor extends J2SKeywordVisitor {
 				}
 			}
 			String fieldName = getJ2SName(node);
-			if (checkSameName(declaringClass, fieldName)) {
+			if (isSameName(declaringClass, fieldName)) {
 				buffer.append('$');
 			}
 			if (checkKeywordViolation(fieldName)) {
@@ -2051,11 +2031,10 @@ public class Java2ScriptLegacyVisitor extends J2SKeywordVisitor {
 			} else {
 				fieldName = fieldVar;
 			}
-			// System.err.println(fieldName);
 			if (checkKeywordViolation(fieldName)) {
 				buffer.append('$');
 			}
-			if (declaringClass != null && checkSameName(declaringClass, fieldName)) {
+			if (declaringClass != null && isSameName(declaringClass, fieldName)) {
 				buffer.append('$');
 			}
 			if (declaringClass != null && isInheritedFieldName(declaringClass, fieldName)) {
@@ -2086,7 +2065,6 @@ public class Java2ScriptLegacyVisitor extends J2SKeywordVisitor {
 					}
 				}
 			}
-//					String name = variableDeclaration.getName();
 			String name = getJ2SName(node);
 			name = shortenQualifiedName(name);
 			if (!(isClassString && "valueOf".equals(name)) && checkKeywordViolation(name)) {
@@ -2108,6 +2086,23 @@ public class Java2ScriptLegacyVisitor extends J2SKeywordVisitor {
 			String name = getJ2SName(node);
 			name = shortenQualifiedName(name);
 			if (!(isClassString && "valueOf".equals(name)) && checkKeywordViolation(name)) {
+				buffer.append('$');
+			}
+			buffer.append(name);
+		}
+	}
+
+	private void processSimpleNameInTypeBinding(SimpleName node, ITypeBinding typeBinding) {
+		if (typeBinding != null) {
+			String name = typeBinding.getQualifiedName();
+			name = assureQualifiedName(shortenQualifiedName(name));
+			if (checkKeywordViolation(name)) {
+				buffer.append('$');
+			}
+			buffer.append(name);
+		} else {
+			String name = node.getFullyQualifiedName();
+			if (checkKeywordViolation(name)) {
 				buffer.append('$');
 			}
 			buffer.append(name);
@@ -2810,11 +2805,11 @@ public class Java2ScriptLegacyVisitor extends J2SKeywordVisitor {
 		if ((node != rootTypeNode) && node.getParent() != null && (node.getParent() instanceof AbstractTypeDeclaration
 				|| node.getParent() instanceof TypeDeclarationStatement)) {
 			/* inner static class */
-			Java2ScriptLegacyVisitor visitor = null;
+			J2SLegacyVisitor visitor = null;
 			try {
 				visitor = this.getClass().newInstance();
 			} catch (@SuppressWarnings("unused") Exception e) {
-				visitor = new Java2ScriptLegacyVisitor(); // Default visitor
+				visitor = new J2SLegacyVisitor(); // Default visitor
 			}
 			visitor.rootTypeNode = node;
 			String className = typeVisitor.getClassName();
@@ -2958,7 +2953,7 @@ public class Java2ScriptLegacyVisitor extends J2SKeywordVisitor {
 
 	/// static methods originally in ASTJ2sMapVisitor
 
-	private static boolean checkSameName(ITypeBinding binding, String name) {
+	private static boolean isSameName(ITypeBinding binding, String name) {
 		if (binding != null) {
 			IMethodBinding[] declaredMethods = binding.getDeclaredMethods();
 			for (int i = 0; i < declaredMethods.length; i++) {
@@ -2967,13 +2962,13 @@ public class Java2ScriptLegacyVisitor extends J2SKeywordVisitor {
 				}
 			}
 			ITypeBinding superclass = binding.getSuperclass();
-			if (checkSameName(superclass, name)) {
+			if (isSameName(superclass, name)) {
 				return true;
 			}
 			ITypeBinding[] interfaces = binding.getInterfaces();
 			if (interfaces != null) {
 				for (int i = 0; i < interfaces.length; i++) {
-					if (checkSameName(interfaces[i], name)) {
+					if (isSameName(interfaces[i], name)) {
 						return true;
 					}
 				}

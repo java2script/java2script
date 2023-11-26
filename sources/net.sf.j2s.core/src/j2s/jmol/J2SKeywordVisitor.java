@@ -91,7 +91,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 
 /**
  * 
- * ASTVisitor > Java2ScriptASTVisitor > J2SKeywordVisitor > Java2ScriptPrimaryVisitor
+ * ASTVisitor > J2SASTVisitor > J2SKeywordVisitor > Java2ScriptLegacyVisitor
  * 
  * This class will traverse most of the common keyword and
  * common expression.
@@ -101,7 +101,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
  * @author zhou renjian
  *
  */
-public abstract class J2SKeywordVisitor extends J2SASTVisitor {
+abstract class J2SKeywordVisitor extends J2SASTVisitor {
 	
 	/**
 	 * FinalVariable that is used to record variable state, which will provide

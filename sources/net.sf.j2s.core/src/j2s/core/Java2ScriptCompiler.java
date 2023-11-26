@@ -23,7 +23,7 @@ import org.eclipse.jdt.core.compiler.BuildContext;
 import org.eclipse.jdt.core.dom.ASTParser;
 
 import j2s.CorePlugin;
-import j2s.jmol.Java2ScriptLegacyCompiler;
+import j2s.jmol.J2SLegacyCompiler;
 import j2s.swingjs.Java2ScriptSwingJSCompiler;
 
 /**
@@ -160,7 +160,7 @@ public abstract class Java2ScriptCompiler {
 		File f = getJ2SConfigName(project, files[0]);
 		return ( f == null ? null 
 				: J2S_CONFIG_JMOL.equals(j2stype = f.getName()) ? 
-				new Java2ScriptLegacyCompiler(f)
+				new J2SLegacyCompiler(f)
 				: J2S_CONFIG_SWINGJS.equals(j2stype) ?
 						new Java2ScriptSwingJSCompiler(f) : null);
 	}

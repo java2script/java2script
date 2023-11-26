@@ -13,7 +13,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import j2s.CorePlugin;
 import j2s.core.Java2ScriptCompiler;
 
-public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
+public class J2SLegacyCompiler extends Java2ScriptCompiler {
 
 	private final static String J2S_PACKAGE_FIXES = "j2s.package.fixes";
 
@@ -32,7 +32,7 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 			,"Class.forName", "Clazz._4Name"//
 	};
 
-	public Java2ScriptLegacyCompiler(File f) {
+	public J2SLegacyCompiler(File f) {
 		super(false, f);
 	}
 
@@ -117,7 +117,7 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 			return false;
 		}
 
-		Java2ScriptLegacyVisitor visitor = new Java2ScriptLegacyVisitor();
+		J2SLegacyVisitor visitor = new J2SLegacyVisitor();
 		isDebugging = "debug".equals(props.getProperty("j2s.compiler.mode"));
 		errorOccurs = false;
 		try {
@@ -143,7 +143,7 @@ public class Java2ScriptLegacyCompiler extends Java2ScriptCompiler {
 		return false;
 	}
 
-	private void outputJavaScript(Java2ScriptLegacyVisitor visitor, J2SDependencyVisitor dvisitor, CompilationUnit fRoot,
+	private void outputJavaScript(J2SLegacyVisitor visitor, J2SDependencyVisitor dvisitor, CompilationUnit fRoot,
 			String outputPath, String trailer, String sourceLocation) {
 		String js = finalFixes(dvisitor.cleanLoadCalls(visitor));
 		String elementName = fRoot.getJavaElement().getElementName();

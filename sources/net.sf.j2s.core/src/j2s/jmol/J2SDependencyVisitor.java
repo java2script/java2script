@@ -53,7 +53,7 @@ import j2s.core.Java2ScriptCompiler;
 
 /**
  * 
- * ASTVisitor > Java2ScriptASTVisitor > Java2ScriptDependencyVisitor
+ * ASTVisitor > J2SASTVisitor > J2SDependencyVisitor
  * 
  * This class is called by root.accept(me) in the first pass of the
  * transpiler to catalog all the references to classes and then later
@@ -63,7 +63,7 @@ import j2s.core.Java2ScriptCompiler;
  * 
  * 2006-5-2
  */
-public class J2SDependencyVisitor extends J2SASTVisitor {
+class J2SDependencyVisitor extends J2SASTVisitor {
 
 	private static class QNTypeBinding {
 		String qualifiedName;

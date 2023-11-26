@@ -39,16 +39,16 @@ import org.eclipse.jdt.core.dom.TextElement;
 
 /**
  * 
- * ASTVisitor > Java2ScriptASTVisitor > Java2ScriptDependencyVisitor
+ * ASTVisitor > J2SASTVisitor > J2SDependencyVisitor
  * 
- * ASTVisitor > Java2ScriptASTVisitor > J2SKeywordVisitor > Java2ScriptPrimaryVisitor
+ * ASTVisitor > J2SASTVisitor > J2SKeywordVisitor > Java2ScriptLegacyVisitor
  * 
  * @author zhou renjian
  */
 abstract class J2SASTVisitor extends ASTVisitor {
 
 	protected final static String[] preDeclaredPackages = { //
-			"java.lang", //
+			"java.lang", //publicfinal refactoring -- Helpers to inner static classes
 			"java.lang.ref", //
 			"java.lang.ref.reflect", //
 			"java.lang.reflect", //
