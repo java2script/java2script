@@ -27,7 +27,55 @@ import java.lang.reflect.Array;
  * @since 1.2
  */
 public class Collections {
+	
+    static EmptyEnumeration<Object> EMPTY_ENUMERATION;
+    static EmptyIterator<Object> EMPTY_ITERATOR;
 
+
+    @SuppressWarnings("unchecked")
+    public static <T> Enumeration<T> emptyEnumeration() {
+    	if (EMPTY_ENUMERATION == null)
+    		EMPTY_ENUMERATION = new EmptyEnumeration<>();
+        return (Enumeration<T>) EMPTY_ENUMERATION;
+    }
+
+    private static class EmptyEnumeration<E> implements Enumeration<E> {
+
+        @Override
+		public boolean hasMoreElements() { return false; }
+        @Override
+		public E nextElement() { throw new NoSuchElementException(); }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> Iterator<T> emptyIterator() {
+    	if (EMPTY_ITERATOR == null) {
+    		EMPTY_ITERATOR = new EmptyIterator<>();
+    	}
+        return (Iterator<T>) EMPTY_ITERATOR;
+    }
+
+
+    /**
+     * From Java 8+
+     * @author hanso
+     *
+     * @param <E>
+     */
+    private static class EmptyIterator<E> implements Iterator<E> {
+        @Override
+		public boolean hasNext() { return false; }
+        @Override
+		public E next() { throw new NoSuchElementException(); }
+        @Override
+		public void remove() { throw new IllegalStateException(); }
+//        @Override
+//        public void forEachRemaining(Consumer<? super E> action) {
+//            Objects.requireNonNull(action);
+//        }
+    }
+
+    
 	private static final class CopiesList<E> extends AbstractList<E> implements
 			Serializable {
 		private static final long serialVersionUID = 2739099268398711800L;
@@ -91,8 +139,6 @@ public class Collections {
 	@SuppressWarnings("unchecked")
     private static final class EmptySet extends AbstractSet implements
 			Serializable {
-		private static final long serialVersionUID = 1582296315990362920L;
-
 		@Override
         public boolean contains(Object object) {
 			return false;
