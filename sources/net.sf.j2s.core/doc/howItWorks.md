@@ -7,12 +7,12 @@ As such, it use the "legacy" version of the transpiler created and formerly main
 solely by Zhou Renjien. This code was the basis for SwingJS, and by careful adapting Jmol
 to fit it, we could make it work with this somewhat quirky code. (For example, there is no
 support for boxing and unboxing numbers -- int i = Integer.valueOf(3) is not properly turned
-into just the number 3. I got around this in those early days by just going through all 
+into just the number 3.) I got around this in those early days by just going through all 
 (and I mean ALL) of the Jmol code, making sure there were no implicit boxing or unboxing. 
 
 The primary issue with this transpiler is that it does not "qualify" method names. 
 Thus, BufferedWriter.write(char) and BufferedWriter.write(int) both run through the
-same method in JavaScript, and (a very complex and time-expensive) algorithm then
+same method in JavaScript, and a (very complex and time-expensive) algorithm then
 sorts out based on the JavaScript parameter type what is the MOST LIKELY intended
 method target. I did a huge amount of refactoring in Jmol to ensure that it almost
 never calls overloaded methods like this. 
@@ -64,6 +64,7 @@ The full java2script/SwingJS operation involves two parts: Creating the JavaScri
 The code for these two parts are well-separated:
 
 net.sf.j2s.core       java2script transpiler
+
 net.sf.j2s.java.core  SwingJS runtime
 
 
@@ -91,14 +92,14 @@ thank you https://bugs.eclipse.org/bugs/show_bug.cgi?id=525280
 ]
 
 
-When it is desired to create the transpiler (net.sf.j2s.core.jar):
+When it is desired to create the transpiler (j2s.core.jar):
 
 1) Use File...Export...Deployable plug-ins and fragments
   (if you do not see this option, check that you are using Eclipse 
     Enterprise)
-2) Choose net.sf.j2s.core (Version x.x.x), check the directory,
+2) Choose j2s.core.jar (Version x.x.x), indicate the output directory,
    and press finish.
-3) Copy this file to the drop-ins directory, restart Eclipse, 
+3) Copy this file to the dropins directory, restart Eclipse, 
    and test.
 4) Copy this file to the project dist/swingjs folder and also
    to the swingjs/ver/x.x.x folder (or appropriate). 
@@ -107,12 +108,9 @@ When it is desired to create the transpiler (net.sf.j2s.core.jar):
 
 I do this with a DOS batch file, which also adds a timestamp. 
    
-That's it. I advise to NOT change the version number. I know, this
-sounds stupid, but if you change that number, installation in Eclipse requires starting Eclipse with a -clean as the first option. https://www.eclipsezone.com//eclipse/forums/t61566.html
-This is pain. If you do not do this clean build, Eclipse just
-ignores your drop-in. 
+That's it. 
 
-The dist directory also includes SwingJS-site.zip, created from the net.sf.j2s.core.java project. 
+The dist directory includes SwingJS-site.zip, created from the net.sf.j2s.core.java project.
 
 
 **SwingJS runtime maintenance**
@@ -130,7 +128,7 @@ The important thing here is to maintain backward compatibility at all times. It 
 So, basically, you can add to or modify any of the several thousand classes in j2s.net.sf.java.core/src. Just be careful to allow for what is already there to still run. Adding a new class can be a challenge. Note that we have not implemented serialization or accessibility. This was a design decision based on need. We needed applet code to run, and these two features added far too much complexity to the task. So we ignored them. (Serialization, in particular, is probably not ever going to work in JavaScript, because the java2script transpiler does not preserve enough information about variable types to make that work properly.)
 
 
-Bob Hanson 2019.10.13
+Bob Hanson 2019.10.13, 2023.11.13
 
 
 
