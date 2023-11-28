@@ -98,28 +98,33 @@ public class CRC32 implements Checksum {
 //}
 //}
 
-  public void update(byte[] buf, int index, int len) {
+  @Override
+public void update(byte[] buf, int index, int len) {
     int c = ~crc;
     while (--len >= 0)
       c = crc_table[(c ^ buf[index++]) & 0xff] ^ (c >>> 8);
     crc = ~c;
   }
 
-  public void reset() {
+  @Override
+public void reset() {
     crc = 0;
   }
 
-  public void resetLong(long vv) {
+  @Override
+public void resetLong(long vv) {
     crc = (int) (vv & 0xffffffffL);
   }
 
-  public long getValue() {
+  @Override
+public long getValue() {
     return crc & 0xffffffffL;
   }
 
   private byte[] b1 = new byte[1];
 
-  public void updateByteAsInt(int b) {
+  @Override
+public void updateByteAsInt(int b) {
     b1[0] = (byte) b;
     update(b1, 0, 1);
   }

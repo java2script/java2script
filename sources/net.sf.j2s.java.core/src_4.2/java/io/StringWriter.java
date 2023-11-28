@@ -26,7 +26,7 @@ package java.io;
  * @see StringReader
  */
 public class StringWriter extends Writer {
-	private StringBuffer buf;
+	private String buf;
 
 	/**
 	 * Constructs a new StringWriter which has a StringBuffer allocated with the
@@ -35,7 +35,7 @@ public class StringWriter extends Writer {
 	 */
 	public StringWriter() {
 		super();
-		buf = new StringBuffer(16);
+		buf = "";
 		lock = buf;
 	}
 
@@ -49,7 +49,7 @@ public class StringWriter extends Writer {
 	 */
 	public StringWriter(int initialSize) {
 		if (initialSize >= 0) {
-			buf = new StringBuffer(initialSize);
+			buf = "";
 			lock = buf;
 		} else {
             throw new IllegalArgumentException();
@@ -77,18 +77,19 @@ public class StringWriter extends Writer {
 		/*empty*/
 	}
 
-	/**
-	 * Answer the contents of this StringWriter as a StringBuffer. Any changes
-	 * made to the StringBuffer by the receiver or the caller are reflected in
-	 * this StringWriter.
-	 * 
-	 * @return this StringWriters local StringBuffer.
-	 */
-	public StringBuffer getBuffer() {
-		synchronized (lock) {
-			return buf;
-		}
-	}
+// Jmol unused
+//	/**
+//	 * Answer the contents of this StringWriter as a StringBuffer. Any changes
+//	 * made to the StringBuffer by the receiver or the caller are reflected in
+//	 * this StringWriter.
+//	 * 
+//	 * @return this StringWriters local StringBuffer.
+//	 */
+//	public StringBuffer getBuffer() {
+//		synchronized (lock) {
+//			return buf;
+//		}
+//	}
 
 	/**
 	 * Answer the contents of this StringWriter as a String. Any changes made to
@@ -100,7 +101,7 @@ public class StringWriter extends Writer {
 	@Override
     public String toString() {
 		synchronized (lock) {
-			return buf.toString();
+			return buf;
 		}
 	}
 
@@ -124,7 +125,7 @@ public class StringWriter extends Writer {
 		if (0 <= offset && offset <= cbuf.length && 0 <= count
 				&& count <= cbuf.length - offset) {
 			synchronized (lock) {
-				this.buf.append(cbuf, offset, count);
+				buf += new String(cbuf, offset, count);
 			}
 		} else {
 			throw new IndexOutOfBoundsException();
@@ -143,7 +144,7 @@ public class StringWriter extends Writer {
 	@Override
     public void write(int oneChar) {
 		synchronized (lock) {
-			buf.append((char) oneChar);
+			buf += (char) oneChar;
 		}
 	}
 
@@ -158,7 +159,7 @@ public class StringWriter extends Writer {
 	@Override
     public void write(String str) {
 		synchronized (lock) {
-			buf.append(str);
+			buf += str;
 		}
 	}
 
@@ -181,7 +182,7 @@ public class StringWriter extends Writer {
     public void write(String str, int offset, int count) {
 		String sub = str.substring(offset, offset + count);
 		synchronized (lock) {
-			buf.append(sub);
+			buf += sub;
 		}
 	}
 	

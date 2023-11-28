@@ -1445,15 +1445,15 @@ case 1:
 	if(typeof x=="string"||x instanceof String){
 		return new String(x);
 	}
-	if(x.__CLASS_NAME__=="StringBuffer"||x.__CLASS_NAME__=="java.lang.StringBuffer"){
-		var value=x.shareValue();
-		var length=x.length();
-		var valueCopy=new Array(length);
-		for(var i=0;i<length;i++){
-			valueCopy[i]=value[i];
-		}
-		return valueCopy.join('')
-	}
+//	if(x.__CLASS_NAME__=="StringBuffer"||x.__CLASS_NAME__=="java.lang.StringBuffer"){
+//		var value=x.shareValue();
+//		var length=x.length();
+//		var valueCopy=new Array(length);
+//		for(var i=0;i<length;i++){
+//			valueCopy[i]=value[i];
+//		}
+//		return valueCopy.join('')
+//	}
 	return""+x;
 case 2:	
 	var x=arguments[0];
@@ -1638,14 +1638,7 @@ return"class java.lang.Character";
 }
 }return String.valueOf(c);
 },"~N");
-Clazz.defineStatics(c$,
-"MIN_VALUE",'\u0000',
-"MAX_VALUE",'\uffff',
-"MIN_RADIX",2,
-"MAX_RADIX",36,
-"TYPE",null);
-
-java.lang.Character.TYPE=java.lang.Character.prototype.TYPE=java.lang.Character;
+c$.TYPE=c$;
 
 
 
@@ -1667,11 +1660,13 @@ var a = Clazz.newArray(size);
 return a;
 },"Class,~N");
 
+c$.getLength = function(o){return o.length};
+c$.get = function(o, i){return o[i]};
+
 javautil.Date=Date;
 Date.TYPE="javautil.Date";
 Date.__CLASS_NAME__="Date";
 Clazz.implementOf(Date,[java.io.Serializable,java.lang.Comparable]);
-
 Clazz.defineMethod(javautil.Date,"clone",
 function(){
 return new Date(this.getTime());
@@ -1962,25 +1957,22 @@ return this.lineNumber==-2;
 });
 Clazz.overrideMethod(c$,"toString",
 function(){
-var buf=new StringBuilder(80);
-buf.append(this.getClassName());
-buf.append('.');
-buf.append(this.getMethodName());
+var buf = this.getClassName() + "." + this.getMethodName();
 if(this.isNativeMethod()){
-buf.append("(Native Method)");
+buf += ("(Native Method)");
 }else{
 var fName=this.getFileName();
 if(fName==null){
-buf.append("(Unknown Source)");
+buf += ("(Unknown Source)");
 }else{
 var lineNum=this.getLineNumber();
-buf.append('(');
-buf.append(fName);
+buf += ('(');
+buf += (fName);
 if(lineNum>=0){
-buf.append(':');
-buf.append(lineNum);
-}buf.append(')');
-}}return buf.toString();
+buf += (':');
+buf = buf + lineNum;
+}buf += (')');
+}}return buf;
 });
 TypeError.prototype.getMessage || (TypeError.prototype.getMessage = function(){ return (this.message || this.toString()) + (this.getStackTrace ? this.getStackTrace() : Clazz.getStackTrace())});
 
@@ -2255,55 +2247,14 @@ this.bytesTransferred=0;
 Clazz.instantialize(this,arguments);
 },java.io,"InterruptedIOException",java.io.IOException);
 
-c$=Clazz.declareType(java.io,"ObjectStreamException",java.io.IOException);
-
-c$=Clazz.decorateAsClass(function(){
-this.classname=null;
-Clazz.instantialize(this,arguments);
-},java.io,"InvalidClassException",java.io.ObjectStreamException);
-Clazz.makeConstructor(c$,
-function(className,detailMessage){
-Clazz.superConstructor(this,java.io.InvalidClassException,[detailMessage]);
-this.classname=className;
-},"~S,~S");
-Clazz.defineMethod(c$,"getMessage",
-function(){
-var msg=Clazz.superCall(this,java.io.InvalidClassException,"getMessage",[]);
-if(this.classname!=null){
-msg=this.classname+';' + ' '+msg;
-}return msg;
-});
-
-c$=Clazz.declareType(java.io,"InvalidObjectException",java.io.ObjectStreamException);
-
-c$=Clazz.declareType(java.io,"NotActiveException",java.io.ObjectStreamException);
-
-c$=Clazz.declareType(java.io,"NotSerializableException",java.io.ObjectStreamException);
-
-c$=Clazz.decorateAsClass(function(){
-this.eof=false;
-this.length=0;
-Clazz.instantialize(this,arguments);
-},java.io,"OptionalDataException",java.io.ObjectStreamException);
-
-c$=Clazz.declareType(java.io,"StreamCorruptedException",java.io.ObjectStreamException);
-
 c$=Clazz.declareType(java.io,"SyncFailedException",java.io.IOException);
 
 c$=Clazz.declareType(java.io,"UnsupportedEncodingException",java.io.IOException);
 
 c$=Clazz.declareType(java.io,"UTFDataFormatException",java.io.IOException);
 
-c$=Clazz.decorateAsClass(function(){
-this.detail=null;
-Clazz.instantialize(this,arguments);
-},java.io,"WriteAbortedException",java.io.ObjectStreamException);
-Clazz.makeConstructor(c$,
-function(detailMessage,rootCause){
-Clazz.superConstructor(this,java.io.WriteAbortedException,[detailMessage]);
-this.detail=rootCause;
-this.initCause(rootCause);
-},"~S,Exception");
+// ignore ObjectStream exceptions
+
 Clazz.defineMethod(c$,"getMessage",
 function(){
 var msg=Clazz.superCall(this,java.io.WriteAbortedException,"getMessage",[]);
@@ -2347,11 +2298,9 @@ c$=Clazz.declareType(javautil,"NoSuchElementException",RuntimeException);
 c$=Clazz.declareType(javautil,"TooManyListenersException",Exception);
 
 c$=Clazz.declareType(java.lang,"Void");
-Clazz.defineStatics(c$,
-"TYPE",null);
-{
-java.lang.Void.TYPE=java.lang.Void;
-}Clazz.declareInterface(java.lang.reflect,"GenericDeclaration");
+c$.TYPE = c$;
+
+Clazz.declareInterface(java.lang.reflect,"GenericDeclaration");
 Clazz.declareInterface(java.lang.reflect,"AnnotatedElement");
 
 c$=Clazz.declareType(java.lang.reflect,"AccessibleObject",null,java.lang.reflect.AnnotatedElement);
@@ -2417,11 +2366,8 @@ return 0.0;
 c$.emptyArgs=c$.prototype.emptyArgs=new Array(0);
 Clazz.declareInterface(java.lang.reflect,"InvocationHandler");
 c$=Clazz.declareInterface(java.lang.reflect,"Member");
-Clazz.defineStatics(c$,
-"PUBLIC",0,
-"DECLARED",1);
-
 c$=Clazz.declareType(java.lang.reflect,"Modifier");
+
 Clazz.makeConstructor(c$,
 function(){
 });
@@ -2492,24 +2438,6 @@ if(sb.length>0){
 return sb.join(" ");
 }return"";
 },"~N");
-Clazz.defineStatics(c$,
-"PUBLIC",0x1,
-"PRIVATE",0x2,
-"PROTECTED",0x4,
-"STATIC",0x8,
-"FINAL",0x10,
-"SYNCHRONIZED",0x20,
-"VOLATILE",0x40,
-"TRANSIENT",0x80,
-"NATIVE",0x100,
-"INTERFACE",0x200,
-"ABSTRACT",0x400,
-"STRICT",0x800,
-"BRIDGE",0x40,
-"VARARGS",0x80,
-"SYNTHETIC",0x1000,
-"ANNOTATION",0x2000,
-"ENUM",0x4000);
 
 c$=Clazz.decorateAsClass(function(){
 this.clazz=null;

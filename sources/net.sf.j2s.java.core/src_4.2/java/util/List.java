@@ -61,6 +61,7 @@ public interface List<E> extends Collection<E> {
 	 * @exception IllegalArgumentException
 	 *                when the object cannot be added to this List
 	 */
+	@Override
 	public boolean add(E object);
 
 	/**
@@ -101,6 +102,7 @@ public interface List<E> extends Collection<E> {
 	 * @exception IllegalArgumentException
 	 *                when an object cannot be added to this List
 	 */
+	@Override
 	public boolean addAll(Collection<? extends E> collection);
 
 	/**
@@ -112,6 +114,7 @@ public interface List<E> extends Collection<E> {
 	 * @see #isEmpty
 	 * @see #size
 	 */
+	@Override
 	public void clear();
 
 	/**
@@ -121,6 +124,7 @@ public interface List<E> extends Collection<E> {
 	 *            the object to search for
 	 * @return true if object is an element of this List, false otherwise
 	 */
+	@Override
 	public boolean contains(Object object);
 
 	/**
@@ -131,6 +135,7 @@ public interface List<E> extends Collection<E> {
 	 * @return true if all objects in the specified Collection are elements of
 	 *         this List, false otherwise
 	 */
+	@Override
 	public boolean containsAll(Collection<?> collection);
 
 	/**
@@ -143,6 +148,7 @@ public interface List<E> extends Collection<E> {
 	 *         object <code>false</code> if it is different from this object.
 	 * @see #hashCode
 	 */
+	@Override
 	public boolean equals(Object object);
 
 	/**
@@ -165,6 +171,7 @@ public interface List<E> extends Collection<E> {
 	 * 
 	 * @see #equals
 	 */
+	@Override
 	public int hashCode();
 
 	/**
@@ -184,6 +191,7 @@ public interface List<E> extends Collection<E> {
 	 * 
 	 * @see #size
 	 */
+	@Override
 	public boolean isEmpty();
 
 	/**
@@ -194,6 +202,7 @@ public interface List<E> extends Collection<E> {
 	 * 
 	 * @see Iterator
 	 */
+	@Override
 	public Iterator<E> iterator();
 
 	/**
@@ -256,6 +265,7 @@ public interface List<E> extends Collection<E> {
 	 * @exception UnsupportedOperationException
 	 *                when removing from this List is not supported
 	 */
+	@Override
 	public boolean remove(Object object);
 
 	/**
@@ -269,6 +279,7 @@ public interface List<E> extends Collection<E> {
 	 * @exception UnsupportedOperationException
 	 *                when removing from this List is not supported
 	 */
+	@Override
 	public boolean removeAll(Collection<?> collection);
 
 	/**
@@ -282,6 +293,7 @@ public interface List<E> extends Collection<E> {
 	 * @exception UnsupportedOperationException
 	 *                when removing from this List is not supported
 	 */
+	@Override
 	public boolean retainAll(Collection<?> collection);
 
 	/**
@@ -310,6 +322,7 @@ public interface List<E> extends Collection<E> {
 	 * 
 	 * @return the number of elements in this List
 	 */
+	@Override
 	public int size();
 
 	/**
@@ -334,6 +347,7 @@ public interface List<E> extends Collection<E> {
 	 * 
 	 * @return an array of the elements from this List
 	 */
+	@Override
 	public Object[] toArray();
 
 	/**
@@ -351,5 +365,6 @@ public interface List<E> extends Collection<E> {
 	 *                when the type of an element in this List cannot be stored
 	 *                in the type of the specified array
 	 */
+	@Override
 	public <T> T[] toArray(T[] array);
 }

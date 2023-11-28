@@ -20,7 +20,7 @@ package java.io;
  * Closeable represents the source or destination of some data which can be
  * called its close method to release resources it holds.
  */
-public interface Closeable {
+public interface Closeable extends AutoCloseable {
 	
 	/**
 	 * Close the object and release any system resources it holds. If the object
@@ -29,5 +29,6 @@ public interface Closeable {
 	 * @throws IOException
 	 *             if any error raises when closing the object.
 	 */
+	@Override
 	public void close() throws IOException;
 }

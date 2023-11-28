@@ -23,7 +23,7 @@ import org.eclipse.jdt.core.compiler.BuildContext;
 import org.eclipse.jdt.core.dom.ASTParser;
 
 import j2s.CorePlugin;
-import j2s.jmol.Java2ScriptLegacyCompiler;
+import j2s.jmol.J2SLegacyCompiler;
 import j2s.swingjs.Java2ScriptSwingJSCompiler;
 
 /**
@@ -84,9 +84,12 @@ public abstract class Java2ScriptCompiler {
 
 	abstract public boolean compileToJavaScript(IFile javaSource, String trailer);
 
-	abstract protected String getDefaultJ2SFile();
-
 	abstract public void finalizeProject();
+
+	/*
+	 * To save a default file with comments specific to this transpiler.
+	 */
+	abstract protected String getDefaultJ2SFileContents();
 
 	/**
 	 * The name of the J2S options file, aka as the "Dot-j2s" file. Please do not
@@ -99,7 +102,6 @@ public abstract class Java2ScriptCompiler {
 	protected Properties props;
 
 	protected String projectFolder;
-//	protected String outputPath;
 	protected String siteFolder;
 	protected String j2sPath;
 	protected String excludedPaths;
@@ -113,6 +115,9 @@ public abstract class Java2ScriptCompiler {
 	protected ASTParser astParser;
 
 	protected IJavaProject project;
+
+	protected int nResources;
+
 
 	/**
 	 * This will activate @j2sDebug blocks, at least in SwingJS
@@ -158,7 +163,7 @@ public abstract class Java2ScriptCompiler {
 		File f = getJ2SConfigName(project, files[0]);
 		return ( f == null ? null 
 				: J2S_CONFIG_JMOL.equals(j2stype = f.getName()) ? 
-				new Java2ScriptLegacyCompiler(f)
+				new J2SLegacyCompiler(f)
 				: J2S_CONFIG_SWINGJS.equals(j2stype) ?
 						new Java2ScriptSwingJSCompiler(f) : null);
 	}
@@ -271,10 +276,10 @@ public abstract class Java2ScriptCompiler {
 			return false;
 		}
 		if (getFileContents(activeJ2SFile).trim().length() == 0) {
-			writeToFile(activeJ2SFile, getDefaultJ2SFile());
+			writeToFile(activeJ2SFile, getDefaultJ2SFileContents());
 		}
 		int jslLevel = javaLanguageLevel;
-		if (jslLevel == 8) {
+		if (isSwingJS) {
 			// SwingJS allows 8 or 11
 			try {
 				String ver = getProperty(J2S_COMPILER_JAVA_VERSION, "" + jslLevel);
@@ -345,14 +350,17 @@ public abstract class Java2ScriptCompiler {
 		return excludeFile(javaSource.getFullPath().toString());
 	}
 
-	private boolean excludeFile(String filePath) {
+	public boolean excludeFile(String filePath) {
 		if (lstExcludedPaths != null) {
+			if (filePath == null)
+				return true;
 			if (filePath.indexOf('\\') >= 0)
 				filePath = filePath.replace('\\', '/');
-			for (int i = lstExcludedPaths.size(); --i >= 0;)
+			for (int i = lstExcludedPaths.size(); --i >= 0;) {
 				if (filePath.indexOf(lstExcludedPaths.get(i)) >= 0) {
 					return true;
 				}
+			}
 		}
 		return false;
 	}
@@ -475,12 +483,12 @@ public abstract class Java2ScriptCompiler {
 		return n;
 	}
 
-	protected int checkCopiedResources(String packageName, String sourceLocation, String outputDir) {
+	protected void copyAllResources(String packageName, String sourceLocation) {		
 		int pt = packageName.indexOf(".");
 		if (pt >= 0)
 			packageName = packageName.substring(0, pt);
 		if (copiedResourcePackages.contains(packageName))
-			return 0;
+			return;
 		copiedResourcePackages.add(packageName);
 		pt = sourceLocation.lastIndexOf("/" + packageName + "/");
 		if (pt <= 0) {
@@ -488,12 +496,11 @@ public abstract class Java2ScriptCompiler {
 			if (!"_".equals(packageName))
 				System.out.println(
 						"J2S ignoring bad sourceLocation for package \"" + packageName + "\": " + sourceLocation);
-			return 0;
+			return;
 		}
-		String sourceDir = sourceLocation.substring(0, pt);
-		File src = new File(sourceDir, packageName);
-		File dest = new File(outputDir, packageName);
-		return copySiteResources(src, dest);
+		File src = new File(sourceLocation.substring(0, pt), packageName);
+		File dest = new File(j2sPath, packageName);
+		nResources += copySiteResources(src, dest);
 	}
 
 	protected String fixPackageName(String name) {

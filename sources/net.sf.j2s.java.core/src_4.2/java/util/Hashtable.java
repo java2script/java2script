@@ -57,11 +57,13 @@ public class Hashtable<K,V> extends Dictionary<K,V> implements Map<K,V>, Cloneab
 	transient int modCount;
 
 	private static final Enumeration<?> EMPTY_ENUMERATION = new Enumeration<Object>() {
-        public boolean hasMoreElements() {
+        @Override
+		public boolean hasMoreElements() {
             return false;
         }
         
-        public Object nextElement() {
+        @Override
+		public Object nextElement() {
             throw new NoSuchElementException();
         }
     };
@@ -131,6 +133,7 @@ public class Hashtable<K,V> extends Dictionary<K,V> implements Map<K,V>, Cloneab
 			expectedModCount = modCount;
 		}
 
+		@Override
 		public boolean hasNext() {
 			if (lastEntry != null && lastEntry.next != null) {
 				return true;
@@ -145,6 +148,7 @@ public class Hashtable<K,V> extends Dictionary<K,V> implements Map<K,V>, Cloneab
 			return false;
 		}
 
+		@Override
 		public E next() {
 			if (expectedModCount == modCount) {
 				if (lastEntry != null) {
@@ -171,6 +175,7 @@ public class Hashtable<K,V> extends Dictionary<K,V> implements Map<K,V>, Cloneab
             throw new ConcurrentModificationException();
 		}
 
+		@Override
 		public void remove() {
 			if (expectedModCount == modCount) {
 				if (canRemove) {
@@ -223,6 +228,7 @@ public class Hashtable<K,V> extends Dictionary<K,V> implements Map<K,V>, Cloneab
 			start = lastSlot + 1;
 		}
 
+		@Override
 		public boolean hasMoreElements() {
 			if (entry != null) {
                 return true;
@@ -236,6 +242,7 @@ public class Hashtable<K,V> extends Dictionary<K,V> implements Map<K,V>, Cloneab
 			return false;
 		}
 
+		@Override
 		@SuppressWarnings("unchecked")
         public E nextElement() {
 			if (hasMoreElements()) {
@@ -317,6 +324,7 @@ public class Hashtable<K,V> extends Dictionary<K,V> implements Map<K,V>, Cloneab
 	 * @see #isEmpty
 	 * @see #size
 	 */
+	@Override
 	public synchronized void clear() {
 		elementCount = 0;
 		Arrays.fill(elementData, null);
@@ -392,6 +400,7 @@ public class Hashtable<K,V> extends Dictionary<K,V> implements Map<K,V>, Cloneab
 	 * @see #contains
 	 * @see java.lang.Object#equals
 	 */
+	@Override
 	public synchronized boolean containsKey(Object key) {
 		return getEntry(key) != null;
 	}
@@ -404,6 +413,7 @@ public class Hashtable<K,V> extends Dictionary<K,V> implements Map<K,V>, Cloneab
 	 * @return true if <code>value</code> is a value of this Hashtable, false
 	 *         otherwise
 	 */
+	@Override
 	public boolean containsValue(Object value) {
 		return contains(value);
 	}
@@ -435,6 +445,7 @@ public class Hashtable<K,V> extends Dictionary<K,V> implements Map<K,V>, Cloneab
 	 * 
 	 * @return a Set of the mappings
 	 */
+	@Override
 	public Set<Map.Entry<K,V>> entrySet() {
 		return new Collections.SynchronizedSet<Map.Entry<K, V>>(new AbstractSet<Map.Entry<K,V>>() {
 			@Override
@@ -467,6 +478,7 @@ public class Hashtable<K,V> extends Dictionary<K,V> implements Map<K,V>, Cloneab
 			@Override
             public Iterator<Map.Entry<K,V>> iterator() {
 				return new HashIterator<Map.Entry<K, V>>(new MapEntry.Type<Map.Entry<K, V>, K, V>() {
+					@Override
 					public Map.Entry<K, V> get(MapEntry<K, V> entry) {
 						return entry;
 					}
@@ -609,6 +621,7 @@ public class Hashtable<K,V> extends Dictionary<K,V> implements Map<K,V>, Cloneab
 	 * 
 	 * @return a Set of the keys
 	 */
+	@Override
 	public Set<K> keySet() {
 		return new Collections.SynchronizedSet<K>(
             new AbstractSet<K>() {
@@ -640,7 +653,8 @@ public class Hashtable<K,V> extends Dictionary<K,V> implements Map<K,V>, Cloneab
                 public Iterator<K> iterator() {
     				return new HashIterator<K>(
                         new MapEntry.Type<K, K, V>() {
-        					public K get(MapEntry<K, V> entry) {
+        					@Override
+							public K get(MapEntry<K, V> entry) {
         						return entry.key;
         					}
     				});
@@ -704,6 +718,7 @@ public class Hashtable<K,V> extends Dictionary<K,V> implements Map<K,V>, Cloneab
 	 * @param map
 	 *            the Map to copy mappings from
 	 */
+	@Override
 	public synchronized void putAll(Map<? extends K,? extends V> map) {
 		for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
 			put(entry.getKey(), entry.getValue());
@@ -804,31 +819,30 @@ public class Hashtable<K,V> extends Dictionary<K,V> implements Map<K,V>, Cloneab
             return "{}";
         }
 
-		StringBuilder buffer = new StringBuilder(size() * 28);
-		buffer.append('{');
+        String buffer = "{";
 		for (int i = lastSlot; i >= firstSlot; i--) {
 			Entry<K, V> entry = elementData[i];
 			while (entry != null) {
 				if (entry.key != this) {
-					buffer.append(entry.key);
+					buffer += (entry.key);
 				} else {
-					buffer.append("(this Map)");
+					buffer += ("(this Map)");
 				}
-				buffer.append('=');
+				buffer += ('=');
 				if (entry.value != this) {
-					buffer.append(entry.value);
+					buffer += (entry.value);
 				} else {
-					buffer.append("(this Map)");
+					buffer += ("(this Map)");
 				}
-				buffer.append(", ");
+				buffer += (", ");
 				entry = entry.next;
 			}
 		}
 		// Remove the last ", "
 		if (elementCount > 0) {
-            buffer.setLength(buffer.length() - 2);
+            buffer = buffer.substring(0, buffer.length() - 2);
         }
-		buffer.append('}');
+		buffer += ('}');
 		return buffer.toString();
 	}
 
@@ -839,6 +853,7 @@ public class Hashtable<K,V> extends Dictionary<K,V> implements Map<K,V>, Cloneab
 	 * 
 	 * @return a Collection of the values
 	 */
+	@Override
 	public Collection<V> values() {
 		return new Collections.SynchronizedCollection<V>(new AbstractCollection<V>() {
 			@Override
@@ -859,6 +874,7 @@ public class Hashtable<K,V> extends Dictionary<K,V> implements Map<K,V>, Cloneab
 			@Override
             public Iterator<V> iterator() {
 				return new HashIterator<V>(new MapEntry.Type<V, K, V>() {
+					@Override
 					public V get(MapEntry<K, V> entry) {
 						return entry.value;
 					}

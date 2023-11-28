@@ -135,7 +135,8 @@ public class IdentityHashMap<K, V> extends AbstractMap<K, V> implements
             expectedModCount = hm.modCount;
         }
 
-        public boolean hasNext() {
+        @Override
+		public boolean hasNext() {
             while (position < associatedMap.elementData.length) {
                 // if this is an empty spot, go to the next one
                 if (associatedMap.elementData[position] == null) {
@@ -153,7 +154,8 @@ public class IdentityHashMap<K, V> extends AbstractMap<K, V> implements
             }
         }
 
-        public E next() {
+        @Override
+		public E next() {
             checkConcurrentMod();
             if (!hasNext()) {
                 throw new NoSuchElementException();
@@ -168,7 +170,8 @@ public class IdentityHashMap<K, V> extends AbstractMap<K, V> implements
             return type.get(result);
         }
 
-        public void remove() {
+        @Override
+		public void remove() {
             checkConcurrentMod();
             if (!canRemove) {
                 throw new IllegalStateException();
@@ -227,7 +230,8 @@ public class IdentityHashMap<K, V> extends AbstractMap<K, V> implements
         public Iterator<Map.Entry<KT, VT>> iterator() {
             return new IdentityHashMapIterator<Map.Entry<KT, VT>, KT, VT>(
                     new MapEntry.Type<Map.Entry<KT, VT>, KT, VT>() {
-                        public Map.Entry<KT, VT> get(MapEntry<KT, VT> entry) {
+                        @Override
+						public Map.Entry<KT, VT> get(MapEntry<KT, VT> entry) {
                             return entry;
                         }
                     }, associatedMap);
@@ -627,7 +631,8 @@ public class IdentityHashMap<K, V> extends AbstractMap<K, V> implements
                 public Iterator<K> iterator() {
                     return new IdentityHashMapIterator<K, K, V>(
                             new MapEntry.Type<K, K, V>() {
-                                public K get(MapEntry<K, V> entry) {
+                                @Override
+								public K get(MapEntry<K, V> entry) {
                                     return entry.key;
                                 }
                             }, IdentityHashMap.this);
@@ -667,7 +672,8 @@ public class IdentityHashMap<K, V> extends AbstractMap<K, V> implements
                 public Iterator<V> iterator() {
                     return new IdentityHashMapIterator<V, K, V>(
                             new MapEntry.Type<V, K, V>() {
-                                public V get(MapEntry<K, V> entry) {
+                                @Override
+								public V get(MapEntry<K, V> entry) {
                                     return entry.value;
                                 }
                             }, IdentityHashMap.this);

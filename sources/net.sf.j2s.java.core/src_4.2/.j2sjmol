@@ -1,6 +1,5 @@
 #Java2Script Configuration
-xj2s.excluded.paths=org/apache/harmony/luni/util/
-xj2s.string.fixes=org.apache.harmony.luni.util.Msg.getString (",(",org.apache.harmony.luni.util.Msg,,[\\,[,\\, ],],\\, \\,,\\,
+j2s.excluded.paths=
 j2s.site.directory=site_jmol
 j2s.compiler.status=enable
 j2s.compiler.mode=debug

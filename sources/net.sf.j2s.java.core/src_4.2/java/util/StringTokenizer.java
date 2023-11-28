@@ -115,6 +115,7 @@ public class StringTokenizer implements Enumeration<Object> {
 	 * 
 	 * @return true if unprocessed tokens remain
 	 */
+	@Override
 	public boolean hasMoreElements() {
 		return hasMoreTokens();
 	}
@@ -146,6 +147,7 @@ public class StringTokenizer implements Enumeration<Object> {
 	 * @exception NoSuchElementException
 	 *                if no tokens remain
 	 */
+	@Override
 	public Object nextElement() {
 		return nextToken();
 	}

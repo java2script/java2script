@@ -115,6 +115,7 @@ public class ObjectStreamField implements Comparable<Object> {
 	 *         receiver is "equal" to the parameter. 1 if the receiver is
 	 *         "greater" than the parameter.
 	 */
+	@Override
 	public int compareTo(Object o) {
 		ObjectStreamField f = (ObjectStreamField) o;
 		boolean thisPrimitive = this.isPrimitive();
@@ -131,11 +132,13 @@ public class ObjectStreamField implements Comparable<Object> {
 	}
     
     
-    public boolean equals(Object arg0) {
+    @Override
+	public boolean equals(Object arg0) {
         return compareTo(arg0) == 0;
     }
     
-    public int hashCode() {
+    @Override
+	public int hashCode() {
         return getName().hashCode();
     }
 
@@ -285,6 +288,7 @@ public class ObjectStreamField implements Comparable<Object> {
 		// Sort if necessary
 		if (fields.length > 1) {
 			Comparator<ObjectStreamField> fieldDescComparator = new Comparator<ObjectStreamField>() {
+				@Override
 				public int compare(ObjectStreamField f1, ObjectStreamField f2) {
 					return f1.compareTo(f2);
 				}

@@ -100,6 +100,7 @@ public interface Collection<E> extends Iterable<E> {
 	 *         object <code>false</code> if it is different from this object.
 	 * @see #hashCode
 	 */
+	@Override
 	public boolean equals(Object object);
 
 	/**
@@ -110,6 +111,7 @@ public interface Collection<E> extends Iterable<E> {
 	 * 
 	 * @see #equals
 	 */
+	@Override
 	public int hashCode();
 
 	/**
@@ -127,6 +129,7 @@ public interface Collection<E> extends Iterable<E> {
 	 * 
 	 * @return an iterator for accessing the collection contents
 	 */
+	@Override
 	public Iterator<E> iterator();
 
 	/**

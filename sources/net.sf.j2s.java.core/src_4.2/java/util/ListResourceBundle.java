@@ -79,6 +79,7 @@ public abstract class ListResourceBundle extends ResourceBundle {
 				return false;
 			}
 
+			@Override
 			public boolean hasMoreElements() {
 				if (local.hasMoreElements()) {
                     return true;
@@ -86,6 +87,7 @@ public abstract class ListResourceBundle extends ResourceBundle {
 				return findNext();
 			}
 
+			@Override
 			public String nextElement() {
 				if (local.hasMoreElements()) {
                     return local.nextElement();

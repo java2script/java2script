@@ -48,6 +48,7 @@ public interface ListIterator<E> extends Iterator<E> {
 	 * 
 	 * @see #next
 	 */
+	@Override
 	public boolean hasNext();
 
 	/**
@@ -69,6 +70,7 @@ public interface ListIterator<E> extends Iterator<E> {
 	 * 
 	 * @see #hasNext
 	 */
+	@Override
 	public E next();
 
 	/**
@@ -119,6 +121,7 @@ public interface ListIterator<E> extends Iterator<E> {
 	 *                <code>add</code> have already been called after the last
 	 *                call to <code>next</code> or <code>previous</code>
 	 */
+	@Override
 	public void remove();
 
 	/**

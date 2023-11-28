@@ -63,7 +63,8 @@ public abstract class Writer implements Appendable, Closeable, Flushable {
      * @throws IOException
      *             If an error occurs attempting to close this Writer.
      */
-    public abstract void close() throws IOException;
+    @Override
+	public abstract void close() throws IOException;
 
     /**
      * Flush this Writer. This must be implemented by any concrete subclasses.
@@ -72,7 +73,8 @@ public abstract class Writer implements Appendable, Closeable, Flushable {
      * @throws IOException
      *             If an error occurs attempting to flush this Writer.
      */
-    public abstract void flush() throws IOException;
+    @Override
+	public abstract void flush() throws IOException;
 
     /**
      * Writes the entire character buffer <code>buf</code> to this Writer.
@@ -181,7 +183,8 @@ public abstract class Writer implements Appendable, Closeable, Flushable {
      * @throws IOException
      *             If any IOException raises during the procedure.
      */
-    public Writer append(char c) throws IOException {
+    @Override
+	public Writer append(char c) throws IOException {
         write(c);
         return this;
     }
@@ -198,7 +201,8 @@ public abstract class Writer implements Appendable, Closeable, Flushable {
      * @throws IOException
      *             If any IOException raises during the procedure.
      */
-    public Writer append(CharSequence csq) throws IOException {
+    @Override
+	public Writer append(CharSequence csq) throws IOException {
         if (null == csq) {
             write(TOKEN_NULL);
         } else {
@@ -230,7 +234,8 @@ public abstract class Writer implements Appendable, Closeable, Flushable {
      * @throws IOException
      *             If any IOException raises during the procedure.
      */
-    public Writer append(CharSequence csq, int start, int end)
+    @Override
+	public Writer append(CharSequence csq, int start, int end)
             throws IOException {
         if (null == csq) {
             write(TOKEN_NULL.substring(start, end));

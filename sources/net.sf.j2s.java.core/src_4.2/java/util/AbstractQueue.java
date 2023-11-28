@@ -91,7 +91,8 @@ public abstract class AbstractQueue<E> extends AbstractCollection<E> implements
      * @return the element in the head of the queue.
      * @throws NoSuchElementException if the queue is empty.
      */
-    public E remove() {
+    @Override
+	public E remove() {
         E o = poll();
         if (null == o) {
             throw new NoSuchElementException();
@@ -105,7 +106,8 @@ public abstract class AbstractQueue<E> extends AbstractCollection<E> implements
      * @return the element in the head of the queue.
      * @throws NoSuchElementException if the queue is empty.
      */
-    public E element() {
+    @Override
+	public E element() {
         E o = peek();
         if (null == o) {
             throw new NoSuchElementException();

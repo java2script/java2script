@@ -202,6 +202,4 @@ function(a){
 return this.indexOf(a)!=-1;
 },"~O");
 /*eoif*/})();
-//Clazz.defineStatics(c$,
-//"INSERTIONSORT_THRESHOLD",7);
 });

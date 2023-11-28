@@ -60,6 +60,7 @@ public class EventObject implements Serializable {
 	 * 
 	 * @return the string representation of this EventObject
 	 */
+	@Override
 	public String toString() {
 		return getClass().getName() + "[source=" + String.valueOf(source) + ']'; //$NON-NLS-1$
 	}

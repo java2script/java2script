@@ -49,5 +49,6 @@ public interface Comparator<T> {
 	 *         object <code>false</code> if it is different from this object.
 	 * @see Object#hashCode
 	 */
+	@Override
 	public boolean equals(Object object);
 }

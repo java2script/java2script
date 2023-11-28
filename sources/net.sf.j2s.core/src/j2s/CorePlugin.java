@@ -26,11 +26,13 @@ public class CorePlugin extends Plugin {
 	 * the actual "x.y.z" version is specified in plugin.xml.
 	 * 
 	 */
-	public static String VERSION = "5.0.1-v1";
+	public static String VERSION = "5.0.1-v2";
 	
 	// if you change the x.x.x number, be sure to also indicate that in 
 	// j2sApplet.js and also (Bob only) update.bat, update-clean.bat
 
+	// BH 2023.11.27 -- 5.0.1-v2 final refactoring and creatiton of J2SUtil
+	// BH 2023.11.21 -- 5.0.1-v2 adds Java8 syntaxes for try and switch; removes dependency for instanceOf and exception checking
 	// BH 2023.11.09 -- 5.0.1-v1 merges Jmol legacy (.j2sjmol) with Java8//11 (.j2s)
 	// BH 2023.03.29 -- 3.3.1-v7 fixes outer static method call from within lambda expression. 
 	// BH 2023.02.09 -- 3.3.1.v6 fixes j2s.excluded.paths needing /src/xxxx

@@ -118,7 +118,7 @@ public class StringBufferInputStream extends InputStream {
 			}
 			throw new ArrayIndexOutOfBoundsException();
 		}
-		throw new NullPointerException(org.apache.harmony.luni.util.Msg.getString("K0047")); //$NON-NLS-1$
+		throw new NullPointerException(("K0047")); //$NON-NLS-1$
 	}
 
 	/**

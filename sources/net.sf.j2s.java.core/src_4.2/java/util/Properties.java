@@ -17,6 +17,7 @@
 
 package java.util;
 
+// BH 2023.11.16 StringBuilder to String for JavaScript
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -94,10 +95,10 @@ public class Properties extends Hashtable<Object,Object> {
 		defaults = properties;
 	}
 
-	private void dumpString(StringBuilder buffer, String string, boolean key) {
+	private String dumpString(String buffer, String string, boolean key) {
 		int i = 0;
 		if (!key && i < string.length() && string.charAt(i) == ' ') {
-			buffer.append("\\ "); //$NON-NLS-1$
+			buffer += ("\\ "); //$NON-NLS-1$
 			i++;
 		}
 
@@ -105,33 +106,34 @@ public class Properties extends Hashtable<Object,Object> {
 			char ch = string.charAt(i);
 			switch (ch) {
 			case '\t':
-				buffer.append("\\t"); //$NON-NLS-1$
+				buffer += ("\\t"); //$NON-NLS-1$
 				break;
 			case '\n':
-				buffer.append("\\n"); //$NON-NLS-1$
+				buffer += ("\\n"); //$NON-NLS-1$
 				break;
 			case '\f':
-				buffer.append("\\f"); //$NON-NLS-1$
+				buffer += ("\\f"); //$NON-NLS-1$
 				break;
 			case '\r':
-				buffer.append("\\r"); //$NON-NLS-1$
+				buffer += ("\\r"); //$NON-NLS-1$
 				break;
 			default:
 				if ("\\#!=:".indexOf(ch) >= 0 || (key && ch == ' ')) {
-                    buffer.append('\\');
+                    buffer += ('\\');
                 }
 				if (ch >= ' ' && ch <= '~') {
-					buffer.append(ch);
+					buffer += (ch);
 				} else {
 					String hex = Integer.toHexString(ch);
-					buffer.append("\\u"); //$NON-NLS-1$
+					buffer += ("\\u"); //$NON-NLS-1$
 					for (int j = 0; j < 4 - hex.length(); j++) {
-                        buffer.append("0"); //$NON-NLS-1$
+                        buffer += ("0"); //$NON-NLS-1$
                     }
-					buffer.append(hex);
+					buffer += (hex);
 				}
 			}
 		}
+		return buffer;
 	}
 
 	/**
@@ -186,12 +188,12 @@ public class Properties extends Hashtable<Object,Object> {
 		if (out == null) {
             throw new NullPointerException();
         }
-		StringBuffer buffer = new StringBuffer(80);
+		String buffer = "";
 		Enumeration<?> keys = propertyNames();
 		while (keys.hasMoreElements()) {
 			String key = (String) keys.nextElement();
-			buffer.append(key);
-			buffer.append('=');
+			buffer += (key);
+			buffer += ('=');
 			String property = (String) get(key);
 			Properties def = defaults;
 			while (property == null) {
@@ -199,13 +201,13 @@ public class Properties extends Hashtable<Object,Object> {
 				def = def.defaults;
 			}
 			if (property.length() > 40) {
-				buffer.append(property.substring(0, 37));
-				buffer.append("..."); //$NON-NLS-1$
+				buffer += (property.substring(0, 37));
+				buffer += ("..."); //$NON-NLS-1$
 			} else {
-                buffer.append(property);
+                buffer += (property);
             }
 			out.println(buffer.toString());
-			buffer.setLength(0);
+			buffer = "";
 		}
 	}
 
@@ -220,12 +222,12 @@ public class Properties extends Hashtable<Object,Object> {
 		if (writer == null) {
             throw new NullPointerException();
         }
-		StringBuffer buffer = new StringBuffer(80);
+		String buffer = "";
 		Enumeration<?> keys = propertyNames();
 		while (keys.hasMoreElements()) {
 			String key = (String) keys.nextElement();
-			buffer.append(key);
-			buffer.append('=');
+			buffer += (key);
+			buffer += ('=');
 			String property = (String) get(key);
 			Properties def = defaults;
 			while (property == null) {
@@ -233,13 +235,13 @@ public class Properties extends Hashtable<Object,Object> {
 				def = def.defaults;
 			}
 			if (property.length() > 40) {
-				buffer.append(property.substring(0, 37));
-				buffer.append("..."); //$NON-NLS-1$
+				buffer += (property.substring(0, 37));
+				buffer += ("..."); //$NON-NLS-1$
 			} else {
-                buffer.append(property);
+                buffer += (property);
             }
 			writer.println(buffer.toString());
-			buffer.setLength(0);
+			buffer = "";
 		}
 	}
 
@@ -502,7 +504,7 @@ public class Properties extends Hashtable<Object,Object> {
 			lineSeparator = "\r\n"; //$NON-NLS-1$
         }
 
-		StringBuilder buffer = new StringBuilder(200);
+        String buffer = "";
 		OutputStreamWriter writer = new OutputStreamWriter(out, "ISO8859_1"); //$NON-NLS-1$
 		if (comment != null) {
             writer.write("#"); //$NON-NLS-1$
@@ -515,12 +517,12 @@ public class Properties extends Hashtable<Object,Object> {
 
 		for (Map.Entry<Object, Object> entry : entrySet()) {
 			String key = (String) entry.getKey();
-			dumpString(buffer, key, true);
-			buffer.append('=');
+			buffer = dumpString(buffer, key, true);
+			buffer += ('=');
 			dumpString(buffer, (String) entry.getValue(), false);
-			buffer.append(lineSeparator);
-			writer.write(buffer.toString());
-			buffer.setLength(0);
+			buffer += (lineSeparator);
+			writer.write(buffer);
+			buffer = "";
 		}
 		writer.flush();
 	}
@@ -549,21 +551,25 @@ public class Properties extends Hashtable<Object,Object> {
             }
             
             builder.setErrorHandler(new ErrorHandler() {
-                public void warning(SAXParseException e) throws SAXException {
+                @Override
+				public void warning(SAXParseException e) throws SAXException {
                     throw e;
                 }
 
-                public void error(SAXParseException e) throws SAXException {
+                @Override
+				public void error(SAXParseException e) throws SAXException {
                     throw e;
                 }
 
-                public void fatalError(SAXParseException e) throws SAXException {
+                @Override
+				public void fatalError(SAXParseException e) throws SAXException {
                     throw e;
                 }
             });
             
             builder.setEntityResolver(new EntityResolver() {
-                public InputSource resolveEntity(String publicId, String systemId)
+                @Override
+				public InputSource resolveEntity(String publicId, String systemId)
                         throws SAXException, IOException {
                     if (systemId.equals(PROP_DTD_NAME)) {
                         InputSource result = new InputSource(new StringReader(

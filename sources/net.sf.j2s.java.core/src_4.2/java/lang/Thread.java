@@ -320,7 +320,8 @@ public class Thread implements Runnable {
      *          java.lang.Runnable, java.lang.String)
      * @see     java.lang.Runnable#run()
      */
-    public void run() {
+    @Override
+	public void run() {
 	if (target != null) {
 	    target.run();
 	}
@@ -417,7 +418,8 @@ public class Thread implements Runnable {
      *
      * @return  a string representation of this thread.
      */
-    public String toString() {
+    @Override
+	public String toString() {
         ThreadGroup group = getThreadGroup();
 	if (group != null) {
 	    return "Thread[" + getName() + "," + getPriority() + "," + 

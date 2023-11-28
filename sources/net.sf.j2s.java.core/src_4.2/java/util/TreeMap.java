@@ -130,7 +130,8 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements SortedMap<K, V>,
                 super(map, map.root == null ? null : TreeMap.minimum(map.root));
             }
 
-            public Map.Entry<K, V> next() {
+            @Override
+			public Map.Entry<K, V> next() {
                 makeNext();
                 return lastNode;
             }
@@ -145,7 +146,8 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements SortedMap<K, V>,
                 super(map, map.root == null ? null : TreeMap.minimum(map.root));
             }
 
-            public K next() {
+            @Override
+			public K next() {
                 makeNext();
                 return lastNode.key;
             }
@@ -161,7 +163,8 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements SortedMap<K, V>,
                 super(map, map.root == null ? null : TreeMap.minimum(map.root));
             }
      
-            public V next() {
+            @Override
+			public V next() {
                 makeNext();
                 return lastNode.value;
             }
@@ -197,7 +200,8 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements SortedMap<K, V>,
             super(map, startNode, end);
         }
 
-        public Map.Entry<K, V> next() {
+        @Override
+		public Map.Entry<K, V> next() {
             makeNext();
             cleanNext();
             return lastNode;
@@ -211,7 +215,8 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements SortedMap<K, V>,
             super(map, startNode, end);
         }
 
-        public K next() {
+        @Override
+		public K next() {
             makeNext();
             cleanNext();
             return lastNode.key;
@@ -225,7 +230,8 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements SortedMap<K, V>,
             super(map, startNode, end);
         }
 
-        public V next() {
+        @Override
+		public V next() {
             makeNext();
             cleanNext();
             return lastNode.value;
@@ -261,7 +267,8 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements SortedMap<K, V>,
             super(map, startNode, end);
         }
 
-        public Map.Entry<K, V> next() {
+        @Override
+		public Map.Entry<K, V> next() {
             makeNext();
             cleanNext();
             return lastNode;
@@ -276,7 +283,8 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements SortedMap<K, V>,
             super(map, startNode, end);
         }
 
-        public K next() {
+        @Override
+		public K next() {
             makeNext();
             cleanNext();
             return lastNode.key;
@@ -291,7 +299,8 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements SortedMap<K, V>,
             super(map, startNode, end);
         }
 
-        public V next() {
+        @Override
+		public V next() {
             makeNext();
             cleanNext();
             return lastNode.value;
@@ -392,7 +401,8 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements SortedMap<K, V>,
                 return true;
             }
 
-            public Comparator<? super K> comparator() {
+            @Override
+			public Comparator<? super K> comparator() {
                 return backingMap.comparator();
             }
 
@@ -413,7 +423,8 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements SortedMap<K, V>,
                 return entrySet;
             }
 
-            public K firstKey() {
+            @Override
+			public K firstKey() {
                 TreeMap.Entry<K,V> node = firstEntry();
                 if (node != null ) {
                     return node.key;
@@ -442,7 +453,8 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements SortedMap<K, V>,
                 return null;
             }
 
-            public SortedMap<K,V> headMap(K endKey) {
+            @Override
+			public SortedMap<K,V> headMap(K endKey) {
                 checkRange(endKey);
                 if (hasStart) {
                     return new SubMap<K,V>(startKey, backingMap, endKey);
@@ -467,7 +479,8 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements SortedMap<K, V>,
                 return keySet;
             }
 
-            public K lastKey() {
+            @Override
+			public K lastKey() {
                 if (!hasEnd) {
                     return backingMap.lastKey();
                 }
@@ -495,7 +508,8 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements SortedMap<K, V>,
                 return null;
             }
 
-            public SortedMap<K,V> subMap(K startKey, K endKey) {
+            @Override
+			public SortedMap<K,V> subMap(K startKey, K endKey) {
                 checkRange(startKey);
                 checkRange(endKey);
                 Comparator<? super K> c = backingMap.comparator();
@@ -511,7 +525,8 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements SortedMap<K, V>,
                 throw new IllegalArgumentException();
             }
 
-            public SortedMap<K,V> tailMap(K startKey) {
+            @Override
+			public SortedMap<K,V> tailMap(K startKey) {
                 checkRange(startKey);
                 if (hasEnd) {
                     return new SubMap<K,V>(startKey, backingMap, endKey);
@@ -802,6 +817,7 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements SortedMap<K, V>,
 	 * 
 	 * @return a Comparator or null if the natural ordering is used
 	 */
+	@Override
 	public Comparator<? super K> comparator() {
 		return comparator;
 	}
@@ -972,6 +988,7 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements SortedMap<K, V>,
 	 * @exception NoSuchElementException
 	 *                when this TreeMap is empty
 	 */
+	@Override
 	public K firstKey() {
 		if (root != null) {
             return minimum(root).key;
@@ -1091,6 +1108,7 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements SortedMap<K, V>,
 	 *                when the end key is null and the comparator cannot handle
 	 *                null
 	 */
+	@Override
 	public SortedMap<K, V> headMap(K endKey) {
 		// Check for errors
 		if (comparator == null) {
@@ -1144,6 +1162,7 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements SortedMap<K, V>,
 	 * @exception NoSuchElementException
 	 *                when this TreeMap is empty
 	 */
+	@Override
 	public K lastKey() {
 		if (root != null) {
             return maximum(root).key;
@@ -1378,6 +1397,7 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements SortedMap<K, V>,
 	 *                when the start or end key is null and the comparator
 	 *                cannot handle null
 	 */
+	@Override
 	public SortedMap<K, V> subMap(K startKey, K endKey) {
 		if (comparator == null) {
 			if (toComparable(startKey).compareTo(endKey) <= 0) {
@@ -1420,6 +1440,7 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements SortedMap<K, V>,
 	 *                when the start key is null and the comparator cannot
 	 *                handle null
 	 */
+	@Override
 	public SortedMap<K, V> tailMap(K startKey) {
 		// Check for errors
 		if (comparator == null) {

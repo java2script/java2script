@@ -23,7 +23,6 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 
@@ -423,7 +422,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private ASTNode innerNode;
 	private String this$0Name;
 
-	private static IType appletType;  // do we care?
+//	private static IType appletType;  // do we care?
 
 	public Java2ScriptVisitor() {
 		// default constructor is necessary for addClassOrInterface

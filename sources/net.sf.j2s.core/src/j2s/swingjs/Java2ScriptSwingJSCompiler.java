@@ -27,7 +27,7 @@ import j2s.core.Java2ScriptCompiler;
  */
 public class Java2ScriptSwingJSCompiler extends Java2ScriptCompiler {
 
-	private int nResources, nSources, nJS, nHTML;
+	private int nSources, nJS, nHTML;
 
 	private Map<String, String> htMethodsCalled;
 	private List<String> lstMethodsDeclared;
@@ -283,7 +283,7 @@ public class Java2ScriptSwingJSCompiler extends Java2ScriptCompiler {
 			addHTML(visitor.getAppList(false), siteFolder, htmlTemplate, false);
 			String packageName = visitor.getMyPackageName();
 			if (packageName != null) {
-				nResources += checkCopiedResources(packageName, sourceLocation, j2sPath);
+				copyAllResources(packageName, sourceLocation);
 			}
 			return true;
 		} catch (Throwable e) {
@@ -359,7 +359,7 @@ public class Java2ScriptSwingJSCompiler extends Java2ScriptCompiler {
 	 */
 
 	@Override
-	protected String getDefaultJ2SFile() {
+	protected String getDefaultJ2SFileContents() {
 
 		return "#j2s default configuration file created by net.sf.java2script_" + CorePlugin.VERSION + " " + new Date()
 				+ "\n\n" + "#enable the Java2Script transpiler -- comment out to disable\n"

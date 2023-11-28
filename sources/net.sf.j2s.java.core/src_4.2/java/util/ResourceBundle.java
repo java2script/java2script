@@ -636,14 +636,17 @@ return r.join ('');
 			}
 		}
 
+		@Override
 		public Enumeration getKeys() {
 			return new Enumeration() {
 				int index = -1;
+				@Override
 				public Object nextElement() {
 					index++;
 					return keys[index];
 				}
 			
+				@Override
 				public boolean hasMoreElements() {
 					return index < keys.length - 1;
 				}
@@ -651,6 +654,7 @@ return r.join ('');
 			//return new Vector(map.keySet()).elements();
 		}
 
+		@Override
 		protected Object handleGetObject(String key) {
 			if (!this.initialized) {
 				this.initBundle();

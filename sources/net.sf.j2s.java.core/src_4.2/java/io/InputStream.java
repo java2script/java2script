@@ -44,7 +44,7 @@ import java.io.IOException;
  * @see     java.io.PushbackInputStream
  * @since   JDK1.0
  */
-public abstract class InputStream {
+public abstract class InputStream implements Closeable {
 
     // SKIP_BUFFER_SIZE is used to determine the size of skipBuffer
     private static final int SKIP_BUFFER_SIZE = 2048;
@@ -286,7 +286,8 @@ public abstract class InputStream {
      *
      * @exception  IOException  if an I/O error occurs.
      */
-    public void close() throws IOException {}
+    @Override
+	public void close() throws IOException {}
 
     /**
      * Marks the current position in this input stream. A subsequent call to

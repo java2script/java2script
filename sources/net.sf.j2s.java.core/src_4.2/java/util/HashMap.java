@@ -83,7 +83,8 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>,
             expectedModCount = hm.modCount;
         }
 
-        public boolean hasNext() {
+        @Override
+		public boolean hasNext() {
             if (entry != null) {
                 return true;
             }
@@ -103,7 +104,8 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>,
             }
         }
 
-        public E next() {
+        @Override
+		public E next() {
             checkConcurrentMod();
             if (!hasNext()) {
                 throw new NoSuchElementException();
@@ -124,7 +126,8 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>,
             return type.get(result);
         }
 
-        public void remove() {
+        @Override
+		public void remove() {
             checkConcurrentMod();
             if (!canRemove) {
                 throw new IllegalStateException();
@@ -189,7 +192,8 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>,
         @Override
         public Iterator<Map.Entry<KT,VT>> iterator() {
             return new HashMapIterator<Map.Entry<KT,VT>,KT,VT>(new MapEntry.Type<Map.Entry<KT,VT>, KT, VT>() {
-                public Map.Entry<KT,VT> get(MapEntry<KT,VT> entry) {
+                @Override
+				public Map.Entry<KT,VT> get(MapEntry<KT,VT> entry) {
                     return entry;
                 }
             }, associatedMap);
@@ -494,7 +498,8 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>,
                 @Override
                 public Iterator<K> iterator() {
                     return new HashMapIterator<K,K,V>(new MapEntry.Type<K,K,V>() {
-                        public K get(MapEntry<K,V> entry) {
+                        @Override
+						public K get(MapEntry<K,V> entry) {
                             return entry.key;
                         }
                     }, HashMap.this);
@@ -674,7 +679,8 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>,
                 @Override
                 public Iterator<V> iterator() {
                     return new HashMapIterator<V,K,V>(new MapEntry.Type<V,K,V>() {
-                        public V get(MapEntry<K,V> entry) {
+                        @Override
+						public V get(MapEntry<K,V> entry) {
                             return entry.value;
                         }
                     }, HashMap.this);
