@@ -1638,14 +1638,7 @@ return"class java.lang.Character";
 }
 }return String.valueOf(c);
 },"~N");
-Clazz.defineStatics(c$,
-"MIN_VALUE",'\u0000',
-"MAX_VALUE",'\uffff',
-"MIN_RADIX",2,
-"MAX_RADIX",36,
-"TYPE",null);
-
-java.lang.Character.TYPE=java.lang.Character.prototype.TYPE=java.lang.Character;
+c$.TYPE=c$;
 
 
 
@@ -2305,11 +2298,9 @@ c$=Clazz.declareType(javautil,"NoSuchElementException",RuntimeException);
 c$=Clazz.declareType(javautil,"TooManyListenersException",Exception);
 
 c$=Clazz.declareType(java.lang,"Void");
-Clazz.defineStatics(c$,
-"TYPE",null);
-{
-java.lang.Void.TYPE=java.lang.Void;
-}Clazz.declareInterface(java.lang.reflect,"GenericDeclaration");
+c$.TYPE = c$;
+
+Clazz.declareInterface(java.lang.reflect,"GenericDeclaration");
 Clazz.declareInterface(java.lang.reflect,"AnnotatedElement");
 
 c$=Clazz.declareType(java.lang.reflect,"AccessibleObject",null,java.lang.reflect.AnnotatedElement);
@@ -2375,11 +2366,8 @@ return 0.0;
 c$.emptyArgs=c$.prototype.emptyArgs=new Array(0);
 Clazz.declareInterface(java.lang.reflect,"InvocationHandler");
 c$=Clazz.declareInterface(java.lang.reflect,"Member");
-Clazz.defineStatics(c$,
-"PUBLIC",0,
-"DECLARED",1);
-
 c$=Clazz.declareType(java.lang.reflect,"Modifier");
+
 Clazz.makeConstructor(c$,
 function(){
 });
@@ -2450,24 +2438,6 @@ if(sb.length>0){
 return sb.join(" ");
 }return"";
 },"~N");
-Clazz.defineStatics(c$,
-"PUBLIC",0x1,
-"PRIVATE",0x2,
-"PROTECTED",0x4,
-"STATIC",0x8,
-"FINAL",0x10,
-"SYNCHRONIZED",0x20,
-"VOLATILE",0x40,
-"TRANSIENT",0x80,
-"NATIVE",0x100,
-"INTERFACE",0x200,
-"ABSTRACT",0x400,
-"STRICT",0x800,
-"BRIDGE",0x40,
-"VARARGS",0x80,
-"SYNTHETIC",0x1000,
-"ANNOTATION",0x2000,
-"ENUM",0x4000);
 
 c$=Clazz.decorateAsClass(function(){
 this.clazz=null;

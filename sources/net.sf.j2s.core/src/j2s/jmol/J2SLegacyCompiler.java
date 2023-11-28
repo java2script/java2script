@@ -13,6 +13,17 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import j2s.CorePlugin;
 import j2s.core.Java2ScriptCompiler;
 
+/**
+ * This transpiler takes the place of the original Java Builder created in 2006-2012 by Zhou Renjian
+ * and others. It uses instead an Eclipse CompiliationParticipant to track Java compiling and
+ * produce JavaScript versions of the class files. 
+ * 
+ * It has been tuned for Jmol, with many of the original features removed. 
+ * Only remaining are @j2sNative, @j2sIgnore, and @j2sIgnoreSuperConstructor. 
+ * 
+ * @author Bob Hanson 
+ *
+ */
 public class J2SLegacyCompiler extends Java2ScriptCompiler {
 
 	private final static String J2S_PACKAGE_FIXES = "j2s.package.fixes";
@@ -20,8 +31,6 @@ public class J2SLegacyCompiler extends Java2ScriptCompiler {
 	private final static String J2S_STRING_FIXES = "j2s.string.fixes";
 
 	private String[] stringFixes;
-
-	private int nResources;
 
 	private static String[] myStringFixes = { //
 			"cla$$", "c$" //
@@ -81,74 +90,59 @@ public class J2SLegacyCompiler extends Java2ScriptCompiler {
 	 * From the CompilationParticipant, not the old builder
 	 * 
 	 * @param javaSource
-	 * @return
+	 * @return true if no errors
 	 */
 	
 	public boolean compileToJavaScript(IFile javaSource, String trailer) {
-//		nSources++;
+		
+		// 1. set up AbstractSyntaxTree CompilationUnit
+		
 		ICompilationUnit createdUnit = JavaCore.createCompilationUnitFrom(javaSource);
 		String sourceLocation = javaSource.getLocation().toString();
 		String outputPath = j2sPath;
 		astParser.setResolveBindings(true);
 		astParser.setSource(createdUnit);
 		CompilationUnit root = (CompilationUnit) astParser.createAST(null);
-		J2SDependencyVisitor dvisitor = new J2SDependencyVisitor(this);
-		boolean errorOccurs = false;
-		try {
-			root.accept(dvisitor);
-		} catch (Throwable e) {
-			e.printStackTrace();
-			errorOccurs = true;
-		}
-		if (errorOccurs) {
-			String elementName = root.getJavaElement().getElementName();
-			// if (elementName.endsWith(".class") || elementName.endsWith(".java")) {
-			// //$NON-NLS-1$//$NON-NLS-2$
-			elementName = elementName.substring(0, elementName.lastIndexOf('.'));
-			// } /* maybe ended with other customized extension
-			String packageName = dvisitor.getPackageName();
-			if (packageName != null) {
-				File folder = new File(outputPath, packageName.replace('.', File.separatorChar));
-				File jsFile = new File(folder, elementName + ".js"); //$NON-NLS-1$
-				if (jsFile.exists()) {
-					jsFile.delete();
-				}
-			}
-			return false;
-		}
-
+		
+		// 2. run J2SLegacyVisitor to produce preliminary JavaScript
+		
 		J2SLegacyVisitor visitor = new J2SLegacyVisitor();
 		isDebugging = "debug".equals(props.getProperty("j2s.compiler.mode"));
-		errorOccurs = false;
 		try {
 			root.accept(visitor);
 		} catch (Throwable e) {
 			e.printStackTrace();
-			errorOccurs = true;
+			deleteJSFileFromError(root, visitor, outputPath);
+			return false;
 		}
-		if (!errorOccurs) {
-			outputJavaScript(visitor, dvisitor, root, outputPath, trailer, sourceLocation);
+		String js = visitor.buffer.toString();
+		visitor = null;
+		
+		// 3. catalog all of the class dependencies
+		
+		J2SDependencyVisitor dvisitor = new J2SDependencyVisitor(this);
+		try {
+			root.accept(dvisitor);
+		} catch (Throwable e) {
+			e.printStackTrace();
+			deleteJSFileFromError(root, dvisitor, outputPath);
+			return false;
+		}
+
+		// 4. post-process the JavaScript from the legacy visitor and write it to disk
+		
+		js = dvisitor.cleanLoadCalls(js);
+		if (js == null) {
+			// nothing but a package statement
 			return true;
 		}
+		for (int i = 0; i < stringFixes.length; i++) {
+			js = rep(js, stringFixes[i++], stringFixes[i]);
+		}
+		js += ";//" + trailer + "\n";
+		String packageName = dvisitor.getPackageName();
 		String elementName = root.getJavaElement().getElementName();
 		elementName = elementName.substring(0, elementName.lastIndexOf('.'));
-		String packageName = visitor.getPackageName();
-		if (packageName != null) {
-			File folder = new File(outputPath, packageName.replace('.', File.separatorChar));
-			File jsFile = new File(folder.getAbsolutePath(), elementName + ".js"); //$NON-NLS-1$
-			if (jsFile.exists()) {
-				jsFile.delete();
-			}
-		}
-		return false;
-	}
-
-	private void outputJavaScript(J2SLegacyVisitor visitor, J2SDependencyVisitor dvisitor, CompilationUnit fRoot,
-			String outputPath, String trailer, String sourceLocation) {
-		String js = finalFixes(dvisitor.cleanLoadCalls(visitor));
-		String elementName = fRoot.getJavaElement().getElementName();
-		elementName = elementName.substring(0, elementName.lastIndexOf('.'));
-		String packageName = visitor.getPackageName();
 		if (packageName != null) {
 			String dir = packageName.replace('.', '/');
 			dir = fixPackageName(dir);
@@ -163,20 +157,30 @@ public class J2SLegacyCompiler extends Java2ScriptCompiler {
 		}
 		elementName = fixPackageName(elementName);
 		File jsFile = new File(outputPath, elementName + ".js"); // $NON-NLS-1
-		writeToFile(jsFile, js + ";//" + trailer + "\r\n");
+		writeToFile(jsFile, js);		
+		
+		// 5. copy all resources to the package directory (if not already copied)
 		
 		if (packageName != null) {
-			nResources += checkCopiedResources(packageName, sourceLocation, j2sPath);
+			copyAllResources(packageName, sourceLocation);
+		}
+		return true;
+	}
+
+	private void deleteJSFileFromError(CompilationUnit root, J2SASTVisitor dvisitor, String outputPath) {
+		// This should never happen.
+		String elementName = root.getJavaElement().getElementName();
+		elementName = elementName.substring(0, elementName.lastIndexOf('.'));
+		String packageName = dvisitor.getPackageName();
+		if (packageName != null) {
+			File folder = new File(outputPath, packageName.replace('.', File.separatorChar));
+			File jsFile = new File(folder, elementName + ".js"); //$NON-NLS-1$
+			if (jsFile.exists()) {
+				jsFile.delete();
+			}
 		}
 	}
 
-	private String finalFixes(String js) {
-		for (int i = 0; i < stringFixes.length; i++) {
-			js = rep(js, stringFixes[i++], stringFixes[i]);
-		}
-		return js;
-	}
-	
 	@Override
 	protected String getDefaultJ2SFileContents() {
 		return "#j2sjmol default configuration file created by j2s.core plugin " + CorePlugin.VERSION + " " + new Date()

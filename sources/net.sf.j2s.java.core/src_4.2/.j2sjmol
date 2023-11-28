@@ -1,5 +1,5 @@
 #Java2Script Configuration
-j2s.excluded.paths=java/lang/StringBuffer
+j2s.excluded.paths=
 j2s.site.directory=site_jmol
 j2s.compiler.status=enable
 j2s.compiler.mode=debug

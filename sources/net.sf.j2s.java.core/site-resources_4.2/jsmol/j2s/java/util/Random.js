@@ -63,21 +63,6 @@ function(n){
 if(n>0){
 n = Math.min(n, 31);
 return Math.floor((2 << (n - 1)) * Math.random())
-
-/*
-if((n&-n)==n){
-return((n*this.next(31))>>31);
-}var bits;
-var val;
-do{
-bits=this.next(31);
-val=bits%n;
-}while(bits-val+(n-1)<0);
-
-
-return val;
-
-*/
 }
 throw new IllegalArgumentException();
 },"~N");
@@ -88,11 +73,7 @@ return Math.ceil(0xffffffff*Math.random())-0x80000000;
 Clazz.defineMethod(c$,"setSeed",
 function(seed){
 Math.seedrandom(seed);
-//this.seed=(seed^25214903917)&(281474976710655);
-//this.haveNextNextGaussian=false;
 },"~N");
-//Clazz.defineStatics(c$,
-//"multiplier",0x5deece66d);
 });
 
 // seedrandom.js

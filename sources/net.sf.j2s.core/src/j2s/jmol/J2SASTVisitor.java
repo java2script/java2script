@@ -38,24 +38,11 @@ import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
 
 /**
- * 
- * ASTVisitor > J2SASTVisitor > J2SDependencyVisitor
- * 
- * ASTVisitor > J2SASTVisitor > J2SKeywordVisitor > Java2ScriptLegacyVisitor
+ * Superclass for J2SDependencyVisitor and Java2ScriptLegacyVisitor
  * 
  * @author zhou renjian
  */
 abstract class J2SASTVisitor extends ASTVisitor {
-
-	protected final static String[] preDeclaredPackages = { //
-			"java.lang", //publicfinal refactoring -- Helpers to inner static classes
-			"java.lang.ref", //
-			"java.lang.ref.reflect", //
-			"java.lang.reflect", //
-			"java.lang.annotation", //
-			"java.io", //
-			"java.util" //
-	};
 
 	protected Javadoc[] nativeJavadoc = null;	
 	protected ASTNode javadocRoot = null;
@@ -207,45 +194,6 @@ abstract class J2SASTVisitor extends ASTVisitor {
 		return previousStart;
 	}
 	
-	/**
-	 * Check for given tag in JavaDoc or annotations.
-	 * 
-	 * @param node
-	 * @return
-	 */
-	static Object getJ2STag(BodyDeclaration node, String tagName) {
-		Javadoc javadoc = node.getJavadoc();
-		if (javadoc != null) {
-			List<?> tags = javadoc.tags();
-			if (tags.size() != 0) {
-				for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
-					TagElement tagEl = (TagElement) iter.next();
-					if (tagName.equals(tagEl.getTagName())) {
-						return tagEl;
-					}
-				}
-			}
-		}
-		List<?> modifiers = node.modifiers();
-		String tag = null;
-		for (Iterator<?> iter = modifiers.iterator(); iter.hasNext();) {
-			Object obj = iter.next();
-			if (obj instanceof Annotation) {
-				Annotation annotation = (Annotation) obj;
-				String qName = annotation.getTypeName().getFullyQualifiedName();
-				int idx = qName.indexOf("J2S");
-				if (idx >= 0) {
-					if (tag == null)
-						tag = tagName.substring(4); // drop @j2s
-					if (qName.indexOf(tag, idx) == idx + 3) {
-						return annotation;
-					}
-				}
-			}
-		}
-		return null;
-	}
-
 	protected void checkJavadocs(ASTNode root) {
 		if (root != javadocRoot) {
 			nativeJavadoc = null;
@@ -412,7 +360,5 @@ abstract class J2SASTVisitor extends ASTVisitor {
 		}
 		return existed;
 	}
-
-
 
 }

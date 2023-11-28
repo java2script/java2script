@@ -2335,13 +2335,6 @@ Clazz.isAFloat = function(a) { // just checking first parameter
 Clazz.isAP = function(a) {
 	return (a && Clazz.getClassName(a[0]) == "JU.P3");
 }
-Clazz.defineStatics = function (clazz) {
-	for (var j = arguments.length, i = (j - 1) / 2; --i >= 0;) {
-		var val = arguments[--j]
-		var name = arguments[--j];
-		clazz[name] = clazz.prototype[name] = val;
-	}
-};
 
 /* public */
 Clazz.prepareFields = function (clazz, fieldsFun) {

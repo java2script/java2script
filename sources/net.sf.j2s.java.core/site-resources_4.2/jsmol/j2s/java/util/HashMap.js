@@ -510,6 +510,4 @@ return a;
 /*eoif*/})();
 };
 /*eoif*/})();
-//Clazz.defineStatics(c$,
-//"DEFAULT_SIZE",16);
 });

@@ -116,6 +116,9 @@ public abstract class Java2ScriptCompiler {
 
 	protected IJavaProject project;
 
+	protected int nResources;
+
+
 	/**
 	 * This will activate @j2sDebug blocks, at least in SwingJS
 	 */
@@ -480,12 +483,12 @@ public abstract class Java2ScriptCompiler {
 		return n;
 	}
 
-	protected int checkCopiedResources(String packageName, String sourceLocation, String outputDir) {
+	protected void copyAllResources(String packageName, String sourceLocation) {		
 		int pt = packageName.indexOf(".");
 		if (pt >= 0)
 			packageName = packageName.substring(0, pt);
 		if (copiedResourcePackages.contains(packageName))
-			return 0;
+			return;
 		copiedResourcePackages.add(packageName);
 		pt = sourceLocation.lastIndexOf("/" + packageName + "/");
 		if (pt <= 0) {
@@ -493,12 +496,11 @@ public abstract class Java2ScriptCompiler {
 			if (!"_".equals(packageName))
 				System.out.println(
 						"J2S ignoring bad sourceLocation for package \"" + packageName + "\": " + sourceLocation);
-			return 0;
+			return;
 		}
-		String sourceDir = sourceLocation.substring(0, pt);
-		File src = new File(sourceDir, packageName);
-		File dest = new File(outputDir, packageName);
-		return copySiteResources(src, dest);
+		File src = new File(sourceLocation.substring(0, pt), packageName);
+		File dest = new File(j2sPath, packageName);
+		nResources += copySiteResources(src, dest);
 	}
 
 	protected String fixPackageName(String name) {

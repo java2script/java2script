@@ -53,11 +53,9 @@ import j2s.core.Java2ScriptCompiler;
 
 /**
  * 
- * ASTVisitor > J2SASTVisitor > J2SDependencyVisitor
- * 
  * This class is called by root.accept(me) in the first pass of the
- * transpiler to catalog all the references to classes and then later
- * called by Java2ScriptVisitor to process those.
+ * legacy transpiler to catalog all the references to classes.
+ * It is later delivered the final JavaScript in order to process it.
  * 
  * @author zhou renjian
  * 
@@ -69,7 +67,7 @@ class J2SDependencyVisitor extends J2SASTVisitor {
 		String qualifiedName;
 		ITypeBinding binding;
 		
-		public QNTypeBinding() {
+		QNTypeBinding() {
 		}
 
 		public boolean equals(Object obj) {
@@ -91,19 +89,8 @@ class J2SDependencyVisitor extends J2SASTVisitor {
 		}
 	}
 
-	// BH 2023.11.10 interfaces as well must be ignored
-
 	private Java2ScriptCompiler compiler;
 
-	public J2SDependencyVisitor(Java2ScriptCompiler compiler) {
-		super(false);
-		this.compiler = compiler;
-	}
-	
-	private J2SDependencyVisitor getSelfVisitor() {
-		return new J2SDependencyVisitor(compiler);
-	}
-	
 	private Set<Object> j2sRequireImport = new HashSet<>();
 	
 	private Set<Object> j2sOptionalImport = new HashSet<>();
@@ -116,6 +103,203 @@ class J2SDependencyVisitor extends J2SASTVisitor {
 
 	private Set<Object> imports = new HashSet<Object>();
 	
+	public J2SDependencyVisitor(Java2ScriptCompiler compiler) {
+		super(false);
+		this.compiler = compiler;
+	}
+	
+	private J2SDependencyVisitor getSelfVisitor() {
+		return new J2SDependencyVisitor(compiler);
+	}
+	
+	/**
+	 * Adjust Clazz._load calls to only include the necessary class dependencies.
+	 * 
+	 * The only nonprivate method here.
+	 * 
+	 * @param visitor
+	 * @return
+	 */
+	public String cleanLoadCalls(String js) {
+		// js at this point starts with:
+
+//		Clazz.declarePackage("com.jcraft.jzlib");
+//		var cla$$ = Clazz.decorateAsClass(function(){
+//		this.crc = 0;
+//		this.b1 = null;
+//		Clazz.instantialize(this, arguments);
+//		}, com.jcraft.jzlib, "CRC32", null, com.jcraft.jzlib.Checksum);
+//      ...
+//
+// possibly without "cla$$ = " because it has no methods or fields
+//		
+// for example, a simple interface will look like this:
+//
+//		Clazz.declarePackage("com.jcraft.jzlib");
+//		Clazz.declareInterface(com.jcraft.jzlib, "Checksum");
+//
+//
+// These need to be wrapped by the Clazz.load() method.
+//		
+//		Clazz.declarePackage("com.jcraft.jzlib");
+//		Clazz.load(["com.jcraft.jzlib.Checksum"], "com.jcraft.jzlib.CRC32", null, function(){
+//		var cla$$ = ...
+//      });
+//
+//		and then wrapped with an anonymous function call if "var cla$$" is present
+
+		StringBuffer buf = new StringBuffer();
+
+		// extract the package line if it is there
+
+		if (js.startsWith("Clazz.declarePackage")) {
+			int index = js.indexOf("\n") + 1;
+			buf.append(js.substring(0, index));
+			js = js.substring(index);
+			if (js.trim().length() == 0)
+				return null;
+		}
+
+		boolean haveCla$$ = (js.indexOf("var cla$$") >= 0);
+		if (!haveCla$$) {
+			buf.append(js);
+			return buf.toString();
+		}
+		String trail = ";\n";
+		if (finalizeImports()) {
+			// need to create the Clazz.load(...) wrapper
+
+			// remove ignored imports from the interface list
+
+			if (j2sIgnoreImport.size() > 0) {
+				//
+				// BH 2023.11.10 interfaces as well and remove javax.sound.sampled.LineListener
+				// in the following case:
+				// Clazz.instantialize (this, arguments);
+				// }, org.jmol.util, "JmolAudio", null, [javax.sound.sampled.LineListener,
+				// org.jmol.api.JmolAudioPlayer]);
+				int pt = js.indexOf("Clazz.instantialize");
+				pt = (pt < 0 ? -1 : js.indexOf("},", pt));
+				int pt1 = (pt < 0 ? -1 : js.indexOf("\n", pt + 2));
+				if (pt1 > 0) {
+					String js1 = js.substring(0, pt1);
+					boolean fixed = false;
+					for (Iterator<Object> iter = j2sIgnoreImport.iterator(); iter.hasNext();) {
+						String s = (String) iter.next();
+						pt = js1.indexOf(s);
+						if (pt > 2) {
+							fixed = true;
+							int len = s.length();
+							if (js1.charAt(pt + len) == ',') {
+								len += 2;
+							} else if (js1.charAt(pt - 2) == ',') {
+								len += 2;
+								pt -= 2;
+							}
+							js1 = js1.substring(0, pt) + js1.substring(pt + len);
+						}
+					}
+					if (fixed) {
+						js = js1 + js.substring(pt1);
+					}
+				}
+			}
+
+			// one of these per class
+
+			buf.append("Clazz.load(");
+			// clazz.load([imports],name,[interfaces],[??])
+			if (imports.size() != 0 || j2sRequireImport.size() != 0) {
+				buf.append("[");
+				String[] ss = imports.toArray(new String[0]);
+				Arrays.sort(ss);
+				String lastClassName = joinArrayClasses(buf, ss, null);
+				if (imports.size() != 0 && j2sRequireImport.size() != 0) {
+					buf.append(", ");
+				}
+				ss = j2sRequireImport.toArray(new String[0]);
+				Arrays.sort(ss);
+				joinArrayClasses(buf, ss, lastClassName);
+				buf.append("], ");
+			} else {
+				buf.append("null, ");
+			}
+			if (allClassNames.size() > 1) {
+				buf.append("[");
+			}
+			joinArrayClasses(buf, allClassNames.toArray(new String[allClassNames.size()]), null);
+			if (allClassNames.size() > 1) {
+				buf.append("]");
+			}
+			buf.append(", ");
+			if (j2sOptionalImport.size() != 0) {
+				buf.append("[");
+				String[] ss = j2sOptionalImport.toArray(new String[0]);
+				Arrays.sort(ss);
+				joinArrayClasses(buf, ss, null);
+				buf.append("], ");
+			} else {
+				buf.append("null, ");
+			}
+		} else {
+			// no imports or dependencies
+			buf.append("(");
+			// js unchanged
+			trail = "()" + trail;
+		}
+		// now wrap c$ calls
+		buf.append("function(){\n");
+		buf.append(js);
+		buf.append("})"); // closes anonymous function and parens or Clazz.load
+		buf.append(trail);
+
+		return buf.toString();
+	}
+
+	private boolean finalizeImports() {
+		checkSuperType(imports);
+		checkSuperType(j2sRequireImport);
+		checkSuperType(j2sOptionalImport);
+		remedyDependency(imports);
+		remedyDependency(j2sRequireImport);
+		remedyDependency(j2sOptionalImport);
+
+		imports.remove("");
+		j2sRequireImport.remove("");
+		j2sOptionalImport.remove("");
+
+		for (Iterator<Object> iter = j2sIgnoreImport.iterator(); iter.hasNext();) {
+			String s = (String) iter.next();
+			if (imports.contains(s)) {
+				imports.remove(s);
+			}
+			if (j2sRequireImport.contains(s)) {
+				j2sRequireImport.remove(s);
+			}
+			if (j2sOptionalImport.contains(s)) {
+				j2sOptionalImport.remove(s);
+			}
+		}
+		for (Iterator<Object> iter = imports.iterator(); iter.hasNext();) {
+			String s = (String) iter.next();
+			if (j2sRequireImport.contains(s)) {
+				j2sRequireImport.remove(s);
+			}
+			if (j2sOptionalImport.contains(s)) {
+				j2sOptionalImport.remove(s);
+			}
+		}
+		for (Iterator<Object> iter = j2sRequireImport.iterator(); iter.hasNext();) {
+			String s = (String) iter.next();
+			if (j2sOptionalImport.contains(s)) {
+				j2sOptionalImport.remove(s);
+			}
+		}
+		return (imports.size() != 0 
+				|| j2sRequireImport.size() != 0
+				|| j2sOptionalImport.size() != 0);
+	}
+
 	///////// initialization methods - from root.accept(me) ////////////
 	
 
@@ -127,7 +311,7 @@ class J2SDependencyVisitor extends J2SASTVisitor {
 		super.endVisit(node);
 		if(node.isStatic()&&node.isOnDemand()) {			
 			String qnameStr = node.getName().getFullyQualifiedName();
-			if(qnameStr!=null && !qnameStr.equals("") && isQualifiedNameOK(qnameStr, node)) {
+			if(qnameStr!=null && !qnameStr.equals("") && mustAddDependency(qnameStr, node, true)) {
 				if(!imports.contains(qnameStr)) {
 					imports.add(qnameStr);
 				}
@@ -165,7 +349,6 @@ class J2SDependencyVisitor extends J2SASTVisitor {
 		imports.add("java.lang.Enum");
 		processImports(node);
 		processJ2SRequireImport(node);
-		//visitForOptionals(node);
 		return super.visit(node);
 	}
 
@@ -192,9 +375,9 @@ class J2SDependencyVisitor extends J2SASTVisitor {
 		}else{
 			return super.visit(node);
 		}
-		qualifiedName = discardGenericType(qualifiedName);
+		qualifiedName = J2SUtil.discardGenericType(qualifiedName);
 		qn.qualifiedName = qualifiedName;
-		if (isQualifiedNameOK(qualifiedName, node) 
+		if (mustAddDependency(qualifiedName, node, true) 
 				&& !imports.contains(qn)
 				&& !j2sRequireImport.contains(qn)) {
 			j2sOptionalImport.add(qn);
@@ -221,9 +404,9 @@ class J2SDependencyVisitor extends J2SASTVisitor {
 			qualifiedName = resolveTypeBinding.getQualifiedName();
 			qn.binding = resolveTypeBinding;
 		}
-		qualifiedName = discardGenericType(qualifiedName);
+		qualifiedName = J2SUtil.discardGenericType(qualifiedName);
 		qn.qualifiedName = qualifiedName;
-		if (isQualifiedNameOK(qualifiedName, node) 
+		if (mustAddDependency(qualifiedName, node, true) 
 				&& !imports.contains(qn)
 				&& !j2sRequireImport.contains(qn)) {
 			j2sOptionalImport.add(qn);
@@ -259,9 +442,9 @@ class J2SDependencyVisitor extends J2SASTVisitor {
 					qualifiedName = resolveTypeBinding.getQualifiedName();
 					qn.binding = resolveTypeBinding;
 				}
-				qualifiedName = discardGenericType(qualifiedName);
+				qualifiedName = J2SUtil.discardGenericType(qualifiedName);
 				qn.qualifiedName = qualifiedName;
-				if (isQualifiedNameOK(qualifiedName, node) 
+				if (mustAddDependency(qualifiedName, node, true) 
 						&& !imports.contains(qn)
 						&& !j2sRequireImport.contains(qn)) {
 					j2sOptionalImport.add(qn);
@@ -283,7 +466,7 @@ class J2SDependencyVisitor extends J2SASTVisitor {
 	 * this.xxx
 	 */
 	public boolean visit(FieldDeclaration node) {
-		if (getJ2STag(node, "@j2sIgnore") != null) {
+		if (J2SUtil.getJ2STag(node, "@j2sIgnore") != null) {
 			return false;
 		}
 		return super.visit(node);
@@ -312,9 +495,9 @@ class J2SDependencyVisitor extends J2SASTVisitor {
 					qualifiedName = resolveTypeBinding.getQualifiedName();
 					qn.binding = resolveTypeBinding;
 				}
-				qualifiedName = discardGenericType(qualifiedName);
+				qualifiedName = J2SUtil.discardGenericType(qualifiedName);
 				qn.qualifiedName = qualifiedName;
-				if (isQualifiedNameOK(qualifiedName, node)
+				if (mustAddDependency(qualifiedName, node, true)
 						&& !imports.contains(qn) && !j2sRequireImport.contains(qn)) {
 					j2sOptionalImport.add(qn);
 				}
@@ -324,15 +507,12 @@ class J2SDependencyVisitor extends J2SASTVisitor {
 	}
 
 	public boolean visit(Initializer node) {
-		if (getJ2STag(node, "@j2sIgnore") != null) {
+		if (J2SUtil.getJ2STag(node, "@j2sIgnore") != null) {
 			return false;
 		}
 		return super.visit(node);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.QualifiedName)
-	 */
 	public boolean visit(QualifiedName node) {
 		Object constValue = node.resolveConstantExpressionValue();
 		if (constValue != null && (constValue instanceof Number
@@ -345,9 +525,7 @@ class J2SDependencyVisitor extends J2SASTVisitor {
 		}
 		return super.visit(node);
 	}
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SimpleName)
-	 */
+
 	public boolean visit(SimpleName node) {
 		Object constValue = node.resolveConstantExpressionValue();
 		if (constValue != null && (constValue instanceof Number
@@ -406,7 +584,7 @@ class J2SDependencyVisitor extends J2SASTVisitor {
 					}
 				}
 			}
-			if (isQualifiedNameOK(qualifiedName, node) 
+			if (mustAddDependency(qualifiedName, node, true) 
 					&& !imports.contains(qualifiedName)
 					&& !j2sRequireImport.contains(qualifiedName)) {
 				qn.qualifiedName = qualifiedName;
@@ -426,7 +604,7 @@ class J2SDependencyVisitor extends J2SASTVisitor {
 					declaringClass = dclClass;
 				}
 				qualifiedName = declaringClass.getQualifiedName();
-				if (isQualifiedNameOK(qualifiedName, node) 
+				if (mustAddDependency(qualifiedName, node, true) 
 						&& !imports.contains(qualifiedName)
 						&& !j2sRequireImport.contains(qualifiedName)) {
 					qn.qualifiedName = qualifiedName;
@@ -439,32 +617,11 @@ class J2SDependencyVisitor extends J2SASTVisitor {
 		return super.visit(node);
 	}
 
-// BH 2023.11.23 No! this is unnecessary
-// we never need to declare imports for instanceOf
-//	public boolean visit(InstanceofExpression node) {
-//		Type type = node.getRightOperand();
-//		ITypeBinding resolveTypeBinding = type.resolveBinding();
-//		QNTypeBinding qn = new QNTypeBinding();
-//		String qualifiedName = resolveTypeBinding.getQualifiedName();
-//		qn.binding = resolveTypeBinding;
-//		qualifiedName = discardGenericType(qualifiedName);
-//		qn.qualifiedName = qualifiedName;
-//		if (isQualifiedNameOK(qualifiedName, node) 
-//				&& !imports.contains(qn)
-//				&& !j2sRequireImport.contains(qn)) {
-//			j2sOptionalImport.add(qn);
-//		}
-//		return super.visit(node);
-//	}
-//	
 	public boolean visit(MethodDeclaration node) {
-		if (getJ2STag(node, "@j2sNativeSrc") != null) {
-			return false;
-		}		
-		if (getJ2STag(node, "@j2sNative") != null) {
+		if (J2SUtil.getJ2STag(node, "@j2sNative") != null) {
 			return false;
 		}
-		if (getJ2STag(node, "@j2sIgnore") != null) {
+		if (J2SUtil.getJ2STag(node, "@j2sIgnore") != null) {
 			return false;
 		}
 		if (node.getBody() == null) {
@@ -475,77 +632,6 @@ class J2SDependencyVisitor extends J2SASTVisitor {
 		}
 		return super.visit(node);
 	}
-	
-//	public boolean visit(Block node) {
-//
-//
-//		
-//		
-//		
-//		
-//		ASTNode parent = node.getParent();
-//		if (parent instanceof MethodDeclaration) {
-//			MethodDeclaration method = (MethodDeclaration) parent;
-//			Javadoc javadoc = method.getJavadoc();
-//			/*
-//			 * if comment contains "@j2sNative", then output the given native 
-//			 * JavaScript codes directly. 
-//			 */
-//			if (processJ2STags(javadoc, node, true) == false) {
-//				return false;
-//			}
-//			
-//			
-//			
-//			
-//			
-//			
-//			
-//			
-//			
-//			
-//			
-//			
-//			
-//			
-//			
-//			
-//			
-//			
-//			
-//			
-//			
-//			
-//		} else if (parent instanceof Initializer) {
-//			Initializer initializer = (Initializer) parent;
-//			Javadoc javadoc = initializer.getJavadoc();
-//			/*
-//			 * if comment contains "@j2sNative", then output the given native 
-//			 * JavaScript codes directly. 
-//			 */
-//			if (processJ2STags(javadoc, node, true) == false) {
-//				return false;
-//			}
-//		}
-//		int blockStart = node.getStartPosition();
-//		int previousStart = getPreviousStartPosition(node);
-//		ASTNode root = node.getRoot();
-//		checkJavadocs(root);
-//		for (int i = nativeJavadoc.length - 1; i >= 0; i--) {
-//			Javadoc javadoc = nativeJavadoc[i];
-//			int commentStart = javadoc.getStartPosition();
-//			if (commentStart > previousStart && commentStart < blockStart) {
-//				/*
-//				 * if the block's leading comment contains "@j2sNative", 
-//				 * then output the given native JavaScript codes directly. 
-//				 */
-//				if (!processJ2STags(javadoc, node, true)) {
-//					return false;
-//				}
-//			}
-//		}
-//		return super.visit(node);
-//	}
 	
 	private void readJ2sImportTags(AbstractTypeDeclaration node) {
 		Javadoc javadoc = node.getJavadoc();
@@ -649,7 +735,13 @@ class J2SDependencyVisitor extends J2SASTVisitor {
 			}
 		}
 	}
-	
+
+	/**
+	 * all we have here are java.lang, io, net, text, util
+	 * 
+	 * all exceptions will be pre-defined in j2sjmol.js or JSmolJavaExt.js
+	 * 
+	 */
 	private static String[] knownClasses = new String[] {
 			"java.lang.Object",
 			"java.lang.Class",
@@ -664,10 +756,23 @@ class J2SDependencyVisitor extends J2SASTVisitor {
 			"java.lang.System",
 			"java.io.PrintStream",
 			"java.lang.Math",
-			"java.lang.Integer"
+			"java.lang.Integer",
+			"java.lang.Character",
+			"java.lang.Double",
+			"java.lang.Float",
+			"java.lang.Short",
+			"java.lang.Long",
+			"java.lang.Byte",
+			
 	};	
 
-	private static boolean isClassKnown(String qualifiedName) {
+	private static boolean isClassKnown(String qualifiedName, boolean refOnly) {
+		if (!qualifiedName.startsWith("java."))
+			return false;
+		if (refOnly && (qualifiedName.startsWith("java.lang.") && qualifiedName.indexOf(".", 10) < 0
+				|| qualifiedName.endsWith("Exception"))
+				)
+			return true;
 		for (int i = 0; i < knownClasses.length; i++) {
 			if (knownClasses[i].equals(qualifiedName)) {
 				return true;
@@ -676,9 +781,9 @@ class J2SDependencyVisitor extends J2SASTVisitor {
 		return false;
 	}
 	
-	private static boolean isQualifiedNameOK(String qualifiedName, ASTNode node) {
+	private static boolean mustAddDependency(String qualifiedName, ASTNode node, boolean refOnly) {
 		if (qualifiedName != null 
-				&& !isClassKnown(qualifiedName)
+				&& !isClassKnown(qualifiedName, refOnly)
 				&& qualifiedName.indexOf('[') < 0
 				&& !"int".equals(qualifiedName)
 				&& !"float".equals(qualifiedName)
@@ -689,7 +794,6 @@ class J2SDependencyVisitor extends J2SASTVisitor {
 				&& !"char".equals(qualifiedName)
 				&& !"boolean".equals(qualifiedName)
 				&& !"void".equals(qualifiedName)
-				&& !qualifiedName.startsWith("org.w3c.dom.")
 				) {
 			ASTNode root = node.getRoot();
 			if (root instanceof CompilationUnit) {
@@ -733,9 +837,9 @@ class J2SDependencyVisitor extends J2SASTVisitor {
 					qualifiedName = superBinding.getQualifiedName();
 					qn.binding = superBinding;
 				}
-				qualifiedName = discardGenericType(qualifiedName);
+				qualifiedName = J2SUtil.discardGenericType(qualifiedName);
 				qn.qualifiedName = qualifiedName;
-				if (isQualifiedNameOK(qualifiedName, node)) {
+				if (mustAddDependency(qualifiedName, node, false)) {
 					imports.add(qn);
 				}
 				//musts.add(superBinding.getQualifiedName());
@@ -767,9 +871,9 @@ class J2SDependencyVisitor extends J2SASTVisitor {
 						qualifiedName = binding.getQualifiedName();
 						qn.binding = binding;
 					}
-					qualifiedName = discardGenericType(qualifiedName);
+					qualifiedName = J2SUtil.discardGenericType(qualifiedName);
 					qn.qualifiedName = qualifiedName;
-					if (isQualifiedNameOK(qualifiedName, node)) {
+					if (mustAddDependency(qualifiedName, node, false)) {
 						imports.add(qn);
 					}
 				} else {
@@ -799,7 +903,7 @@ class J2SDependencyVisitor extends J2SASTVisitor {
 					j2sRequireImport.addAll(visitor.j2sOptionalImport);
 				}
 			} else if (element instanceof Initializer) {
-				if (getJ2STag((Initializer) element, "@j2sIgnore") != null) {
+				if (J2SUtil.getJ2STag((Initializer) element, "@j2sIgnore") != null) {
 					continue;
 				}
 				J2SDependencyVisitor visitor = getSelfVisitor();
@@ -809,7 +913,7 @@ class J2SDependencyVisitor extends J2SASTVisitor {
 				j2sRequireImport.addAll(visitor.j2sOptionalImport);
 			} else if (element instanceof FieldDeclaration) {
 				FieldDeclaration field = (FieldDeclaration) element;
-				if (getJ2STag(field, "@j2sIgnore") != null) {
+				if (J2SUtil.getJ2STag(field, "@j2sIgnore") != null) {
 					continue;
 				}
 					List<?> fragments = field.fragments();
@@ -839,144 +943,6 @@ class J2SDependencyVisitor extends J2SASTVisitor {
 		return false;
 	}
 	
-	private String discardGenericType(String name) {
-		return  BindingHelper.discardGenericType(name);
-	}
-	
-///////// delivery section -- from Java2ScriptLegayCompiler ///////////////
-
-	/**
-	 * Adjust Clazz._load calls to only include the necessary class dependencies.
-	 * 
-	 * The only nonprivate method here.
-	 * 
-	 * @param visitor
-	 * @return
-	 */
-	public String cleanLoadCalls(J2SASTVisitor visitor) {
-		checkSuperType(imports);
-		checkSuperType(j2sRequireImport);
-		checkSuperType(j2sOptionalImport);
-		remedyDependency(imports);
-		remedyDependency(j2sRequireImport);
-		remedyDependency(j2sOptionalImport);
-
-		imports.remove("");
-		j2sRequireImport.remove("");
-		j2sOptionalImport.remove("");
-
-		for (Iterator<Object> iter = j2sIgnoreImport.iterator(); iter.hasNext();) {
-			String s = (String) iter.next();
-			if (imports.contains(s)) {
-				imports.remove(s);
-			}
-			if (j2sRequireImport.contains(s)) {
-				j2sRequireImport.remove(s);
-			}
-			if (j2sOptionalImport.contains(s)) {
-				j2sOptionalImport.remove(s);
-			}
-		}
-		for (Iterator<Object> iter = imports.iterator(); iter.hasNext();) {
-			String s = (String) iter.next();
-			if (j2sRequireImport.contains(s)) {
-				j2sRequireImport.remove(s);
-			}
-			if (j2sOptionalImport.contains(s)) {
-				j2sOptionalImport.remove(s);
-			}
-		}
-		for (Iterator<Object> iter = j2sRequireImport.iterator(); iter.hasNext();) {
-			String s = (String) iter.next();
-			if (j2sOptionalImport.contains(s)) {
-				j2sOptionalImport.remove(s);
-			}
-		}
-		String js = visitor.buffer.toString();
-		if (imports.size() == 0 && j2sRequireImport.size() == 0 && j2sOptionalImport.size() == 0) {
-			return js;
-		}
-		StringBuffer buf = new StringBuffer();
-		if (js.startsWith("Clazz.declarePackage")) {
-			int index = js.indexOf("\r\n");
-			buf.append(js.substring(0, index + 2));
-			js = js.substring(index + 2);
-		}
-
-		if (j2sIgnoreImport.size() > 0) {
-			// BH 2023.11.10 interfaces as well and remove javax.sound.sampled.LineListener in the following case:
-			//	Clazz.instantialize (this, arguments);
-			//}, org.jmol.util, "JmolAudio", null, [javax.sound.sampled.LineListener, org.jmol.api.JmolAudioPlayer]);
-			int pt = js.indexOf("Clazz.instantialize");
-			pt = (pt < 0 ? -1 : js.indexOf("},", pt));
-			int pt1 = (pt < 0 ? -1 : js.indexOf("\r\n", pt + 2));
-			if (pt1 > 0) {
-				String js1 = js.substring(0, pt1);
-				boolean fixed = false;
-				for (Iterator<Object> iter = j2sIgnoreImport.iterator(); iter.hasNext();) {
-					String s = (String) iter.next();
-					pt = js1.indexOf(s);
-					if (pt > 2) {
-						fixed = true;
-						int len = s.length();
-						if (js1.charAt(pt + len) == ',') {
-							len += 2;
-						} else if (js1.charAt(pt - 2) == ',') {
-							len += 2;
-							pt -= 2;
-						}
-						js1 = js1.substring(0, pt) + js1.substring(pt + len);
-					}
-				}
-				if (fixed) {
-					js = js1 + js.substring(pt1);
-				}
-			}
-		}
-		
-		// one of these per class
-		
-		buf.append("Clazz.load (");
-		// clazz.load([imports],name,[interfaces],[??])
-		if (imports.size() != 0 || j2sRequireImport.size() != 0) {
-			buf.append("[");
-			String[] ss = imports.toArray(new String[0]);
-			Arrays.sort(ss);
-			String lastClassName = joinArrayClasses(buf,ss, null);
-			if (imports.size() != 0 && j2sRequireImport.size() != 0) {
-				buf.append(", ");
-			}
-			ss = j2sRequireImport.toArray(new String[0]);
-			Arrays.sort(ss);
-			joinArrayClasses(buf, ss, lastClassName);
-			buf.append("], ");
-		} else {
-			buf.append("null, ");
-		}
-		if (allClassNames.size() > 1) {
-			buf.append("[");
-		}
-		joinArrayClasses(buf, allClassNames.toArray(new String[allClassNames.size()]), 
-				null);
-		if (allClassNames.size() > 1) {
-			buf.append("]");
-		}
-		buf.append(", ");
-		if (j2sOptionalImport.size() != 0) {
-			buf.append("[");
-			String[] ss = j2sOptionalImport.toArray(new String[0]);
-			Arrays.sort(ss);
-			joinArrayClasses(buf, ss, null);
-			buf.append("], ");
-		} else {
-			buf.append("null, ");
-		}
-		buf.append("function () {\r\n");
-		buf.append(js);
-		buf.append("});\r\n");
-		return buf.toString();
-	}
-
 	private void checkSuperType(Set<Object> set) {
 		Set<QNTypeBinding> reseted = new HashSet<QNTypeBinding>();
 		for (Iterator<Object> setIterator = set.iterator(); setIterator.hasNext();) {
@@ -989,7 +955,7 @@ class J2SDependencyVisitor extends J2SASTVisitor {
 			for (Iterator<ITypeBinding> classBindingIterator = allClassBindings.iterator(); classBindingIterator
 					.hasNext();) {
 				ITypeBinding binding = classBindingIterator.next();
-				if (qn.binding != null && BindingHelper.isSuperType(binding, qn.binding)) {
+				if (qn.binding != null && J2SUtil.isSuperType(binding, qn.binding)) {
 					setIterator.remove();
 					isRemoved = true;
 					break;
