@@ -120,21 +120,11 @@ package java.util;
  * @see     HashMap
  * @see     TreeMap
  * @since JDK1.0
+ * 
  */
 public class Hashtable<K,V>
     extends Dictionary<K,V>
     implements Map<K,V>, Cloneable {
-
-	/**
-	 * flag developers can use to switch off all use of simple JavaScript Map objects
-	 * 
-	 * not final, so that it can be managed on the fly in SwingJS
-	 */
-	public static boolean USE_SIMPLE = true;
-
-
-	Map<String, Object> 秘m;
-	boolean 秘allowJS = false;
 
     /**
      * The hash table data.
@@ -168,31 +158,35 @@ public class Hashtable<K,V>
      * rehash).  This field is used to make iterators on Collection-views of
      * the Hashtable fail-fast.  (See ConcurrentModificationException).
      */
-    private transient int modCount = 0;
+    private transient int modCount;
 
-    /**
-     * SwingJS note: This constructor DOES NOT allow JavaScript Map object for Hashtable<String,?>.
-     * 
-     * Constructs a new, empty hashtable with the specified initial
-     * capacity and the specified load factor.
-     *
-     * @param      initialCapacity   the initial capacity of the hashtable.
-     * @param      loadFactor        the load factor of the hashtable.
-     * @exception  IllegalArgumentException  if the initial capacity is less
-     *             than zero, or if the load factor is nonpositive.
-     */
-    public Hashtable(int initialCapacity, float loadFactor) {
-        if (initialCapacity < 0)
-            throw new IllegalArgumentException("Illegal Capacity: "+
-                                               initialCapacity);
-        if (loadFactor <= 0 || Float.isNaN(loadFactor))
-            throw new IllegalArgumentException("Illegal Load: "+loadFactor);
-        if (initialCapacity==0)
-            initialCapacity = 1;
-        this.loadFactor = loadFactor;
-        table = new Entry<?,?>[initialCapacity];
-        threshold = (int)Math.min(initialCapacity * loadFactor, MAX_ARRAY_SIZE + 1);
-    }
+	/**
+	 * SwingJS note: This constructor DOES NOT allow JavaScript Map object for
+	 * Hashtable<String,?>.
+	 * 
+	 * Constructs a new, empty hashtable with the specified initial capacity and the
+	 * specified load factor.
+	 *
+	 * @param size       the initial capacity of the hashtable.
+	 * @param loadFactor the load factor of the hashtable.
+	 * @exception IllegalArgumentException if the initial capacity is less than
+	 *                                     zero, or if the load factor is
+	 *                                     nonpositive.
+	 * 
+     *              @j2sIgnore
+	 */
+	public Hashtable(int capacity, float loadFactor) {
+		super();
+		if (capacity < 0)
+			throw new IllegalArgumentException("Illegal Capacity: " + capacity);
+		if (loadFactor <= 0 || Float.isNaN(loadFactor))
+			throw new IllegalArgumentException("Illegal Load: " + loadFactor);
+		if (capacity == 0)
+			capacity = 1;
+		this.loadFactor = loadFactor;
+		table = new Entry<?, ?>[capacity];
+		threshold = (int) Math.min(capacity * loadFactor, MAX_ARRAY_SIZE + 1);
+	}
     
     /**
      * SwingJS note: This constructor allows JavaScript Map object for Hashtable<String,?>.
@@ -203,11 +197,11 @@ public class Hashtable<K,V>
      * @param     initialCapacity   the initial capacity of the hashtable.
      * @exception IllegalArgumentException if the initial capacity is less
      *              than zero.
+     *              
+     *              @j2sIgnore
      */
     public Hashtable(int initialCapacity) {
         this(initialCapacity, 0.75f);
-        秘allowJS = true;
-		秘setJS();		
     }
 
     /**
@@ -215,11 +209,45 @@ public class Hashtable<K,V>
      * 
      * Constructs a new, empty hashtable with a default initial capacity (11)
      * and load factor (0.75).
+     * 
+	 * @j2sIgnoreSuperConstructor
      */
-    public Hashtable() {
-        this(11, 0.75f);
-        秘allowJS = true;
-		秘setJS();		
+    @SuppressWarnings("unused")
+	public Hashtable() {
+		super();
+		Hashtable map = null;
+		int capacity = 11;
+		float loadFactor = 0.75f;
+		/**
+		 * 
+		 * @j2sNative
+		 * 			capacity = arguments[0];
+		 * 			loadFactor = arguments[1];
+		 * 			if (typeof capacity == "object") { 
+		 * 				map = capacity; 
+		 * 				capacity = Math.max(2*t.size(), 11); 
+         *				this.秘allowJS = map.秘allowJS;
+		 * 			} else {
+         *				this.秘allowJS = true;
+		 * 			}
+		 *            capacity = (capacity || 11); 
+		 *            loadFactor = (loadFactor || 0.75);
+		 * 
+		 */
+		{
+		}
+		if (capacity < 0)
+			throw new IllegalArgumentException("Illegal Capacity: " + capacity);
+		if (loadFactor <= 0 || Float.isNaN(loadFactor))
+			throw new IllegalArgumentException("Illegal Load: " + loadFactor);
+		if (capacity == 0)
+			capacity = 1;
+		this.loadFactor = loadFactor;
+		table = new Entry<?, ?>[capacity];
+		threshold = (int) Math.min(capacity * loadFactor, MAX_ARRAY_SIZE + 1);
+		秘setJS();
+		if (map != null)
+			putAll(map);
     }
 
     /**
@@ -230,6 +258,8 @@ public class Hashtable<K,V>
      * @param t the map whose mappings are to be placed in this map.
      * @throws NullPointerException if the specified map is null.
      * @since   1.2
+     * 
+     * @j2sIgnore
      */
     public Hashtable(Map<? extends K, ? extends V> t) {
         this(Math.max(2*t.size(), 11), 0.75f);
@@ -765,250 +795,6 @@ public class Hashtable<K,V>
         }
     }
 
-
-    private <T> Enumeration<T> getEnumeration(int type) {
-
-        if (size() == 0) {
-            return Collections.emptyEnumeration();
-        } else {
-            return new Enumerator<>(type, false);
-        }
-    }
-
-    private <T> Iterator<T> getIterator(int type) {
-
-        if (size() == 0) {
-            return Collections.emptyIterator();
-        } else {
-            return new Enumerator<>(type, true);
-        }
-    }
-
-    // Views
-
-    /**
-     * Each of these fields are initialized to contain an instance of the
-     * appropriate view the first time this view is requested.  The views are
-     * stateless, so there's no reason to create more than one of each.
-     */
-    private transient volatile Set<K> keySet;
-    private transient volatile Set<Map.Entry<K,V>> entrySet;
-    private transient volatile Collection<V> values;
-
-    /**
-     * Returns a {@link Set} view of the keys contained in this map.
-     * The set is backed by the map, so changes to the map are
-     * reflected in the set, and vice-versa.  If the map is modified
-     * while an iteration over the set is in progress (except through
-     * the iterator's own <tt>remove</tt> operation), the results of
-     * the iteration are undefined.  The set supports element removal,
-     * which removes the corresponding mapping from the map, via the
-     * <tt>Iterator.remove</tt>, <tt>Set.remove</tt>,
-     * <tt>removeAll</tt>, <tt>retainAll</tt>, and <tt>clear</tt>
-     * operations.  It does not support the <tt>add</tt> or <tt>addAll</tt>
-     * operations.
-     *
-     * @since 1.2
-     */
-    @Override
-	public Set<K> keySet() {
-        if (keySet == null)
-            keySet = //SwintgJS Collections.synchronizedSet(
-            new KeySet();//, this);
-        return keySet;
-    }
-
-    private class KeySet extends AbstractSet<K> {
-        @Override
-		public Iterator<K> iterator() {
-            return getIterator(KEYS);
-        }
-        @Override
-		public int size() {
-            return Hashtable.this.size();
-        }
-        @Override
-		public boolean contains(Object o) {
-            return containsKey(o);
-        }
-        @Override
-		public boolean remove(Object o) {
-            return Hashtable.this.remove(o) != null;
-        }
-        @Override
-		public void clear() {
-            Hashtable.this.clear();
-        }
-    }
-
-    /**
-     * Returns a {@link Set} view of the mappings contained in this map.
-     * The set is backed by the map, so changes to the map are
-     * reflected in the set, and vice-versa.  If the map is modified
-     * while an iteration over the set is in progress (except through
-     * the iterator's own <tt>remove</tt> operation, or through the
-     * <tt>setValue</tt> operation on a map entry returned by the
-     * iterator) the results of the iteration are undefined.  The set
-     * supports element removal, which removes the corresponding
-     * mapping from the map, via the <tt>Iterator.remove</tt>,
-     * <tt>Set.remove</tt>, <tt>removeAll</tt>, <tt>retainAll</tt> and
-     * <tt>clear</tt> operations.  It does not support the
-     * <tt>add</tt> or <tt>addAll</tt> operations.
-     *
-     * @since 1.2
-     */
-    @Override
-	public Set<Map.Entry<K,V>> entrySet() {
-        if (entrySet==null)
-            entrySet = //SwingJS Collections.synchronizedSet(
-            		new EntrySet();//, this);
-        return entrySet;
-    }
-
-    private class EntrySet extends AbstractSet<Map.Entry<K,V>> {
-        @Override
-		public Iterator<Map.Entry<K,V>> iterator() {
-            return getIterator(ENTRIES);
-        }
-
-        @Override
-		public boolean add(Map.Entry<K,V> o) {
-            return super.add(o);
-        }
-
-        @Override
-		public boolean contains(Object o) {
-            if (!(o instanceof Map.Entry))
-                return false;
-            Map.Entry<?,?> entry = (Map.Entry<?,?>)o;
-            Object key = entry.getKey();
-            
-            switch (秘hasKey(Hashtable.this, key)) {
-            case NOT_SIMPLE:
-            	break;
-            case INVALID_KEY:
-    			秘ensureJavaMap(Hashtable.this);
-    			break;
-            case HAS_KEY:
-				Object value = entry.getValue();
-				Object v = Hashtable.this.get(key);
-				return (value == v || value != null && value.equals(key));
-            case NO_SUCH_KEY:
-            	return false;
-            }
-            Entry<?,?>[] tab = table;
-            int hash = key.hashCode();
-            int index = (hash & 0x7FFFFFFF) % tab.length;
-
-            for (Entry<?,?> e = tab[index]; e != null; e = e.next_)
-                if (e.hash==hash && e.equals(entry))
-                    return true;
-            return false;
-
-        }
-
-        @Override
-		public boolean remove(Object o) {
-            if (!(o instanceof Map.Entry))
-                return false;
-            Map.Entry<?,?> entry = (Map.Entry<?,?>) o;
-            Object key = entry.getKey();
-            
-            switch (秘hasKey(Hashtable.this, key)) {
-            case NOT_SIMPLE:
-	            break;
-            case INVALID_KEY:
-    			秘ensureJavaMap(Hashtable.this);
-    			break;
-            case HAS_KEY:
-				Object value = entry.getValue();
-				if (value == null)
-					return false;
-				Object v = get(key);
-				if (v == value || v.equals(value)) {
-					Hashtable.this.remove(key);
-					return true;
-				}
-				return false;
-            case NO_SUCH_KEY:
-				return false;
-			}
-            Entry<?,?>[] tab = table;
-            int hash = key.hashCode();
-            int index = (hash & 0x7FFFFFFF) % tab.length;
-
-            Entry<K,V> e = (Entry<K,V>)tab[index];
-            for(Entry<K,V> prev = null; e != null; prev = e, e = e.next_) {
-                if (e.hash==hash && e.equals(entry)) {
-                    modCount++;
-                    if (prev != null)
-                        prev.next_ = e.next_;
-                    else
-                        tab[index] = e.next_;
-
-                    count--;
-                    e.value = null;
-                    return true;
-                }
-            }
-            return false;
-		}
-
-        @Override
-		public int size() {
-            return Hashtable.this.size();
-        }
-
-        @Override
-		public void clear() {
-            Hashtable.this.clear();
-        }
-    }
-
-    /**
-     * Returns a {@link Collection} view of the values contained in this map.
-     * The collection is backed by the map, so changes to the map are
-     * reflected in the collection, and vice-versa.  If the map is
-     * modified while an iteration over the collection is in progress
-     * (except through the iterator's own <tt>remove</tt> operation),
-     * the results of the iteration are undefined.  The collection
-     * supports element removal, which removes the corresponding
-     * mapping from the map, via the <tt>Iterator.remove</tt>,
-     * <tt>Collection.remove</tt>, <tt>removeAll</tt>,
-     * <tt>retainAll</tt> and <tt>clear</tt> operations.  It does not
-     * support the <tt>add</tt> or <tt>addAll</tt> operations.
-     *
-     * @since 1.2
-     */
-    @Override
-	public Collection<V> values() {
-    		
-        if (values==null)
-            values = //Collections.synchronizedCollection(
-            new ValueCollection();//, this);
-        return values;
-    }
-
-    private class ValueCollection extends AbstractCollection<V> {
-        @Override
-		public Iterator<V> iterator() {
-            return getIterator(VALUES);
-        }
-        @Override
-		public int size() {
-            return Hashtable.this.size();
-        }
-        @Override
-		public boolean contains(Object o) {
-            return containsValue(o);
-        }
-        @Override
-		public void clear() {
-            Hashtable.this.clear();
-        }
-        
-    }
-
     // Comparison and hashing
 
     /**
@@ -1156,6 +942,262 @@ public class Hashtable<K,V>
         }
     }
 
+
+    private <T> Enumeration<T> getEnumeration(int type) {
+
+        if (size() == 0) {
+            return Collections.emptyEnumeration();
+        } else {
+            return new Enumerator<>(this, type, false);
+        }
+    }
+
+    <T> Iterator<T> getIterator(int type) {
+
+        if (size() == 0) {
+            return Collections.emptyIterator();
+        } else {
+            return new Enumerator<>(this, type, true);
+        }
+    }
+
+    // Views
+
+    /**
+     * Each of these fields are initialized to contain an instance of the
+     * appropriate view the first time this view is requested.  The views are
+     * stateless, so there's no reason to create more than one of each.
+     */
+    private transient volatile Set<K> keySet;
+    private transient volatile Set<Map.Entry<K,V>> entrySet;
+    private transient volatile Collection<V> values;
+
+    /**
+     * Returns a {@link Set} view of the keys contained in this map.
+     * The set is backed by the map, so changes to the map are
+     * reflected in the set, and vice-versa.  If the map is modified
+     * while an iteration over the set is in progress (except through
+     * the iterator's own <tt>remove</tt> operation), the results of
+     * the iteration are undefined.  The set supports element removal,
+     * which removes the corresponding mapping from the map, via the
+     * <tt>Iterator.remove</tt>, <tt>Set.remove</tt>,
+     * <tt>removeAll</tt>, <tt>retainAll</tt>, and <tt>clear</tt>
+     * operations.  It does not support the <tt>add</tt> or <tt>addAll</tt>
+     * operations.
+     *
+     * @since 1.2
+     */
+    @Override
+	public Set<K> keySet() {
+        if (keySet == null)
+            keySet = new KeySet(this);
+        return keySet;
+    }
+
+    private static class KeySet<K> extends AbstractSet<K> {
+    	private Hashtable ht;
+        public KeySet(Hashtable ht) {
+        	this.ht = ht;
+		}
+		@Override
+		public Iterator<K> iterator() {
+            return ht.getIterator(KEYS);
+        }
+        @Override
+		public int size() {
+            return ht.size();
+        }
+        @Override
+		public boolean contains(Object o) {
+            return ht.containsKey(o);
+        }
+        @Override
+		public boolean remove(Object o) {
+            return ht.remove(o) != null;
+        }
+        @Override
+		public void clear() {
+            ht.clear();
+        }
+    }
+
+    /**
+     * Returns a {@link Set} view of the mappings contained in this map.
+     * The set is backed by the map, so changes to the map are
+     * reflected in the set, and vice-versa.  If the map is modified
+     * while an iteration over the set is in progress (except through
+     * the iterator's own <tt>remove</tt> operation, or through the
+     * <tt>setValue</tt> operation on a map entry returned by the
+     * iterator) the results of the iteration are undefined.  The set
+     * supports element removal, which removes the corresponding
+     * mapping from the map, via the <tt>Iterator.remove</tt>,
+     * <tt>Set.remove</tt>, <tt>removeAll</tt>, <tt>retainAll</tt> and
+     * <tt>clear</tt> operations.  It does not support the
+     * <tt>add</tt> or <tt>addAll</tt> operations.
+     *
+     * @since 1.2
+     */
+    @Override
+	public Set<Map.Entry<K,V>> entrySet() {
+        if (entrySet==null)
+            entrySet = new EntrySet(this);
+        return entrySet;
+    }
+
+    private static class EntrySet<K,V> extends AbstractSet<Map.Entry<K,V>> {
+        private Hashtable ht;
+
+		public EntrySet(Hashtable ht) {
+			this.ht = ht;
+		}
+
+		@Override
+		public Iterator<Map.Entry<K,V>> iterator() {
+            return ht.getIterator(ENTRIES);
+        }
+
+        @Override
+		public boolean add(Map.Entry<K,V> o) {
+            return super.add(o);
+        }
+
+        @Override
+		public boolean contains(Object o) {
+            if (!(o instanceof Map.Entry))
+                return false;
+            Map.Entry<?,?> entry = (Map.Entry<?,?>)o;
+            Object key = entry.getKey();
+            
+            switch (秘hasKey(ht, key)) {
+            case NOT_SIMPLE:
+            	break;
+            case INVALID_KEY:
+    			秘ensureJavaMap(ht);
+    			break;
+            case HAS_KEY:
+				Object value = entry.getValue();
+				Object v = ht.get(key);
+				return (value == v || value != null && value.equals(key));
+            case NO_SUCH_KEY:
+            	return false;
+            }
+            Entry<?,?>[] tab = ht.table;
+            int hash = key.hashCode();
+            int index = (hash & 0x7FFFFFFF) % tab.length;
+
+            for (Entry<?,?> e = tab[index]; e != null; e = e.next_)
+                if (e.hash==hash && e.equals(entry))
+                    return true;
+            return false;
+
+        }
+
+        @Override
+		public boolean remove(Object o) {
+            if (!(o instanceof Map.Entry))
+                return false;
+            Map.Entry<?,?> entry = (Map.Entry<?,?>) o;
+            Object key = entry.getKey();
+            
+            switch (秘hasKey(ht, key)) {
+            case NOT_SIMPLE:
+	            break;
+            case INVALID_KEY:
+    			秘ensureJavaMap(ht);
+    			break;
+            case HAS_KEY:
+				Object value = entry.getValue();
+				if (value == null)
+					return false;
+				Object v = ht.get(key);
+				if (v == value || v.equals(value)) {
+					ht.remove(key);
+					return true;
+				}
+				return false;
+            case NO_SUCH_KEY:
+				return false;
+			}
+            Entry<?,?>[] tab = ht.table;
+            int hash = key.hashCode();
+            int index = (hash & 0x7FFFFFFF) % tab.length;
+
+            Entry<K,V> e = (Entry<K,V>)tab[index];
+            for(Entry<K,V> prev = null; e != null; prev = e, e = e.next_) {
+                if (e.hash==hash && e.equals(entry)) {
+                    ht.modCount++;
+                    if (prev != null)
+                        prev.next_ = e.next_;
+                    else
+                        tab[index] = e.next_;
+
+                    ht.count--;
+                    e.value = null;
+                    return true;
+                }
+            }
+            return false;
+		}
+
+        @Override
+		public int size() {
+            return ht.size();
+        }
+
+        @Override
+		public void clear() {
+            ht.clear();
+        }
+    }
+
+    /**
+     * Returns a {@link Collection} view of the values contained in this map.
+     * The collection is backed by the map, so changes to the map are
+     * reflected in the collection, and vice-versa.  If the map is
+     * modified while an iteration over the collection is in progress
+     * (except through the iterator's own <tt>remove</tt> operation),
+     * the results of the iteration are undefined.  The collection
+     * supports element removal, which removes the corresponding
+     * mapping from the map, via the <tt>Iterator.remove</tt>,
+     * <tt>Collection.remove</tt>, <tt>removeAll</tt>,
+     * <tt>retainAll</tt> and <tt>clear</tt> operations.  It does not
+     * support the <tt>add</tt> or <tt>addAll</tt> operations.
+     *
+     * @since 1.2
+     */
+    @Override
+	public Collection<V> values() {
+    		
+        if (values==null)
+            values = new ValueCollection(this);
+        return values;
+    }
+
+    private static class ValueCollection<V> extends AbstractCollection<V> {
+    	
+        private Hashtable ht;
+		public ValueCollection(Hashtable ht) {
+        	this.ht = ht;
+		}
+		@Override
+		public Iterator<V> iterator() {
+            return ht.getIterator(VALUES);
+        }
+        @Override
+		public int size() {
+            return ht.size();
+        }
+        @Override
+		public boolean contains(Object o) {
+            return ht.containsValue(o);
+        }
+        @Override
+		public void clear() {
+            ht.clear();
+        }
+        
+    }
+
     // Types of Enumerations/Iterations
     private static final int KEYS = 0;
     private static final int VALUES = 1;
@@ -1168,16 +1210,16 @@ public class Hashtable<K,V>
      * to avoid unintentionally increasing the capabilities granted a user
      * by passing an Enumeration.
      */
-    private class Enumerator<T> implements Enumeration<T>, Iterator<T> {
-    	private Entry<?,?>[] table = Hashtable.this.table;
-        private int index = table.length;
+    private static class Enumerator<T> implements Enumeration<T>, Iterator<T> {
+    	private Entry<?,?>[] table;
+        private int index;
         private Entry<?,?> next_;
         private Entry<?,?> current;
         private int type;
 		@SuppressWarnings("unused")
 		private Iterator jsMapIterator;
 		
-
+		private Hashtable ht;
 
         /**
          * Indicates whether this Enumerator is serving as an Iterator
@@ -1192,14 +1234,17 @@ public class Hashtable<K,V>
          */
         private int expectedModCount;
 
-        Enumerator(int type, boolean iterator) {
+        Enumerator(Hashtable ht, int type, boolean iterator) {
+        	this.ht = ht;
+        	this.table = ht.table;
+        	this.index = ht.table.length;
             this.type = type;
             this.isIterator = iterator;
-            expectedModCount = modCount;
-			if(秘isSimple(Hashtable.this)) {
+            expectedModCount = ht.modCount;
+			if(秘isSimple(ht)) {
 				// note that unlike HashMap, this implementation
 				// initializes with the next element in place
-				@SuppressWarnings("unused") Map m = Hashtable.this.秘m;
+				@SuppressWarnings("unused") Map m = ht.秘m;
 				/**
 				 * @j2sNative
 				 * 
@@ -1213,7 +1258,7 @@ public class Hashtable<K,V>
 
         @Override
 		public boolean hasMoreElements() {
-			if(秘isSimple(Hashtable.this)) {
+			if(秘isSimple(ht)) {
 				boolean b = false;
 				/** 
 				 * @j2sNative 
@@ -1239,7 +1284,7 @@ public class Hashtable<K,V>
 		@Override
 		public T nextElement() {
 			Entry<?, ?> node = next_;
-			if (秘isSimple(Hashtable.this)) {
+			if (秘isSimple(ht)) {
 				@SuppressWarnings("unused")
 				int t = type;
 				current = node;
@@ -1251,8 +1296,8 @@ public class Hashtable<K,V>
 				{}
 				next_ = n;
 				if (node != null) {
-					K k = null;
-					V v = null;
+					Object k = null;
+					Object v = null;
 					boolean done = false;
 					/**
 					 * @j2sNative
@@ -1266,11 +1311,11 @@ public class Hashtable<K,V>
 					 */
 					{}
 					if (!done) {
-						return (T) new Entry<K, V>(0, k, v, null) {
+						return (T) new Entry<Object, Object>(0, k, v, null) {
 
 							@Override
-							public V setValue(V value) {
-								return Hashtable.this.put(getKey(), value);
+							public Object setValue(Object value) {
+								return ht.put(getKey(), value);
 							}
 						};
 					}
@@ -1301,7 +1346,7 @@ public class Hashtable<K,V>
 
         @Override
 		public T next() {
-            if (modCount != expectedModCount)
+            if (ht.modCount != expectedModCount)
                 throw new ConcurrentModificationException();
             return nextElement();
         }
@@ -1313,35 +1358,35 @@ public class Hashtable<K,V>
 			Entry<?, ?> p = current;
 			if (p == null)
 				throw new IllegalStateException("Hashtable Enumerator");
-			if (modCount != expectedModCount)
+			if (ht.modCount != expectedModCount)
 				throw new ConcurrentModificationException();
 
-			if (秘isSimple(Hashtable.this)) {
-				K key = null;
+			if (秘isSimple(ht)) {
+				Object key = null;
 				/**
 				 * @j2sNative
 				 * 
 				 * 			key = p.value[0];
 				 */
 				{}
-				Hashtable.this.remove(key);
+				ht.remove(key);
 				expectedModCount++;
 			} else {
 
-				synchronized (Hashtable.this) {
-					Entry<?, ?>[] tab = Hashtable.this.table;
+				synchronized (ht) {
+					Entry<?, ?>[] tab = ht.table;
 					int index = (current.hash & 0x7FFFFFFF) % tab.length;
 
-					Entry<K, V> e = (Entry<K, V>) tab[index];
-					for (Entry<K, V> prev = null; e != null; prev = e, e = e.next_) {
+					Entry<?, ?> e = (Entry<?, ?>) tab[index];
+					for (Entry prev = null; e != null; prev = e, e = e.next_) {
 						if (e == current) {
-							modCount++;
+							ht.modCount++;
 							expectedModCount++;
 							if (prev == null)
 								tab[index] = e.next_;
 							else
 								prev.next_ = e.next_;
-							count--;
+							ht.count--;
 							current = null;
 							return;
 						}
@@ -1367,6 +1412,66 @@ public class Hashtable<K,V>
 		
 	}
 
+	static Object 秘get(Object map, Object key) {
+		/**
+		 * @j2sNative
+		 * 
+		 * return map.秘m.get(key == null ? null : key + "")
+		 */
+		{
+		return null;
+		}
+	}
+
+	static void 秘set(Map map, Object key, Object value) {
+		/**
+		 * @j2sNative
+		 * 
+		 * map.秘m.set(key == null ? null : key + "", value)
+		 */
+	}
+
+	/**
+	 * Determine the type of key within this map.
+	 *  
+	 * We allow null keys for HashMap, but other than that only String keys,
+	 * because although JavaScript Map allows for non-string values, it cannot
+	 * detect the equivalence of Integer.valueOf(n) for a given n.
+	 * 
+	 * @param map
+	 * @param key
+	 * @return 0 (NOT_SIMPLE), 1 (INVALID_KEY), 2 (NO_SUCH_KEY), or 3 (HAS_KEY)
+	 */
+	static int 秘hasKey(Map map, Object key) { 
+		
+		/**
+		 * 
+		 * Note that JavaScript Map.has() will distinguish between new String("") and "". 
+		 * And yet Java will not. So the "1" return here must be handled as "invalid -- convert now"
+		 * even if it is just a remove or contains check.
+		 * 
+		 * @j2sNative
+		 * 
+		 * 			return (!map.秘m ? 0 : key != null && typeof key != "string" 
+		 *                ? 1 : map.秘m.has(key) ? 3 : 2); 
+		 *
+		 */
+		{
+			return Map.NOT_SIMPLE;
+		}
+	}
+
+	static boolean 秘isSimple(Map map) {
+		/**
+		 * @j2sNative
+		 * 
+		 * 	return !!map.秘m;
+		 */
+		{
+			return false;
+		}
+		
+	}
 
 	/**
 	 * We've had our fun, now we have to go back to Java...
@@ -1384,73 +1489,17 @@ public class Hashtable<K,V>
 			 * 		}
 			 */
 	}
-
-	final static int NOT_SIMPLE = 0;
-	final static int INVALID_KEY = 1;
-	final static int NO_SUCH_KEY = 2;
-	final static int HAS_KEY = 3;
-	
-	static boolean 秘isSimple(Map map) {
-		/**
-		 * @j2sNative
-		 * 
-		 * 	return !!map.秘m;
-		 */
-		{
-			return false;
-		}
-		
-	}
 	
 	/**
-	 * Determine the type of key within this map.
-	 *  
-	 * We allow null keys for HashMap, but other than that only String keys,
-	 * because although JavaScript Map allows for non-string values, it cannot
-	 * detect the equivalence of Integer.valueOf(n) for a given n.
+	 * flag developers can use to switch off all use of simple JavaScript Map objects
 	 * 
-	 * @param map
-	 * @param key
-	 * @return 0 (NOT_SIMPLE), 1 (INVALID_KEY), 2 (NO_SUCH_KEY), or 3 (HAS_KEY)
+	 * not final, so that it can be managed on the fly in SwingJS
 	 */
-	static int 秘hasKey(Map map, Object key) {
-		
-		/**
-		 * 
-		 * Note that JavaScript Map.has() will distinguish between new String("") and "". 
-		 * And yet Java will not. So the "1" return here must be handled as "invalid -- convert now"
-		 * even if it is just a remove or contains check.
-		 * 
-		 * @j2sNative
-		 * 
-		 * 			return (!map.秘m ? 0 : key != null && typeof key != "string" 
-		 *                ? 1 : map.秘m.has(key) ? 3 : 2); 
-		 *
-		 */
-		{
-			return NOT_SIMPLE;
-		}
-	}
+	public static boolean USE_SIMPLE = true;
 
-	
-	static void 秘set(Map map, Object key, Object value) {
-		/**
-		 * @j2sNative
-		 * 
-		 * map.秘m.set(key == null ? null : key + "", value)
-		 */
-	}
 
-	static Object 秘get(Object map, Object key) {
-		/**
-		 * @j2sNative
-		 * 
-		 * return map.秘m.get(key == null ? null : key + "")
-		 */
-		{
-		return null;
-		}
-	}
+	Map<String, Object> 秘m;
+	boolean 秘allowJS = false;
 
 
 }

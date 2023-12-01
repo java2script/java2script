@@ -330,10 +330,8 @@ class J2SDependencyVisitor extends J2SASTVisitor {
 			allClassBindings.add(resolveBinding);
 		}
 		readJ2sImportTags(node);
-
 		processImports(node);
 		processJ2SRequireImport(node);
-		//visitForOptionals(node);
 		return super.visit(node);
 	}
 
@@ -345,7 +343,6 @@ class J2SDependencyVisitor extends J2SASTVisitor {
 			allClassBindings.add(resolveBinding);
 		}
 		readJ2sImportTags(node);
-
 		imports.add("java.lang.Enum");
 		processImports(node);
 		processJ2SRequireImport(node);
@@ -508,8 +505,8 @@ class J2SDependencyVisitor extends J2SASTVisitor {
 
 	public boolean visit(Initializer node) {
 		if (J2SUtil.getJ2STag(node, "@j2sIgnore") != null) {
-			return false;
-		}
+		return false;
+	}
 		return super.visit(node);
 	}
 
@@ -842,7 +839,6 @@ class J2SDependencyVisitor extends J2SASTVisitor {
 				if (mustAddDependency(qualifiedName, node, false)) {
 					imports.add(qn);
 				}
-				//musts.add(superBinding.getQualifiedName());
 			}
 		}
 		List<?> superInterfaces = null;

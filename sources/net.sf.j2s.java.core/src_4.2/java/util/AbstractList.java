@@ -30,26 +30,28 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
 
 	protected transient int modCount;
 
-	private class SimpleListIterator implements Iterator<E> {
+	private static class SimpleListIterator<E> implements Iterator<E> {
 		int pos = -1;
         int expectedModCount;
 		int lastPosition = -1;
+		AbstractList<E> list;
 
-		SimpleListIterator() {
+		SimpleListIterator(AbstractList<E> l) {
             super();
-			expectedModCount = modCount;
+            this.list = l;
+			expectedModCount = l.modCount;
 		}
 
 		@Override
 		public boolean hasNext() {
-			return pos + 1 < size();
+			return pos + 1 < list.size();
 		}
 
 		@Override
 		public E next() {
-			if (expectedModCount == modCount) {
+			if (expectedModCount == list.modCount) {
 				try {
-					E result = get(pos + 1);
+					E result = list.get(pos + 1);
 					lastPosition = ++pos;
 					return result;
 				} catch (IndexOutOfBoundsException e) {
@@ -61,13 +63,13 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
 
 		@Override
 		public void remove() {
-			if (expectedModCount == modCount) {
+			if (expectedModCount == list.modCount) {
 				try {
-					AbstractList.this.remove(lastPosition);
+					list.remove(lastPosition);
 				} catch (IndexOutOfBoundsException e) {
 					throw new IllegalStateException();
 				}
-				if (modCount != expectedModCount) {
+				if (list.modCount != expectedModCount) {
                     expectedModCount++;
                 }
 				if (pos == lastPosition) {
@@ -80,11 +82,12 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
 		}
 	}
 
-	private final class FullListIterator extends SimpleListIterator implements
+	@SuppressWarnings("hiding")
+	private static class FullListIterator<E> extends SimpleListIterator<E> implements
 			ListIterator<E> {
-		FullListIterator(int start) {
-            super();
-			if (0 <= start && start <= size()) {
+		FullListIterator(AbstractList<E> list, int start) {
+            super(list);
+			if (0 <= start && start <= list.size()) {
                 pos = start - 1;
             } else {
                 throw new IndexOutOfBoundsException();
@@ -93,15 +96,15 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
 
 		@Override
 		public void add(E object) {
-			if (expectedModCount == modCount) {
+			if (expectedModCount == list.modCount) {
 				try {
-					AbstractList.this.add(pos + 1, object);
+					list.add(pos + 1, object);
 				} catch (IndexOutOfBoundsException e) {
 					throw new NoSuchElementException();
 				}
 				pos++;
 				lastPosition = -1;
-				if (modCount != expectedModCount) {
+				if (list.modCount != expectedModCount) {
                     expectedModCount++;
                 }
 			} else {
@@ -121,9 +124,9 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
 
 		@Override
 		public E previous() {
-			if (expectedModCount == modCount) {
+			if (expectedModCount == list.modCount) {
 				try {
-					E result = get(pos);
+					E result = list.get(pos);
 					lastPosition = pos;
 					pos--;
 					return result;
@@ -141,9 +144,9 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
 
 		@Override
 		public void set(E object) {
-			if (expectedModCount == modCount) {
+			if (expectedModCount == list.modCount) {
 				try {
-					AbstractList.this.set(lastPosition, object);
+					list.set(lastPosition, object);
 				} catch (IndexOutOfBoundsException e) {
 					throw new IllegalStateException();
 				}
@@ -590,7 +593,7 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
 	 */
 	@Override
     public Iterator<E> iterator() {
-		return new SimpleListIterator();
+		return new SimpleListIterator<E>(this);
 	}
 
 	/**
@@ -652,7 +655,7 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
 	 */
 	@Override
 	public ListIterator<E> listIterator(int location) {
-		return new FullListIterator(location);
+		return new FullListIterator(this, location);
 	}
 
 	/**

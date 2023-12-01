@@ -29,6 +29,7 @@ public abstract class Dictionary<K,V> {
 	/**
 	 * Constructs a new instance of this class.
 	 * 
+	 * @j2sIgnore
 	 */
 	public Dictionary() {
 		super();
