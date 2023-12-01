@@ -683,7 +683,7 @@ public class Quat {
    * 
    * @return       pairwise array of data1 / data2 or data1 \ data2
    */
-  public static Quat[] div(Quat[] data1, Quat[] data2, int nMax, boolean isRelative) {
+  public static Quat[] arrayDiv(Quat[] data1, Quat[] data2, int nMax, boolean isRelative) {
     int n;
     if (data1 == null || data2 == null || (n = Math.min(data1.length, data2.length)) == 0)
       return null;
