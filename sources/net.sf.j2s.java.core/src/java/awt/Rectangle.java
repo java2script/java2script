@@ -692,15 +692,19 @@ public class Rectangle extends Rectangle2D
      * @since     1.1
      */
     public boolean contains(int X, int Y, int W, int H) {
-        int w = this.width;
-        int h = this.height;
+    	return contains(this.x, this.y, this.width, this.height, X, Y, W, H);
+    }
+
+	private static boolean contains(int tx, int ty, int tw, int th, int X, int Y, int W, int H) {
+        int w = tw;
+        int h = th;
         if ((w | h | W | H) < 0) {
             // At least one of the dimensions is negative...
             return false;
         }
         // Note: if any dimension is zero, tests below must return false...
-        int x = this.x;
-        int y = this.y;
+        int x = tx;
+        int y = ty;
         if (X < x || Y < y) {
             return false;
         }
@@ -726,7 +730,11 @@ public class Rectangle extends Rectangle2D
             if (h >= y && H > h) return false;
         }
         return true;
-    }
+	}
+
+	public static boolean contains(int[] is, int X, int Y, int W, int H) {
+		return contains(is[0], is[1], is[2], is[3], X, Y, W, H);
+	}
 
     /**
      * Checks whether or not this <code>Rectangle</code> contains the
@@ -1211,4 +1219,5 @@ public class Rectangle extends Rectangle2D
 		public String toString() {
         return getClass().getName() + "[x=" + x + ",y=" + y + ",width=" + width + ",height=" + height + "]";
     }
+
 }

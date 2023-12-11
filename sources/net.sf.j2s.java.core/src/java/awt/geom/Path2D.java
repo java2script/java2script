@@ -307,6 +307,9 @@ public abstract class Path2D implements Shape, Cloneable {
             floatCoords[numCoords++] = (float) y;
         }
 
+    	public void clear() {
+    		numCoords = 0;
+    	}
         /**
          * {@inheritDoc}
          * @since 1.6
@@ -2446,6 +2449,7 @@ public abstract class Path2D implements Shape, Cloneable {
         // offer "public Object clone()" for backwards
         // compatibility so we cannot restrict it further.
         // REMIND: Can we do both somehow?
+
 
 //    /*
 //     * Support fields and methods for serializing the subclasses.

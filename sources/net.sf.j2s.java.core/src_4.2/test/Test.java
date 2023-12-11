@@ -6,6 +6,8 @@ import java.awt.event.MouseListener;
 
 public class Test implements ITest {
 	
+	int tnoinit;
+	int tinit = 1;
 	static int i = '2';
 	final static String s = "test " + "here";
 	final static String s1 = new String("test5");

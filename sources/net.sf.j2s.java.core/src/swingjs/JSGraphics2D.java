@@ -75,7 +75,7 @@ public class JSGraphics2D implements
 	private GraphicsConfiguration gc;
 
 	private BasicStroke currentStroke;
-	private Shape currentClip;
+	private Object currentClip;
 
 	private AlphaComposite alphaComposite;
 	private int initialState;
@@ -90,7 +90,7 @@ public class JSGraphics2D implements
 
 	private RenderingHints hints;	
 
-	private AffineTransform transform;
+	private final AffineTransform transform = new AffineTransform();
 
 	private Color backgroundColor;
 	private AffineTransform fontTransform;
@@ -123,7 +123,6 @@ public class JSGraphics2D implements
 											// passing an actual HTML5 canvas
 		this.canvas = (HTML5Canvas) canvas;
 		ctx = this.canvas.getContext("2d");
-		transform = new AffineTransform();
 		setStroke(new BasicStroke());
 		/**
 		 * @j2sNative
@@ -768,8 +767,14 @@ public class JSGraphics2D implements
 	}
 
 	private boolean isClipped(int x, int y, int w, int h) {
-		boolean is = currentClip != null && !currentClip.contains(x, y, w, h);
+		boolean is = currentClip != null && !contains(x, y, w, h);
 		return is;
+	}
+
+	private boolean contains(int x, int y, int w, int h) {
+		return (currentClip instanceof int[] 
+				? Rectangle.contains(((int[]) currentClip), x, y, w, h)
+						: ((Shape) currentClip).contains(x, y, w, h));
 	}
 
 	private void observe(Image img, ImageObserver observer, boolean isOK) {
@@ -979,7 +984,7 @@ public class JSGraphics2D implements
 		Rectangle r = (currentClip instanceof Rectangle ? (Rectangle) currentClip : null);
 		Object o = currentClip;
 		if (r == null || r.x != x || r.y != y || r.width != width || r.height != height) {
-			currentClip = new Rectangle(x, y, width, height);
+			currentClip = new int[] {x, y, width, height};
 		}
 		if (debugClip) {
 			System.out.println("JSGraphics2D.clipPriv to " + currentClip + " from " + o);
@@ -1022,7 +1027,8 @@ public class JSGraphics2D implements
 
 	public Shape getClip() {
 		// This will not be entirely accurate if shapes are involved
-		return currentClip == null ? getClipBoundsImpl() : currentClip;
+		return (currentClip == null || currentClip instanceof int[] 
+				? getClipBoundsImpl() : (Shape) currentClip);
 	}
 
 	public void drawString(String s, int x, int y) {
@@ -1190,9 +1196,16 @@ public class JSGraphics2D implements
 		if (currentClip == null) {
 			currentClip = new Rectangle(0, 0, width, height);
 		}
-		return currentClip.getBounds();
+		return getBounds();
 	}
 
+	private Rectangle getBounds() {
+		if (currentClip instanceof int[]) {
+			int[] a = (int[]) currentClip;
+			return new Rectangle(a[0], a[1], a[2], a[3]);
+		}
+		return ((Shape) currentClip).getBounds();
+	}
 	private Color clearColorSaved;
 	private boolean clearing;
 
@@ -1384,7 +1397,7 @@ public class JSGraphics2D implements
 		 */
 		{
 		}
-		g.transform = new AffineTransform(transform);
+		g.transform.setTransform(transform);
 		if (hints != null) {
 			g.hints = (RenderingHints) hints.clone();
 		}

@@ -10686,6 +10686,7 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// BH 2023.12.07 fixes mouseUp on body causing (ignorable) error
 // BH 2023.11.06 adds css touch-action none
 // BH 2023.11.01 adds pointerup, pointerdown, and pointermove to J2S.setMouse
 // BH 2023.11.01 allows null applet in J2S.setMouse (?? should it ever be null?)
@@ -12554,7 +12555,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			return;
 		}
 		
-		if (J2S._dmouseOwner) {
+		if (J2S._dmouseOwner && J2S._dmouseOwner.isDragging) {
 			if (J2S._dmouseDrag)
 				J2S._dmouseDrag(ev);
 			else
@@ -12584,9 +12585,13 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	}
 	
 	var mouseUp = function(who, ev) {
-		who.isDown = false;
-		if (who.applet == null)
+		if (J2S._dmouseOwner) {
+			J2S._dmouseOwner.isDragging = false;
+			J2S._dmouseOwner = null;
+		}
+		if (!who || who.applet == null)
 			return;
+		who.isDown = false;
 		if (J2S._traceMouse)
 			J2S.traceMouse(who,"UP", ev);
 

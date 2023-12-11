@@ -150,14 +150,14 @@ public class BasicStroke implements Stroke, Cloneable {
      */
     public final static int CAP_SQUARE = 2;
 
-    float width;
+    final float width;
 
-    int join;
-    int cap;
-    float miterlimit;
+    final int join;
+    final int cap;
+    final float miterlimit;
 
-    float dash[];
-    float dash_phase;
+    final float dash[];
+    final float dash_phase;
 
     /**
      * Constructs a new <code>BasicStroke</code> with the specified
@@ -223,9 +223,7 @@ public class BasicStroke implements Stroke, Cloneable {
         this.cap        = cap;
         this.join       = join;
         this.miterlimit = miterlimit;
-        if (dash != null) {
-            this.dash = (float []) dash.clone();
-        }
+        this.dash = (dash == null ? null : dash); // was .clone()
         this.dash_phase = dash_phase;
     }
 
@@ -450,7 +448,9 @@ public class BasicStroke implements Stroke, Cloneable {
     
   	@Override
 		public Object clone() {
-  		return new BasicStroke(width, cap, join, miterlimit, dash, dash_phase);
+  		return this;
+ // COULD THIS WORK??
+//  		return new BasicStroke(width, cap, join, miterlimit, dash, dash_phase);
   	}
 
 

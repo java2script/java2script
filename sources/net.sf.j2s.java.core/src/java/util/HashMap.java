@@ -927,6 +927,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 	final Object removeNode(int hash, Object key, Object value, boolean matchValue, boolean movable, int mode) {
 
 		V v;
+		if (mode == HAS_KEY) {
 			v = (hash == RET_VALUE || matchValue ? /** @j2sNative this.秘m.get(key) ||*/ null : null);
 			if (!matchValue || v == value || (value != null && value.equals(v))) {
 				/**
