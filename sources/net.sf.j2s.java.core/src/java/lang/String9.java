@@ -14,10 +14,10 @@ public final class String9 {
     static final byte LATIN1 = 0;
     static final byte UTF16  = 1;
 
-    private boolean isLatin1() {
-        return COMPACT_STRINGS && coder == LATIN1;
-    }
-
+//    private boolean isLatin1() {
+//        return COMPACT_STRINGS && coder == LATIN1;
+//    }
+//
 
     /*
      * StringIndexOutOfBoundsException  if {@code index} is
