@@ -1,5 +1,6 @@
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// BH 2023.12.14 fixes resizing into application (making it smaller)
 // BH 2023.12.13 fixes RIGHT-DRAG and SHIFT-LEFT-DRAG modifier
 // BH 2023.12.07 fixes mouseUp on body causing (ignorable) error
 // BH 2023.11.06 adds css touch-action none
@@ -1851,6 +1852,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		}
 		
 		if (J2S._dmouseOwner && J2S._dmouseOwner.isDragging) {
+		    // resizing mouse dragged over applet
 			if (J2S._dmouseDrag)
 				J2S._dmouseDrag(ev);
 			else
@@ -1880,9 +1882,14 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	}
 	
 	var mouseUp = function(who, ev) {
-		if (J2S._dmouseOwner) {
-			J2S._dmouseOwner.isDragging = false;
-			J2S._dmouseOwner = null;
+		if (J2S._dmouseOwner && J2S._dmouseOwner.isDragging) {
+		    // resizing mouse released over applet
+			if (J2S._dmouseDrag) {
+				J2S._dmouseUp(ev);
+			} else {
+				System.out.println("move setting dmouseowner null");
+				J2S._dmouseOwner = null;
+			}
 		}
 		if (!who || who.applet == null)
 			return;
@@ -3185,6 +3192,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		var down = function(ev) {
 			J2S._dmouseOwner = tag;
 			J2S._dmouseDrag = drag;
+			J2S._dmouseUp = up;
 
 			tag.isDragging = true; // used by J2S mouse event business
 			pageX = Math.round(ev.pageX);
@@ -3236,6 +3244,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			}
 		}, up = function(ev) {
 			J2S._dmouseDrag = null;
+			J2S._dmouseUp = null;
 			if (J2S._dmouseOwner == tag) {
 				tag.isDragging = false;
 				J2S._dmouseOwner = null
