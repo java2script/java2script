@@ -69,8 +69,7 @@ public class JSMouse {
 			return keyAction(id, jqevent, time);
 		}	
 		if (id != MouseEvent.MOUSE_WHEEL 
-				&& id != MouseEvent.MOUSE_MOVED
-				&& id != MouseEvent.MOUSE_DRAGGED)
+				&& id != MouseEvent.MOUSE_MOVED)
 			modifiers = applyLeftMouse(modifiers);
 		switch (id) {	
 		case MouseEvent.MOUSE_WHEEL:

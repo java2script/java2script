@@ -1,5 +1,6 @@
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// BH 2023.12.13 fixes RIGHT-DRAG and SHIFT-LEFT-DRAG modifier
 // BH 2023.12.07 fixes mouseUp on body causing (ignorable) error
 // BH 2023.11.06 adds css touch-action none
 // BH 2023.11.01 adds pointerup, pointerdown, and pointermove to J2S.setMouse
@@ -1686,26 +1687,6 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 		return ignore;
 	};
 
-	var getKeyModifiers = function(ev) {
-		var modifiers = 0;
-		if (ev.shiftKey)
-			modifiers |= (1 << 0) | (1 << 6); // InputEvent.SHIFT_MASK +
-												// InputEvent.SHIFT_DOWN_MASK;
-		if (ev.ctrlKey)
-			modifiers |= (1 << 1) | (1 << 7); // InputEvent.CTRL_MASK +
-												// InputEvent.CTRL_DOWN_MASK;
-		if (ev.metaKey)
-			modifiers |= (1 << 2) | (1 << 8); // InputEvent.META_MASK +
-												// InputEvent.META_DOWN_MASK;
-		if (ev.altKey)
-			modifiers |= (1 << 3) | (1 << 9); // InputEvent.ALT_MASK +
-												// InputEvent.ALT_DOWN_MASK;
-		if (ev.altGraphKey)
-			modifiers |= (1 << 5) | (1 << 13); // InputEvent.ALT_GRAPH_MASK +
-												// InputEvent.ALT_GRAPH_DOWN_MASK;
-		return modifiers;
-	}
-
 	J2S.setKeyListener = function(who) {
 		J2S.$bind(who, 'keydown keypress keyup', function(ev) {
 			if (doIgnore(ev))
@@ -2178,7 +2159,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		// and also recognize a drag (503 + buttons pressed
 		var modifiers = 0;
 		if (id == 503) {
-			modifiers = ev.buttons << 10;
+			modifiers = (ev.buttons == 0 ? 0 : ev.buttons == 2 ? (1 << 12) : (1 << 10));
 		} else {
 			switch (ev.button) {
 			default:
@@ -2200,6 +2181,26 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			}
 		}
 		return modifiers | getKeyModifiers(ev);
+	}
+
+	var getKeyModifiers = function(ev) {
+		var modifiers = 0;
+		if (ev.shiftKey)
+			modifiers |= (1 << 0) | (1 << 6); // InputEvent.SHIFT_MASK +
+												// InputEvent.SHIFT_DOWN_MASK;
+		if (ev.ctrlKey)
+			modifiers |= (1 << 1) | (1 << 7); // InputEvent.CTRL_MASK +
+												// InputEvent.CTRL_DOWN_MASK;
+		if (ev.metaKey)
+			modifiers |= (1 << 2) | (1 << 8); // InputEvent.META_MASK +
+												// InputEvent.META_DOWN_MASK;
+		if (ev.altKey)
+			modifiers |= (1 << 3) | (1 << 9); // InputEvent.ALT_MASK +
+												// InputEvent.ALT_DOWN_MASK;
+		if (ev.altGraphKey)
+			modifiers |= (1 << 5) | (1 << 13); // InputEvent.ALT_GRAPH_MASK +
+												// InputEvent.ALT_GRAPH_DOWN_MASK;
+		return modifiers;
 	}
 
 	var getXY = function(who, ev, id) {
