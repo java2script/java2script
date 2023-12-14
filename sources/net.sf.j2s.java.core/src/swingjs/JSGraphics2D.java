@@ -1287,7 +1287,7 @@ public class JSGraphics2D implements
 		map[SAVE_ALPHA] = (/** @j2sNative 1 ? this.ctx.globalAlpha : */0);//Float.valueOf(ctx.globalAlpha);
 		map[SAVE_COMPOSITE] = alphaComposite;
 		map[SAVE_STROKE] = currentStroke;
-		map[SAVE_TRANSFORM] = transform;
+		map[SAVE_TRANSFORM] = transform.秘toArray();
 		map[SAVE_FONT] = font;
 		map[SAVE_CLIP] = currentClip;
 		return HTML5CanvasContext2D.push(ctx, map);
@@ -1360,7 +1360,7 @@ public class JSGraphics2D implements
 		setAlpha(/** @j2sNative map[a] || */0);
 		shader = null;
 		setStroke((Stroke) map[SAVE_STROKE]);
-		setTransform((AffineTransform) map[SAVE_TRANSFORM]);
+		setTransform(transform.秘fromArray((double[]) map[SAVE_TRANSFORM]));
 		setFont((Font) map[SAVE_FONT]);
 		currentClip = (Shape) map[SAVE_CLIP];
 	}
