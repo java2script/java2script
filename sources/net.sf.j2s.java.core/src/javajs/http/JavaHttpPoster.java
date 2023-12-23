@@ -19,36 +19,57 @@ import javajs.http.SimpleHttpClient.Request.FormData;
  * 
  * adapted from https://github.com/atulsm/https-multipart-purejava
  * 
+ * 2023.12.21 BH fixed to allow x-www-encoding 
+ * 
  * @author Bob Hanson
  *
  */
 public class JavaHttpPoster {
 
-	public static void post(HttpURLConnection conn, List<FormData> formData) throws IOException {
-		String boundary = "---" + System.nanoTime() + "---";
-		conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
-		OutputStream os = conn.getOutputStream();
-		for (int i = 0; i < formData.size(); i++) {
-			FormData data = formData.get(i);
-			String name = data.getName();
-			Object value = data.getData();
-			String contentType = data.getContentType();
-			String fileName = data.getFileName();
-			append(os, "--" + boundary + "\r\n");
-			append(os, "Content-Disposition: form-data; name=\"" + name
-					+ (fileName == null ? "" : "\"; filename=\"" + fileName) + "\"");
-			append(os, "\r\nContent-Type: ");
-			append(os, contentType == null ? "application/octet-stream" : contentType);
-			append(os, "\r\n\r\n");
-			append(os, value);
-			append(os, "\r\n");
-		}
-		append(os, "\r\n--" + boundary + "--\r\n");
-		os.flush();
+	public static	 void post(HttpURLConnection conn, List<FormData> formData, boolean isWWWEncoded) throws IOException {
+		
+		conn.setRequestMethod("POST");
+		
+		//	isWWWEncoded is from setting
+		//  request.addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+
+			if (isWWWEncoded) {
+				OutputStream os = conn.getOutputStream();
+				append(os, SimpleHttpClient.wwwEncode(formData));
+				os.flush();
+			} else {
+				String boundary = "---" + System.nanoTime() + "---";
+				conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+				OutputStream os = conn.getOutputStream();
+				for (int i = 0; i < formData.size(); i++) {
+					FormData data = formData.get(i);
+					String name = data.getName();
+					Object value = data.getData();
+					String contentType = data.getContentType();
+						
+					String fileName = data.getFileName();
+					append(os, "--" + boundary + "\r\n");
+					append(os, "Content-Disposition: form-data; name=\"" + name
+							+ (fileName == null ? "" : "\"; filename=\"" + fileName) + "\"");
+					if (contentType != null) {
+						// default is text
+						append(os, "\r\nContent-Type: ");
+						append(os, contentType == null ? "application/octet-stream" : contentType);
+					}
+					append(os, "\r\n\r\n");
+					append(os, value);
+					append(os, "\r\n");
+				}
+				append(os, "\r\n--" + boundary + "--\r\n");
+				os.flush();
+			}		
+		
 
 	}
 
 	private static void append(OutputStream outputStream, Object val) throws IOException {
+		
+		//System.out.println("JHP.append " + val);
 		if (val instanceof byte[]) {
 			outputStream.write((byte[]) val);
 		} else {

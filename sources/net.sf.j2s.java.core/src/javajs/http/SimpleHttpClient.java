@@ -40,12 +40,40 @@ import java.util.function.Function;
  * The SimpleHttpClient is very light -- just a constructor and five methods,
  * providing limited access to HttpRequest and HttpResponse implementations.
  * 
+ * 2023.12.21 BH fixed GET and x-www-encoded POST missing "&" between name=value sets 
  * 
  * @author Bob Hanson
  * @author Mateusz Warowny
  * 
  */
 public class SimpleHttpClient implements HttpClient {
+
+
+	public static String wwwEncode(List<Request.FormData> queryData) {
+		Map<String, String> htGetParams = new LinkedHashMap<>();
+		for (int i = 0; i < queryData.size(); i++) {
+			Request.FormData fd = queryData.get(i);
+			htGetParams.put(fd.getName(), fd.getData().toString());
+		}
+		String data = "";
+		for (Entry<String, String> e : htGetParams.entrySet()) {
+			data += "&" + e.getKey() + "=" + encodeURI(e.getValue());
+		}
+		return data.substring(1);
+	}
+
+	public static String encodeURI(String value) {
+		try {
+			// convert " " to "%20", not "+"
+			// based on https://stackoverflow.com/questions/2678551/when-to-encode-space-to-plus-or-20
+			// Answer # 46. and "URI Generic Syntax " https://tools.ietf.org/html/rfc3986
+			// This will be consistent, then, with JavaScript encodeURIComponent().
+			return URLEncoder.encode(value.replace(' ', '\0'), "UTF-8").replaceAll("%00", "%20");
+		} catch (UnsupportedEncodingException e) {
+			// impossible
+			return null;
+		}
+	}
 
 	SimpleHttpClient() {
 		// for reflection
@@ -186,6 +214,8 @@ public class SimpleHttpClient implements HttpClient {
 		 */
 		boolean hasFormBody = false;
 
+		private boolean isWWWencoded;
+
 		Request(URI uri, String method) {
 			this.uri = uri;
 			this.method = method.toUpperCase();
@@ -217,6 +247,9 @@ public class SimpleHttpClient implements HttpClient {
 		@Override
 		public HttpRequest addHeader(String name, String value) {
 			htHeaders.put(name, value);
+			if (name.equals("Content-Type") && value.startsWith("application/x-www-form-urlencoded")) {
+				isWWWencoded = true;
+			}
 			return this;
 		}
 
@@ -353,29 +386,9 @@ public class SimpleHttpClient implements HttpClient {
 		private URL createURL() throws MalformedURLException {
 			String data = "";
 			if (queryData != null) {
-				Map<String, String> htGetParams = new LinkedHashMap<>();
-				for (int i = 0; i < queryData.size(); i++) {
-					FormData fd = queryData.get(i);
-					htGetParams.put(fd.getName(), fd.getData().toString());
-				}
-				for (Entry<String, String> e : htGetParams.entrySet()) {
-					data += e.getKey() + "=" + encodeURI(e.getValue());
-				}
+				data = wwwEncode(queryData);
 			}
 			return (data.length() > 0 ? new URL(uri.toString() + "?" + data) : uri.toURL());
-		}
-
-		private String encodeURI(String value) {
-			try {
-				// convert " " to "%20", not "+"
-				// based on https://stackoverflow.com/questions/2678551/when-to-encode-space-to-plus-or-20
-				// Answer # 46. and "URI Generic Syntax " https://tools.ietf.org/html/rfc3986
-				// This will be consistent, then, with JavaScript encodeURIComponent().
-				return URLEncoder.encode(value.replace(' ', '\0'), "UTF-8").replaceAll("%00", "%20");
-			} catch (UnsupportedEncodingException e) {
-				// impossible
-				return null;
-			}
 		}
 
 		Response fulfillPost(Response r) throws IOException {
@@ -392,10 +405,11 @@ public class SimpleHttpClient implements HttpClient {
 			 * @j2sIgnore
 			 */
 			{
-				JavaHttpPoster.post(conn, formData);
+				JavaHttpPoster.post(conn, formData, isWWWencoded);
 				if (true)
 					return;
 			}
+			// JavaSCript only
 			for (int i = 0, n = formData.size(); i < n; i++) {
 				FormData data = formData.get(i);
 				((AjaxURLConnection) conn).addFormData(data.name, data.data, data.contentType, data.fileName);
@@ -692,4 +706,5 @@ public class SimpleHttpClient implements HttpClient {
 		}
 	}
 
+	
 }
