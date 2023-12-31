@@ -19,11 +19,29 @@ within Eclipse, with immediate JavaScript testing and debugging in a browser bas
 in Java. Using the java2script/SwingJS Eclipse plug-in, both Java .class files and their equivalent .js files are created simultaneously. 
 
 
-java2script/SwingJS includes an Eclipse plug-in (technically a "drop-in"), net.sf.j2s.core.zip
+java2script/SwingJS includes an Eclipse plug-in (technically a "drop-in"), net.sf.j2s.cor
+
+e.zip
 (see https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.core/dist/swingjs), 
 along with a JavaScript version of the Java Virtual Machine (SwingJS, https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.java.core/SwingJS-site.zip) 
 to allow the rapid and
 automated production of browser-ready JavaScript versions of Java applications and applets. 
+
+
+# Working Examples
+
+Examples of SwingJS applied to allow single-source Java+JavaScript development include:
+
+Jmol-SwingJS  https://github.com/BobHanson/Jmol-SwingJS
+
+JalView-JS https://www.jalview.org/jalview-js
+
+MathePrisma https://www.matheprisma.de/  (over 600 applets)
+
+Open Source Physics (OSP) https://github.com/OpenSourcePhysics/osp/tree/swingJS
+
+TrackerJS https://physlets.org/tracker/trackerJS
+
 
 
 # QuickStart
