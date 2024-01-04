@@ -14,7 +14,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -669,17 +671,31 @@ public class JSUtil implements JSUtilI {
 	 */
 	@Override
 	public void displayURL(String url, String target) {
-		showWebPage((URL)(Object)url, target);
+		showWebPage(url, target);
 	}
 	
-	public static void showWebPage(URL url, Object target) {
-			/**
-			 * @j2sNative
-			 * 
-			 * 			if (target) window.open(url.toString(), target); else
-			 *            window.open(url.toString());
-			 */
-	  }
+	public static void showWebPage(Object url, Object target) {
+		String surl = (url instanceof String ? (String) url : url.toString());
+		/**
+		 * @j2sNative
+		 * 
+		 * 			if (target) window.open(surl, target); else
+		 *            window.open(url.toString());
+		 */
+		{
+			try {
+			Class<?> c = Class.forName("java.awt.Desktop");
+			Method getDesktop = c.getMethod("getDesktop", new Class[] {});
+			Object deskTop = getDesktop.invoke(null, new Object[] {});
+			Method browse = c.getMethod("browse", new Class[] { URI.class });
+			Object arguments[] = { new URI(surl) };
+			browse.invoke(deskTop, arguments);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+	}
 	
 	
 
