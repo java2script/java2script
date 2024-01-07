@@ -1317,8 +1317,11 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
                                       int tabIndex,
                                       int x, int y, int w, int h,
                                       boolean isSelected ) {
-        g.setColor(!isSelected || selectedColor == null?
-                   tabPane.getBackgroundAt(tabIndex) : selectedColor);
+    	// BH SwingJS adjustment here - 
+        g.setColor(!isSelected ?
+                   tabPane.getBackgroundAt(tabIndex) : selectedColor == null ? 
+                		   tabPane.getComponentAt(tabIndex).getBackground()
+                		   : selectedColor);
         switch(tabPlacement) {
           case LEFT:
               g.fillRect(x+1, y+1, w-1, h-3);
@@ -1404,6 +1407,10 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
                                getTabBounds(selectedIndex, calcRect);
 
         g.setColor(lightHighlight);
+        
+        Color sColor = (selectedIndex < 0 ? null : selectedColor == null ? 
+                		   tabPane.getComponentAt(selectedIndex).getBackground()
+                		   : selectedColor);
 
         // Draw unbroken line if tabs are not on TOP, OR
         // selected tab is not in run adjacent to content, OR
@@ -1416,7 +1423,11 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
         } else {
             // Break line to show visual connection to selected tab
             g.drawLine(x, y, selRect.x - 1, y);
-            if (selRect.x + selRect.width < x + w - 2) {
+            int sw = Math.min(selRect.x + selRect.width, x + w - 2);
+            g.setColor(sColor);
+            g.drawLine(selRect.x, y, sw, y);
+            if (sw < x + w - 2) {
+            	g.setColor(lightHighlight);
                 g.drawLine(selRect.x + selRect.width, y,
                            x+w-2, y);
             } else {
@@ -2059,7 +2070,8 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
             focusIndex = index;
             repaintTab(focusIndex);
         }
-        else {
+        else
+        {
             focusIndex = index;
         }
     }

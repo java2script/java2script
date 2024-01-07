@@ -871,13 +871,13 @@ public class HTML5LookAndFeel extends LookAndFeel {
 		//
 		// ** TabbedBane value objects
 
-		Object tabbedPaneTabInsets = new InsetsUIResource(2, 4, 2, 4);
+		Object tabbedPaneTabInsets = new InsetsUIResource(2, 4, 1, 4); // 3 px shorter
 
 		Object tabbedPaneTabPadInsets = new InsetsUIResource(2, 2, 2, 1);// selected tab size
 
-		Object tabbedPaneTabAreaInsets = new InsetsUIResource(3, 2, 0, 2);
+		Object tabbedPaneTabAreaInsets = new InsetsUIResource(0, 2, 0, 2);
 
-		Object tabbedPaneContentBorderInsets = new InsetsUIResource(2, 2, 3, 3);
+		Object tabbedPaneContentBorderInsets = new InsetsUIResource(1, 2, 5, 3);
 
 		// *** Text value objects
 
@@ -1380,7 +1380,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				// "Menu.checkIcon", menuItemCheckIcon,
 				// "Menu.arrowIcon", menuArrowIcon,
 				// "Menu.menuPopupOffsetX", new Integer(0),
-				// "Menu.menuPopupOffsetY", new Integer(0),
+				 "Menu.menuPopupOffsetY", new Integer(-3),// moves popup menus just a bit higher
 				// "Menu.submenuPopupOffsetX", new Integer(0),
 				// "Menu.submenuPopupOffsetY", new Integer(0),
 				// "Menu.shortcutKeys", new int[] {KeyEvent.ALT_MASK},
@@ -1693,7 +1693,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				// which is zero by default
 				"TabbedPane.tabsOverlapBorder",
 				Boolean.FALSE,
-				// "TabbedPane.selectionFollowsFocus", Boolean.TRUE,
+				"TabbedPane.selectionFollowsFocus", Boolean.FALSE,
 
 				"TabbedPane.labelShift",
 				1,

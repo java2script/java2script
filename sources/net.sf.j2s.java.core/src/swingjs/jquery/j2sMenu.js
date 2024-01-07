@@ -10,6 +10,11 @@ J2S.__makeMenu = function() {
 // run once; set to NOP
 J2S.__makeMenu = function(){};	
 
+
+ var MODE_UNKNOWN = 0;
+ var MODE_TOUCH = 1;
+ var MODE_MOUSE = 2;
+
  var outActive;
  var vart;
 
@@ -112,7 +117,7 @@ J2S.__makeMenu = function(){};
 		 var a = myMenuItem(target)
 		 if (a.hasClass(".ui-state-focus"))
 			 return;		 
-		 if (!a.hasClass("j2s-popup-menu")) {
+		 if (!a.hasClass("j2s-popup-menu") && !a.hasClass("ui-j2smenu-node")) {
 			 me._closeSubmenus(a.parent());			 
 		 }
 		 var m = a;
@@ -146,7 +151,8 @@ J2S.__makeMenu = function(){};
 				me.element.trigger("setFocus",[!0]);
 				me.active&&me.active.parents(".ui-j2smenu").length===1&&clearMe(me.timer, trigger);
 			} 
-			doCmd("collapseAll", me, 0, 1);			 
+			if (me.mouseState != MODE_TOUCH)
+				doCmd("collapseAll", me, 0, 1);			 
 		}
 		break;
 	 case "clearClickOut":
@@ -175,7 +181,8 @@ J2S.__makeMenu = function(){};
 		 myMenuBar(target).length == 0 && (myMenu(target).length||me.collapseAll(t));
 	 	return;
 	 case "onleave":
-		 me._closeMe("onleave");
+		 if (me.mouseState != MODE_TOUCH)
+		   me._closeMe("onleave");
 		 return;
 	 case "onfocus":
 		 n||me.setFocus(t,me.active||me.element.children(".ui-j2smenu-item").eq(0));
@@ -197,6 +204,7 @@ J2S.__makeMenu = function(){};
 		 return;
 	 case "_hidePopupMenu":
 		 // trigger Java to deselect these - the JMenu class
+		 me.mouseState = MODE_UNKNOWN; // unknown
 		 t = me.element.find(".ui-j2smenu[aria-hidden!=true]").attr("aria-hidden","true").parent();
 		 var a = me;
 		 doCmd("_hide", a, a.element);
@@ -287,15 +295,24 @@ J2S.__makeMenu = function(){};
 		 }
 		 break;
 	 case "collapseAll":
-		 return; // fails for Tracker touch
-		 if (me.closed || me.clickoutDisabled) {
-			 return;
-		 }
-		 doCmd("_hidePopupMenu", me);
-		 clearMe(me.timer, trigger),
-		 setCollapseTimer(me, t)
+		 // touch needs this setTimeout to delay close action until touch is processed
+		 setTimeout(function() {
+			 if (me.closed || me.clickoutDisabled) {
+				 return;
+			 }
+			 doCmd("_hidePopupMenu", me);
+			 clearMe(me.timer, trigger),
+			 setCollapseTimer(me, t)
+		 }, 100);
 		 break;
 	 case "setFocus":
+		 me.clickoutDisabled = true;
+		 // we determine this to be a touch because a 
+		 // focus from DOWN is made before a focus from OVER or MOVE
+		 if (event.type == "pointermove" || event.type == "pointerover")
+			 me.mouseState = MODE_MOUSE;// TODO menu only
+		 else if (event.type == "pointerdown" && me.mouseState == MODE_UNKNOWN)
+			 me.mouseState = MODE_TOUCH;
 		 var a = n.first();
 		 var u=n.children(".ui-j2smenu");
 		 var subIsActive = (a[0] == (me.active && me.active[0]));
@@ -327,6 +344,9 @@ J2S.__makeMenu = function(){};
 		 t = a;
 		 break;
 	 case "select":
+		 if (me.mouseMode == MODE_MOUSE) {
+			 return;
+		 } 
 		 me.active=me.active||myMenuItem(target);
 		 if (isMenu(me.active)) {
 			 // the anchor element is the first child.
@@ -509,7 +529,7 @@ $.widget("ui.j2smenu",{
      setCloseTimer(this);
  },
 
- 
+ mouseState:MODE_UNKNOWN,
  
  _activate:function(t){     doCmd("_activate", this, t); },
  _startOpening: function(t){ doCmd("_startOpening", this, t); },
