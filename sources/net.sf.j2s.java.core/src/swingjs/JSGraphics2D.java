@@ -965,7 +965,11 @@ public class JSGraphics2D implements
 	}
 
 	public void setClipPriv(Shape clip) {
-		if (clip instanceof Rectangle) {
+		Object c = clip;
+		
+		if (c instanceof int[]) {			
+			clipPriv(((int[])c)[0], ((int[])c)[1], ((int[])c)[2], ((int[])c)[3]);
+		} else if (clip instanceof Rectangle) {
 			Rectangle r = (Rectangle) clip;
 			clipPriv((int) Math.floor(r.getMinX()), (int) Math.floor(r.getMinY()), (int) Math.ceil(r.getWidth()),
 					(int) Math.ceil(r.getHeight()));
