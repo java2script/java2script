@@ -422,7 +422,7 @@ public class Java2ScriptSwingJSCompiler extends Java2ScriptCompiler {
 				+ "</script>\n" + "</head>\n" + "<body>\n" + "<script>\n" + "SwingJS.getApplet('testApplet', Info)\n"
 				+ "getClassList = function(){J2S._saveFile('_j2sclasslist.txt', Clazz.ClassFilesLoaded.sort().join('\\n'))}\n"
 				+ "</script>\n" + "<div style=\"position:absolute;left:900px;top:30px;width:600px;height:300px;\">\n"
-				+ "<div id=\"sysoutdiv\" contentEditable=\"true\" style=\"border:1px solid green;width:100%;height:95%;overflow:auto\"></div>\n"
+				+ "<div spellcheck=\"false\" id=\"sysoutdiv\" contentEditable=\"true\" style=\"border:1px solid green;width:100%;height:95%;overflow:auto\"></div>\n"
 				+ "This is System.out. <a href=\"javascript:testApplet._clearConsole()\">clear it</a>  <a href='javascript:J2S.getProfile()'>start/stop profiling</a><br>see <a href=___j2sflags.htm>___j2sflags.htm</a> for SwingJS URL command-line options<br><a href=\"javascript:getClassList()\">get _j2sClassList.txt</a>\n"
 				+ "</div>\n" + "</body>\n" + "</html>\n";
 	}
