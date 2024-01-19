@@ -242,6 +242,16 @@ public class CifDataParser implements GenericCifDataParser {
    */
   @Override
   public Map<String, Object> getAllCifData() {
+    return getAllCifDataType();
+  }
+  public Map<String, Object> getAllCifDataType(String... types) {
+    if (types != null) {
+      if (types.length == 0)
+        types = null;
+      else
+        for (int i = 0; i < types.length; i++)
+          types[i] = fixKey(types[i]);
+    }
     line = "";
     String key;
     Map<String, Object> data = null, data0 = null;
@@ -259,7 +269,7 @@ public class CifDataParser implements GenericCifDataParser {
           continue;
         }
         if (key.startsWith("loop_")) {
-          getAllCifLoopData(data);
+          getAllCifLoopData(data, types);
           continue;
         }
         if (key.startsWith("save_")) {
@@ -286,7 +296,9 @@ public class CifDataParser implements GenericCifDataParser {
           if (value == null) {
             System.out.println("CIF ERROR ? end of file; data missing: " + key);
           } else {
-            data.put(fixKey(key), value);
+            key = fixKey(key);
+            if (types == null || checkKey(types, key))
+              data.put(key, value);
           }
         }
       }
@@ -305,31 +317,47 @@ public class CifDataParser implements GenericCifDataParser {
   }
 
   /**
-   * create our own list of keywords and for each one create a list
-   * of data associated with that keyword. For example, a list of all 
-   * x coordinates, then a list of all y coordinates, etc.
+   * create our own list of keywords and for each one create a list of data
+   * associated with that keyword. For example, a list of all x coordinates,
+   * then a list of all y coordinates, etc.
    * 
    * @param data
    * @throws Exception
    */
   @SuppressWarnings("unchecked")
-  private void getAllCifLoopData(Map<String, Object> data) throws Exception {
+  private void getAllCifLoopData(Map<String, Object> data, String[] types)
+      throws Exception {
     String key;
     Lst<String> keyWords = new  Lst<String>();
     Object o;
-    while ((o = peekToken()) != null && o instanceof String &&  ((String) o).charAt(0) == '_') {
+    boolean skipping = false;
+    while ((o = peekToken()) != null && o instanceof String
+        && ((String) o).charAt(0) == '_') {
       key = fixKey((String) getTokenPeeked());
       keyWords.addLast(key);
+      if (types == null || checkKey(types, key))
       data.put(key, new  Lst<String>());
+      else
+        skipping = true;
     }
     columnCount = keyWords.size();
     if (columnCount == 0)
       return;
     isLoop = true;
+    if (skipping)
+      skipLoop(false);
+    else
     while (getData())
       for (int i = 0; i < columnCount; i++)
         ((Lst<Object>)data.get(keyWords.get(i))).addLast(columnData[i]);
     isLoop = false;
+  }
+
+  private boolean checkKey(String[] types, String key) {
+    for (int i = 0; i < types.length; i++)
+      if (key.startsWith(types[i]))
+        return true;
+    return false;
   }
 
   @Override
@@ -893,6 +921,7 @@ public class CifDataParser implements GenericCifDataParser {
       } catch (Exception e) {
         System.out.println("exception in CifDataParser ; " + e);
       }
+      return "[";
     case ']':
       ich++;
       return  "]";
