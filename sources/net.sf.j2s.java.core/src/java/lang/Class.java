@@ -2482,7 +2482,7 @@ public final class Class<T> {
 	    /**
 	     * @j2sNative
 	     * 
-	    if (data == null || data == "error" || data.indexOf && data.indexOf("[Exception") == 0)
+	    if (data == null || data == Boolean.FALSE || data == "error" || data.indexOf && data.indexOf("[Exception") == 0)
 	      return null;
 	            
 	    var bytes = (data.__BYTESIZE == 1 ? data : J2S._strToBytes(data));
