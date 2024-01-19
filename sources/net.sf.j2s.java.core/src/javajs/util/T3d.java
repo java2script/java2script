@@ -121,14 +121,6 @@ public abstract class T3d implements JSONEncodable, Serializable {
     z += t.z;
   }
   
-  public void addF(T3 t) {
-    x += t.x;
-    y += t.y;
-    z += t.z;
-  }
-
-
-
   /**
    * Computes the square of the distance between this point and point p1.
    * 
@@ -366,13 +358,13 @@ public abstract class T3d implements JSONEncodable, Serializable {
     return "[" + x + "," + y + "," + z + "]";
   }
 
-  public T3d setP(T3 t) {
+  public T3d setP(T3d t) {
     set(t.x, t.y, t.z);
     return this;
   }
 
-  public T3 putP(T3 t) {
-    t.set((float) x, (float) y, (float) z);
+  public T3d putP(T3d t) {
+    t.set(x, y, z);
     return t;
   }
   

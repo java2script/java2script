@@ -27,12 +27,11 @@
  */
 package javax.swing.border;
 
-import java.awt.Graphics;
-import java.awt.Insets;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Shape;
+import java.awt.Insets;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
@@ -57,9 +56,9 @@ public class LineBorder extends AbstractBorder
     private static Border blackLine;
     private static Border grayLine;
 
-    protected int thickness;
-    protected Color lineColor;
-    protected boolean roundedCorners;
+    protected final int thickness;
+    protected final Color lineColor;
+    protected final boolean roundedCorners;
 
     /** Convenience method for getting the Color.black LineBorder of thickness 1.
       */
@@ -111,6 +110,14 @@ public class LineBorder extends AbstractBorder
         this.roundedCorners = roundedCorners;
     }
 
+    private RoundRectangle2D.Float 秘outerR;
+    private RoundRectangle2D.Float 秘innerR;
+
+    private Rectangle2D.Float 秘outer;
+    private Rectangle2D.Float 秘inner;
+    
+    Path2D.Float 秘path = new Path2D.Float(Path2D.WIND_EVEN_ODD);
+
     /**
      * Paints the border for the specified component with the
      * specified position and size.
@@ -128,25 +135,33 @@ public class LineBorder extends AbstractBorder
 
             Color oldColor = g2d.getColor();
             g2d.setColor(this.lineColor);
-
-            Shape outer;
-            Shape inner;
-
             int offs = this.thickness;
             int size = offs + offs;
+            秘path.clear();
             if (this.roundedCorners) {
                 int arc = offs + size;
-                outer = new RoundRectangle2D.Float(x, y, width, height, arc, arc);
-                inner = new RoundRectangle2D.Float(x + offs, y + offs, width - size, height - size, arc, arc);
+                if (秘outerR == null) {
+                	秘outerR = new RoundRectangle2D.Float(x, y, width, height, arc, arc);
+                	秘innerR = new RoundRectangle2D.Float(x + offs, y + offs, width - size, height - size, arc, arc);
+                } else {
+                	秘outerR.setRoundRect(x, y, width, height, arc, arc);
+                	秘innerR.setRoundRect(x + offs, y + offs, width - size, height - size, arc, arc);
+                }
+                秘path.append(秘outer, false);
+                秘path.append(秘inner, false);
             }
             else {
-                outer = new Rectangle2D.Float(x-0.5f, y-0.5f, width+1, height+1);
-                inner = new Rectangle2D.Float(x + offs-0.5f, y + offs-0.5f, width - size+1, height - size+1);
+            	if (秘outer == null) {
+            		秘outer = new Rectangle2D.Float(x-0.5f, y-0.5f, width+1, height+1);
+            		秘inner = new Rectangle2D.Float(x + offs-0.5f, y + offs-0.5f, width - size+1, height - size+1);
+            	} else {
+                    秘outer.setRect(x-0.5f, y-0.5f, width+1, height+1);
+                    秘inner.setRect(x + offs-0.5f, y + offs-0.5f, width - size+1, height - size+1);
+            	}
+                秘path.append(秘outer, false);
+                秘path.append(秘inner, false);
             }
-            Path2D path = new Path2D.Float(Path2D.WIND_EVEN_ODD);
-            path.append(outer, false);
-            path.append(inner, false);
-            g2d.fill(path);
+            g2d.fill(秘path);
             g2d.setColor(oldColor);
         }
     }

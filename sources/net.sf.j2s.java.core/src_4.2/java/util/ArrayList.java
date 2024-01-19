@@ -15,6 +15,10 @@
  *  limitations under the License.
  */
 
+//BH 12/18/2015 7:30:28 AM using slice for toArray()
+//BH 7/4/2016 3:16:31 PM adding _removeItemAt and _removeObject
+
+
 package java.util;
 
 
@@ -22,7 +26,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.lang.reflect.Array;
 
 /**
  * ArrayList is an implementation of List, backed by an array. All optional
@@ -141,6 +144,10 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, Cloneable,
 	 */
 	@Override
     public boolean add(E object) {
+		return add1(object);
+	}
+	
+	public boolean add1(E object) {
 		if (lastIndex == array.length) {
             growAtEnd(1);
         }
@@ -494,6 +501,29 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, Cloneable,
 	 */
 	@Override
     public E remove(int location) {
+		/**
+		 * @j2s Native
+		 * 
+		 * if (!(typeof location == "number") {
+		 *   var o = location;
+		 *   return _removeObject(o);
+		 * }
+		 */
+		{
+		}
+		return _removeItemAt(location);
+	}
+	
+    public boolean _removeObject(E o) {
+    	int i = indexOf(o);
+    	if (i < 0)
+    		return false;
+    	_removeItemAt(i);
+    	return true;
+    }
+	
+    public E _removeItemAt(int location) {
+
 		E result;
 		int size = size();
 		if (0 <= location && location < size) {
@@ -600,13 +630,12 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, Cloneable,
 	 * Answers a new array containing all elements contained in this ArrayList.
 	 * 
 	 * @return an array of the elements from this ArrayList
+	 * 
+	 * @j2sIgnore
 	 */
 	@Override
     public Object[] toArray() {
-		int size = size();
-		Object[] result = new Object[size];
-		System.arraycopy(array, firstIndex, result, 0, size);
-		return result;
+		return null;
 	}
 
 	/**
@@ -625,17 +654,22 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, Cloneable,
 	 *                stored in the type of the specified array
 	 */
 	@Override
-    @SuppressWarnings("unchecked")
     public <T> T[] toArray(T[] contents) {
 		int size = size();
-		if (size > contents.length) {
-            Class<?> ct = contents.getClass().getComponentType();
-			contents = (T[]) Array.newInstance(ct, size);
-        }
-		System.arraycopy(array, firstIndex, contents, 0, size);
-		if (size < contents.length) {
-            contents[size] = null;
-        }
+		if(contents == null || size > contents.length) {
+			/**
+			 * @j2sNative
+			 * 
+			 * 			  return this.array.slice(firstIndex, firstIndex + size);
+			 */
+			{
+				return null;
+			}			
+		}
+		System.arraycopy(this.array,this.firstIndex,contents,0,size);
+		if(size<contents.length) {
+			contents[size] = null;
+		}
 		return contents;
 	}
 

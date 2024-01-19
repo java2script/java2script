@@ -75,7 +75,12 @@ public interface Map<K,V> {
 		 * @return object
 		 */
 		public V setValue(V object);
-	};
+	}
+
+	int NOT_SIMPLE = 0;
+	int INVALID_KEY = 1;
+	int NO_SUCH_KEY = 2;
+	int HAS_KEY = 3;;
 
 	/**
 	 * Removes all elements from this Map, leaving it empty.
@@ -241,4 +246,5 @@ public interface Map<K,V> {
 	 * @return a Collection of the values
 	 */
 	public Collection<V> values();
+ 
 }

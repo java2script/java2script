@@ -14,20 +14,6 @@ import java.util.function.Function;
  *
  */
 public interface DOMNode {
-	
-	
-	public default void x(){
-	  Consumer<String> x = new Consumer<String>(){
-
-		@Override
-		public void accept(String t) {
-			// TODO Auto-generated method stub
-			
-		}
-		  
-	  };
-	}
-	
 	/**
 	 * avoiding GCC inability to handle .finally and .catch
 	 * 

@@ -3987,6 +3987,22 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
                 (m10 == a.m10) && (m11 == a.m11) && (m12 == a.m12));
     }
 
+	public double[] 秘toArray() {
+		return new double[] {m00, m01, m02, m10, m11, m12, state, type };
+	}
+
+	public AffineTransform 秘fromArray(double[] a) {
+		m00 = a[0];
+		m01 = a[1];
+		m02 = a[2];
+		m10 = a[3];
+		m11 = a[4];
+		m12 = a[5];
+		state = (int) a[6];
+		type = (int) a[7];
+		return this;
+	}
+
     /* Serialization support.  A readObject method is neccessary because
      * the state field is part of the implementation of this particular
      * AffineTransform and not part of the public specification.  The

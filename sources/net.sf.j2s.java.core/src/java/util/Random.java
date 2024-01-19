@@ -20,8 +20,6 @@ package java.util;
 
 import java.io.Serializable;
 
-import swingjs.JSUtil;
-
 /**
  * This class provides methods that generates pseudo-random numbers of different
  * types, such as int, long, double and float using either

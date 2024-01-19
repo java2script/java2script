@@ -402,8 +402,8 @@ public class WeakHashMap<K, V> extends AbstractMap<K, V> implements Map<K, V> {
     @Override
     public Collection<V> values() {
         poll();
-        if (valuesCollection == null) {
-            valuesCollection = new AbstractCollection<V>() {
+        if (values == null) {
+            values = new AbstractCollection<V>() {
                 @Override
                 public int size() {
                     return WeakHashMap.this.size();
@@ -430,7 +430,7 @@ public class WeakHashMap<K, V> extends AbstractMap<K, V> implements Map<K, V> {
                 }
             };
         }
-        return valuesCollection;
+        return values;
     }
 
     /**

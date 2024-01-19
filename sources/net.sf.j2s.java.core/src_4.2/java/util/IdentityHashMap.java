@@ -651,8 +651,8 @@ public class IdentityHashMap<K, V> extends AbstractMap<K, V> implements
      */
     @Override
     public Collection<V> values() {
-        if (valuesCollection == null) {
-            valuesCollection = new AbstractCollection<V>() {
+        if (values == null) {
+            values = new AbstractCollection<V>() {
                 @Override
                 public boolean contains(Object object) {
                     return containsValue(object);
@@ -692,7 +692,7 @@ public class IdentityHashMap<K, V> extends AbstractMap<K, V> implements
                 }
             };
         }
-        return valuesCollection;
+        return values;
     }
 
     /**

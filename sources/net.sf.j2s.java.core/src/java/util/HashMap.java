@@ -1265,18 +1265,16 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 				return false;
 			Map.Entry<?, ?> e = (Map.Entry<?, ?>) o;
 			Object key = e.getKey();
-			
-			if(Map.秘isSimple(HashMap.this)) {
-				if (!HashMap.this.containsKey(key))
-					return false;
+			if (!HashMap.this.containsKey(key))
+				return false;
+
+			if (Map.秘isSimple(HashMap.this)) {
 				Object value = e.getValue();
 				Object v = HashMap.this.get(key);
-				return (value == v || value != null && value.equals(key));
-			} else {
-				Node<K, V> candidate = getNode(hash(key), key);
-				return candidate != null && candidate.equals(e);
+				return (value == v || value != null && value.equals(v));
 			}
-
+			Node<K, V> candidate = getNode(hash(key), key);
+			return candidate != null && candidate.equals(e);
 		}
 
 		@Override

@@ -1959,7 +1959,8 @@ public class File
      */
     @Override
 	public String toString() {
-        return getPath();
+        String s = getPath();
+        return (s.startsWith("./") ? s.substring(2) : s);
     }
  
     public Path toPath() {

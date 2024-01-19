@@ -1,5 +1,8 @@
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// BH 2023.12.14 fixes resizing into application (making it smaller)
+// BH 2023.12.13 fixes RIGHT-DRAG and SHIFT-LEFT-DRAG modifier
+// BH 2023.12.07 fixes mouseUp on body causing (ignorable) error
 // BH 2023.11.06 adds css touch-action none
 // BH 2023.11.01 adds pointerup, pointerdown, and pointermove to J2S.setMouse
 // BH 2023.11.01 allows null applet in J2S.setMouse (?? should it ever be null?)
@@ -1685,26 +1688,6 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 		return ignore;
 	};
 
-	var getKeyModifiers = function(ev) {
-		var modifiers = 0;
-		if (ev.shiftKey)
-			modifiers |= (1 << 0) | (1 << 6); // InputEvent.SHIFT_MASK +
-												// InputEvent.SHIFT_DOWN_MASK;
-		if (ev.ctrlKey)
-			modifiers |= (1 << 1) | (1 << 7); // InputEvent.CTRL_MASK +
-												// InputEvent.CTRL_DOWN_MASK;
-		if (ev.metaKey)
-			modifiers |= (1 << 2) | (1 << 8); // InputEvent.META_MASK +
-												// InputEvent.META_DOWN_MASK;
-		if (ev.altKey)
-			modifiers |= (1 << 3) | (1 << 9); // InputEvent.ALT_MASK +
-												// InputEvent.ALT_DOWN_MASK;
-		if (ev.altGraphKey)
-			modifiers |= (1 << 5) | (1 << 13); // InputEvent.ALT_GRAPH_MASK +
-												// InputEvent.ALT_GRAPH_DOWN_MASK;
-		return modifiers;
-	}
-
 	J2S.setKeyListener = function(who) {
 		J2S.$bind(who, 'keydown keypress keyup', function(ev) {
 			if (doIgnore(ev))
@@ -1868,7 +1851,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			return;
 		}
 		
-		if (J2S._dmouseOwner) {
+		if (J2S._dmouseOwner && J2S._dmouseOwner.isDragging) {
+		    // resizing mouse dragged over applet
 			if (J2S._dmouseDrag)
 				J2S._dmouseDrag(ev);
 			else
@@ -1898,9 +1882,18 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	}
 	
 	var mouseUp = function(who, ev) {
-		who.isDown = false;
-		if (who.applet == null)
+		if (J2S._dmouseOwner && J2S._dmouseOwner.isDragging) {
+		    // resizing mouse released over applet
+			if (J2S._dmouseDrag) {
+				J2S._dmouseUp(ev);
+			} else {
+				System.out.println("move setting dmouseowner null");
+				J2S._dmouseOwner = null;
+			}
+		}
+		if (!who || who.applet == null)
 			return;
+		who.isDown = false;
 		if (J2S._traceMouse)
 			J2S.traceMouse(who,"UP", ev);
 
@@ -2173,7 +2166,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		// and also recognize a drag (503 + buttons pressed
 		var modifiers = 0;
 		if (id == 503) {
-			modifiers = ev.buttons << 10;
+			modifiers = (ev.buttons == 0 ? 0 : ev.buttons == 2 ? (1 << 12) : (1 << 10));
 		} else {
 			switch (ev.button) {
 			default:
@@ -2195,6 +2188,26 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			}
 		}
 		return modifiers | getKeyModifiers(ev);
+	}
+
+	var getKeyModifiers = function(ev) {
+		var modifiers = 0;
+		if (ev.shiftKey)
+			modifiers |= (1 << 0) | (1 << 6); // InputEvent.SHIFT_MASK +
+												// InputEvent.SHIFT_DOWN_MASK;
+		if (ev.ctrlKey)
+			modifiers |= (1 << 1) | (1 << 7); // InputEvent.CTRL_MASK +
+												// InputEvent.CTRL_DOWN_MASK;
+		if (ev.metaKey)
+			modifiers |= (1 << 2) | (1 << 8); // InputEvent.META_MASK +
+												// InputEvent.META_DOWN_MASK;
+		if (ev.altKey)
+			modifiers |= (1 << 3) | (1 << 9); // InputEvent.ALT_MASK +
+												// InputEvent.ALT_DOWN_MASK;
+		if (ev.altGraphKey)
+			modifiers |= (1 << 5) | (1 << 13); // InputEvent.ALT_GRAPH_MASK +
+												// InputEvent.ALT_GRAPH_DOWN_MASK;
+		return modifiers;
 	}
 
 	var getXY = function(who, ev, id) {
@@ -3179,6 +3192,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		var down = function(ev) {
 			J2S._dmouseOwner = tag;
 			J2S._dmouseDrag = drag;
+			J2S._dmouseUp = up;
 
 			tag.isDragging = true; // used by J2S mouse event business
 			pageX = Math.round(ev.pageX);
@@ -3230,6 +3244,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			}
 		}, up = function(ev) {
 			J2S._dmouseDrag = null;
+			J2S._dmouseUp = null;
 			if (J2S._dmouseOwner == tag) {
 				tag.isDragging = false;
 				J2S._dmouseOwner = null

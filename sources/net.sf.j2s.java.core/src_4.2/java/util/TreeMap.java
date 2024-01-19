@@ -536,10 +536,10 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements SortedMap<K, V>,
 
             @Override
             public Collection<V> values() {
-                if(valuesCollection==null) {
-                    valuesCollection = new SubMapValuesCollection<K,V>(this);
+                if(values==null) {
+                    values = new SubMapValuesCollection<K,V>(this);
                 }
-                return valuesCollection;
+                return values;
             }
         }
 
@@ -1460,8 +1460,8 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements SortedMap<K, V>,
 	 */
 	@Override
     public Collection<V> values() {
-		if (valuesCollection == null) {
-			valuesCollection = new AbstractCollection<V>() {
+		if (values == null) {
+			values = new AbstractCollection<V>() {
 				@Override
                 public boolean contains(Object object) {
 					return containsValue(object);
@@ -1483,7 +1483,7 @@ public class TreeMap<K, V> extends AbstractMap<K, V> implements SortedMap<K, V>,
 				}
 			};
 		}
-		return valuesCollection;
+		return values;
 	}
 
 	private void writeObject(ObjectOutputStream stream) throws IOException {

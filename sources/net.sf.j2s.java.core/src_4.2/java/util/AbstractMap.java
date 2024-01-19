@@ -26,12 +26,14 @@ package java.util;
 public abstract class AbstractMap<K, V> implements Map<K, V> {
 
     // Lazily initialized key set.
-    Set<K> keySet;
+    Set<K> keySet = null;
 
-    Collection<V> valuesCollection;
+    Collection<V> values = null;
     
     /**
      * Constructs a new instance of this AbstractMap.
+     * 
+     * @j2sIgnore
      */
     protected AbstractMap() {
         super();
@@ -306,16 +308,17 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
     	putAllAM(map);
     }
 
-    /**
-     * BH SAEM
-     * 
-     * @param map
-     */
+	/**
+	 * BH SAEM
+	 * 
+	 * @param map
+	 */
 	protected void putAllAM(Map<? extends K, ? extends V> map) {
-        for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
-            put(entry.getKey(), entry.getValue());
-        }
-    }
+		if (!map.isEmpty())
+			for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
+				put(entry.getKey(), entry.getValue());
+			}
+	}
 
     /**
      * Removes a mapping with the specified key from this Map.
@@ -419,8 +422,8 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
      */
     @Override
 	public Collection<V> values() {
-        if (valuesCollection == null) {
-            valuesCollection = new AbstractCollection<V>() {
+        if (values == null) {
+            values = new AbstractCollection<V>() {
                 @Override
                 public int size() {
                     return AbstractMap.this.size();
@@ -454,7 +457,7 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
                 }
             };
         }
-        return valuesCollection;
+        return values;
     }
 
     /**
@@ -487,7 +490,7 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
             result = (AbstractMap<K, V>) super.clone();
         }
         result.keySet = null;
-        result.valuesCollection = null;
+        result.values = null;
         return result;
 	}
 }

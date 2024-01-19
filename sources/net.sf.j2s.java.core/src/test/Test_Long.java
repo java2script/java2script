@@ -757,7 +757,7 @@ public class Test_Long extends Test_ {
 		Integer IJ = null; 
 		assert(L != O);
 		assert(II == IJ);
-		assert(L == L);
+//		assert(L == L);
 		assert(P != L);
 		assert(P.equals(L));
 		assert(L != null);

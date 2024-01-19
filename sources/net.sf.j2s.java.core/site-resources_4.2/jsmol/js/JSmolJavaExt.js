@@ -1686,13 +1686,10 @@ return Clazz.instanceOf(obj,javautil.Date)&&this.getTime()==(obj).getTime();
 },"Object");
 Clazz.defineMethod(javautil.Date,"compareTo",
 function(anotherDate){
+if (anotherDate == null)return 1;
 var thisTime=this.getTime();
 var anotherTime=anotherDate.getTime();
 return(thisTime<anotherTime?-1:(thisTime==anotherTime?0:1));
-},"javautil.Date");
-Clazz.defineMethod(javautil.Date,"compareTo",
-function(o){
-return this.compareTo(o);
 },"Object");
 Clazz.overrideMethod(javautil.Date,"hashCode",
 function(){
@@ -1760,22 +1757,19 @@ function(){
 this.fillInStackTrace();
 });
 Clazz.makeConstructor(c$,
-function(message){
-this.fillInStackTrace();
-this.detailMessage=message;
-},"~S");
-Clazz.makeConstructor(c$,
 function(message,cause){
 this.fillInStackTrace();
+if (!cause && typeof message == "object") {
+	cause = message;
+	message = cause.toString();
+}
+cause && (this.cause=cause);
 this.detailMessage=message;
-this.cause=cause;
 },"~S,Throwable");
-Clazz.makeConstructor(c$,
-function(cause){
-this.fillInStackTrace();
-this.detailMessage=(cause==null?null:cause.toString());
-this.cause=cause;
-},"Throwable");
+
+
+
+
 Clazz.defineMethod(c$,"getMessage",
 function(){
 return (this.message || this.detailMessage || this.toString());
@@ -2005,16 +1999,8 @@ c$=Clazz.declareType(java.lang,"AbstractMethodError",IncompatibleClassChangeErro
 c$=Clazz.declareType(java.lang,"AssertionError",Error);
 Clazz.makeConstructor(c$,
 function(detailMessage){
-Clazz.superConstructor(this,AssertionError,[String.valueOf(detailMessage),(Clazz.instanceOf(detailMessage,Throwable)?detailMessage:null)]);
+Clazz.superConstructor(this,AssertionError,["" + detailMessage,(Clazz.instanceOf(detailMessage,Throwable)?detailMessage:null)]);
 },"~O");
-Clazz.makeConstructor(c$,
-function(detailMessage){
-this.construct("" + detailMessage);
-},"~B");
-Clazz.makeConstructor(c$,
-function(detailMessage){
-this.construct("" + detailMessage);
-},"~N");
 
 c$=Clazz.declareType(java.lang,"ClassCircularityError",LinkageError);
 

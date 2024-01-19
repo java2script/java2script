@@ -102,12 +102,9 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener, Mouse
 
 				class Options {
 					JPopupMenu jPopupMenu;
-					int delay;
-					boolean disabled;
-					JQueryObject focus, blur, select;
 				}
 				
-			JQueryObject active, activeMenu, element;
+			JQueryObject activeMenu;
 			Options options;
 			abstract void disposeMenu(JPopupMenu menu);
 			abstract void hideMenu(JPopupMenu menu);
@@ -218,10 +215,6 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener, Mouse
 
 	@Override
 	public void setVisible(boolean b) {
-		//System.out.println("jspopupmenu setvis " + b);
-		// TODO: We are not setting vis false when closing
-		//if (b && menu != null && menu.isVisible())
-			//b = false;
 		hideMenusAndToolTip();
 		if (b) {
 			if (isTainted || menu == null || outerNode == null || DOMNode.firstChild(outerNode) == null) {
@@ -574,8 +567,6 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener, Mouse
 //
 		@Override
 		public void keyTyped(KeyEvent e) {
-			// TODO Auto-generated method stub
-			
 		}
 
 		@Override
@@ -585,8 +576,6 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener, Mouse
 
 		@Override
 		public void keyReleased(KeyEvent e) {
-			// TODO Auto-generated method stub
-			
 		}
     }
 
@@ -1184,7 +1173,16 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener, Mouse
 //	private static int np=0;
 	
 	/**
-	 * from j2sMenu.js
+	 * 
+	 * From j2sMenu.js.
+	 * 
+	 * Processes only a few of the many actions generated there, specifically mouse
+	 * enter, move, and exit.
+	 * 
+	 * Handles all menu and submenu open/close/collapse-all actions.
+	 * 
+	 * Does NOT process mouse down/up or click events, which are all taken care of
+	 * by J2S mouse action methods.
 	 * 
 	 * @param data
 	 */
@@ -1202,12 +1200,8 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener, Mouse
 		String id = (base == null ? null : (String) DOMNode.getAttr(base, "id"));
 		JComponent c = (base == null ? null : (JComponent) DOMNode.getAttr(base, "data-component"));
 		JSComponentUI tui = (base == null ? null : (JSComponentUI) DOMNode.getAttr(base, "data-ui"));
-		JMenu menu = null;
-//		JSComponentUI myui = (/** @j2sNative m[0]["data-ui"] || */null);
-		
+		JMenu menu = null;		
 		int eventID = 0;
-		
-	//	System.out.println("pm " + trigger);
 		switch (trigger) {
 		case "_hidePopupMenu":
 		case "_hide":
@@ -1259,7 +1253,6 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener, Mouse
 			break;
 		case "unsetFocus":
 			hideTooltip();
-			//System.out.println("pm unfocus " + id);
 			eventID = MouseEvent.MOUSE_EXITED;
 			break;
 		case "_openSubmenu":
@@ -1275,6 +1268,8 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener, Mouse
 			System.err.println("JSPopupMenu not processing " + trigger);
 			break;
 		}
+		// delay any closures for 100 ms
+		showTime = System.currentTimeMillis();
 		if (e != null && eventID != 0 && c != null) {
 				JSMouse.retargetMouseEvent(e, base, c, c, eventID);
 		}
@@ -1310,26 +1305,18 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener, Mouse
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void mouseEntered(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@SuppressWarnings("unused")
@@ -1337,7 +1324,9 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener, Mouse
 	public void mouseExited(MouseEvent e) {
 		try {
 			if (/**
-				 * @j2sNative e.bdata.jqevent.target.className.indexOf("j2smenu") >= 0 ||
+				 * @j2sNative 
+				 * e.bdata.jqevent.target.className.indexOf("j2smenu") >= 0 
+				 * || e.bdata.jqevent.target.id.indexOf("MenuBar") >= 0 ||
 				 */
 			false)
 				return;

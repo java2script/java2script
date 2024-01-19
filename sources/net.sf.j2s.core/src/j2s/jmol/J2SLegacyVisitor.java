@@ -135,8 +135,33 @@ import j2s.jmol.J2SUtil.TypeHelper;
  */
 class J2SLegacyVisitor extends J2SASTVisitor {
 
-	private final static String emptyFunction = "Clazz.decorateAsClass(function(){Clazz.instantialize(this, arguments);}, ";
+	private final static String openFunc = "function(){\n";
+	private final static String closeFunc = "})";
+	private final static String endStatement = ";\n";
+	private final static String emptyNoParamFunc = openFunc + closeFunc + endStatement;
+	private final static String closeClazzFunc = ")" + endStatement;
+	private static final String openAnonFunc = ";(" + openFunc;
+	private static final String closeAnonFunc = closeFunc + "()" + endStatement;
+	private final static String closeFuncSemi = closeFunc + endStatement;
+	private final static String cla$$OpenFunc = "cla$$, " + openFunc;
+	private final static String openClazzDecorate = "Clazz.decorateAsClass(" + openFunc;
+	private final static String closeClazzDecorate = "Clazz.instantialize(this, arguments);}, ";
+	private final static String openClazzDeclareType = "Clazz.declareType(";
+	private final static String openClazzDeclareAnonymous = "Clazz.declareAnonymous(";
+	private static final String openClazzDeclareInterface = "Clazz.declareInterface(";
+	private final static String openClazzInnerTypeInstance = "Clazz.innerTypeInstance(";
+	private final static String openClazzPrepareFields = "Clazz.prepareFields (" + cla$$OpenFunc;
+	private final static String openClazzDefineMethod = "Clazz.defineMethod(";
+	private final static String openClazzOverrideMethod = "Clazz.overrideMethod(";
+	private static final String openClazzOverrideConstructor = "Clazz.overrideConstructor(";
+	private final static String openClazzMakeConstructor = "Clazz.makeConstructor(";
+	private final static String emptyConstructor = openClazzMakeConstructor + cla$$OpenFunc + closeFuncSemi;
+	private final static String clazzPrepareCallback = "Clazz.prepareCallback(this, arguments);\n";
+	private final static String checkOpenType = openClazzDecorate + closeClazzDecorate;
 
+	private static final int emptyConstructorLen = emptyConstructor.length() + 1;
+	private final static int checkOpenTypeLen = checkOpenType.length();
+	
 	protected J2SLegacyVisitor() {
 		super(true);
 	}
@@ -173,67 +198,62 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 			anonClassName = binding.getQualifiedName();
 		}
 		anonClassName = J2SUtil.assureQualifiedName(shortenQualifiedName(anonClassName));
-		String shortClassName = null;
-		int idx = anonClassName.lastIndexOf('.');
-		if (idx == -1) {
-			shortClassName = anonClassName;
-		} else {
-			shortClassName = anonClassName.substring(idx + 1);
-		}
-		String className = typeHelper.getClassName();
 		String fullClassName = anonClassName;
+		int idx = anonClassName.lastIndexOf('.');
+		String shortClassName = (idx < 0 ? anonClassName : anonClassName.substring(idx + 1));
+
+		String className = typeHelper.getClassName();
+		String oldClassName = className;
+		typeHelper.setClassName(shortClassName);
+		
 		buffer.append("(Clazz.isClassDefined(\"");
 		buffer.append(fullClassName);
 		buffer.append("\") ? 0 : ");
 
-		StringBuffer tmpBuffer = buffer;
+		StringBuffer fullBuffer = buffer;
 		buffer = methodBuffer;
 		methodBuffer = new StringBuffer();
 
 		buffer.append("cla$$.$");
 		buffer.append(shortClassName);
-		buffer.append("$=function(){\n");
-
-		buffer.append("/*if5*/;(function(){\n");
-		buffer.append("var cla$$ =");
-		buffer.append("Clazz.decorateAsClass(");
-		String oldClassName = className;
-		typeHelper.setClassName(shortClassName);
-		buffer.append("function(){\n");
-		if (!(node.getParent() instanceof EnumConstantDeclaration)) {
-			buffer.append("Clazz.prepareCallback(this, arguments);\n");
+		buffer.append("$=" + openFunc);
+		buffer.append("/*if5*/" + openAnonFunc);
+		buffer.append("var cla$$ = ");
+		
+		// start of possible substitution with decorateType or decorateAnonymous
+		int pt0 = buffer.length();
+		buffer.append(openClazzDecorate);
+		boolean isEnum = (node.getParent() instanceof EnumConstantDeclaration);
+		if (!isEnum) {
+			buffer.append(clazzPrepareCallback);
 		}
+		
 		StringBuffer oldLaterBuffer = laterBuffer;
 		laterBuffer = new StringBuffer();
 		List<?> bodyDeclarations = node.bodyDeclarations();
 
+		// start of fields 
+		
+		int pt1 = buffer.length();
+		
 		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			ASTNode element = (ASTNode) iter.next();
 			if (element instanceof MethodDeclaration) {
-				continue;
-			} else if (element instanceof FieldDeclaration) {
-				FieldDeclaration fieldDeclaration = (FieldDeclaration) element;
-				if (fieldNeedsPreparation(fieldDeclaration, false)) {
-					processFieldDeclaration(fieldDeclaration, true);
-					continue;
-				}
+				// just looking at fields here
+			} else if (element instanceof FieldDeclaration && fieldNeedsPreparation((FieldDeclaration) element, false)) {
+				processFieldDeclaration((FieldDeclaration) element, true);
+			} else {
+				element.accept(this);
 			}
-			element.accept(this);
 		}
-		buffer.append("Clazz.instantialize(this, arguments);\n");
-		buffer.append("}, ");
-		String emptyFun = emptyFunction;
-		idx = buffer.lastIndexOf(emptyFun);
-		if (idx != -1 && idx == buffer.length() - emptyFun.length()) {
-			buffer.replace(idx, buffer.length(), "Clazz.declareType(");
+		
+		// check for simple anonymous, allowing replacement with 
+		// Clazz.declareType and Clazz.declareAnonymous		
+		boolean isSimple = (buffer.length() == pt1);				
+		if (isSimple) {
+			buffer.replace(pt0, buffer.length(), isEnum ? openClazzDeclareType : openClazzDeclareAnonymous);
 		} else {
-			emptyFun = "Clazz.decorateAsClass(function(){\n" + "Clazz.prepareCallback (this, arguments);\n"
-					+ "Clazz.instantialize(this, arguments);\n" + "}, ";
-			idx = buffer.lastIndexOf(emptyFun);
-
-			if (idx != -1 && idx == buffer.length() - emptyFun.length()) {
-				buffer.replace(idx, buffer.length(), "Clazz.declareAnonymous(");
-			}
+			buffer.append(closeClazzDecorate);
 		}
 
 		int lastIndexOf = fullClassName.lastIndexOf('.');
@@ -262,11 +282,9 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 				}
 			}
 		}
-		buffer.append(");\n");
+		buffer.append(closeClazzFunc);
 
-		if (checkAnonOrEnumNeedsFieldPreparations(bodyDeclarations)) {
-			writePrepareFields(bodyDeclarations, false);
-		}
+		writePrepareFields(bodyDeclarations, false);
 
 		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			ASTNode element = (ASTNode) iter.next();
@@ -299,7 +317,7 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 			}
 		}
 
-		buffer.append("/*eoif5*/})();\n");
+		buffer.append("/*eoif5*/" + closeAnonFunc);
 		typeHelper.setClassName(oldClassName);
 		buffer.append(laterBuffer);
 		laterBuffer = oldLaterBuffer;
@@ -307,7 +325,7 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 		String methods = methodBuffer.toString();
 		methodBuffer = buffer;
 		methodBuffer.append(methods);
-		buffer = tmpBuffer;
+		buffer = fullBuffer;
 		buffer.append(thisPackageName);
 		buffer.append(".");
 		idx = className.indexOf('$');
@@ -437,7 +455,7 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 			if (binding != null) {
 				if (!binding.isTopLevel()) {
 					if ((binding.getModifiers() & Modifier.STATIC) == 0) {
-						buffer.append("Clazz.innerTypeInstance(");
+						buffer.append(openClazzInnerTypeInstance);
 						if (binding.isAnonymous() || binding.isLocal()) {
 							buffer.append(J2SUtil.assureQualifiedName(shortenQualifiedName(binding.getBinaryName())));
 						} else {
@@ -511,7 +529,7 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 			methodDeclareStack.pop();
 			buffer.append(", ");
 
-			buffer.append("Clazz.innerTypeInstance(");
+			buffer.append(openClazzInnerTypeInstance);
 			buffer.append(anonClassName);
 			buffer.append(", this, ");
 			String scope = null;
@@ -558,7 +576,7 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 			methodDeclaration = constructorBinding.getMethodDeclaration();
 		}
 		processMethodParameterList(node.arguments(), methodDeclaration, true, null, null);
-		buffer.append(");\n");
+		buffer.append(closeClazzFunc);
 		return false;
 	}
 
@@ -571,18 +589,60 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 		return super.visit(node);
 	}
 
+	public boolean visit(EnumDeclaration node) {
+		ITypeBinding binding = node.resolveBinding();
+		J2SUtil.TypeHelper typeVisitor = typeHelper;
+		if (binding != null && binding.isTopLevel()) {
+			typeVisitor.setClassName(binding.getName());
+		}
+		if ((node != rootTypeNode) && node.getParent() != null && node.getParent() instanceof AbstractTypeDeclaration) {
+			processInnerEnum(node);
+			return false;
+		}
+		
+		buffer.append("var cla$$ = ").append(openClazzDecorate);
+
+		List<?> bodyDeclarations = node.bodyDeclarations();
+
+		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
+			ASTNode element = (ASTNode) iter.next();
+			if (element instanceof MethodDeclaration) {
+				// MethodDeclaration method = (MethodDeclaration) element;
+				// if ((method.getModifiers() & Modifier.STATIC) != 0) {
+				continue;
+				// }
+			} else if (element instanceof Initializer) {
+				continue;
+			} else if (element instanceof FieldDeclaration
+			/* && isFieldNeedPreparation((FieldDeclaration) element) */) {
+				// if (node.isInterface()) {
+				/*
+				 * As members of interface should be treated as final and for javascript
+				 * interface won't get instantiated, so the member will be treated specially.
+				 */
+				// continue;
+				// }
+				FieldDeclaration fieldDeclaration = (FieldDeclaration) element;
+				if (fieldNeedsPreparation(fieldDeclaration, false)) {
+					processFieldDeclaration(fieldDeclaration, true);
+					continue;
+				}
+			}
+			element.accept(this);
+		}
+		return false;
+	}
+
 	public void endVisit(EnumDeclaration node) {
 		if (node != rootTypeNode && node.getParent() != null && node.getParent() instanceof AbstractTypeDeclaration) {
 			return;
 		}
-		buffer.append("Clazz.instantialize(this, arguments);\n");
-		buffer.append("}, ");
+		buffer.append(closeClazzDecorate);
 
-		String emptyFun = emptyFunction;
-		int idx = buffer.lastIndexOf(emptyFun);
+		int idx = buffer.lastIndexOf(checkOpenType);
 
-		if (idx != -1 && idx == buffer.length() - emptyFun.length()) {
-			buffer.replace(idx, buffer.length(), "Clazz.declareType(");
+		if (idx != -1 && idx == buffer.length() - checkOpenTypeLen) {
+			buffer.replace(idx, buffer.length(), openClazzDeclareType);
 		}
 
 		ASTNode parent = node.getParent();
@@ -667,9 +727,7 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 
 		List<?> bodyDeclarations = node.bodyDeclarations();
 
-		if (checkAnonOrEnumNeedsFieldPreparations(bodyDeclarations)) {
-			writePrepareFields(bodyDeclarations, false);
-		}
+		writePrepareFields(bodyDeclarations, false);
 
 		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			ASTNode element = (ASTNode) iter.next();
@@ -745,51 +803,6 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 		}
 	}
 
-	public boolean visit(EnumDeclaration node) {
-		ITypeBinding binding = node.resolveBinding();
-		J2SUtil.TypeHelper typeVisitor = typeHelper;
-		if (binding != null && binding.isTopLevel()) {
-			typeVisitor.setClassName(binding.getName());
-		}
-		if ((node != rootTypeNode) && node.getParent() != null && node.getParent() instanceof AbstractTypeDeclaration) {
-			processInnerEnum(node);
-			return false;
-		}
-		
-		buffer.append("var cla$$ = Clazz.decorateAsClass(");
-		buffer.append("function(){\n");
-
-		List<?> bodyDeclarations = node.bodyDeclarations();
-
-		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
-			ASTNode element = (ASTNode) iter.next();
-			if (element instanceof MethodDeclaration) {
-				// MethodDeclaration method = (MethodDeclaration) element;
-				// if ((method.getModifiers() & Modifier.STATIC) != 0) {
-				continue;
-				// }
-			} else if (element instanceof Initializer) {
-				continue;
-			} else if (element instanceof FieldDeclaration
-			/* && isFieldNeedPreparation((FieldDeclaration) element) */) {
-				// if (node.isInterface()) {
-				/*
-				 * As members of interface should be treated as final and for javascript
-				 * interface won't get instantiated, so the member will be treated specially.
-				 */
-				// continue;
-				// }
-				FieldDeclaration fieldDeclaration = (FieldDeclaration) element;
-				if (fieldNeedsPreparation(fieldDeclaration, false)) {
-					processFieldDeclaration(fieldDeclaration, true);
-					continue;
-				}
-			}
-			element.accept(this);
-		}
-		return false;
-	}
-
 	private void processInnerEnum(EnumDeclaration node) {		
 		/* inner static Enum class */
 		J2SLegacyVisitor visitor = null;
@@ -806,17 +819,17 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 		String str = visitor.buffer.toString();
 		if ((node.getModifiers() & Modifier.STATIC) != 0) {
 			if (str.startsWith("var cla$$")) {
-				laterBuffer.append("/*if1*/;(function(){\n");
+				laterBuffer.append("/*if1*/" + openAnonFunc);
 				laterBuffer.append(str);
-				laterBuffer.append("/*eoif1*/})();\n");
+				laterBuffer.append("/*eoif1*/" + closeAnonFunc);
 			} else {
 				laterBuffer.append(str);
 			}
 		} else {
 			// never found?
-			methodBuffer.append("/*if2*/;(function(){\n");
+			methodBuffer.append("/*if2*/" + openAnonFunc);
 			methodBuffer.append(str);
-			methodBuffer.append("/*eoif2*/})();\n");
+			methodBuffer.append("/*eoif2*/" + closeAnonFunc);
 		}
 	}
 
@@ -1041,42 +1054,6 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 		return false;
 	}
 
-	public void endVisit(MethodDeclaration node) {
-		if (ignore(node)) {
-			return;
-		}
-
-		IMethodBinding mBinding = node.resolveBinding();
-		if (mBinding != null) {
-			methodDeclareStack.pop();
-		}
-		List<J2SUtil.FinalVariable> finalVars = variableHelper.finalVars;
-		List<?> visitedVars = variableHelper.visitedVars;
-		List<J2SUtil.FinalVariable> normalVars = variableHelper.normalVars;
-		List<?> parameters = node.parameters();
-		String methodSig = null;
-		IMethodBinding resolveBinding = node.resolveBinding();
-		if (resolveBinding != null) {
-			methodSig = resolveBinding.getKey();
-		}
-		for (int i = parameters.size() - 1; i >= 0; i--) {
-			SingleVariableDeclaration varDecl = (SingleVariableDeclaration) parameters.get(i);
-			
-			SimpleName name = varDecl.getName();
-			IBinding binding = name.resolveBinding();
-			if (binding != null) {
-				String identifier = name.getIdentifier();
-				J2SUtil.FinalVariable f = new J2SUtil.FinalVariable(blockLevel + 1, identifier, methodSig);
-				f.toVariableName = identifier;
-				normalVars.remove(f);
-				if ((binding.getModifiers() & Modifier.FINAL) != 0) {
-					finalVars.remove(f);
-				}
-				visitedVars.remove(f);
-			}
-		}
-	}
-
 	public boolean visit(MethodDeclaration node) {
 		if (ignore(node)) {
 			return false;
@@ -1175,26 +1152,24 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 
 		if (node.isConstructor()) {
 			if (J2SUtil.getJ2STag(node, "@j2sOverride") != null) {
-				buffer.append("Clazz.overrideConstructor(");
+				buffer.append(openClazzOverrideConstructor);
 			} else {
-				buffer.append("Clazz.makeConstructor(");
+				buffer.append(openClazzMakeConstructor);
 			}
 		} else {
 			if ((node.getModifiers() & Modifier.STATIC) != 0) {
 				/* replace full class name with short variable name */
 				buffer.append("cla$$");
-				// buffer.append(fullClassName);
 				buffer.append(".");
-				// buffer.append(methods[i].getName());
 				node.getName().accept(this);
 				buffer.append(" = ");
 			}
 			if (J2SUtil.getJ2STag(node, "@j2sOverride") != null) {
-				buffer.append("Clazz.overrideMethod(");
+				buffer.append(openClazzOverrideMethod);
 			} else if (J2SUtil.MethodReferenceASTVisitor.canAutoOverride(node)) {
-				buffer.append("Clazz.overrideMethod(");
+				buffer.append(openClazzOverrideMethod);
 			} else {
-				buffer.append("Clazz.defineMethod(");
+				buffer.append(openClazzDefineMethod);
 			}
 		}
 		/* replace full class name with short variable name */
@@ -1212,10 +1187,10 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 			buffer.append("\", ");
 		}
 		buffer.append("\n");
-		buffer.append("function (");
+		buffer.append("function(");
 		List<?> parameters = node.parameters();
 		boxList(parameters, ", ");
-		buffer.append(") ");
+		buffer.append(")");
 		if (node.isConstructor()) {
 			boolean isSuperCalled = false;
 			List<?> statements = node.getBody().statements();
@@ -1342,6 +1317,41 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 		}
 		buffer.append(");\n");
 		return false;
+	}
+
+	public void endVisit(MethodDeclaration node) {
+		if (ignore(node)) {
+			return;
+		}
+
+		IMethodBinding mBinding = node.resolveBinding();
+		if (mBinding != null) {
+			methodDeclareStack.pop();
+		}
+		List<J2SUtil.FinalVariable> finalVars = variableHelper.finalVars;
+		List<?> visitedVars = variableHelper.visitedVars;
+		List<J2SUtil.FinalVariable> normalVars = variableHelper.normalVars;
+		List<?> parameters = node.parameters();
+		String methodSig = null;
+		IMethodBinding resolveBinding = node.resolveBinding();
+		if (resolveBinding != null) {
+			methodSig = resolveBinding.getKey();
+		}
+		for (int i = parameters.size() - 1; i >= 0; i--) {
+			SingleVariableDeclaration varDecl = (SingleVariableDeclaration) parameters.get(i);			
+			SimpleName name = varDecl.getName();
+			IBinding binding = name.resolveBinding();
+			if (binding != null) {
+				String identifier = name.getIdentifier();
+				J2SUtil.FinalVariable f = new J2SUtil.FinalVariable(blockLevel + 1, identifier, methodSig);
+				f.toVariableName = identifier;
+				normalVars.remove(f);
+				if (isFinalOrEffectivelyFinal((IVariableBinding) binding)) {
+					finalVars.remove(f);
+				}
+				visitedVars.remove(f);
+			}
+		}
 	}
 
 	public boolean visit(MethodInvocation node) {
@@ -1583,7 +1593,7 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 
 	public boolean visit(TypeDeclaration node) {
 		ITypeBinding binding = node.resolveBinding();
-		if (binding.isAnnotation())
+		if (binding != null && binding.isAnnotation())
 			return false;
 		boolean isTopLevel = (binding != null && binding.isTopLevel());
 		J2SUtil.TypeHelper typeVisitor = typeHelper;
@@ -1600,11 +1610,11 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 			return false;
 		}
 
-		buffer.append("var cla$$ = Clazz.decorateAsClass(function(){\n");
+		buffer.append("var cla$$ = ").append(openClazzDecorate);
 		if (node == rootTypeNode && (node.getModifiers() & Modifier.STATIC) == 0
 				&& ((node.getParent() instanceof TypeDeclaration && !((TypeDeclaration) node.getParent()).isInterface())
 						|| node.getParent() instanceof TypeDeclarationStatement)) {
-			buffer.append("Clazz.prepareCallback(this, arguments);\n");
+			buffer.append(clazzPrepareCallback);
 		}
 		List<?> bodyDeclarations = node.bodyDeclarations();
 		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
@@ -1651,17 +1661,16 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 			return;
 		}
 		ITypeBinding typeBinding = node.resolveBinding();
-		if (typeBinding.isAnnotation())
+		if (typeBinding != null && typeBinding.isAnnotation())
 			return;
-		boolean isInterface = node.isInterface(); 
+		boolean isInterface = node.isInterface();
 		if (!isInterface) {
-			buffer.append("Clazz.instantialize(this, arguments);\n}, ");
+			buffer.append(closeClazzDecorate);
 		}
-		String emptyFun = emptyFunction;
-		int idx = buffer.lastIndexOf(emptyFun);
+		int idx = buffer.lastIndexOf(checkOpenType);
 
-		if (idx != -1 && idx == buffer.length() - emptyFun.length()) {
-			buffer.replace(idx, buffer.length(), "Clazz.declareType(");
+		if (idx != -1 && idx == buffer.length() - checkOpenTypeLen) {
+			buffer.replace(idx, buffer.length(), openClazzDeclareType);
 		}
 
 		String fullClassName = getFullDotClassName(typeHelper.getClassName());
@@ -1693,12 +1702,11 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 			if (need_c$) {
 				buffer.append("var cla$$ = ");
 			}
-			buffer.append("Clazz.declareInterface(");	
+			buffer.append(openClazzDeclareInterface);
 		}
-		
-		
+
 		// add package and name
-		
+
 		int lastIndexOf = fullClassName.lastIndexOf('.');
 		if (lastIndexOf != -1) {
 			buffer.append(J2SUtil.assureQualifiedName(shortenPackageName(fullClassName)));
@@ -1707,8 +1715,8 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 			buffer.append("null, \"" + fullClassName + "\"");
 		}
 
-		// add superclass 
-		
+		// add superclass
+
 		String superName = null;
 		if (typeBinding != null) {
 			ITypeBinding superclass = typeBinding.getSuperclass();
@@ -1728,9 +1736,9 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 			buffer.append(", null");
 		}
 		buffer.append(", ");
-		
+
 		// add superInterfaces
-		
+
 		List<?> superInterfaces = node.superInterfaceTypes();
 		int size = superInterfaces.size();
 		if (size == 0) {
@@ -1764,7 +1772,7 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 			ITypeBinding binding = superclass;
 			if (!binding.isTopLevel()) {
 				if ((binding.getModifiers() & Modifier.STATIC) == 0) {
-					buffer.append(", Clazz.innerTypeInstance(");
+					buffer.append(", ").append(openClazzInnerTypeInstance);
 					buffer.append(J2SUtil.assureQualifiedName(shortenQualifiedName(binding.getQualifiedName())));
 					buffer.append(", this, null, Clazz.inheritArgs");
 					buffer.append(")");
@@ -1783,28 +1791,32 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 		StringBuffer laterBufferBackup = laterBuffer;
 		// buffer.append(laterBuffer);
 		laterBuffer = new StringBuffer();
-		// Enum is considered as static member!
+		StringBuffer tmpBuffer = buffer;
 
 		// pass 1: write Clazz.prepareFields(...) if necessary
 		List<?> bodyDeclarations = node.bodyDeclarations();
-		StringBuffer tmpBuffer = buffer;
-		if (checkTypeNeedsFieldPreparations(bodyDeclarations, isInterface)) {
-			writePrepareFields(bodyDeclarations, isInterface);
-		}
+		boolean havePrepareFields = writePrepareFields(bodyDeclarations, isInterface);
 
-		// pass 2: Enum declarations
-		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
-			ASTNode element = (ASTNode) iter.next();
-			if (element instanceof EnumDeclaration) {
-				element.accept(this);
+		// pass 3: methods - first, constructors, then others.
+		MethodDeclaration[] methods = node.getMethods();
+		for (int i = 0; i < methods.length; i++) {
+			if (methods[i].isConstructor()) {
+				int ipt0 = buffer.length();
+				methods[i].accept(this);
+				if (!havePrepareFields) {
+					// skipping unnecessary constructor?
+					if (buffer.length() - ipt0 == emptyConstructorLen) {
+						buffer.setLength(ipt0);
+						bufferLog("1824 unnec constructor");
+					}
+				}
 			}
 		}
 
-		// pass 3: methods
-		MethodDeclaration[] methods = node.getMethods();
 		for (int i = 0; i < methods.length; i++) {
 			// All the methods are defined outside the main function body! -- March 17, 2006
-			methods[i].accept(this);
+			if (!methods[i].isConstructor())
+				methods[i].accept(this);
 		}
 
 		// pass 4: inner classes for interfaces only
@@ -1814,15 +1826,15 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 				element.accept(this);
 			}
 		}
-		
+
 		// Interface's inner interfaces or classes
 		buffer.append(laterBuffer);
 		tmpBuffer = buffer;
 		StringBuffer tmpLaterBuffer = laterBuffer;
 		buffer = new StringBuffer();
 		laterBuffer = new StringBuffer();
-		
-		// pass 5: static {  ....  } blocks and static fields
+
+		// pass 5: static { .... } blocks and static fields
 		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			ASTNode element = (ASTNode) iter.next();
 			if (element instanceof TypeDeclaration) {
@@ -1857,6 +1869,16 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 				}
 			}
 		}
+		
+		// pass 5: Enum declarations
+		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
+			ASTNode element = (ASTNode) iter.next();
+			if (element instanceof EnumDeclaration) {
+				element.accept(this);
+			}
+		}
+
+
 		buffer = tmpBuffer;
 		laterBuffer = tmpLaterBuffer;
 
@@ -1865,9 +1887,9 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 			methodBuffer = new StringBuffer();
 		}
 		buffer.append(laterBufferBackup);
-				
+
 		// pass 6: add static initializers and static fields
-		
+
 		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			ASTNode element = (ASTNode) iter.next();
 			if (element instanceof TypeDeclaration) {
@@ -1902,8 +1924,7 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 						Type type = field.getType();
 						boolean isPrimitive = type.isPrimitiveType();
 						if (!isArray && (field.getModifiers() & Modifier.FINAL) != 0
-								&& !fieldNeedsPreparation(field, false)
-								&& (isPrimitive || isString(type))) {
+								&& !fieldNeedsPreparation(field, false) && (isPrimitive || isString(type))) {
 							// BH 2023.11.09 final static primitives literals that are not
 							// being boxed can be ignored since any expression is presented here as a
 							// literal
@@ -1952,9 +1973,9 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 						&& ((TypeDeclaration) node.getParent()).isInterface())) {
 			String str = visitor.buffer.toString();
 			if (str.startsWith("var cla$$")) {
-				laterBuffer.append("/*if3*/;(function(){\n");
+				laterBuffer.append("/*if3*/" + openAnonFunc);
 				laterBuffer.append(str);
-				laterBuffer.append("/*eoif3*/})();\n");
+				laterBuffer.append("/*eoif3*/" + closeAnonFunc);
 			} else {
 				laterBuffer.append(str);
 			}
@@ -1968,9 +1989,9 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 			targetClassName = targetClassName.replace('.', '$');
 			methodBuffer.append(targetClassName);
 			methodBuffer.append("$ = function(){\n");
-			methodBuffer.append("/*if4*/;(function(){\n");
+			methodBuffer.append("/*if4*/" + openAnonFunc);
 			methodBuffer.append(visitor.buffer);
-			methodBuffer.append("/*eoif4*/})();\n");
+			methodBuffer.append("/*eoif4*/" + closeAnonFunc);
 			methodBuffer.append("};\n");
 
 			String pkgName = visitor.getPackageName();
@@ -2434,6 +2455,11 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 			boxOrUnboxExpression(right);
 		}
 		return false;
+	}
+
+	public boolean visit(Block node) {
+		buffer.append("{\n");
+		return super.visit(node);
 	}
 
 	public void endVisit(Block node) {
@@ -3440,7 +3466,7 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 			List<J2SUtil.FinalVariable> normalVars = variableHelper.normalVars;
 			f.toVariableName = identifier;
 			normalVars.add(f);
-			if ((binding.getModifiers() & Modifier.FINAL) != 0) {
+			if (isFinalOrEffectivelyFinal((IVariableBinding) binding)) {
 				finalVars.add(f);
 			}
 		}
@@ -3495,7 +3521,8 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 			}
 
 			String fieldVar = null;
-			if (variableHelper.isFinalSensible && (varBinding.getModifiers() & Modifier.FINAL) != 0
+			if (variableHelper.isFinalSensible 
+					&& isFinalOrEffectivelyFinal(varBinding)
 					&& varBinding.getDeclaringMethod() != null) {
 				String key = varBinding.getDeclaringMethod().getKey();
 				if (methodDeclareStack.size() == 0 || !key.equals(methodDeclareStack.peek())) {
@@ -3538,6 +3565,10 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 			}
 			buffer.append(fieldName);
 		}
+	}
+
+	private static boolean isFinalOrEffectivelyFinal(IVariableBinding binding) {
+		return Modifier.isFinal(binding.getModifiers()) || binding.isEffectivelyFinal();
 	}
 
 	private void processSimpleNameInMethodBinding(SimpleName node, char ch, IMethodBinding mthBinding) {
@@ -3729,20 +3760,6 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 
 		return false;
 	}
-
-	/*
-	 * Check to see whether there are @j2sNative and append sources to buffer
-	 */
-	private boolean writeJ2STags(MethodDeclaration node, boolean needScope) {
-		String prefix = "{\n";
-		String suffix = "\n}";
-		if (!needScope) {
-			prefix = "";
-			suffix = "";
-		}
-		return writeJ2SSources(node, "@j2sNative", prefix, suffix, false);
-	}
-
 
 	private String getFullClassName() {
 		return typeHelper.getFullClassName(thisPackageName);
@@ -3992,33 +4009,29 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 		}
 	}
 
-	private void writePrepareFields(List<?> bodyDeclarations, boolean isInterface) {
+	private boolean writePrepareFields(List<?> bodyDeclarations, boolean isInterface) {
 		// create the <init> method in Java
-		// not static, has initializer, not a constant number, character, boolean, or string
-		buffer.append("Clazz.prepareFields (cla$$, function(){\n");
+		// initialized field or instance initializer (not static), not ignored, not a constant number, character, boolean, or
+		// string n
+		int ipt = buffer.length();
 		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			ASTNode element = (ASTNode) iter.next();
 			if (element instanceof FieldDeclaration) {
 				FieldDeclaration field = (FieldDeclaration) element;
-				if (ignore(field)) {
-					continue;
-				}
-				if (isInterface || !fieldNeedsPreparation(field, true)) {
-					continue;
-				}
-				element.accept(this);
+				if (!isInterface && !ignore(field) && fieldNeedsPreparation(field, true))
+					element.accept(this);
 			} else if (element instanceof Initializer) {
 				Initializer init = (Initializer) element;
-				if (ignore(init)) {
-					continue;
-				}
-				if ((init.getModifiers() & Modifier.STATIC) == 0) {
+				if (!ignore(init) && (init.getModifiers() & Modifier.STATIC) == 0)
 					element.accept(this);
-				}
 			}
 		}
+		if (buffer.length() == ipt) {
+			return false;
+		}
+		buffer.insert(ipt, openClazzPrepareFields);
 		buffer.append("});\n");
-
+		return true;
 	}
 
 	private void writeStaticFieldWithInitializer(Expression initializer, Type type, VariableDeclarationFragment vdf,
@@ -4180,46 +4193,6 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 		if (right instanceof InfixExpression) {
 			if (checkInfixOperator((InfixExpression) right)) {
 				return true;
-			}
-		}
-		return false;
-	}
-
-	private static boolean checkAnonOrEnumNeedsFieldPreparations(List<?> bodyDeclarations) {
-		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
-			ASTNode element = (ASTNode) iter.next();
-			if (element instanceof FieldDeclaration) {
-				FieldDeclaration field = (FieldDeclaration) element;
-				if (fieldNeedsPreparation(field, false))
-					return true;
-			} else if (element instanceof Initializer) {
-				Initializer init = (Initializer) element;
-				if ((init.getModifiers() & Modifier.STATIC) == 0) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	private static boolean checkTypeNeedsFieldPreparations(List<?> bodyDeclarations, boolean isInterface) {
-		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
-			ASTNode element = (ASTNode) iter.next();
-			if (element instanceof FieldDeclaration) {
-				FieldDeclaration field = (FieldDeclaration) element;
-				if (ignore(field)
-						|| isInterface || !fieldNeedsPreparation(field, false)) {
-					continue;
-				}
-				return true;
-			} else if (element instanceof Initializer) {
-				Initializer init = (Initializer) element;
-				if (ignore(init)) {
-					continue;
-				}
-				if ((init.getModifiers() & Modifier.STATIC) == 0) {
-					return true;
-				}
 			}
 		}
 		return false;

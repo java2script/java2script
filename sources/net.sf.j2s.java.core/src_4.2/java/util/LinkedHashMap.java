@@ -42,9 +42,7 @@ public class LinkedHashMap<K, V> extends HashMap<K, V> {
      * Constructs a new empty instance of LinkedHashMap.
      */
     public LinkedHashMap() {
-        super();
-        accessOrder = false;
-        head = null;
+        this(16, 0.75f, false);
     }
 
     /**
@@ -54,9 +52,7 @@ public class LinkedHashMap<K, V> extends HashMap<K, V> {
      *            Size of LinkedHashMap required
      */
     public LinkedHashMap(int s) {
-        super(s);
-        accessOrder = false;
-        head = null;
+        this(s, 0.75f, false);
     }
 
     /**
@@ -68,10 +64,7 @@ public class LinkedHashMap<K, V> extends HashMap<K, V> {
      *            Load factor
      */
     public LinkedHashMap(int s, float lf) {
-        super(s, lf);
-        accessOrder = false;
-        head = null;
-        tail = null;
+    	this(s, lf, false);
     }
 
     /**
@@ -105,7 +98,7 @@ public class LinkedHashMap<K, V> extends HashMap<K, V> {
         putAll(m);
     }
 
-    static final class LinkedHashIterator<E, KT, VT> extends HashMapIterator<E, KT, VT> {
+    static class LinkedHashIterator<E, KT, VT> extends HashMapIterator<E, KT, VT> {
         LinkedHashIterator(MapEntry.Type<E, KT, VT> value, LinkedHashMap<KT, VT> hm) {
             super(value, hm);
             entry = hm.head;
@@ -135,7 +128,6 @@ public class LinkedHashMap<K, V> extends HashMap<K, V> {
             if (!canRemove) {
                 throw new IllegalStateException();
             }
-
             canRemove = false;
             associatedMap.modCount++;
 
@@ -173,6 +165,7 @@ public class LinkedHashMap<K, V> extends HashMap<K, V> {
                 }
             }
             associatedMap.elementCount--;
+            
             expectedModCount++;
         }
     }
@@ -237,7 +230,7 @@ public class LinkedHashMap<K, V> extends HashMap<K, V> {
      */
     @Override
     public V get(Object key) {
-        LinkedHashMapEntry<K, V> m = (LinkedHashMapEntry<K, V>) getEntry(key);
+        LinkedHashMapEntry<K, V> m = (LinkedHashMapEntry<K, V>) getJavaEntry(key);
         if (m == null) {
             return null;
         }
@@ -283,7 +276,7 @@ public class LinkedHashMap<K, V> extends HashMap<K, V> {
     @Override
     public V put(K key, V value) {
         int index = getModuloHash(key);
-        LinkedHashMapEntry<K, V> m = (LinkedHashMapEntry<K, V>) findEntry(key, index);
+        LinkedHashMapEntry<K, V> m = (LinkedHashMapEntry<K, V>) findJavaEntry(key, index);
 
         if (m == null) {
             modCount++;
@@ -437,8 +430,8 @@ public class LinkedHashMap<K, V> extends HashMap<K, V> {
      */
     @Override
     public Collection<V> values() {
-        if (valuesCollection == null) {
-            valuesCollection = new AbstractCollection<V>() {
+        if (values == null) {
+            values = new AbstractCollection<V>() {
                 @Override
                 public boolean contains(Object object) {
                     return containsValue(object);
@@ -465,7 +458,7 @@ public class LinkedHashMap<K, V> extends HashMap<K, V> {
                 }
             };
         }
-        return valuesCollection;
+        return values;
     }
 
     /**
@@ -478,7 +471,7 @@ public class LinkedHashMap<K, V> extends HashMap<K, V> {
      */
     @Override
     public V remove(Object key) {
-        LinkedHashMapEntry<K, V> m = (LinkedHashMapEntry<K, V>) removeEntry(key);
+        LinkedHashMapEntry<K, V> m = (LinkedHashMapEntry<K, V>) removeJavaEntry(key);
         if (m == null) {
             return null;
         }
@@ -539,4 +532,14 @@ public class LinkedHashMap<K, V> extends HashMap<K, V> {
         }
         return map;
     }
+    
+    
+	@Override
+	protected void 秘setJS() {
+		// not implemented in JavaScript.map
+		秘m = null;
+	}
+
+
+
 }

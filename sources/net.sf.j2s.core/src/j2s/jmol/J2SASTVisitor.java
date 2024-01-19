@@ -84,17 +84,12 @@ abstract class J2SASTVisitor extends ASTVisitor {
 
 	public boolean visit(Block node) {
 		blockLevel++;
-		if (buffer != null) {
-			buffer.append("{\r\n");
-		}
 		ASTNode parent = node.getParent();
 		if (parent instanceof MethodDeclaration) {
 			MethodDeclaration method = (MethodDeclaration) parent;
 			Javadoc javadoc = method.getJavadoc();
-			/*
-			 * if comment contains "@j2sNative", then output the given native JavaScript
-			 * codes directly.
-			 */
+			// if comment contains "@j2sNative", then output the given native JavaScript
+			// codes directly.
 			if (!processJ2STags(javadoc, node, true)) {
 				return false;
 			}
@@ -118,10 +113,10 @@ abstract class J2SASTVisitor extends ASTVisitor {
 						superclass = superclass.getSuperclass();
 					}
 					if (containsSuperPrivateMethod) {
-						buffer.append("var $private = Clazz.checkPrivateMethod (arguments);\r\n");
-						buffer.append("if ($private != null) {\r\n");
-						buffer.append("return $private.apply (this, arguments);\r\n");
-						buffer.append("}\r\n");
+						buffer.append("var $private = Clazz.checkPrivateMethod (arguments);\n");
+						buffer.append("if ($private != null) {\n");
+						buffer.append("return $private.apply (this, arguments);\n");
+						buffer.append("}\n");
 					}
 				}
 			}
@@ -244,8 +239,24 @@ abstract class J2SASTVisitor extends ASTVisitor {
 					if ("@j2sNative".equals(tagEl.getTagName())) {
 						if (superVisit)
 							super.visit(node);
-						if (buffer != null)
-							writeJavaScript(tagEl);
+						if (buffer != null) {
+							List<?> fragments = tagEl.fragments();
+							boolean isFirstLine = true;
+							StringBuffer buf = new StringBuffer();
+							for (Iterator<?> iterator = fragments.iterator(); iterator
+									.hasNext();) {
+								TextElement commentEl = (TextElement) iterator.next();
+								String text = commentEl.getText().trim();
+								if (isFirstLine) {
+									if (text.length() == 0) {
+										continue;
+									}
+								}
+								buf.append(text);
+								buf.append("\n");
+							}
+							buffer.append(fixCommentBlock(buf.toString()));
+						}
 						return false;
 					}
 				}
@@ -254,25 +265,6 @@ abstract class J2SASTVisitor extends ASTVisitor {
 		return true;
 	}
 
-	private void writeJavaScript(TagElement tagEl) {
-		List<?> fragments = tagEl.fragments();
-		boolean isFirstLine = true;
-		StringBuffer buf = new StringBuffer();
-		for (Iterator<?> iterator = fragments.iterator(); iterator
-				.hasNext();) {
-			TextElement commentEl = (TextElement) iterator.next();
-			String text = commentEl.getText().trim();
-			if (isFirstLine) {
-				if (text.length() == 0) {
-					continue;
-				}
-			}
-			buf.append(text);
-			buf.append("\r\n");
-		}
-		buffer.append(fixCommentBlock(buf.toString()));
-	}
-	
 	private String fixCommentBlock(String text) {
 		if (text == null || text.length() == 0) {
 			return text;
@@ -284,16 +276,19 @@ abstract class J2SASTVisitor extends ASTVisitor {
 	
 	/**
 	 * Write JavaScript source from @j2sNative and @J2SIgnore
+	 * 
+	 * @return true if JavaScript was written
 	 */
-	protected boolean writeJ2SSources(BodyDeclaration node, String tagName, String prefix, String suffix, boolean both) {
-		boolean existed = false;
+	protected boolean writeJ2STags(BodyDeclaration node, boolean needScope) {
+		String prefix = (needScope ? "{\n" : "");
+		String suffix = (needScope ? "\n}" : "");
 		Javadoc javadoc = node.getJavadoc();
 		if (javadoc != null) {
 			List<?> tags = javadoc.tags();
 			if (tags.size() != 0) {
 				for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
 					TagElement tagEl = (TagElement) iter.next();
-					if (tagName.equals(tagEl.getTagName())) {
+					if ("@j2sNative".equals(tagEl.getTagName())) {
 						List<?> fragments = tagEl.fragments();
 						StringBuffer buf = new StringBuffer();
 						boolean isFirstLine = true;
@@ -306,18 +301,15 @@ abstract class J2SASTVisitor extends ASTVisitor {
 								}
 							}
 							buf.append(text);
-							buf.append("\r\n");
+							buf.append("\n");
 						}
 						String sources = buf.toString().trim();
 						sources = sources.replaceAll("(\\/)-\\*|\\*-(\\/)", "$1*$2").replaceAll("<@>", "@");
 						buffer.append(prefix + sources + suffix);
-						existed = true;
+						return true;
 					}
 				}
 			}
-		}
-		if (existed && !both) {
-			return existed;
 		}
 		List<?> modifiers = node.modifiers();
 		for (Iterator<?> iter = modifiers.iterator(); iter.hasNext();) {
@@ -327,9 +319,7 @@ abstract class J2SASTVisitor extends ASTVisitor {
 				String qName = annotation.getTypeName().getFullyQualifiedName();
 				int index = qName.indexOf("J2S");
 				if (index != -1) {
-					String annName = qName.substring(index);
-					annName = annName.replaceFirst("J2S", "@j2s");
-					if (annName.startsWith(tagName)) {
+					if (qName.substring(index).startsWith("J2SNative")) {
 						StringBuffer buf = new StringBuffer();
 						IAnnotationBinding annotationBinding = annotation.resolveAnnotationBinding();
 						if (annotationBinding != null) {
@@ -342,23 +332,23 @@ abstract class J2SASTVisitor extends ASTVisitor {
 											Object[] lines = (Object[]) value;
 											for (int j = 0; j < lines.length; j++) {
 												buf.append(lines[j]);
-												buf.append("\r\n");
+												buf.append("\n");
 											}
 										} else if (value instanceof String) {
 											buf.append(value);
-											buf.append("\r\n");
+											buf.append("\n");
 										}
 									}
 								}
 							}
 						}
 						buffer.append(prefix + buf.toString().trim() + suffix);
-						existed = true;
+						return true;
 					}
 				}
 			}
 		}
-		return existed;
+		return false;
 	}
 
 }

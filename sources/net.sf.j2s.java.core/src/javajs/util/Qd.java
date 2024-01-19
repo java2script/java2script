@@ -672,7 +672,7 @@ public class Qd {
    * 
    * @return       pairwise array of data1 / data2 or data1 \ data2
    */
-  public static Qd[] div(Qd[] data1, Qd[] data2, int nMax, boolean isRelative) {
+  public static Qd[] arrayDiv(Qd[] data1, Qd[] data2, int nMax, boolean isRelative) {
     int n;
     if (data1 == null || data2 == null || (n = Math.min(data1.length, data2.length)) == 0)
       return null;

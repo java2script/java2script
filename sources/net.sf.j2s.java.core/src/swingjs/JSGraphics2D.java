@@ -75,7 +75,7 @@ public class JSGraphics2D implements
 	private GraphicsConfiguration gc;
 
 	private BasicStroke currentStroke;
-	private Shape currentClip;
+	private Object currentClip;
 
 	private AlphaComposite alphaComposite;
 	private int initialState;
@@ -90,7 +90,7 @@ public class JSGraphics2D implements
 
 	private RenderingHints hints;	
 
-	private AffineTransform transform;
+	private final AffineTransform transform = new AffineTransform();
 
 	private Color backgroundColor;
 	private AffineTransform fontTransform;
@@ -123,7 +123,6 @@ public class JSGraphics2D implements
 											// passing an actual HTML5 canvas
 		this.canvas = (HTML5Canvas) canvas;
 		ctx = this.canvas.getContext("2d");
-		transform = new AffineTransform();
 		setStroke(new BasicStroke());
 		/**
 		 * @j2sNative
@@ -768,8 +767,14 @@ public class JSGraphics2D implements
 	}
 
 	private boolean isClipped(int x, int y, int w, int h) {
-		boolean is = currentClip != null && !currentClip.contains(x, y, w, h);
+		boolean is = currentClip != null && !contains(x, y, w, h);
 		return is;
+	}
+
+	private boolean contains(int x, int y, int w, int h) {
+		return (currentClip instanceof int[] 
+				? Rectangle.contains(((int[]) currentClip), x, y, w, h)
+						: ((Shape) currentClip).contains(x, y, w, h));
 	}
 
 	private void observe(Image img, ImageObserver observer, boolean isOK) {
@@ -960,7 +965,11 @@ public class JSGraphics2D implements
 	}
 
 	public void setClipPriv(Shape clip) {
-		if (clip instanceof Rectangle) {
+		Object c = clip;
+		
+		if (c instanceof int[]) {			
+			clipPriv(((int[])c)[0], ((int[])c)[1], ((int[])c)[2], ((int[])c)[3]);
+		} else if (clip instanceof Rectangle) {
 			Rectangle r = (Rectangle) clip;
 			clipPriv((int) Math.floor(r.getMinX()), (int) Math.floor(r.getMinY()), (int) Math.ceil(r.getWidth()),
 					(int) Math.ceil(r.getHeight()));
@@ -979,7 +988,7 @@ public class JSGraphics2D implements
 		Rectangle r = (currentClip instanceof Rectangle ? (Rectangle) currentClip : null);
 		Object o = currentClip;
 		if (r == null || r.x != x || r.y != y || r.width != width || r.height != height) {
-			currentClip = new Rectangle(x, y, width, height);
+			currentClip = new int[] {x, y, width, height};
 		}
 		if (debugClip) {
 			System.out.println("JSGraphics2D.clipPriv to " + currentClip + " from " + o);
@@ -1022,7 +1031,8 @@ public class JSGraphics2D implements
 
 	public Shape getClip() {
 		// This will not be entirely accurate if shapes are involved
-		return currentClip == null ? getClipBoundsImpl() : currentClip;
+		return (currentClip == null || currentClip instanceof int[] 
+				? getClipBoundsImpl() : (Shape) currentClip);
 	}
 
 	public void drawString(String s, int x, int y) {
@@ -1190,9 +1200,16 @@ public class JSGraphics2D implements
 		if (currentClip == null) {
 			currentClip = new Rectangle(0, 0, width, height);
 		}
-		return currentClip.getBounds();
+		return getBounds();
 	}
 
+	private Rectangle getBounds() {
+		if (currentClip instanceof int[]) {
+			int[] a = (int[]) currentClip;
+			return new Rectangle(a[0], a[1], a[2], a[3]);
+		}
+		return ((Shape) currentClip).getBounds();
+	}
 	private Color clearColorSaved;
 	private boolean clearing;
 
@@ -1274,7 +1291,7 @@ public class JSGraphics2D implements
 		map[SAVE_ALPHA] = (/** @j2sNative 1 ? this.ctx.globalAlpha : */0);//Float.valueOf(ctx.globalAlpha);
 		map[SAVE_COMPOSITE] = alphaComposite;
 		map[SAVE_STROKE] = currentStroke;
-		map[SAVE_TRANSFORM] = transform;
+		map[SAVE_TRANSFORM] = transform.秘toArray();
 		map[SAVE_FONT] = font;
 		map[SAVE_CLIP] = currentClip;
 		return HTML5CanvasContext2D.push(ctx, map);
@@ -1347,7 +1364,7 @@ public class JSGraphics2D implements
 		setAlpha(/** @j2sNative map[a] || */0);
 		shader = null;
 		setStroke((Stroke) map[SAVE_STROKE]);
-		setTransform((AffineTransform) map[SAVE_TRANSFORM]);
+		setTransform(transform.秘fromArray((double[]) map[SAVE_TRANSFORM]));
 		setFont((Font) map[SAVE_FONT]);
 		currentClip = (Shape) map[SAVE_CLIP];
 	}
@@ -1384,7 +1401,7 @@ public class JSGraphics2D implements
 		 */
 		{
 		}
-		g.transform = new AffineTransform(transform);
+		g.transform.setTransform(transform);
 		if (hints != null) {
 			g.hints = (RenderingHints) hints.clone();
 		}
