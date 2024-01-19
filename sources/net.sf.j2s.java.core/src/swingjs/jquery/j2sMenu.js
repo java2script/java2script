@@ -238,6 +238,16 @@ J2S.__makeMenu = function(){};
 			 System.err.println("j2sMenu error: " + err);
 		 }
 		 return;
+	 case "closeSiblingMenus":
+		 var m = t.closest("ul").find(".ui-state-active")
+		 m.removeClass("ui-state-active");
+		 var v = t.find(".ui-j2smenu");
+		 if (!v.length)
+			 return;
+		 doCmd("_hide", me, v);
+		 v.attr("aria-hidden","true").attr("aria-expanded","false");
+		 t = v.parent();
+		 return;
 	 case "_closeSubmenus":
 		 var a = me.active;
 		 if (a && a[0] && a[0]["data-component"].getUIClassID$() != "MenuUI")
@@ -320,6 +330,10 @@ J2S.__makeMenu = function(){};
 			 return;
 		 me.unsetFocus(t,t&&t.type==="focus", "fromSetFocus");
 		 me._scrollIntoView(n);
+		 // BH added 2024.01.16
+		 n.siblings().each(function(a,b){
+				 doCmd("closeSiblingMenus", me, $(b));
+		 })
 		 me.active=a;
 		 var r=me.active.addClass("ui-state-focus");
 		 //testing var r=me.active.children(".a").addClass("ui-state-focus");
@@ -716,4 +730,4 @@ Swing.disposeMenu = function(menu) {
 })(J2S.Swing, J2S.__$);
 
 
-// end of j2sMenu.js 2023.06.04 2020.06.09 2020.05.15  2020.01.25
+// end of j2sMenu.js 2024.01.16 2023.06.04 2020.06.09 2020.05.15  2020.01.25

@@ -1268,6 +1268,8 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener, Mouse
 			System.err.println("JSPopupMenu not processing " + trigger);
 			break;
 		}
+		// delay any closures for 100 ms
+		showTime = System.currentTimeMillis();
 		if (e != null && eventID != 0 && c != null) {
 				JSMouse.retargetMouseEvent(e, base, c, c, eventID);
 		}

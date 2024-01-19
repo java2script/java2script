@@ -2,7 +2,7 @@ package swingjs.jquery;
 
 import swingjs.JSUtil;
 
-//based on  jQuery UI - v1.9.2 - 2015-05-28
+//based on  jQuery UI - v1.9.2 - 2015-05-28 
 
 // BH 2023.01.07 updated j2sMenu.js for better touch with delayed menu closure detecting mouse
 
