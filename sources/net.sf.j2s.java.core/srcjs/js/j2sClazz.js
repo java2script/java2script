@@ -4453,66 +4453,54 @@ var fixLongAB = function(a,b) {
 }
 
 
-Long.$eq=function(a,b){
+Long.$cmp=function(a,b, unsigned){
 	if (fixLongAB(a,b)) {
-		return a == b;
+		return (a < b ? -1 : a > b ? 1 : 0);
 	}
 	a = ab[0];b = ab[1];
-	return (a[0] == b[0] && a[1] == b[1] && a[2]== b[2]);
+	if (unsigned) {
+		a = toLongRLH(a);
+		b = toLongRLH(b);
+		for (let i = 2; i >= 0; i--) {
+			if (a[i] < b[i]) return -1;
+			if (a[i] > b[i]) return 1;
+		}
+		return 0;
+	}
+	return (
+		a[2] < b[2] ? -1
+		: a[2] > b[2] ? 1
+		: a[2] == 0 ? 0
+		: a[1] < b[1] ? -a[2]
+		: a[1] > b[1] ? a[2]
+		: a[0] < b[0] ? -a[2]
+		: a[0] > b[0] ? a[2]
+		: 0
+	);
+}
+
+Long.$eq=function(a,b){
+	return Long.$cmp(a, b) == 0;
 }
 
 Long.$ne=function(a,b){
-	if (fixLongAB(a,b)) {
-		return a != b;
-	}
-	a = ab[0];b = ab[1];
-	return (a[0] != b[0] || a[1] != b[1] || a[2]!= b[2]);
-}
-
-Long.$gt=function(a,b){
-	if (fixLongAB(a,b)) {
-		return a > b;
-	}
-	a = ab[0];b = ab[1];
-	return (a[2] > b[2] || a[2] == b[2] && (a[1] > b[1] || a[1] == b[1] && a[0] > b[0]));
-}
-
-Long.$cmp=function(a,b, unsigned){ 
-		if (fixLongAB(a,b)) {
-			return (a < b ? -1 : a > b ? 1 : 0);
-		}
-		a = ab[0];b = ab[1];
-		if (unsigned) {
-			a = toLongRLH(a);
-			b = toLongRLH(b);
-		}
-		return (a[2] < b[2] ? -1 : a[2] > b[2] ? 1
-				: a[2] == 0 ? 0 : a[1] < b[1] ? -1 : a[1] > b[1] ? 1 
-						: a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
+	return Long.$cmp(a, b) != 0;
 }
 
 Long.$ge=function(a,b){
-	if (fixLongAB(a,b)) {
-		return a >= b;
-	}
-	a = ab[0];b = ab[1];
-	return (a[2] > b[2] || a[2] == b[2] && (a[1] > b[1] || a[1] == b[1] && a[0] >= b[0]));
+	return Long.$cmp(a, b) >= 0;
+}
+
+Long.$gt=function(a,b){
+	return Long.$cmp(a, b) > 0;
 }
 
 Long.$le=function(a,b){
-	if (fixLongAB(a,b)) {
-		return a <= b;
-	}
-	a = ab[0];b = ab[1];
-	return (a[2] < b[2] || a[2] == b[2] && (a[1] < b[1] || a[1] == b[1] && a[0] <= b[0]));
+	return Long.$cmp(a, b) <= 0;
 }
 
 Long.$lt=function(a,b){
-	if (fixLongAB(a,b)) {
-		return a < b;
-	}
-	a = ab[0];b = ab[1];
-	return (a[2] < b[2] || a[2] == b[2] && (a[1] < b[1] || a[1] == b[1] && a[0] < b[0]));
+	return Long.$cmp(a, b) < 0;
 }
 
 
