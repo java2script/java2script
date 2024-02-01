@@ -1315,7 +1315,10 @@ public class Hashtable<K,V>
 
 							@Override
 							public Object setValue(Object value) {
-								return ht.put(getKey(), value);
+								int m = ht.modCount;
+								Object v = ht.put(getKey(), value);
+								ht.modCount = m;
+								return (T) v;
 							}
 						};
 					}

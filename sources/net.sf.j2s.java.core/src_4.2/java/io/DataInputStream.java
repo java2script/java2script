@@ -161,6 +161,20 @@ public class DataInputStream extends FilterInputStream implements DataInput {
     return in.read(b, off, len);
   }
 
+	public final int readDIS(byte b[], int off, int len) throws IOException {
+		InputStream is = this.in;
+		/**
+		 * @j2sNative
+		 * 
+		 * 			if (is.readBIS) return is.readBIS(b, off, len); 
+		 * 			if (is.readBAIS)
+		 *            return is.readBAIS(b, off, len);
+		 */
+		{
+		}
+		return is.read(b, off, len);
+	}
+
 //  /**
 //   * See the general contract of the <code>readFully</code> method of
 //   * <code>DataInput</code>.
