@@ -535,9 +535,9 @@ public class LinkedHashMap<K, V> extends HashMap<K, V> {
     
     
 	@Override
-	protected void 秘setJS() {
+	protected void __setJS() {
 		// not implemented in JavaScript.map
-		秘m = null;
+		__m = null;
 	}
 
 

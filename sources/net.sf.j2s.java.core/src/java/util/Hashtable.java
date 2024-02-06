@@ -1893,7 +1893,10 @@ public class Hashtable<K,V>
 
 							@Override
 							public V setValue(V value) {
-								return Hashtable.this.put(getKey(), value);
+								int m = modCount;
+								V v = put(getKey(), value);
+								modCount = m;
+								return v;
 							}
 						};
 					}

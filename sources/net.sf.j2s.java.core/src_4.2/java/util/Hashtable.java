@@ -226,9 +226,9 @@ public class Hashtable<K,V>
 		 * 			if (typeof capacity == "object") { 
 		 * 				map = capacity; 
 		 * 				capacity = Math.max(2*t.size(), 11); 
-         *				this.秘allowJS = map.秘allowJS;
+         *				this.__allowJS = map.__allowJS;
 		 * 			} else {
-         *				this.秘allowJS = true;
+         *				this.__allowJS = true;
 		 * 			}
 		 *            capacity = (capacity || 11); 
 		 *            loadFactor = (loadFactor || 0.75);
@@ -245,7 +245,7 @@ public class Hashtable<K,V>
 		this.loadFactor = loadFactor;
 		table = new Entry<?, ?>[capacity];
 		threshold = (int) Math.min(capacity * loadFactor, MAX_ARRAY_SIZE + 1);
-		秘setJS();
+		__setJS();
 		if (map != null)
 			putAll(map);
     }
@@ -268,7 +268,7 @@ public class Hashtable<K,V>
          * b = t.allowJS;
          */
         {}
-        秘allowJS = b;
+        __allowJS = b;
         putAll(t);
     }
 
@@ -281,7 +281,7 @@ public class Hashtable<K,V>
 	public synchronized int size() {
     	int c = count;
     	/** @j2sNative 
-    	 * c = this.秘m && this.秘m.size || c;
+    	 * c = this.__m && this.__m.size || c;
     	 */
     	{}
 		return c;
@@ -352,9 +352,9 @@ public class Hashtable<K,V>
 		if (size() == 0)
 			return false;
 
-		if (秘isSimple(this)) {
+		if (__isSimple(this)) {
 			@SuppressWarnings("unused")
-			Map m = this.秘m;
+			Map m = this.__m;
 			/**
 			 * @j2sNative
 			 * 
@@ -411,11 +411,11 @@ public class Hashtable<K,V>
     @Override
 	public synchronized boolean containsKey(Object key) {
     	
-		switch (秘hasKey(this, key)) {
+		switch (__hasKey(this, key)) {
 		case NOT_SIMPLE:
 			break;
 		case INVALID_KEY:
-			秘ensureJavaMap(this);
+			__ensureJavaMap(this);
 			break;
 		case NO_SUCH_KEY:
 			return false;
@@ -452,11 +452,11 @@ public class Hashtable<K,V>
     public synchronized V get(Object key) {
     	if (key == null)
     		return null;
-		switch (秘hasKey(this, key)) {
+		switch (__hasKey(this, key)) {
 		case NOT_SIMPLE:
 			break;
 		case INVALID_KEY:
-			秘ensureJavaMap(this);
+			__ensureJavaMap(this);
 			break;
 		case NO_SUCH_KEY:
 			return null;
@@ -465,7 +465,7 @@ public class Hashtable<K,V>
 			/**
 			 * @j2sNative
 			 * 
-			 * 			v = this.秘m.get(key);
+			 * 			v = this.__m.get(key);
 			 */
 			{}
 			return v;
@@ -571,17 +571,17 @@ public class Hashtable<K,V>
             throw new NullPointerException();
         }
 
-		switch (秘hasKey(this, key)) {
+		switch (__hasKey(this, key)) {
 		case NOT_SIMPLE:
 			break;
 		case INVALID_KEY:
-			秘ensureJavaMap(this);
+			__ensureJavaMap(this);
 			break;
 		case NO_SUCH_KEY:
 			/**
 			 * @j2sNative
 			 * 
-			 * 			this.秘m.set(key, value);
+			 * 			this.__m.set(key, value);
 			 */
 			{}
 			++modCount;
@@ -591,8 +591,8 @@ public class Hashtable<K,V>
 			/**
 			 * @j2sNative
 			 * 
-			 * 			v0 = this.秘m.get(key); 
-			 * 			this.秘m.set(key, value);
+			 * 			v0 = this.__m.get(key); 
+			 * 			this.__m.set(key, value);
 			 */
 			{}
 			++modCount;
@@ -631,11 +631,11 @@ public class Hashtable<K,V>
     	if (key == null)
     		throw new NullPointerException("Hashtable key may not be null");
     		
-		switch (秘hasKey(this, key)) {
+		switch (__hasKey(this, key)) {
 		case NOT_SIMPLE:
 			break;
 		case INVALID_KEY:
-			秘ensureJavaMap(this);
+			__ensureJavaMap(this);
 			break;
 		case NO_SUCH_KEY:
 			return null;
@@ -644,7 +644,7 @@ public class Hashtable<K,V>
 			/**
 			 * @j2sNative
 			 * 
-			 * 			v0 = this.秘m.get(key); this.秘m["delete"](key);
+			 * 			v0 = this.__m.get(key); this.__m["delete"](key);
 			 */
 			{}
 			++modCount;
@@ -686,10 +686,10 @@ public class Hashtable<K,V>
 	public synchronized void putAll(Map<? extends K, ? extends V> t) {
 		K key = null;
 		V value = null;
-		if (秘isSimple(t)) {
+		if (__isSimple(t)) {
 			Hashtable me = this;
 			/**
-			 * @j2sNative t.秘m.forEach(function(value, key) { me.put(key, value); })
+			 * @j2sNative t.__m.forEach(function(value, key) { me.put(key, value); })
 			 */
 			{}
 			return;
@@ -705,16 +705,16 @@ public class Hashtable<K,V>
 	public synchronized void clear() {
 		Entry<?, ?> tab[] = table;
 		modCount++;
-		if (秘isSimple(this)) {
+		if (__isSimple(this)) {
 			/**
 			 * @j2sNative
 			 * 
-			 * 			this.秘m.clear();
+			 * 			this.__m.clear();
 			 * 
 			 */
 			{}
 		}
-		秘setJS();
+		__setJS();
 		for (int index = tab.length; --index >= 0;)
 			tab[index] = null;
 		count = 0;
@@ -739,20 +739,20 @@ public class Hashtable<K,V>
 			t.entrySet = null;
 			t.values = null;
 			t.modCount = 0;
-			if (秘isSimple(this)) {
-				t.秘setJS();
+			if (__isSimple(this)) {
+				t.__setJS();
 				@SuppressWarnings("unused")
 				Hashtable me = this;
 				// evict is for afterNodeAccess, which is not public
 				/**
 				 * @j2sNative 
-				 * me.秘m.forEach(function(value, key) { 
-				 * 		t.秘m.set(key, value); t.modCount++; 
+				 * me.__m.forEach(function(value, key) { 
+				 * 		t.__m.set(key, value); t.modCount++; 
 				 * });
 				 */
 				{}
 			} else {
-				t.秘m = null;
+				t.__m = null;
 			}
 			return t;
 		} catch (CloneNotSupportedException e) {
@@ -1068,11 +1068,11 @@ public class Hashtable<K,V>
             Map.Entry<?,?> entry = (Map.Entry<?,?>)o;
             Object key = entry.getKey();
             
-            switch (秘hasKey(ht, key)) {
+            switch (__hasKey(ht, key)) {
             case NOT_SIMPLE:
             	break;
             case INVALID_KEY:
-    			秘ensureJavaMap(ht);
+    			__ensureJavaMap(ht);
     			break;
             case HAS_KEY:
 				Object value = entry.getValue();
@@ -1099,11 +1099,11 @@ public class Hashtable<K,V>
             Map.Entry<?,?> entry = (Map.Entry<?,?>) o;
             Object key = entry.getKey();
             
-            switch (秘hasKey(ht, key)) {
+            switch (__hasKey(ht, key)) {
             case NOT_SIMPLE:
 	            break;
             case INVALID_KEY:
-    			秘ensureJavaMap(ht);
+    			__ensureJavaMap(ht);
     			break;
             case HAS_KEY:
 				Object value = entry.getValue();
@@ -1241,10 +1241,10 @@ public class Hashtable<K,V>
             this.type = type;
             this.isIterator = iterator;
             expectedModCount = ht.modCount;
-			if(秘isSimple(ht)) {
+			if(__isSimple(ht)) {
 				// note that unlike HashMap, this implementation
 				// initializes with the next element in place
-				@SuppressWarnings("unused") Map m = ht.秘m;
+				@SuppressWarnings("unused") Map m = ht.__m;
 				/**
 				 * @j2sNative
 				 * 
@@ -1258,7 +1258,7 @@ public class Hashtable<K,V>
 
         @Override
 		public boolean hasMoreElements() {
-			if(秘isSimple(ht)) {
+			if(__isSimple(ht)) {
 				boolean b = false;
 				/** 
 				 * @j2sNative 
@@ -1284,7 +1284,7 @@ public class Hashtable<K,V>
 		@Override
 		public T nextElement() {
 			Entry<?, ?> node = next_;
-			if (秘isSimple(ht)) {
+			if (__isSimple(ht)) {
 				@SuppressWarnings("unused")
 				int t = type;
 				current = node;
@@ -1364,7 +1364,7 @@ public class Hashtable<K,V>
 			if (ht.modCount != expectedModCount)
 				throw new ConcurrentModificationException();
 
-			if (秘isSimple(ht)) {
+			if (__isSimple(ht)) {
 				Object key = null;
 				/**
 				 * @j2sNative
@@ -1400,37 +1400,37 @@ public class Hashtable<K,V>
 		}
     }
     
-	protected void 秘setJS() {		
-		if (秘allowJS && USE_SIMPLE) {
+	protected void __setJS() {		
+		if (__allowJS && USE_SIMPLE) {
 			Map<String, Object> m = null;
 			/** @j2sNative 
 			 * 
 			 * m = new Map();
 			 */
 			{}
-			秘m =  m;			
+			__m =  m;			
 		} else {
-			秘m = null;
+			__m = null;
 		}
 		
 	}
 
-	static Object 秘get(Object map, Object key) {
+	static Object __get(Object map, Object key) {
 		/**
 		 * @j2sNative
 		 * 
-		 * return map.秘m.get(key == null ? null : key + "")
+		 * return map.__m.get(key == null ? null : key + "")
 		 */
 		{
 		return null;
 		}
 	}
 
-	static void 秘set(Map map, Object key, Object value) {
+	static void __set(Map map, Object key, Object value) {
 		/**
 		 * @j2sNative
 		 * 
-		 * map.秘m.set(key == null ? null : key + "", value)
+		 * map.__m.set(key == null ? null : key + "", value)
 		 */
 	}
 
@@ -1445,7 +1445,7 @@ public class Hashtable<K,V>
 	 * @param key
 	 * @return 0 (NOT_SIMPLE), 1 (INVALID_KEY), 2 (NO_SUCH_KEY), or 3 (HAS_KEY)
 	 */
-	static int 秘hasKey(Map map, Object key) { 
+	static int __hasKey(Map map, Object key) { 
 		
 		/**
 		 * 
@@ -1455,8 +1455,8 @@ public class Hashtable<K,V>
 		 * 
 		 * @j2sNative
 		 * 
-		 * 			return (!map.秘m ? 0 : key != null && typeof key != "string" 
-		 *                ? 1 : map.秘m.has(key) ? 3 : 2); 
+		 * 			return (!map.__m ? 0 : key != null && typeof key != "string" 
+		 *                ? 1 : map.__m.has(key) ? 3 : 2); 
 		 *
 		 */
 		{
@@ -1464,11 +1464,11 @@ public class Hashtable<K,V>
 		}
 	}
 
-	static boolean 秘isSimple(Map map) {
+	static boolean __isSimple(Map map) {
 		/**
 		 * @j2sNative
 		 * 
-		 * 	return !!map.秘m;
+		 * 	return !!map.__m;
 		 */
 		{
 			return false;
@@ -1480,13 +1480,13 @@ public class Hashtable<K,V>
 	 * We've had our fun, now we have to go back to Java...
 	 * 
 	 */
-	static void 秘ensureJavaMap(Map map) {
+	static void __ensureJavaMap(Map map) {
 			/**
 			 * @j2sNative
 			 * 
-			 * 		if (map.秘m) {
-			 * 			var m = map.秘m; 
-			 *          map.秘m = null;
+			 * 		if (map.__m) {
+			 * 			var m = map.__m; 
+			 *          map.__m = null;
 			 *          m.forEach(function(value, key){map.put(key, value);}); 
 			 *          m.clear();
 			 * 		}
@@ -1501,8 +1501,8 @@ public class Hashtable<K,V>
 	public static boolean USE_SIMPLE = true;
 
 
-	Map<String, Object> 秘m;
-	boolean 秘allowJS = false;
+	Map<String, Object> __m;
+	boolean __allowJS = false;
 
 
 }

@@ -91,9 +91,9 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 			type = value;
 			expectedModCount = hm.modCount;
 			lastEntry = entry = null;
-			isSimple = 秘isSimple(associatedMap);
+			isSimple = __isSimple(associatedMap);
 			if (isSimple) {
-				@SuppressWarnings("unused") Map m = associatedMap.秘m;
+				@SuppressWarnings("unused") Map m = associatedMap.__m;
 				/**
 				 * @j2sNative
 				 * 
@@ -226,7 +226,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 			Object key = ((Map.Entry) object).getKey();
 			if (!associatedMap.containsKey(key))
 				return false;
-			if (秘isSimple(associatedMap)) {
+			if (__isSimple(associatedMap)) {
 				Object value = ((Map.Entry) object).getValue();
 				Object v = associatedMap.get(key);
 				return (value == v || value != null && value.equals(v));
@@ -241,7 +241,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 			return new HashMapIterator<Map.Entry<KT, VT>, KT, VT>(new MapEntry.Type<Map.Entry<KT, VT>, KT, VT>() {
 				@Override
 				public Map.Entry<KT, VT> get(MapEntry<KT, VT> entry) {
-					if (秘isSimple(associatedMap)) {
+					if (__isSimple(associatedMap)) {
 						KT key = null;
 						VT value = null;
 						/**
@@ -327,9 +327,9 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 		/**
 		 * @j2sNative
 		 * 
-		 * 			if (typeof capacity == "object") { map = capacity; this.秘allowJS =
-		 *            map.秘allowJS; capacity = (map.size() < 6 ? 11 : map.size() * 2); }
-		 *            else { this.秘allowJS = true; } !capacity && (capacity = 0);
+		 * 			if (typeof capacity == "object") { map = capacity; this.__allowJS =
+		 *            map.__allowJS; capacity = (map.size() < 6 ? 11 : map.size() * 2); }
+		 *            else { this.__allowJS = true; } !capacity && (capacity = 0);
 		 *            !loadFactor && (loadFactor = 0.75);
 		 */
 		{
@@ -344,7 +344,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 		} else {
 			throw new IllegalArgumentException();
 		}
-		秘setJS();
+		__setJS();
 		if (map != null) {
 			putAll(map);
 		}
@@ -369,12 +369,12 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 			return;
 		K key = null;
 		V value = null;
-		if (秘isSimple(this) && 秘isSimple(mOriginal)) {
+		if (__isSimple(this) && __isSimple(mOriginal)) {
 			HashMap me = this;
 			int hash = NO_RETURN;
-			int mode = 秘hasKey(me, key);
+			int mode = __hasKey(me, key);
 			/**
-			 * @j2sNative mOriginal.秘m.forEach(function(value, key) {
+			 * @j2sNative mOriginal.__m.forEach(function(value, key) {
 			 * 			me.putJSVal(hash, key, value, false, evict, mode);
 			 *		});
 			 */
@@ -382,10 +382,10 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 			}
 			return;
 		}
-		if (秘isSimple(mOriginal)) {
+		if (__isSimple(mOriginal)) {
 			HashMap me = this;
 			/**
-			 * @j2sNative mOriginal.秘m.forEach(function(value, key) {
+			 * @j2sNative mOriginal.__m.forEach(function(value, key) {
 			 *       me.putJavaValue(key, value);
 			 *   });
 			 */
@@ -393,7 +393,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 			}
 			return;
 		}
-		秘m = null;
+		__m = null;
 		for (Map.Entry<? extends K, ? extends V> e : mOriginal.entrySet()) {
 			key = e.getKey();
 			value = e.getValue();
@@ -412,7 +412,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 		modCount = 0;
 		threshold = 0;
 		elementCount = 0;
-		秘setJS();
+		__setJS();
 	}
 
 	/**
@@ -424,17 +424,17 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 	@Override
 	public void clear() {
 		modCount++;
-		if (秘isSimple(this)) {
+		if (__isSimple(this)) {
 			/**
 			 * @j2sNative
 			 * 
-			 * 			this.秘m.clear();
+			 * 			this.__m.clear();
 			 * 
 			 */
 			{
 			}
 		}
-		秘setJS();
+		__setJS();
 		if (elementCount > 0) {
 			elementCount = 0;
 			Arrays.fill(elementData, null);
@@ -475,11 +475,11 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 	 */
 	@Override
 	public boolean containsKey(Object key) {
-		switch (秘hasKey(this, key)) {
+		switch (__hasKey(this, key)) {
 		case NOT_SIMPLE:
 			break;
 		case INVALID_KEY:
-			秘ensureJavaMap(this);
+			__ensureJavaMap(this);
 			break;
 		case NO_SUCH_KEY:
 			return false;
@@ -518,9 +518,9 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 	 */
 	@Override
 	public boolean containsValue(Object value) {
-		if (秘isSimple(this)) {
+		if (__isSimple(this)) {
 			@SuppressWarnings("unused")
-			Map m = 秘m;
+			Map m = __m;
 			/**
 			 * @j2sNative
 			 * 
@@ -580,11 +580,11 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 	@Override
 	public V get(Object key) {
 
-		switch (秘hasKey(this, key)) {
+		switch (__hasKey(this, key)) {
 		case NOT_SIMPLE:
 			break;
 		case INVALID_KEY:
-			秘ensureJavaMap(this);
+			__ensureJavaMap(this);
 			break;
 		case NO_SUCH_KEY:
 			return null;
@@ -593,7 +593,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 			/**
 			 * @j2sNative
 			 * 
-			 * 			v = this.秘m.get(key);
+			 * 			v = this.__m.get(key);
 			 */
 			{}
 			return v;
@@ -681,7 +681,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 					return new HashMapIterator<K, K, V>(new MapEntry.Type<K, K, V>() {
 						@Override
 						public K get(MapEntry<K, V> entry) {
-							if (秘isSimple(HashMap.this)) {
+							if (__isSimple(HashMap.this)) {
 								/**
 								 * @j2sNative
 								 * return (entry == null ? null : entry.value[0]);
@@ -707,12 +707,12 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 	 */
 	@Override
 	public V put(K key, V value) {
-		int type = 秘hasKey(this, key);
+		int type = __hasKey(this, key);
 		switch (type) {
 		case NOT_SIMPLE:
 			break;
 		case INVALID_KEY:
-			秘ensureJavaMap(this);
+			__ensureJavaMap(this);
 			break;
 		case NO_SUCH_KEY:
 		case HAS_KEY:
@@ -782,7 +782,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 		/**
 		 * @j2sNative
 		 * 
-		 * 			this.秘m.set(key, value);
+		 * 			this.__m.set(key, value);
 		 */
 		{
 		}
@@ -791,7 +791,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 		case HAS_KEY:
 			if (hash != NO_RETURN) {
 				/**
-				 * @j2sNative v0 = this.秘m.get(key) || null;
+				 * @j2sNative v0 = this.__m.get(key) || null;
 				 */
 				{
 				}
@@ -800,7 +800,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 				/**
 				 * @j2sNative
 				 * 
-				 * 			this.秘m.set(key, value);
+				 * 			this.__m.set(key, value);
 				 */
 				{
 				}
@@ -842,11 +842,11 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 	 */
 	@Override
 	public V remove(Object key) {
-		switch (秘hasKey(this, key)) {
+		switch (__hasKey(this, key)) {
 		case NOT_SIMPLE:
 			break;
 		case INVALID_KEY:
-			秘ensureJavaMap(this);
+			__ensureJavaMap(this);
 			break;
 		case NO_SUCH_KEY:
 			return null;
@@ -861,7 +861,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 		V v = null;
 		if (hash == RET_VALUE || matchValue) {
 			/**
-			 * @j2sNative v = this.秘m.get(key) || null;
+			 * @j2sNative v = this.__m.get(key) || null;
 			 * 
 			 */
 			{
@@ -871,7 +871,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 			/**
 			 * @j2sNative
 			 * 
-			 * 			this.秘m["delete"](key);
+			 * 			this.__m["delete"](key);
 			 */
 			{
 			}
@@ -925,8 +925,8 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 	@Override
 	public int size() {
 		/** @j2sNative 
-		 * if (this.秘m)
-		 *  return this.秘m.size;
+		 * if (this.__m)
+		 *  return this.__m.size;
 		 */
 		{}
 		return elementCount;
@@ -963,7 +963,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 					return new HashMapIterator<V, K, V>(new MapEntry.Type<V, K, V>() {
 						@Override
 						public V get(MapEntry<K, V> entry) {
-							if (秘isSimple(HashMap.this)) {
+							if (__isSimple(HashMap.this)) {
 								/**
 								 * @j2sNative
 								 * return (entry == null ? null : entry.value[1]);
@@ -979,8 +979,8 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 		return values;
 	}
 
-	protected void 秘setJS() {
-		if (秘allowJS && USE_SIMPLE) {
+	protected void __setJS() {
+		if (__allowJS && USE_SIMPLE) {
 			Map<String, Object> m = null;
 			/**
 			 * @j2sNative
@@ -989,28 +989,28 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 			 */
 			{
 			}
-			秘m = m;
+			__m = m;
 		} else {
-			秘m = null;
+			__m = null;
 		}
 	}
 
-	static Object 秘get(Object map, Object key) {
+	static Object __get(Object map, Object key) {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			return map.秘m.get(key == null ? null : key + "");
+		 * 			return map.__m.get(key == null ? null : key + "");
 		 */
 		{
 			return null;
 		}
 	}
 
-	static void 秘set(Map map, Object key, Object value) {
+	static void __set(Map map, Object key, Object value) {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			map.秘m.set(key == null ? null : key + "", value);
+		 * 			map.__m.set(key == null ? null : key + "", value);
 		 */
 		{
 		}
@@ -1027,7 +1027,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 	 * @param key
 	 * @return 0 (NOT_SIMPLE), 1 (INVALID_KEY), 2 (NO_SUCH_KEY), or 3 (HAS_KEY)
 	 */
-	static int 秘hasKey(Map map, Object key) {
+	static int __hasKey(Map map, Object key) {
 
 		/**
 		 * 
@@ -1037,8 +1037,8 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 		 * 
 		 * @j2sNative
 		 * 
-		 * 			return (!map.秘m ? 0 : key != null && typeof key != "string" ? 1 :
-		 *            map.秘m.has(key) ? 3 : 2);
+		 * 			return (!map.__m ? 0 : key != null && typeof key != "string" ? 1 :
+		 *            map.__m.has(key) ? 3 : 2);
 		 *
 		 */
 		{
@@ -1046,11 +1046,11 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 		}
 	}
 
-	static boolean 秘isSimple(Map map) {
+	static boolean __isSimple(Map map) {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			return !!map.秘m;
+		 * 			return !!map.__m;
 		 */
 		{
 			return false;
@@ -1062,11 +1062,11 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 	 * We've had our fun, now we have to go back to Java...
 	 * 
 	 */
-	static void 秘ensureJavaMap(Map map) {
+	static void __ensureJavaMap(Map map) {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			if (map.秘m) { var m = map.秘m; map.秘m = null;
+		 * 			if (map.__m) { var m = map.__m; map.__m = null;
 		 *            m.forEach(function(value, key){map.put(key, value);}); m.clear();
 		 *            }
 		 */
@@ -1082,8 +1082,8 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 	 */
 	public static boolean USE_SIMPLE = true;
 
-	Map<String, Object> 秘m;
-	boolean 秘allowJS = false;
+	Map<String, Object> __m;
+	boolean __allowJS = false;
 
 	static final int NO_RETURN = 0;
 	static final int RET_VALUE = 1;
