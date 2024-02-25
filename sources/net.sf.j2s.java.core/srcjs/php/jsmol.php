@@ -3,6 +3,8 @@
 // jsmol.php
 // Bob Hanson hansonr@stolaf.edu 1/11/2013
 //
+// 2024.02.05 fixing missing utf-8 header
+// 10 NOV 2018 -- print($output) should be echo($output) to prevent trailing \r\n
 // 27 MAR 2018 -- security upgrade
 // 31 MAR 2016 -- https://cactus -> https://cactus
 // 09 Nov 2015 -- bug fix for www.pdb --> www.rcsb
@@ -99,6 +101,7 @@ $imagedata = "";
 $contentType = "";
 $output = "";
 $isBinary = false;
+$isJS = false;
 $filename = "";
 
 if ($call == "getInfoFromDatabase") {
@@ -136,12 +139,13 @@ if ($call == "getInfoFromDatabase") {
 	}
 	
 } else if ($call == "getRawDataFromDatabase") {
-	$isBinary = (strpos($query, ".gz") >= 0);
-		if ($database != "_")
-			$query = $database.$query;
-		if (strpos(strtolower($query), 'https://') !== 0 && strpos(strtolower($query), 'http://') !== 0) {
-      $output = "invalid url";
-    } else if (strpos($query, '?POST?') > 0) {
+	$isBinary = (strpos($query, ".gz") !== false);
+	$isJS = (strpos($query, '.js') !== false);
+	if ($database != "_")
+		$query = $database.$query;
+	if (strpos(strtolower($query), 'https://') !== 0 && strpos(strtolower($query), 'http://') !== 0) {
+        	$output = "invalid url";
+	} else if (strpos($query, '?POST?') > 0) {
 			list($query,$data) = explode('?POST?', $query, 2);
 			$context = stream_context_create(array('http' => array(
 				'method' => 'POST',
@@ -149,12 +153,12 @@ if ($call == "getInfoFromDatabase") {
 				'content' => $data))
 			);
 			$output = file_get_contents($query, false, $context);
-		} else {
+	} else {
   		$output = file_get_contents($query);
-      if ($test != "") {
-        $output = $query."<br>".$output;
-      }
-		}
+      		if ($test != "") {
+       		 $output = $query."<br>".$output;
+      		}
+	}
 } else if ($call == "saveFile") {
 	$imagedata = $_REQUEST["data"];//getValueSimple($values, "data", ""); don't want to convert " to _ here
 	$filename = getValueSimple($values, "filename", "");
@@ -187,9 +191,11 @@ ob_start();
   	header('Access-Control-Allow-Origin: *');
   	if ($isBinary) {
   		header('Content-Type: text/plain; charset=x-user-defined');
-    } else if (strpos($output, '<html') > 0) {
-      header('Content-type: text/html; charset=utf-8');
-  	} else {
+  	} else if ($isJS) {
+  		header('Content-Type: text/javascript; charset=utf-8');
+    	} else if (strpos($output, '<html') !== false) {
+      		header('Content-type: text/html; charset=utf-8');
+	} else {
   		header('Content-Type: application/json');
   	}
    }

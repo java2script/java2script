@@ -3,6 +3,9 @@ package test;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
 
 public class Test implements ITest {
 	
@@ -59,7 +62,17 @@ public class Test implements ITest {
 	public final static void main(String[] args) {
 	
 		new javax.swing.JButton(); 
-
+		
+		ByteArrayInputStream bis = new ByteArrayInputStream(new byte[] {'t','e','s','t'});
+		DataInputStream dis = new DataInputStream(bis);
+		byte[] bytes = new byte[4];
+		try {
+			dis.read(bytes, 0, 4);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
 		char ch = '1';
 	    switch (ch) {
 	    case 0b111111:

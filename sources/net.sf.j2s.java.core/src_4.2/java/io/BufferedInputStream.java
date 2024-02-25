@@ -235,7 +235,7 @@ class BufferedInputStream extends FilterInputStream {
                 buffer = buf = nbuf;
             }
         count = pos;
-        int n = getInIfOpen().read(buffer, pos, buffer.length - pos);
+        int n = isRead(buffer, pos, buffer.length - pos);
         if (n > 0)
             count = n + pos;
     }
@@ -262,6 +262,8 @@ class BufferedInputStream extends FilterInputStream {
         return getBufIfOpen()[pos++] & 0xff;
     }
 
+    
+    
     /**
      * Read characters into a portion of an array, reading from the underlying
      * stream at most once if necessary.
@@ -279,7 +281,7 @@ class BufferedInputStream extends FilterInputStream {
                bytes into the local buffer.  In this way buffered streams will
                cascade harmlessly. */
             if (len >= getBufIfOpen().length && markpos < 0) {
-                return getInIfOpen().read(b, off, len);
+            	return isRead(b, off, len);
             }
             fill();
             avail = count - pos;
@@ -291,7 +293,20 @@ class BufferedInputStream extends FilterInputStream {
         return cnt;
     }
 
-    /**
+    private int isRead(byte[] b, int off, int len) throws IOException {
+        InputStream is = getInIfOpen();
+        /**
+         * @j2sNative
+         * if (is.readBAIS) return is.readBAIS(b, off, len);
+         */
+        {}        
+        return is.read(b, off, len);
+	}
+
+	/**
+	 * 
+	 * @j2sOverride
+	 * 
      * Reads bytes from this byte-input stream into the specified byte array,
      * starting at the given offset.
      *
@@ -332,6 +347,10 @@ class BufferedInputStream extends FilterInputStream {
     public synchronized int read(byte b[], int off, int len)
         throws IOException
     {
+    	return readBIS(b, off, len);
+    }
+
+    public int readBIS(byte[] b, int off, int len) throws IOException {
         getBufIfOpen(); // Check for closed stream
         if ((off | len | (off + len) | (b.length - (off + len))) < 0) {
             throw new IndexOutOfBoundsException();
@@ -352,9 +371,9 @@ class BufferedInputStream extends FilterInputStream {
             if (input != null && input.available() <= 0)
                 return n;
         }
-    }
+	}
 
-    /**
+	/**
      * See the general contract of the <code>skip</code>
      * method of <code>InputStream</code>.
      *

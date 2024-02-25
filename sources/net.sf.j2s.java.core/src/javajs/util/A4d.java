@@ -35,26 +35,7 @@ import javajs.api.JSONEncodable;
  * for unique constructor and method names
  * for the optimization of compiled JavaScript using Java2Script
  */
-public class A4d implements JSONEncodable, Serializable {
-
-  /*
-   * I assumed that the length of the axis vector is not significant.
-   */
-
-  /**
-   * The x coordinate.
-   */
-  public double x;
-
-  /**
-   * The y coordinate.
-   */
-  public double y;
-
-  /**
-   * The z coordinate.
-   */
-  public double z;
+public class A4d extends P3d {
 
   /**
    * The angle.

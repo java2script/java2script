@@ -84,6 +84,9 @@ public class InflaterInputStream extends FilterInputStream {
     return read(byte1, 0, 1) == -1 ? -1 : byte1[0] & 0xff;
   }
 
+  /**
+   * @j2sOverride
+   */
   @Override
   public int read(byte[] b, int off, int len) throws IOException {
     return readInf(b, off, len);

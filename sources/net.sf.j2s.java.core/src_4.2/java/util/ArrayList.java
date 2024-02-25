@@ -45,6 +45,8 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, Cloneable,
 	private transient E[] array;
 
 	/**
+	 * @j2sIgnore
+	 * 
 	 * Constructs a new instance of ArrayList with zero capacity.
 	 */
 	public ArrayList() {
@@ -52,21 +54,27 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, Cloneable,
 	}
 
 	/**
+	 * @j2sIgnore
 	 * Constructs a new instance of ArrayList with the specified capacity.
 	 * 
 	 * @param capacity
 	 *            the initial capacity of this ArrayList
 	 */
 	public ArrayList(int capacity) {
-		firstIndex = lastIndex = 0;
+		setCapacity(capacity);
+	}
+
+	private void setCapacity(int capacity) {
 		try {
 			array = newElementArray(capacity);
 		} catch (NegativeArraySizeException e) {
 			throw new IllegalArgumentException();
 		}
-	}
 
+	}
 	/**
+	 * @j2sIgnoreSuperConstructor
+	 * 
 	 * Constructs a new instance of ArrayList containing the elements in the
 	 * specified collection. The ArrayList will have an initial capacity which
 	 * is 110% of the size of the collection. The order of the elements in this
@@ -76,8 +84,25 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, Cloneable,
 	 *            the collection of elements to add
 	 */
 	public ArrayList(Collection<? extends E> collection) {
-		int size = collection.size();
 		firstIndex = lastIndex = 0;
+		int n = -1;
+		/**
+		 * @j2sNative
+		 *  if (!collection) {
+		 *    n = 0;
+		 *  } else if (typeof collection == "number") {
+		 *     n = collection;
+		 *  }
+		 *  
+		 *  
+		 *  
+		 */
+		{}
+		if (n >= 0) {
+			setCapacity(n);
+			return;
+		}
+		int size = collection.size();
 		array = newElementArray(size + (size / 10));
 		addAll(collection);
 	}
@@ -103,6 +128,10 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, Cloneable,
 	 */
 	@Override
     public void add(int location, E object) {
+		add2(location, object);
+	}
+
+	public void add2(int location, E object) {
 		int size = size();
 		if (0 < location && location < size) {
 			if (firstIndex == 0 && lastIndex == array.length) {
@@ -131,7 +160,6 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, Cloneable,
 		} else {
             throw new IndexOutOfBoundsException();
         }
-
 		modCount++;
 	}
 
@@ -639,6 +667,8 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, Cloneable,
 	}
 
 	/**
+	 * @j2sOverride
+	 * 
 	 * Answers an array containing all elements contained in this ArrayList. If
 	 * the specified array is large enough to hold the elements, the specified
 	 * array is used, otherwise an array of the same type is created. If the

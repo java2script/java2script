@@ -14121,6 +14121,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2024.02.23 fixes missing Long.signum
 // BH 2023.04.30 fixes issues when Info.console == window.console
 // BH 2023.03.01 upgrade for Java11 String, including String.isBlank() and CharSequence.lines(String) (in Java11 this is StringRoman1.lines(byte[])
 // BH 2023.02.12 upgrade for (asynchronous?) packaging
@@ -18567,66 +18568,54 @@ var fixLongAB = function(a,b) {
 }
 
 
-Long.$eq=function(a,b){
+Long.$cmp=function(a,b, unsigned){
 	if (fixLongAB(a,b)) {
-		return a == b;
+		return (a < b ? -1 : a > b ? 1 : 0);
 	}
 	a = ab[0];b = ab[1];
-	return (a[0] == b[0] && a[1] == b[1] && a[2]== b[2]);
+	if (unsigned) {
+		a = toLongRLH(a);
+		b = toLongRLH(b);
+		for (let i = 2; i >= 0; i--) {
+			if (a[i] < b[i]) return -1;
+			if (a[i] > b[i]) return 1;
+		}
+		return 0;
+	}
+	return (
+		a[2] < b[2] ? -1
+		: a[2] > b[2] ? 1
+		: a[2] == 0 ? 0
+		: a[1] < b[1] ? -a[2]
+		: a[1] > b[1] ? a[2]
+		: a[0] < b[0] ? -a[2]
+		: a[0] > b[0] ? a[2]
+		: 0
+	);
+}
+
+Long.$eq=function(a,b){
+	return Long.$cmp(a, b) == 0;
 }
 
 Long.$ne=function(a,b){
-	if (fixLongAB(a,b)) {
-		return a != b;
-	}
-	a = ab[0];b = ab[1];
-	return (a[0] != b[0] || a[1] != b[1] || a[2]!= b[2]);
-}
-
-Long.$gt=function(a,b){
-	if (fixLongAB(a,b)) {
-		return a > b;
-	}
-	a = ab[0];b = ab[1];
-	return (a[2] > b[2] || a[2] == b[2] && (a[1] > b[1] || a[1] == b[1] && a[0] > b[0]));
-}
-
-Long.$cmp=function(a,b, unsigned){ 
-		if (fixLongAB(a,b)) {
-			return (a < b ? -1 : a > b ? 1 : 0);
-		}
-		a = ab[0];b = ab[1];
-		if (unsigned) {
-			a = toLongRLH(a);
-			b = toLongRLH(b);
-		}
-		return (a[2] < b[2] ? -1 : a[2] > b[2] ? 1
-				: a[2] == 0 ? 0 : a[1] < b[1] ? -1 : a[1] > b[1] ? 1 
-						: a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
+	return Long.$cmp(a, b) != 0;
 }
 
 Long.$ge=function(a,b){
-	if (fixLongAB(a,b)) {
-		return a >= b;
-	}
-	a = ab[0];b = ab[1];
-	return (a[2] > b[2] || a[2] == b[2] && (a[1] > b[1] || a[1] == b[1] && a[0] >= b[0]));
+	return Long.$cmp(a, b) >= 0;
+}
+
+Long.$gt=function(a,b){
+	return Long.$cmp(a, b) > 0;
 }
 
 Long.$le=function(a,b){
-	if (fixLongAB(a,b)) {
-		return a <= b;
-	}
-	a = ab[0];b = ab[1];
-	return (a[2] < b[2] || a[2] == b[2] && (a[1] < b[1] || a[1] == b[1] && a[0] <= b[0]));
+	return Long.$cmp(a, b) <= 0;
 }
 
 Long.$lt=function(a,b){
-	if (fixLongAB(a,b)) {
-		return a < b;
-	}
-	a = ab[0];b = ab[1];
-	return (a[2] < b[2] || a[2] == b[2] && (a[1] < b[1] || a[1] == b[1] && a[0] < b[0]));
+	return Long.$cmp(a, b) < 0;
 }
 
 
@@ -19210,7 +19199,8 @@ return i;
 }, 1);
 
 m$(C$, 'signum$J', function (i) {
-return Long.$ival((Long.$or((Long.$sr(i,63)),(Long.$usr((Long.$neg(i)),63)))));
+return Long.$sign(i);
+//Long.$ival((Long.$or((Long.$sr(i,63)),(Long.$usr((Long.$neg(i)),63)))));
 }, 1);
 
 m$(C$, 'reverseBytes$J', function (i) {
@@ -19318,10 +19308,7 @@ Long.toUnsignedBigInteger$J = function(i) {
     bi || (bi=(Clazz.load("java.math.BigInteger"), Clazz.new_(java.math.BigInteger.c$$S,["18446744073709551616"])));
     return (i >= 0 ? bi.valueOf$J(i) : bi.valueOf$J(i).add$java_math_BigInteger(bi));
 }
-
     
-m$(Long,"signum$J", function(i){ return i < 0 ? -1 : i > 0 ? 1 : 0; }, 1);
-
 Clazz._setDeclared("java.lang.Short", java.lang.Short = Short = function(){
 if (arguments[0] === null || typeof arguments[0] != "object")this.c$(arguments[0]);
 });

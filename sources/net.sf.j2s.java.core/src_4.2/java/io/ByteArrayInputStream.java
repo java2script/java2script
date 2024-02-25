@@ -148,6 +148,8 @@ class ByteArrayInputStream extends InputStream {
     }
 
     /**
+     * @j2sOverride
+
      * Reads up to <code>len</code> bytes of data into an array of bytes
      * from this input stream.
      * If <code>pos</code> equals <code>count</code>,
@@ -178,6 +180,10 @@ class ByteArrayInputStream extends InputStream {
      */
     @Override
     public synchronized int read(byte b[], int off, int len) {
+    	return readBAIS(b, off, len);
+    }
+
+    public int readBAIS(byte[] b, int off, int len) {
         if (b == null) {
             throw new NullPointerException();
         } else if (off < 0 || len < 0 || len > b.length - off) {
@@ -198,9 +204,9 @@ class ByteArrayInputStream extends InputStream {
         System.arraycopy(buf, pos, b, off, len);
         pos += len;
         return len;
-    }
+	}
 
-    /**
+	/**
      * Skips <code>n</code> bytes of input from this input stream. Fewer
      * bytes might be skipped if the end of the input stream is reached.
      * The actual number <code>k</code>

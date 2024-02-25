@@ -39,6 +39,8 @@ public class StringTokenizer implements Enumeration<Object> {
 	private int position;
 
 	/**
+	 * @j2sIgnore
+	 * 
 	 * Constructs a new StringTokenizer for string using whitespace as the
 	 * delimiter, returnDelimiters is false.
 	 * 
@@ -50,6 +52,8 @@ public class StringTokenizer implements Enumeration<Object> {
 	}
 
 	/**
+	 * @j2sIgnore
+	 * 
 	 * Constructs a new StringTokenizer for string using the specified
 	 * delimiters, returnDelimiters is false.
 	 * 
@@ -63,25 +67,29 @@ public class StringTokenizer implements Enumeration<Object> {
 	}
 
 	/**
-	 * Constructs a new StringTokenizer for string using the specified
-	 * delimiters and returning delimiters as tokens when specified.
+	 * Constructs a new StringTokenizer for string using the specified delimiters
+	 * and returning delimiters as tokens when specified.
 	 * 
-	 * @param string
-	 *            the string to be tokenized
-	 * @param delimiters
-	 *            the delimiters to use
-	 * @param returnDelimiters
-	 *            true to return each delimiter as a token
+	 * @param string           the string to be tokenized
+	 * @param delimiters       the delimiters to use
+	 * @param returnDelimiters true to return each delimiter as a token
 	 */
-	public StringTokenizer(String string, String delimiters,
-			boolean returnDelimiters) {
-		if (string != null) {
-			this.string = string;
-			this.delimiters = delimiters;
-			this.returnDelimiters = returnDelimiters;
-			this.position = 0;
-		} else
+	public StringTokenizer(String string, String delimiters, boolean returnDelimiters) {
+		/**
+		 * @j2sNative
+		 * 
+		 * switch (arguments.length) { 
+		 * case 1: delimiters = " \t\n\r\f"; 
+		 * case 2: returnDelimiters = false; 
+		 * }
+		 */
+		{}
+		if (string == null)
 			throw new NullPointerException();
+		this.string = string;
+		this.delimiters = delimiters;
+		this.returnDelimiters = returnDelimiters;
+		this.position = 0;
 	}
 
 	/**
@@ -160,6 +168,11 @@ public class StringTokenizer implements Enumeration<Object> {
 	 *                if no tokens remain
 	 */
 	public String nextToken() {
+		/**
+		 * @j2sNative
+		 * (arguments.length == 1) && (this.delimiters = arguments[0]);	
+		 */
+		{}
 		int i = position;
 		int length = string.length();
 
@@ -187,6 +200,7 @@ public class StringTokenizer implements Enumeration<Object> {
 	}
 
 	/**
+	 * @j2sIgnore
 	 * Returns the next token in the string as a String. The delimiters used are
 	 * changed to the specified delimiters.
 	 * 

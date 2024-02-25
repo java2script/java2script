@@ -295,18 +295,24 @@ public class Thread implements Runnable {
      * @see        java.lang.Thread#run()
      * @see        java.lang.Thread#stop()
      * 
-     * @j2sNative
-     * window.setTimeout ((function (runnable) {
-     * 	return function () {
-     * 		runnable.run ();
-     *	};
-     * }) (this), 0);
      */
     public synchronized void start() {
-    	// ;
+    	startT();
     }
 
-    /**
+    public void startT() {
+    	/**
+    	 * 
+	     * @j2sNative
+	     * window.setTimeout ((function (runnable) {
+	     * 	return function () {
+	     * 		runnable.run ();
+	     *	};
+	     * }) (this), 0);
+    	 */
+    	{}
+	}
+	/**
      * If this thread was constructed using a separate 
      * <code>Runnable</code> run object, then that 
      * <code>Runnable</code> object's <code>run</code> method is called; 

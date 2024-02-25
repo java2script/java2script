@@ -104,6 +104,8 @@ public class DataInputStream extends FilterInputStream implements DataInput {
   //    }
 
   /**
+   * @j2sOverride
+   * 
    * Reads up to <code>len</code> bytes of data from the contained input stream
    * into an array of bytes. An attempt is made to read as many as
    * <code>len</code> bytes, but a smaller number may be read, possibly zero.
@@ -160,6 +162,20 @@ public class DataInputStream extends FilterInputStream implements DataInput {
   public final int read(byte b[], int off, int len) throws IOException {
     return in.read(b, off, len);
   }
+
+	public final int readDIS(byte b[], int off, int len) throws IOException {
+		InputStream is = this.in;
+		/**
+		 * @j2sNative
+		 * 
+		 * 			if (is.readBIS) return is.readBIS(b, off, len); 
+		 * 			if (is.readBAIS)
+		 *            return is.readBAIS(b, off, len);
+		 */
+		{
+		}
+		return is.read(b, off, len);
+	}
 
 //  /**
 //   * See the general contract of the <code>readFully</code> method of

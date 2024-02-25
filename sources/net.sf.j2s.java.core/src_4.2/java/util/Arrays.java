@@ -43,6 +43,8 @@ public class Arrays {
     
 
     /**
+     * @j2sIgnore
+     * 
      * Assigns the specified Object reference to each element of the specified
      * array of Objects.
      *
@@ -71,6 +73,15 @@ public class Arrays {
      *	       <tt>toIndex &gt; a.length</tt>
      */
     public static void fill(Object[] a, int fromIndex, int toIndex,Object val){
+    	/**
+    	 * @j2sNative
+    	 *  if (arguments.length == 2) {
+    	 *     val = arguments[1];
+    	 *     fromIndex = 0;
+    	 *     toIndex = a.length;
+    	 *  }
+    	 */
+    	{}
         rangeCheck(a.length, fromIndex, toIndex);
         for (int i=fromIndex; i<toIndex; i++)
             a[i] = val;

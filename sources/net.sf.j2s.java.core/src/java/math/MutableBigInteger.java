@@ -1,4 +1,6 @@
 /*
+ * 2024.02.21 BH modified for SwingJS with a few (more!)  (x + 0x80000000)|0  adjustments
+ * 
  * Copyright (c) 1999, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -25,7 +27,7 @@
 
 package java.math;
 
-/**
+/** 
  * A class used to represent multiprecision integers that makes efficient
  * use of allocated space by allowing a number to occupy only part of
  * an array so that the arrays do not have to be reallocated as often.
@@ -294,8 +296,8 @@ public class MutableBigInteger {
         // comparison.
         int[] bval = b.value;
         for (int i = offset, j = b.offset; i < alen + offset; i++, j++) {
-            int b1 = value[i] + 0x80000000;
-            int b2 = bval[j]  + 0x80000000;
+            int b1 = (value[i] + 0x80000000)| 0;
+            int b2 = (bval[j]  + 0x80000000)| 0;
             if (b1 < b2)
                 return -1;
             if (b1 > b2)
@@ -339,7 +341,7 @@ public class MutableBigInteger {
             long v = val[i++] & LONG_MASK;
             if (v != hb)
                 return v < hb ? -1 : 1;
-            carry = (bv & 1) << 31; // carray will be either 0x80000000 or 0
+            carry = ((bv & 1) << 31)|0; // carray will be either 0x80000000 or 0
         }
         return carry == 0 ? 0 : -1;
     }
@@ -1131,7 +1133,6 @@ public class MutableBigInteger {
             quotient.value[intLen - xlen] = q;
             remLong = rem & LONG_MASK;
         }
-
         quotient.normalize();
         // Unnormalize
         if (shift > 0)
@@ -1362,8 +1363,7 @@ public class MutableBigInteger {
         if (compareShifted(b, n) < 0) {
             // step 3a: if a1<b1, let quotient=a12/b1 and r=a12%b1
             r = a12.divide2n1n(b1, quotient);
-
-            // step 4: d=quotient*b2
+                    // step 4: d=quotient*b2
             d = new MutableBigInteger(quotient.toBigInteger().multiply(b2));
         } else {
             // step 3b: if a1>=b1, let quotient=beta^n-1 and r=a12-b1*2^n+b1
@@ -1378,7 +1378,7 @@ public class MutableBigInteger {
             d.leftShift(32 * n);
             d.subtract(new MutableBigInteger(b2));
         }
-
+        
         // step 5: r = r*beta^n + a3 - d (paper says a4)
         // However, don't subtract d until after the while loop so r doesn't become negative
         r.leftShift(32 * n);
@@ -1548,13 +1548,13 @@ public class MutableBigInteger {
             int qrem = 0;
             boolean skipCorrection = false;
             int nh = rem.value[j+rem.offset];
-            int nh2 = nh + 0x80000000;
+            int nh2 = (nh + 0x80000000)| 0;
             int nm = rem.value[j+1+rem.offset];
 
             if (nh == dh) {
                 qhat = ~0;
                 qrem = nh + nm;
-                skipCorrection = qrem + 0x80000000 < nh2;
+                skipCorrection = ((qrem + 0x80000000)| 0) < nh2;
             } else {
                 long nChunk = (((long)nh) << 32) | (nm & LONG_MASK);
                 if (nChunk >= 0) {
@@ -1607,13 +1607,13 @@ public class MutableBigInteger {
         int qrem = 0;
         boolean skipCorrection = false;
         int nh = rem.value[limit - 1 + rem.offset];
-        int nh2 = nh + 0x80000000;
+        int nh2 = (nh + 0x80000000)|0;
         int nm = rem.value[limit + rem.offset];
 
         if (nh == dh) {
             qhat = ~0;
             qrem = nh + nm;
-            skipCorrection = qrem + 0x80000000 < nh2;
+            skipCorrection = ((qrem + 0x80000000)|0) < nh2;
         } else {
             long nChunk = (((long) nh) << 32) | (nm & LONG_MASK);
             if (nChunk >= 0) {
@@ -1653,7 +1653,7 @@ public class MutableBigInteger {
                 borrow = mulsubBorrow(rem.value, divisor, qhat, dlen, limit - 1 + rem.offset);
 
             // D5 Test remainder
-            if (borrow + 0x80000000 > nh2) {
+            if (((borrow + 0x80000000)|0) > nh2) {
                 // D6 Add back
                 if(needRemainder)
                     divadd(divisor, rem.value, limit - 1 + 1 + rem.offset);
@@ -1723,13 +1723,13 @@ public class MutableBigInteger {
             int qrem = 0;
             boolean skipCorrection = false;
             int nh = rem.value[j + rem.offset];
-            int nh2 = nh + 0x80000000;
+            int nh2 = (nh + 0x80000000)|0;
             int nm = rem.value[j + 1 + rem.offset];
 
             if (nh == dh) {
                 qhat = ~0;
                 qrem = nh + nm;
-                skipCorrection = qrem + 0x80000000 < nh2;
+                skipCorrection = ((qrem + 0x80000000)|0) < nh2;
             } else {
                 long nChunk = (((long) nh) << 32) | (nm & LONG_MASK);
                 if (nChunk >= 0) {
@@ -1767,7 +1767,7 @@ public class MutableBigInteger {
             int borrow = mulsubLong(rem.value, dh, dl, qhat,  j + rem.offset);
 
             // D5 Test remainder
-            if (borrow + 0x80000000 > nh2) {
+            if (((borrow + 0x80000000)|0) > nh2) {
                 // D6 Add back
                 divaddLong(dh,dl, rem.value, j + 1 + rem.offset);
                 qhat--;
@@ -1963,7 +1963,7 @@ public class MutableBigInteger {
         int t = (aZeros < bZeros ? aZeros : bZeros);
 
         while (a != b) {
-            if ((a+0x80000000) > (b+0x80000000)) {  // a > b as unsigned
+            if (((a + 0x80000000)|0) > ((b + 0x80000000)|0)) {  // a > b as unsigned
                 a -= b;
                 a >>>= Integer.numberOfTrailingZeros(a);
             } else {
@@ -2246,4 +2246,20 @@ public class MutableBigInteger {
         mod.subtract(t1);
         return mod;
     }
+
+//    static {
+//    	int a = 100;
+//    	int b = a + 0x80000000;
+//    	System.out.println(b);
+//    	System.out.println((a + 0x80000000) | 0);
+//    	System.out.println(a + 0x80000000L); // NOT in Java
+//    	System.out.println((int) (a + 0x80000000L));
+//    	a = -100;
+//    	b = a + 0x80000000;
+//    	System.out.println("?");
+//    	System.out.println(b); //NOT in JS
+//    	System.out.println((a + 0x80000000) | 0);
+//    	System.out.println(a + 0x80000000L);
+//    	System.out.println((int) (a + 0x80000000L));
+//    }
 }

@@ -2,6 +2,7 @@ package test;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.CharBuffer;
+import java.util.HashMap;
 
 import javajs.util.Rdr;
 import javajs.util.SB;
@@ -12,6 +13,10 @@ public class Test_String extends Test_ {
 		String s, sb;
 		byte[] b;
 
+		HashMap<String, String> map = new HashMap<String, String>();
+		map.put("test",  "value");
+		System.out.println("test=" + map.get("test"));
+		
 		sb = new String(new byte[] { 97, 98, 99 });
 		System.out.println(sb);
 		assert (sb.equals("abc"));

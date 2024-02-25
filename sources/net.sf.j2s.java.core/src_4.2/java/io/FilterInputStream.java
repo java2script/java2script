@@ -111,6 +111,8 @@ class FilterInputStream extends InputStream {
 //    }
 
     /**
+     * @j2sOverride
+     *  
      * Reads up to <code>len</code> bytes of data from this input stream
      * into an array of bytes. If <code>len</code> is not zero, the method
      * blocks until some input is available; otherwise, no

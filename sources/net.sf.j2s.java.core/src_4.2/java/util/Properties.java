@@ -78,13 +78,15 @@ public class Properties extends Hashtable<Object,Object> {
 			KEY_DONE = 4, IGNORE = 5;
 
 	/**
+	 * @j2sIgnore;
 	 * Constructs a new Properties object.
 	 */
 	public Properties() {
-		super();
 	}
 
 	/**
+	 * @j2sIgnoreSuperConstructor
+	 * 
 	 * Constructs a new Properties object using the specified default
 	 * properties.
 	 * 
@@ -92,7 +94,9 @@ public class Properties extends Hashtable<Object,Object> {
 	 *            the default properties
 	 */
 	public Properties(Properties properties) {
-		defaults = properties;
+		initHT(); 
+		// check null just for JavaScript undefined
+		defaults = (properties == null ? null : properties);
 	}
 
 	private String dumpString(String buffer, String string, boolean key) {
