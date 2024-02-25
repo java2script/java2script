@@ -30,6 +30,82 @@ public class Test_Long extends Test_ {
 	
 	public static void main(String[] args) {
 
+		long m1 = -1L;
+		long m2 = -2L;
+		long p2 = 2L;
+		assert(Long.compare(m1, m2) == 1);
+		assert(Long.compare(m2, m1) == -1);
+		assert(Long.compareUnsigned(m1, m2) == 1);
+		assert(Long.compareUnsigned(m2, m1) == -1);
+		assert(Long.compareUnsigned(m1, p2) == 1);
+		assert(Long.compareUnsigned(p2, m1) == -1);
+		System.out.println("Long.compareUnsigned OK");
+		
+    	long a = 0x11111111111001L;
+    	long b = 0x11111111100000L;
+    	
+    	long c = -(int) (a-b) + a - b;
+    	System.out.println(c);
+    	assert(c == 0);
+    	long e = a - b;
+    	System.out.println("a-b=" + (a-b));
+    	assert(e == 69633);
+
+
+    	// next two fail to wrap second operator
+    	
+    	a = 10;
+    	b = 12;
+    	
+    	c = a - b - (int) (a-b);    	
+    	// var c=Long.$sub(a,b - Long.$ival((Long.$sub(a,b))) );
+    	System.out.println(c);
+    	assert(c == 0);
+    	
+    	e = a - b - 1;
+    	System.out.println("10-12-1=" + e ); 
+    	assert(e == -3);
+    	// var e=Long.$sub(a,b-1);
+    	// gives -4 ??
+    	
+    	// something wrong here
+    	a = 10;
+    	b = 3;
+    	c = 12;	
+    	
+    	a = 0x11111111111001L;
+    	b = 0x11111111100000L;
+    	
+    	c = -(int) (a-b) + a - b;
+    	
+    	long d = a + b - (int) (a-b) - c; // 13 - 7 - 12 == -6
+    	// var d=Long.$sub(
+    	//    Long.$sub(
+    	//       Long.$add(a,b),
+    	//       Long.$ival((Long.$sub(a,b)))
+    	//    ),
+    	//    c
+    	// );
+    	System.out.println(d);
+    	// gives     	9607679204777982    	
+    	assert(d == 9607679204917248L);
+    	
+    	// something wrong here
+    	a = 10;
+    	b = 3;
+    	c = 12;	
+    	
+    	d = a + b - (int) (a-b) - c; // 13 - 7 - 12 == -6
+    	// var d=Long.$sub(
+    	//    Long.$sub(
+    	//       Long.$add(a,b),
+    	//       Long.$ival((Long.$sub(a,b)))
+    	//    ),
+    	//    c
+    	// );
+    	System.out.println(d);
+    	// gives     	9607679204777982    	
+    	assert(d == -6);
 
 		long j = Long.parseLong("2"), k = 10, l = 1, m = 12;
 		Long J = Long.valueOf(j);
@@ -390,6 +466,10 @@ public class Test_Long extends Test_ {
 		m = 12;
 		j = k + l + l;
 		assert(j == 12);
+		
+		j = k - l - m;
+		assert(j == -3);
+		
 		j = k | l | 0xFL;
 		assert(j == 15);
 		m = 2;

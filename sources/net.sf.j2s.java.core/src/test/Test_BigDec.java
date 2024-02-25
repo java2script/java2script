@@ -1,8 +1,8 @@
 package test;
 
-import test.math.BigDecimal;
+import java.math.BigDecimal;
 
-import test.math.MathContext;
+import java.math.MathContext;
 //import test.math.BigInteger;
 //import test.math.MutableBigInteger;
 //import java.util.GregorianCalendar;
@@ -12,12 +12,49 @@ public class Test_BigDec extends Test_ {
 
     
     public static void main(String[] args) {
+    	
+    	int precision = 1000;
+    	
+    	
+		BigDecimal factor1 = new BigDecimal("1");
+		factor1 = factor1.setScale(precision);
+		BigDecimal five = new BigDecimal("5");
+		five = five.setScale(precision);
+		
+		factor1 = factor1.divide(five, BigDecimal.ROUND_FLOOR);
+		System.out.println(chopText(factor1.toString()));
+		assert(factor1.toString().equals("0.2000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"));
 
+		
+		
+		factor1 = new BigDecimal("1");
+		BigDecimal di = factor1.divideToIntegralValue(five);
+		System.out.println(di);
+		assert(di.toString().equals("0E+1000"));
+
+		BigDecimal[] dr = factor1.divideAndRemainder(five);
+		System.out.println(dr[0]);
+		assert(dr[0].toString().equals("0E+1000"));
+		System.out.println(dr[1]);
+		assert(dr[1].toString().equals("1"));
+		
+    	
     	testBDDiv();
     	testBDMul();
     	
 		System.out.println("testBD OK");
 
+	}
+
+	private static String chopText(String s) {
+		int nd = 50;
+		String c = "";
+		int n = s.length() / nd;
+		int p = 0;
+		for (int i = 0; i < n; i++)
+			c += s.substring(i*nd, p = (i+1)*nd) + "\n";
+		s = c + s.substring(p);
+		return s;
 	}
 
 	// failing		testBDDiv();

@@ -7,6 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2024.02.23 fixes missing Long.signum
 // BH 2023.04.30 fixes issues when Info.console == window.console
 // BH 2023.03.01 upgrade for Java11 String, including String.isBlank() and CharSequence.lines(String) (in Java11 this is StringRoman1.lines(byte[])
 // BH 2023.02.12 upgrade for (asynchronous?) packaging
@@ -5084,7 +5085,8 @@ return i;
 }, 1);
 
 m$(C$, 'signum$J', function (i) {
-return Long.$ival((Long.$or((Long.$sr(i,63)),(Long.$usr((Long.$neg(i)),63)))));
+return Long.$sign(i);
+//Long.$ival((Long.$or((Long.$sr(i,63)),(Long.$usr((Long.$neg(i)),63)))));
 }, 1);
 
 m$(C$, 'reverseBytes$J', function (i) {
@@ -5192,10 +5194,7 @@ Long.toUnsignedBigInteger$J = function(i) {
     bi || (bi=(Clazz.load("java.math.BigInteger"), Clazz.new_(java.math.BigInteger.c$$S,["18446744073709551616"])));
     return (i >= 0 ? bi.valueOf$J(i) : bi.valueOf$J(i).add$java_math_BigInteger(bi));
 }
-
     
-m$(Long,"signum$J", function(i){ return i < 0 ? -1 : i > 0 ? 1 : 0; }, 1);
-
 Clazz._setDeclared("java.lang.Short", java.lang.Short = Short = function(){
 if (arguments[0] === null || typeof arguments[0] != "object")this.c$(arguments[0]);
 });
