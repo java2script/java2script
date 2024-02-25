@@ -294,8 +294,8 @@ public class MutableBigInteger {
         // comparison.
         int[] bval = b.value;
         for (int i = offset, j = b.offset; i < alen + offset; i++, j++) {
-            int b1 = value[i] + 0x80000000;
-            int b2 = bval[j]  + 0x80000000;
+            int b1 = (value[i] + 0x80000000)|0;
+            int b2 = (bval[j]  + 0x80000000)|0;
             if (b1 < b2)
                 return -1;
             if (b1 > b2)
@@ -889,9 +889,11 @@ public class MutableBigInteger {
         for (int i=rstart+1-y+len; i < rstart+1; i++)
             result[i] = 0;
 
-        value = result;
         intLen = resultLen;
         offset = result.length - resultLen;
+        
+        value = result;
+
     }
 
     /**
@@ -939,18 +941,17 @@ public class MutableBigInteger {
         // Subtract common parts of both numbers
         while (y > 0) {
             x--; y--;
-
-            diff = (a.value[x+a.offset] & LONG_MASK) -
-                   (b.value[y+b.offset] & LONG_MASK) - ((int)-(diff>>32));
+            // 2024.02.22 BH long-long-int fails, now (long-long)-int
+            diff = ((a.value[x+a.offset] & LONG_MASK)
+                    - (b.value[y+b.offset] & LONG_MASK)) - (int)-(diff>>32);
             result[rstart--] = (int)diff;
         }
-        // Subtract remainder of longer number
+	// Subtract remainder of longer number
         while (x > 0) {
             x--;
-            diff = (a.value[x+a.offset] & LONG_MASK) - ((int)-(diff>>32));
+            diff = (a.value[x+a.offset] & LONG_MASK) - (int)-(diff>>32);
             result[rstart--] = (int)diff;
         }
-
         value = result;
         intLen = resultLen;
         offset = value.length - resultLen;
@@ -1261,6 +1262,8 @@ public class MutableBigInteger {
             int n = j * m;            // step 2b: block length in 32-bit units
             long n32 = 32L * n;         // block length in bits
             int sigma = (int) Math.max(0, n32 - b.bitLength());   // step 3: sigma = max{T | (2^T)*B < beta^n}
+            
+            
             MutableBigInteger bShifted = new MutableBigInteger(b);
             bShifted.safeLeftShift(sigma);   // step 4a: shift b so its length is a multiple of n
             MutableBigInteger aShifted = new MutableBigInteger (this);
@@ -1278,7 +1281,6 @@ public class MutableBigInteger {
             // step 7: z[t-2] = [a[t-1], a[t-2]]
             MutableBigInteger z = aShifted.getBlock(t-2, t, n);    // the second to most significant block
             z.addDisjoint(a1, n);   // z[t-2]
-
             // do schoolbook division on blocks, dividing 2-block numbers by 1-block numbers
             MutableBigInteger qi = new MutableBigInteger();
             MutableBigInteger ri;
@@ -1356,7 +1358,6 @@ public class MutableBigInteger {
         MutableBigInteger b1 = new MutableBigInteger(b);
         b1.safeRightShift(n * 32);
         BigInteger b2 = b.getLower(n);
-
         MutableBigInteger r;
         MutableBigInteger d;
         if (compareShifted(b, n) < 0) {
@@ -1381,6 +1382,7 @@ public class MutableBigInteger {
 
         // step 5: r = r*beta^n + a3 - d (paper says a4)
         // However, don't subtract d until after the while loop so r doesn't become negative
+        
         r.leftShift(32 * n);
         r.addLower(this, n);
 
@@ -1390,7 +1392,6 @@ public class MutableBigInteger {
             quotient.subtract(MutableBigInteger.ONE);
         }
         r.subtract(d);
-
         return r;
     }
 
@@ -1548,13 +1549,13 @@ public class MutableBigInteger {
             int qrem = 0;
             boolean skipCorrection = false;
             int nh = rem.value[j+rem.offset];
-            int nh2 = nh + 0x80000000;
+            int nh2 = (nh + 0x80000000)|0;
             int nm = rem.value[j+1+rem.offset];
 
             if (nh == dh) {
                 qhat = ~0;
                 qrem = nh + nm;
-                skipCorrection = qrem + 0x80000000 < nh2;
+                skipCorrection = ((qrem + 0x80000000)|0) < nh2;
             } else {
                 long nChunk = (((long)nh) << 32) | (nm & LONG_MASK);
                 if (nChunk >= 0) {
@@ -1592,7 +1593,7 @@ public class MutableBigInteger {
             int borrow = mulsub(rem.value, divisor, qhat, dlen, j+rem.offset);
 
             // D5 Test remainder
-            if (borrow + 0x80000000 > nh2) {
+            if (((borrow + 0x80000000)|0) > nh2) {
                 // D6 Add back
                 divadd(divisor, rem.value, j+1+rem.offset);
                 qhat--;
@@ -1607,13 +1608,13 @@ public class MutableBigInteger {
         int qrem = 0;
         boolean skipCorrection = false;
         int nh = rem.value[limit - 1 + rem.offset];
-        int nh2 = nh + 0x80000000;
+        int nh2 = (nh + 0x80000000)|0;
         int nm = rem.value[limit + rem.offset];
 
         if (nh == dh) {
             qhat = ~0;
             qrem = nh + nm;
-            skipCorrection = qrem + 0x80000000 < nh2;
+            skipCorrection = ((qrem + 0x80000000)|0) < nh2;
         } else {
             long nChunk = (((long) nh) << 32) | (nm & LONG_MASK);
             if (nChunk >= 0) {
@@ -1653,7 +1654,7 @@ public class MutableBigInteger {
                 borrow = mulsubBorrow(rem.value, divisor, qhat, dlen, limit - 1 + rem.offset);
 
             // D5 Test remainder
-            if (borrow + 0x80000000 > nh2) {
+            if (((borrow + 0x80000000)|0) > nh2) {
                 // D6 Add back
                 if(needRemainder)
                     divadd(divisor, rem.value, limit - 1 + 1 + rem.offset);
@@ -1723,13 +1724,13 @@ public class MutableBigInteger {
             int qrem = 0;
             boolean skipCorrection = false;
             int nh = rem.value[j + rem.offset];
-            int nh2 = nh + 0x80000000;
+            int nh2 = (nh + 0x80000000)|0;
             int nm = rem.value[j + 1 + rem.offset];
 
             if (nh == dh) {
                 qhat = ~0;
                 qrem = nh + nm;
-                skipCorrection = qrem + 0x80000000 < nh2;
+                skipCorrection = ((qrem + 0x80000000)|0) < nh2;
             } else {
                 long nChunk = (((long) nh) << 32) | (nm & LONG_MASK);
                 if (nChunk >= 0) {
@@ -1767,7 +1768,7 @@ public class MutableBigInteger {
             int borrow = mulsubLong(rem.value, dh, dl, qhat,  j + rem.offset);
 
             // D5 Test remainder
-            if (borrow + 0x80000000 > nh2) {
+            if (((borrow + 0x80000000)|0) > nh2) {
                 // D6 Add back
                 divaddLong(dh,dl, rem.value, j + 1 + rem.offset);
                 qhat--;
@@ -1963,7 +1964,7 @@ public class MutableBigInteger {
         int t = (aZeros < bZeros ? aZeros : bZeros);
 
         while (a != b) {
-            if ((a+0x80000000) > (b+0x80000000)) {  // a > b as unsigned
+            if (((a+0x80000000)|0) > ((b+0x80000000)|0)) {  // a > b as unsigned
                 a -= b;
                 a >>>= Integer.numberOfTrailingZeros(a);
             } else {
