@@ -1,9 +1,12 @@
 package test;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URL;
 import java.util.Properties;
 
 public class Test_Resource extends Test_ {
@@ -15,8 +18,17 @@ public class Test_Resource extends Test_ {
 	static boolean isClosed = false;
 
 	public static void main(String[] args) {
+		
 		Properties p = new Properties();
 		try {
+			
+			
+		    URL url = Test_Resource.class.getResource("test.properties");
+		    File file = new File(url.toURI());
+		    BufferedReader fr = new BufferedReader(new FileReader(file));
+		      System.out.println(fr.readLine());
+			fr.close();
+			System.out.println("URItest OK");
 			// check for proper referencing of an interface
 			Class<?> c = Test_Resource.class;
 			System.out.println("Class.getResourceAsStream(\"test.properties\")");
