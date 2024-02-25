@@ -31,6 +31,7 @@ import j2s.CorePlugin;
 // TODO: superclass inheritance for JAXB XmlAccessorType
 // TODO: Transpiler bug allows static String name, but JavaScript function().name is read-only and will be "clazz"
 
+//BH 2024.02.22 -- 3.3.1-v7 fixes long extension issue causing MutableBitInteger to miscalculate subtraction(no change in version #)
 //BH 2023.03.29 -- 3.3.1-v7 fixes outer static method call from within lambda expression. 
 //BH 2023.02.09 -- 3.3.1.v6 fixes j2s.excluded.paths needing /src/xxxx
 //BH 2022.06.27 -- 3.3.1-v5 fixes missing method annotations
@@ -4313,11 +4314,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private void addExtendedOperands(List<?> extendedOperands, String op, char pre, char post, boolean isToString,
 			boolean isLongCall) {
 		buffer.append(' ');
+		if (isLongCall)
+			op = ",";
 		for (Iterator<?> iter = extendedOperands.iterator(); iter.hasNext();) {
 			Expression exp = (Expression) iter.next();
-			// op may be int for a while, but after that it changes to long
-			if (isLongCall && exp.resolveTypeBinding().getName().equals("long"))
-				op = ",";
 			buffer.append(op);
 			buffer.append(pre);
 			addOperand(exp, isToString);
