@@ -104,6 +104,8 @@ public class DataInputStream extends FilterInputStream implements DataInput {
   //    }
 
   /**
+   * @j2sOverride
+   * 
    * Reads up to <code>len</code> bytes of data from the contained input stream
    * into an array of bytes. An attempt is made to read as many as
    * <code>len</code> bytes, but a smaller number may be read, possibly zero.

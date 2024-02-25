@@ -148,6 +148,8 @@ class ByteArrayInputStream extends InputStream {
     }
 
     /**
+     * @j2sOverride
+
      * Reads up to <code>len</code> bytes of data into an array of bytes
      * from this input stream.
      * If <code>pos</code> equals <code>count</code>,

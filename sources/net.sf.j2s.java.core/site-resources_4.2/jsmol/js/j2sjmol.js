@@ -894,7 +894,7 @@ Clazz.defineMethod = function (clazzThis, funName, funBody, funParams) {
 	if (!f$.stacks || f$.claxxReference !== clazzThis) {
 		//Generate a new delegating method for the class                
     var id = ++SAEMid;
-    console.log("SAEM " + clazzThis.__CLASS_NAME__ + "." + funName);
+    //console.log("SAEM " + clazzThis.__CLASS_NAME__ + "." + funName);
   	var delegate = function () {
   		return searchAndExecuteMethod(id, this, arguments.callee.claxxReference, arguments.callee.methodName, arguments);
   	};

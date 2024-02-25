@@ -304,6 +304,9 @@ class BufferedInputStream extends FilterInputStream {
 	}
 
 	/**
+	 * 
+	 * @j2sOverride
+	 * 
      * Reads bytes from this byte-input stream into the specified byte array,
      * starting at the given offset.
      *

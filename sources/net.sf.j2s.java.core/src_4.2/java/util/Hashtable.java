@@ -161,6 +161,8 @@ public class Hashtable<K,V>
     private transient int modCount;
 
 	/**
+     *  @j2sIgnore
+     *  
 	 * SwingJS note: This constructor DOES NOT allow JavaScript Map object for
 	 * Hashtable<String,?>.
 	 * 
@@ -173,7 +175,6 @@ public class Hashtable<K,V>
 	 *                                     zero, or if the load factor is
 	 *                                     nonpositive.
 	 * 
-     *              @j2sIgnore
 	 */
 	public Hashtable(int capacity, float loadFactor) {
 		super();
@@ -212,9 +213,12 @@ public class Hashtable<K,V>
      * 
 	 * @j2sIgnoreSuperConstructor
      */
-    @SuppressWarnings("unused")
 	public Hashtable() {
-		super();
+    	initHT();
+    }
+
+    @SuppressWarnings("unused")
+    protected void initHT() {
 		Hashtable map = null;
 		int capacity = 11;
 		float loadFactor = 0.75f;
@@ -248,9 +252,9 @@ public class Hashtable<K,V>
 		__setJS();
 		if (map != null)
 			putAll(map);
-    }
+	}
 
-    /**
+	/**
      * Constructs a new hashtable with the same mappings as the given
      * Map.  The hashtable is created with an initial capacity sufficient to
      * hold the mappings in the given Map and a default load factor (0.75).
@@ -762,6 +766,8 @@ public class Hashtable<K,V>
 	}
 
     /**
+     * @j2sOverride
+     * 
      * Returns a string representation of this <tt>Hashtable</tt> object
      * in the form of a set of entries, enclosed in braces and separated
      * by the ASCII characters "<tt>,&nbsp;</tt>" (comma and space). Each
@@ -777,21 +783,20 @@ public class Hashtable<K,V>
         if (max == -1)
             return "{}";
 
-        StringBuilder sb = new StringBuilder();
         Iterator<Map.Entry<K,V>> it = entrySet().iterator();
 
-        sb.append('{');
+        String sb = "{";
         for (int i = 0; ; i++) {
             Map.Entry<K,V> e = it.next();
             K key = e.getKey();
             V value = e.getValue();
-            sb.append(key   == this ? "(this Map)" : key.toString());
-            sb.append('=');
-            sb.append(value == this ? "(this Map)" : value.toString());
+            sb += (key == this ? "(this Map)" : key.toString());
+            sb += "=";
+            sb += (value == this ? "(this Map)" : value.toString());
 
             if (i == max)
-                return sb.append('}').toString();
-            sb.append(", ");
+                return sb + '}';
+            sb += ", ";
         }
     }
 
@@ -1432,6 +1437,7 @@ public class Hashtable<K,V>
 		 * 
 		 * map.__m.set(key == null ? null : key + "", value)
 		 */
+		{}
 	}
 
 	/**
@@ -1491,6 +1497,7 @@ public class Hashtable<K,V>
 			 *          m.clear();
 			 * 		}
 			 */
+		{}
 	}
 	
 	/**
