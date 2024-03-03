@@ -30,6 +30,8 @@ package javax.swing;
 
 import java.util.Vector;
 
+import javax.swing.border.EmptyBorder;
+
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Insets;
@@ -95,6 +97,7 @@ public class JMenuBar extends JComponent implements MenuElement
      */
     public JMenuBar() {
         super();
+        setBorder(new EmptyBorder(4, 0, 2, 0));
         //setFocusTraversalKeysEnabled(false);
         setSelectionModel(new DefaultSingleSelectionModel());
         updateUI();

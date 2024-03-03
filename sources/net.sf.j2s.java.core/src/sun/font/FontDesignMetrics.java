@@ -30,12 +30,14 @@ package sun.font;
 
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.geom.Rectangle2D;
 //import java.awt.font.FontRenderContext;
 //import java.awt.geom.AffineTransform;
 //import sun.java2d.Disposer;
 //import sun.java2d.DisposerRecord;
 import java.util.Hashtable;
 
+import swingjs.JSFontMetrics;
 import swingjs.JSToolkit;
 
 /*
@@ -404,10 +406,10 @@ private float leading;
 //        return frc;
 //    }
 //
-    @Override
-		public int charWidth(char ch) {
-        // default metrics for compatibility with legacy code
-    	return stringWidth("" + ch);
+//    @Override
+//		public int charWidth(char ch) {
+//        // default metrics for compatibility with legacy code
+//    	return stringWidth("" + ch);
 //        float w;
 //        if (ch < 0x100) {
 //            w = getLatinCharWidth(ch);
@@ -416,8 +418,8 @@ private float leading;
 //            w = handleCharWidth(ch);
 //        }
 //        return (int)(0.5 + w);
-    }
-
+//    }
+//
 //    public int charWidth(int ch) {
 //        if (!Character.isValidCodePoint(ch)) {
 //            ch = 0xffff;
@@ -429,7 +431,7 @@ private float leading;
 //    }
 
     @Override
-		public int stringWidth(String str) {
+	public int stringWidth(String str) {
       return (int) (0.5 + getWidth(str));
     }
     
@@ -481,31 +483,6 @@ private float leading;
 		return (int) (0.5 + width);
 	}
 
-    /**
-     * Gets the advance widths of the first 256 characters in the
-     * <code>Font</code>.  The advance is the
-     * distance from the leftmost point to the rightmost point on the
-     * character's baseline.  Note that the advance of a
-     * <code>String</code> is not necessarily the sum of the advances
-     * of its characters.
-     * @return    an array storing the advance widths of the
-     *                 characters in the <code>Font</code>
-     *                 described by this <code>FontMetrics</code> object.
-     */
-    // More efficient than base class implementation - reuses existing cache
-    @Override
-		public int[] getWidths() {
-        int[] widths = new int[256];
-//        for (char ch = 0 ; ch < 256 ; ch++) {
-//            float w = advCache[ch];
-//            if (w == UNKNOWN_WIDTH) {
-//                w = advCache[ch] = handleCharWidth(ch);
-//            }
-//            widths[ch] = (int) (0.5 + w);
-//        }
-        return widths;
-    }
-
   /*
    * Returns the typographic ascent of the font. This is the maximum distance
    * glyphs in this font extend above the base line (measured in typographic
@@ -527,12 +504,15 @@ private float leading;
         return (int)(roundingUpValue + descent);
     }
 
+    //JSFontMetrics 秘fm;
+    
     private void _getMetrics() {
     	if (ascent >= 0)
     		return;
-		ascent = font.getFontMetrics().getAscent();
-		descent = font.getFontMetrics().getDescent();
-		leading = font.getFontMetrics().getLeading();
+//    	秘fm = new JSFontMetrics(font);
+		ascent = JSFontMetrics.fontAscent(font);
+		descent = JSFontMetrics.fontDescent(font);
+		leading = JSFontMetrics.fontLeading(font);
 	}
 
 	@Override
@@ -562,20 +542,120 @@ private float leading;
         return height;
     }
 
+//	public JSFontMetrics 秘getJSMetrics() {
+//    	_getMetrics();
+//		return 秘fm;
+//	}
+	
+	/**
+	 * The length of the metrics array must be >= 8. This method will store the
+	 * following elements in that array before returning: metrics[0]: ascent
+	 * metrics[1]: descent metrics[2]: leading metrics[3]: max advance metrics[4]:
+	 * strikethrough offset metrics[5]: strikethrough thickness metrics[6]:
+	 * underline offset metrics[7]: underline thickness
+	 */
+	public void 秘fillMetrics(float[] metrics) {
+    	_getMetrics();
+		metrics[0] = ascent;
+		metrics[1] = descent;
+		metrics[2] = leading;
+		metrics[3] = 0;
+		if (metrics.length >= 8) {
+			metrics[4] = font.getSize2D() / -4f;
+			metrics[5] = metrics[6] = metrics[7] = 1;
+		}
+	}
+
+	public Rectangle2D 秘getStringBounds(String s) {
+    	_getMetrics();
+    	return new Rectangle2D.Float(0, -ascent, stringWidth(s), ascent + descent + leading);        	
+	}
+
+	/**
+	 * The actual {@link Font} from which the font metrics are created. This cannot
+	 * be null.
+	 *
+	 * @serial
+	 * @see #getFont()
+	 */
+	private final Font font;
+
+	private float[] fwidths;
+	private int[] iwidths;
+	private int FIRST_PRINTABLE = 32;
+
+    @Override
+	public int charWidth(char pt) {
+		return (pt < 256 ? (int)(0.5 + getWidthsFloat()[pt]) : stringWidth("" + pt));
+	}
+
 	@Override
 	public int charWidth(int codePoint) {
 		// from FontMetrics
 		if (!Character.isValidCodePoint(codePoint)) {
 			codePoint = 0xffff; // substitute missing glyph width
 		}
-
 		if (codePoint < 256) {
 			return getWidths()[codePoint];
-		} else {
-			char[] buffer = new char[2];
-			int len = Character.toChars(codePoint, buffer, 0);
-			return charsWidth(buffer, 0, len);
 		}
+		String s = /** @j2sNative String.fromCharCode(codePoint) || */
+				null;
+		return stringWidth(s);
 	}
+
+//	public int charWidth(int pt) {
+//		/**
+//		 * could be a character  ?? really ? how?
+//		 * 
+//		 * @j2sNative
+//		 * 
+//		 * 			var spt; return ((pt + 0 == pt ? pt : (pt = (spt =
+//		 *            pt).charCodeAt(0))) < 256 ? (this.getWidthsFloat$()[pt] | 0) :
+//		 *            this.stringWidth$S(isChar ? spt : String.fromCharCode(pt)));
+//		 */
+//	}
+
+    /**
+     * Gets the advance widths of the first 256 characters in the
+     * <code>Font</code>.  The advance is the
+     * distance from the leftmost point to the rightmost point on the
+     * character's baseline.  Note that the advance of a
+     * <code>String</code> is not necessarily the sum of the advances
+     * of its characters.
+     * @return    an array storing the advance widths of the
+     *                 characters in the <code>Font</code>
+     *                 described by this <code>FontMetrics</code> object.
+     */
+    // More efficient than base class implementation - reuses existing cache
+    @Override
+	public int[] getWidths() {
+		if (iwidths != null)
+			return iwidths;
+		iwidths = new int[256];
+		getWidthsFloat();
+		for (int ch = FIRST_PRINTABLE; ch < 256; ch++) {
+			iwidths[ch] = (int) fwidths[ch];
+		}
+		return iwidths;
+	}
+
+	public float[] getWidthsFloat() {
+		if (fwidths != null)
+			return fwidths;
+		fwidths = new float[256];
+		for (int ch = FIRST_PRINTABLE; ch < 256; ch++) {
+			fwidths[ch] = JSToolkit.getStringWidth(null, font, "" + (char) ch);
+		}
+		return fwidths;
+	}
+
+	public float getFloatWidth(int ch) {
+		String s = (/** @j2sNative 1 ? String.fromCharCode(ch) : */
+		"");
+		return JSToolkit.getStringWidth(null, font, s);
+	}
+
+
+
 
 }
