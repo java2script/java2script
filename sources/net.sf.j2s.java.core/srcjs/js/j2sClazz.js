@@ -7,6 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2024.03.03 removes unnecessary loadClass("xxxx") on exceptionOf(e,"xxxx") call
 // BH 2024.02.23 fixes missing Long.signum
 // BH 2023.04.30 fixes issues when Info.console == window.console
 // BH 2023.03.01 upgrade for Java11 String, including String.isBlank() and CharSequence.lines(String) (in Java11 this is StringRoman1.lines(byte[])
@@ -293,48 +294,6 @@ if (me.__ARRAYTYPE) {
   return me;
 }
 
-/**
- * sgurin Implements Java's keyword "instanceof" in JavaScript's way **for
- * exception objects**.
- * 
- * calls Clazz.instanceOf if e is a Java exception. If not, try to detect known
- * native exceptions, like native NullPointerExceptions and wrap it into a Java
- * exception and call Clazz.instanceOf again. if the native exception can't be
- * wrapped, false is returned.
- * 
- * @param obj
- *            the object to be tested
- * @param clazz
- *            the class to be checked
- * @return whether the object is an instance of the class
- * @author: sgurin
- */
-Clazz.exceptionOf = function(e, clazz) {
-  if (typeof clazz == "string")
-    clazz = Clazz.load(clazz);
-  if(e.__CLASS_NAME__)
-    return Clazz.instanceOf(e, clazz);
-  if (!e.getMessage) {
-    e.getMessage = function() {return "" + e};
-  }
-  if (!e.printStackTrace$) {
-    e.printStackTrace$ = function(){System.err.println$S(e + "\n" + this.stack)};
-    e.printStackTrace$java_io_PrintStream = function(stream){
-    	stream.println$S(e + "\n" + e.stack);
-    };
-    // alert(e + " try/catch path:" + Clazz._getStackTrace(-10));
-  }
-  if(clazz == Error) {
-    if (("" + e).indexOf("Error") < 0)
-      return false;
-    System.err.println$O(Clazz._getStackTrace());
-    return true;
-    // everything here is a Java Exception, not a Java Error
-  }
-  return (clazz == Exception || clazz == Throwable
-    || clazz == NullPointerException && _isNPEExceptionPredicate(e));
-};
-
 Clazz.forName = function(name, initialize, loader, isQuiet) {
   // we need to consider loading a class from the path of the calling class.
  var cl = null;
@@ -434,6 +393,52 @@ Clazz.instanceOf = function (obj, clazz) {
                && isInstanceOf(obj.__BASECLASS, clazz.__BASECLASS); 
   }
   return (obj instanceof clazz || isInstanceOf(getClassName(obj, true), clazz, true));
+};
+
+/**
+ * sgurin Implements Java's keyword "instanceof" in JavaScript's way **for
+ * exception objects**.
+ * 
+ * calls Clazz.instanceOf if e is a Java exception. If not, try to detect known
+ * native exceptions, like native NullPointerExceptions and wrap it into a Java
+ * exception and call Clazz.instanceOf again. if the native exception can't be
+ * wrapped, false is returned.
+ * 
+ * @param obj
+ *            the object to be tested
+ * @param clazz
+ *            the class to be checked
+ * @return whether the object is an instance of the class
+ * @author: sgurin
+ */
+Clazz.exceptionOf = function(e, clazz) {
+  if(e.__CLASS_NAME__) {
+	  if (typeof clazz == "string") {
+		  var c = Clazz._getDeclared(clazz);
+		  if (!c) return false;
+		  clazz = c;
+	  }
+    return Clazz.instanceOf(e, clazz);
+  }
+  if (!e.getMessage) {
+    e.getMessage = function() {return "" + e};
+  }
+  if (!e.printStackTrace$) {
+    e.printStackTrace$ = function(){System.err.println$S(e + "\n" + this.stack)};
+    e.printStackTrace$java_io_PrintStream = function(stream){
+    	stream.println$S(e + "\n" + e.stack);
+    };
+    // alert(e + " try/catch path:" + Clazz._getStackTrace(-10));
+  }
+  if(clazz == Error) {
+    if (("" + e).indexOf("Error") < 0)
+      return false;
+    System.err.println$O(Clazz._getStackTrace());
+    return true;
+    // everything here is a Java Exception, not a Java Error
+  }
+  return (clazz == Exception || clazz == Throwable
+    || clazz == NullPointerException && _isNPEExceptionPredicate(e));
 };
 
 var initStatic = function(cl, impls) {

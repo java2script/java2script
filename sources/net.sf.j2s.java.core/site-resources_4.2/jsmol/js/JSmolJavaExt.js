@@ -1002,6 +1002,8 @@ return buf.join('');
 
 if(String.prototype.$replace==null){
 java.lang.String=String;
+Clazz._setDeclared("String", String);
+
 if(Clazz._supportsNativeObject){
 for(var i=0;i<Clazz._extendedObjectMethods.length;i++){
 var p=Clazz._extendedObjectMethods[i];
@@ -1666,6 +1668,8 @@ c$.get = function(o, i){return o[i]};
 javautil.Date=Date;
 Date.TYPE="javautil.Date";
 Date.__CLASS_NAME__="Date";
+Clazz._setDeclared("java.util.Date", Date);
+Clazz._setDeclared("Date", Date);
 Clazz.implementOf(Date,[java.io.Serializable,java.lang.Comparable]);
 Clazz.defineMethod(javautil.Date,"clone",
 function(){

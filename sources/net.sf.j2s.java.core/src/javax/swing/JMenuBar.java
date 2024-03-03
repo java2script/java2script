@@ -97,7 +97,7 @@ public class JMenuBar extends JComponent implements MenuElement
      */
     public JMenuBar() {
         super();
-        setBorder(new EmptyBorder(4, 0, 2, 0));
+        setBorder(new EmptyBorder(4, 4, 2, 4));
         //setFocusTraversalKeysEnabled(false);
         setSelectionModel(new DefaultSingleSelectionModel());
         updateUI();
