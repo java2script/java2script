@@ -350,7 +350,7 @@ public abstract class M34d implements JSONEncodable {
     m22 *= x;
   }
 
-  protected void transpose33() {
+  public void transpose33() {
     double tmp = m01;
     m01 = m10;
     m10 = tmp;

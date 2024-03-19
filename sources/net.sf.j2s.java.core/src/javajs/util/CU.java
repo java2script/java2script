@@ -34,6 +34,7 @@ public class CU {
   }
   
   private final static String[] colorNames = {
+    "contrast",             // fedcba
     "black",                // 000000
     "pewhite",              // ffffff
     "pecyan",               // 00ffff
@@ -203,6 +204,7 @@ public class CU {
   
   private final static int[] colorArgbs = {
   //#FFFFC3 hover
+    0xFFfedcba, // CONTRAST (colix = 3)
     0xFF000000, // black
     // plus the PE chain colors
     0xFFffffff, // pewhite
@@ -460,7 +462,7 @@ public class CU {
     return colorTriadToFFRGB(pt.x, pt.y, pt.z);
   }
 
-  public static void toRGB3f(int c, double[] f) {
+  public static void toRGB3(int c, double[] f) {
     f[0] = ((c >> 16) & 0xFF) / 255f; // red
     f[1] = ((c >> 8) & 0xFF) / 255f;
     f[2] = (c & 0xFF) / 255f;

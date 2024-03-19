@@ -5,6 +5,7 @@
 
 // https://github.com/BobHanson/java2script/raw/master/sources/net.sf.j2s.java.core/site-resources_4.2/jsmol/js/j2sjmol.js
 
+// BH 2024.03.18 messed up Enum and ArrayList 
 // BH 2024.03.03 fixes new Clazz.exceptionOf(e,"NullPointerException") not working
 
 LoadClazz = function() {
@@ -1526,7 +1527,7 @@ Clazz.instantialize = function(objThis, args) {
 		args = argsClone;
 	}
 
-	var c = objThis.construct;
+	var c = objThis.construct; // the actual constructor Xxx() {...}
 	if (c) {
 		if (!objThis.con$truct) { // no need to init fields
 			c.apply (objThis, args);
@@ -2115,11 +2116,13 @@ Clazz.cloneFinals = function(){
 Clazz.defineEnumConstant = function(clazzEnum, enumName, enumOrdinal, initialParams, clazzEnumExt) {
 	var o = (clazzEnumExt ? new clazzEnumExt() : new clazzEnum());
 	// BH avoids unnecessary calls to SAEM
-	o.$name = enumName;
-	o.$ordinal = enumOrdinal;
-	//Clazz.superConstructor (o, clazzEnum, [enumName, enumOrdinal]);
-	if (initialParams && initialParams.length)
-		o.construct.apply (o, initialParams);
+	if (initialParams && initialParams.length) {
+		o.constructor.apply (o, initialParams);
+//		Clazz.superConstructor (o, clazzEnum, [enumName, enumOrdinal]);
+//	} else {
+		o.$name = enumName;
+		o.$ordinal = enumOrdinal;
+//	}
 	clazzEnum[enumName] = o;
 	clazzEnum.prototype[enumName] = o;
 	if (!clazzEnum["$ values"]) {         // BH added
