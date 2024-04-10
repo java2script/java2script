@@ -2119,7 +2119,8 @@ Clazz.defineEnumConstant = function(clazzEnum, enumName, enumOrdinal, initialPar
 	if (initialParams && initialParams.length) {
 		o.constructor.apply (o, initialParams);
 //		Clazz.superConstructor (o, clazzEnum, [enumName, enumOrdinal]);
-//	} else {
+	}
+//else {
 		o.$name = enumName;
 		o.$ordinal = enumOrdinal;
 //	}
