@@ -2,6 +2,7 @@
 package test;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 
 //import test.math.BigInteger;
 //import test.math.MutableBigInteger;
@@ -10,13 +11,38 @@ public class Test_BigInt extends Test_ {
 
 	public static void main(String[] args) {
 
+		BigInteger n = new BigInteger("10473");
+		BigInteger exp = new BigInteger("9261");
+		BigInteger mod = new BigInteger("17947");
+		BigInteger p = n.modPow(exp, mod);
+//		System.out.println(p.toString()); // 815 but is 3908
+
+		int v = 0;
+		// for 10473, 29
+//		n = new BigInteger("14");
+//		exp = new BigInteger("3");
+		 n = new BigInteger("10473");
+		 exp = new BigInteger("9261");
+		// first failure is 2195, giving 197 in JS and 1658 in Java
+		// also 2287, 2431, 2443, 2455, and several more
+		for (int i = 1; i < 3000; i++) {
+			mod = BigInteger.valueOf(i);
+			p = n.modPow(exp, mod);
+			v += p.intValue();
+			System.out.println(i + "." + p.toString());// + "\t" + v);
+//			System.out.println(Arrays.toString(p.toByteArray()));
+		}
+		System.out.println(v);
+		if (true)
+			return;
 //		// working with full long support. 
-		
-		// three tweaks needed: 
-		
+
+		// three tweaks needed:
+
 		// 1) MutableBigInteger.compare explicit int check (x)|0
-		// 2) MutableBigInteger.inverseMod32 requires long rather than int for Newton's method
-        // 1) BigInteger needs alias valueOf for toString;
+		// 2) MutableBigInteger.inverseMod32 requires long rather than int for Newton's
+		// method
+		// 1) BigInteger needs alias valueOf for toString;
 		testModPow();
 		testShift();
 		testSub();
