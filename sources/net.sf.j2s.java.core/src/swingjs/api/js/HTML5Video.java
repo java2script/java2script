@@ -10,6 +10,7 @@ import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.swing.BoxLayout;
@@ -392,8 +393,20 @@ public interface HTML5Video extends DOMNode {
 		 */		
 	}
 	
+	/**
+	 * capture frame metadata while playing. Specifically, grab the metadata.mediaTime values, 
+	 * reporting these to the provided results array as 
+	 * 
+	 * results[0] = frameCount
+	 * 
+	 * resutls[n] = frame-n startTime (seconds)
+	 * 
+	 * @param jsvideo
+	 * @param result array to load
+	 * @return
+	 */
 	@SuppressWarnings("unused")
-	public static int requestVideoFrameCallback(HTML5Video jsvideo, double[] result) {
+	public static int requestVideoFrameCallback(HTML5Video jsvideo, Consumer<Object> callback) {
 		Object[] f = null;
 		/**
 		 * @j2sNative
@@ -404,7 +417,7 @@ public interface HTML5Video extends DOMNode {
 		 * 					if (jsvideo._cancelVFCallback) {
 		 * 						jsvideo._cancelVFCallback = false;
 		 * 					} else {
-		 * 						result[++result[0]] = now;
+		 * 						callback.accept$O(metadata);
 		 *          			jsvideo.requestVideoFrameCallback(f[0]);
 		 *          		}
 		 *           };
