@@ -354,6 +354,7 @@ public interface HTML5Video extends DOMNode {
 		 * @j2sNative
 		 * 
 		 * jsvideo.dialog = dialog;
+		 * jsvideo.label = label;
 		 * 
 		 */
 		Object[] j2sListener = HTML5Video.addActionListener(jsvideo, new ActionListener() {

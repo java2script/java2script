@@ -1,6 +1,9 @@
 package swingjs;
 
 import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -22,6 +25,7 @@ import swingjs.JSFileSystem.JSPath;
 import swingjs.api.Interface;
 import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Canvas;
+import swingjs.json.JSON;
 
 /**
  * An image consumer for off-line images.
@@ -323,6 +327,92 @@ public class JSImagekit implements ImageConsumer {
 		if (type == null)
 			return (/** @j2sNative URL.createObjectURL(new Blob([b])) || */null);
 		return (/** @j2sNative URL.createObjectURL(new Blob([b], {type:type})) || */null);
+	}
+
+	static boolean mediaInfoLoaded = false;
+	static Object mediaInfoObject = null;
+	private static String mediaInfoURL = "https://unpkg.com/mediainfo.js@0.3.1/dist/umd/index.min.js";
+	
+
+	/**
+	 * Load mediainfo.js and MediaInfoModule.wasm, then use them to generate a JSON array. 
+	 * 
+	 * @param data
+	 * @param trackType
+	 * @param success
+	 * @param onError
+	 * @param path
+	 */
+	public static void getMediaInfoAsync(byte[] data, String trackType, String path, Consumer<Map<String, Object>> success, Consumer<String> onError) {
+
+		if (!mediaInfoLoaded) {
+			// load MediaInfo.js
+			JSUtil.loadScriptAsync(path == null ? mediaInfoURL : path.startsWith("http") ? path : JSUtil.newJSUtil().getJ2SPath() + path, () -> {
+				mediaInfoLoaded = true;
+				getMediaInfoAsync(data, null, trackType, success, onError);
+			});
+			return;
+		}
+		Consumer<Object> f;
+		if (mediaInfoObject == null) {
+			f = new Consumer<Object>() {
+
+				@Override
+				public void accept(Object mediainfo) {
+					mediaInfoObject = mediainfo;
+					getMediaInfoAsync(data, null, trackType, success, onError); 
+				}
+				
+			};
+			// load MediaInfo.wasm and create MediaInfo object
+			/**
+			 * @j2sNative
+			 * 
+			 * 			MediaInfo.mediaInfoFactory( { format: 'JSON' },
+			 *            function(mediainfo){ f.accept$O(mediainfo) } 
+			 *          );
+			 * 
+			 */
+			return;
+		}
+		f = new Consumer<Object>() {
+
+			@Override
+			public void accept(Object result) {
+				try {
+					Map<String, Object> info = null;
+					info = (Map<String, Object>) JSON.parse((String) result);
+					if (trackType != null) {
+						info = (Map<String, Object>) info.get("media");
+						List<Object> tracks = (List<Object>) info.get("track");
+						info = null;
+						for (int i = tracks.size(); --i >= 0;) {
+							info = (Map<String, Object>) tracks.get(i);
+							if (info.get("@type").equals(trackType))
+								break;
+						}
+					}
+					success.accept(info);
+				} catch (Exception e) {
+					e.printStackTrace();
+					onError.accept(e.getMessage());
+				}
+			}
+			
+		};
+		/**
+		 * @j2sNative
+		 * 
+		 * 			C$.mediaInfoObject.analyzeData(data.length, 
+		 * 				function(chunkSize, offset){
+		 *            		return new Uint8Array(data.slice(offset, offset + chunkSize)); 
+		 *            	}
+		 *            ).then(
+		 *            	function(result){f.accept$O(result)}, 
+		 *              function(error){onError ? onError.accept$O(error) : console.log(error)}
+		 *            );
+		 */
+
 	}
 
 

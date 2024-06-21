@@ -14,6 +14,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -23,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.swing.BoxLayout;
@@ -41,7 +44,10 @@ import javax.swing.TransferHandler;
 import javax.swing.WindowConstants;
 
 import javajs.async.SwingJSUtils.StateHelper;
+import javajs.util.Rdr;
 import javajs.util.VideoReader;
+import swingjs.JSImagekit;
+import swingjs.JSUtil;
 import swingjs.api.JSUtilI;
 import swingjs.api.js.HTML5Video;
 
@@ -118,13 +124,15 @@ public class Test_Video {
 		String video = (
 		// "test/jmoljana_960x540.png");
 		// fails"test/EnergyTransfer.mp4"
-		// "test/jmoljana.mp4",
-		"test/duet.mp4");
+		"test/jmoljana.mp4"
+		//"test/duet.mp4"
+				);
 
 		URL videoURL = null;
 		if (testRemote)
 			try {
 				videoURL = new URL("https://chemapps.stolaf.edu/test/duet.mp4");
+				video = null;
 			} catch (MalformedURLException e1) {
 			}
 		vw = 1920;
@@ -141,7 +149,7 @@ public class Test_Video {
 		imageLabel.setIcon(imageicon);
 		File file = new File(video);
 
-		createVideoLabel(file, videoURL, video);
+		createVideoLabel(file, videoURL);
 		// A little trick to allow "final" self reference in a Runnable parameter
 
 		createDialog();
@@ -173,7 +181,7 @@ public class Test_Video {
 		if (dialog != null) {
 			dialog.dispose();
 		}
-		dialog = HTML5Video.createDialog(null, label, 500, true, new Function<HTML5Video, Void>() {
+		dialog = HTML5Video.createDialog(null, label, 500, new Function<HTML5Video, Void>() {
 
 			@Override
 			public Void apply(HTML5Video video) {
@@ -185,21 +193,22 @@ public class Test_Video {
 	}
 
 	JLabel label = new JLabel((String) null);
+	private byte[] videoData;
 
-	private void createVideoLabel(File file, URL videoURL, String video) {
-		boolean asBytes = (file != null);
+	private void createVideoLabel(File file, URL videoURL) {
 		ImageIcon icon;
-		if (!isJS) {
-			icon = new ImageIcon("test/video_image.png");
-			if (!(file.toString().equals(file.getAbsolutePath()))) {
-				file = new File("site/swingjs/j2s/" + file.toString());
+		byte[] bytes = null;
+		if (file != null) {
+			if (!isJS) {
+				icon = new ImageIcon("test/video_image.png");
+				if (!(file.toString().equals(file.getAbsolutePath()))) {
+					file = new File("site/swingjs/j2s/" + file.toString());
+				}
+				System.out.println(file.getAbsolutePath());
+				System.out.println(getMP4Codec(file.getAbsolutePath(), file.getName()));
+				return;
 			}
-			System.out.println(file.getAbsolutePath());
-			System.out.println(getMP4Codec(file.getAbsolutePath(), file.getName()));
-			return;
-		} else if (asBytes) {
 			try {
-				byte[] bytes;
 //				if (testRemote) {
 //					bytes = videoURL.openStream().readAllBytes();// Argh! Java 9!
 //				} else {
@@ -208,12 +217,32 @@ public class Test_Video {
 				icon = new ImageIcon(bytes, "jsvideo");
 			} catch (IOException e1) {
 				icon = null;
+				bytes = null;
 			}
-		} else if (videoURL != null) {
-			icon = new ImageIcon(videoURL, "jsvideo");
 		} else {
-			icon = new ImageIcon(video, "jsvideo");
+			icon = new ImageIcon(videoURL, "jsvideo");
+			try {
+				bytes = JSUtil.getBytes(videoURL);
+				if (bytes == null) {
+					BufferedInputStream bis = (BufferedInputStream) videoURL.openStream();
+					bytes = (byte[]) Rdr.getStreamAsBytes(bis, null);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
+		JSImagekit.getMediaInfoAsync(bytes, "Video", null, new Consumer<Map<String, Object>>() {
+
+			@Override
+			public void accept(Map<String, Object> info) {
+				for (Entry<String, Object> e: info.entrySet()) {
+					System.out.println(e.getKey() + " = " + e.getValue());
+				}
+			}
+			
+		}, null);
+			
+		this.videoData = bytes;
 		label.setIcon(icon);
 		jsvideo = (HTML5Video) label.getClientProperty("jsvideo");
 		HTML5Video.addActionListener(jsvideo, new ActionListener() {
@@ -225,7 +254,7 @@ public class Test_Video {
 				HTML5Video target = (HTML5Video) sources[0];
 				Object jsevent = sources[1];
 				System.out.println(event + " " + HTML5Video.getCurrentTime(jsvideo));
-				if (cbCapture.isSelected() && event.equals("canplaythrough")) {
+				if (cbCapture != null && cbCapture.isSelected() && event.equals("canplaythrough")) {
 					grabImage();
 				}
 
@@ -242,10 +271,23 @@ public class Test_Video {
 
 	}
 
+	protected void loadVideo(URL url) {
+		Rectangle bounds = label.getBounds();
+		layerPane.remove(label);
+		createVideoLabel(null, url);
+		if (!isJS) {
+			return;
+		}
+		createDialog();
+		layerPane.add(label, JLayeredPane.DEFAULT_LAYER);
+		label.setBounds(bounds);
+		label.setVisible(true);
+	}
+
 	protected void loadVideo(File file) {
 		Rectangle bounds = label.getBounds();
 		layerPane.remove(label);
-		createVideoLabel(file, null, null);
+		createVideoLabel(file, null);
 		if (!isJS) {
 			return;
 		}
@@ -256,9 +298,10 @@ public class Test_Video {
 
 	}
 
+	@SuppressWarnings("unused")
 	private void describeVideo(String resource, String name) throws IOException {
 		VideoReader vr = new VideoReader(resource);
-		List<Map<String, Object>> contents = vr.getContents(true);
+		//List<Map<String, Object>> contents = vr.getContents(true);
 		System.out.println("codec = " + vr.getCodec());
 		main.setTitle(name + " " + vr.getFileType() + "|" + vr.getCodec());
 	}
@@ -273,6 +316,30 @@ public class Test_Video {
 		for (int i = 0; i < allprops.length; i++)
 			showProperty(allprops[i]);
 	}
+
+	protected void setTimes(double[] htmlRequstTimes) {
+		// Chrome only
+		int n = (int) htmlRequstTimes[0] + 1;
+		htmlRequstTimes[0] = htmlRequstTimes[1];
+		if (n < 2) {
+			return;
+		}
+			
+			double t0 = 0, dt;
+			int nFrames = 1;
+			for (int i = 1; i < n; i++) {
+				  dt = htmlRequstTimes[i] - htmlRequstTimes[i - 1];
+				  if (dt > 0) {
+					  if (t0 == 0)
+						  t0 = htmlRequstTimes[i - 1];
+					  System.out.println("htmlTime["+nFrames+"]\t" + (htmlRequstTimes[i]-t0) + "\t" + dt);
+					  nFrames++;
+				  }
+			}
+			dt = duration / (nFrames + 1); // Chrome adds in last frame length
+			  System.out.println("duration " + duration + " for " + nFrames + " frames; ave dt = " + dt + " for nframes + 1 or " + (duration / nFrames) + " for nframes");
+	}
+
 
 	private static String[] allprops = { "audioTracks", //
 			"autoplay", //
