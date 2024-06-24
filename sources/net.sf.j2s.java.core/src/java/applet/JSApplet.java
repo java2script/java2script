@@ -204,6 +204,9 @@ public class JSApplet extends JSPanel {
      * @see     java.applet.Applet#getCodeBase()
      */
     public URL getDocumentBase() {
+   	 if (stub == null)
+		 throw new NullPointerException();
+
         return stub.getDocumentBase();
     }
 
@@ -244,6 +247,8 @@ public class JSApplet extends JSPanel {
      *          or <code>null</code> if not set.
      */
      public String getParameter(String name) {
+    	 if (stub == null)
+    		 throw new NullPointerException();
          return stub.getParameter(name);
      }
 
@@ -257,6 +262,8 @@ public class JSApplet extends JSPanel {
      * @return  the applet's context.
      */
     public AppletContext getAppletContext() {
+   	 if (stub == null)
+		 throw new NullPointerException();
         return stub.getAppletContext();
     }
 

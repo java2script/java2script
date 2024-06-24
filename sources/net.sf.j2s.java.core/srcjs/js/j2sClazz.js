@@ -7,6 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2024.06.22 adds Integer.getIngeger(String, int) (returning null)
 // BH 2024.03.03 removes unnecessary loadClass("xxxx") on exceptionOf(e,"xxxx") call
 // BH 2024.02.23 fixes missing Long.signum
 // BH 2023.04.30 fixes issues when Info.console == window.console
@@ -3953,6 +3954,11 @@ function(s){
 m$(Integer,"parseInt$S$I",
 function(s,radix){
 	return parseIntLimit(s, radix, minInt, maxInt);
+}, 1);
+
+m$(Integer,"getInteger$S$I",
+function(ms,i){
+  return Integer.valueOf$I(i);
 }, 1);
 
 m$(Integer,"highestOneBit$I",
