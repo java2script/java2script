@@ -73,8 +73,8 @@ import java.util.Map;
 
 import javajs.util.CU;
 import javajs.util.Lst;
-import javajs.util.M3;
-import javajs.util.P3;
+import javajs.util.M3d;
+import javajs.util.P3d;
 
 /**
  * 
@@ -110,7 +110,7 @@ import javajs.util.P3;
 public class GifEncoder extends ImageEncoder {
 
   private Map<String, Object> params;
-  private P3[] palette;
+  private P3d[] palette;
   private int backgroundColor;
 
   private boolean interlaced;
@@ -146,15 +146,22 @@ public class GifEncoder extends ImageEncoder {
       isTransparent = true;
     }
 
+    if (backgroundColor == 0xFF000000) {
+      // fix speckling of text Jmol 14.32.69
+      // must return background to true color
+      for (int i = pixels.length; --i >= 0;)
+          pixels[i] = pixels[i] &~0x040404;
+    }
+
     interlaced = (Boolean.TRUE == params.get("interlaced"));
     if (params.containsKey("captureRootExt") // file0000.gif 
         || !params.containsKey("captureMode")) // animated gif
       return;
     interlaced = false;
     capturing = true;
-    Integer c = (Integer) params.get("captureByteCount");
-    if (c != null)
-      byteCount = c.intValue();
+      Integer c = (Integer) params.get("captureByteCount");
+      if (c != null)
+        byteCount = c.intValue();
     switch ("maec"
         .indexOf(((String) params.get("captureMode")).substring(0, 1))) {
     case 0: //"movie"
@@ -212,8 +219,7 @@ public class GifEncoder extends ImageEncoder {
    * a color point in normalized L*a*b space with a flag indicating whether it
    * is the background color
    */
-  @SuppressWarnings("serial")
-  private class ColorItem extends P3 {
+  private class ColorItem extends P3d {
     /**
 	 * 
 	 */
@@ -229,16 +235,16 @@ public class GifEncoder extends ImageEncoder {
    * A list of normalized L*a*b points with an index and a center and volume
    * 
    */
-  private class ColorCell extends Lst<P3> {
+  private class ColorCell extends Lst<P3d> {
 
     /**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	protected int index;
-    protected P3 center;
+    protected P3d center;
 
-    private float volume;
+    private double volume;
 
     ColorCell(int index) {
       this.index = index;
@@ -249,23 +255,23 @@ public class GifEncoder extends ImageEncoder {
      *        debugging only
      * @return volume in normalized L*a*b space
      */
-    public float getVolume(boolean doVisualize) {
+    public double getVolume(boolean doVisualize) {
       if (volume != 0)
         return volume;
       if (size() < 2)
         return -1;
       //if (true)
       //return lst.size();
-      //float d;
-      float maxx = -Integer.MAX_VALUE;
-      float minx = Integer.MAX_VALUE;
-      float maxy = -Integer.MAX_VALUE;
-      float miny = Integer.MAX_VALUE;
-      float maxz = -Integer.MAX_VALUE;
-      float minz = Integer.MAX_VALUE;
+      //double d;
+      double maxx = -Integer.MAX_VALUE;
+      double minx = Integer.MAX_VALUE;
+      double maxy = -Integer.MAX_VALUE;
+      double miny = Integer.MAX_VALUE;
+      double maxz = -Integer.MAX_VALUE;
+      double minz = Integer.MAX_VALUE;
       int n = size();
       for (int i = n; --i >= 0;) {
-        P3 xyz = get(i);
+        P3d xyz = get(i);
         if (xyz.x < minx)
           minx = xyz.x;
         if (xyz.y < miny)
@@ -279,9 +285,9 @@ public class GifEncoder extends ImageEncoder {
         if (xyz.z > maxz)
           maxz = xyz.z;
       }
-      float dx = (maxx - minx);
-      float dy = (maxy - miny);
-      float dz = (maxz - minz);
+      double dx = (maxx - minx);
+      double dy = (maxy - miny);
+      double dz = (maxz - minz);
       // Jmol visualization only
       //      if (doVisualize) {
       //        P3 ptRGB = toRGB(center);
@@ -296,8 +302,8 @@ public class GifEncoder extends ImageEncoder {
       //        xyzToLab(pt0, pt0);
       //        rgbToXyz(pt1, pt1);
       //        xyzToLab(pt1, pt1);
-      //        System.out.println("boundbox corners " + pt0 + " " + pt1);
-      //        System.out.println("draw d" + index + " boundbox color " + ptRGB
+      //System.out.println("boundbox corners " + pt0 + " " + pt1);
+      //System.out.println("draw d" + index + " boundbox color " + ptRGB
       //            + " mesh nofill");
       //      }
       return volume = dx * dx + dy * dy + dz * dz;
@@ -308,7 +314,7 @@ public class GifEncoder extends ImageEncoder {
     //        boolean isMain = (i < 0);
     //      P3 lab = rgbToXyz(rgb, null);
     //      xyzToLab(lab, lab);
-    //      System.out.println("draw d" + index + (isMain ? "_" : "_" + i) + " width "
+    //System.out.println("draw d" + index + (isMain ? "_" : "_" + i) + " width "
     //          + (isMain ? 1.0 : 0.2) + " " + lab
     //          + " color " + rgb + (isMain ? " '" + -i + "'" : ""));
     //      }
@@ -319,12 +325,12 @@ public class GifEncoder extends ImageEncoder {
      * @return RGB point
      * 
      */
-    protected P3 setColor() {
+    protected P3d setColor() {
       int count = size();
-      center = new P3();
+      center = new P3d();
       for (int i = count; --i >= 0;)
         center.add(get(i));
-      center.scale(1f / count);
+      center.scale(1d / count);
       // Jmol visualization only
       //volume = 0;
       //getVolume(true); 
@@ -350,13 +356,13 @@ public class GifEncoder extends ImageEncoder {
       int newIndex = cells.size();
       ColorCell newCell = new ColorCell(newIndex);
       cells.addLast(newCell);
-      float[][] ranges = new float[3][3];
+      double[][] ranges = new double[3][3];
       for (int ic = 0; ic < 3; ic++) {
-        float low = Float.MAX_VALUE;
-        float high = -Float.MAX_VALUE;
+        double low = Double.MAX_VALUE;
+        double high = -Double.MAX_VALUE;
         for (int i = n; --i >= 0;) {
-          P3 lab = get(i);
-          float v = (ic == 0 ? lab.x : ic == 1 ? lab.y : lab.z);
+          P3d lab = get(i);
+          double v = (ic == 0 ? lab.x : ic == 1 ? lab.y : lab.z);
           if (low > v)
             low = v;
           if (high < v)
@@ -366,9 +372,9 @@ public class GifEncoder extends ImageEncoder {
         ranges[1][ic] = high;
         ranges[2][ic] = high - low;
       }
-      float[] r = ranges[2];
+      double[] r = ranges[2];
       int mode = (r[0] >= r[1] ? (r[0] >= r[2] ? 0 : 2) : r[1] >= r[2] ? 1 : 2);
-      float val = ranges[0][mode] + ranges[2][mode] / 2;
+      double val = ranges[0][mode] + ranges[2][mode] / 2;
       volume = 0; // recalculate volume if needed
       switch (mode) {
       case 0:
@@ -426,7 +432,7 @@ public class GifEncoder extends ImageEncoder {
 
     Map<Integer, ColorCell> colorMap = new Hashtable<Integer, ColorCell>();
     bitsPerPixel = (nColors <= 2 ? 1 : nColors <= 4 ? 2 : nColors <= 16 ? 4 : 8);
-    palette = new P3[1 << bitsPerPixel];
+    palette = new P3d[1 << bitsPerPixel];
     for (int i = 0; i < nColors; i++) {
       ColorCell c = cells.get(i);
       colorMap.put(
@@ -471,11 +477,11 @@ public class GifEncoder extends ImageEncoder {
     tempColors.clear();
     if (n > 256)
       while ((n = cells.size()) < 256) {
-        float maxVol = 0;
+        double maxVol = 0;
         ColorCell maxCell = null;
         for (int i = n; --i >= 1;) {
           ColorCell c = cells.get(i);
-          float v = c.getVolume(false);
+          double v = c.getVolume(false);
           if (v > maxVol) {
             maxVol = v;
             maxCell = c;
@@ -516,12 +522,12 @@ public class GifEncoder extends ImageEncoder {
     // this strip.
     //
     int w2 = width + 2;
-    P3[] errors = new P3[w2];
+    P3d[] errors = new P3d[w2];
     // We should replace, not overwrite, pixels 
     // as this may be the raw canvas.buf32.
     int[] newPixels = new int[pixels.length];
-    P3 err = new P3();
-    P3 lab;
+    P3d err = new P3d();
+    P3d lab;
     int rgb;
     Map<Integer, ColorCell> nearestCell = new Hashtable<Integer, ColorCell>();
     for (int i = 0, p = 0; i < height; ++i) {
@@ -531,8 +537,8 @@ public class GifEncoder extends ImageEncoder {
           // leave as 0
           continue;
         }
-        P3 pe = errors[p % w2];
-        if (pe == null || pe.x == Float.MAX_VALUE) {
+        P3d pe = errors[p % w2];
+        if (pe == null || pe.x == Double.MAX_VALUE) {
           lab = null;
           rgb = pixels[p];
         } else {
@@ -554,12 +560,12 @@ public class GifEncoder extends ImageEncoder {
           cell = nearestCell.get(key);
           if (cell == null) {
             // find nearest cell
-            float maxerr = Float.MAX_VALUE;
+            double maxerr = Double.MAX_VALUE;
             // skip 0 0 0
             for (int ib = cells.size(); --ib >= 1;) {
               ColorCell c = cells.get(ib);
               err.sub2(lab, c.center);
-              float d = err.lengthSquared();
+              double d = err.lengthSquared();
               if (d < maxerr) {
                 maxerr = d;
                 cell = c;
@@ -581,7 +587,7 @@ public class GifEncoder extends ImageEncoder {
                 addError(err, 1, errors, p + width + 1, w2);
             }
           }
-          err.x = Float.MAX_VALUE; // used; flag for resetting to 0
+          err.x = Double.MAX_VALUE; // used; flag for resetting to 0
         }
         newPixels[p] = cell.index;
       }
@@ -589,15 +595,15 @@ public class GifEncoder extends ImageEncoder {
     return newPixels;
   }
 
-  private void addError(P3 err, int f, P3[] errors, int p, int w2) {
+  private void addError(P3d err, int f, P3d[] errors, int p, int w2) {
     // GIMP will allow changing the background color.
     if (pixels[p] == backgroundColor)
       return;
     p %= w2;
-    P3 errp = errors[p];
+    P3d errp = errors[p];
     if (errp == null)
-      errp = errors[p] = new P3();
-    else if (errp.x == Float.MAX_VALUE) // reuse
+      errp = errors[p] = new P3d();
+    else if (errp.x == Double.MAX_VALUE) // reuse
       errp.set(0, 0, 0);
     errp.scaleAdd2(f / 16f, err, errp);
   }
@@ -606,8 +612,8 @@ public class GifEncoder extends ImageEncoder {
 
   // these could be static, but that just makes for more JavaScript code
 
-  protected P3 toLABnorm(int rgb) {
-    P3 lab = P3.new3((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF);
+  protected P3d toLABnorm(int rgb) {
+    P3d lab = CU.colorPtFromInt(rgb, null);
     rgbToXyz(lab, lab);
     xyzToLab(lab, lab);
     // normalize to 0-100
@@ -616,8 +622,8 @@ public class GifEncoder extends ImageEncoder {
     return lab;
   }
 
-  protected P3 toRGB(P3 lab) {
-    P3 xyz = P3.newP(lab);
+  protected P3d toRGB(P3d lab) {
+    P3d xyz = P3d.newP(lab);
     // normalized to 0-100
     xyz.y = xyz.y / 100f * (98.254f + 86.185f) - 86.185f;
     xyz.z = xyz.z / 100f * (94.482f + 107.863f) - 107.863f;
@@ -625,22 +631,22 @@ public class GifEncoder extends ImageEncoder {
     return xyzToRgb(xyz, xyz);
   }
 
-  private static M3 xyz2rgb;
-  private static M3 rgb2xyz;
+  private static M3d xyz2rgb;
+  private static M3d rgb2xyz;
 
   static {
-    rgb2xyz = M3.newA9(new float[] { 0.4124f, 0.3576f, 0.1805f, 0.2126f,
+    rgb2xyz = M3d.newA9(new double[] { 0.4124f, 0.3576f, 0.1805f, 0.2126f,
         0.7152f, 0.0722f, 0.0193f, 0.1192f, 0.9505f });
 
-    xyz2rgb = M3.newA9(new float[] { 3.2406f, -1.5372f, -0.4986f, -0.9689f,
+    xyz2rgb = M3d.newA9(new double[] { 3.2406f, -1.5372f, -0.4986f, -0.9689f,
         1.8758f, 0.0415f, 0.0557f, -0.2040f, 1.0570f });
   }
 
-  public P3 rgbToXyz(P3 rgb, P3 xyz) {
+  public P3d rgbToXyz(P3d rgb, P3d xyz) {
     // http://en.wikipedia.org/wiki/CIE_1931_color_space
     // http://rsb.info.nih.gov/ij/plugins/download/Color_Space_Converter.java
     if (xyz == null)
-      xyz = new P3();
+      xyz = new P3d();
     xyz.x = sxyz(rgb.x);
     xyz.y = sxyz(rgb.y);
     xyz.z = sxyz(rgb.z);
@@ -648,17 +654,17 @@ public class GifEncoder extends ImageEncoder {
     return xyz;
   }
 
-  private float sxyz(float x) {
+  private double sxyz(double x) {
     x /= 255;
-    return (float) (x <= 0.04045 ? x / 12.92 : Math.pow(((x + 0.055) / 1.055),
+    return  (x <= 0.04045 ? x / 12.92 : Math.pow(((x + 0.055) / 1.055),
         2.4)) * 100;
   }
 
-  public P3 xyzToRgb(P3 xyz, P3 rgb) {
+  public P3d xyzToRgb(P3d xyz, P3d rgb) {
     // http://en.wikipedia.org/wiki/CIE_1931_color_space
     // http://rsb.info.nih.gov/ij/plugins/download/Color_Space_Converter.java
     if (rgb == null)
-      rgb = new P3();
+      rgb = new P3d();
     rgb.setT(xyz);
     rgb.scale(0.01f);
     xyz2rgb.rotate(rgb);
@@ -668,44 +674,44 @@ public class GifEncoder extends ImageEncoder {
     return rgb;
   }
 
-  private float srgb(float x) {
-    return (float) (x > 0.0031308f ? (1.055 * Math.pow(x, 1.0 / 2.4)) - 0.055
+  private double srgb(double x) {
+    return (x > 0.0031308f ? (1.055 * Math.pow(x, 1.0 / 2.4)) - 0.055
         : x * 12.92) * 255;
   }
 
-  public P3 xyzToLab(P3 xyz, P3 lab) {
+  public P3d xyzToLab(P3d xyz, P3d lab) {
     // http://en.wikipedia.org/wiki/Lab_color_space
     // http://rsb.info.nih.gov/ij/plugins/download/Color_Space_Converter.java
     // Lab([0..100], [-86.185..98.254], [-107.863..94.482])
     // XYZn = D65 = {95.0429, 100.0, 108.8900};
     if (lab == null)
-      lab = new P3();
-    float x = flab(xyz.x / 95.0429f);
-    float y = flab(xyz.y / 100);
-    float z = flab(xyz.z / 108.89f);
+      lab = new P3d();
+    double x = flab(xyz.x / 95.0429f);
+    double y = flab(xyz.y / 100);
+    double z = flab(xyz.z / 108.89f);
     lab.x = (116 * y) - 16;
     lab.y = 500 * (x - y);
     lab.z = 200 * (y - z);
     return lab;
   }
 
-  private float flab(float t) {
-    return (float) (t > 8.85645168E-3 /* (24/116)^3 */? Math.pow(t,
+  private double flab(double t) {
+    return  (t > 8.85645168E-3 /* (24/116)^3 */? Math.pow(t,
         0.333333333) : 7.78703704 /* 1/3*116/24*116/24 */* t + 0.137931034 /* 16/116 */
     );
   }
 
-  public P3 labToXyz(P3 lab, P3 xyz) {
+  public P3d labToXyz(P3d lab, P3d xyz) {
     // http://en.wikipedia.org/wiki/Lab_color_space
     // http://rsb.info.nih.gov/ij/plugins/download/Color_Space_Converter.java
     // XYZn = D65 = {95.0429, 100.0, 108.8900};
     if (xyz == null)
-      xyz = new P3();
+      xyz = new P3d();
 
     xyz.setT(lab);
-    float y = (xyz.x + 16) / 116;
-    float x = xyz.y / 500 + y;
-    float z = y - xyz.z / 200;
+    double y = (xyz.x + 16) / 116;
+    double x = xyz.y / 500 + y;
+    double z = y - xyz.z / 200;
     xyz.x = fxyz(x) * 95.0429f;
     xyz.y = fxyz(y) * 100;
     xyz.z = fxyz(z) * 108.89f;
@@ -713,12 +719,12 @@ public class GifEncoder extends ImageEncoder {
     return xyz;
   }
 
-  private float fxyz(float t) {
-    return (float) (t > 0.206896552 /* (24/116) */? t * t * t
+  private double fxyz(double t) {
+    return  (t > 0.206896552 /* (24/116) */? t * t * t
         : 0.128418549 /* 3*24/116*24/116 */* (t - 0.137931034 /* 16/116 */));
   }
 
-  private float clamp(float c, float min, float max) {
+  private double clamp(double c, double min, double max) {
     c = (c < min ? min : c > max ? max : c);
     return (min == 0 ? Math.round(c) : c);
   }
@@ -825,7 +831,7 @@ public class GifEncoder extends ImageEncoder {
     int packedFields = 0x80 | (interlaced ? 0x40 : 0) | (bitsPerPixel - 1);
     putByte(packedFields);
     int colorMapSize = 1 << bitsPerPixel;
-    P3 p = new P3();
+    P3d p = new P3d();
     for (int i = 0; i < colorMapSize; i++) {
       if (palette[i] != null)
         p = palette[i];

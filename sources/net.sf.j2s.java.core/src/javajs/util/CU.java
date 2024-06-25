@@ -458,9 +458,9 @@ public class CU {
     return pt;
   }
 
-  public static int colorPtToFFRGB(T3 pt) {
-    return colorTriadToFFRGB(pt.x, pt.y, pt.z);
-  }
+  public static int colorPtToFFRGB(T3d pt) {
+	    return colorTriadToFFRGB(pt.x, pt.y, pt.z);
+	  }
 
   public static void toRGB3(int c, double[] f) {
     f[0] = ((c >> 16) & 0xFF) / 255f; // red
