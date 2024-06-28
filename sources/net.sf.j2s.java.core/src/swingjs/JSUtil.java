@@ -456,7 +456,7 @@ public class JSUtil implements JSUtilI {
 	return css;
 	}
 
-	static String processJS(String js, String resourceName) {
+	public static String processJS(String js, String resourceName) {
 	try {
 		/**
 		 * @j2sNative

@@ -1,8 +1,15 @@
+/**
+ *  NOTE: If you change this file, copy its contents into 
+ *  its spot at the end of JQueryUI.java. Or, if you are testing
+ *  work here and set JQueryUI.loadResourceInternal = false only while testing,
+ *  then do that paste.
+ * 
+
+ */
+
 // BH 2023.06.06 no-move menu actuation; adds cursor:pointer to ui-j2s-menu to enable click; adds pointerdown/up; 
 //   see https://stackoverflow.com/questions/3025348/how-do-i-use-jquery-for-click-event-in-iphone-web-application/4910962#4910962
 // based on jQuery UI - v1.9.2 - 2012-12-17
-// NOTE: If you change this file, then you need to touch and save JQueryUI.java, as only then
-//       will the transpiler copy this file to site/swingjs/j2s/swingjs/jquery/
 
 ;(function(Swing, $) {
 

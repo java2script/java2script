@@ -80,6 +80,12 @@ public interface J2SInterface {
 
 	JSFunction getCaller();
 
+	void __makeSlider();
+
+	void __makeMenu();
+
+	void __makeComboBox();
+
 
 }
 

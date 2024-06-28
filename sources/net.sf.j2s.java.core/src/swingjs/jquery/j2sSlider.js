@@ -1,7 +1,13 @@
+/**
+ *  NOTE: If you change this file, copy its contents into 
+ *  its spot at the end of JQueryUI.java. Or, if you are testing
+ *  work here and set JQueryUI.loadResourceInternal = false only while testing,
+ *  then do that paste.
+ *  
+ */
+
 // based on  jQuery UI - v1.9.2 - 2015-05-28
 
-//NOTE: If you change this file, then you need to touch and save JQueryUI.java, as only then
-//will the transpiler copy this file to site/swingjs/j2s/swingjs/jquery/
 
 ;(function($) {
 	

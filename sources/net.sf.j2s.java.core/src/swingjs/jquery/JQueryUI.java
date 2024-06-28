@@ -1,5 +1,8 @@
 package swingjs.jquery;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import swingjs.JSUtil;
 
 //based on  jQuery UI - v1.9.2 - 2015-05-28 
@@ -25,24 +28,45 @@ import swingjs.JSUtil;
  */  
 public class JQueryUI {
 	
+	private final static String RESOURCE_J2SCOMBOBOX = "swingjs/jquery/j2sComboBox.js";
+	private final static String RESOURCE_J2SMENU = "swingjs/jquery/j2sMenu.js";
+	private final static String RESOURCE_J2SSLIDER = "swingjs/jquery/j2sSlider.js";
+
+	static boolean loadResourceInternal = true;
 	public static void loadJQComboBox() {
-		if (/** @j2sNative !J2S.__makeComboBox && */true)
-			JSUtil.loadStaticResource("swingjs/jquery/j2sComboBox.js");
-		/** @j2sNative J2S.__makeComboBox(); */
+		String resource = RESOURCE_J2SCOMBOBOX;
+		if (/** @j2sNative !J2S.__makeComboBox && */true) {
+			loadResource(resource);
+			JSUtil.J2S.__makeComboBox();
+		}
 	}
 	
 	public static void loadJQMenu() {
-		if (/** @j2sNative !J2S.__makeMenu && */true)
-			JSUtil.loadStaticResource("swingjs/jquery/j2sMenu.js");
-		/** @j2sNative J2S.__makeMenu(); */
+		String resource = RESOURCE_J2SMENU;
+		if (/** @j2sNative !J2S.__makeMenu && */true) {
+			loadResource(resource);
+			JSUtil.J2S.__makeMenu();
+		}
 	}
 
 	public static void loadJQSlider() {
-		if (/** @j2sNative !J2S.__makeSlider && */true)
-			JSUtil.loadStaticResource("swingjs/jquery/j2sSlider.js");
-		/** @j2sNative J2S.__makeSlider(); */
+		String resource = RESOURCE_J2SSLIDER;
+		if (/** @j2sNative !J2S.__makeSlider && */true) {
+			loadResource(resource);
+			JSUtil.J2S.__makeSlider();
+		}
 	}
-	
+
+	private static void loadResource(String resourceName) {
+		if (loadResourceInternal) {
+			JSUtil.processJS(htResource.get(resourceName), resourceName);
+		} else {
+			JSUtil.loadStaticResource(resourceName);
+		}
+	}
+
+	private static Map<String, String> htResource = new HashMap<>();
+
 	static {
 	  
 		/**      
@@ -108,5 +132,1966 @@ try{
 	System.err.println("JQueryUI failed to load jQuery.ui.position -- jQuery version conflict?");
 }
 		 */
+		
+		
+
+		// BH 2024.06.28
+		
+	htResource.put(RESOURCE_J2SCOMBOBOX, ";(function($) {\n" + 
+			"\n" + 
+			"J2S.__makeComboBox = function() {\n" + 
+			"  J2S.__makeComboBox = function(){};	\n" + 
+			"  \n" + 
+			"  $( function() {\n" + 
+			"    $('head').append('<style>.j2scb-sel {background-color:#B8CFE5;}'\n" + 
+			"    		+'\\n.j2scb-unsel {background-color:inherit;}'\n" + 
+			"    		+'\\n.j2scb-hov {background-color:lightblue;}'\n" + 
+			"    		+'\\n.j2scbcont {position:absolute; left:0px;top:0px;}'\n" + 
+			"    		+'\\n.j2scbhead {position:absolute; left:0px;top:0px;text-align:left;overflow:hidden;padding:0px 2px 1px 2px}'\n" + 
+			"    		+'\\n.j2scbbtn {position:absolute; leftbackground-color:inherit;:100px;top:0px; width:20px;text-align:center;cursor:pointer;background-color:lightblue;padding:0px}'\n" + 
+			"    		+'\\n.j2scbpopup {position:absolute; list-style:none}'\n" + 
+			"    		+'\\n.j2scblist {background-color:inherit;position:absolute; left:0px;top:0px;margin:0;border:black solid 1px;cursor:pointer;text-align:left;padding:0em;scrollbar-width:thin;cursor:pointer;}</style>'\n" + 
+			"    );\n" + 
+			"    \n" + 
+			"    var CLOSE_DELAY = 100; // BH 2019.10.04 50 was just a bit too fast; could close early\n" + 
+			"        \n" + 
+			"    // the widget definition, where 'custom' is the namespace,\n" + 
+			"    // 'j2sCB' the widget name\n" + 
+			"\n" + 
+			"    $.widget( 'custom.j2sCB', {\n" + 
+			"    	\n" + 
+			"      options: {\n" + 
+			"    	mode: 's', // or 'm'\n" + 
+			" 		height: 0,\n" + 
+			" 		items: null,\n" + 
+			" 		disabled: false,\n" + 
+			" 		popupVisible: false,\n" + 
+			" 		selectedIndex: -1,\n" + 
+			" 		backgroundColor: \"blue\",\n" + 
+			" 		// z-index\n" + 
+			" 		zIndex:999999,\n" + 
+			" 		name:null,\n" + 
+			"        // Callbacks\n" + 
+			"        change: null\n" + 
+			"      },\n" + 
+			"      itemCount: 0,\n" + 
+			"      \n" + 
+			"      id: function() {return this.element[0].id},\n" + 
+			"      find: function(x) {return this.element.find(x)},\n" + 
+			"      on: function(a, x) {for(var i = a.length; --i >= 0;)this._on(a[i],x)},\n" + 
+			"      on2: function(obj, evts, handle) {var a = {};for(var i = evts.length; --i >= 0;)a[evts[i]]=handle;this._on(obj, a)},\n" + 
+			"\n" + 
+			"  	  popupVisible: function() { return this.options.popupVisible; }, \n" + 
+			"\n" + 
+			"  	  setHeight: function(h) {\n" + 
+			"		  this.options.height = h;\n" + 
+			"	  },\n" + 
+			"      setZIndex: function(z) {\n" + 
+			"    	this.options.zIndex = z;\n" + 
+			"      },\n" + 
+			"      \n" + 
+			"      _mouse: function(e) { \n" + 
+			"    	  var opt = $(e.target).closest('.j2scbopt');\n" + 
+			"    	  this._trigger('change', e, [this, 'mouse', (opt[0] ? opt[0].j2scbIndex : -1)])\n" + 
+			"      },\n" + 
+			"      _keyEvent: function(e) {\n" + 
+			"    	  this._trigger('change', e, [this, 'keyevent']);\n" + 
+			"      },\n" + 
+			" \n" + 
+			"      // Called when created, and later when changing options\n" + 
+			"      _refresh: function() {\n" + 
+			" \n" + 
+			"        // Trigger a callback/event\n" + 
+			"        this._trigger( 'change' , null, [this, \"refreshed\"] );\n" + 
+			"      },\n" + 
+			" \n" + 
+			"      // The constructor\n" + 
+			"      _create: function() {\n" + 
+			"    	var id = this.id();\n" + 
+			"        this.element.addClass( 'custom-j2sCB' );\n" + 
+			"        this.cont = $( '<div>', {'class': 'j2scbcont', 'id':id+'_cont' });\n" + 
+			"        this.cont.append(this.head = $( '<button>', {'class': 'j2scbhead', 'id':id+'_head' }));\n" + 
+			"        this.cont.append(this.btn = $( '<button>', {'class': 'j2scbbtn', 'id':id+'_btn' , text:'\\u25bc'}));\n" + 
+			"        this.btn.addClass(\"swingjs-ui\");\n" + 
+			"        this.popup = $( '<div>', {'class': 'j2scbpopup', 'name':this.options.name, 'id':id+'_popup' });\n" + 
+			"        this.popup.css({\n" + 
+			"        	display:'none'\n" + 
+			"        });\n" + 
+			"        this.list = $( '<ul>', {'class': 'j2scblist', 'id':id+'_list' });\n" + 
+			"        this.on2(this.list, 'click pointerdown mousedown touchstart mousemove touchmove pointermove pointerup mouseup touchend mousewheel mouseover mouseout mouseenter mouseexit'.split(' '), '_mouse');\n" + 
+			"        this.popup.append(this.list);        \n" + 
+			"        this.element.append(this.cont);\n" + 
+			"        // important to add popup after body so that it does not take on any body attributes \n" + 
+			"        $('body').after(this.popup);\n" + 
+			"        this.updateCSS();    	\n" + 
+			"        this.on( [this.head, this.btn, this.cont], { click: '_tog' });\n" + 
+			"        this.on( [this.popup, this.list], {mouseover: '_stopT' });\n" + 
+			"        this.on( [this.cont, this.head, this.btn, this.popup, this.list], {\n" + 
+			"        	mouseleave: '_close'//,\n" + 
+			"        	//keydown: '_keyEvent'\n" + 
+			"        		});\n" + 
+			"        \n" + 
+			"        if (this.options.items)\n" + 
+			"        	this.add(this.options.items, 1);\n" + 
+			"        \n" + 
+			"        this.setSelectedIndex(this.options.selectedIndex)\n" + 
+			"        this._refresh();\n" + 
+			"      },\n" + 
+			"      // Events bound via _on are removed automatically\n" + 
+			"      // revert other modifications here\n" + 
+			"      _destroy: function() {\n" + 
+			"        // remove generated elements\n" + 
+			"        this.cont.remove();\n" + 
+			"        // must append to body, as otherwise it is not actually removed\n" + 
+			"        $(\"body\").append(this.popup);\n" + 
+			"        this.popup.remove();\n" + 
+			"        this.element\n" + 
+			"          .removeClass( 'custom-j2sCB' )\n" + 
+			"          .enableSelection()\n" + 
+			"          .css( 'background-color', 'transparent' );\n" + 
+			"		this._trigger('change', null, [this, 'destroyed']);\n" + 
+			"      },\n" + 
+			" \n" + 
+			"      // _setOptions is called with a hash of all options that are changing\n" + 
+			"      // always refresh when changing options\n" + 
+			"      _setOptions: function() {\n" + 
+			"        // _super and _superApply handle keeping the right this-context\n" + 
+			"        this._superApply( arguments );\n" + 
+			"        this._refresh();\n" + 
+			"      },\n" + 
+			" \n" + 
+			"      // _setOption is called for each individual option that is changing\n" + 
+			"      _setOption: function( key, value ) {\n" + 
+			"    	  if (key == \"disabled\") {\n" + 
+			"    		  this.options.disabled = true;\n" + 
+			"    	  }\n" + 
+			"        //[prevent invalid value here with test and return]\n" + 
+			"        this._super( key, value );\n" + 
+			"      },\n" + 
+			"\n" + 
+			"      update: function(andTrigger) {\n" + 
+			"   		 var sel = this._selectedItem();\n" + 
+			"   		 var all;\n" + 
+			"   		 var i = (sel[0] ? sel[0].j2scbIndex : -1);\n" + 
+			"   		 this.options.selectedIndex = i;\n" + 
+			"   		 if (sel.length == 0) {\n" + 
+			"   			 this.head.text(\"\");\n" + 
+			"   		 } else if (this.options.mode == 's') {\n" + 
+			"   			 var item = this.list[\"j2shead\"+i];\n" + 
+			"   			 if (item) {\n" + 
+			"   				 this.head[0].removeChild(this.head[0].firstChild);\n" + 
+			"   				 item.style.top=\"0px\";\n" + 
+			"   				 this.head[0].appendChild(item);\n" + 
+			"   			 } else {\n" + 
+			"   				 this.head.text(sel.text());\n" + 
+			"   			 }\n" + 
+			"   		 } else {\n" + 
+			"   	   		 this.head.text(sel.length + ' of ' \n" + 
+			"   	   					+ (all = this.list.find('.j2scbopt').length) + ' selected option' + (all > 1 ? 's' :''));\n" + 
+			"   		 }\n" + 
+			"   		 if (andTrigger)\n" + 
+			" 	      	this._trigger( 'change' , null, [this, \"selected\", sel[0].j2scbIndex]);\n" + 
+			"// 	     else\n" + 
+			"// 	    	 this._stopT(\"update\");\n" + 
+			"       },  \n" + 
+			"      updateList: function(items) {\n" + 
+			"    	  this.list.children().detach();\n" + 
+			"    	  this.add(items, 1);\n" + 
+			"	  },\n" + 
+			"      updateList2: function(items) {\n" + 
+			"    	  this.list.children().detach();\n" + 
+			"    	  this.add(items, 2);\n" + 
+			"	  },\n" + 
+			"      add: function(items, step) {\n" + 
+			"      	  var y = 0;\n" + 
+			"    	  if (Array.isArray(items)) {\n" + 
+			"        	this.itemCount = 0;    		\n" + 
+			"    	  } else {\n" + 
+			"    	  	this.list.children().each(function(a) {y += a.height()});\n" + 
+			"    		items = [items];  \n" + 
+			"    	  }\n" + 
+			"    	  for (var i = 0; i < items.length; i += step) {\n" + 
+			"    		var item = items[i];\n" + 
+			"    		if (!item)continue;\n" + 
+			"    		var opt = $('<li>', {'class':'j2scbopt j2scb-unsel', 'id': this.id() + '_opt' + this.itemCount});\n" + 
+			"    		var pt = opt[0].j2scbIndex = this.itemCount++;    		\n" + 
+			"    		this.list.append(opt);\n" + 
+			"			if (typeof item == 'string') {\n" + 
+			"				opt.text(item);\n" + 
+			"    		} else {\n" + 
+			"    			var ji = $(item);\n" + 
+			"    			ji.css(\"background-color\", \"transparent\");\n" + 
+			"    			opt.append(item);\n" + 
+			"    			opt.css({height:ji.css(\"height\")});\n" + 
+			"	    		y += opt.height();\n" + 
+			"	    		if (step == 2)\n" + 
+			"	    			this.list[\"j2shead\" + pt] = items[i + 1];\n" + 
+			"    		}\n" + 
+			"    		this.list.css({height: (y + 2) + \"px\"});\n" + 
+			"	        this._on(opt, {mouseleave: '_close', mouseover: '_overOpt', click : '_clickOpt', touchend : '_clickOpt', pointerup : '_clickOpt', mouseup : '_clickOpt'});\n" + 
+			"    	  }\n" + 
+			"      },\n" + 
+			"      updateCSS: function() {\n" + 
+			"    	  var cbox = this.cont.parent();\n" + 
+			"    	  var bg = cbox.css(\"background-color\");\n" + 
+			"    	  this.options.backgroundColor = bg;\n" + 
+			"    	  var font = {\"font-family\": cbox.css(\"font-family\")\n" + 
+			"    			  , \"font-size\": cbox.css(\"font-size\")\n" + 
+			"    			  , \"font-weight\": cbox.css(\"font-weight\")\n" + 
+			"    			  , \"font-style\": cbox.css(\"font-style\")\n" + 
+			"    			  , \"font-style\": cbox.css(\"font-style\")\n" + 
+			"    			  , backgroundColor: bg\n" + 
+			"    			  }; 	  \n" + 
+			"          var w = this.element.width();\n" + 
+			"          if (w == 0)\n" + 
+			"        	  return;\n" + 
+			"          var h = this.element.height() + 'px';\n" + 
+			"          this.cont.css({\n" + 
+			"          	width: (w - 2) + 'px',\n" + 
+			"          	height: h,\n" + 
+			"          	backgroundColor: bg\n" + 
+			"          });\n" + 
+			"          this.head.css({\n" + 
+			"          	width: (w - 20) + 'px',\n" + 
+			"          	height: h\n" + 
+			"          });\n" + 
+			"          this.head.css(font);\n" + 
+			"          this.btn.css({\n" + 
+			"          	left: (w - 20) + 'px',\n" + 
+			"          	height: h,\n" + 
+			"          	backgroundColor: bg\n" + 
+			"          });\n" + 
+			"          h = (this.options.height ? this.options.height + 'px' : null);\n" + 
+			"          this.popup.css({\n" + 
+			"            width: w + 'px',\n" + 
+			"        	height: h\n" + 
+			"         });  \n" + 
+			"          this.popup.css(font);\n" + 
+			"          this.list.css({\n" + 
+			"            width: w + 'px',\n" + 
+			"          	height: h,\n" + 
+			"          	overflowY: (h ? null : 'auto')\n" + 
+			"          }); \n" + 
+			"          this.list.css(font);\n" + 
+			"          font[\"font-size\"] = \"0.7em\";\n" + 
+			"          this.btn.css(font);\n" + 
+			"      },\n" + 
+			"      \n" + 
+			"      setSelectedIndex: function(n) { return this._clickOpt({target: $('#' + this.id() + '_opt' + n)}, false) },\n" + 
+			"      _selectedItem: function() { return this.list && this.list.find('.j2scb-sel') },\n" + 
+			"            \n" + 
+			"      setText: function(s) { this.head.text(s) },\n" + 
+			"      hoverOver: function(i) {\n" + 
+			"      	this._overOpt(i >= 0 ? this.list[0].children[i] : null);  \n" + 
+			"        },\n" + 
+			"      showPopup: function() { this._open(null);},\n" + 
+			"      _tog: function(e) {\n" + 
+			"    	  if (this.popup.css(\"display\") == \"block\") {\n" + 
+			"    		  this.hidePopup();\n" + 
+			"    	  } else {\n" + 
+			"    		  var me = this;\n" + 
+			"    		setTimeout(function(){ me._open(e) },100);\n" + 
+			"    	  }\n" + 
+			"    	  return false;\n" + 
+			"      },\n" + 
+			"  	  _open: function(e) {\n" + 
+			"  		this.cont.focus();\n" + 
+			"  		if (this.options.disabled)\n" + 
+			"  			return;\n" + 
+			"		this._stopT(\"_open\");\n" + 
+			"		var loc = this.element.offset();\n" + 
+			"		if (e)\n" + 
+			"			this._trigger('change', null, [this, 'opening']);\n" + 
+			"		this.options.popupVisible = true;\n" + 
+			"	 	this.popup.css({\n" + 
+			"	 		'display':'block',\n" + 
+			"	 		left: loc.left + 'px',\n" + 
+			"        	top: (loc.top + this.element.height()) + 'px',\n" + 
+			"        	width:this.element.css('width') - 2,\n" + 
+			"	 		'z-index': this.options.zIndex\n" + 
+			"	 	});\n" + 
+			"	  	this.list.scrollTop(0);\n" + 
+			"	  	this.element.focus();\n" + 
+			"	  },\n" + 
+			"  	  hidePopup: function() {\n" + 
+			"  		  // we need a time click here\n" + 
+			"  		 var me = this;\n" + 
+			"  		 setTimeout(function(){\n" + 
+			"   		 if (me.options.popupVisible) {\n" + 
+			"   			me.options.popupVisible = false;\n" + 
+			"   			me.popup.hide();\n" + 
+			"   		 }\n" + 
+			"  		},10);\n" + 
+			"   	  },\n" + 
+			"      _overOpt: function(e) {\n" + 
+			"    	  this._stopT(\"_overOpt\");\n" + 
+			"    	  this.list.find('.j2scbopt').removeClass('j2scb-hov j2scb-sel');\n" + 
+			"    	  var opt = $(e && e.target || e).closest('.j2scbopt');\n" + 
+			"    	  opt.addClass('j2scb-hov');\n" + 
+			"    	  this.options.hoveredIndex = (opt[0] ? opt[0].j2scbIndex : -1);\n" + 
+			"      },\n" + 
+			"      _clickOpt: function(e, andTrigger) {\n" + 
+			"    	    andTrigger |= (arguments.length == 1);\n" + 
+			"    	    var opt = $(e.target || e).closest('.j2scbopt');\n" + 
+			"    	  	var opts = this.list.find('.j2scbopt');\n" + 
+			"    	  	opts.removeClass('j2scb-hov');\n" + 
+			"	    	if (this.options.mode=='s') {\n" + 
+			"	    		opts.removeClass('j2scb-sel');\n" + 
+			"	    	    opts.addClass('j2scb-unsel');\n" + 
+			"	    	    opt.removeClass('j2scb-unsel');\n" + 
+			"	    	    opt.addClass('j2scb-sel');\n" + 
+			"	    	    if (andTrigger)\n" + 
+			"	    	    	this._close();\n" + 
+			"	    	} else if (mode == 'm') {  \n" + 
+			"	    		  if (opt.is('.j2scb-sel')) {\n" + 
+			"	    			opt.addClass('j2scb-unsel');\n" + 
+			"	    			opt.removeClass('j2scb-sel');\n" + 
+			"	    	      } else {\n" + 
+			"	    			opt.addClass('j2scb-sel');\n" + 
+			"	    			opt.removeClass('j2scb-unsel');\n" + 
+			"	    	      }  \n" + 
+			"	    	}  \n" + 
+			"	    	this.update(andTrigger);\n" + 
+			"	    	return opt;\n" + 
+			"      },\n" + 
+			"      _stopT: function(why) {\n" + 
+			"    	  clearTimeout(this.t);\n" + 
+			"    	  this.t = 0;\n" + 
+			"      },\n" + 
+			"      _close: function() {\n" + 
+			"          if (this.t)return;\n" + 
+			"          var me = this;\n" + 
+			"          this.t = setTimeout(function() {  \n" + 
+			"      		  me.hidePopup();\n" + 
+			"      		  me.t = 0;\n" + 
+			"      	  },CLOSE_DELAY);\n" + 
+			"      }\n" + 
+			"      \n" + 
+			"    });\n" + 
+			" \n" + 
+			"  });\n" + 
+			"  \n" + 
+			"};  \n" + 
+			"\n" + 
+			"})(J2S.__$);\n" + 
+			"");
+	
+	// BH 2024.06.28
+	
+		
+	htResource.put(RESOURCE_J2SMENU, ";(function(Swing, $) {\n" + 
+			"\n" + 
+			"J2S.__makeMenu = function() {\n" + 
+			"// run once; set to NOP\n" + 
+			"J2S.__makeMenu = function(){};	\n" + 
+			"\n" + 
+			"\n" + 
+			" var MODE_UNKNOWN = 0;\n" + 
+			" var MODE_TOUCH = 1;\n" + 
+			" var MODE_MOUSE = 2;\n" + 
+			"\n" + 
+			" var outActive;\n" + 
+			" var vart;\n" + 
+			"\n" + 
+			" var n=!1, e = $;\n" + 
+			"\n" + 
+			" // local methods here for help with debugging\n" + 
+			"	\n" + 
+			" \n" + 
+			" // BH note that swingjs.plaf.JSButton will set and clear ui-state-disabled on its own\n" + 
+			" \n" + 
+			"\n" + 
+			" var delayMe = function(element, f, ms) {\n" + 
+			"	 var id = element._delay(f, ms);\n" + 
+			"	 return id;\n" + 
+			" }	\n" + 
+			" \n" + 
+			" var clearMe = function(id, why) {\n" + 
+			"	 return clearTimeout(id);\n" + 
+			" }\n" + 
+			"\n" + 
+			" var someMenuOpen = function() {\n" + 
+			"	 return $(\".swingjsPopupMenu:visible\").length > 0;\n" + 
+			" }\n" + 
+			" \n" + 
+			" var closeOnLeave = function(me, t) {\n" + 
+			"	 	$.contains(me.element[0],me.document[0].activeElement)\n" + 
+			"	 	  ||me.collapseAll(t)\n" + 
+			" }\n" + 
+			" \n" + 
+			" var cleanText = function(n) {\n" + 
+			"	 return n && n.innerText.replace(/\\n/g,\"|\");\n" + 
+			" }\n" + 
+			" \n" + 
+			" var CLICK_OUT_DELAY = 200;// ms; 100 was too fast\n" + 
+			" var CLOSE_DELAY = 700;\n" + 
+			" \n" + 
+			" var setCloseTimer = function(me) {\n" + 
+			"	 if (vart)\n" + 
+			"		 clearTimeout(vart);\n" + 
+			"     vart = me.t = setTimeout(function() {  	 \n" + 
+			"    	 me._getT();\n" + 
+			"    	 me._stopT(\"closeTimer collapsing\");\n" + 
+			"    	 me.collapseAll();\n" + 
+			" 		  vart = me.t = 0;\n" + 
+			" 	  },CLOSE_DELAY);\n" + 
+			" }\n" + 
+			" var setCollapseTimer = function(me, t) {\n" + 
+			"	 //System.err.println(\"collapseAll \" + me.uuid);\n" + 
+			"	 me.timer = delayMe(me,\n" + 
+			"       function(){\n" + 
+			"		 doCmd(\"clearClickOut\", me);\n" + 
+			"		 if (!someMenuOpen())\n" + 
+			"			 return;\n" + 
+			"		 var r=n?me.element:e(t&&t.target).closest(me.element.find(\".ui-j2smenu\"));\n" + 
+			"		 r.length||(r=me.element);\n" + 
+			"		 me._closeSubmenus(r);\n" + 
+			"		 me.unsetFocus(t);\n" + 
+			"		 me.activeMenu=r;\n" + 
+			"		 me.closed = true;\n" + 
+			"	   }, me.delay); \n" + 
+			"\n" + 
+			" }\n" + 
+			" \n" + 
+			" var myMenuItem = function(t) { return $(t).closest(\".ui-j2smenu-item\") }\n" + 
+			" var myMenuBar = function(t) { return $(t).closest(\".j2s-menuBar-menu\") }\n" + 
+			" var myMenu = function(t) { return $(t).closest(\".ui-j2smenu\") }\n" + 
+			" var isPopupMenu = function(t) { return t && t.is(\".ui-j2s-popup-menu\") }\n" + 
+			" var isDisabled = function(t) { return t && t.is(\".ui-state-disabled\") }\n" + 
+			" var isMenu = function(t) { return t && (t.has(\".ui-j2smenu\").length > 0) }\n" + 
+			" \n" + 
+			" var doCmd = function(trigger,me,t,n,why) {\n" + 
+			"	 \n" + 
+			"	 var debug = function(){}\n" + 
+			"	 \n" + 
+			"	 debug(\"j2sMenu trigger \" + trigger + \" \" + (me.active && me.active[0].innerText.split(\"\\n\").join(\"-\")))\n" + 
+			"	 \n" + 
+			"	 why || (why = \"\");\n" + 
+			"	 var event = t;\n" + 
+			"	 var target = (!t || !t.target ? null : myMenuItem(t.target)[0]);\n" + 
+			"\n" + 
+			"	 switch(trigger) {\n" + 
+			"	 case \"onoutn\":\n" + 
+			"		 me._closeMe();\n" + 
+			"		 break;\n" + 
+			"	 case \"onmoven\":\n" + 
+			"		 me.clickoutDisabled = false;\n" + 
+			"		 if ($(target).hasClass(\"ui-j2smenu\")) {\n" + 
+			"			 // this is the most likely way we will leave, via a mousemove on the border\n" + 
+			"			 me._closeMe();  \n" + 
+			"			 break;\n" + 
+			"		 }\n" + 
+			"	 case \"onmovep\":\n" + 
+			"	 case \"onovern\":\n" + 
+			"		 me.clickoutDisabled = false;\n" + 
+			"		 me._stopT(trigger);\n" + 
+			"		 if (!t)return;\n" + 
+			"		 // BH 2018\n" + 
+			"		 // -- added stopPropagation\n" + 
+			"		 // -- changed to mouseover from mouseenter, since we have children\n" + 
+			"		 var a = myMenuItem(target)\n" + 
+			"		 if (a.hasClass(\".ui-state-focus\"))\n" + 
+			"			 return;		 \n" + 
+			"		 if (!a.hasClass(\"j2s-popup-menu\") && !a.hasClass(\"ui-j2smenu-node\")) {\n" + 
+			"			 me._closeSubmenus(a.parent());			 \n" + 
+			"		 }\n" + 
+			"		 var m = a;\n" + 
+			"		 //testing a = a.find(\".a\");\n" + 
+			"		 a[0] && a[0].focus();\n" + 
+			"		 var n=myMenuItem(t.currentTarget);\n" + 
+			"		 n.siblings().children(\".ui-state-active\").removeClass(\"ui-state-active\");\n" + 
+			"		 t.stopPropagation();\n" + 
+			"		 me.setFocus(t,n);\n" + 
+			"		 t = m;\n" + 
+			"		 break;\n" + 
+			"	 case \"onpress\":\n" + 
+			"		var n=myMenuItem(target);\n" + 
+			"		me.setFocus(t,n);\n" + 
+			"		me.elementPressed = n[0];\n" + 
+			"	 case \"onrelease\":\n" + 
+			"	 case \"onclick\":\n" + 
+			"		var n=myMenuItem(target);\n" + 
+			"		if (isDisabled(n) || n[0] != me.elementPressed)\n" + 
+			"			return;\n" + 
+			"		if (isDisabled(n.first()))\n" + 
+			"			break;\n" + 
+			"		me.select(t);\n" + 
+			"		var doOpen = isPopupMenu(n.first());\n" + 
+			"		if (doOpen) {\n" + 
+			"			// must disable clickout in progress, or a click here will close all menus just after expanding\n" + 
+			"			me.clickoutDisabled = true;\n" + 
+			"			me.expand(t);\n" + 
+			"		} else {\n" + 
+			"			if (!me.element.is(\":focus\")) {\n" + 
+			"				me.element.trigger(\"setFocus\",[!0]);\n" + 
+			"				me.active&&me.active.parents(\".ui-j2smenu\").length===1&&clearMe(me.timer, trigger);\n" + 
+			"			} \n" + 
+			"			if (me.mouseState != MODE_TOUCH)\n" + 
+			"				doCmd(\"collapseAll\", me, 0, 1);			 \n" + 
+			"		}\n" + 
+			"		break;\n" + 
+			"	 case \"clearClickOut\":\n" + 
+			"		 me._off(me.document, \"click\");\n" + 
+			"		 outActive = null;\n" + 
+			"		 me._stopT(\"clearClickOut\");\n" + 
+			"		 return;\n" + 
+			"	 case \"setClickOut\":\n" + 
+			"		 if (me.clickoutDisabled)\n" + 
+			"			 return;\n" + 
+			"		 if (outActive)\n" + 
+			"			 doCmd(\"clearClickOut\", outActive);\n" + 
+			"		 setTimeout(function(){	\n" + 
+			"			 if (me.clickoutDisabled)\n" + 
+			"				 return;\n" + 
+			"			 outActive = me;\n" + 
+			"			 me._on(me.document,{ \"click\":function(t){doCmd(\"onclick_out\", me, $, t),n=!1}});			 			 \n" + 
+			"		 },CLICK_OUT_DELAY);\n" + 
+			"		 return;\n" + 
+			"	 case \"onclick_out\":\n" + 
+			"		 if (me.clickoutDisabled || outActive != me || !someMenuOpen()) {\n" + 
+			"			 me.clickoutDisabled = false;\n" + 
+			"			 doCmd(\"clearClickOut\", me);\n" + 
+			"			 return;\n" + 
+			"		 }		 \n" + 
+			"		 myMenuBar(target).length == 0 && (myMenu(target).length||me.collapseAll(t));\n" + 
+			"	 	return;\n" + 
+			"	 case \"onleave\":\n" + 
+			"		 if (me.mouseState != MODE_TOUCH)\n" + 
+			"		   me._closeMe(\"onleave\");\n" + 
+			"		 return;\n" + 
+			"	 case \"onfocus\":\n" + 
+			"		 n||me.setFocus(t,me.active||me.element.children(\".ui-j2smenu-item\").eq(0));\n" + 
+			"		 return;\n" + 
+			"	 case \"onblur\":\n" + 
+			"		 me.timer = delayMe(me, function(){closeOnLeave(me, t)});\n" + 
+			"		 break;\n" + 
+			"	 case \"_activate\":\n" + 
+			"		 isDisabled(me.active)||(me.active.children(\".a[aria-haspopup='true']\").length?me.expand(t):me.select(t));\n" + 
+			"		 break;\n" + 
+			"	 case \"_startOpening\":\n" + 
+			"		 if(t.attr(\"aria-hidden\")!==\"true\" && t.css('display') !== 'none') {\n" + 
+			"			 return;\n" + 
+			"		 }\n" + 
+			"		 me.closed = false;\n" + 
+			"		 //me.timer=delayMe(me, function(){\n" + 
+			"			 me._closeSubmenus(),me._openSubmenu(t);\n" + 
+			"		//	 },me.delay);\n" + 
+			"		 return;\n" + 
+			"	 case \"_hidePopupMenu\":\n" + 
+			"		 // trigger Java to deselect these - the JMenu class\n" + 
+			"		 me.mouseState = MODE_UNKNOWN; // unknown\n" + 
+			"		 t = me.element.find(\".ui-j2smenu[aria-hidden!=true]\").attr(\"aria-hidden\",\"true\").parent();\n" + 
+			"		 var a = me;\n" + 
+			"		 doCmd(\"_hide\", a, a.element);\n" + 
+			"		 if (!t[0])\n" + 
+			"			 return;\n" + 
+			"		 break;\n" + 
+			"	 case \"_openSubmenu\":\n" + 
+			"		 n||(n = me.active || me.activeMenu);\n" + 
+			"		 if (isDisabled(n))\n" + 
+			"			 return;\n" + 
+			"		 var item = n[0].firstElementChild;\n" + 
+			"		 var li = n;\n" + 
+			"		 n = e.extend({of:n},me.options.position);\n" + 
+			"		 me._stopT(\"opening\");\n" + 
+			"		 clearMe(me.timer, trigger);\n" + 
+			"		 var ui = me.activeMenu && me.activeMenu[0] && me.activeMenu[0][\"data-ui\"];\n" + 
+			"	 	 ui && ui.processJ2SMenuCmd$OA([trigger,me,null,t.parent(),n,why]);\n" + 
+			"		 // adds role=xxxx\n" + 
+			"	 	 me.refresh(\"_openSubmenu\",n);\n" + 
+			"		 // adds mouse binding to role=menuitem\n" + 
+			"	 	 ensureMouseSet(ui.popupMenu, li);\n" + 
+			"		 var v = me.element.find(\".ui-j2smenu\").not(t.parents(\".ui-j2smenu\"));\n" + 
+			"		 doCmd(\"_hide\", me, v);\n" + 
+			"		 try {\n" + 
+			"			 // required if menu has been modified\n" + 
+			"			 doCmd(\"_show\", me, me.activeMenu);\n" + 
+			"			 doCmd(\"_show\", me, t);\n" + 
+			"			 t.removeAttr(\"aria-hidden\").attr(\"aria-expanded\",\"true\").position(n);\n" + 
+			"			 me.closed = false;\n" + 
+			"		 } catch(err){\n" + 
+			"			 System.err.println(\"j2sMenu error: \" + err);\n" + 
+			"		 }\n" + 
+			"		 return;\n" + 
+			"	 case \"closeSiblingMenus\":\n" + 
+			"		 var m = t.closest(\"ul\").find(\".ui-state-active\")\n" + 
+			"		 m.removeClass(\"ui-state-active\");\n" + 
+			"		 var v = t.find(\".ui-j2smenu\");\n" + 
+			"		 if (!v.length)\n" + 
+			"			 return;\n" + 
+			"		 doCmd(\"_hide\", me, v);\n" + 
+			"		 v.attr(\"aria-hidden\",\"true\").attr(\"aria-expanded\",\"false\");\n" + 
+			"		 t = v.parent();\n" + 
+			"		 return;\n" + 
+			"	 case \"_closeSubmenus\":\n" + 
+			"		 var a = me.active;\n" + 
+			"		 if (a && a[0] && a[0][\"data-component\"].getUIClassID$() != \"MenuUI\")\n" + 
+			"			return;\n" + 
+			"		 t||(t=me.active?me.active.parent():me.element);\n" + 
+			"		 var m = t.closest(\"ul\").find(\".ui-state-active\")\n" + 
+			"		 m.removeClass(\"ui-state-active\");\n" + 
+			"		 var v = t.find(\".ui-j2smenu\");\n" + 
+			"		 if (!v.length)\n" + 
+			"			 return;\n" + 
+			"		 doCmd(\"_hide\", me, v);\n" + 
+			"		 v.attr(\"aria-hidden\",\"true\").attr(\"aria-expanded\",\"false\");\n" + 
+			"		 t = v.parent();\n" + 
+			"		 break;\n" + 
+			"	 case \"_move\":\n" + 
+			"		 var a = n[0];\n" + 
+			"		 var b = n[1];\n" + 
+			"		 var r = me.active&&\n" + 
+			"				 (a===\"first\"||a===\"last\"? me.active[a===\"first\"?\"prevAll\":\"nextAll\"](\".ui-j2smenu-item\").eq(-1)\n" + 
+			"				   : me.active[a+\"All\"](\".ui-j2smenu-item\").eq(0));\n" + 
+			"		 if(!r||!r.length||!me.active)\n" + 
+			"			 r=me.activeMenu.children(\".ui-j2smenu-item\")[b]();\n" + 
+			"		 me._closeSubmenus(r);\n" + 
+			"		 me.setFocus(t,r);\n" + 
+			"		 return;\n" + 
+			"	 case \"_show\":\n" + 
+			"		 t.show();\n" + 
+			"		 break;\n" + 
+			"	 case \"_hide\":\n" + 
+			"		 if (!t[0])\n" + 
+			"			 return;\n" + 
+			"		 t.hide();\n" + 
+			"		 break;\n" + 
+			"	 case \"expand\":\n" + 
+			"    	 if (!someMenuOpen() || isDisabled(me.active))\n" + 
+			"			 return;\n" + 
+			"		 n = me.active&&me.active.children(\".ui-j2smenu\").children(\".ui-j2smenu-item\").first();\n" + 
+			"		 if (n&&n.length) {\n" + 
+			"			 me._openSubmenu(n.parent());\n" + 
+			"			 //me.timer = delayMe(me,function(){\n" + 
+			"				 me.setFocus(t,n)\n" + 
+			"				// });\n" + 
+			"		 }\n" + 
+			"		 break;\n" + 
+			"	 case \"collapse\":\n" + 
+			"		 if (!someMenuOpen())\n" + 
+			"			 return;\n" + 
+			"		 me._closeSubmenus();\n" + 
+			"		 var v=me.active&&me.active.parent().closest(\".ui-j2smenu-item\",me.element);\n" + 
+			"		 if (v && v.length) {\n" + 
+			"			 me.setFocus(t,v);\n" + 
+			"			 me._closeSubmenus(v);\n" + 
+			"		 } else {\n" + 
+			"			 doCmd(\"collapseAll\", me, 0, 1);			 \n" + 
+			"		 }\n" + 
+			"		 break;\n" + 
+			"	 case \"collapseAll\":\n" + 
+			"		 // touch needs this setTimeout to delay close action until touch is processed\n" + 
+			"		 setTimeout(function() {\n" + 
+			"			 if (me.closed || me.clickoutDisabled) {\n" + 
+			"				 return;\n" + 
+			"			 }\n" + 
+			"			 doCmd(\"_hidePopupMenu\", me);\n" + 
+			"			 clearMe(me.timer, trigger),\n" + 
+			"			 setCollapseTimer(me, t)\n" + 
+			"		 }, 100);\n" + 
+			"		 break;\n" + 
+			"	 case \"setFocus\":\n" + 
+			"		 me.clickoutDisabled = true;\n" + 
+			"		 // we determine this to be a touch because a \n" + 
+			"		 // focus from DOWN is made before a focus from OVER or MOVE\n" + 
+			"		 if (event.type == \"pointermove\" || event.type == \"pointerover\")\n" + 
+			"			 me.mouseState = MODE_MOUSE;// TODO menu only\n" + 
+			"		 else if (event.type == \"pointerdown\" && me.mouseState == MODE_UNKNOWN)\n" + 
+			"			 me.mouseState = MODE_TOUCH;\n" + 
+			"		 var a = n.first();\n" + 
+			"		 var u=n.children(\".ui-j2smenu\");\n" + 
+			"		 var subIsActive = (a[0] == (me.active && me.active[0]));\n" + 
+			"		 if (u.length == 0 && subIsActive)\n" + 
+			"			 return;\n" + 
+			"		 me.unsetFocus(t,t&&t.type===\"focus\", \"fromSetFocus\");\n" + 
+			"		 me._scrollIntoView(n);\n" + 
+			"		 // BH added 2024.01.16\n" + 
+			"		 n.siblings().each(function(a,b){\n" + 
+			"				 doCmd(\"closeSiblingMenus\", me, $(b));\n" + 
+			"		 })\n" + 
+			"		 me.active=a;\n" + 
+			"		 var r=me.active.addClass(\"ui-state-focus\");\n" + 
+			"		 //testing var r=me.active.children(\".a\").addClass(\"ui-state-focus\");\n" + 
+			"		 me.options.role&&me.element.attr(\"aria-activedescendant\", r.attr(\"id\"));\n" + 
+			"		 myMenuItem(me.active.parent()).children(\".a:first\").addClass(\"ui-state-active\");\n" + 
+			"		 u.length&&(/^pointer/.test(t.type) || /^mouse/.test(t.type))&&me._startOpening(u);\n" + 
+			"		 me.activeMenu=n.parent();\n" + 
+			"		 me._trigger(\"focus\",t,{item:n});\n" + 
+			"		 t = n;\n" + 
+			"		 break;\n" + 
+			"	 case \"unsetFocus\":\n" + 
+			"		 if (me.active && t && typeof n == \"undefined\" && t.relatedTarget && t.relatedTarget.getAttribute(\"role\") != \"presentation\") {\n" + 
+			"			 doCmd(\"_hide\", me, t, me.element);\n" + 
+			"		 }\n" + 
+			"		 n||clearMe(me.timer);\n" + 
+			"		 if(!me.active)return;\n" + 
+			"		 me.active.removeClass(\"ui-state-focus\");\n" + 
+			"		 // testing me.active.children(\".a\").removeClass(\"ui-state-focus\");\n" + 
+			"		 var a = me.active;\n" + 
+			"		 me.active=null;\n" + 
+			"		 me._trigger(\"blur\",t,{item:a});\n" + 
+			"		 t = a;\n" + 
+			"		 break;\n" + 
+			"	 case \"select\":\n" + 
+			"		 if (me.mouseMode == MODE_MOUSE) {\n" + 
+			"			 return;\n" + 
+			"		 } \n" + 
+			"		 me.active=me.active||myMenuItem(target);\n" + 
+			"		 if (isMenu(me.active)) {\n" + 
+			"			 // the anchor element is the first child.\n" + 
+			"			me.clickoutDisabled = !me.active.children().first().is(\".ui-state-active\");\n" + 
+			"		 } else {\n" + 
+			"			me.collapseAll(t,!0);\n" + 
+			"		 }\n" + 
+			"		 me._trigger(\"select\",t,{item:me.active});\n" + 
+			"		 if (!t[0]) {\n" + 
+			"			 return;\n" + 
+			"		 }\n" + 
+			"		 break;\n" + 
+			"	 case \"refresh\":\n" + 
+			"		 n=me.options.icons.submenu;\n" + 
+			"		 var role=me.options.role;\n" + 
+			"		 var r=me.element.find(me.options.menus);\n" + 
+			"		 t = r.filter(\":not(.ui-j2smenu)\")\n" + 
+			"		   .addClass(\"ui-j2smenu ui-widget ui-widget-content ui-corner-all\");\n" + 
+			"		 doCmd(\"_hide\", me, t);\n" + 
+			"		 t.attr({role:me.options.role,\"aria-hidden\":\"true\",\"aria-expanded\":\"false\"})\n" + 
+			"		   .each(function(){\n" + 
+			"			   var t=e(this),r=t.prev(\".a\"),\n" + 
+			"			   i=e(\"<span>\").addClass(\"ui-j2smenu-icon ui-icon \"+n)\n" + 
+			"			   .attr({role:role})\n" + 
+			"			   .data(\"ui-j2smenu-submenu-carat\",!0);\n" + 
+			"			   r.attr(\"aria-haspopup\",\"true\").prepend(i);\n" + 
+			"			   t.attr(\"aria-labelledby\",r.attr(\"id\"));\n" + 
+			"		   });\n" + 
+			"		 t=r.add(me.element);\n" + 
+			"		 t.children(\":not(.ui-j2smenu-item):has(.a)\").addClass(\"ui-j2smenu-item\")\n" + 
+			"		   		.attr(\"role\",\"presentation\").children(\".a\").uniqueId()\n" + 
+			"		   		.addClass(\"ui-corner-all\").attr({tabIndex:-1,role:\"menuitem\"});\n" + 
+			"		 t.children(\":not(.ui-j2smenu-item)\").addClass(\"ui-widget-content ui-j2smenu-divider\");\n" + 
+			"		 t.children(\".ui-state-disabled\").attr(\"aria-disabled\",\"true\");\n" + 
+			"		 me.active&&!e.contains(me.element[0],me.active[0])&&me.unsetFocus();\n" + 
+			"		 return;\n" + 
+			"	 case \"keyActivate\":\n" + 
+			"		 \n" + 
+			"		 // BH 1/15/2019 key mnemonics\n" + 
+			"		 \n" + 
+			"		 var node = e(\".j2s-popup-menu  > :visible.ui-mnem-\" + Character.toLowerCase$I(t.keyCode));\n" + 
+			"		 switch (node.length) {\n" + 
+			"		 case 0:\n" + 
+			"			 doCmd(\"onclick\", me, t);\n" + 
+			"			 break;\n" + 
+			"		 case 1:\n" + 
+			"			 doCmd(\"_openSubmenu\", me, node.next(\"ul\"), node);\n" + 
+			"			 break;\n" + 
+			"		 default:\n" + 
+			"			 // ignore multiple hits\n" + 
+			"			 break;\n" + 
+			"		 }\n" + 
+			"		 break;\n" + 
+			"	 }\n" + 
+			"	 \n" + 
+			"	 var ui = me.activeMenu && me.activeMenu[0] && me.activeMenu[0][\"data-ui\"];\n" + 
+			" 	 ui && ui.processJ2SMenuCmd$OA([trigger,me,event,t,n,target,why]);\n" + 
+			" }\n" + 
+			" \n" + 
+			"$.widget(\"ui.j2smenu\",{\n" + 
+			" version:\"1.9.2\",\n" + 
+			" defaultElement:\"<ul>\",\n" + 
+			" delay:300,\n" + 
+			" options:{icons:{submenu:\"ui-icon-carat-1-e\"},\n" + 
+			" menus:\"ul\",\n" + 
+			" position:{my:\"left top\",at:\"right top\"},\n" + 
+			" role:\"j2smenu\",\n" + 
+			" blur:null,\n" + 
+			" focus:null,\n" + 
+			" select:null,\n" + 
+			" jPopupMenu:null\n" + 
+			" },\n" + 
+			" \n" + 
+			" \n" + 
+			" _create:function(){\n" + 
+			"\n" + 
+			"	 this.t = this.timer = 0;\n" + 
+			"	 \n" + 
+			"	 this.closed = false;\n" + 
+			"	 \n" + 
+			"//	 if (typeof this.options.delay == \"number\")\n" + 
+			"//		 this.delay = this.options.delay;\n" + 
+			"	 \n" + 
+			"	 this.activeMenu=this.element,\n" + 
+			"	 this.element.uniqueId().addClass(\"ui-j2smenu ui-widget ui-widget-content ui-corner-all\")\n" + 
+			"	   .toggleClass(\"ui-j2smenu-icons\",!!this.element.find(\".ui-icon\").length)\n" + 
+			"	   .attr({role:this.options.role,tabIndex:0})\n" + 
+			"	   .bind(\"click\"+this.eventNamespace,e.proxy(function(e){ this.options.disabled&&e.preventDefault() },this)),\n" + 
+			"	 this.options.disabled&&this.element.addClass(\"ui-state-disabled\").attr(\"aria-disabled\",\"true\"),\n" + 
+			"	 this._on({\n" + 
+			"		 \"click .ui-state-disabled > .a\":	function(t){ t.preventDefault() },\n" + 
+			"		 \"click .ui-j2smenu-item:has(.a)\":	function(t){ doCmd(\"onclick\",this,t);},\n" + 
+			"                 \"pointerdown .ui-j2smenu-item > .a\":   function(t){ doCmd(\"onpress\",this,t) },\n" + 
+			"                 \"pointerup .ui-j2smenu-item > .a\":     function(t){ doCmd(\"onrelease\",this,t) },\n" + 
+			"		 \"mousedown .ui-j2smenu-item > .a\":	function(t){ doCmd(\"onpress\",this,t) },\n" + 
+			"		 \"mouseup .ui-j2smenu-item > .a\":	function(t){ doCmd(\"onrelease\",this,t) },\n" + 
+			"		 \"mousemove .swingjsPopupMenu \":	function(t){ doCmd(\"onmovep\",this,t,0); },\n" + 
+			"		 \"mouseleave .ui-j2smenu\":			function(t){ doCmd(\"onleave\",this,t); },\n" + 
+			"		 \"mousemove .ui-j2smenu-node\":		function(t){ doCmd(\"onmoven\",this,t,0); },\n" + 
+			"		 \"mouseout  .ui-j2smenu-node\":		function(t){ doCmd(\"onoutn\",this,t,0); },\n" + 
+			"		 \"mouseover .ui-j2smenu-node\":		function(t){ doCmd(\"onovern\",this,t,0); },		 \n" + 
+			"		 mouseleave:						function(t){ doCmd(\"onleave\",this,t); },\n" + 
+			"		 blur:								function(t){ doCmd(\"onblur\",this,t)},\n" + 
+			"		 focus:								function(t,n){ doCmd(\"onfocus\",this,t,n); },\n" + 
+			"		 keydown:		\"_keydown\"\n" + 
+			"	 }), \n" + 
+			"	 this.refresh(\"create\");\n" + 
+			" 	},\n" + 
+			" _destroy:function(){this.element.removeAttr(\"aria-activedescendant\").find(\".ui-j2smenu\").andSelf()\n" + 
+			"	 .removeClass(\"ui-j2smenu ui-widget ui-widget-content ui-corner-all ui-j2smenu-icons\")\n" + 
+			"	 .removeAttr(\"role\").removeAttr(\"tabIndex\").removeAttr(\"aria-labelledby\").removeAttr(\"aria-expanded\")\n" + 
+			"	 .removeAttr(\"aria-hidden\").removeAttr(\"aria-disabled\").removeUniqueId().show(),\n" + 
+			"	 this.element.find(\".ui-j2smenu-item\").removeClass(\"ui-j2smenu-item\")\n" + 
+			"	 .removeAttr(\"role\").removeAttr(\"aria-disabled\")\n" + 
+			"	 .children(\".a\").removeUniqueId().removeClass(\"ui-corner-all ui-state-hover\")\n" + 
+			"	 .removeAttr(\"tabIndex\").removeAttr(\"role\").removeAttr(\"aria-haspopup\").children().each(function(){var t=e(this);t.data(\"ui-j2smenu-submenu-carat\")&&t.remove()}),this.element.find(\".ui-j2smenu-divider\").removeClass(\"ui-j2smenu-divider ui-widget-content\")\n" + 
+			"	 },\n" + 
+			" _keydown:function(t){\n" + 
+			"	t.preventDefault();	 	\n" + 
+			"	 var n,r,i,s,o,u=!0;\n" + 
+			"	 switch(t.keyCode){\n" + 
+			"	 case 16:\n" + 
+			"	 case 17:\n" + 
+			"	 case 18: // CTRL ALT SHIFT alone\n" + 
+			"		 break;\n" + 
+			"	 case e.ui.keyCode.PAGE_UP:\n" + 
+			"		 this.previousPage(t);\n" + 
+			"		 break;\n" + 
+			"	 case e.ui.keyCode.PAGE_DOWN:\n" + 
+			"		 this.nextPage(t);\n" + 
+			"		 break;\n" + 
+			"	 case e.ui.keyCode.HOME:\n" + 
+			"		 this._move(\"first\",\"first\",t);\n" + 
+			"		 break;\n" + 
+			"	 case e.ui.keyCode.END:\n" + 
+			"		 this._move(\"last\",\"last\",t);\n" + 
+			"		 break;\n" + 
+			"	 case e.ui.keyCode.UP:\n" + 
+			"		 this.previous(t);\n" + 
+			"		 break;\n" + 
+			"	 case e.ui.keyCode.DOWN:\n" + 
+			"		 this.next(t);\n" + 
+			"		 break;\n" + 
+			"	 case e.ui.keyCode.LEFT:\n" + 
+			"		 this.collapse(t);\n" + 
+			"		 break;\n" + 
+			"	 case e.ui.keyCode.RIGHT:\n" + 
+			"		 this.active && !isDisabled(this.active) && this.expand(t);\n" + 
+			"		 break;\n" + 
+			"	 case e.ui.keyCode.ENTER:\n" + 
+			"	 case e.ui.keyCode.SPACE:\n" + 
+			"		 this._activate(t);\n" + 
+			"		 break;\n" + 
+			"	 case e.ui.keyCode.ESCAPE:\n" + 
+			"		 \n" + 
+			"		 this.collapse(t);\n" + 
+			"		 break;\n" + 
+			"	 default:\n" + 
+			"		doCmd(\"keyActivate\",this, t, true);\n" + 
+			"		break;\n" + 
+			"	}\n" + 
+			" },\n" + 
+			"\n" + 
+			" on: function(a, x) {for(var i = a.length; --i >= 0;)this._on(a[i],x)},\n" + 
+			" on2: function(obj, evts, handle) {var a = {};for(var i = evts.length; --i >= 0;)a[evts[i]]=handle;this._on(obj, a)},\n" + 
+			" _stopT: function(why) {\n" + 
+			"	  clearTimeout(this.t);\n" + 
+			"	  this.t = 0;\n" + 
+			" },\n" + 
+			" _getT: function() {vart = this.t;},\n" + 
+			" _closeMe: function() {\n" + 
+			"     if (this.t){\n" + 
+			"    	 this._stopT(\"closeMe\");\n" + 
+			"     }\n" + 
+			"     if (vart){\n" + 
+			"    	 this.t = vart;\n" + 
+			"    	 this._stopT(\"closeMe\");\n" + 
+			"    	 vart = 0;\n" + 
+			"     }\n" + 
+			"     setCloseTimer(this);\n" + 
+			" },\n" + 
+			"\n" + 
+			" mouseState:MODE_UNKNOWN,\n" + 
+			" \n" + 
+			" _activate:function(t){     doCmd(\"_activate\", this, t); },\n" + 
+			" _startOpening: function(t){ doCmd(\"_startOpening\", this, t); },\n" + 
+			" setFocus:function(t,n){       doCmd(\"setFocus\", this, t, n) },\n" + 
+			" unsetFocus:function(t,n){        doCmd(\"unsetFocus\", this, t, n);},\n" + 
+			" _openSubmenu:function(t){  doCmd(\"_openSubmenu\", this, t);},\n" + 
+			" _closeSubmenus:function(t){doCmd(\"_closeSubmenus\", this, t, n);},\n" + 
+			" collapseAll:function(t,n,why){ doCmd(\"collapseAll\",this, t, n, why);},\n" + 
+			" collapse:function(t){      doCmd(\"collapse\", this, t);},\n" + 
+			" refresh:function(t,n){     doCmd(\"refresh\", this, t, n); },\n" + 
+			" expand:function(t){        doCmd(\"expand\", this, t);},\n" + 
+			" select:function(t){        doCmd(\"select\", this, t); },\n" + 
+			" setClickOut:function() {    doCmd(\"setClickOut\", this); }, \n" + 
+			" next:function(t){this._move(\"next\",\"first\",t)},\n" + 
+			" previous:function(t){this._move(\"prev\",\"last\",t)},\n" + 
+			" _scrollIntoView:function(t){var n,r,i,s,o,u;this._hasScroll()&&(n=parseFloat(e.css(this.activeMenu[0],\"borderTopWidth\"))||0,r=parseFloat(e.css(this.activeMenu[0],\"paddingTop\"))||0,i=t.offset().top-this.activeMenu.offset().top-n-r,s=this.activeMenu.scrollTop(),o=this.activeMenu.height(),u=t.height(),i<0?this.activeMenu.scrollTop(s+i):i+u>o&&this.activeMenu.scrollTop(s+i-o+u))},\n" + 
+			" isFirstItem:function(){return this.active&&!this.active.prevAll(\".ui-j2smenu-item\").length},\n" + 
+			" isLastItem:function(){return this.active&&!this.active.nextAll(\".ui-j2smenu-item\").length},\n" + 
+			" nextPage:function(t){var n,r,i;if(!this.active){this.next(t);return}if(this.isLastItem())return;this._hasScroll()?(r=this.active.offset().top,i=this.element.height(),this.active.nextAll(\".ui-j2smenu-item\").each(function(){return n=e(this),n.offset().top-r-i<0}),this.setFocus(t,n)):this.setFocus(t,this.activeMenu.children(\".ui-j2smenu-item\")[this.active?\"last\":\"first\"]())},\n" + 
+			" previousPage:function(t){var n,r,i;if(!this.active){this.next(t);return}if(this.isFirstItem())return;this._hasScroll()?(r=this.active.offset().top,i=this.element.height(),this.active.prevAll(\".ui-j2smenu-item\").each(function(){return n=e(this),n.offset().top-r+i>0}),this.setFocus(t,n)):this.setFocus(t,this.activeMenu.children(\".ui-j2smenu-item\").first())},\n" + 
+			"\n" + 
+			" _move:function(a,b,t){ doCmd(\"_move\", this, t, [a,b]);},\n" + 
+			" _hasScroll:function(){return this.element.outerHeight()<this.element.prop(\"scrollHeight\")}\n" + 
+			" })\n" + 
+			"\n" + 
+			"Swing.menuCounter = 0;\n" + 
+			"Swing.menuInitialized = 0;\n" + 
+			"\n" + 
+			"Swing.__getMenuStyle = function(applet) { return '\\\n" + 
+			"	.swingjsPopupMenu{font-family:Arial,sans-serif;font-size:11px;position:absolute;z-index:'+J2S.getZ(applet, \"menu\")+'}\\\n" + 
+			"	.swingjsPopupMenu,.swingjsPopupMenu .ui-corner-all{border-radius:5px}\\\n" + 
+			"	.swingjsPopupMenu,.swingjsPopupMenu .ui-widget-content{border:1px solid #a6c9e2;background-color:#fcfdfd;color:#222}\\\n" + 
+			"	.swingjsPopupMenu .a{color:#222;font-size:10px;}\\\n" + 
+			"	.swingjsPopupMenu input[type=\"checkbox\"]{vertical-align:middle;}\\\n" + 
+			"	.swingjsPopupMenu,.swingjsPopupMenu .ui-j2smenu{list-style:none;padding:2px;margin:0;display:block;outline:none;box-shadow:1px 1px 5px rgba(50,50,50,0.75)}\\\n" + 
+			"	.swingjsPopupMenu .ui-j2s-menuBar-menu:focus{outline:none;background:#d0e5f5}\\\n" + 
+			"	.swingjsPopupMenu .ui-j2smenu{cursor:pointer;outline:none;margin-top:-3px;position:absolute}\\\n" + 
+			"	.swingjsPopupMenu .ui-j2smenu-item{outline:none;cursor:pointer;margin:0 0 0 0;padding:0.1em;width:100%}\\\n" + 
+			"	.swingjsPopupMenu .a:focus{outline:none;cursor:pointer;margin:0 0 0 0;padding:0.1em}\\\n" + 
+			"	.swingjsPopupMenu .ui-j2smenu-divider{position:absolute;margin:3px 1px;height:0;transform:translateY(-0.2em);font-size:1;line-height:1px;border-width:1px 0 0 0;width:93%;}\\\n" + 
+			"	.swingjsPopupMenu .ui-j2smenu-item .a{display:block;padding:0.05em 0.4em;white-space:nowrap;border:1px solid transparent}\\\n" + 
+			"	.swingjsPopupMenu .ui-j2smenu-icons{position:relative}\\\n" + 
+			"	.swingjsPopupMenu .ui-j2smenu-icons .ui-j2smenu-item .a{position:relative;padding-left:2em}\\\n" + 
+			"	.swingjsPopupMenu .ui-icon{display:block;text-indent:-99999px;overflow:hidden;background-repeat:no-repeat;position:absolute;top:.2em;left:.2em}\\\n" + 
+			"	.swingjsPopupMenu .ui-j2smenu-icon{position:static;float:right}\\\n" + 
+			"	.swingjsPopupMenu .ui-icon-alt-y{min-width:30ex;text-align:right;background-image:none;background-position:0 0}\\\n" + 
+			"	.swingjsPopupMenu .ui-icon-alt-y:after{content:\"alt-Y\"}\\\n" + 
+			"	.swingjsPopupMenu .ui-icon-alt-shift-x:{min-width:130ex;text-align:right;background-image:none;background-position:0 0}\\\n" + 
+			"	.swingjsPopupMenu .ui-icon-alt-shift-x:after{content:\"alt-shift-X\"}\\\n" + 
+			"	.swingjsPopupMenu .ui-icon-carat-1-e{min-width:1ex;text-align:right;background-image:none;background-position:0 0}\\\n" + 
+			"	.swingjsPopupMenu .ui-icon-carat-1-e:after{content:\"\\\\0025B6\"}\\\n" + 
+			"	.swingjsPopupMenu .ui-state-default{border:1px solid #c5dbec;background:#dfeffc;color:#2e6e9e}\\\n" + 
+			"	.swingjsPopupMenu .ui-state-default .a{color:#2e6e9e;}\\\n" + 
+			"	.swingjsPopupMenu .ui-state-hover,.swingjsPopupMenu .ui-state-focus{background:#d0e5f5;color:#1d5987}\\\n" + 
+			"	.swingjsPopupMenu .ui-state-hover .a{color:#1d5987;cursor:pointer;}\\\n" + 
+			"	.swingjsPopupMenu .ui-state-active{border:1px solid #79b7e7;background:#f5f8f9;color:#e17009}\\\n" + 
+			"	.swingjsPopupMenu .ui-state-active .a{color:#e17009;cursor:pointer;}\\\n" + 
+			"	.swingjsPopupMenu .ui-state-highlight{border:1px solid #fad42e;background:#fbec88;color:#363636}\\\n" + 
+			"	.swingjsPopupMenu .ui-state-highlight .a{color:#363636}\\\n" + 
+			"	.swingjsPopupMenu .ui-state-disabled *{color:#d6d6d6!important;font-weight:normal;cursor:default}\\\n" + 
+			"	.swingjsPopupMenu .ui-state-disabled .a:hover{background-color:transparent!important;border-color:transparent!important}\\\n" + 
+			"	.swingjsPopupMenu .ui-state-disabled .ui-icon{filter:Alpha(Opacity=35)}'};\n" + 
+			"\n" + 
+			"Swing.setMenu = function(menu) {\n" + 
+			"  // the object will be installed using $(body).after()\n" + 
+			"  \n" + 
+			"  // called by javajs.swing.JPopupMenu or swingjs.plaf.JSPopupMenuUI\n" + 
+			"  menu._applet = (menu.ui ? menu.ui.applet : menu.applet); // SwingJS vs JSmol\n" + 
+			"	Swing.__getMenuStyle && J2S.$after(\"head\", '<style>'+Swing.__getMenuStyle(menu._applet)+'</style>');  \n" + 
+			"	Swing.__getMenuStyle = null; // \"static\"\n" + 
+			"	  \n" + 
+			"	// TODO: We can't be creating fields in JPopupMenu! This is ancient stuff.\n" + 
+			"	  \n" + 
+			"    menu._visible = false;\n" + 
+			"    menu._j2sname = menu.id = menu.ui.id + '_' + (++Swing.menuCounter);\n" + 
+			"    menu.$ulTop = J2S.__$(); // empty jQuery selector\n" + 
+			"    var proto = menu.$init$.exClazz[\"prototype\"];\n" + 
+			"    proto._hideJSMenu = function(){Swing.hideMenu(this)};\n" + 
+			"    proto.dragBind || ( proto.dragBind = function(isBind){} );\n" + 
+			"    proto.setContainer || ( proto.setContainer = function(c){ this.$ulTop = c } );\n" + 
+			"    proto.setPosition || ( proto.setPosition = function(x,y) {\n" + 
+			"      this.$ulTop.css({left:x+\"px\",top:y+\"px\",position:\"absolute\"});\n" + 
+			"    } );    \n" + 
+			"	menu._applet._menus || (menu._applet._menus = {});\n" + 
+			"	menu._applet._menus[menu._j2sname] = menu;\n" + 
+			"	menu._tainted = true;\n" + 
+			"}\n" + 
+			"\n" + 
+			"Swing.updateMenu = function(menu, andShow) {\n" + 
+			"	    // for SwingJS the top node is domNode itself, which is already <ul>\n" + 
+			"    var node = menu.ui.domNode;\n" + 
+			"    if (node != menu.$ulTop[0]) {\n" + 
+			"        if (menu.$ulTop) {\n" + 
+			"          menu.$ulTop.remove();\n" + 
+			"        }\n" + 
+			"        menu.setContainer(J2S.$(node));\n" + 
+			"        J2S.$(node).addClass(\"swingjsPopupMenu\");\n" + 
+			"    }\n" + 
+			"	node.style.display = (andShow ? \"block\" : \"none\");\n" + 
+			"    J2S.$after(\"body\",node);\n" + 
+			"    var m = menu.$ulTop.j2smenu({delay:100, jPopupMenu: menu});\n" + 
+			"    m.j2smenu('refresh');  \n" + 
+			"    // this next is critical for SwingJS\n" + 
+			"	menu._tainted = false;\n" + 
+			"}\n" + 
+			"\n" + 
+			"Swing.getInstance = function(menu) {\n" + 
+			"	return menu.$ulTop.data(\"ui-j2smenu\");\n" + 
+			"}\n" + 
+			"\n" + 
+			"var ensureMouseSet = function(menu, node) {\n" + 
+			"	// allow mouseup and other events to do their job\n" + 
+			"	// for all JMenu and JMenuItem entries\n" + 
+			"    var v = node.find(\"[role=menuitem]\");\n" + 
+			"    for (var i = v.length; --i >= 0;) {\n" + 
+			"    	if (v[i]._menu != menu) {\n" + 
+			"    		setMouseMenuItem(menu, v[i]);\n" + 
+			"    	}\n" + 
+			"    }\n" + 
+			"}\n" + 
+			"\n" + 
+			"var setMouseMenuItem = function(menu, node) {\n" + 
+			"    J2S.unsetMouse(node);\n" + 
+			"    node._menu = menu;\n" + 
+			"    node.applet = menu._applet;\n" + 
+			"    while (!node.applet && menu.invoker.parent != null) {\n" + 
+			"    	menu = menu.invoker.parent;\n" + 
+			"    node.applet = menu._applet;\n" + 
+			"    }\n" + 
+			"    node._frameViewer = menu.invoker.getFrameViewer$();\n" + 
+			"    J2S.setMouse(node, true);\n" + 
+			"}\n" + 
+			"\n" + 
+			"Swing.showMenu = function(menu, x, y) {\n" + 
+			"  // called by javajs.swing.JPopupMenu and swingjs.plaf.JSPopupMenuUI\n" + 
+			"  // allow for a user callback for customization of menu\n" + 
+			" \n" + 
+			"  for (var i in menu._applet._menus)\n" + 
+			"    Swing.hideMenu(menu._applet._menus[i], true);  \n" + 
+			"  if (J2S._showMenuCallback)\n" + 
+			"	J2S._showMenuCallback(menu, x, y);\n" + 
+			"  var wasTainted = menu._tainted;\n" + 
+			"  \n" + 
+			"  // TODO: We can't be creating fields in JPopupMenu!\n" + 
+			"  \n" + 
+			"  if (menu._tainted)\n" + 
+			"	  Swing.updateMenu(menu);\n" + 
+			"  ensureMouseSet(menu, menu.$ulTop);\n" + 
+			"  menu.setPosition(x, y);\n" + 
+			"  menu.$ulTop.hide().j2smenu(\"setClickOut\").show();  \n" + 
+			"  menu._visible = true;\n" + 
+			"  menu.timestamp = System.currentTimeMillis$();\n" + 
+			"  menu.dragBind(true);\n" + 
+			"  menu.$ulTop.bind(\"contextmenu\", function() {return false;});\n" + 
+			"} \n" + 
+			"\n" + 
+			"Swing.hideMenu = function(menu, force) {\n" + 
+			"  // called internally often -- even on mouse moves\n" + 
+			"	if (menu._visible === false && !force) return;\n" + 
+			"	menu.dragBind(false);\n" + 
+			"	menu.$ulTop.hide();\n" + 
+			"	menu._visible = menu.isDragging = false;\n" + 
+			"}\n" + 
+			"\n" + 
+			"Swing.disposeMenu = function(menu) {\n" + 
+			"  // called by javajs.swing.JPopupMenu\n" + 
+			"  if (J2S._persistentMenu)\n" + 
+			"  	return\n" + 
+			"  Swing.hideMenu(menu);\n" + 
+			"  menu.$ulTop.j2smenu().destroy && menu.$ulTop.j2smenu().destroy();\n" + 
+			"    var v = menu.$ulTop.find(\"[role=menuitem]\");\n" + 
+			"    for (var i = v.length; --i >= 0;) {\n" + 
+			"        v[i].applet = menu.ui.applet;\n" + 
+			"        J2S.unsetMouse(v[i]);\n" + 
+			"//??        v[i]._frameViewer = null;\n" + 
+			"//??        v[i]._menu = null;\n" + 
+			"    }\n" + 
+			"	delete menu._applet._menus[menu._j2sname];\n" + 
+			"}\n" + 
+			"\n" + 
+			"\n" + 
+			"};\n" + 
+			"\n" + 
+			"})(J2S.Swing, J2S.__$);\n" + 
+			"");
+
+	// BH 2024.06.28
+	
+	htResource.put(RESOURCE_J2SSLIDER, ";(function($) {\n" + 
+			"	\n" + 
+			"J2S.__makeSlider = function() {\n" + 
+			"	// run once; set to NOP\n" + 
+			"  J2S.__makeSlider = function(){};	\n" + 
+			"\n" + 
+			"		$('head').append('<style>\\\n" + 
+			"	.ui-j2sslider-at-bottom { border-bottom-color:red }\\\n" + 
+			"	.ui-j2sslider-at-left { border-left-color:red }\\\n" + 
+			"	.ui-j2sslider-at-right { border-right-color:red }\\\n" + 
+			"	.ui-j2sslider-at-top { border-top-color:red }\\\n" + 
+			"	.ui-j2sslider-tick-mark-horiz { display:inline-block; height:1px; background: black; border:1px; width:5px; position:absolute; left:14px; }\\\n" + 
+			"	.ui-j2sslider-tick-mark-vert { display:inline-block; width:1px; background: black; border:1px; height:5px; position:absolute; top:12px; }\\\n" + 
+			"	.ui-j2sscrollbar-horizontal { color:black;border-style:none solid none solid; border-width: 0px 5px; height: .3em; top: 40%;margin:0px 2px}\\\n" + 
+			"	.ui-j2sscrollbar-vertical { color:black;border-style:solid none solid none; border-width: 5px 0px; width: .3em; left: 40%; margin:2px 0px }\\\n" + 
+			"	.ui-j2sslider-horizontal .ui-j2sslider-handle { margin-left: -.4em; border:1px solid blue; box-sizing:border-box;}\\\n" + 
+			"	.ui-j2sslider-horizontal .ui-j2sslider-range-max { right: 0; }\\\n" + 
+			"	.ui-j2sslider-horizontal .ui-j2sslider-range-min { left: 0; }\\\n" + 
+			"	.ui-j2sslider-horizontal .ui-j2sslider-range { top: 0.1em; height: 30%; }\\\n" + 
+			"	.ui-j2sslider-horizontal { height: .3em; top: 40%;margin:0px 9px}\\\n" + 
+			"	.ui-j2sslider-vertical .ui-j2sslider-handle { margin-left: 0; margin-bottom: -.3em;border:1px solid blue; box-sizing:border-box; }\\\n" + 
+			"	.ui-j2sslider-vertical .ui-j2sslider-range-max { top: 0; }\\\n" + 
+			"	.ui-j2sslider-vertical .ui-j2sslider-range-min { bottom: 0; }\\\n" + 
+			"	.ui-j2sslider-vertical .ui-j2sslider-range { left: 0.1em; width: 30%; }\\\n" + 
+			"	.ui-j2sslider-vertical { width: .3em; left: 40%; margin:10px 0px }\\\n" + 
+			"	.ui-j2sslider .ui-j2sslider-handle { position: absolute; width: 0.8em; height: 0.8em; cursor: default; }\\\n" + 
+			"	.ui-j2sslider .ui-j2sslider-range { position: absolute; font-size: 0.3em; display: block; border: 0; background-position: 0 0; }\\\n" + 
+			"	.ui-j2sslider { position: relative; text-align: left;}\\\n" + 
+			"	.ui-state-disabled { cursor: default !important; }</style>');\n" + 
+			"		\n" + 
+			"\n" + 
+			"		\n" + 
+			"// number of pages in a slider\n" + 
+			"// (how many times can you page 3/down to go through the whole range)\n" + 
+			"var numPages = 5;\n" + 
+			"\n" + 
+			"var closestHandle, index, allowed, offset, dir;\n" + 
+			"\n" + 
+			"var actionTimer, actionTimer2;\n" + 
+			"var actionDelay = 60, actionDelay0 = 200;\n" + 
+			"var startAction = function(me, dir) {\n" + 
+			"	if (actionTimer)\n" + 
+			"		return;\n" + 
+			"	me.jslider.ui.scrollByUnit$I(dir)\n" + 
+			"	actionTimer = setTimeout(function(){\n" + 
+			"		actionTimer = setInterval(function() {\n" + 
+			"			me.jslider.ui.scrollByUnit$I(dir)\n" + 
+			"		}, actionDelay);\n" + 
+			"	}, actionDelay0);\n" + 
+			"}\n" + 
+			"\n" + 
+			"var startAction2 = function(me, dir, val) {\n" + 
+			"	me.jslider.ui.scrollDueToClickInTrack$I$I(dir, val);\n" + 
+			"	if (!me.isScrollBar)\n" + 
+			"		return;\n" + 
+			"	actionTimer2 = \n" + 
+			"		setTimeout(function(){\n" + 
+			"			actionTimer2 = setInterval(function() {\n" + 
+			"				me.jslider.ui.scrollDueToClickInTrack$I$I(dir);\n" + 
+			"			}, actionDelay);\n" + 
+			"		}, actionDelay0);\n" + 
+			"}\n" + 
+			"\n" + 
+			"var clearEnds = function(me) {\n" + 
+			"	var e = me.element;\n" + 
+			"	if (actionTimer)\n" + 
+			"		clearInterval(actionTimer);\n" + 
+			"	if (actionTimer2)\n" + 
+			"		clearInterval(actionTimer2);\n" + 
+			"	actionTimer = 0;\n" + 
+			"	actionTimer2 = 0;\n" + 
+			"	e.removeClass(\"ui-j2sslider-at-top\");\n" + 
+			"	e.removeClass(\"ui-j2sslider-at-bottom\");\n" + 
+			"	e.removeClass(\"ui-j2sslider-at-left\");\n" + 
+			"	e.removeClass(\"ui-j2sslider-at-right\");\n" + 
+			"}\n" + 
+			"\n" + 
+			"var OBJ_WRAP = 0;\n" + 
+			"var OBJ_TRACK = 1;\n" + 
+			"var OBJ_HANDLE = 2;\n" + 
+			"\n" + 
+			"var doMouseCapture = function(me, event, obj, isEndCheck) {\n" + 
+			"\n" + 
+			"	var that = me, o = me.options;\n" + 
+			"	\n" + 
+			"	if (o.disabled ||\n" + 
+			"			(event.type == \"mousemove\" || event.type == \"pointermove\") && event.buttons == 0) {\n" + 
+			"		return false;\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	var position = me._getPosition(event);\n" + 
+			"\n" + 
+			"	index = event.target.index;\n" + 
+			"\n" + 
+			"	closestHandle = $(event.target);// handles[index];//$(\n" + 
+			"									// me );\n" + 
+			"\n" + 
+			"	// workaround for bug #3736 (if both handles of\n" + 
+			"	// a range are at 0,\n" + 
+			"	// the first is always used as the one with\n" + 
+			"	// least distance,\n" + 
+			"	// and moving it is obviously prevented by\n" + 
+			"	// preventing negative ranges)\n" + 
+			"	if (o.range === true\n" + 
+			"			&& me.values(1) === o.min) {\n" + 
+			"		index += 1;\n" + 
+			"		closestHandle = $(me.handles[index]);\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	allowed = (obj == OBJ_HANDLE ? me._start(event, index) : true);\n" + 
+			"	if (allowed === false) {\n" + 
+			"		return false;\n" + 
+			"	}\n" + 
+			"	\n" + 
+			"	me._mouseSliding = true;\n" + 
+			"\n" + 
+			"	me._handleIndex = index;\n" + 
+			"\n" + 
+			"	if (obj == OBJ_HANDLE)\n" + 
+			"		closestHandle.addClass(\"ui-state-active\").focus();\n" + 
+			"\n" + 
+			"	offset = closestHandle.offset();\n" + 
+			"	var mouseOverHandle = (obj == OBJ_HANDLE) && $(event.target).parents()\n" + 
+			"			.andSelf().is(\".ui-j2sslider-handle\");\n" + 
+			"	me.closestHandle = closestHandle;\n" + 
+			"	me._clickOffset = (mouseOverHandle ? \n" + 
+			"		{\n" + 
+			"		left : position.x\n" + 
+			"				- offset.left\n" + 
+			"				- (closestHandle.width() / 2 * o.scaleX)\n" + 
+			"				,\n" + 
+			"		top : position.y\n" + 
+			"				- offset.top\n" + 
+			"				- (closestHandle.height() / 2 * o.scaleY)\n" + 
+			"				- (parseInt(closestHandle\n" + 
+			"						.css(\"borderTopWidth\"), 10) || 0)\n" + 
+			"				- (parseInt(closestHandle\n" + 
+			"						.css(\"borderBottomWidth\"),\n" + 
+			"						10) || 0)\n" + 
+			"				+ (parseInt(closestHandle\n" + 
+			"						.css(\"marginTop\"), 10) || 0)\n" + 
+			"		} : {\n" + 
+			"			left : 0,\n" + 
+			"			top : 0\n" + 
+			"		});\n" + 
+			"	var val = normValueFromMouse(me, position, obj);\n" + 
+			"	var pixmouse = getPixelMouse(me, position, false);\n" + 
+			"	\n" + 
+			"	var isAtEnd = !mouseOverHandle && (!me.isScrollBar ? 0 : \n" + 
+			"		pixmouse < 5 ? -1 : pixmouse > length(me) + 5 ? 1 : 0);\n" + 
+			"	var dir = Math.signum(!isAtEnd ? val - me.jslider.getValue$() : isAtEnd);\n" + 
+			"	if (isAtEnd) {\n" + 
+			"		me.element.addClass(me.orientation === \"horizontal\" ? \n" + 
+			"				(isAtEnd == 1 ? \"ui-j2sslider-at-right\" : \"ui-j2sslider-at-left\")\n" + 
+			"				: (isAtEnd == 1 ? \"ui-j2sslider-at-bottom\" : \"ui-j2sslider-at-top\"));\n" + 
+			"		startAction(me, dir);	\n" + 
+			"	} else {\n" + 
+			"		clearEnds(me);				\n" + 
+			"		if (isEndCheck) {\n" + 
+			"			return;\n" + 
+			"		}\n" + 
+			"//				if (!me.handles.hasClass(\"ui-state-hover\")) {\n" + 
+			"			if (obj != OBJ_HANDLE) {\n" + 
+			"				startAction2(me, dir, val);\n" + 
+			"//					}\n" + 
+			"		}\n" + 
+			"	}\n" + 
+			"	me._animateOff = true;\n" + 
+			"	return true;\n" + 
+			"}\n" + 
+			"\n" + 
+			"var normValueFromMouse = function(me, position, obj) {\n" + 
+			"	var pixelMouse = getPixelMouse(me, position, true);\n" + 
+			"	var fMouse = (pixelMouse / getPixelTotal(me));						\n" + 
+			"	if (fMouse > 1) {\n" + 
+			"		fMouse = 1;\n" + 
+			"	}\n" + 
+			"	if (fMouse < 0) {\n" + 
+			"		fMouse = 0;\n" + 
+			"	}\n" + 
+			"	if (me.orientation === \"vertical\") {\n" + 
+			"		fMouse = 1 - fMouse;\n" + 
+			"	}\n" + 
+			"	if (me.options.inverted) {\n" + 
+			"		fMouse = 1 - fMouse;\n" + 
+			"	}\n" + 
+			"	var valueTotal = me._valueMax()\n" + 
+			"			- me._valueMin();\n" + 
+			"	var valueMouse = me._valueMin() + fMouse * valueTotal;\n" + 
+			"	return me._trimAlignValue(valueMouse);\n" + 
+			"}\n" + 
+			"\n" + 
+			"var getPixelMouse = function(me, position, offsetHandle) {\n" + 
+			"	var offset = me.element.offset();\n" + 
+			"	var p = (me.orientation === \"horizontal\" ?\n" + 
+			"			position.x\n" + 
+			"				- offset.left\n" + 
+			"				- (me._clickOffset ? me._clickOffset.left : 0)\n" + 
+			"		 : position.y\n" + 
+			"				- offset.top\n" + 
+			"				- (me._clickOffset ? me._clickOffset.top : 0));\n" + 
+			"	return p - (offsetHandle ? me.handleSize / 2 : 0);\n" + 
+			"}\n" + 
+			"\n" + 
+			"var length = function(me) {\n" + 
+			"	return (me.orientation == \"horizontal\" ? width(me) : height(me))\n" + 
+			"}\n" + 
+			"\n" + 
+			"var getPixelTotal = function(me) {\n" + 
+			"	return length(me) - me.visibleAdjust || 100;	\n" + 
+			"}\n" + 
+			"\n" + 
+			"var postMouseEvent = function(me, xye, id) {\n" + 
+			"	// set target to the handle\n" + 
+			"	xye.ev.currentTarget\n" + 
+			"		&& (xye.ev.target = xye.ev.currentTarget);\n" + 
+			"	// pass event to JSlider in case there is a\n" + 
+			"	// mouse listener implemented for that\n" + 
+			"	// InputEvent.BUTTON1 +\n" + 
+			"	// InputEvent.BUTTON1_DOWN_MASK;\n" + 
+			"	// same call here as in j2sApplet\n" + 
+			"	me.jslider.getFrameViewer$()\n" + 
+			"		.processMouseEvent$I$I$I$I$J$O$I(\n" + 
+			"				id, xye.x, xye.y, 1040,\n" + 
+			"				System.currentTimeMillis$(),\n" + 
+			"				xye.ev);\n" + 
+			"}\n" + 
+			"\n" + 
+			"var width = function(me) {\n" + 
+			"	var w = Math.max(0, me.element.width() || me.element.parent().width() - me.marginX || 0);\n" + 
+			"	return w;\n" + 
+			"}\n" + 
+			"\n" + 
+			"var height = function(me) {\n" + 
+			"	return Math.max(0, me.element.height() || me.element.parent().height() - me.marginY || 0);\n" + 
+			"}\n" + 
+			"\n" + 
+			"\n" + 
+			"$.widget(\n" + 
+			"	\"ui.j2sslider\",\n" + 
+			"	$.ui.mouse,\n" + 
+			"	{\n" + 
+			"		version : \"1.9.2\",\n" + 
+			"		widgetEventPrefix : \"slide\",\n" + 
+			"\n" + 
+			"		options : {\n" + 
+			"			jslider : null,\n" + 
+			"			animate : false,\n" + 
+			"			distance : 0,\n" + 
+			"			scaleX : 1, // diamond cursor scaling X\n" + 
+			"			scaleY : 1, // diamand cursor scaling Y\n" + 
+			"			max : 100,\n" + 
+			"			min : 0,\n" + 
+			"			isScrollBar : false,\n" + 
+			"			orientation : \"horizontal\",\n" + 
+			"			range : false,\n" + 
+			"			step : 1,\n" + 
+			"			value : 0,\n" + 
+			"			inverted : false,\n" + 
+			"			values : null\n" + 
+			"		},\n" + 
+			"\n" + 
+			"		_create : function() {\n" + 
+			"			var handleCount, \n" + 
+			"				o = this.options, \n" + 
+			"				existingHandles = this.element.find(\".ui-j2sslider-handle\").addClass(\"ui-state-default\"),// ui-corner-all\"), \n" + 
+			"				handle = \"<a class='ui-j2sslider-handle ui-state-default' href='#'></a>\", // was ui-corner-all \n" + 
+			"				handles = [];\n" + 
+			"			this.jslider || (this.jslider = o.jslider);\n" + 
+			"			this._keySliding = false;\n" + 
+			"			this._mouseSliding = false;\n" + 
+			"			this._animateOff = true;\n" + 
+			"			this._handleIndex = null;\n" + 
+			"			this._detectOrientation();\n" + 
+			"			this._mouseInit();\n" + 
+			"			this.isScrollBar = o.isScrollBar;\n" + 
+			"			this.handleSize = 0; // scrollbar only\n" + 
+			"			this.visibleAmount = 0;\n" + 
+			"			this.visibleAdjust = 0;\n" + 
+			"			this.visibleFraction = 0;\n" + 
+			"			this.handleFraction = 0;\n" + 
+			"			this.marginX = (o.isScrollBar ? 0 : 19); // from CSS - margin * 2 + border\n" + 
+			"			this.marginY = (o.isScrollBar ? 0 : 0);\n" + 
+			"			this.element\n" + 
+			"					.addClass(\"ui-j2sslider\"\n" + 
+			"							+ \" ui-j2sslider-\"\n" + 
+			"							+ this.orientation\n" + 
+			"							+ \" ui-widget\"\n" + 
+			"							+ \" ui-widget-content\"\n" + 
+			"							+ \" ui-corner-all\"\n" + 
+			"							+ (o.disabled ? \" ui-j2sslider-disabled ui-disabled\"\n" + 
+			"									: \"\"));\n" + 
+			"			this.range = $([]);\n" + 
+			"\n" + 
+			"			if (o.range) {\n" + 
+			"				if (o.range === true) {\n" + 
+			"					if (!o.values) {\n" + 
+			"						o.values = [ this._valueMin(),\n" + 
+			"								this._valueMin() ];\n" + 
+			"					}\n" + 
+			"					if (o.values.length\n" + 
+			"							&& o.values.length !== 2) {\n" + 
+			"						o.values = [ o.values[0],\n" + 
+			"								o.values[0] ];\n" + 
+			"					}\n" + 
+			"				}\n" + 
+			"\n" + 
+			"				this.range = $(\"<div></div>\")\n" + 
+			"					.appendTo(this.element)\n" + 
+			"					.addClass(\n" + 
+			"							\"ui-j2sslider-range\"\n" + 
+			"								+\n" + 
+			"								// note: this isn't\n" + 
+			"								// the most\n" + 
+			"								// fittingly\n" + 
+			"								// semantic\n" + 
+			"								// framework class\n" + 
+			"								// for this element,\n" + 
+			"								// but worked best\n" + 
+			"								// visually with a\n" + 
+			"								// variety of themes\n" + 
+			"								\" ui-widget-header\"\n" + 
+			"								+ ((o.range === \"min\" || o.range === \"max\") ? \" ui-j2sslider-range-\" + o.range : \"\")\n" + 
+			"					);\n" + 
+			"			}\n" + 
+			"\n" + 
+			"			var me = this;\n" + 
+			"\n" + 
+			"			var fDown = function(xye, id) {\n" + 
+			"				doMouseCapture(me, xye.ev, OBJ_HANDLE, false);\n" + 
+			"				postMouseEvent(me, xye, id);\n" + 
+			"			};\n" + 
+			"\n" + 
+			"			var fDownTrack = function(event, id) {\n" + 
+			"				doMouseCapture(me, event, OBJ_TRACK, false);\n" + 
+			"				me._mouseSliding = false;\n" + 
+			"			};\n" + 
+			"\n" + 
+			"			var fUpTrack = function(event, id) {\n" + 
+			"				//me._stop(event, me._handleIndex);\n" + 
+			"				me._change(event, me._handleIndex);\n" + 
+			"				clearEnds(me);\n" + 
+			"			};\n" + 
+			"\n" + 
+			"			var fDownWrap = function(event, id) {\n" + 
+			"				doMouseCapture(me, event, OBJ_WRAP, false);\n" + 
+			"				me._mouseSliding = false;\n" + 
+			"			};\n" + 
+			"\n" + 
+			"			var fDrag = function(xye, id) {\n" + 
+			"				if (id != 506 || me.options.disabled)\n" + 
+			"					return;\n" + 
+			"				var event = xye.ev;\n" + 
+			"				var position = me._getPosition(event);\n" + 
+			"				var normValue = normValueFromMouse(me, position, OBJ_HANDLE);\n" + 
+			"				me._slide(event, me._handleIndex, normValue);\n" + 
+			"				postMouseEvent(me, xye, id);\n" + 
+			"			};\n" + 
+			"\n" + 
+			"			var fUp = function(xye, id) {\n" + 
+			"				if (me.options.disabled)\n" + 
+			"					return;\n" + 
+			"				var event = xye.ev;\n" + 
+			"				me.handles.removeClass(\"ui-state-active\");\n" + 
+			"				me._mouseSliding = false;\n" + 
+			"				me._stop(event, me._handleIndex);\n" + 
+			"				me._change(event, me._handleIndex);\n" + 
+			"				me._handleIndex = null;\n" + 
+			"				me._clickOffset = null;\n" + 
+			"				me._animateOff = false;\n" + 
+			"				postMouseEvent(me, xye, id);\n" + 
+			"			};\n" + 
+			"\n" + 
+			"			var fOutTrack = function(event, id) {\n" + 
+			"				clearEnds(me);\n" + 
+			"			};\n" + 
+			"\n" + 
+			"			var fMoveTrack = function(event, id) {\n" + 
+			"				doMouseCapture(me, event, OBJ_TRACK, true);\n" + 
+			"			};\n" + 
+			"\n" + 
+			"			handleCount = (o.values && o.values.length) || 1;\n" + 
+			"\n" + 
+			"			for (var i = 0; i < handleCount; i++) {\n" + 
+			"				handles.push(handle);\n" + 
+			"			}\n" + 
+			"\n" + 
+			"			this.handles = existingHandles.add($(\n" + 
+			"					handles.join(\"\"))\n" + 
+			"					.appendTo(this.element));\n" + 
+			"\n" + 
+			"			for (var i = 0; i < handleCount; i++) {\n" + 
+			"				handle = this.handles[i];\n" + 
+			"				handle.index = i;\n" + 
+			"				J2S.setDraggable(handle, [ fDown, fDrag, fUp ]);\n" + 
+			"			}\n" + 
+			"			\n" + 
+			"			if (handleCount == 1) {\n" + 
+			"				$(this.element).mousedown(fDownTrack);\n" + 
+			"				if (this.isScrollBar) {\n" + 
+			"					$(this.element).mousemove(fMoveTrack);\n" + 
+			"					$(this.element).mouseup(fUpTrack);\n" + 
+			"					$(this.element).mouseout(fOutTrack);\n" + 
+			"				} else {\n" + 
+			"					$(this.element).closest(\".ui-j2sslider-wrap\").mousedown(fDownWrap);\n" + 
+			"				}\n" + 
+			"			}\n" + 
+			"			\n" + 
+			"			this.handle = this.handles.eq(0);\n" + 
+			"			this.handles.add(this.range).filter(\"a\").click(function(event) {event.preventDefault();})\n" + 
+			"			this.handles.each(function(i) {$(this).data(\"ui-j2sslider-handle-index\", i);});\n" + 
+			"			this._refreshValue();\n" + 
+			"			this._animateOff = false;\n" + 
+			"		},\n" + 
+			"		\n" + 
+			"		_destroy : function() {\n" + 
+			"			\n" + 
+			"			for (var i = 0; i < this.handles.length; i++) {\n" + 
+			"				J2S.setDraggable(this.handles[i], false);\n" + 
+			"			}\n" + 
+			"			\n" + 
+			"\n" + 
+			"			this.handles.remove();\n" + 
+			"			this.range.remove();\n" + 
+			"\n" + 
+			"			this.element.removeClass(\n" + 
+			"					\"ui-j2sslider\"\n" + 
+			"					+ \" ui-j2sslider-horizontal\"\n" + 
+			"					+ \" ui-j2sslider-vertical\"\n" + 
+			"					+ \" ui-j2sscrollbar-horizontal\"\n" + 
+			"					+ \" ui-j2sscrollbar-vertical\"\n" + 
+			"					+ \" ui-j2sslider-disabled\"\n" + 
+			"					+ \" ui-widget\" \n" + 
+			"					+ \" ui-widget-content\"\n" + 
+			"					+ \" ui-corner-all\");\n" + 
+			"\n" + 
+			"			this._mouseDestroy();\n" + 
+			"		},\n" + 
+			"\n" + 
+			"		_detectOrientation : function() {\n" + 
+			"			this.orientation = (this.options.orientation === \"vertical\") ? \"vertical\"\n" + 
+			"					: \"horizontal\";\n" + 
+			"		},\n" + 
+			"		_resetClass : function() {\n" + 
+			"			var type = (this.isScrollBar ? \"scrollbar\" : \"slider\");\n" + 
+			"			this.element\n" + 
+			"					.removeClass(\n" + 
+			"							\"ui-j2sscrollbar-horizontal ui-j2sscrollbar-vertical ui-j2sslider-horizontal ui-j2sslider-vertical\")\n" + 
+			"					.addClass(\n" + 
+			"							\"ui-j2s\" + type + \"-\"\n" + 
+			"									+ this.orientation);\n" + 
+			"			if (this.isScrollBar)\n" + 
+			"				this.element.removeClass(\"ui-widget-content\");\n" + 
+			"		},\n" + 
+			"		_start : function(event, index) {\n" + 
+			"			var uiHash = {\n" + 
+			"				handle : this.handles[index],\n" + 
+			"				value : this.value()\n" + 
+			"			};\n" + 
+			"			if (this.options.values\n" + 
+			"					&& this.options.values.length) {\n" + 
+			"				uiHash.value = this.values(index);\n" + 
+			"				uiHash.values = this.values();\n" + 
+			"			}\n" + 
+			"			return this._trigger(\"start\", event, uiHash);\n" + 
+			"		},\n" + 
+			"\n" + 
+			"		_slide : function(event, index, newVal) {\n" + 
+			"			var otherVal, newValues, allowed;\n" + 
+			"\n" + 
+			"			if (this.options.values\n" + 
+			"					&& this.options.values.length) {\n" + 
+			"				otherVal = this.values(index ? 0 : 1);\n" + 
+			"\n" + 
+			"				if ((this.options.values.length === 2 && this.options.range === true)\n" + 
+			"						&& ((index === 0 && newVal > otherVal) || (index === 1 && newVal < otherVal))) {\n" + 
+			"					newVal = otherVal;\n" + 
+			"				}\n" + 
+			"\n" + 
+			"				if (newVal !== this.values(index)) {\n" + 
+			"					newValues = this.values();\n" + 
+			"					newValues[index] = newVal;\n" + 
+			"					// A slide can be canceled by returning\n" + 
+			"					// false from the slide callback\n" + 
+			"					allowed = this\n" + 
+			"							._trigger(\n" + 
+			"									\"slide\",\n" + 
+			"									event,\n" + 
+			"									{\n" + 
+			"										handle : this.handles[index],\n" + 
+			"										value : newVal,\n" + 
+			"										values : newValues\n" + 
+			"									});\n" + 
+			"					otherVal = this.values(index ? 0 : 1);\n" + 
+			"					if (allowed !== false) {\n" + 
+			"						this.values(index, newVal, true);\n" + 
+			"					}\n" + 
+			"				}\n" + 
+			"			} else {\n" + 
+			"				if (newVal !== this.value()) {\n" + 
+			"					// A slide can be canceled by returning\n" + 
+			"					// false from the slide callback\n" + 
+			"					allowed = this\n" + 
+			"							._trigger(\n" + 
+			"									\"slide\",\n" + 
+			"									event,\n" + 
+			"									{\n" + 
+			"										handle : this.handles[index],\n" + 
+			"										value : newVal\n" + 
+			"									});\n" + 
+			"					if (allowed !== false) {\n" + 
+			"						this.value(newVal);\n" + 
+			"					}\n" + 
+			"				}\n" + 
+			"			}\n" + 
+			"		},\n" + 
+			"\n" + 
+			"		_stop : function(event, index) {\n" + 
+			"			var uiHash = {\n" + 
+			"				handle : this.handles[index],\n" + 
+			"				value : this.value()\n" + 
+			"			};\n" + 
+			"			if (this.options.values\n" + 
+			"					&& this.options.values.length) {\n" + 
+			"				uiHash.value = this.values(index);\n" + 
+			"				uiHash.values = this.values();\n" + 
+			"			}\n" + 
+			"\n" + 
+			"			this._trigger(\"stop\", event, uiHash);\n" + 
+			"		},\n" + 
+			"\n" + 
+			"		_change : function(event, index) {\n" + 
+			"			if (!this._keySliding && !this._mouseSliding) {\n" + 
+			"				var uiHash = {\n" + 
+			"					handle : this.handles[index],\n" + 
+			"					value : this.value()\n" + 
+			"				};\n" + 
+			"				if (this.options.values\n" + 
+			"						&& this.options.values.length) {\n" + 
+			"					uiHash.value = this.values(index);\n" + 
+			"					uiHash.values = this.values();\n" + 
+			"				}\n" + 
+			"\n" + 
+			"				this._trigger(\"change\", event, uiHash);\n" + 
+			"			}\n" + 
+			"		},\n" + 
+			"\n" + 
+			"		getState : function() {\n" + 
+			"			return this.options\n" + 
+			"		},\n" + 
+			"\n" + 
+			"		value : function(newValue) {\n" + 
+			"			if (arguments.length) {\n" + 
+			"\n" + 
+			"				this.options.value = this\n" + 
+			"						._trimAlignValue(newValue);\n" + 
+			"				this._refreshValue();\n" + 
+			"				this._change(null, 0);\n" + 
+			"				return;\n" + 
+			"			}\n" + 
+			"\n" + 
+			"			return this._value();\n" + 
+			"		},\n" + 
+			"\n" + 
+			"		values : function(index, newValue) {\n" + 
+			"			var vals, newValues, i;\n" + 
+			"\n" + 
+			"			if (arguments.length > 1) {\n" + 
+			"				this.options.values[index] = this\n" + 
+			"						._trimAlignValue(newValue);\n" + 
+			"				this._refreshValue();\n" + 
+			"				this._change(null, index);\n" + 
+			"				return;\n" + 
+			"			}\n" + 
+			"\n" + 
+			"			if (arguments.length) {\n" + 
+			"				if ($.isArray(arguments[0])) {\n" + 
+			"					vals = this.options.values;\n" + 
+			"					newValues = arguments[0];\n" + 
+			"					for (var i = 0; i < vals.length; i += 1) {\n" + 
+			"						vals[i] = this\n" + 
+			"								._trimAlignValue(newValues[i]);\n" + 
+			"						this._change(null, i);\n" + 
+			"					}\n" + 
+			"					this._refreshValue();\n" + 
+			"				} else {\n" + 
+			"					if (this.options.values\n" + 
+			"							&& this.options.values.length) {\n" + 
+			"						return this._values(index);\n" + 
+			"					} else {\n" + 
+			"						return this.value();\n" + 
+			"					}\n" + 
+			"				}\n" + 
+			"			} else {\n" + 
+			"				return this._values();\n" + 
+			"			}\n" + 
+			"		},\n" + 
+			"\n" + 
+			"		_setOption : function(key, value) {\n" + 
+			"			var i, valsLength = 0;\n" + 
+			"\n" + 
+			"			if ($.isArray(this.options.values)) {\n" + 
+			"				valsLength = this.options.values.length;\n" + 
+			"			}\n" + 
+			"\n" + 
+			"			$.Widget.prototype._setOption.apply(this,\n" + 
+			"					arguments);\n" + 
+			"\n" + 
+			"			switch (key) {\n" + 
+			"			case \"disabled\":\n" + 
+			"				if (value) {\n" + 
+			"					this.handles.filter(\".ui-state-focus\")\n" + 
+			"							.blur();\n" + 
+			"					this.handles\n" + 
+			"							.removeClass(\"ui-state-hover\");\n" + 
+			"					this.handles.prop(\"disabled\", true);\n" + 
+			"					this.element.addClass(\"ui-disabled\");\n" + 
+			"				} else {\n" + 
+			"					this.handles.prop(\"disabled\", false);\n" + 
+			"					this.element.removeClass(\"ui-disabled\");\n" + 
+			"				}\n" + 
+			"				break;\n" + 
+			"			case \"orientation\":\n" + 
+			"				this._detectOrientation();\n" + 
+			"				this._resetClass();\n" + 
+			"				this._refreshValue();\n" + 
+			"				break;\n" + 
+			"			case \"value\":\n" + 
+			"				this._animateOff = true;\n" + 
+			"				this._refreshValue();\n" + 
+			"				this._change(null, 0);\n" + 
+			"				this._animateOff = false;\n" + 
+			"				break;\n" + 
+			"			case \"values\":\n" + 
+			"				this._animateOff = true;\n" + 
+			"				this._refreshValue();\n" + 
+			"				for (var i = 0; i < valsLength; i += 1) {\n" + 
+			"					this._change(null, i);\n" + 
+			"				}\n" + 
+			"				this._animateOff = false;\n" + 
+			"				break;\n" + 
+			"			case \"min\":\n" + 
+			"			case \"max\":\n" + 
+			"				this._animateOff = true;\n" + 
+			"				this._refreshValue();\n" + 
+			"				this._animateOff = false;\n" + 
+			"			break;\n" + 
+			"			case \"visibleAmount\":\n" + 
+			"				this.isScrollBar = true;\n" + 
+			"				this.visibleAmount = value;\n" + 
+			"				var min = this._valueMin();\n" + 
+			"				var max = this._valueMax();\n" + 
+			"				var f = (value >= 0 && min + value <= max ? \n" + 
+			"					 value * 1 / (max - min) : 0.1);\n" + 
+			"				this.visibleFraction = f;\n" + 
+			"				if (f < 0.1)\n" + 
+			"					f = 0.1;\n" + 
+			"				this.handleFraction = f;\n" + 
+			"				var hw = length(this);\n" + 
+			"				if (this.orientation === \"horizontal\")\n" + 
+			"					$(this.handles[0]).width(this.handleSize = f * hw);\n" + 
+			"				else\n" + 
+			"					$(this.handles[0]).height(this.handleSize = f * hw);\n" + 
+			"				this.visibleAdjust = (f - this.visibleFraction) * hw;\n" + 
+			"				this._animateOff = true;\n" + 
+			"				this._resetClass();\n" + 
+			"				this._refreshValue();\n" + 
+			"				this._animateOff = false;\n" + 
+			"			break;\n" + 
+			"			}\n" + 
+			"		},\n" + 
+			"\n" + 
+			"		// internal value getter\n" + 
+			"		// _value() returns value trimmed by min and max,\n" + 
+			"		// aligned by step\n" + 
+			"		_value : function() {\n" + 
+			"			return this._trimAlignValue(this.options.value);\n" + 
+			"		},\n" + 
+			"\n" + 
+			"		// internal values getter\n" + 
+			"		// _values() returns array of values trimmed by min\n" + 
+			"		// and max, aligned by step\n" + 
+			"		// _values( index ) returns single value trimmed by\n" + 
+			"		// min and max, aligned by step\n" + 
+			"		_values : function(index) {\n" + 
+			"			if (arguments.length) {\n" + 
+			"				return this._trimAlignValue(this.options.values[index]);\n" + 
+			"			} \n" + 
+			"			// .slice() creates a copy of the array\n" + 
+			"			// this copy gets trimmed by min and max and\n" + 
+			"			// then returned\n" + 
+			"			var vals = this.options.values.slice();\n" + 
+			"			for (var i = 0; i < vals.length; i += 1) {\n" + 
+			"				vals[i] = this._trimAlignValue(vals[i]);\n" + 
+			"			}\n" + 
+			"			return vals;\n" + 
+			"		},\n" + 
+			"\n" + 
+			"		_getPosition : function(event) {\n" + 
+			"			var position = (event.pageX || event.pageX === 0 ?\n" + 
+			"				{\n" + 
+			"					x : event.pageX,\n" + 
+			"					y : event.pageY\n" + 
+			"				} : {\n" + 
+			"					// touch event? get position from touch\n" + 
+			"					x : event.originalEvent.touches[0].pageX,\n" + 
+			"					y : event.originalEvent.touches[0].pageY\n" + 
+			"				});\n" + 
+			"			return position;\n" + 
+			"		},\n" + 
+			"		\n" + 
+			"		// returns the step-aligned value that val is\n" + 
+			"		// closest to, between (inclusive) min and max\n" + 
+			"		_trimAlignValue : function(val) {\n" + 
+			"			if (val <= this._valueMin()) {\n" + 
+			"				return this._valueMin();\n" + 
+			"			}\n" + 
+			"			var max = Math.round(this._valueMax() - this.visibleAmount); //* (1-this.handleFraction)\n" + 
+			"			if (val >= max) {\n" + 
+			"				return max;\n" + 
+			"			}\n" + 
+			"			var step = (this.options.step > 0) ? this.options.step\n" + 
+			"					: 1, valModStep = (val - this\n" + 
+			"					._valueMin())\n" + 
+			"					% step, alignValue = val - valModStep;\n" + 
+			"\n" + 
+			"			if (Math.abs(valModStep) * 2 >= step) {\n" + 
+			"				alignValue += (valModStep > 0) ? step\n" + 
+			"						: (-step);\n" + 
+			"			}\n" + 
+			"\n" + 
+			"			// Since JavaScript has problems with large\n" + 
+			"			// floats, round\n" + 
+			"			// the final value to 5 digits after the decimal\n" + 
+			"			// point (see #4124)\n" + 
+			"\n" + 
+			"			return Math.round(alignValue);// parseFloat(alignValue.toFixed(5));\n" + 
+			"		},\n" + 
+			"\n" + 
+			"		_valueMin : function() {\n" + 
+			"			return this.options.min;\n" + 
+			"		},\n" + 
+			"\n" + 
+			"		_valueMax : function() {\n" + 
+			"			return this.options.max;\n" + 
+			"		},\n" + 
+			"\n" + 
+			"		_getValPercent : function(i) {\n" + 
+			"			var dif = this._valueMax() - this._valueMin();\n" + 
+			"			var valPercent = (dif == 0 ? 0\n" + 
+			"					: ((i >= 0 ? this.values(i) : this\n" + 
+			"							.value()) - this._valueMin())\n" + 
+			"							/ dif * 100);\n" + 
+			"			return (this.options.inverted && !this.isScrollBar ? 100 - valPercent\n" + 
+			"					: valPercent);\n" + 
+			"		},\n" + 
+			"\n" + 
+			"		_refreshValue : function() {\n" + 
+			"			var lastValPercent, valPercent, value, valueMin, valueMax;\n" + 
+			"			var o = this.options;\n" + 
+			"			var oRange = o.range;\n" + 
+			"			var that = this;\n" + 
+			"			var animate = (!this._animateOff) ? o.animate : false;\n" + 
+			"			var _set = {};\n" + 
+			"			if (this.options.values\n" + 
+			"					&& this.options.values.length) {\n" + 
+			"				this.handles\n" + 
+			"						.each(function(i) {\n" + 
+			"							valPercent = that\n" + 
+			"									._getValPercent(i);\n" + 
+			"							_set[that.orientation === \"horizontal\" ? \"left\"\n" + 
+			"									: \"bottom\"] = valPercent\n" + 
+			"									+ \"%\";\n" + 
+			"							$(this).stop(1, 1)[animate ? \"animate\"\n" + 
+			"									: \"css\"](_set,\n" + 
+			"									o.animate);\n" + 
+			"							if (that.options.range === true) {\n" + 
+			"								if (that.orientation === \"horizontal\") {\n" + 
+			"									if (i === 0) {\n" + 
+			"										that.range.stop(1,\n" + 
+			"												1)[animate ? \"animate\"\n" + 
+			"												: \"css\"]\n" + 
+			"												(\n" + 
+			"														{\n" + 
+			"															left : valPercent\n" + 
+			"																	+ \"%\"\n" + 
+			"														},\n" + 
+			"														o.animate);\n" + 
+			"									}\n" + 
+			"									if (i === 1) {\n" + 
+			"										that.range[animate ? \"animate\"\n" + 
+			"												: \"css\"]\n" + 
+			"												(\n" + 
+			"														{\n" + 
+			"															width : (valPercent - lastValPercent)\n" + 
+			"																	+ \"%\"\n" + 
+			"														},\n" + 
+			"														{\n" + 
+			"															queue : false,\n" + 
+			"															duration : o.animate\n" + 
+			"														});\n" + 
+			"									}\n" + 
+			"								} else {\n" + 
+			"									if (i === 0) {\n" + 
+			"										that.range.stop(1,\n" + 
+			"												1)[animate ? \"animate\"\n" + 
+			"												: \"css\"]\n" + 
+			"												(\n" + 
+			"														{\n" + 
+			"															bottom : (valPercent)\n" + 
+			"																	+ \"%\"\n" + 
+			"														},\n" + 
+			"														o.animate);\n" + 
+			"									}\n" + 
+			"									if (i === 1) {\n" + 
+			"										that.range[animate ? \"animate\"\n" + 
+			"												: \"css\"]\n" + 
+			"												(\n" + 
+			"														{\n" + 
+			"															height : (valPercent - lastValPercent)\n" + 
+			"																	+ \"%\"\n" + 
+			"														},\n" + 
+			"														{\n" + 
+			"															queue : false,\n" + 
+			"															duration : o.animate\n" + 
+			"														});\n" + 
+			"									}\n" + 
+			"								}\n" + 
+			"							}\n" + 
+			"							lastValPercent = valPercent;\n" + 
+			"						});\n" + 
+			"			} else {\n" + 
+			"				// just one handle\n" + 
+			"				valPercent = this._getValPercent(-1);\n" + 
+			"				var isHorizontal = (this.orientation === \"horizontal\");\n" + 
+			"				var val = (valPercent * getPixelTotal(this)/100) + \"px\";									\n" + 
+			"				_set[isHorizontal ? \"left\"\n" + 
+			"						: this.isScrollBar ? \"top\" : \"bottom\"] = val;\n" + 
+			"				this.handle.stop(1, 1)[animate ? \"animate\"\n" + 
+			"						: \"css\"](_set, o.animate);\n" + 
+			"\n" + 
+			"				if (oRange === \"min\" && isHorizontal) {\n" + 
+			"					this.range.stop(1, 1)[animate ? \"animate\"\n" + 
+			"							: \"css\"]({\n" + 
+			"						width : valPercent + \"%\"\n" + 
+			"					}, o.animate);\n" + 
+			"				}\n" + 
+			"				if (oRange === \"max\" && isHorizontal) {\n" + 
+			"					this.range[animate ? \"animate\" : \"css\"]\n" + 
+			"							({\n" + 
+			"								width : (100 - valPercent)\n" + 
+			"										+ \"%\"\n" + 
+			"							}, {\n" + 
+			"								queue : false,\n" + 
+			"								duration : o.animate\n" + 
+			"							});\n" + 
+			"				}\n" + 
+			"				if (oRange === \"min\"\n" + 
+			"						&& this.orientation === \"vertical\") {\n" + 
+			"					this.range.stop(1, 1)[animate ? \"animate\"\n" + 
+			"							: \"css\"]({\n" + 
+			"						height : valPercent + \"%\"\n" + 
+			"					}, o.animate);\n" + 
+			"				}\n" + 
+			"				if (oRange === \"max\"\n" + 
+			"						&& this.orientation === \"vertical\") {\n" + 
+			"					this.range[animate ? \"animate\" : \"css\"]\n" + 
+			"							({\n" + 
+			"								height : (100 - valPercent)\n" + 
+			"										+ \"%\"\n" + 
+			"							}, {\n" + 
+			"								queue : false,\n" + 
+			"								duration : o.animate\n" + 
+			"							});\n" + 
+			"				}\n" + 
+			"			}\n" + 
+			"		}\n" + 
+			"\n" + 
+			"	});\n" + 
+			"};\n" + 
+			"\n" + 
+			"})(J2S.__$);\n" + 
+			"");
+
    }
+	
+	
 }
