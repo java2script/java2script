@@ -41,8 +41,8 @@ public class Lst<V> extends ArrayList<V> {
     super();  
   }
   
-  public boolean addLast(V v) {
-      return super.add(v);
+  public void addLast(V v) {
+      super.add(v);
   }
   
   public V removeItemAt(int location) {
