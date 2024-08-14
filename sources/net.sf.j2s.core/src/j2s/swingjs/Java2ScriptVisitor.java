@@ -31,7 +31,11 @@ import j2s.CorePlugin;
 // TODO: superclass inheritance for JAXB XmlAccessorType
 // TODO: Transpiler bug allows static String name, but JavaScript function().name is read-only and will be "clazz"
 
-//BH 2024.02.22 -- 3.3.1-v7 fixes long extension issue causing MutableBitInteger to miscalculate subtraction(no change in version #)
+//BH 2024.07.14 -- 5.0.1-v4 fixes numerical array initializer using characters ['a','b',...], but not new int[] { "test".charAt(3) }
+//BH 2024.02.22 -- 5.0.1-v3 fixes long extension issue causing MutableBitInteger to miscalculate subtraction(no change in version #)
+//BH 2023.11.27 -- 5.0.1-v2 final refactoring and creatiton of J2SUtil
+//BH 2023.11.21 -- 5.0.1-v2 adds Java8 syntaxes for try and switch; removes dependency for instanceOf and exception checking
+//BH 2023.11.09 -- 5.0.1-v1 merges Jmol legacy (.j2sjmol) with Java8//11 (.j2s)
 //BH 2023.03.29 -- 3.3.1-v7 fixes outer static method call from within lambda expression. 
 //BH 2023.02.09 -- 3.3.1.v6 fixes j2s.excluded.paths needing /src/xxxx
 //BH 2022.06.27 -- 3.3.1-v5 fixes missing method annotations
@@ -3015,13 +3019,61 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	public boolean visit(ArrayInitializer node) {
 		// as in: public String[] d = {"1", "2"};
-		buffer.append(clazzArray(node.resolveTypeBinding(), ARRAY_INITIALIZED));
+		ITypeBinding type = node.resolveTypeBinding();
+		buffer.append(clazzArray(type, ARRAY_INITIALIZED));
 		buffer.append(", [");
+		int toChar = toCharType(type);
 		@SuppressWarnings("unchecked")
-		List<ASTNode> expressions = node.expressions();
-		visitList(expressions, ", ");
+		List<ASTNode> ex = node.expressions();
+		if (toChar == 0) {
+			visitList(ex, ", ");
+		} else {
+			fixCharArrayInit(buffer, ex, toChar);
+		}
 		buffer.append("])");
 		return false;
+	}
+
+	private static int toCharType(ITypeBinding type) {
+		switch (type == null ? "" : type.getName()) {
+		case "char[]":
+			return 1;
+		case "byte[]":
+		case "short[]":
+		case "int[]":
+		case "long[]":
+		case "float[]":
+		case "double[]":
+			return -1;
+		default:
+			return 0;
+		}
+	}
+
+	private void fixCharArrayInit(StringBuffer buffer, List<ASTNode> list, int toChar) {
+		for (Iterator<ASTNode> iter = list.iterator(); iter.hasNext();) {
+			int pt = buffer.length();
+			appendBoxingNode(iter.next(), false, null, false, false);
+			if (toChar != 0) {
+				String s = buffer.substring(pt);
+				// only fix "x" and number
+				// not fixed:  int[] a = new int[] {"test".charAt(0)}
+				try {
+				if (pt > 0 && (s.charAt(0) == '"') != (toChar == 1)) {
+					buffer.replace(pt,  buffer.length(), 
+							(toChar == 1 ? 
+							"\"" + ((char) Integer.parseInt(s)) + "\"" 
+							: s.length() == 3 ? "" + (byte) s.charAt(1) : s)
+							);
+				}
+				} catch (@SuppressWarnings("unused") Exception e) {
+					// ignore
+				}
+			}
+			if (!iter.hasNext())
+				return;
+			buffer.append(", ");
+		}
 	}
 
 	public boolean visit(Assignment node) {
@@ -4431,8 +4483,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		switch (name) {
 		case "char":
 		case "Character":
-			addOperand(exp, false);
-			break;
 		case "Byte":
 		case "Short":
 		case "Integer":
