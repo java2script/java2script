@@ -206,7 +206,7 @@ public class JSMouse {
 	 * @param modifiers
 	 * @param clickCount
 	 */
-	private void clicked(long time, int x, int y, int modifiers, int clickCount) {
+	public void clicked(long time, int x, int y, int modifiers, int clickCount) {
 		// clearKeyBuffer();
 		// clickedCount is not reliable on some platforms
 		// so we will just deal with it ourselves
@@ -404,10 +404,10 @@ public class JSMouse {
 		boolean popupTrigger = isPopupTrigger(id, modifiers, JSToolkit.isWin);
 		MouseEvent e;
 		if (id == MouseEvent.MOUSE_WHEEL) {
-			e = new MouseWheelEvent(source, id, time, modifiers, x, y, x, y, count, popupTrigger,
+			e = new MouseWheelEvent(source, id, time, modifiers, x, y, count, popupTrigger,
 					MouseWheelEvent.WHEEL_UNIT_SCROLL, 1, dy);
 		} else {
-			e = new MouseEvent(source, id, time, modifiers, x, y, x, y, count, popupTrigger, button);
+			e = new MouseEvent(source, id, time, modifiers, x, y, count, popupTrigger, button);
 		}
 		byte[] bdata = new byte[0];
 		e.setBData(bdata);

@@ -1,5 +1,6 @@
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// BH 2024.10.03 adds two-finger tap as "click"; reinstates touch gestures lost when we went to pointerup 2023.11.01
 // BH 2023.12.14 fixes resizing into application (making it smaller)
 // BH 2023.12.13 fixes RIGHT-DRAG and SHIFT-LEFT-DRAG modifier
 // BH 2023.12.07 fixes mouseUp on body causing (ignorable) error
@@ -1729,11 +1730,13 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	J2S._haveMouse;
 	J2S._firstTouch; // three-position switch: undefined, true, false
 
-	J2S.$bind('body', 'pointerdown pointermove mousedown mousemove mouseup', function(ev) {
+	J2S.$bind('body', //'pointerdown pointermove 
+		'mousedown mousemove mouseup', function(ev) {
 		J2S._haveMouse = true;
 	});
 	
-	J2S.$bind('body', 'pointerup mouseup touchend', function(ev) {
+	J2S.$bind('body', //'pointerup 
+		'mouseup touchend', function(ev) {
 		mouseUp(null, ev);
 		return true;
 	});
@@ -1797,13 +1800,16 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		// otherwise, if J2S._firstTouch is undefined (!!x != x), set J2S._firstTouch
 		// and ignore future touch events (through the first touchend):
 		
-		if (ev.type == "pointerdown" || ev.type == "mousedown") {// BHTEst
+		if (//ev.type == "pointerdown" || 
+			ev.type == "mousedown") {// BHTEst
 		    J2S._haveMouse = true;
 		} else { 
 		    if (J2S._haveMouse) return;
 		    if (!!J2S._firstTouch != J2S._firstTouch) {
-			J2S._firstTouch = true;
-		        return;
+// q - why did we do this?
+//			J2S._firstTouch = true;
+//		        return;
+			J2S._firstTouch = false;
 		    }
 		}
 
@@ -2061,7 +2067,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		J2S.$bind(who, (J2S._haveMouse ? 'mousedown pointerdown' : 'pointerdown mousedown touchstart'), 
 				function(ev) { return mouseDown(who, ev) });
 
-		J2S.$bind(who, (J2S._haveMouse ? 'mouseup pointerup' : 'pointerup mouseup touchend'), 
+		J2S.$bind(who, (J2S._haveMouse ? 'mouseup pointerup' : // 'pointerup 
+		'mouseup touchend'), 
 				function(ev) { return mouseUp(who, ev) });
 
 		J2S.$bind(who, 'pointerenter mouseenter', function(ev) { return mouseEnter(who, ev) });
@@ -2255,21 +2262,24 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			J2S._touching = false;
 			break;
 		}
-		if (!oe.touches || oe.touches.length != 2)
+		if (!oe.touches || oe.touches.length != (ev.type == "touchend" ? 1 : 2))
 			return false;
+		var n = 0;
 		switch (ev.type) {
 		case "touchstart":
 			who._touches = [ [], [] ];
 			break;
+		case "touchend":
 		case "touchmove":
 			var offsets = J2S.$offset(who.id);
 			var t0 = who._touches[0];
 			var t1 = who._touches[1];
 			t0.push([ oe.touches[0].pageX - offsets.left,
 					oe.touches[0].pageY - offsets.top ]);
-			t1.push([ oe.touches[1].pageX - offsets.left,
+			if (ev.type != "touchend")
+			    t1.push([ oe.touches[1].pageX - offsets.left,
 					oe.touches[1].pageY - offsets.top ]);
-			var n = t0.length;
+			n = t0.length;
 			if (n > 3) {
 				t0.shift();
 				t1.shift();

@@ -57,23 +57,29 @@ public class JSMouse2 {
 	 * 
 	 */
 	public void processTwoPointGesture(float[][][] touches) {
-
-		if (touches[0].length < 2)
-			return;
 		float[][] t1 = touches[0];
 		float[][] t2 = touches[1];
+		int nt = t1.length;
+		if (nt < 2)
+			return;
+		boolean isClick = (nt > t2.length);
 		float[] t1first = t1[0];
-		float[] t1last = t1[t2.length - 1];
 		float x1first = t1first[0];
-		float x1last = t1last[0];
-		float dx1 = x1last - x1first;
 		float y1first = t1first[1];
+		
+		if (isClick) {			
+			mouse.clicked(System.currentTimeMillis(), (int) x1first, (int) y1first, 0, 2);
+			return;
+		}
+		float[] t1last = t1[nt - 1];
+		float x1last = t1last[0];
 		float y1last = t1last[1];
+		float dx1 = x1last - x1first;
 		float dy1 = y1last - y1first;
 		V3 v1 = V3.new3(dx1, dy1, 0);
 		float d1 = v1.length();
 		float[] t2first = t2[0];
-		float[] t2last = t2[t2.length - 1];
+		float[] t2last = t2[nt - 1];
 		float x2first = t2first[0];
 		float x2last = t2last[0];
 		float dx2 = x2last - x2first;
