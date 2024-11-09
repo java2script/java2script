@@ -37,24 +37,27 @@ public class JQueryUI {
 		String resource = RESOURCE_J2SCOMBOBOX;
 		if (/** @j2sNative !J2S.__makeComboBox && */true) {
 			loadResource(resource);
-			JSUtil.J2S.__makeComboBox();
 		}
+		// outside {} in case j2sComboBox.js has been preloaded, overriding the setting here
+		JSUtil.J2S.__makeComboBox();
 	}
 	
 	public static void loadJQMenu() {
 		String resource = RESOURCE_J2SMENU;
 		if (/** @j2sNative !J2S.__makeMenu && */true) {
 			loadResource(resource);
-			JSUtil.J2S.__makeMenu();
 		}
+		// outside {} in case j2sMenu.js has been preloaded, overriding the setting here
+		JSUtil.J2S.__makeMenu();
 	}
 
 	public static void loadJQSlider() {
 		String resource = RESOURCE_J2SSLIDER;
 		if (/** @j2sNative !J2S.__makeSlider && */true) {
 			loadResource(resource);
-			JSUtil.J2S.__makeSlider();
 		}
+		// outside {} in case j2sSlider.js has been preloaded, overriding the setting here
+		JSUtil.J2S.__makeSlider();
 	}
 
 	private static void loadResource(String resourceName) {

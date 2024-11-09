@@ -10686,6 +10686,7 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// BH 2024.11.09 makes equivalent J2S._debugCore and J2S._nozcore, as well as J2S._debugCode and J2S._nocore
 // BH 2024.10.03 adds two-finger tap as "click"; reinstates touch gestures lost when we went to pointerup 2023.11.01
 // BH 2023.12.14 fixes resizing into application (making it smaller)
 // BH 2023.12.13 fixes RIGHT-DRAG and SHIFT-LEFT-DRAG modifier
@@ -10792,15 +10793,14 @@ if (getFlag("j2s")) {
 	// note: these flag checks are purposely loose. "?j2smouse" will set j2smouse and j2smousemove. 
 	J2S._appArgs = getURIField("j2sargs", null); // to be passed on to application
 	J2S._debugClip = getFlag("j2sdebugclip");    // shows all show/restore and clip operations in JSGraphics2D
-	J2S._debugCode = getFlag("j2sdebugcode");    // same as j2snocore?
-	J2S._debugCore = getFlag("j2sdebugcore");    // same as j2snozcore?
 	J2S._debugPaint = getFlag("j2sdebugpaint");  // repaint manager information
 	J2S._headless = getFlag("j2sheadless");      // run headlessly
 	J2S._lang = getURIField("j2slang", null);    // preferred language; application should check
 	 // will alert in system.out.println with a message when events occur
-	J2S._loadcore = !getFlag("j2snocore");		 // no core files 
 	J2S._nooutput = getFlag("j2snooutput");      // no System.out, only System.err message
-	J2S._nozcore = getFlag("j2snozcore");        // no compressed core.z.js files
+	J2S._debugCore = J2S._nozcore = getFlag("j2sdebugcore") || getFlag("j2snozcore"); // no compressed core.z.js files
+	J2S._debugCode = J2S._nocore = getFlag("j2sdebugcode") || getFlag("j2snocore"); // no core files
+	J2S._loadcore = !J2S._nocore;		  
 	J2S._strict = getFlag("j2sstrict");          // strict mode -- experimental
 	J2S._startProfiling = getFlag("j2sprofile"); // track object creation
 	J2S._traceEvents = getFlag("j2sevents");     // reports ComponentEvent instances 
