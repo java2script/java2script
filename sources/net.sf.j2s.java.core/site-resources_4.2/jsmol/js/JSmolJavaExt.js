@@ -1077,9 +1077,7 @@ for(i=0;i<arr.length-1;i++){
 funStr+="\""+arr[i]+"\" + $"+orders[i]+" + ";
 }
 funStr+="\""+arr[i]+"\"; }";
-var f=null;
-eval(funStr)
-return f;
+return eval(funStr);
 };
 
 sp.replaceAll=function(exp,str){
