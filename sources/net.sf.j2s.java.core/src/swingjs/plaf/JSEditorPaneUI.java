@@ -99,6 +99,7 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 			focusNode = enableNode = textNode = domNode;
 			DOMNode.setStyles(domNode, "resize", "none", "margin", "0px", "padding", "1px", "box-sizing", "border-box");
 			bindJSKeyEvents(focusNode, true);
+			@SuppressWarnings("unused")
 			JSEditorPaneUI me = this;
 			$(domNode).on("paste", /** @j2sNative function(e){ return me.handleJSPasteEvent(e.originalEvent,e)} || */null);
 		}
@@ -270,7 +271,6 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 		super.propertyChange(e);
 	}
 
-	@SuppressWarnings("unused")
 	private String currentHTML;
 	private boolean isStyled;
 	private String mytext;
@@ -678,7 +678,6 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 	 * @return range information or length: [textNode,charOffset] or
 	 *         [nontextNode,charNodesOffset] or [null, nlen]
 	 */
-	@SuppressWarnings("unused")
 	@Override
 	protected Object[] getJSNodePt(DOMNode dnode, int pt, Object[] lastRange, int level) {
 		// JavaScript below will call this method iteratively with off >= 0.
@@ -718,6 +717,7 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 			if (isTAB) {
 				return (pt == 0 ? r = lastRange : setNode(r, null, pt - 1));
 			}
+			@SuppressWarnings("null")
 			Node[] nodes = node.childNodes;
 			String tag = node.tagName;
 			int n = nodes.length;
@@ -1096,7 +1096,7 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 		return new int[] { Math.min(x,  y), Math.max(x,  y) };
 	}
 
-	private String stemp;
+	//private String stemp;
 	private int[] xyTemp;
 	
     @Override
@@ -1118,7 +1118,7 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 		String s = (String) DOMNode.getAttr(domNode, "innerText");
 		switch (mode) {
 		case KeyEvent.KEY_PRESSED:
-			stemp = s;
+			//stemp = s;
 			xyTemp = getJavaMarkAndDot();
 			return false;
 		case KeyEvent.KEY_TYPED:
@@ -1254,13 +1254,13 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 		}
 	}
 
-	private int tabCount(String s) {
-		int n = 0;
-		for (int i = s.length(); --i >= 0;)
-			if (s.charAt(i) == '\t')
-				n++;
-		return n;
-	}
+//	private int tabCount(String s) {
+//		int n = 0;
+//		for (int i = s.length(); --i >= 0;)
+//			if (s.charAt(i) == '\t')
+//				n++;
+//		return n;
+//	}
 	
 	@Override
 	void setJSText() {
@@ -1357,7 +1357,7 @@ public class JSEditorPaneUI extends JSTextUI implements KeyListener {
 	public Rectangle modelToView(JTextComponent tc, int pos, Position.Bias bias) throws BadLocationException {
 		Rectangle alloc = getVisibleEditorRect();
 		Document doc = editor.getDocument();
-		Object[] r1 = getJSNodePt(focusNode, pos, null, 0);
+		//Object[] r1 = getJSNodePt(focusNode, pos, null, 0);
 		try {
 			if (alloc != null) {
 				rootView.setSize(alloc.width, alloc.height);

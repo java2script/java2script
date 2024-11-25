@@ -12,6 +12,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenuBar;
 import javax.swing.JPopupMenu;
 import javax.swing.LookAndFeel;
+import javax.swing.text.JTextComponent;
 
 import swingjs.api.js.DOMNode;
 
@@ -127,7 +128,7 @@ public class JSLabelUI extends JSLightweightUI {
 	public Dimension getPreferredSize(JComponent jc) {
 		c = this.jc = jc; // renderer issue 
 		updateDOMNode();
-		return (isAWT ? getMinimumSizePeer(jc, label)
+		return (isAWT ? getMinimumSizePeer(jc, label, false)
 				: label == null ? super.getPreferredSize(jc)
 						: JSGraphicsUtils.getPreferredButtonSize(((AbstractButton) jc),
 								((AbstractButton) jc).getIconTextGap()));
@@ -136,18 +137,19 @@ public class JSLabelUI extends JSLightweightUI {
 	final static int[] htAdj = { 0, 7, 6, 7, 6, 6, 5, 5, 6, 7, 7, 7, 6, 6, 5, 5, 5, 5, 6, 6, 4, 4, 4, 4, 3, 3, 5, 5,
 			3, 3, 4, 3, 2, 3, 3, 3, 2, 2, 2, 2, 0, };
 
-	static Dimension getMinimumSizePeer(JComponent jc, Object label) {
+	static Dimension getMinimumSizePeer(JComponent jc, Object label, boolean preferredWidth) {
 		Font f = jc.getFont();
 		String s = null;
 		if (f == null)
 			return new Dimension(14, 8);
 		FontMetrics fm = f.getFontMetrics();
-		s = ((JLabel) label).getText();
+		s = (label == null ? ((JTextComponent) jc).getText() 
+				:((JLabel) label).getText());
 		if (s == null)
 			s = "";
 		int sz = f.getSize();
 		int adj = (sz <= 40 ? htAdj[sz] : 0);
-		return new Dimension(fm.stringWidth(s) + 14, fm.getHeight() + adj);
+		return new Dimension(preferredWidth ? fm.stringWidth(s) + 14 : 4, fm.getHeight() + adj);
 	}
 
 }

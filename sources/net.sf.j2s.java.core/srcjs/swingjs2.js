@@ -14131,6 +14131,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2024.11.23 implementing java.awt.Toolkit.getDefaultToolkit().getDesktopProperty("awt.multiClickInterval")
 // BH 2024.06.22 adds Integer.getIngeger(String, int) (returning null)
 // BH 2024.03.03 removes unnecessary loadClass("xxxx") on exceptionOf(e,"xxxx") call
 // BH 2024.02.23 fixes missing Long.signum
@@ -17463,6 +17464,13 @@ C$.getProperty$S=function (key) {
 		return Clazz._isHeadless;
 	C$.checkKey$S(key);
 	var p = (C$.props == null ? sysprops[key] : C$.props.getProperty$S(key))
+	if (p == null) {
+		switch (key) {
+		case "DeskTop_awt.multiClickInterval":
+			// from java.awt.Toolkit.getDesktopProperty(name)
+			return Integer.valueOf$I(500);
+		}
+	}
 	return (p == null ? null : p);
 }
 

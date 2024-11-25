@@ -40,6 +40,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Point2D.Double;
 import java.awt.geom.Rectangle2D;
@@ -280,7 +281,9 @@ public abstract class JSTextUI extends JSLightweightUI {
 				return HANDLED;
 			}
 			if (!ignore && eventType == KeyEvent.KEY_PRESSED
-					&& (keyEvent.getModifiersEx() & (KeyEvent.CTRL_DOWN_MASK | KeyEvent.ALT_DOWN_MASK)) != 0) {
+					&& (keyEvent.getModifiersEx() 
+					    & (InputEvent.CTRL_DOWN_MASK 
+					    		| InputEvent.ALT_DOWN_MASK)) != 0) {
 				// dispatch a missing KeyTyped event.
 				int code = keyEvent.getKeyCode();
 				if (code >= 65 && code <= 90) {

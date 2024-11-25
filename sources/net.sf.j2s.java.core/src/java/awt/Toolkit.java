@@ -1748,7 +1748,12 @@ public abstract class Toolkit {
      * an opportunity to lazily evaluate desktop property values.
      */
     protected Object lazilyLoadDesktopProperty(String name) {
-        return null;
+    	// BH SwingJS -- we store these in Clazz.js System.getProperty$S.
+    	// but they will be Objects. For example, 
+    	
+    	// "awt.multiClickInterval" => Integer.valueOf(500);
+    	
+    	return System.getProperty("DeskTop_" + name);
     }
 
     /**
@@ -1810,7 +1815,7 @@ public abstract class Toolkit {
     public PropertyChangeListener[] getPropertyChangeListeners(String propertyName) {
         return desktopPropsSupport.getPropertyChangeListeners(propertyName);
     }
-
+    
     protected final Map<String,Object> desktopProperties =
             new HashMap<String,Object>();
     protected final PropertyChangeSupport desktopPropsSupport =
