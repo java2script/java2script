@@ -1389,8 +1389,6 @@ public abstract class JSTextUI extends JSLightweightUI {
 					handleCtrlV(KeyEvent.KEY_RELEASED);
 				return NOT_CONSUMED;
 			case KeyEvent.VK_A: // a
-				if (!isCTRL)
-					return null;
 				return null;
 //				allowKeyEvent(jQueryEvent);
 //				return NOT_CONSUMED; // allow standard browser CTRL-C, with no Java-Event processing
@@ -1402,18 +1400,24 @@ public abstract class JSTextUI extends JSLightweightUI {
 			
 			case KeyEvent.VK_TAB:
 				return handleTab(jQueryEvent, type);
-			case KeyEvent.VK_HOME:
-			case KeyEvent.VK_END:
 			case KeyEvent.VK_UP:
 			case KeyEvent.VK_DOWN:
-			case KeyEvent.VK_LEFT:
-			case KeyEvent.VK_RIGHT:
+				// Jmol needs to catch these
+				return null;
 			case KeyEvent.VK_PAGE_UP:
 			case KeyEvent.VK_PAGE_DOWN:
+				// unfortunately, these CTRL-PAGE_UP and CTRL-PAGE_DOWN 
+				// cannot be stopped in a browser from switching tabs
+			case KeyEvent.VK_HOME:
+			case KeyEvent.VK_END:
+			case KeyEvent.VK_LEFT:
+			case KeyEvent.VK_RIGHT:
 			case KeyEvent.VK_KP_UP:
 			case KeyEvent.VK_KP_DOWN:
 			case KeyEvent.VK_KP_LEFT:
 			case KeyEvent.VK_KP_RIGHT:
+				// BH 2024 - I don't understand why I did this
+			    // BH 2024 - removed VK_UP and VK_DOWN from this list
 				// accept only if neither ALT nor CTRL is down
 				return (/** @j2sNative jQueryEvent.altKey || */
 				isCTRL ? CONSUMED : null);
