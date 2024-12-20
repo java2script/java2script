@@ -53,7 +53,8 @@ static boolean j2sHeadless = true;
 			
 
 			if (/** @j2sNative true || */
-			false) {
+			true 
+			|| false) {
 
 			
 			
@@ -75,12 +76,19 @@ static boolean j2sHeadless = true;
 						System.out.println(ze.getName());
 					}
 					;
+					if (ze == null)
+						break;
 					System.out.println(ze.getName());
-					if (ze.getName().equals("xl/calcChain.xml")) {
-						bytes = new byte[(int) ze.getSize()];
-						zis.read(bytes);
-						break out;
-					}
+					
+					bytes = new byte[(int) ze.getSize()];
+					System.out.println(zis.read(bytes));
+
+					
+//					if (ze.getName().equals("xl/calcChain.xml")) {
+//						bytes = new byte[(int) ze.getSize()];
+//						zis.read(bytes);
+//						break out;
+//					}
 				}
 				zis.close();
 				s = new String(bytes);

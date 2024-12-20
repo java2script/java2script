@@ -1212,22 +1212,34 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 		// x.click() in any manifestation will not work from Chrome or Safari.
 		// These browers require that the user see and click the link.
 		if (J2S._canClickFileReader) {
+			var px = screen.width / 2 - 80; 
+			var py = screen.height / 2 - 40; 
 			var x = document.createElement("input");
+			x.id = "swingjs2input";
 			x.value = x.text = "xxxx";
 			x.type = "file";
+			x.style.z_index = 1000000;
+			x.style.position = "fixed";
+			x.style.left = px + 'px';
+			x.style.top = py + 'px';
+
 			if (isMultiple)
 				x.setAttribute("multiple", "true");
 			x.addEventListener("change", function(ev) {
 				J2S._fileReaderCancelListener = null;
+				var f = this.files;
+				$("#swingjs2input").remove();
 				window.removeEventListener("focus", J2S._fileReaderCancelListener);
-				(isMultiple ? readFiles(this.files) : readFile(this.files[0]));
-			}, false);			
+				window.setTimeout(function(){(isMultiple ? readFiles(f) : readFile(f[0]))},1);
+			}, false);		
+			document.body.append(x);
 			x.click();
 			window.addEventListener("focus", J2S._fileReaderCancelListener = function(a){
 				setTimeout(function() {
 					window.removeEventListener("focus", J2S._fileReaderCancelListener);
 					if (J2S._fileReaderCancelListener != null) {
 						J2S._fileReaderCancelListener = null;
+						$("#swingjs2input").remove();
 						fDone(null, null);
 					}
 				},500)

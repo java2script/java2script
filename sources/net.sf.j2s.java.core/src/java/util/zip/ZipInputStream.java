@@ -346,16 +346,29 @@ private boolean isPushback;
     }
     e.method = get16(tmpbuf, LOCHOW);
     e.time = get32(tmpbuf, LOCTIM);
-    if ((flag & 8) == 8) {
-      /* "Data Descriptor" present */
-      if (e.method != DEFLATED) {
-        throw new ZipException("only DEFLATED entries can have EXT descriptor");
-      }
-    } else {
-      e.crc = get32(tmpbuf, LOCCRC);
-      e.csize = get32(tmpbuf, LOCSIZ);
-      e.size = get32(tmpbuf, LOCLEN);
-    }
+	boolean readSizes = ((flag & 8) != 8 || e.getMethod() != DEFLATED);
+	// flag 8 means size is unknown at compression time
+		// leave crc and sizes -1
+		/* "Data Descriptor" present */
+	// still read the 0 if  (e.getMethod() == DEFLATED)
+			// DO NOT throw new ZipException
+			//System.out.println("ZipInputStream: only DEFLATED entries can have EXT descriptor?? - " + e.getName());
+	if (readSizes) {
+		e.setCrc(get32(tmpbuf, LOCCRC));
+		e.setCompressedSize(get32(tmpbuf, LOCSIZ));
+		e.setSize(get32(tmpbuf, LOCLEN));
+	}
+//    if ((flag & 8) == 8) {
+	// oops - don't set 0!
+//      /* "Data Descriptor" present */
+//      if (e.method != DEFLATED) {
+//        throw new ZipException("only DEFLATED entries can have EXT descriptor");
+//      }
+//    } else {
+//      e.crc = get32(tmpbuf, LOCCRC);
+//      e.csize = get32(tmpbuf, LOCSIZ);
+//      e.size = get32(tmpbuf, LOCLEN);
+//    }
     len = get16(tmpbuf, LOCEXT);
     byte[] bb = new byte[len + 4];
     if (len > 0) {
