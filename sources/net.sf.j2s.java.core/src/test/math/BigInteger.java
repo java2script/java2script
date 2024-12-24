@@ -2497,7 +2497,7 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
             // Combine results using Chinese Remainder Theorem
             BigInteger y1 = m2.modInverse(m1);
             BigInteger y2 = m1.modInverse(m2);
-
+            
             if (m.mag.length < MAX_MAG_LENGTH / 2) {
                 result = a1.multiply(m2).multiply(y1).add(a2.multiply(m1).multiply(y2)).mod(m);
             } else {
@@ -2514,7 +2514,7 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
         return (invertResult ? result.modInverse(m) : result);
     }
 
-    static int[] bnExpModThreshTable = {7, 25, 81, 241, 673, 1793,
+	static int[] bnExpModThreshTable = {7, 25, 81, 241, 673, 1793,
                                                 Integer.MAX_VALUE}; // Sentinel
 
     /**
@@ -2633,6 +2633,8 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
         }
 
         // Set b to the square of the base
+        
+        
         int[] b = squareToLen(table[0], modLen, null);
         b = montReduce(b, mod, modLen, inv);
 
@@ -2647,6 +2649,7 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
 
         // Pre load the window that slides over the exponent
         int bitpos = 1 << ((ebits-1) & (32-1));
+
 
         int buf = 0;
         int elen = exp.length;
@@ -2686,11 +2689,12 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
             buf <<= 1;
 
             if (elen != 0) {
+
                 buf |= ((exp[eIndex] & bitpos) != 0) ? 1 : 0;
                 bitpos >>>= 1;
                 if (bitpos == 0) {
                     eIndex++;
-                    bitpos = 1 << (32-1);
+                    bitpos = (1 << (32-1));
                     elen--;
                 }
             }
@@ -2743,7 +2747,7 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
         return new BigInteger(1, t2);
     }
 
-    /**
+	/**
      * Montgomery reduce n, modulo mod.  This reduces modulo mod and divides
      * by 2^(32*mlen). Adapted from Colin Plumb's C library.
      */
@@ -2754,7 +2758,7 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
 
         do {
             int nEnd = n[n.length-1-offset];
-            int carry = mulAdd(n, mod, offset, mlen, inv * nEnd);
+            int carry = mulAdd(n, mod, offset, mlen, (int)((long)inv * nEnd));
             c += addOne(n, offset, mlen, carry);
             offset++;
         } while (--len > 0);

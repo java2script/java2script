@@ -46,6 +46,7 @@ import java.awt.font.LineBreakMeasurer;
 import java.awt.font.TextHitInfo;
 import java.awt.font.TextLayout;
 import java.lang.ref.SoftReference;
+import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -87,6 +88,8 @@ import javax.swing.text.JTextComponent;
 //import javax.swing.text.DefaultCaret;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
+
+import sun.font.FontDesignMetrics;
 
 /**
  * A collection of utility methods for Swing.
@@ -141,8 +144,8 @@ public class SwingUtilities2 {
     /* Presently this class assumes default fractional metrics.
      * This may need to change to emulate future platform L&Fs.
      */
-    public static class AATextInfo {
-
+//    public static class AATextInfo {
+//
 //        private static AATextInfo getAATextInfoFromMap(Map hints) {
 //
 //            Object aaHint   = hints.get(KEY_TEXT_ANTIALIASING);
@@ -156,22 +159,22 @@ public class SwingUtilities2 {
 //                return new AATextInfo(aaHint, 0);//(Integer)contHint);
 //            }
 //        }
-
-        public static AATextInfo getAATextInfo(boolean lafCondition) {
-//            SunToolkit.setAAFontSettingsCondition(lafCondition);
-//            Toolkit tk = Toolkit.getDefaultToolkit();
-//            Object map = tk.getDesktopProperty(SunToolkit.DESKTOPFONTHINTS);
-//            if (map instanceof Map) {
-//                return getAATextInfoFromMap((Map)map);
-//            } else {
-                return null;
-//            }
-        }
-
-        Object aaHint;
-        Integer lcdContrastHint;
-        FontRenderContext frc;
-
+//
+////        public static AATextInfo getAATextInfo(boolean lafCondition) {
+////            SunToolkit.setAAFontSettingsCondition(lafCondition);
+////            Toolkit tk = Toolkit.getDefaultToolkit();
+////            Object map = tk.getDesktopProperty(SunToolkit.DESKTOPFONTHINTS);
+////            if (map instanceof Map) {
+////                return getAATextInfoFromMap((Map)map);
+////            } else {
+////                return null;
+////            }
+////        }
+////
+//        Object aaHint;
+//        Integer lcdContrastHint;
+//        FontRenderContext frc;
+//
 //        /* These are rarely constructed objects, and only when a complete
 //         * UI is being updated, so the cost of the tests here is minimal
 //         * and saves tests elsewhere.
@@ -190,7 +193,7 @@ public class SwingUtilities2 {
 //            this.frc = new FontRenderContext(null, aaHint,
 //                                             VALUE_FRACTIONALMETRICS_DEFAULT);
 //        }
-    }
+//    }
 
     /**
      * Key used in client properties used to indicate that the
@@ -246,13 +249,15 @@ public class SwingUtilities2 {
      *         specified component.
      */
     public static AATextInfo drawTextAntialiased(JComponent c) {
-        if (c != null) {
-            /* a non-null property implies some form of AA requested */
-            return (AATextInfo)c.getClientProperty(AA_TEXT_PROPERTY_KEY);
-        }
+//        if (c != null) {
+//            /* a non-null property implies some form of AA requested */
+//            return (AATextInfo)c.getClientProperty(AA_TEXT_PROPERTY_KEY);
+//        }
         // No component, assume aa is off
         return null;
     }
+    
+    class AATextInfo {};
 
     /**
      * Returns the left side bearing of the first character of string. The
@@ -533,6 +538,9 @@ public class SwingUtilities2 {
 
 
     /**
+     * SwingJS -- no need for antialiasing text -- we always do that
+     * SwingJS -- no need for printing
+     * 
      * Draws the string at the specified location.
      *
      * @param c JComponent that will display the string, may be null
@@ -802,22 +810,23 @@ public class SwingUtilities2 {
         }
     }
 
-//    /**
-//     * The following draw functions have the same semantic as the
-//     * Graphics methods with the same names.
-//     *
-//     * this is used for printing
-//     */
-//    public static int drawChars(JComponent c, Graphics g,
-//                                 char[] data,
-//                                 int offset,
-//                                 int length,
-//                                 int x,
-//                                 int y) {
-//        if ( length <= 0 ) { //no need to paint empty strings
-//            return x;
-//        }
-//        int nextX = x + getFontMetrics(c, g).charsWidth(data, offset, length);
+    /**
+     * SwingJS - ignoring printing; all text already antialiased
+     * The following draw functions have the same semantic as the
+     * Graphics methods with the same names.
+     *
+     * this is used for printing
+     */
+    public static int drawChars(JComponent c, Graphics g,
+                                 char[] data,
+                                 int offset,
+                                 int length,
+                                 int x,
+                                 int y) {
+        if ( length <= 0 ) { //no need to paint empty strings
+            return x;
+        }
+        int nextX = x + getFontMetrics(c, g).charsWidth(data, offset, length);
 //        if (isPrinting(g)) {
 //            Graphics2D g2d = getGraphics2D(g);
 //            if (g2d != null) {
@@ -883,39 +892,39 @@ public class SwingUtilities2 {
 //            }
 //        }
 //        else {
-//            g.drawChars(data, offset, length, x, y);
+            g.drawChars(data, offset, length, x, y);
 //        }
-//        return nextX;
-//    }
-//
-//    /*
-//     * see documentation for drawChars
-//     * returns the advance
-//     */
-//    public static float drawString(JComponent c, Graphics g,
-//                                   AttributedCharacterIterator iterator,
-//                                   int x,
-//                                   int y) {
-//
-//        float retVal;
-//        boolean isPrinting = isPrinting(g);
-//        Color col = g.getColor();
-//
-//        if (isPrinting) {
-//            /* Use alternate print color if specified */
-//            if (col instanceof PrintColorUIResource) {
-//                g.setColor(((PrintColorUIResource)col).getPrintColor());
-//            }
-//        }
-//
-//        Graphics2D g2d = getGraphics2D(g);
-//        if (g2d == null) {
-//            g.drawString(iterator,x,y); //for the cases where advance
-//                                        //matters it should not happen
-//            retVal = x;
-//
-//        } else {
-//            FontRenderContext frc;
+        return nextX;
+    }
+
+    /*
+     * see documentation for drawChars
+     * returns the advance
+     */
+    public static float drawString(JComponent c, Graphics g,
+                                   AttributedCharacterIterator iterator,
+                                   int x,
+                                   int y) {
+
+        float retVal;
+        boolean isPrinting = isPrinting(g);
+        Color col = g.getColor();
+
+        if (isPrinting) {
+            /* Use alternate print color if specified */
+            if (col instanceof PrintColorUIResource) {
+                g.setColor(((PrintColorUIResource)col).getPrintColor());
+            }
+        }
+
+        Graphics2D g2d = getGraphics2D(g);
+        if (g2d == null) {
+            g.drawString(iterator,x,y); //for the cases where advance
+                                        //matters it should not happen
+            retVal = x;
+
+        } else {
+            FontRenderContext frc;
 //            if (isPrinting) {
 //                frc = getFontRenderContext(c);
 //                if (frc.isAntiAliased() || frc.usesFractionalMetrics()) {
@@ -924,73 +933,73 @@ public class SwingUtilities2 {
 //            } else if ((frc = getFRCProperty(c)) != null) {
 //                /* frc = frc; ! */
 //            } else {
-//                frc = g2d.getFontRenderContext();
-//            }
-//            TextLayout layout = new TextLayout(iterator, frc);
-//            if (isPrinting) {
-//                FontRenderContext deviceFRC = g2d.getFontRenderContext();
-//                if (!isFontRenderContextPrintCompatible(frc, deviceFRC)) {
-//                    float screenWidth = layout.getAdvance();
-//                    layout = new TextLayout(iterator, deviceFRC);
-//                    layout = layout.getJustifiedLayout(screenWidth);
-//                }
-//            }
-//            layout.draw(g2d, x, y);
-//            retVal = layout.getAdvance();
-//        }
-//
-//        if (isPrinting) {
-//            g.setColor(col);
-//        }
-//
-//        return retVal;
-//    }
+                frc = g2d.getFontRenderContext();
+  //          }
+            TextLayout layout = new TextLayout(iterator, frc);
+            if (isPrinting) {
+                FontRenderContext deviceFRC = g2d.getFontRenderContext();
+                if (!isFontRenderContextPrintCompatible(frc, deviceFRC)) {
+                    float screenWidth = layout.getAdvance();
+                    layout = new TextLayout(iterator, deviceFRC);
+                    layout = layout.getJustifiedLayout(screenWidth);
+                }
+            }
+            layout.draw(g2d, x, y);
+            retVal = layout.getAdvance();
+        }
 
-//    /*
-//     * Checks if two given FontRenderContexts are compatible for printing.
-//     * We can't just use equals as we want to exclude from the comparison :
-//     * + whether AA is set as irrelevant for printing and shouldn't affect
-//     * printed metrics anyway
-//     * + any translation component in the transform of either FRC, as it
-//     * does not affect metrics.
-//     * Compatible means no special handling needed for text painting
-//     */
-//    private static boolean
-//        isFontRenderContextPrintCompatible(FontRenderContext frc1,
-//                                           FontRenderContext frc2) {
-//
-//        if (frc1 == frc2) {
-//            return true;
-//        }
-//
-//        if (frc1 == null || frc2 == null) { // not supposed to happen
-//            return false;
-//        }
-//
-//        if (frc1.getFractionalMetricsHint() !=
-//            frc2.getFractionalMetricsHint()) {
-//            return false;
-//        }
-//
-//        /* If both are identity, return true */
-//        if (!frc1.isTransformed() && !frc2.isTransformed()) {
-//            return true;
-//        }
-//
-//        /* That's the end of the cheap tests, need to get and compare
-//         * the transform matrices. We don't care about the translation
-//         * components, so return true if they are otherwise identical.
-//         */
-//        double[] mat1 = new double[4];
-//        double[] mat2 = new double[4];
-//        frc1.getTransform().getMatrix(mat1);
-//        frc2.getTransform().getMatrix(mat2);
-//        return
-//            mat1[0] == mat2[0] &&
-//            mat1[1] == mat2[1] &&
-//            mat1[2] == mat2[2] &&
-//            mat1[3] == mat2[3];
-//    }
+        if (isPrinting) {
+            g.setColor(col);
+        }
+
+        return retVal;
+    }
+
+    /*
+     * Checks if two given FontRenderContexts are compatible for printing.
+     * We can't just use equals as we want to exclude from the comparison :
+     * + whether AA is set as irrelevant for printing and shouldn't affect
+     * printed metrics anyway
+     * + any translation component in the transform of either FRC, as it
+     * does not affect metrics.
+     * Compatible means no special handling needed for text painting
+     */
+    private static boolean
+        isFontRenderContextPrintCompatible(FontRenderContext frc1,
+                                           FontRenderContext frc2) {
+
+        if (frc1 == frc2) {
+            return true;
+        }
+
+        if (frc1 == null || frc2 == null) { // not supposed to happen
+            return false;
+        }
+
+        if (frc1.getFractionalMetricsHint() !=
+            frc2.getFractionalMetricsHint()) {
+            return false;
+        }
+
+        /* If both are identity, return true */
+        if (!frc1.isTransformed() && !frc2.isTransformed()) {
+            return true;
+        }
+
+        /* That's the end of the cheap tests, need to get and compare
+         * the transform matrices. We don't care about the translation
+         * components, so return true if they are otherwise identical.
+         */
+        double[] mat1 = new double[4];
+        double[] mat2 = new double[4];
+        frc1.getTransform().getMatrix(mat1);
+        frc2.getTransform().getMatrix(mat2);
+        return
+            mat1[0] == mat2[0] &&
+            mat1[1] == mat2[1] &&
+            mat1[2] == mat2[2] &&
+            mat1[3] == mat2[3];
+    }
 
     /*
      * Tries it best to get Graphics2D out of the given Graphics
@@ -1034,21 +1043,21 @@ public class SwingUtilities2 {
             : getFontRenderContext(c);
     }
 
-//    /*
-//     * This method is to be used only for JComponent.getFontMetrics.
-//     * In all other places to get FontMetrics we need to use
-//     * JComponent.getFontMetrics.
-//     *
-//     */
-//    public static FontMetrics getFontMetrics(JComponent c, Font font) {
-////        FontRenderContext  frc = DEFAULT_FRC;//getFRCProperty(c);
-////        if (frc == null) {
-////            frc = DEFAULT_FRC;
-////        }
-//        return FontDesignMetrics.getMetrics(font);//, frc);
-//    }
+    /*
+     * This method is to be used only for JComponent.getFontMetrics.
+     * In all other places to get FontMetrics we need to use
+     * JComponent.getFontMetrics.
+     *
+     */
+    public static FontMetrics getFontMetrics(JComponent c, Font font) {
+//        FontRenderContext  //frc = getFRCProperty(c);
+//        if (frc == null) {
+//            frc = DEFAULT_FRC;
+   //     }
+        return FontDesignMetrics.getMetrics(font); // , frc
+    }
 
-//
+
 //    /* Get any FontRenderContext associated with a JComponent
 //     * - may return null
 //     */
@@ -1062,7 +1071,7 @@ public class SwingUtilities2 {
 //        }
 //        return null;
 //    }
-
+//
     /*
      * returns true if the Graphics is print Graphics
      * false otherwise
@@ -1113,7 +1122,7 @@ public class SwingUtilities2 {
         private FontRenderContext frc;
         private Map<Character, Short> cache;
         // Used for the creation of a GlyphVector
-        private static final char[] oneChar = new char[1];
+//        private static final char[] oneChar = new char[1];
 
         public BearingCacheEntry(FontMetrics fontMetrics) {
             this.fontMetrics = fontMetrics;
@@ -1190,7 +1199,8 @@ public class SwingUtilities2 {
 
         }
 
-        public boolean equals(Object entry) {
+        @Override
+		public boolean equals(Object entry) {
             if (entry == this) {
                 return true;
             }
@@ -1202,7 +1212,8 @@ public class SwingUtilities2 {
                     frc.equals(oEntry.frc));
         }
 
-        public int hashCode() {
+        @Override
+		public int hashCode() {
             int result = 17;
             if (font != null) {
                 result = 37 * result + font.hashCode();

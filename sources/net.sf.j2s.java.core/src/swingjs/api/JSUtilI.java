@@ -386,4 +386,16 @@ public interface JSUtilI {
    */
     String getJ2SPath();
 
+    /**
+     * Asyncronously fires either success or onError after running mediainfo.analyzeData
+     * 
+     * This information is always created in JSImagekit for the JSImage.
+     * 
+     * @param videoData  byte array data of video
+     * @param trackType  the &amp;type for the media track to return, or null to return the full MediaInfo result JSON map 
+     * @param success function to handle the returned map, if everything works out
+     * @param onError function to handle the error message, if an error occurs
+     */
+    void getMediaInfoAsync(byte[] videoData, String trackType, String path, Consumer<Map<String, Object>> success, Consumer<String> onError);
+
 }

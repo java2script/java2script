@@ -110,7 +110,7 @@ public class JSTextFieldUI extends JSTextUI {
 
 	@Override
 	public Dimension getMinimumSize(JComponent jc) {
-		return (isAWT ? JSLabelUI.getMinimumSizePeer(jc, editor) : super.getMinimumSize(jc));
+		return JSLabelUI.getMinimumSizePeer(jc, editor, false);
 	}
 
 	@Override

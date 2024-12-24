@@ -456,7 +456,7 @@ public class JSUtil implements JSUtilI {
 	return css;
 	}
 
-	static String processJS(String js, String resourceName) {
+	public static String processJS(String js, String resourceName) {
 	try {
 		/**
 		 * @j2sNative
@@ -753,6 +753,10 @@ public class JSUtil implements JSUtilI {
 		}
 	}
 
+	/**
+	 * Sets the url's ajax field to point to it.
+	 * @param url
+	 */
 	public static void setAjax(URL url) {
 		JSON.setAjax(url);	
 	}
@@ -1284,8 +1288,28 @@ public class JSUtil implements JSUtilI {
 		return (String) getAppletAttribute("_j2sFullPath");
 	}
 
-	
+	public static void loadScriptAsync(String url, Runnable success) {
+		URL u;
+		try {
+			u = new URL(url);
+			JSFunction f = /** @j2sNative function(){success.run$()} || */ null;
+			setAjax("url", u, "url", url, "dataType", "script", "success", f);
+			u.getContent();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
-
+	/**
+	 * Get
+	 * @param data
+	 * @param trackType
+	 * @param success
+	 * @param onError
+	 */
+	@Override
+	public void getMediaInfoAsync(byte[] data, String trackType, String path, Consumer<Map<String, Object>> success, Consumer<String> onError) {
+		JSImagekit.getMediaInfoAsync(data, trackType, path, success, onError);
+	}
 }
 

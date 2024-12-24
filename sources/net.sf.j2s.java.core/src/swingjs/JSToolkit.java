@@ -223,7 +223,9 @@ public class JSToolkit extends SunToolkit
 	 * @return
 	 */
 	public static GraphicsConfiguration getGraphicsConfiguration() {
-		JSAppletViewer ap = JSToolkit.getAppletViewer();
+		JSAppletViewer ap = getAppletViewer();
+		if (ap == null)
+			ap = Thread.currentThread().getThreadGroup().秘getAppletViewer();
 		GraphicsConfiguration gc = (ap == null ? null : ap.graphicsConfig);
 		return (gc == null ? (gc = ap.graphicsConfig = (GraphicsConfiguration) JSUtil.getInstance("swingjs.JSGraphicsConfiguration")) : gc);
 	}
@@ -252,6 +254,25 @@ public class JSToolkit extends SunToolkit
 		{
 		}
 		return w;
+	}
+
+	public static Object getTextMetrics(HTML5CanvasContext2D context, Font font,
+			String text) {
+		if (text == null || text.length() == 0)
+			return 0;
+		@SuppressWarnings("unused")
+		String fontInfo = getCanvasFont(font);
+		if (context == null)
+			context = getDefaultCanvasContext2d();
+		Object tm = null;
+		/**
+		 * @j2sNative
+		 * context.font = fontInfo; 
+		 * tm = context.measureText(text);
+		 */
+		{
+		}
+		return tm;
 	}
 
 	/**
@@ -872,7 +893,8 @@ public class JSToolkit extends SunToolkit
 		String family = getCSSFontFamilyName(font.getFamily());
 		// for whatever reason, Java font points are much larger than HTML5 canvas
 		// points
-		return strStyle + font.getSize() + "px " + family;
+		font.getSize();
+		return strStyle + font.getSize2D() + "px " + family;
 	}
 
 	public static String getCSSFontFamilyName(String family) {

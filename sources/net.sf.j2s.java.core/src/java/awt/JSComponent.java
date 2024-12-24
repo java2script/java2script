@@ -249,7 +249,7 @@ public abstract class JSComponent extends Component {
 	 */
 	@Override
 	public Graphics getGraphics() {
-		if (width == 0 || height == 0 || !isVisible())
+		if (!秘winOrApplet && (width == 0 || height == 0 || !isVisible()))
 			return null;
 		Graphics g;
 		// this was 秘frameViewer != null, but that

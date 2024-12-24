@@ -2754,7 +2754,8 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
 
         do {
             int nEnd = n[n.length-1-offset];
-            int carry = mulAdd(n, mod, offset, mlen, inv * nEnd);
+            // BH JavaScript does not roll over int multiplication
+            int carry = mulAdd(n, mod, offset, mlen, (int)((long)inv * nEnd));
             c += addOne(n, offset, mlen, carry);
             offset++;
         } while (--len > 0);

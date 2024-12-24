@@ -26,11 +26,13 @@ public class CorePlugin extends Plugin {
 	 * the actual "x.y.z" version is specified in plugin.xml.
 	 * 
 	 */
-	public static String VERSION = "5.0.1-v2";
+	public static String VERSION = "5.0.1-v4";
 	
 	// if you change the x.x.x number, be sure to also indicate that in 
 	// j2sApplet.js and also (Bob only) update.bat, update-clean.bat
 
+	// BH 2024.07.14 -- 5.0.1-v4 fixes numerical array initializer using characters ['a','b',...]
+	// BH 2024.02.22 -- 5.0.1-v3 fixes long extension issue causing MutableBitInteger to miscalculate subtraction(no change in version #)
 	// BH 2023.11.27 -- 5.0.1-v2 final refactoring and creatiton of J2SUtil
 	// BH 2023.11.21 -- 5.0.1-v2 adds Java8 syntaxes for try and switch; removes dependency for instanceOf and exception checking
 	// BH 2023.11.09 -- 5.0.1-v1 merges Jmol legacy (.j2sjmol) with Java8//11 (.j2s)

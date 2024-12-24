@@ -29,7 +29,9 @@
 package java.awt;
 
 import java.awt.font.FontRenderContext;
+import java.awt.font.LineMetrics;
 import java.awt.geom.Rectangle2D;
+import java.text.CharacterIterator;
 
 /**
  * The <code>FontMetrics</code> class defines a font metrics object, which
@@ -435,88 +437,89 @@ public abstract class FontMetrics {
 //        return widths;
 //    }
 
-//    /**
-//     * Checks to see if the <code>Font</code> has uniform line metrics.  A
-//     * composite font may consist of several different fonts to cover
-//     * various character sets.  In such cases, the
-//     * <code>FontLineMetrics</code> objects are not uniform.
-//     * Different fonts may have a different ascent, descent, metrics and
-//     * so on.  This information is sometimes necessary for line
-//     * measuring and line breaking.
-//     * @return <code>true</code> if the font has uniform line metrics;
-//     * <code>false</code> otherwise.
-//     * @see java.awt.Font#hasUniformLineMetrics()
-//     */
-//    public boolean hasUniformLineMetrics() {
-//        return font.hasUniformLineMetrics();
-//    }
-//
-//    /**
-//     * Returns the {@link LineMetrics} object for the specified
-//     * <code>String</code> in the specified {@link Graphics} context.
-//     * @param str the specified <code>String</code>
-//     * @param context the specified <code>Graphics</code> context
-//     * @return a <code>LineMetrics</code> object created with the
-//     * specified <code>String</code> and <code>Graphics</code> context.
-//     * @see java.awt.Font#getLineMetrics(String, FontRenderContext)
-//     */
-//    public LineMetrics getLineMetrics( String str, Graphics context) {
-//        return font.getLineMetrics(str, myFRC(context));
-//    }
-//
-//    /**
-//     * Returns the {@link LineMetrics} object for the specified
-//     * <code>String</code> in the specified {@link Graphics} context.
-//     * @param str the specified <code>String</code>
-//     * @param beginIndex the initial offset of <code>str</code>
-//     * @param limit the end offset of <code>str</code>
-//     * @param context the specified <code>Graphics</code> context
-//     * @return a <code>LineMetrics</code> object created with the
-//     * specified <code>String</code> and <code>Graphics</code> context.
-//     * @see java.awt.Font#getLineMetrics(String, int, int, FontRenderContext)
-//     */
-//    public LineMetrics getLineMetrics( String str,
-//                                            int beginIndex, int limit,
-//                                            Graphics context) {
-//        return font.getLineMetrics(str, beginIndex, limit, myFRC(context));
-//    }
-//
-//    /**
-//     * Returns the {@link LineMetrics} object for the specified
-//     * character array in the specified {@link Graphics} context.
-//     * @param chars the specified character array
-//     * @param beginIndex the initial offset of <code>chars</code>
-//     * @param limit the end offset of <code>chars</code>
-//     * @param context the specified <code>Graphics</code> context
-//     * @return a <code>LineMetrics</code> object created with the
-//     * specified character array and <code>Graphics</code> context.
-//     * @see java.awt.Font#getLineMetrics(char[], int, int, FontRenderContext)
-//     */
-//    public LineMetrics getLineMetrics(char [] chars,
-//                                            int beginIndex, int limit,
-//                                            Graphics context) {
-//        return font.getLineMetrics(
-//                                chars, beginIndex, limit, myFRC(context));
-//    }
-//
-//    /**
-//     * Returns the {@link LineMetrics} object for the specified
-//     * {@link CharacterIterator} in the specified {@link Graphics}
-//     * context.
-//     * @param ci the specified <code>CharacterIterator</code>
-//     * @param beginIndex the initial offset in <code>ci</code>
-//     * @param limit the end index of <code>ci</code>
-//     * @param context the specified <code>Graphics</code> context
-//     * @return a <code>LineMetrics</code> object created with the
-//     * specified arguments.
-//     * @see java.awt.Font#getLineMetrics(CharacterIterator, int, int, FontRenderContext)
-//     */
-//    public LineMetrics getLineMetrics(CharacterIterator ci,
-//                                            int beginIndex, int limit,
-//                                            Graphics context) {
-//        return font.getLineMetrics(ci, beginIndex, limit, myFRC(context));
-//    }
-//
+    /**
+     * Checks to see if the <code>Font</code> has uniform line metrics.  A
+     * composite font may consist of several different fonts to cover
+     * various character sets.  In such cases, the
+     * <code>FontLineMetrics</code> objects are not uniform.
+     * Different fonts may have a different ascent, descent, metrics and
+     * so on.  This information is sometimes necessary for line
+     * measuring and line breaking.
+     * @return <code>true</code> if the font has uniform line metrics;
+     * <code>false</code> otherwise.
+     * @see java.awt.Font#hasUniformLineMetrics()
+     */
+    public boolean hasUniformLineMetrics() {
+        return font.hasUniformLineMetrics();
+    }
+
+
+    /**
+     * Returns the {@link LineMetrics} object for the specified
+     * <code>String</code> in the specified {@link Graphics} context.
+     * @param str the specified <code>String</code>
+     * @param context the specified <code>Graphics</code> context
+     * @return a <code>LineMetrics</code> object created with the
+     * specified <code>String</code> and <code>Graphics</code> context.
+     * @see java.awt.Font#getLineMetrics(String, FontRenderContext)
+     */
+    public LineMetrics getLineMetrics( String str, Graphics context) {
+        return font.getLineMetrics(str, myFRC(context));
+    }
+
+    /**
+     * Returns the {@link LineMetrics} object for the specified
+     * <code>String</code> in the specified {@link Graphics} context.
+     * @param str the specified <code>String</code>
+     * @param beginIndex the initial offset of <code>str</code>
+     * @param limit the end offset of <code>str</code>
+     * @param context the specified <code>Graphics</code> context
+     * @return a <code>LineMetrics</code> object created with the
+     * specified <code>String</code> and <code>Graphics</code> context.
+     * @see java.awt.Font#getLineMetrics(String, int, int, FontRenderContext)
+     */
+    public LineMetrics getLineMetrics( String str,
+                                            int beginIndex, int limit,
+                                            Graphics context) {
+        return font.getLineMetrics(str, beginIndex, limit, myFRC(context));
+    }
+
+    /**
+     * Returns the {@link LineMetrics} object for the specified
+     * character array in the specified {@link Graphics} context.
+     * @param chars the specified character array
+     * @param beginIndex the initial offset of <code>chars</code>
+     * @param limit the end offset of <code>chars</code>
+     * @param context the specified <code>Graphics</code> context
+     * @return a <code>LineMetrics</code> object created with the
+     * specified character array and <code>Graphics</code> context.
+     * @see java.awt.Font#getLineMetrics(char[], int, int, FontRenderContext)
+     */
+    public LineMetrics getLineMetrics(char [] chars,
+                                            int beginIndex, int limit,
+                                            Graphics context) {
+        return font.getLineMetrics(
+                                chars, beginIndex, limit, myFRC(context));
+    }
+
+    /**
+     * Returns the {@link LineMetrics} object for the specified
+     * {@link CharacterIterator} in the specified {@link Graphics}
+     * context.
+     * @param ci the specified <code>CharacterIterator</code>
+     * @param beginIndex the initial offset in <code>ci</code>
+     * @param limit the end index of <code>ci</code>
+     * @param context the specified <code>Graphics</code> context
+     * @return a <code>LineMetrics</code> object created with the
+     * specified arguments.
+     * @see java.awt.Font#getLineMetrics(CharacterIterator, int, int, FontRenderContext)
+     */
+    public LineMetrics getLineMetrics(CharacterIterator ci,
+                                            int beginIndex, int limit,
+                                            Graphics context) {
+        return font.getLineMetrics(ci, beginIndex, limit, myFRC(context));
+    }
+
     /**
      * Returns the bounds of the specified <code>String</code> in the
      * specified <code>Graphics</code> context.  The bounds is used
@@ -616,9 +619,9 @@ public abstract class FontMetrics {
 //    }
 //
     private FontRenderContext myFRC(Graphics context) {
-//        if (context instanceof Graphics2D) {
-//            return ((Graphics2D)context).getFontRenderContext();
-//        }
+        if (context instanceof Graphics2D) {
+            return ((Graphics2D)context).getFontRenderContext();
+        }
         return DEFAULT_FRC;
     }
 

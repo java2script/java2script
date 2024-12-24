@@ -10,6 +10,7 @@ import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.swing.BoxLayout;
@@ -62,8 +63,10 @@ public interface HTML5Video extends DOMNode {
 						// already been loaded (or partially loaded), and the load() method is called to
 						// reload it.
 			"ended", // Playback has stopped because the end of the media was reached.
+			"error", // An error occurred while fetching the media data, or the type of the resource is not a supported media format.
 			"loadeddata", // The first frame of the media has finished loading.
 			"loadedmetadata", // The metadata has been loaded.
+			"loadstart", // Fired when the browser has started to load the resource.
 			"pause", // Playback has been paused.
 			"play", // Playback has begun.
 			"playing", // Playback is ready to start after having been paused or delayed due to lack of
@@ -99,6 +102,8 @@ public interface HTML5Video extends DOMNode {
 	public void mozGetMetadata() throws Throwable;
 
 	public void pause() throws Throwable;
+	
+	public int requestVideoFrameCallback(Object callback) throws Throwable;
 
 	public Promise play() throws Throwable;
 
@@ -349,6 +354,7 @@ public interface HTML5Video extends DOMNode {
 		 * @j2sNative
 		 * 
 		 * jsvideo.dialog = dialog;
+		 * jsvideo.label = label;
 		 * 
 		 */
 		Object[] j2sListener = HTML5Video.addActionListener(jsvideo, new ActionListener() {
@@ -378,7 +384,58 @@ public interface HTML5Video extends DOMNode {
 		HTML5Video.setCurrentTime(jsvideo, 0);
 		return dialog;
 	}
+
+	public static void cancelVideoFrameCallback(HTML5Video jsvideo) {
+		
+		/**
+		 * @j2sNative
+		 *          jsvideo._cancelVFCallback = true;
+		 *          
+		 */		
+	}
 	
+	/**
+	 * capture frame metadata while playing. Specifically, grab the metadata.mediaTime values, 
+	 * reporting these to the provided results array as 
+	 * 
+	 * results[0] = frameCount
+	 * 
+	 * resutls[n] = frame-n startTime (seconds)
+	 * 
+	 * @param jsvideo
+	 * @param result array to load
+	 * @return
+	 */
+	@SuppressWarnings("unused")
+	public static int requestVideoFrameCallback(HTML5Video jsvideo, Consumer<Object> callback) {
+		Object[] f = null;
+		/**
+		 * @j2sNative
+		 * 			if (jsvideo.requestVideoFrameCallback) {
+		 *           jsvideo._cancelVFCallback = false;
+		 * 			 f = [];
+		 * 			 f[0] = function(now, metadata) {
+		 * 					if (jsvideo._cancelVFCallback) {
+		 * 						jsvideo._cancelVFCallback = false;
+		 * 					} else {
+		 * 						callback.accept$O(metadata);
+		 *          			jsvideo.requestVideoFrameCallback(f[0]);
+		 *          		}
+		 *           };
+		 * 			}	
+		 * 
+		 */
+		if (f == null)
+			return 0;
+		int id = 0;
+		try {
+			id = jsvideo.requestVideoFrameCallback(f[0]);
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+		return id;
+	}
+
 	static JPanel getControls(JLabel label) {
 
 		JPanel controls = new JPanel();

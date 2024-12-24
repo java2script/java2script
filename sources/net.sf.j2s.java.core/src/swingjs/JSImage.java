@@ -6,6 +6,8 @@ import java.awt.image.BufferedImage;
 import java.awt.image.MemoryImageSource;
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
+import java.util.function.Consumer;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -40,6 +42,8 @@ import swingjs.plaf.JSComponentUI;
 public class JSImage extends BufferedImage {
 
 	public String src;
+	protected Map<String, Object> videoTrackInfo;
+	public Object 秘source;
 
 	/**
 	 * Frome JSImageKit reading pixels from an image file or MemoryImageSource
@@ -51,6 +55,7 @@ public class JSImage extends BufferedImage {
 	 */
 	public JSImage(int[] argb, int width, int height, String src, int type) {
 		super(width, height, type);
+		@SuppressWarnings("unused")
 		MemoryImageSource m; // just an Eclipse tag so we can find this reference;
 		this.src = src;
 		if (argb != null)
@@ -139,8 +144,9 @@ public class JSImage extends BufferedImage {
 					}
 				}
 			};
-			if (b != null)
+			if (b != null) {
 				src = JSImagekit.getDataBlob(b, "video/mp4");
+			}
 			// see https://developer.mozilla.org/en-US/docs/Web/HTML/CORS_enabled_image
 			/**
 			 * @j2sNative img.crossOrigin = "Anonymous"; 

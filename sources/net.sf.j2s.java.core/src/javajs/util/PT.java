@@ -827,7 +827,7 @@ public class PT {
 	    int nq = 4;
 	    while (nq < sLen) {
 	      qqqq += qqqq;
-	      nq += 4;
+	      nq *= 2;
 	    }
 	    if (checkStar) {
 	      if (isStar0) {

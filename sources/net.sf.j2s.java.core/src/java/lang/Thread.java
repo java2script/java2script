@@ -379,7 +379,8 @@ class Thread implements Runnable {
      * @param acc the AccessControlContext to inherit, or
      *            AccessController.getContext() if null
      */
-    private void init(ThreadGroup g, Runnable target, String name,
+    @SuppressWarnings("unlikely-arg-type")
+	private void init(ThreadGroup g, Runnable target, String name,
                       long stackSize, Object acc) { // was access controller
         Thread parent = (秘thisThread == null ? null : 秘thisThread);
 //        SecurityManager security = System.getSecurityManager();

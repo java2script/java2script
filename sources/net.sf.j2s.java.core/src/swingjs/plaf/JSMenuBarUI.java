@@ -125,7 +125,7 @@ public class JSMenuBarUI extends JSPanelUI implements ContainerListener {
 
 	@Override
 	public Insets getInsets() {
-		return new Insets(2,10,2,10);
+		return new Insets(0,10,0,10);
 		
 	}
 	

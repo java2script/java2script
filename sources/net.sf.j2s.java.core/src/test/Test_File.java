@@ -24,6 +24,9 @@ public class Test_File extends Test_ {
 		System.out.println(System.getProperty("jnlp.codebase"));
 		String tmpdir = System.getProperty("java.io.tmpdir");
 		System.out.println(tmpdir);
+		
+		String[] files = new File(tmpdir).list();
+		
 		File f = new File("./test");
 		URI u = f.toURI();
 		System.out.println(u);

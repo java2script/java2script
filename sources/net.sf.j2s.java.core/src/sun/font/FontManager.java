@@ -139,4 +139,9 @@ public interface FontManager {
      */
     public void preferProportionalFonts();
 
+	public static boolean isComplexText(char[] chars, int beginIndex, int limit) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

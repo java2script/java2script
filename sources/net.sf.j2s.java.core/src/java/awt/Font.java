@@ -70,8 +70,8 @@ import sun.font.AttributeMap;
 import sun.font.AttributeValues;
 import sun.font.CoreMetrics;
 import sun.font.Font2DHandle;
+import sun.font.FontDesignMetrics;
 import sun.font.FontLineMetrics;
-import swingjs.JSFontMetrics;
 import swingjs.JSToolkit;
 
 /**
@@ -235,18 +235,10 @@ import swingjs.JSToolkit;
 public class Font
 {
 
-  FontMetrics fm;
-  
-  public FontMetrics getFontMetrics() {  	
-		if (fm == null)
-			((JSFontMetrics) (fm = new JSFontMetrics())).setFont(this);
-  	return fm;
+  public FontMetrics getFontMetrics() {
+	  return FontDesignMetrics.getMetrics(this);
   }
   
-  public void setFontMetrics(FontMetrics fm) {
-    this.fm = fm;
-  }
-	
 //    /**
 //     * This is now only used during serialization.  Typically
 //     * it is null.
@@ -422,16 +414,16 @@ public class Font
      */
     private transient boolean nonIdentityTx;
 
-    /*
-     * A cached value used when a transform is required for internal
-     * use.  This must not be exposed to callers since AffineTransform
-     * is mutable.
-     */
-    private static AffineTransform identityTx;
-
-    private static AffineTransform getIdentityTx() {
-    	return (identityTx == null ? (identityTx = new AffineTransform()) : identityTx);
-    }
+//    /*
+//     * A cached value used when a transform is required for internal
+//     * use.  This must not be exposed to callers since AffineTransform
+//     * is mutable.
+//     */
+//    private static AffineTransform identityTx;
+//
+//    private static AffineTransform getIdentityTx() {
+//    	return (identityTx == null ? (identityTx = new AffineTransform()) : identityTx);
+//    }
     /*
      * JDK 1.1 serialVersionUID
      */
@@ -2212,11 +2204,7 @@ public class Font
              * just pass identity here
              */
             float [] metrics = new float[8];
-            ((JSFontMetrics)getFontMetrics()).//getFont2D().
-            getMetrics(getIdentityTx(),
-                                       frc.getAntiAliasingHint(),
-                                       frc.getFractionalMetricsHint(),
-                                       metrics);
+            ((FontDesignMetrics) getFontMetrics()).秘fillMetrics(metrics);
             float ascent  = metrics[0];
             float descent = metrics[1];
             float leading = metrics[2];
@@ -2367,7 +2355,7 @@ public class Font
      * @since 1.2
      */
     public Rectangle2D getStringBounds( String str, FontRenderContext frc) {
-        return getStringBoundsStr(str, 0, -1);
+        return getStringBoundsStr(str, 0, str.length());
     }
 
    /**
@@ -2403,56 +2391,93 @@ public class Font
         return getStringBoundsStr(str, beginIndex, limit);
     }
 
-   /**
-     * Returns the logical bounds of the specified array of characters
-     * in the specified <code>FontRenderContext</code>.  The logical
-     * bounds contains the origin, ascent, advance, and height, which
-     * includes the leading.  The logical bounds does not always enclose
-     * all the text.  For example, in some languages and in some fonts,
-     * accent marks can be positioned above the ascent or below the
-     * descent.  To obtain a visual bounding box, which encloses all the
-     * text, use the {@link TextLayout#getBounds() getBounds} method of
-     * <code>TextLayout</code>.
-     * <p>Note: The returned bounds is in baseline-relative coordinates
-     * (see {@link java.awt.Font class notes}).
-     * @param chars an array of characters
-     * @param beginIndex the initial offset in the array of
-     * characters
-     * @param limit the end offset in the array of characters
-     * @param frc the specified <code>FontRenderContext</code>
-     * @return a <code>Rectangle2D</code> that is the bounding box of the
-     * specified array of characters in the specified
-     * <code>FontRenderContext</code>.
-     * @throws IndexOutOfBoundsException if <code>beginIndex</code> is
-     *         less than zero, or <code>limit</code> is greater than the
-     *         length of <code>chars</code>, or <code>beginIndex</code>
-     *         is greater than <code>limit</code>.
-     * @see FontRenderContext
-     * @see Font#createGlyphVector
-     * @since 1.2
-     */
-    public Rectangle2D getStringBounds(char [] chars,
-                                    int beginIndex, int limit,
-                                       FontRenderContext frc) {
-    	SB sb = new SB();
-    	sb.appendCB(chars, beginIndex, limit);
-    	return getStringBoundsStr(sb.toString(), 0, -1);
-    }
-    
-    public Rectangle2D getStringBoundsStr(String s, int i, int j) {
-    	if (j >= i)
-    		s = s.substring(i, j);
-//        if (beginIndex < 0) {
-//            throw new IndexOutOfBoundsException("beginIndex: " + beginIndex);
-//        }
-//        if (limit > chars.length) {
-//            throw new IndexOutOfBoundsException("limit: " + limit);
-//        }
-//        if (beginIndex > limit) {
-//            throw new IndexOutOfBoundsException("range length: " +
-//                                                (limit - beginIndex));
-//        }
+	/**
+	 * Returns the logical bounds of the specified array of characters in the
+	 * specified <code>FontRenderContext</code>. The logical bounds contains the
+	 * origin, ascent, advance, and height, which includes the leading. The logical
+	 * bounds does not always enclose all the text. For example, in some languages
+	 * and in some fonts, accent marks can be positioned above the ascent or below
+	 * the descent. To obtain a visual bounding box, which encloses all the text,
+	 * use the {@link TextLayout#getBounds() getBounds} method of
+	 * <code>TextLayout</code>.
+	 * <p>
+	 * Note: The returned bounds is in baseline-relative coordinates (see
+	 * {@link java.awt.Font class notes}).
+	 * 
+	 * @param chars      an array of characters
+	 * @param beginIndex the initial offset in the array of characters
+	 * @param limit      the end offset in the array of characters
+	 * @param frc        the specified <code>FontRenderContext</code>
+	 * @return a <code>Rectangle2D</code> that is the bounding box of the specified
+	 *         array of characters in the specified <code>FontRenderContext</code>.
+	 * @throws IndexOutOfBoundsException if <code>beginIndex</code> is less than
+	 *                                   zero, or <code>limit</code> is greater than
+	 *                                   the length of <code>chars</code>, or
+	 *                                   <code>beginIndex</code> is greater than
+	 *                                   <code>limit</code>.
+	 * @see FontRenderContext
+	 * @see Font#createGlyphVector
+	 * @since 1.2
+	 */
+	@SuppressWarnings("unused")
+	public Rectangle2D getStringBounds(char[] chars, int beginIndex, int limit, FontRenderContext frc) {
 
+		if (beginIndex < 0) {
+			throw new IndexOutOfBoundsException("beginIndex: " + beginIndex);
+		}
+		if (limit > chars.length) {
+			throw new IndexOutOfBoundsException("limit: " + limit);
+		}
+		if (beginIndex > limit) {
+			throw new IndexOutOfBoundsException("range length: " + (limit - beginIndex));
+		}
+
+		// In JavaScript, we just let the browser figure this out. 
+		SB sb = new SB();
+		sb.appendCB(chars, beginIndex, limit);
+    	return ((FontDesignMetrics) getFontMetrics()).秘getStringBounds(sb.toString());
+
+
+//			boolean simple = values == null || (values.getKerning() == 0 && values.getLigatures() == 0
+//					&& values.getBaselineTransform() == null);
+//			if (simple) {
+//				simple = !FontUtilities.isComplexText(chars, beginIndex, limit);
+//			}
+//			//
+//			if (simple) {
+//				GlyphVector gv = new StandardGlyphVector(this, chars, beginIndex, limit - beginIndex, frc);
+//				return gv.getLogicalBounds();
+//			} else {
+//				// need char array constructor on textlayout
+//				String str = new String(chars, beginIndex, limit - beginIndex);
+//				TextLayout tl = new TextLayout(str, this, frc);
+//				return new Rectangle2D.Float(0, -tl.getAscent(), tl.getAdvance(),
+//						tl.getAscent() + tl.getDescent() + tl.getLeading());
+//			}
+
+	}
+    
+	/**
+	 * Keep it simple in JavaScript.
+	 * 
+	 * @param s
+	 * @param beginIndex
+	 * @param limit
+	 * @return Rectangle2D.Float
+	 */
+    public Rectangle2D getStringBoundsStr(String s, int beginIndex, int limit) {
+        if (beginIndex < 0) {
+            throw new IndexOutOfBoundsException("beginIndex: " + beginIndex);
+        }
+        if (limit > s.length()) {
+            throw new IndexOutOfBoundsException("limit: " + limit);
+        }
+        if (beginIndex > limit) {
+            throw new IndexOutOfBoundsException("range length: " +
+                                                (limit - beginIndex));
+        }
+    	
+        s = s.substring(beginIndex, limit);
         // this code should be in textlayout
         // quick check for simple text, assume GV ok to use if simple
 
@@ -2466,11 +2491,7 @@ public class Font
 //        if (simple) {
 //            GlyphVector gv = new StandardGlyphVector(this, chars, beginIndex,
 //                                                     limit - beginIndex, frc);
-        	FontMetrics fm = getFontMetrics();
-        	int dec = fm.getDescent();
-        	int asc = fm.getAscent();
-        	int width = fm.stringWidth(s);
-        	return new Rectangle2D.Float(0, -dec, width, asc + dec);        	
+        	return ((FontDesignMetrics) getFontMetrics()).秘getStringBounds(s);
 //            return null;//gv.getLogicalBounds();
 //        } else {
 //            // need char array constructor on textlayout
@@ -2551,9 +2572,7 @@ public class Font
      */
     public Rectangle2D getMaxCharBounds(FontRenderContext frc) {
         float [] metrics = new float[4];
-
-        ((JSFontMetrics) getFontMetrics()).getMetrics(frc, metrics);
-
+        ((FontDesignMetrics) getFontMetrics()).秘fillMetrics(metrics);
         return new Rectangle2D.Float(0, -metrics[0],
                                 metrics[3],
                                 metrics[0] + metrics[1] + metrics[2]);

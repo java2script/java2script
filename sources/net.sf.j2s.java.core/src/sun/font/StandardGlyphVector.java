@@ -44,8 +44,10 @@ import java.awt.geom.Rectangle2D;
 import java.text.CharacterIterator;
 
 import sun.awt.SunHints;
+import sun.font.GlyphLayout.GVData;
 import sun.java2d.loops.FontInfo;
 import swingjs.JSFontMetrics;
+import swingjs.JSToolkit;
 import swingjs.JSUtil;
 
 /**
@@ -1155,9 +1157,7 @@ public class StandardGlyphVector extends GlyphVector {
         glyphs = new int[count]; // hmmm
         /* Glyphs obtained here are already validated by the font */
         userGlyphs = glyphs;
-        
-        
-        //font2D.getMapper().
+                
         JSFontMetrics.charsToGlyphs(count, text, glyphs);
     }
 
@@ -1221,10 +1221,8 @@ public class StandardGlyphVector extends GlyphVector {
         setFRCTX();
         initPositions();
         
-        double h0 = -font.getFontMetrics().getDescent();
-        double h1 = font.getFontMetrics().getHeight() + h0;
-
-        return new Rectangle2D.Double(x + positions[start * 2], y + positions[start * 2 + 1] + h0, positions[count * 2], positions[count * 2 + 1] + h1);
+        float h = JSFontMetrics.fontAscent(font);
+        return new Rectangle2D.Float(x + positions[start * 2], y + positions[start * 2 + 1] - h, positions[count * 2], positions[count * 2 + 1] + h);
 //        GeneralPath result = new GeneralPath(GeneralPath.WIND_NON_ZERO);
 //        for (int i = start, e = start + count, n = start * 2; i < e; ++i, n += 2) {
 //            float px = x + positions[n];
@@ -1781,6 +1779,54 @@ public class StandardGlyphVector extends GlyphVector {
 //            FontStrike strike = new FontStrike();
 //            return new GlyphStrike(sgv, null, dx, dy);
         }
+
+    	/**
+    	 * Only used by StandardGlyphVector. 
+    	 * 
+    	 * Takes the place of nativeLayout in SunLayoutEngine.
+    	 * 
+    	 * @param font2d actually just Font in JavaScript; there is no Font2D
+    	 * @param mat
+    	 * @param gmask
+    	 * @param baseIndex
+    	 * @param tr
+    	 * @param typo_flags
+    	 * @param pt
+    	 * @param data
+    	 */
+    	public static void layout(Font2D font2d, float[] mat, int gmask, int baseIndex, TextRecord tr, int typo_flags,
+    			Point2D.Float pt, GVData data) {
+    		Font f = (Font) (Object) font2d;
+    		FontDesignMetrics fm = (FontDesignMetrics) f.getFontMetrics();
+    		// TODO: scaling? rotation?
+    		int g2 = 0;
+    		float x = 0, y = 0, w; // I suspect all fonts are( laid out linearly in x. Maybe not?
+    		for (int g = 0, p = tr.start; p < tr.limit; p++, g++) {
+    			int ch = tr.text[p];
+    			if (Character.isHighSurrogate((char) ch) && p < tr.limit - 1 && Character.isLowSurrogate(tr.text[++p])) {
+    				// rare case
+    				ch = Character.toCodePoint((char) ch, tr.text[p]); // inc
+    				w = fm.getFloatWidth(ch);
+    			} else if (ch > 255) {
+    				// unicode value
+    				w = fm.getFloatWidth(ch);
+    			} else {
+    				w = fm.getWidthsFloat()[ch];
+
+    			}
+
+    			data._indices[g] = p + baseIndex;
+    			data._positions[g2++] = x;
+    			data._positions[g2++] = y;
+    			data._glyphs[g] = ch;
+    			data._count++;
+    			x += w;
+    		}
+    		data._positions[g2++] = x;
+    		data._positions[g2++] = y;
+
+    	}
+
 
         private GlyphStrike(StandardGlyphVector sgv, FontStrike strike, float dx, float dy) {
             this.sgv = sgv;

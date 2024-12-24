@@ -47,7 +47,8 @@ final public class MeasureD {
   }
 
   public static double computeTorsion(T3d p1, T3d p2, T3d p3, T3d p4, boolean asDegrees) {
-  
+    if (p1.distanceSquared(p2) < 1e-10)
+        return 0;
     double ijx = p1.x - p2.x;
     double ijy = p1.y - p2.y;
     double ijz = p1.z - p2.z;

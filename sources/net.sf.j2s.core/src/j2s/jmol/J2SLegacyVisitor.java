@@ -2100,7 +2100,7 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 						buffer.append(" Clazz.newBooleanArray(");
 						boxList(dim, ", ");
 						buffer.append(", false)");
-					} else {
+					} else { 
 						if (dim != null && dim.size() > 1) {
 							buffer.append(" Clazz.newArray(");
 							boxList(dim, ", ");
@@ -2140,6 +2140,8 @@ class J2SLegacyVisitor extends J2SASTVisitor {
 			buffer.append("]");
 			return false;
 		}
+		// note that this does NOT allow for new byte[] {'a', 'b', 'c'}
+		// only implemented that for SwingJS
 		if (elementType.isPrimitive()) {
 			String typeCode = elementType.getName();
 			if ("int".equals(typeCode)

@@ -839,7 +839,7 @@ public class JSButtonUI extends JSLightweightUI {
 	@Override 
 	public Dimension getPreferredSize(JComponent jc) {
 		if (isAWT && isSimpleButton)
-			return JSLabelUI.getMinimumSizePeer(jc, button);
+			return JSLabelUI.getMinimumSizePeer(jc, button, true);
 		Icon ic;
 		if (!isSimpleButton || isAWT || button.getText() != null || (ic = getIcon()) == null)
 			return super.getPreferredSize(jc);

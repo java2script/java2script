@@ -7,7 +7,7 @@ import javajs.util.AU;
 
 class Test_Array extends Test_ {
 
-	static Object ax1 =new int[2][];
+	static Object ax1 =new int[2][]; 
 	static Object ax = new int[2][3][];
 
 
@@ -60,8 +60,18 @@ class Test_Array extends Test_ {
 			{ { 0, 1, 2 }, { 3, 4, 5 }, { 0, 1, 2 }, { 3, 4, 5 }, { 0, 1, 2 }, { 3, 4, 5 } } };
 
 	public static void main(String[] args) {
-	
-
+			char cc = Character.valueOf('c');
+			byte b = Byte.valueOf((byte)3); 
+			char[] chs = new char[] {65, 'B', cc, Character.valueOf('c')};
+			int[] ints = new int[] {1,2, 'a', 3, b + 1}; // NOT "3".charAt(0)};
+			short[] shorts = new short[] {1,2, 'a', +3};
+			long[] longs = new long[] {1,2, 'a', 3}; 
+			float[] floats = new float[] {1,2, 'a', 3};
+			double[] dbls = new double[] {1,2, 'a', 3};
+			byte[] by  = new byte[] { 0, 'a', 'b', 'c' + 2, b  }; 
+			byte[][] by2  = new byte[][] { {0, 'd'}, {'b', 'c' + 1} }; 
+			System.out.println(Arrays.toString(by));
+			
 			int[] a = new int[] {1,2,3};
 			int i = 2, jj;
 			a[--i] *= a[i + 1];

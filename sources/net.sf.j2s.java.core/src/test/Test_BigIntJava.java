@@ -13,6 +13,31 @@ public class Test_BigIntJava extends Test_ {
 
 	public static void main(String[] args) {
 
+		BigInteger n = new BigInteger("10473");
+		BigInteger exp = new BigInteger("9261");
+		BigInteger mod = new BigInteger("17947");
+		BigInteger p = n.modPow(exp, mod);
+//		System.out.println(p.toString()); // 815 but is 3908
+
+		int v = 0;
+		// for 10473, 29
+		n = new BigInteger("14");
+		exp = new BigInteger("3");
+		// n = new BigInteger("10473");
+		// exp = new BigInteger("9261");
+		// first failure is 2195, giving 197 in JS and 1658 in Java
+		// also 2287, 2431, 2443, 2455, and several more
+		for (int i = 2497; i < 2498; i++) {
+			mod = BigInteger.valueOf(i);
+			p = n.modPow(exp, mod);
+			v += p.intValue();
+			System.out.println(i + "." + p.toString());// + "\t" + v);
+//			System.out.println(Arrays.toString(p.toByteArray()));
+		}
+		System.out.println(v);
+		if (true)
+			return;
+
 		System.out.println(inverseMod32(5));
 		
 //		testMulOdd();

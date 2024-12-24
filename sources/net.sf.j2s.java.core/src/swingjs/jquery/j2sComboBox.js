@@ -1,4 +1,10 @@
 /**
+ * THIS FILE IS FOR REFERENCE AND DEBUGGING ONLY
+ * 
+ *  NOTE: If you change this file, copy its contents into 
+ *  its spot at the end of JQueryUI.java. Or, if you are testing
+ *  work here and set JQueryUI.loadResourceInternal = false only while testing,
+ *  then do that paste.
  * 
  * @author Bob Hanson 2019.07.06
  * 
@@ -10,8 +16,6 @@
 
 // BH 2023.11.02 fixed touch issue not causing click -- hidePopup needed a 1-ms timeout
 
-// NOTE: If you change this file, then you need to touch and save JQueryUI.java, as only then
-//       will the transpiler copy this file to site/swingjs/j2s/swingjs/jquery/
 
 ;(function($) {
 

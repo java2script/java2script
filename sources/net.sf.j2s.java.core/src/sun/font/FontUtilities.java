@@ -174,53 +174,55 @@ public final class FontUtilities {
         return FontAccess.getFontAccess().getFont2D(font);
     }
 
-//    /**
-//     * If there is anything in the text which triggers a case
-//     * where char->glyph does not map 1:1 in straightforward
-//     * left->right ordering, then this method returns true.
-//     * Scripts which might require it but are not treated as such
-//     * due to JDK implementations will not return true.
-//     * ie a 'true' return is an indication of the treatment by
-//     * the implementation.
-//     * Whether supplementary characters should be considered is dependent
-//     * on the needs of the caller. Since this method accepts the 'char' type
-//     * then such chars are always represented by a pair. From a rendering
-//     * perspective these will all (in the cases I know of) still be one
-//     * unicode character -> one glyph. But if a caller is using this to
-//     * discover any case where it cannot make naive assumptions about
-//     * the number of chars, and how to index through them, then it may
-//     * need the option to have a 'true' return in such a case.
-//     */
-//    public static boolean isComplexText(char [] chs, int start, int limit) {
-//
-//        for (int i = start; i < limit; i++) {
-//            if (chs[i] < MIN_LAYOUT_CHARCODE) {
-//                continue;
-//            }
-//            else if (isNonSimpleChar(chs[i])) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-//
-//    /* This is almost the same as the method above, except it takes a
-//     * char which means it may include undecoded surrogate pairs.
-//     * The distinction is made so that code which needs to identify all
-//     * cases in which we do not have a simple mapping from
-//     * char->unicode character->glyph can be be identified.
-//     * For example measurement cannot simply sum advances of 'chars',
-//     * the caret in editable text cannot advance one 'char' at a time, etc.
-//     * These callers really are asking for more than whether 'layout'
-//     * needs to be run, they need to know if they can assume 1->1
-//     * char->glyph mapping.
-//     */
-//    public static boolean isNonSimpleChar(char ch) {
-//        return
-//            isComplexCharCode(ch) ||
-//            (ch >= CharToGlyphMapper.HI_SURROGATE_START &&
-//             ch <= CharToGlyphMapper.LO_SURROGATE_END);
-//    }
+    /**
+     * If there is anything in the text which triggers a case
+     * where char->glyph does not map 1:1 in straightforward
+     * left->right ordering, then this method returns true.
+     * Scripts which might require it but are not treated as such
+     * due to JDK implementations will not return true.
+     * ie a 'true' return is an indication of the treatment by
+     * the implementation.
+     * Whether supplementary characters should be considered is dependent
+     * on the needs of the caller. Since this method accepts the 'char' type
+     * then such chars are always represented by a pair. From a rendering
+     * perspective these will all (in the cases I know of) still be one
+     * unicode character -> one glyph. But if a caller is using this to
+     * discover any case where it cannot make naive assumptions about
+     * the number of chars, and how to index through them, then it may
+     * need the option to have a 'true' return in such a case.
+     * 
+     * @j2sIgnore
+     */
+    public static boolean isComplexText(char [] chs, int start, int limit) {
+
+        for (int i = start; i < limit; i++) {
+            if (chs[i] < MIN_LAYOUT_CHARCODE) {
+                continue;
+            }
+            else if (isNonSimpleChar(chs[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /* This is almost the same as the method above, except it takes a
+     * char which means it may include undecoded surrogate pairs.
+     * The distinction is made so that code which needs to identify all
+     * cases in which we do not have a simple mapping from
+     * char->unicode character->glyph can be be identified.
+     * For example measurement cannot simply sum advances of 'chars',
+     * the caret in editable text cannot advance one 'char' at a time, etc.
+     * These callers really are asking for more than whether 'layout'
+     * needs to be run, they need to know if they can assume 1->1
+     * char->glyph mapping.
+     */
+    public static boolean isNonSimpleChar(char ch) {
+        return
+            isComplexCharCode(ch) ||
+            (ch >= CharToGlyphMapper.HI_SURROGATE_START &&
+             ch <= CharToGlyphMapper.LO_SURROGATE_END);
+    }
 
     /* If the character code falls into any of a number of unicode ranges
      * where we know that simple left->right layout mapping chars to glyphs

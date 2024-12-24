@@ -424,7 +424,8 @@ public class CifDataParser implements GenericCifDataParser {
     while ((str = (String) getNextDataToken()) != null) {
       if (ret == null)
         continue; 
-      ret.append(str).append(" ");
+      if (str.charAt(0) != 0)
+          ret.append(str).append(" ");
       if ((++m % n) == 0)
         ret.append("\n");
     }

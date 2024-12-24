@@ -1,5 +1,7 @@
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// BH 2024.11.09 makes equivalent J2S._debugCore and J2S._nozcore, as well as J2S._debugCode and J2S._nocore
+// BH 2024.10.03 adds two-finger tap as "click"; reinstates touch gestures lost when we went to pointerup 2023.11.01
 // BH 2023.12.14 fixes resizing into application (making it smaller)
 // BH 2023.12.13 fixes RIGHT-DRAG and SHIFT-LEFT-DRAG modifier
 // BH 2023.12.07 fixes mouseUp on body causing (ignorable) error
@@ -105,15 +107,14 @@ if (getFlag("j2s")) {
 	// note: these flag checks are purposely loose. "?j2smouse" will set j2smouse and j2smousemove. 
 	J2S._appArgs = getURIField("j2sargs", null); // to be passed on to application
 	J2S._debugClip = getFlag("j2sdebugclip");    // shows all show/restore and clip operations in JSGraphics2D
-	J2S._debugCode = getFlag("j2sdebugcode");    // same as j2snocore?
-	J2S._debugCore = getFlag("j2sdebugcore");    // same as j2snozcore?
 	J2S._debugPaint = getFlag("j2sdebugpaint");  // repaint manager information
 	J2S._headless = getFlag("j2sheadless");      // run headlessly
 	J2S._lang = getURIField("j2slang", null);    // preferred language; application should check
 	 // will alert in system.out.println with a message when events occur
-	J2S._loadcore = !getFlag("j2snocore");		 // no core files 
 	J2S._nooutput = getFlag("j2snooutput");      // no System.out, only System.err message
-	J2S._nozcore = getFlag("j2snozcore");        // no compressed core.z.js files
+	J2S._debugCore = J2S._nozcore = getFlag("j2sdebugcore") || getFlag("j2snozcore"); // no compressed core.z.js files
+	J2S._debugCode = J2S._nocore = getFlag("j2sdebugcode") || getFlag("j2snocore"); // no core files
+	J2S._loadcore = !J2S._nocore;		  
 	J2S._strict = getFlag("j2sstrict");          // strict mode -- experimental
 	J2S._startProfiling = getFlag("j2sprofile"); // track object creation
 	J2S._traceEvents = getFlag("j2sevents");     // reports ComponentEvent instances 
@@ -1211,22 +1212,34 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 		// x.click() in any manifestation will not work from Chrome or Safari.
 		// These browers require that the user see and click the link.
 		if (J2S._canClickFileReader) {
+			var px = screen.width / 2 - 80; 
+			var py = screen.height / 2 - 40; 
 			var x = document.createElement("input");
+			x.id = "swingjs2input";
 			x.value = x.text = "xxxx";
 			x.type = "file";
+			x.style.z_index = 1000000;
+			x.style.position = "fixed";
+			x.style.left = px + 'px';
+			x.style.top = py + 'px';
+
 			if (isMultiple)
 				x.setAttribute("multiple", "true");
 			x.addEventListener("change", function(ev) {
 				J2S._fileReaderCancelListener = null;
+				var f = this.files;
+				$("#swingjs2input").remove();
 				window.removeEventListener("focus", J2S._fileReaderCancelListener);
-				(isMultiple ? readFiles(this.files) : readFile(this.files[0]));
-			}, false);			
+				window.setTimeout(function(){(isMultiple ? readFiles(f) : readFile(f[0]))},1);
+			}, false);		
+			document.body.append(x);
 			x.click();
 			window.addEventListener("focus", J2S._fileReaderCancelListener = function(a){
 				setTimeout(function() {
 					window.removeEventListener("focus", J2S._fileReaderCancelListener);
 					if (J2S._fileReaderCancelListener != null) {
 						J2S._fileReaderCancelListener = null;
+						$("#swingjs2input").remove();
 						fDone(null, null);
 					}
 				},500)
@@ -1729,11 +1742,13 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	J2S._haveMouse;
 	J2S._firstTouch; // three-position switch: undefined, true, false
 
-	J2S.$bind('body', 'pointerdown pointermove mousedown mousemove mouseup', function(ev) {
+	J2S.$bind('body', //'pointerdown pointermove 
+		'mousedown mousemove mouseup', function(ev) {
 		J2S._haveMouse = true;
 	});
 	
-	J2S.$bind('body', 'pointerup mouseup touchend', function(ev) {
+	J2S.$bind('body', //'pointerup 
+		'mouseup touchend', function(ev) {
 		mouseUp(null, ev);
 		return true;
 	});
@@ -1797,13 +1812,16 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		// otherwise, if J2S._firstTouch is undefined (!!x != x), set J2S._firstTouch
 		// and ignore future touch events (through the first touchend):
 		
-		if (ev.type == "pointerdown" || ev.type == "mousedown") {// BHTEst
+		if (//ev.type == "pointerdown" || 
+			ev.type == "mousedown") {// BHTEst
 		    J2S._haveMouse = true;
 		} else { 
 		    if (J2S._haveMouse) return;
 		    if (!!J2S._firstTouch != J2S._firstTouch) {
-			J2S._firstTouch = true;
-		        return;
+// q - why did we do this?
+//			J2S._firstTouch = true;
+//		        return;
+			J2S._firstTouch = false;
 		    }
 		}
 
@@ -2061,7 +2079,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		J2S.$bind(who, (J2S._haveMouse ? 'mousedown pointerdown' : 'pointerdown mousedown touchstart'), 
 				function(ev) { return mouseDown(who, ev) });
 
-		J2S.$bind(who, (J2S._haveMouse ? 'mouseup pointerup' : 'pointerup mouseup touchend'), 
+		J2S.$bind(who, (J2S._haveMouse ? 'mouseup pointerup' : // 'pointerup 
+		'mouseup touchend'), 
 				function(ev) { return mouseUp(who, ev) });
 
 		J2S.$bind(who, 'pointerenter mouseenter', function(ev) { return mouseEnter(who, ev) });
@@ -2255,21 +2274,24 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			J2S._touching = false;
 			break;
 		}
-		if (!oe.touches || oe.touches.length != 2)
+		if (!oe.touches || oe.touches.length != (ev.type == "touchend" ? 1 : 2))
 			return false;
+		var n = 0;
 		switch (ev.type) {
 		case "touchstart":
 			who._touches = [ [], [] ];
 			break;
+		case "touchend":
 		case "touchmove":
 			var offsets = J2S.$offset(who.id);
 			var t0 = who._touches[0];
 			var t1 = who._touches[1];
 			t0.push([ oe.touches[0].pageX - offsets.left,
 					oe.touches[0].pageY - offsets.top ]);
-			t1.push([ oe.touches[1].pageX - offsets.left,
+			if (ev.type != "touchend")
+			    t1.push([ oe.touches[1].pageX - offsets.left,
 					oe.touches[1].pageY - offsets.top ]);
-			var n = t0.length;
+			n = t0.length;
 			if (n > 3) {
 				t0.shift();
 				t1.shift();

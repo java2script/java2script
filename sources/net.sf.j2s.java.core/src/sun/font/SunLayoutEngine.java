@@ -32,6 +32,8 @@ package sun.font;
 
 import sun.font.GlyphLayout.*;
 import swingjs.JSFontMetrics;
+
+import java.awt.Font;
 import java.awt.geom.Point2D;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -156,8 +158,10 @@ public final class SunLayoutEngine implements LayoutEngine, LayoutEngineFactory 
     //SwingJS Note: This is the method in c++ that sets _count, along with _indices, _positions, and _glyphs
     
         
-        JSFontMetrics.layout(key.font(), mat, gmask, baseIndex, tr, typo_flags, pt, data);
+        layout(key.font(), mat, gmask, baseIndex, tr, typo_flags, pt, data);
 
+        
+        
 //        Font2D font = key.font();
 //        FontStrike strike = font.getStrike(desc);
 //        long layoutTables = 0;
@@ -169,7 +173,57 @@ public final class SunLayoutEngine implements LayoutEngine, LayoutEngineFactory 
 //             key.script(), key.lang(), typo_flags, pt, data,
 //             font.getUnitsPerEm(), layoutTables);
     }
-//
+
+	/**
+	 * Only used by StandardGlyphVector. 
+	 * 
+	 * Takes the place of nativeLayout in SunLayoutEngine.
+	 * 
+	 * @param font2d actually just Font in JavaScript; there is no Font2D
+	 * @param mat
+	 * @param gmask
+	 * @param baseIndex
+	 * @param tr
+	 * @param typo_flags
+	 * @param pt
+	 * @param data
+	 */
+	 static void layout(Font2D font2d, float[] mat, int gmask, int baseIndex, TextRecord tr, int typo_flags,
+			Point2D.Float pt, GVData data) {
+		Font f = (Font) (Object) font2d;
+		FontDesignMetrics fm = (FontDesignMetrics) f.getFontMetrics();
+		// TODO: scaling? rotation?
+		int g2 = 0;
+		float x = 0, y = 0, w; // I suspect all fonts are( laid out linearly in x. Maybe not?
+		for (int g = 0, p = tr.start; p < tr.limit; p++, g++) {
+			int ch = tr.text[p];
+			if (Character.isHighSurrogate((char) ch) && p < tr.limit - 1 && Character.isLowSurrogate(tr.text[++p])) {
+				// rare case
+				ch = Character.toCodePoint((char) ch, tr.text[p]); // inc
+				w = fm.getFloatWidth(ch);
+			} else if (ch > 255) {
+				// unicode value
+				w = fm.getFloatWidth(ch);
+			} else {
+				w = fm.getWidthsFloat()[ch];
+
+			}
+
+			data._indices[g] = p + baseIndex;
+			data._positions[g2++] = x;
+			data._positions[g2++] = y;
+			data._glyphs[g] = ch;
+			data._count++;
+			x += w;
+		}
+		data._positions[g2++] = x;
+		data._positions[g2++] = y;
+
+	}
+
+
+    
+    //
 //    private static native void
 //        nativeLayout(Font2D font, FontStrike strike, float[] mat, int gmask,
 //             int baseIndex, char[] chars, int offset, int limit,

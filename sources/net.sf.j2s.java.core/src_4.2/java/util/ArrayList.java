@@ -45,16 +45,13 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, Cloneable,
 	private transient E[] array;
 
 	/**
-	 * @j2sIgnore
-	 * 
 	 * Constructs a new instance of ArrayList with zero capacity.
 	 */
 	public ArrayList() {
-		this(0);
+		setCapacity(0);
 	}
 
 	/**
-	 * @j2sIgnore
 	 * Constructs a new instance of ArrayList with the specified capacity.
 	 * 
 	 * @param capacity
@@ -690,7 +687,7 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, Cloneable,
 			/**
 			 * @j2sNative
 			 * 
-			 * 			  return this.array.slice(firstIndex, firstIndex + size);
+			 * 			  return this.array.slice(this.firstIndex, this.firstIndex + size);
 			 */
 			{
 				return null;

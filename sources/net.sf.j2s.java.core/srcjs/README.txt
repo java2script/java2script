@@ -6,14 +6,11 @@ This directory:
 
 It contains:
 
-
 js/*.js  a set of files needed for all SwingJS pages
 
-js/make.bat  a script that concatenates the *.js files in the right order to make swingjs2.js
-
-             It is here as a convenience only; when in site/js, a developer can run this script
-             to test changes. It is not used by build_core_applet.xml, which uses ANT concat instead.
-
 js/core/  a folder used by build_core_applet.xml to create Google closure-compiled swingjs/j2s/core files.
-  
+
+php/jsmol.php   a serverside PHP script that can be run to load resources that cannot be loaded by AJAX directly
+
+DO NOT CHANGE SWINGJS2.JS -- it is recreated by build-SwingJS-site.xml  
 

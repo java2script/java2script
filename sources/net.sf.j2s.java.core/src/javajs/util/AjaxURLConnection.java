@@ -139,7 +139,7 @@ public class AjaxURLConnection extends HttpURLConnection {
 	 * 
 	 */
 	@SuppressWarnings("null")
-	private Object doAjax(boolean isBinary, Function<Object, Void> whenDone) {
+	private Object doAjax(boolean isBinary, boolean isScript, Function<Object, Void> whenDone) {
 		getBytesOut();
 		J2SObjectInterface J2S = /** @j2sNative self.J2S || */
 				null;
@@ -238,7 +238,7 @@ public class AjaxURLConnection extends HttpURLConnection {
 			}
 		}
 		result = J2S.doAjax(myURL, postOut, bytesOut, info);
-		if (whenDone != null)
+		if (whenDone != null || isScript)
 			return null;
 		setJQueryResponseCodeFromJQuery(result);
 		return result;
@@ -410,9 +410,6 @@ public class AjaxURLConnection extends HttpURLConnection {
 			return is;
 		responseCode = -1;
 		is = getInputStreamAndResponse(false);
-		switch (responseCode) {
-		
-		}
 		if (responseCode == HTTP_BAD_REQUEST) {
 			throw new java.net.UnknownHostException(url.toString());
 		} else if (responseCode > HTTP_BAD_REQUEST && responseCode != 404) {
@@ -462,7 +459,7 @@ public class AjaxURLConnection extends HttpURLConnection {
 			whenDone.apply(is);
 			return;
 		}
-		doAjax(true, new Function<Object, Void>() {
+		doAjax(true, false, new Function<Object, Void>() {
 
 			@Override
 			public Void apply(Object response) {
@@ -490,7 +487,12 @@ public class AjaxURLConnection extends HttpURLConnection {
 		if (is != null || doCache() && (is = getCachedStream(allowNWError)) != null) {
 			return is;
 		}
-		is = attachStreamData(url, doAjax(ajax == null, null));
+		
+		boolean isScript = /** @j2sNative this.ajax && (this.ajax.dataType == "script")||*/false;
+		Object result = doAjax(ajax == null, isScript, null);
+		if (isScript)
+			return Rdr.getBIS(new byte[0]);
+		is = attachStreamData(url, result);
 		if (doCache() && is != null) {
 			isNetworkError(is);
 			setCachedStream();
@@ -645,8 +647,9 @@ public class AjaxURLConnection extends HttpURLConnection {
 	/**
 	 * @return javajs.util.SB or byte[], depending upon the file type
 	 */
+	@Deprecated
 	public Object getContents() {
-		return doAjax(false, null);
+		return doAjax(false, false, null);
 	}
 
 	@Override
