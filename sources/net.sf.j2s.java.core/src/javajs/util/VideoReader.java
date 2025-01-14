@@ -84,6 +84,11 @@ public class VideoReader {
 		int pt = this.pt;
 		blockLen = readInt();
 		blockType = readString(4);
+		if (blockLen == 1) {
+		  // special flag for long length not int
+		  // presuming here it is not THAT large
+		  blockLen = (int) is.readLong();
+		}
 		if (verbose)
 			System.out.println(blockType + "\t" + pt + "\t0x" + Long.toHexString(pt) + "\t" + blockLen);
 		Map<String, Object> map = new Hashtable<>();
