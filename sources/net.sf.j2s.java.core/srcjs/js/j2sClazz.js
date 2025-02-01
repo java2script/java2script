@@ -7,6 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2025.01.31 added checks for JavaScript SyntaxError similar to other Error types
 // BH 2024.11.23 implementing java.awt.Toolkit.getDefaultToolkit().getDesktopProperty("awt.multiClickInterval")
 // BH 2024.06.22 adds Integer.getIngeger(String, int) (returning null)
 // BH 2024.03.03 removes unnecessary loadClass("xxxx") on exceptionOf(e,"xxxx") call
@@ -1360,7 +1361,7 @@ var getClassName = function(obj, fAsClassName) {
         return "Boolean";
       if (obj instanceof Array || obj.__BYTESIZE)
         return "Array";
-      if (obj instanceof ReferenceError || obj instanceof TypeError) {
+      if (obj instanceof ReferenceError || obj instanceof TypeError || obj instanceof SyntaxError) {
           // note that this is not technically the case.
     	  // we use this to ensure that try/catch delivers these as java.lang.Error instances
        	  return "Error";   	  
@@ -7071,14 +7072,30 @@ if(lineNum>=0){
 
 TypeError.prototype.getMessage$ || (
 		
- ReferenceError.prototype.getMessage$ = TypeError.prototype.getMessage$ 
-		= ReferenceError.prototype.getMessage$ = TypeError.prototype.getLocalizedMessage$ 
+SyntaxError.prototype.getMessage$ 
+  = ReferenceError.prototype.getMessage$ 
+  = TypeError.prototype.getMessage$ 
+  = SyntaxError.prototype.getLocalizedMessage$ 
+  = ReferenceError.prototype.getLocalizedMessage$ 
+  = TypeError.prototype.getLocalizedMessage$ 
 			= function(){ return (this.stack ? this.stack : this.message || this.toString()) + (this.getStackTrace ? this.getStackTrace$() : Clazz._getStackTrace())});
 
-TypeError.prototype.getStackTrace$ = ReferenceError.prototype.getStackTrace$ = function() { return Clazz._getStackTrace() }
-TypeError.prototype.printStackTrace$ = ReferenceError.prototype.printStackTrace$ = function() { printStackTrace(this,System.err) }
-ReferenceError.prototype.printStackTrace$java_io_PrintStream = TypeError.prototype.printStackTrace$java_io_PrintStream = function(stream){stream.println$S(this + "\n" + this.stack);};
-ReferenceError.prototype.printStackTrace$java_io_PrintWriter = TypeError.prototype.printStackTrace$java_io_PrintWriter = function(printer){printer.println$S(this + "\n" + this.stack);};
+TypeError.prototype.getStackTrace$ 
+= SyntaxError.prototype.getStackTrace$ 
+= ReferenceError.prototype.getStackTrace$ 
+= function() { return Clazz._getStackTrace() }
+TypeError.prototype.printStackTrace$ 
+= SyntaxError.prototype.printStackTrace$ 
+= ReferenceError.prototype.printStackTrace$ 
+= function() { printStackTrace(this,System.err) }
+ReferenceError.prototype.printStackTrace$java_io_PrintStream 
+= TypeError.prototype.printStackTrace$java_io_PrintStream 
+= SyntaxError.prototype.printStackTrace$java_io_PrintStream 
+= function(stream){stream.println$S(this + "\n" + this.stack);};
+ReferenceError.prototype.printStackTrace$java_io_PrintWriter 
+= TypeError.prototype.printStackTrace$java_io_PrintWriter 
+= SyntaxError.prototype.printStackTrace$java_io_PrintWriter 
+= function(printer){printer.println$S(this + "\n" + this.stack);};
 
 Clazz.Error = Error;
 
