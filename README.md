@@ -42,6 +42,11 @@ Open Source Physics (OSP) https://github.com/OpenSourcePhysics/osp/tree/swingJS
 
 TrackerJS https://physlets.org/tracker/trackerJS
 
+InChI-SwingJS https://github.com/BobHanson/InChI-SwingJS
+
+OpenChemLib (OCL-SwingJS) https://github.com/BobHanson/OCL-SwingJS
+
+
 
 
 # QuickStart
