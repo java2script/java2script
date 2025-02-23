@@ -14143,6 +14143,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2025.02.22 add hashCode$() for Java Integer.TYPE and related types
 // BH 2025.01.31 added checks for JavaScript SyntaxError similar to other Error types
 // BH 2024.11.23 implementing java.awt.Toolkit.getDefaultToolkit().getDesktopProperty("awt.multiClickInterval")
 // BH 2024.06.22 adds Integer.getIngeger(String, int) (returning null)
@@ -17976,6 +17977,7 @@ var setJ2STypeclass = function(cl, type, paramCode) {
     __PARAMCODE:paramCode, 
     __PRIMITIVE:1  // referenced in java.lang.Class
   };
+  cl.TYPE.hashCode$ = function() {return type.hashCode$()};
   cl.TYPE.isArray$ = cl.TYPE.isEnum$ = cl.TYPE.isAnnotation$ = FALSE;
   cl.TYPE.toString = cl.TYPE.getName$ = cl.TYPE.getTypeName$ 
     = cl.TYPE.getCanonicalName$ = cl.TYPE.getSimpleName$ = function() {return type};

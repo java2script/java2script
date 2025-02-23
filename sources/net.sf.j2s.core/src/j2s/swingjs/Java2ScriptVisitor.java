@@ -31,6 +31,7 @@ import j2s.CorePlugin;
 // TODO: superclass inheritance for JAXB XmlAccessorType
 // TODO: Transpiler bug allows static String name, but JavaScript function().name is read-only and will be "clazz"
 
+//BH 2025.02.22 -- 5.0.1-v5 fixes Iterable<IAtom> AtomIterator::new missing [this,null] in generator  
 //BH 2024.07.14 -- 5.0.1-v4 fixes numerical array initializer using characters ['a','b',...], but not new int[] { "test".charAt(3) }
 //BH 2024.02.22 -- 5.0.1-v3 fixes long extension issue causing MutableBitInteger to miscalculate subtraction(no change in version #)
 //BH 2023.11.27 -- 5.0.1-v2 final refactoring and creatiton of J2SUtil
@@ -796,11 +797,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			// javaClass cannot be a lambda expression, because this is Xxxx::new
 			String key = javaClass.getKey();
 			String finals = listFinalVariables(package_htClassKeyToVisitedFinalVars.get(key), package_outerFinalKey);
-			if (finals != null) {
+			// for Lambda_C we need [this,null], because maybe there are finals expressed elsewhere
+			//if (finals != null) {
 				buffer.append("this,").append(finals);
 				if (params.length() > 0)
 					buffer.append(",");
-			}
+			//}
 			buffer.append(params).append("]");
 		} else if (!isDefault) {
 			IMethodBinding constructorMethodDeclaration = (constructorMethodBinding == null ? null

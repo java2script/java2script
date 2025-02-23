@@ -336,7 +336,8 @@ public class M4d extends M34d {
    * @param v
    *        the new value
    */
-  public void setElement(int row, int col, double v) {
+  @Override
+public void setElement(int row, int col, double v) {
     if (row < 3 && col < 3) {
       set33(row, col, v);
       return;
@@ -379,7 +380,8 @@ public class M4d extends M34d {
    *        the column number to be retrieved (zero indexed)
    * @return the value at the indexed element
    */
-  public double getElement(int row, int col) {
+  @Override
+public double getElement(int row, int col) {
     if (row < 3 && col < 3)
       return get33(row, col);
     if (row > 3 || col > 3) {
