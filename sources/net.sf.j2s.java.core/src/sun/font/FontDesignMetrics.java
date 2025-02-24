@@ -509,7 +509,6 @@ private float leading;
     private void _getMetrics() {
     	if (ascent >= 0)
     		return;
-//    	秘fm = new JSFontMetrics(font);
 		ascent = JSFontMetrics.fontAscent(font);
 		descent = JSFontMetrics.fontDescent(font);
 		leading = JSFontMetrics.fontLeading(font);
@@ -568,7 +567,7 @@ private float leading;
 
 	public Rectangle2D 秘getStringBounds(String s) {
     	_getMetrics();
-    	return new Rectangle2D.Float(0, -ascent, stringWidth(s), ascent + descent + leading);        	
+    	return new Rectangle2D.Float(0, -ascent, getWidth(s), ascent + descent + leading);
 	}
 
 	/**

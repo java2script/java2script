@@ -249,7 +249,8 @@ public class JSToolkit extends SunToolkit
 		/**
 		 * @j2sNative
 		 * context.font = fontInfo; 
-		 * w = Math.ceil(context.measureText(text).width);
+		 * var tm = context.measureText(text);
+		 * w = tm.actualBoundingBoxRight - tm.actualBoundingBoxLeft;
 		 */
 		{
 		}

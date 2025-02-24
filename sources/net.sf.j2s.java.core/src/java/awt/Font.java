@@ -53,6 +53,7 @@ import static sun.font.EAttribute.EWEIGHT;
 import static sun.font.EAttribute.EWIDTH;
 
 import java.awt.font.FontRenderContext;
+import java.awt.font.GlyphVector;
 import java.awt.font.LineMetrics;
 import java.awt.font.TextAttribute;
 import java.awt.font.TextLayout;
@@ -65,6 +66,8 @@ import java.text.AttributedCharacterIterator.Attribute;
 import java.text.CharacterIterator;
 import java.util.Map;
 
+import com.sun.javafx.text.GlyphLayout;
+
 import javajs.util.SB;
 import sun.font.AttributeMap;
 import sun.font.AttributeValues;
@@ -72,6 +75,7 @@ import sun.font.CoreMetrics;
 import sun.font.Font2DHandle;
 import sun.font.FontDesignMetrics;
 import sun.font.FontLineMetrics;
+import sun.font.StandardGlyphVector;
 import swingjs.JSToolkit;
 
 /**
@@ -2578,139 +2582,139 @@ public class Font
                                 metrics[0] + metrics[1] + metrics[2]);
     }
 
-////    /**
-////     * Creates a {@link java.awt.font.GlyphVector GlyphVector} by
-////     * mapping characters to glyphs one-to-one based on the
-////     * Unicode cmap in this <code>Font</code>.  This method does no other
-////     * processing besides the mapping of glyphs to characters.  This
-////     * means that this method is not useful for some scripts, such
-////     * as Arabic, Hebrew, Thai, and Indic, that require reordering,
-////     * shaping, or ligature substitution.
-////     * @param frc the specified <code>FontRenderContext</code>
-////     * @param str the specified <code>String</code>
-////     * @return a new <code>GlyphVector</code> created with the
-////     * specified <code>String</code> and the specified
-////     * <code>FontRenderContext</code>.
-////     */
-////    public GlyphVector createGlyphVector(FontRenderContext frc, String str)
-////    {
-////        return (GlyphVector)new StandardGlyphVector(this, str, frc);
-////    }
-////
-////    /**
-////     * Creates a {@link java.awt.font.GlyphVector GlyphVector} by
-////     * mapping characters to glyphs one-to-one based on the
-////     * Unicode cmap in this <code>Font</code>.  This method does no other
-////     * processing besides the mapping of glyphs to characters.  This
-////     * means that this method is not useful for some scripts, such
-////     * as Arabic, Hebrew, Thai, and Indic, that require reordering,
-////     * shaping, or ligature substitution.
-////     * @param frc the specified <code>FontRenderContext</code>
-////     * @param chars the specified array of characters
-////     * @return a new <code>GlyphVector</code> created with the
-////     * specified array of characters and the specified
-////     * <code>FontRenderContext</code>.
-////     */
-////    public GlyphVector createGlyphVector(FontRenderContext frc, char[] chars)
-////    {
-////        return (GlyphVector)new StandardGlyphVector(this, chars, frc);
-////    }
-////
-////    /**
-////     * Creates a {@link java.awt.font.GlyphVector GlyphVector} by
-////     * mapping the specified characters to glyphs one-to-one based on the
-////     * Unicode cmap in this <code>Font</code>.  This method does no other
-////     * processing besides the mapping of glyphs to characters.  This
-////     * means that this method is not useful for some scripts, such
-////     * as Arabic, Hebrew, Thai, and Indic, that require reordering,
-////     * shaping, or ligature substitution.
-////     * @param frc the specified <code>FontRenderContext</code>
-////     * @param ci the specified <code>CharacterIterator</code>
-////     * @return a new <code>GlyphVector</code> created with the
-////     * specified <code>CharacterIterator</code> and the specified
-////     * <code>FontRenderContext</code>.
-////     */
-////    public GlyphVector createGlyphVector(   FontRenderContext frc,
-////                                            CharacterIterator ci)
-////    {
-////        return (GlyphVector)new StandardGlyphVector(this, ci, frc);
-////    }
-////
-////    /**
-////     * Creates a {@link java.awt.font.GlyphVector GlyphVector} by
-////     * mapping characters to glyphs one-to-one based on the
-////     * Unicode cmap in this <code>Font</code>.  This method does no other
-////     * processing besides the mapping of glyphs to characters.  This
-////     * means that this method is not useful for some scripts, such
-////     * as Arabic, Hebrew, Thai, and Indic, that require reordering,
-////     * shaping, or ligature substitution.
-////     * @param frc the specified <code>FontRenderContext</code>
-////     * @param glyphCodes the specified integer array
-////     * @return a new <code>GlyphVector</code> created with the
-////     * specified integer array and the specified
-////     * <code>FontRenderContext</code>.
-////     */
-////    public GlyphVector createGlyphVector(   FontRenderContext frc,
-////                                            int [] glyphCodes)
-////    {
-////        return (GlyphVector)new StandardGlyphVector(this, glyphCodes, frc);
-////    }
-////
-////    /**
-////     * Returns a new <code>GlyphVector</code> object, performing full
-////     * layout of the text if possible.  Full layout is required for
-////     * complex text, such as Arabic or Hindi.  Support for different
-////     * scripts depends on the font and implementation.
-////     * <p>
-////     * Layout requires bidi analysis, as performed by
-////     * <code>Bidi</code>, and should only be performed on text that
-////     * has a uniform direction.  The direction is indicated in the
-////     * flags parameter,by using LAYOUT_RIGHT_TO_LEFT to indicate a
-////     * right-to-left (Arabic and Hebrew) run direction, or
-////     * LAYOUT_LEFT_TO_RIGHT to indicate a left-to-right (English)
-////     * run direction.
-////     * <p>
-////     * In addition, some operations, such as Arabic shaping, require
-////     * context, so that the characters at the start and limit can have
-////     * the proper shapes.  Sometimes the data in the buffer outside
-////     * the provided range does not have valid data.  The values
-////     * LAYOUT_NO_START_CONTEXT and LAYOUT_NO_LIMIT_CONTEXT can be
-////     * added to the flags parameter to indicate that the text before
-////     * start, or after limit, respectively, should not be examined
-////     * for context.
-////     * <p>
-////     * All other values for the flags parameter are reserved.
-////     *
-////     * @param frc the specified <code>FontRenderContext</code>
-////     * @param text the text to layout
-////     * @param start the start of the text to use for the <code>GlyphVector</code>
-////     * @param limit the limit of the text to use for the <code>GlyphVector</code>
-////     * @param flags control flags as described above
-////     * @return a new <code>GlyphVector</code> representing the text between
-////     * start and limit, with glyphs chosen and positioned so as to best represent
-////     * the text
-////     * @throws ArrayIndexOutOfBoundsException if start or limit is
-////     * out of bounds
-////     * @see java.text.Bidi
-////     * @see #LAYOUT_LEFT_TO_RIGHT
-////     * @see #LAYOUT_RIGHT_TO_LEFT
-////     * @see #LAYOUT_NO_START_CONTEXT
-////     * @see #LAYOUT_NO_LIMIT_CONTEXT
-////     * @since 1.4
-////     */
-////    public GlyphVector layoutGlyphVector(FontRenderContext frc,
-////                                         char[] text,
-////                                         int start,
-////                                         int limit,
-////                                         int flags) {
-////
-////        GlyphLayout gl = GlyphLayout.get(null); // !!! no custom layout engines
-////        StandardGlyphVector gv = gl.layout(this, frc, text,
-////                                           start, limit-start, flags, null);
-////        GlyphLayout.done(gl);
-////        return gv;
-////    }
+    /**
+     * Creates a {@link java.awt.font.GlyphVector GlyphVector} by
+     * mapping characters to glyphs one-to-one based on the
+     * Unicode cmap in this <code>Font</code>.  This method does no other
+     * processing besides the mapping of glyphs to characters.  This
+     * means that this method is not useful for some scripts, such
+     * as Arabic, Hebrew, Thai, and Indic, that require reordering,
+     * shaping, or ligature substitution.
+     * @param frc the specified <code>FontRenderContext</code>
+     * @param str the specified <code>String</code>
+     * @return a new <code>GlyphVector</code> created with the
+     * specified <code>String</code> and the specified
+     * <code>FontRenderContext</code>.
+     */
+    public GlyphVector createGlyphVector(FontRenderContext frc, String str)
+    {
+        return (GlyphVector)new StandardGlyphVector(this, str, frc);
+    }
 
+    /**
+     * Creates a {@link java.awt.font.GlyphVector GlyphVector} by
+     * mapping characters to glyphs one-to-one based on the
+     * Unicode cmap in this <code>Font</code>.  This method does no other
+     * processing besides the mapping of glyphs to characters.  This
+     * means that this method is not useful for some scripts, such
+     * as Arabic, Hebrew, Thai, and Indic, that require reordering,
+     * shaping, or ligature substitution.
+     * @param frc the specified <code>FontRenderContext</code>
+     * @param chars the specified array of characters
+     * @return a new <code>GlyphVector</code> created with the
+     * specified array of characters and the specified
+     * <code>FontRenderContext</code>.
+     */
+    public GlyphVector createGlyphVector(FontRenderContext frc, char[] chars)
+    {
+        return (GlyphVector)new StandardGlyphVector(this, chars, frc);
+    }
+
+    /**
+     * Creates a {@link java.awt.font.GlyphVector GlyphVector} by
+     * mapping the specified characters to glyphs one-to-one based on the
+     * Unicode cmap in this <code>Font</code>.  This method does no other
+     * processing besides the mapping of glyphs to characters.  This
+     * means that this method is not useful for some scripts, such
+     * as Arabic, Hebrew, Thai, and Indic, that require reordering,
+     * shaping, or ligature substitution.
+     * @param frc the specified <code>FontRenderContext</code>
+     * @param ci the specified <code>CharacterIterator</code>
+     * @return a new <code>GlyphVector</code> created with the
+     * specified <code>CharacterIterator</code> and the specified
+     * <code>FontRenderContext</code>.
+     */
+    public GlyphVector createGlyphVector(   FontRenderContext frc,
+                                            CharacterIterator ci)
+    {
+        return (GlyphVector)new StandardGlyphVector(this, ci, frc);
+    }
+
+    /**
+     * Creates a {@link java.awt.font.GlyphVector GlyphVector} by
+     * mapping characters to glyphs one-to-one based on the
+     * Unicode cmap in this <code>Font</code>.  This method does no other
+     * processing besides the mapping of glyphs to characters.  This
+     * means that this method is not useful for some scripts, such
+     * as Arabic, Hebrew, Thai, and Indic, that require reordering,
+     * shaping, or ligature substitution.
+     * @param frc the specified <code>FontRenderContext</code>
+     * @param glyphCodes the specified integer array
+     * @return a new <code>GlyphVector</code> created with the
+     * specified integer array and the specified
+     * <code>FontRenderContext</code>.
+     */
+    public GlyphVector createGlyphVector(   FontRenderContext frc,
+                                            int [] glyphCodes)
+    {
+        return (GlyphVector)new StandardGlyphVector(this, glyphCodes, frc);
+    }
+
+    /**
+     * Returns a new <code>GlyphVector</code> object, performing full
+     * layout of the text if possible.  Full layout is required for
+     * complex text, such as Arabic or Hindi.  Support for different
+     * scripts depends on the font and implementation.
+     * <p>
+     * Layout requires bidi analysis, as performed by
+     * <code>Bidi</code>, and should only be performed on text that
+     * has a uniform direction.  The direction is indicated in the
+     * flags parameter,by using LAYOUT_RIGHT_TO_LEFT to indicate a
+     * right-to-left (Arabic and Hebrew) run direction, or
+     * LAYOUT_LEFT_TO_RIGHT to indicate a left-to-right (English)
+     * run direction.
+     * <p>
+     * In addition, some operations, such as Arabic shaping, require
+     * context, so that the characters at the start and limit can have
+     * the proper shapes.  Sometimes the data in the buffer outside
+     * the provided range does not have valid data.  The values
+     * LAYOUT_NO_START_CONTEXT and LAYOUT_NO_LIMIT_CONTEXT can be
+     * added to the flags parameter to indicate that the text before
+     * start, or after limit, respectively, should not be examined
+     * for context.
+     * <p>
+     * All other values for the flags parameter are reserved.
+     *
+     * @param frc the specified <code>FontRenderContext</code>
+     * @param text the text to layout
+     * @param start the start of the text to use for the <code>GlyphVector</code>
+     * @param limit the limit of the text to use for the <code>GlyphVector</code>
+     * @param flags control flags as described above
+     * @return a new <code>GlyphVector</code> representing the text between
+     * start and limit, with glyphs chosen and positioned so as to best represent
+     * the text
+     * @throws ArrayIndexOutOfBoundsException if start or limit is
+     * out of bounds
+     * @see java.text.Bidi
+     * @see #LAYOUT_LEFT_TO_RIGHT
+     * @see #LAYOUT_RIGHT_TO_LEFT
+     * @see #LAYOUT_NO_START_CONTEXT
+     * @see #LAYOUT_NO_LIMIT_CONTEXT
+     * @since 1.4
+     */
+//    public GlyphVector layoutGlyphVector(FontRenderContext frc,
+//                                         char[] text,
+//                                         int start,
+//                                         int limit,
+//                                         int flags) {
+//
+//        GlyphLayout gl = GlyphLayout.get(null); // !!! no custom layout engines
+//        StandardGlyphVector gv = gl.layout(this, frc, text,
+//                                           start, limit-start, flags, null);
+//        GlyphLayout.done(gl);
+//        return gv;
+//    }
+//
     /**
      * A flag to layoutGlyphVector indicating that text is left-to-right as
      * determined by Bidi analysis.
