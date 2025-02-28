@@ -144,7 +144,11 @@ public class StandardGlyphVector extends GlyphVector {
 		float actualBoundingBoxAscent;
 		float actualBoundingBoxRight;
 		float actualBoundingBoxDescent;
+		float fontBoundingBoxAscent;
+		float fontBoundingBoxDescent;
+		float offsetX, offsetY;
 		private String text;
+		private float logicalWidth;
 		
 		
 		public JSTextMetrics(String text, JSTextMetrics tm) {
@@ -154,6 +158,11 @@ public class StandardGlyphVector extends GlyphVector {
 			this.actualBoundingBoxDescent = tm.actualBoundingBoxDescent;
 			this.actualBoundingBoxLeft = tm.actualBoundingBoxLeft;
 			this.actualBoundingBoxRight = tm.actualBoundingBoxRight;
+			this.fontBoundingBoxAscent = tm.fontBoundingBoxAscent;
+			this.fontBoundingBoxDescent = tm.fontBoundingBoxDescent;
+			this.logicalWidth = actualBoundingBoxRight - actualBoundingBoxLeft;
+			this.offsetX = -actualBoundingBoxLeft;
+			this.offsetY = actualBoundingBoxAscent + fontBoundingBoxDescent;
 //			System. intln("jstxtm" 
 //			+ " " + this.actualBoundingBoxLeft 
 //			+ " " + this.actualBoundingBoxRight 
@@ -169,8 +178,9 @@ public class StandardGlyphVector extends GlyphVector {
 		}
 		
 		protected float getLogicalWidth() {
-			return actualBoundingBoxRight - actualBoundingBoxLeft;
+			return logicalWidth;
 		}
+		
 	}
 	
 	
