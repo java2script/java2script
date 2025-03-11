@@ -261,8 +261,10 @@ public class JSToolkit extends SunToolkit
 			String text) {
 		if (text == null || text.length() == 0)
 			return 0;
+		// Chrome delivers integer values, so we x 10 and then reduce.
+		boolean isChrome = (/** @j2sNative J2S._isChrome || **/ false);
 		@SuppressWarnings("unused")
-		String fontInfo = getCanvasFont(font);
+		String fontInfo = getCanvasFontScaled(font, isChrome ? 10 : 1);
 		if (context == null)
 			context = getDefaultCanvasContext2d();
 		Object tm = null;
@@ -270,6 +272,16 @@ public class JSToolkit extends SunToolkit
 		 * @j2sNative
 		 * context.font = fontInfo; 
 		 * tm = context.measureText(text);
+if (isChrome) {
+	tm = { "width":tm.width/10,
+			"actualBoundingBoxAscent":tm.actualBoundingBoxAscent/10,
+			"actualBoundingBoxDescent":tm.actualBoundingBoxDescent/10,
+			"actualBoundingBoxLeft":tm.actualBoundingBoxLeft/10,
+			"actualBoundingBoxRight":tm.actualBoundingBoxRight/10,
+			"fontBoundingBoxAscent":tm.fontBoundingBoxAscent/10,
+			"fontBoundingBoxDescent":tm.fontBoundingBoxDescent/10
+	}
+}
 		 */
 		{
 		}
@@ -886,6 +898,9 @@ public class JSToolkit extends SunToolkit
 	 * @return "italic bold 10pt Arial"
 	 */
 	public static String getCanvasFont(Font font) {
+		return getCanvasFontScaled(font, 1); 
+	}
+	public static String getCanvasFontScaled(Font font, double scale) {
 		String strStyle = "";
 		if (font.isItalic())
 			strStyle += "italic ";
@@ -895,7 +910,7 @@ public class JSToolkit extends SunToolkit
 		// for whatever reason, Java font points are much larger than HTML5 canvas
 		// points
 		font.getSize();
-		return strStyle + font.getSize2D() + "px " + family;
+		return strStyle + (font.getSize2D() * scale) + "px " + family;
 	}
 
 	public static String getCSSFontFamilyName(String family) {

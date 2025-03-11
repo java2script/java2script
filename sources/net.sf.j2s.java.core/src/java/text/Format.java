@@ -139,6 +139,10 @@ import java.text.ParseException;
 public abstract class Format implements Serializable, Cloneable {
 
     private static final long serialVersionUID = -299282585814624189L;
+	protected boolean isSimpleMMDDYY;
+
+
+    
 
     /**
      * Sole constructor.  (For invocation by subclass constructors, typically
@@ -159,8 +163,8 @@ public abstract class Format implements Serializable, Cloneable {
      * @exception IllegalArgumentException if the Format cannot format the given
      *            object
      */
-    public final String format (Object obj) {
-        return format(obj, new StringBuffer(), new FieldPosition(0)).toString();
+    public /* swingjs final*/ String format (Object obj) {
+        return format(obj, new StringBuffer(), (isSimpleMMDDYY ? null : new FieldPosition(0))).toString();
     }
 
     /**

@@ -31,6 +31,7 @@ import j2s.CorePlugin;
 // TODO: superclass inheritance for JAXB XmlAccessorType
 // TODO: Transpiler bug allows static String name, but JavaScript function().name is read-only and will be "clazz"
 
+//BH 2025.03.05 -- 5.0.1-v6 adds native interface methods for WASM
 //BH 2025.02.22 -- 5.0.1-v5 fixes Iterable<IAtom> AtomIterator::new missing [this,null] in generator  
 //BH 2024.07.14 -- 5.0.1-v4 fixes numerical array initializer using characters ['a','b',...], but not new int[] { "test".charAt(3) }
 //BH 2024.02.22 -- 5.0.1-v3 fixes long extension issue causing MutableBitInteger to miscalculate subtraction(no change in version #)
@@ -1415,10 +1416,15 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			body.accept(this);
 		}
 		meth_current = prevMethod;
-		if (isStatic || isConstructor)
+		if (isStatic || isConstructor) {
 			buffer.append(", ").append(isNative ? 2 : 1);
-		else if (isPrivate)
+			if (isNative) {
+				ITypeBinding ret = mBinding.getReturnType();
+				buffer.append(", \""+getUnreplacedJavaClassNameQualified(ret)+"\"");
+			}
+		} else if (isPrivate) {
 			buffer.append(", " + getPrivateVar(mClass, false));
+		}
 		buffer.append(");\n");
 
 	}

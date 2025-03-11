@@ -3053,7 +3053,9 @@ public final class Class<T> {
 			// interface hack
 			ms = new Method[$methodList$.length];
 			for (int i = ms.length; --i >= 0;) {
-				ms[i] = new Method(this, $methodList$[i], null, Void.class, null, java.lang.reflect.Modifier.PUBLIC);
+				String name = $methodList$[i];
+				boolean isNative = (/** @j2sNative this.$clazz$[o.exName].isNative ||*/ false);
+				ms[i] = new Method(this, name, null, Void.class, null, getMods(isNative));
 			}
 			return ms;
 		}
@@ -3061,6 +3063,8 @@ public final class Class<T> {
 		ms = new Method[0];
 		String attr = null;
 		Object o = null;
+		boolean isNative = false;
+		// JUST $xxxx... names: o.exName.indexOf("$") != 0
 		/**
 		 * @j2sNative
 		 * 
@@ -3074,12 +3078,13 @@ public final class Class<T> {
 		 *            && o != this.$clazz$[attr] 
 		 *            && (isAll || o.exClazz == this.$clazz$)
 		 *            && !o.exName.startsWith("c$")
-		 *            ) { // there are polynormical methods.
+		 *            ) { 		 
+		 *            isNative = o.isNative;
 		 */
 		
-		Method m = new Method(this, attr, UNKNOWN_PARAMETERS, Void.class, NO_PARAMETERS, Modifier.PUBLIC);
-		m._setJSMethod(o, Modifier.PUBLIC);
 
+		Method m = new Method(this, attr, UNKNOWN_PARAMETERS, Void.class, NO_PARAMETERS, getMods(isNative));
+		m._setJSMethod(o, Modifier.PUBLIC);
 		/**
 		 * @j2sNative
 		 * 
@@ -3093,8 +3098,10 @@ public final class Class<T> {
 		 *            && o.exName.indexOf("$") != 0
 		 *            && !o.exName.startsWith("c$")
 		 *            ) {
+		 *            isNative = o.isNative;
 		 */
-		m = new Method(this, attr, UNKNOWN_PARAMETERS, Void.class, NO_PARAMETERS, Modifier.PUBLIC);
+		// NOT $xxxx... names: o.exName.indexOf("$") != 0
+		m = new Method(this, attr, UNKNOWN_PARAMETERS, Void.class, NO_PARAMETERS, getMods(isNative));
 		m._setJSMethod(o, Modifier.STATIC);
 		/**
 		 * @j2sNative
@@ -3103,9 +3110,8 @@ public final class Class<T> {
 		 * }}
 		 */
 
-	    return ms;
+	    return ms; 
 
-	    
 //		checkInitted();
 //		Method[] res = null;
 //		if (useCaches) {
@@ -3167,6 +3173,14 @@ public final class Class<T> {
 //		return res;
 	}
 
+	private int getMods(boolean isNative) {
+		int mods = Modifier.PUBLIC;
+		if (isNative)
+			mods |= Modifier.NATIVE;
+		return mods;
+	}
+
+    
 	
 	public Constructor[] $constructors$;
 
