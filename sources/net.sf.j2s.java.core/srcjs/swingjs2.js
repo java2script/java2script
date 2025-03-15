@@ -14143,6 +14143,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2025.03.12 adds support for writable byte[] parameters in WASM
 // BH 2025.03.06 adds support for JNA+WASM
 // BH 2025.02.22 add hashCode$() for Java Integer.TYPE and related types
 // BH 2025.01.31 added checks for JavaScript SyntaxError similar to other Error types
@@ -14862,6 +14863,8 @@ Clazz._loadWasm = function(cls, lib){
 		return;
 	cls.wasmLoaded = true;
 	var libName = lib.getName$(); // "jnainchi"	var wasmName = libName + ".wasm";
+	if (J2S.wasm && J2S.wasm[libname])
+		return;
 	var className = cls.getName$();
 	var classPath = className.substring(0, className.lastIndexOf(".") + 1).replaceAll(".", "/");
 	var j2sdir = Thread.秘thisThread.getContextClassLoader$().$_$base;
@@ -14874,18 +14877,57 @@ Clazz._loadWasm = function(cls, lib){
 	var funcs = [];
 	J2S.wasm || (J2S.wasm = {});
 	J2S.wasm[libName] || (J2S.wasm[libName] = {});
-	if (!J2S[libName])
 	var getFunc = function(cls, newName, sig, ptypes, retType, fargs, fret) {
 		System.out.println("Clazz.loadWasm creating J2S.wasm." + libName + "." + newName);
 		return function(module) { 
-			var f = module.cwrap(newName, retType, ptypes);	
+			var f = [];
+			f[0] = module.cwrap(newName, retType, ptypes);	
 			//System.out.println(newName + " " + retType + " " + ptypes);
 			J2S.wasm[libName][newName] = jsClass[newName] = jsClass[sig] = function() {
 				var rgs = [];
+				var ba = [];
+				var pa = [];
+				var getNewFunc = false;
 				for (var i = arguments.length; --i >= 0;) {
-					rgs[i] = (fargs[i] ? fargs[i](arguments[i]) : arguments[i]);
+					var a = arguments[i];
+					if (a && a.__NDIM) {
+						// we have a signature "BA" (byte[]), and the 
+						// developer has passed byte[] rather than the assumed
+						// String value. So we need to allocate memory for
+						// the array, fill it, change the wrapping to "number" (for a pointer)
+						// execute the function, and then retrieve the value. 
+						// Emscripten missed this for some reason, and only reads the array 
+						// but does not re-fill it. I think this is a bug. 
+						ba[i] = a;
+						pa[i] = module._malloc(a.length);
+						module.writeArrayToMemory(ba[i], pa[i]);
+						a = pa[i];
+						if (ptypes[i] == "string") {
+							// now we know that a byte[] is being used at runtime instead of a String, 
+							// we need to recreate the wrapped function.
+							// this will only happen once.
+							ptypes[i] = "number";
+							getNewFunc = true;
+						}
+					}
+					rgs[i] = (fargs[i] ? fargs[i](a) : a);
 				}
-				var val = f.apply(null, rgs);
+				if (getNewFunc) {
+					f[0] = module.cwrap(newName, retType, ptypes);
+				}
+				var val = f[0].apply(null, rgs);
+				if (ba.length) {
+					for (var i = pa.length; --i >= 0;) {
+						if (pa[i]) {
+							// fill original array from pointer
+							for (var pt = pa[i], a = ba[i], n = a.length, j = 0; j < n; j++) {
+								a[j] = module.getValue(pt++);
+							}
+							module._free(pa[i]);
+						}
+					}
+					
+				}
 				return (fret ? fret(val, module) : val);			
 			}
 		}
@@ -14990,14 +15032,14 @@ Clazz._loadWasm = function(cls, lib){
 	J2S._wasmPath = libPath;
 	var src = libPath + libName + ".js";
 	$.getScript(src, function() {jnainchiModule().then(
-			function(module){
-				J2S._module = module;
-				for (var i = 0; i < funcs.length; i++) {
-					funcs[i].apply(null, [module]);
-				}
-			    J2S.inchiWasmLoaded = true;
-			})
-		});
+		function(module){
+			J2S._module = module;
+			for (var i = 0; i < funcs.length; i++) {
+				funcs[i].apply(null, [module]);
+			}
+			cls.wasmInitialized = true;
+		})
+	});
 }
 
 Clazz.newClass = function (prefix, name, clazz, clazzSuper, interfacez, type) { 
