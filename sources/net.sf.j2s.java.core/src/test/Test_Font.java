@@ -5,6 +5,8 @@ import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -21,8 +23,33 @@ import sun.font.StandardGlyphVector;
  *
  */
 public class Test_Font {//extends Test_ {
+    protected static String formatMDLFloat(float fl) {
+        String s, fs = "";
+        int l;
+        NumberFormat nf = NumberFormat.getNumberInstance(Locale.ENGLISH);
+        nf.setMinimumIntegerDigits(1);
+        nf.setMaximumIntegerDigits(4);
+        nf.setMinimumFractionDigits(4);
+        nf.setMaximumFractionDigits(4);
+        nf.setGroupingUsed(false);
+        if (Double.isNaN(fl) || Double.isInfinite(fl))
+            s = "0.0000";
+        else
+            s = nf.format(fl);
+        l = 10 - s.length();
+        for (int f = 0; f < l; f++)
+            fs += " ";
+        fs += s;
+        return fs;
+    }
+
 	public static void main(String[] args) {
 
+		
+		System.out.println(formatMDLFloat(2.3f));
+		
+		if (true)
+			return;
 		JLabel c = new JLabel("testing");
 		Graphics2D g = (Graphics2D) c.getGraphics();
 		assert (g == null);

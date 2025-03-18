@@ -895,15 +895,20 @@ Clazz._loadWasm = function(cls, lib){
 	Clazz._isQuietLoad = false;
 	J2S._wasmPath = libPath;
 	var src = libPath + libName + ".js";
-	$.getScript(src, function() {jnainchiModule().then(
-		function(module){
-			J2S._module = module;
-			for (var i = 0; i < funcs.length; i++) {
-				funcs[i].apply(null, [module]);
-			}
-			cls.wasmInitialized = true;
-		})
-	});
+	var f = function(module){
+		J2S._module = module;
+		for (var i = 0; i < funcs.length; i++) {
+			funcs[i].apply(null, [module]);
+		}
+		cls.wasmInitialized = true;
+		J2S.wasm[libName].$ready = true;
+	}
+	// may have been preloaded by other JavaScript
+	var module = J2S[libName + "_module"]
+	if (module)
+		f(module);
+	else
+		$.getScript(src, function() {jnainchiModule().then(function(module) { f(module) })});
 }
 
 Clazz.newClass = function (prefix, name, clazz, clazzSuper, interfacez, type) { 

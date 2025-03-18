@@ -262,9 +262,10 @@ public class JSToolkit extends SunToolkit
 		if (text == null || text.length() == 0)
 			return 0;
 		// Chrome delivers integer values, so we x 10 and then reduce.
-		boolean isChrome = (/** @j2sNative J2S._isChrome || **/ false);
+		// just setting this true generally; we don't need huge precision, I think. 
+//		boolean isChrome = true || (/** @j2sNative J2S._isChrome || **/ false);
 		@SuppressWarnings("unused")
-		String fontInfo = getCanvasFontScaled(font, isChrome ? 10 : 1);
+		String fontInfo = getCanvasFontScaled(font, 100);//isChrome ? 100 : 1);
 		if (context == null)
 			context = getDefaultCanvasContext2d();
 		Object tm = null;
@@ -272,16 +273,14 @@ public class JSToolkit extends SunToolkit
 		 * @j2sNative
 		 * context.font = fontInfo; 
 		 * tm = context.measureText(text);
-if (isChrome) {
-	tm = { "width":tm.width/10,
-			"actualBoundingBoxAscent":tm.actualBoundingBoxAscent/10,
-			"actualBoundingBoxDescent":tm.actualBoundingBoxDescent/10,
-			"actualBoundingBoxLeft":tm.actualBoundingBoxLeft/10,
-			"actualBoundingBoxRight":tm.actualBoundingBoxRight/10,
-			"fontBoundingBoxAscent":tm.fontBoundingBoxAscent/10,
-			"fontBoundingBoxDescent":tm.fontBoundingBoxDescent/10
-	}
-}
+	tm = { "width":tm.width/100,
+			"actualBoundingBoxAscent":tm.actualBoundingBoxAscent/100,
+			"actualBoundingBoxDescent":tm.actualBoundingBoxDescent/100,
+			"actualBoundingBoxLeft":tm.actualBoundingBoxLeft/100,
+			"actualBoundingBoxRight":tm.actualBoundingBoxRight/100,
+			"fontBoundingBoxAscent":tm.fontBoundingBoxAscent/100,
+			"fontBoundingBoxDescent":tm.fontBoundingBoxDescent/100
+		}
 		 */
 		{
 		}

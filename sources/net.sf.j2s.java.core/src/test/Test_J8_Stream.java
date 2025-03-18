@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Spliterator;
 import java.util.Spliterator.OfInt;
 import java.util.function.BiConsumer;
@@ -33,10 +34,20 @@ class J8_param<T> {
 } 
 
 public class Test_J8_Stream extends Test_J8_Stream0 {
-	
+
 	@SuppressWarnings("unused")
 	public static void main(String[] args) {
 
+		List<Integer> list = new ArrayList<>();
+		list.add(Integer.valueOf(33333));
+        Set<Integer> begSymCls = list
+                .stream()
+                .filter(b -> b == 33333)
+                .map(b -> 22322)
+                .collect(Collectors.toSet());
+
+		
+		
 		String st = "test\ning\r\nnow";
 		String[] lines = st.split("\n");
 		int[] ptr = new int[1];

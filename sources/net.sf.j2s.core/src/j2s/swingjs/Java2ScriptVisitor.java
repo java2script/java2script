@@ -1383,7 +1383,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 		buffer.append(") ");
 		if (lambdaType != NOT_LAMBDA) {
-			addLambdaBody(body);
+			addLambdaBody(body, mBinding.getReturnType());
 			if (body == null)
 				return;
 		} else if (isConstructor) {
@@ -7575,8 +7575,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		buffer.append("(" + anonName + "$||(" + anonName + "$=(").append(tmp).append(")))");
 	}
 
-	private void addLambdaBody(ASTNode body) {
+	private void addLambdaBody(ASTNode body, ITypeBinding retType) {
 		if (body instanceof Block) {
+			buffer.append("/*block*/");
 			body.accept(this);
 		} else {
 			// there may be no return, but we still want to do this
@@ -7584,7 +7585,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			if (body == null)
 				return; // handled elsewhere
 			buffer.append("(");
-			body.accept(this);
+			addExpressionAsTargetType((Expression) body, retType, "r", null);
 			buffer.append(");}");
 		}
 	}

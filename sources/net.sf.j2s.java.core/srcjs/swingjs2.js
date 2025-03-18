@@ -14144,7 +14144,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
 // BH 2025.03.12 adds support for writable byte[] parameters in WASM
-// BH 2025.03.06 adds support for JNA+WASM
+// BH 2025.03.06 adds support for JNA+WASM, automated loading of Java native classes if WASM is available
 // BH 2025.02.22 add hashCode$() for Java Integer.TYPE and related types
 // BH 2025.01.31 added checks for JavaScript SyntaxError similar to other Error types
 // BH 2024.11.23 implementing java.awt.Toolkit.getDefaultToolkit().getDesktopProperty("awt.multiClickInterval")
@@ -15031,15 +15031,19 @@ Clazz._loadWasm = function(cls, lib){
 	Clazz._isQuietLoad = false;
 	J2S._wasmPath = libPath;
 	var src = libPath + libName + ".js";
-	$.getScript(src, function() {jnainchiModule().then(
-		function(module){
-			J2S._module = module;
-			for (var i = 0; i < funcs.length; i++) {
-				funcs[i].apply(null, [module]);
-			}
-			cls.wasmInitialized = true;
-		})
-	});
+	var f = function(module){
+		J2S._module = module;
+		for (var i = 0; i < funcs.length; i++) {
+			funcs[i].apply(null, [module]);
+		}
+		cls.wasmInitialized = true;
+	}
+	// may have been preloaded by other JavaScript
+	var module = J2S[libName + "_module"]
+	if (module)
+		f(module);
+	else
+		$.getScript(src, function() {jnainchiModule().then(function(module) { f(module) })});
 }
 
 Clazz.newClass = function (prefix, name, clazz, clazzSuper, interfacez, type) { 
