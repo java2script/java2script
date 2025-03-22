@@ -31,6 +31,7 @@ import j2s.CorePlugin;
 // TODO: superclass inheritance for JAXB XmlAccessorType
 // TODO: Transpiler bug allows static String name, but JavaScript function().name is read-only and will be "clazz"
 
+//BH 2025.03.21 -- 5.0.1-v7 adds @j2sAlias with no name as "strip $"; does not account for multiple versions (could be done at runtime)
 //BH 2025.03.05 -- 5.0.1-v6 adds native interface methods for WASM
 //BH 2025.02.22 -- 5.0.1-v5 fixes Iterable<IAtom> AtomIterator::new missing [this,null] in generator  
 //BH 2024.07.14 -- 5.0.1-v4 fixes numerical array initializer using characters ['a','b',...], but not new int[] { "test".charAt(3) }
@@ -5706,8 +5707,15 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			// $O$O$O for lambda as well
 			names.add(getFinalMethodNameWith$Params(methodName, mBinding, null, false, mtype));
 		}
-		if (alias != null)
-			names.add(alias);
+		if (alias != null) {
+			if (alias.length() == 0) {
+				int pt = methodName.indexOf("$");
+				if (pt != 0)
+					names.add(pt < 0 ? methodName : methodName.substring(0, pt));
+			} else {
+				names.add(alias);
+			}
+		}
 		if ((mode & METHOD_ADD_GENERIC) != 0) {
 			// interesting case of this in Test_ClassBase, where different interfaces and
 			// the superclass
@@ -6236,7 +6244,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			if (tags == null || tags.size() == 0 || (tag = NativeDoc.getTag(tags, "@j2sAlias")) == null)
 				continue;
 			List<?> fragments = tag.fragments();
-			return (fragments == null || fragments.size() == 0 ? null : fragments.get(0).toString().trim());
+			return (fragments == null ? null : fragments.size() == 0 ? "" : fragments.get(0).toString().trim());
 		}
 		return null;
 	}

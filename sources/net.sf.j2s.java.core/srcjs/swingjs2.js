@@ -15037,6 +15037,7 @@ Clazz._loadWasm = function(cls, lib){
 			funcs[i].apply(null, [module]);
 		}
 		cls.wasmInitialized = true;
+		J2S.wasm[libName].$ready = true;
 	}
 	// may have been preloaded by other JavaScript
 	var module = J2S[libName + "_module"]
