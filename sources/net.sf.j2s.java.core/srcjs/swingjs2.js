@@ -11964,6 +11964,8 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 		}
 	}
 
+	J2S.getClassList = function(){J2S._saveFile('_j2sclasslist.txt', Clazz.ClassFilesLoaded.sort().join('\n'))}
+	
 	// J2S._localFileSaveFunction -- // do something local here; Maybe try the
 	// FileSave interface? return true if successful
 
@@ -13490,6 +13492,15 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			return c;
 		}
 
+		var __j2sDebugCode = function() {
+			if (!document.getElementById("j2sprofile")) {
+				$('body').append(`<div id=j2sprofile><a href='javascript:J2S.getProfile()'>start/stop profiling</a> <a href="javascript:J2S.getClassList()">get _j2sClassList.txt</a></div>`);
+			}
+			if (!document.getElementById("sysoutdiv")) {
+				$('body').append(`<div spellcheck="false" id="sysoutdiv" contentEditable="true" style="border:1px solid green;width:800;height:300;overflow:auto">This is System.out</div>`);
+			}
+		}
+
 		proto._setupJS = function() {
 			J2S.setGlobal("j2s.lib", {
 				base : this._j2sPath + "/",
@@ -13499,10 +13510,15 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			});
 			J2S.setGlobal("j2s.tmpdir", "/TEMP/");
 			var isFirst = (__execStack.length == 0);
-			if (isFirst)
+			if (isFirst) 
 				J2S._addExec([ this, __loadClazz, null, "loadClazz" ]);
 			this._addCoreFiles();
 			J2S._addExec([ this, this.__startAppletJS, null, "start applet" ])
+			
+			if (J2S._debugCode) {
+				J2S._addExec([ this, __j2sDebugCode, null, "j2sdebugcode" ])
+			}
+			
 			this._isSigned = true; // access all files via URL hook
 			this._ready = false;
 			this._applet = null;
