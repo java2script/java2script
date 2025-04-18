@@ -10686,6 +10686,7 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// BH 2025.04.17 adds option for explicit directory for core files different from j2sPath/core
 // BH 2024.11.09 makes equivalent J2S._debugCore and J2S._nozcore, as well as J2S._debugCode and J2S._nocore
 // BH 2024.10.03 adds two-finger tap as "click"; reinstates touch gestures lost when we went to pointerup 2023.11.01
 // BH 2023.12.14 fixes resizing into application (making it smaller)
@@ -11964,8 +11965,6 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 		}
 	}
 
-	J2S.getClassList = function(){J2S._saveFile('_j2sclasslist.txt', Clazz.ClassFilesLoaded.sort().join('\n'))}
-	
 	// J2S._localFileSaveFunction -- // do something local here; Maybe try the
 	// FileSave interface? return true if successful
 
@@ -13275,26 +13274,39 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			type = null;
 		}
 
+		var thisPath, isFullName;
 		if (type) {
-			type = type.toLowerCase().split(".")[0]; // package name only
+			var key = type.toLowerCase().substring(type.lastIndexOf("/") + 1);
+			key = key.toLowerCase().split(".")[0]; // package name only
 
 			// return if type is already part of the set.
-			if (__coreSet.join("").indexOf(type) >= 0)
+			if (__coreSet.join("").indexOf(key) >= 0)
 				return;
+
+			__coreSet.push(key);
+			__coreSet.sort();
 
 			// create a concatenated lower-case name for a core file that
 			// includes
 			// all Java applets on the page
+			// only if this is not a full name
 
-			__coreSet.push(type);
-			__coreSet.sort();
-			J2S._coreFiles = [ path + "/core/core" + __coreSet.join("")
-					+ ".z.js" ];
+			// 2025.04.17 adds option to give full (local) path to core file
+			isFullName = (type.indexOf("/") >= 0);
+			if (isFullName){
+				// bypass core/package.js
+				J2S.Globals["core.registered"] = true;
+			}
+			thisPath = (isFullName ? type : path + "/core/core" + __coreSet.join("") + ".z.js");			
+			J2S._coreFiles = [ thisPath ];
 		}
 		if (more && (Array.isArray(more) || (more = more.split(" "))))
 			for (var i = 0; i < more.length; i++)
-				if (more[i] && __coreMore.join("").indexOf(more[i]) < 0)
-					__coreMore.push(path + "/core/core" + more[i] + ".z.js")
+				if (more[i] && __coreMore.join("").indexOf(more[i]) < 0) {
+					isFullName = (more[i].indexOf("/") >= 0);
+					thisPath = (isFullName ? type : path + "/core/core" + more[i] + ".z.js");
+					__coreMore.push(thisPath);
+				}
 		for (var i = 0; i < __coreMore.length; i++)
 			J2S._coreFiles.push(__coreMore[i]);
 	}
@@ -13492,15 +13504,6 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			return c;
 		}
 
-		var __j2sDebugCode = function() {
-			if (!document.getElementById("j2sprofile")) {
-				$('body').append(`<div id=j2sprofile><a href='javascript:J2S.getProfile()'>start/stop profiling</a> <a href="javascript:J2S.getClassList()">get _j2sClassList.txt</a></div>`);
-			}
-			if (!document.getElementById("sysoutdiv")) {
-				$('body').append(`<div spellcheck="false" id="sysoutdiv" contentEditable="true" style="border:1px solid green;width:800;height:300;overflow:auto">This is System.out</div>`);
-			}
-		}
-
 		proto._setupJS = function() {
 			J2S.setGlobal("j2s.lib", {
 				base : this._j2sPath + "/",
@@ -13510,15 +13513,10 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			});
 			J2S.setGlobal("j2s.tmpdir", "/TEMP/");
 			var isFirst = (__execStack.length == 0);
-			if (isFirst) 
+			if (isFirst)
 				J2S._addExec([ this, __loadClazz, null, "loadClazz" ]);
 			this._addCoreFiles();
 			J2S._addExec([ this, this.__startAppletJS, null, "start applet" ])
-			
-			if (J2S._debugCode) {
-				J2S._addExec([ this, __j2sDebugCode, null, "j2sdebugcode" ])
-			}
-			
 			this._isSigned = true; // access all files via URL hook
 			this._ready = false;
 			this._applet = null;
@@ -14159,6 +14157,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2025.04.17 adds option for explicit directory for core files different from j2sPath/core
 // BH 2025.03.12 adds support for writable byte[] parameters in WASM
 // BH 2025.03.06 adds support for JNA+WASM, automated loading of Java native classes if WASM is available
 // BH 2025.02.22 add hashCode$() for Java Integer.TYPE and related types
@@ -14874,6 +14873,8 @@ Clazz.new_ = function(c, args, cl) {
   return obj;
 }
 
+Clazz._Pointer = null;
+
 Clazz._loadWasm = function(cls, lib){
 	if (cls.wasmLoaded)
 		return;
@@ -15010,6 +15011,9 @@ Clazz._loadWasm = function(cls, lib){
 			var retType = "number"; 
 			switch (jsm.nativeReturn) {
 			case "com.sun.jna.Pointer":
+				if (!Clazz._Pointer) {
+					Clazz._Pointer = Clazz.load("com.sun.jna.Pointer");
+				}
 				fret = retPtr; 
 				break;
 			case "[B": // It is assumed these are strings
@@ -15055,7 +15059,6 @@ Clazz._loadWasm = function(cls, lib){
 		cls.wasmInitialized = true;
 		J2S.wasm[libName].$ready = true;
 	}
-	// may have been preloaded by other JavaScript
 	var module = J2S[libName + "_module"]
 	if (module)
 		f(module);
@@ -16852,9 +16855,10 @@ _Loader.loadPackageClasspath = function (pkg, base, isIndex, fSuccess, mode, pt)
 	  // the package idea has been deprecated
 	  // the only package is core/package.js
     if (pkg == "java")
-      pkg = "core" // JSmol -- moves java/package.js to core/package.js
+        pkg = (J2S.Globals["core.registered"] ? null : "core") // JSmol -- moves java/package.js to core/package.js
     // not really asynchronous
-    _Loader.loadClass(pkg + ".package", null, true, true, 1);
+    if (pkg)
+    	_Loader.loadClass(pkg + ".package", null, true, true, 1);
   }
   fSuccess && fSuccess();
 };

@@ -7,6 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2025.04.17 adds option for explicit directory for core files different from j2sPath/core
 // BH 2025.03.12 adds support for writable byte[] parameters in WASM
 // BH 2025.03.06 adds support for JNA+WASM, automated loading of Java native classes if WASM is available
 // BH 2025.02.22 add hashCode$() for Java Integer.TYPE and related types
@@ -2704,9 +2705,10 @@ _Loader.loadPackageClasspath = function (pkg, base, isIndex, fSuccess, mode, pt)
 	  // the package idea has been deprecated
 	  // the only package is core/package.js
     if (pkg == "java")
-      pkg = "core" // JSmol -- moves java/package.js to core/package.js
+        pkg = (J2S.Globals["core.registered"] ? null : "core") // JSmol -- moves java/package.js to core/package.js
     // not really asynchronous
-    _Loader.loadClass(pkg + ".package", null, true, true, 1);
+    if (pkg)
+    	_Loader.loadClass(pkg + ".package", null, true, true, 1);
   }
   fSuccess && fSuccess();
 };
