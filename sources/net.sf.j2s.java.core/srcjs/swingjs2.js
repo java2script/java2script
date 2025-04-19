@@ -10686,6 +10686,7 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// BH 2025.04.18 enables Info.readyFunction for headless apps
 // BH 2025.04.17 adds option for explicit directory for core files different from j2sPath/core
 // BH 2024.11.09 makes equivalent J2S._debugCore and J2S._nozcore, as well as J2S._debugCode and J2S._nocore
 // BH 2024.10.03 adds two-finger tap as "click"; reinstates touch gestures lost when we went to pointerup 2023.11.01
@@ -13589,7 +13590,11 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 					applet._codePath = codePath;
 					Clazz.loadClass("java.lang.Thread").currentThread$().group.html5Applet = applet;
 					cl.main$SA(applet.__Info.args || []);
-					System.exit$(0);
+					if (applet.__Info.readyFunction) {
+						applet.__Info.readyFunction(applet);
+					} else {
+						System.exit$(0);
+					}
 				} else {
 					
 					var viewerOptions = Clazz.new_("java.util.Hashtable");
