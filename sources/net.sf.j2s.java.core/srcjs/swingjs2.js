@@ -10686,6 +10686,7 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// BH 2025.04.20 adds Info.coreAssets:"coreAssets.zip"
 // BH 2025.04.18 enables Info.readyFunction for headless apps
 // BH 2025.04.17 adds option for explicit directory for core files different from j2sPath/core
 // BH 2024.11.09 makes equivalent J2S._debugCore and J2S._nozcore, as well as J2S._debugCode and J2S._nocore
@@ -13582,6 +13583,10 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 					alert("Java class " + clazz + " was not found.");
 					return;
 				}
+				var assets = applet.__Info.coreAssets;
+				if (assets) {
+					loadAssets(assets);
+				}
 				if (applet.__Info.code)
 					codePath += applet.__Info.code.replace(/\./g, "/");
 				codePath = codePath.substring(0,
@@ -13591,7 +13596,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 					Clazz.loadClass("java.lang.Thread").currentThread$().group.html5Applet = applet;
 					cl.main$SA(applet.__Info.args || []);
 					if (applet.__Info.readyFunction) {
-						applet.__Info.readyFunction(applet);
+						J2S._addExec([ this, function(){applet.__Info.readyFunction(applet);}, null, "Info.readyFunction" ]);
 					} else {
 						System.exit$(0);
 					}
@@ -13699,6 +13704,27 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		return proto;
 	};
 
+	var loadAssets = function(assets) {
+		if (!assets) return;
+		if (typeof assets != "string") {
+			// assume array
+			for (var i = 0; i < assets.length; i++) {
+				loadAssets(assets[i]);
+			}
+			return;
+		}
+		try {
+			var bytes = J2S.getFileData(assets,null, true, true);
+			var bis = Clazz.loadClass("javajs.util.Rdr").getBIS$BA(bytes);
+			var cache = J2S.getSetJavaFileCache();
+			var len0 = cache.size$();
+			Clazz.loadClass("javajs.util.ZipTools").readFileAsMap$java_io_BufferedInputStream$java_util_Map$S(bis, cache);
+			System.out.println((cache.size$() - len0) + " items cached from " + assets);
+		} catch(e) {
+			System.out.println("error reading " + assets);
+		}
+	}
+		
 	J2S.repaint = function(applet, asNewThread) {
 		// JmolObjectInterface
 		// asNewThread: true is from RepaintManager.repaintNow()

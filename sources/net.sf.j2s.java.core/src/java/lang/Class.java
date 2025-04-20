@@ -2424,8 +2424,10 @@ public final class Class<T> {
 	    	return null;
 	    name = name.replace('\\','/');
 	    String baseFolder = null;
-	    String fname= name;
+	    String fname = name;
 	    URL url = null;
+		Map<String, Object> fileCache = null;
+	    String javapath = "";
 		if (name.startsWith(File.temporaryDirectory)) {
 			data = JSUtil.getCachedFileData(name,  true);
 			if (data == null)
@@ -2443,10 +2445,9 @@ public final class Class<T> {
 	        baseFolder = Clazz._Loader.getJ2SLibBase();
 	      if (baseFolder.charAt(baseFolder.length - 1) != '/')
 	        baseFolder += "/";
-	      fname = baseFolder + name.substring (1);
 	    } else {
 	      baseFolder = Clazz._Loader.getJ2SLibBase(); // getClass().getClassLoader() uses full path
-	      fname = baseFolder;      
+	      fname = "";      
 	      if (this.$_$base == null) {      
 	        // getClass().getResource() will be here
 	        var pkgs = clazzName.split(".");
@@ -2461,31 +2462,33 @@ public final class Class<T> {
 	      }
 	      fname += name;
 	    }
-	    var javapath = fname;
+	    fname = fname.substring(1);
+	    javapath = fname;
+	    fname = baseFolder + fname;
 	    try {
-//	      if (fname.indexOf(":/") < 0) {
-//	        var d = document.location.href.split("#")[0].split("?")[0].split("/");
-//        	d[d.length - 1] = fname;
-//        	fname = d.join("/");
-//	      }
 	      Clazz.load("java.net.URL");
 	      url = Clazz.new_(java.net.URL.c$$S,["file:/" + fname]);
 	    } catch (e) {
 	      return null;
 	    }
-	    var fileCache = J2S.getSetJavaFileCache(null);
-	    data = fileCache && fileCache.get$O(javapath); 
+	    fileCache = J2S.getSetJavaFileCache(null);
 	    */
 		}
-	    if (data == null)
-	      data = JSUtil.J2S.getFileData(fname.toString(),null,true,true);
+	    data = (fileCache == null ? null : fileCache.get(javapath)); 
+	    if (data == null && fileCache != null) {
+	    	data = fileCache.get(fname);
+	    }
+	    if (data == null) {	    	
+	      data = JSUtil.J2S.getFileData(fname,null,true,true);
+	    }
 	    /**
 	     * @j2sNative
 	     * 
 	    if (data == null || data == Boolean.FALSE || data == "error" || data.indexOf && data.indexOf("[Exception") == 0)
 	      return null;
 	            
-	    var bytes = (data.__BYTESIZE == 1 ? data : J2S._strToBytes(data));
+	    // could be byte[] or BArray or String
+	    var bytes = (data.__BYTESIZE == 1 ? data : data.data ? data.data : J2S._strToBytes(data));
 	    Clazz.load("java.io.BufferedInputStream");
 	    Clazz.load("java.io.ByteArrayInputStream");
 	    var is = Clazz.new_(java.io.BufferedInputStream.c$$java_io_InputStream, [Clazz.new_(java.io.ByteArrayInputStream.c$$BA, [bytes])]); 
@@ -2496,14 +2499,6 @@ public final class Class<T> {
 		{
 			return null;
 		}
-//		
-//		name = resolveName(name);
-//		ClassLoader cl = getClassLoader0();
-//		if (cl == null) {
-//			// A system class.
-//			return ClassLoader.getSystemResourceAsStream(name);
-//		}
-//		return cl.getResourceAsStream(name);
 	}
 
 	/**
