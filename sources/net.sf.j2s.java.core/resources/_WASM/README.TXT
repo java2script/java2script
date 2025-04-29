@@ -1,1 +1,0 @@
-The /_WASM directory can contain Web Assembly code.

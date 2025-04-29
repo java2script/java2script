@@ -336,7 +336,7 @@ public abstract class DateFormat extends Format {
      * @param date the time value to be formatted into a time string.
      * @return the formatted time string.
      */
-    public final String format(Date date)
+    public String format(Date date)
     {
         return format(date, new StringBuffer(),
                       DontCareFieldPosition.INSTANCE).toString();

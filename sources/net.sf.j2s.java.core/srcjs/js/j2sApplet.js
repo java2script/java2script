@@ -1,5 +1,8 @@
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// BH 2025.04.20 adds Info.coreAssets:"coreAssets.zip"
+// BH 2025.04.18 enables Info.readyFunction for headless apps
+// BH 2025.04.17 adds option for explicit directory for core files different from j2sPath/core
 // BH 2024.11.09 makes equivalent J2S._debugCore and J2S._nozcore, as well as J2S._debugCode and J2S._nocore
 // BH 2024.10.03 adds two-finger tap as "click"; reinstates touch gestures lost when we went to pointerup 2023.11.01
 // BH 2023.12.14 fixes resizing into application (making it smaller)
@@ -2587,26 +2590,39 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			type = null;
 		}
 
+		var thisPath, isFullName;
 		if (type) {
-			type = type.toLowerCase().split(".")[0]; // package name only
+			var key = type.toLowerCase().substring(type.lastIndexOf("/") + 1);
+			key = key.toLowerCase().split(".")[0]; // package name only
 
 			// return if type is already part of the set.
-			if (__coreSet.join("").indexOf(type) >= 0)
+			if (__coreSet.join("").indexOf(key) >= 0)
 				return;
+
+			__coreSet.push(key);
+			__coreSet.sort();
 
 			// create a concatenated lower-case name for a core file that
 			// includes
 			// all Java applets on the page
+			// only if this is not a full name
 
-			__coreSet.push(type);
-			__coreSet.sort();
-			J2S._coreFiles = [ path + "/core/core" + __coreSet.join("")
-					+ ".z.js" ];
+			// 2025.04.17 adds option to give full (local) path to core file
+			isFullName = (type.indexOf("/") >= 0);
+			if (isFullName){
+				// bypass core/package.js
+				J2S.Globals["core.registered"] = true;
+			}
+			thisPath = (isFullName ? type : path + "/core/core" + __coreSet.join("") + ".z.js");			
+			J2S._coreFiles = [ thisPath ];
 		}
 		if (more && (Array.isArray(more) || (more = more.split(" "))))
 			for (var i = 0; i < more.length; i++)
-				if (more[i] && __coreMore.join("").indexOf(more[i]) < 0)
-					__coreMore.push(path + "/core/core" + more[i] + ".z.js")
+				if (more[i] && __coreMore.join("").indexOf(more[i]) < 0) {
+					isFullName = (more[i].indexOf("/") >= 0);
+					thisPath = (isFullName ? type : path + "/core/core" + more[i] + ".z.js");
+					__coreMore.push(thisPath);
+				}
 		for (var i = 0; i < __coreMore.length; i++)
 			J2S._coreFiles.push(__coreMore[i]);
 	}
@@ -2881,6 +2897,10 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 					alert("Java class " + clazz + " was not found.");
 					return;
 				}
+				var assets = applet.__Info.coreAssets;
+				if (assets) {
+					loadAssets(assets);
+				}
 				if (applet.__Info.code)
 					codePath += applet.__Info.code.replace(/\./g, "/");
 				codePath = codePath.substring(0,
@@ -2889,7 +2909,11 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 					applet._codePath = codePath;
 					Clazz.loadClass("java.lang.Thread").currentThread$().group.html5Applet = applet;
 					cl.main$SA(applet.__Info.args || []);
-					System.exit$(0);
+					if (applet.__Info.readyFunction) {
+						J2S._addExec([ this, function(){applet.__Info.readyFunction(applet);}, null, "Info.readyFunction" ]);
+					} else {
+						System.exit$(0);
+					}
 				} else {
 					
 					var viewerOptions = Clazz.new_("java.util.Hashtable");
@@ -2994,6 +3018,27 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		return proto;
 	};
 
+	var loadAssets = function(assets) {
+		if (!assets) return;
+		if (typeof assets != "string") {
+			// assume array
+			for (var i = 0; i < assets.length; i++) {
+				loadAssets(assets[i]);
+			}
+			return;
+		}
+		try {
+			var bytes = J2S.getFileData(assets,null, true, true);
+			var bis = Clazz.loadClass("javajs.util.Rdr").getBIS$BA(bytes);
+			var cache = J2S.getSetJavaFileCache();
+			var len0 = cache.size$();
+			Clazz.loadClass("javajs.util.ZipTools").readFileAsMap$java_io_BufferedInputStream$java_util_Map$S(bis, cache);
+			System.out.println((cache.size$() - len0) + " items cached from " + assets);
+		} catch(e) {
+			System.out.println("error reading " + assets);
+		}
+	}
+		
 	J2S.repaint = function(applet, asNewThread) {
 		// JmolObjectInterface
 		// asNewThread: true is from RepaintManager.repaintNow()

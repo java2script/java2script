@@ -2126,13 +2126,13 @@ public class BufferedImage extends Image implements RenderedImage, Transparency,
 	}
 
 	private void toByteABGR(byte[] ctxData, byte[] buf) {
-		// convert canvas [r g b a r g b a ...] into [ b g r a b g r a b g r a...]
+		// convert canvas [r g b a r g b a ...] into [ a b g r a b g r a b g r ...]
 		int n = ctxData.length;
 		for (int i = 0, j = 0; i < n; j += 4) {
+			buf[i++] = ctxData[j + 3];
 			buf[i++] = ctxData[j + 2];
 			buf[i++] = ctxData[j + 1];
-			buf[i++] = ctxData[j];
-			buf[i++] = ctxData[j + 3];
+			buf[i++] = ctxData[j + 0];
 		}
 	}
 

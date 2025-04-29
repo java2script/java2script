@@ -41,8 +41,10 @@ import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.geom.Rectangle2D.Float;
 import java.text.CharacterIterator;
 
+import javajs.util.SB;
 import sun.awt.SunHints;
 import sun.font.GlyphLayout.GVData;
 import sun.java2d.loops.FontInfo;
@@ -135,6 +137,54 @@ import swingjs.JSUtil;
  * to zero, used in superscript).
  */
 public class StandardGlyphVector extends GlyphVector {
+	
+	private static class JSTextMetrics {
+		float width;
+		float actualBoundingBoxLeft;
+		float actualBoundingBoxAscent;
+		float actualBoundingBoxRight;
+		float actualBoundingBoxDescent;
+		float fontBoundingBoxAscent;
+		float fontBoundingBoxDescent;
+		float offsetX, offsetY;
+		private String text;
+		private float logicalWidth;
+		
+		
+		public JSTextMetrics(String text, JSTextMetrics tm) {
+			this.text = text;
+			this.width = tm.width;
+			this.actualBoundingBoxAscent = tm.actualBoundingBoxAscent;
+			this.actualBoundingBoxDescent = tm.actualBoundingBoxDescent;
+			this.actualBoundingBoxLeft = tm.actualBoundingBoxLeft;
+			this.actualBoundingBoxRight = tm.actualBoundingBoxRight;
+			this.fontBoundingBoxAscent = tm.fontBoundingBoxAscent;
+			this.fontBoundingBoxDescent = tm.fontBoundingBoxDescent;
+			this.logicalWidth = actualBoundingBoxRight - actualBoundingBoxLeft;
+			this.offsetX = -actualBoundingBoxLeft;
+			this.offsetY = actualBoundingBoxAscent + fontBoundingBoxDescent;
+//			System. intln("jstxtm" 
+//			+ " " + this.actualBoundingBoxLeft 
+//			+ " " + this.actualBoundingBoxRight 
+//			+ " " + width + " " + this.actualBoundingBoxAscent + " " + this.actualBoundingBoxDescent);
+		}
+
+		protected Rectangle2D.Float getActualBounds(float x0, float y0) {
+			float x = -actualBoundingBoxLeft;
+			float y = -actualBoundingBoxAscent;
+			float w = actualBoundingBoxRight - x;
+			float h = actualBoundingBoxDescent - y;
+			return new Rectangle2D.Float(x + x0, y + y0, w, h);
+		}
+		
+		protected float getLogicalWidth() {
+			return logicalWidth;
+		}
+		
+	}
+	
+	
+	private JSTextMetrics[] jsMetrics;
     private Font font;
     private FontRenderContext frc;
     private int[] glyphs; // always
@@ -142,7 +192,8 @@ public class StandardGlyphVector extends GlyphVector {
     private float[] positions; // only if not default advances
     private int[] charIndices;  // only if interesting
     private int flags; // indicates whether positions, charIndices is interesting
-
+    final private String text; // allows for unicode //BH SwingJS
+    
     private static final int UNINITIALIZED_FLAGS = -1;
 
     // transforms information
@@ -153,7 +204,7 @@ public class StandardGlyphVector extends GlyphVector {
     private AffineTransform dtx;   // device transform used for strike calculations, no translation
     private AffineTransform invdtx; // inverse of dtx or null if dtx is identity
     private AffineTransform frctx; // font render context transform, wish we could just share it
-    private Font2D fontxx2D;         // basic strike-independent stuff
+    private Font2D font2D;         // basic strike-independent stuff
     private GlyphStrike fsref;   // font strike reference for glyphs with no per-glyph transform
 
     /////////////////////////////
@@ -161,15 +212,18 @@ public class StandardGlyphVector extends GlyphVector {
     /////////////////////////////
 
     public StandardGlyphVector(Font font, String str, FontRenderContext frc) {
+    	text = str;
         init(font, str.toCharArray(), 0, str.length(), frc, UNINITIALIZED_FLAGS);
     }
 
     public StandardGlyphVector(Font font, char[] text, FontRenderContext frc) {
+    	this.text = new String(text);
         init(font, text, 0, text.length, frc, UNINITIALIZED_FLAGS);
     }
 
     public StandardGlyphVector(Font font, char[] text, int start, int count,
                                FontRenderContext frc) {
+    	this.text = new String(text);
         init(font, text, start, count, frc, UNINITIALIZED_FLAGS);
     }
 
@@ -184,6 +238,7 @@ public class StandardGlyphVector extends GlyphVector {
      // used by GlyphLayout to construct a glyphvector
     public StandardGlyphVector(Font font, FontRenderContext frc, int[] glyphs, float[] positions,
                                int[] indices, int flags) {
+    	text = new String(glyphs, 0, glyphs.length);
         initGlyphVector(font, frc, glyphs, positions, indices, flags);
 
         // this code should go into layout
@@ -219,7 +274,7 @@ public class StandardGlyphVector extends GlyphVector {
         }
     }
 
-    public void initGlyphVector(Font font, FontRenderContext frc, int[] glyphs, float[] positions,
+	public void initGlyphVector(Font font, FontRenderContext frc, int[] glyphs, float[] positions,
                                 int[] indices, int flags) {
         this.font = font;
         this.frc = frc;
@@ -240,12 +295,14 @@ public class StandardGlyphVector extends GlyphVector {
             c = iter.next()) {
             text[iter.getIndex() - offset] = c;
         }
+        this.text = new String(text);
         init(font, text, 0, text.length, frc, UNINITIALIZED_FLAGS);
     }
 
     public StandardGlyphVector(Font font, int[] glyphs, FontRenderContext frc) {
         // !!! find callers of this
         // should be able to fully init from raw data, e.g. charmap, flags too.
+    	this.text = new String(glyphs, 0, glyphs.length);
         this.font = font;
         this.frc = frc;
         this.flags = UNINITIALIZED_FLAGS;
@@ -301,6 +358,8 @@ public class StandardGlyphVector extends GlyphVector {
 
     @Override
 	public void performDefaultLayout() {
+    	if (true)
+    		return;
         positions = null;
         if (getTracking(font) == 0) {
             clearFlags(FLAG_HAS_POSITION_ADJUSTMENTS);
@@ -387,25 +446,29 @@ public class StandardGlyphVector extends GlyphVector {
     // !!! revisit for text-on-a-path, vertical
     @Override
 	public Rectangle2D getLogicalBounds() {
-        setFRCTX();
-        initPositions();
-
-        LineMetrics lm = font.getLineMetrics("", frc);
-
-        float minX, minY, maxX, maxY;
-        // horiz only for now...
-        minX = 0;
-        minY = -lm.getAscent();
-        maxX = 0;
-        maxY = lm.getDescent() + lm.getLeading();
-        if (glyphs.length > 0) {
-            maxX = positions[positions.length - 2];
-        }
-
-        return new Rectangle2D.Float(minX, minY, maxX - minX, maxY - minY);
+    	// SwingJS needs no more than this
+   		return ((FontDesignMetrics) font.getFontMetrics()).秘getStringBounds(text);
+    	
+//    	
+//        setFRCTX();
+//        initPositions();
+//
+//        LineMetrics lm = font.getLineMetrics("", frc);
+//
+//        float minX, minY, maxX, maxY;
+//        // horiz only for now...
+//        minX = 0;
+//        minY = -lm.getAscent();
+//        maxX = 0;
+//        maxY = lm.getDescent() + lm.getLeading();
+//        if (glyphs.length > 0) {        	
+//            maxX = positions[positions.length - 2];
+//        }
+//
+//        return new Rectangle2D.Float(minX, minY, maxX - minX, maxY - minY);
     }
 
-    // !!! not cached, assume TextLayout will cache if necessary
+	// !!! not cached, assume TextLayout will cache if necessary
     @Override
 	public Rectangle2D getVisualBounds() {
     	return (Rectangle2D) getOutline();
@@ -549,6 +612,17 @@ public class StandardGlyphVector extends GlyphVector {
 		if (ix < 0 || ix >= glyphs.length) {
 			throw new IndexOutOfBoundsException("ix = " + ix);
 		}
+		
+		
+		
+/**
+ * @j2sNative debugger		
+ */
+		
+		
+		
+		
+		
 
 		Shape[] lbcache = lbcacheRef;
 		if (lbcacheRef == null)
@@ -599,6 +673,8 @@ public class StandardGlyphVector extends GlyphVector {
         if (ix < 0 || ix >= glyphs.length) {
             throw new IndexOutOfBoundsException("ix = " + ix);
         }
+        // SwingJS just same as GlyphOutline
+        return getGlyphOutline(ix).getBounds2D();
 //original
 //        Shape[] vbcache;
 //        if (vbcacheRef == null || (vbcache = (Shape[])vbcacheRef.get()) == null) {
@@ -606,19 +682,19 @@ public class StandardGlyphVector extends GlyphVector {
 //            vbcacheRef = new SoftReference(vbcache);
 //        }
 //BH 2020.04.14
-        
-        Shape[] vbcache = vbcacheRef;
-        if (vbcache == null) 
-        	vbcache = vbcacheRef = new Shape[glyphs.length]
-        			;
-        
-        Shape result = vbcache[ix];
-        if (result == null) {
-            result = new DelegatingShape(getGlyphOutlineBounds(ix));
-            vbcache[ix] = result;
-        }
-
-        return result;
+//        
+//        Shape[] vbcache = vbcacheRef;
+//        if (vbcache == null) 
+//        	vbcache = vbcacheRef = new Shape[glyphs.length]
+//        			;
+//        
+//        Shape result = vbcache[ix];
+//        if (result == null) {
+//            result = new DelegatingShape(getGlyphOutlineBounds(ix));
+//            vbcache[ix] = result;
+//        }
+//
+//        return result;
     }
     private Shape[] vbcacheRef;
 
@@ -894,17 +970,17 @@ public class StandardGlyphVector extends GlyphVector {
             result[n] = x;
             result[n+1] = 0;
 
-            int glyphID = glyphs[i];
+//            int glyphID = glyphs[i];
 //            GlyphStrike s = getGlyphStrike(i);
 //            Point2D.Float adv = s.strike.getGlyphMetrics(glyphID);
             result[n+2] = w;//adv.x;
             result[n+3] = 0;//adv.y;
 
-//            Rectangle2D vb = getGlyphVisualBounds(i).getBounds2D();
-//            result[n+4] = (float)(vb.getMinX());
-//            result[n+5] = (float)(vb.getMinY());
-//            result[n+6] = (float)(vb.getWidth());
-//            result[n+7] = (float)(vb.getHeight());
+            Rectangle2D vb = getGlyphVisualBounds(i).getBounds2D();
+            result[n+4] = (float)(vb.getMinX());
+            result[n+5] = (float)(vb.getMinY());
+            result[n+6] = (float)(vb.getWidth());
+            result[n+7] = (float)(vb.getHeight());
         }
         return result;
     }
@@ -1032,16 +1108,16 @@ public class StandardGlyphVector extends GlyphVector {
 
     // called by getGlyphsPixelBounds
     private final void setDTX(AffineTransform tx) {
-        if (!equalNonTranslateTX(dtx, tx)) {
-            resetDTX(getNonTranslateTX(tx));
-        }
+//        if (!equalNonTranslateTX(dtx, tx)) {
+//            resetDTX(getNonTranslateTX(tx));
+//        }
     }
 
     // called by most functions
     private final void setFRCTX() {
-        if (!equalNonTranslateTX(frctx, dtx)) {
-            resetDTX(getNonTranslateTX(frctx));
-        }
+//        if (!equalNonTranslateTX(frctx, dtx)) {
+//            resetDTX(getNonTranslateTX(frctx));
+//        }
     }
 
     /**
@@ -1071,6 +1147,7 @@ public class StandardGlyphVector extends GlyphVector {
      * about "userGlyphs".
      */
     private StandardGlyphVector(GlyphVector gv, FontRenderContext frc) {
+    	this.text = ((StandardGlyphVector) gv).text;
         this.font = gv.getFont();
         this.frc = frc;
         initFontData();
@@ -1114,17 +1191,18 @@ public class StandardGlyphVector extends GlyphVector {
      * those as the missing glyph.
      */
     int[] getValidatedGlyphs(int[] oglyphs) {
-        int len = oglyphs.length;
-        int[] vglyphs = new int[len];
-        for (int i=0; i<len; i++) {
-// SwingJS bypassing Font2D
+    	// SwingJS not going here. 
+    	return oglyphs;
+//        int len = oglyphs.length;
+//        int[] vglyphs = new int[len];
+//        for (int i=0; i<len; i++) {
 //            if (oglyphs[i] == 0xFFFE || oglyphs[i] == 0xFFFF) {
-                vglyphs[i] = oglyphs[i];
+//                vglyphs[i] = oglyphs[i];
 //            } else {
 //                vglyphs[i] = font2D.getValidatedGlyphCode(oglyphs[i]);
 //            }
-        }
-        return vglyphs;
+//        }
+//        return vglyphs;
     }
 
     // utility used by constructors
@@ -1134,7 +1212,7 @@ public class StandardGlyphVector extends GlyphVector {
         if (start < 0 || count < 0 || start + count > text.length) {
             throw new ArrayIndexOutOfBoundsException("start or count out of bounds");
         }
-
+        
         this.font = font;
         this.frc = frc;
         this.flags = flags;
@@ -1162,7 +1240,8 @@ public class StandardGlyphVector extends GlyphVector {
     }
 
     private void initFontData() {
-        //font2D = FontUtilities.getFont2D(font);
+        //SwingJS font2D = FontUtilities.getFont2D(font);
+    	getJavaScriptMetrics();
         float s = font.getSize2D();
         if (font.isTransformed()) {
             ftx = font.getTransform();
@@ -1179,7 +1258,21 @@ public class StandardGlyphVector extends GlyphVector {
         resetDTX(getNonTranslateTX(frctx));
     }
 
-    /**
+    private void getJavaScriptMetrics() {
+    	// 1-based, with 0 being the full text
+    	int n = text.length();
+    	jsMetrics = new JSTextMetrics[n + 1];
+    	if (n == 1) {
+    		jsMetrics[0] = jsMetrics[1] = new JSTextMetrics(text, (JSTextMetrics) JSToolkit.getTextMetrics(null, font, text));
+    	    return;
+    	}
+    	for (int i = n + 1; --i >= 0;) {
+    		String t = i == 0 ? text : text.substring(i - 1, i);
+          jsMetrics[i] = new JSTextMetrics(t, (JSTextMetrics) JSToolkit.getTextMetrics(null, font, t));
+    	}
+	}
+
+	/**
      * Copy glyph position data into a result array starting at the indicated
      * offset in the array.  If the passed-in result array is null, a new
      * array will be allocated and returned.
@@ -1217,12 +1310,21 @@ public class StandardGlyphVector extends GlyphVector {
      * Used by getOutline, getGlyphsOutline
      */
     private Shape getGlyphsOutline(int start, int count, float x, float y) {
-    	
         setFRCTX();
         initPositions();
+        // SwingJS just getting bounds here
+        if (start == 0 && count == glyphs.length)
+        	return jsMetrics[0].getActualBounds(x, y);
+        //float h = JSFontMetrics.fontAscent(font);
+        Rectangle2D.Float r = jsMetrics[start + 1].getActualBounds(0, 0);
+        for (int i = 1, p = start + 1; i < count; i++, p++) {
+            Rectangle2D.Float r1 = jsMetrics[p].getActualBounds(positions[p * 2], positions[p * 2 + 1]);
+        	r.add(r1);
+        }
+        r.x += x;
+        r.y += y;
+        return r;
         
-        float h = JSFontMetrics.fontAscent(font);
-        return new Rectangle2D.Float(x + positions[start * 2], y + positions[start * 2 + 1] - h, positions[count * 2], positions[count * 2 + 1] + h);
 //        GeneralPath result = new GeneralPath(GeneralPath.WIND_NON_ZERO);
 //        for (int i = start, e = start + count, n = start * 2; i < e; ++i, n += 2) {
 //            float px = x + positions[n];
@@ -1357,7 +1459,9 @@ public class StandardGlyphVector extends GlyphVector {
                 }
             }
             for (int i = 0, n = 2; i < glyphs.length; ++i, n += 2) {
-                getGlyphStrike(i).addDefaultGlyphAdvance(glyphs[i], pt);
+            	pt.x += jsMetrics[i + 1].getLogicalWidth();
+            	// ignore y here - assumes horizontal left to right;
+                //getGlyphStrike(i).addDefaultGlyphAdvance(glyphs[i], pt);
                 if (trackPt != null) {
                     pt.x += trackPt.x;
                     pt.y += trackPt.y;
@@ -2016,4 +2120,72 @@ public class StandardGlyphVector extends GlyphVector {
             return result;
         }
     }
+
+// tests
+    
+//      Java:
+//    
+//    	java.awt.Font[family=SansSerif,name=SansSerif,style=plain,size=20]a=20.107422 d=4.3945312 h=25.15625
+//
+//    	H outB java.awt.geom.Rectangle2D$Float[x=1.609375,y=-14.3125,w=11.21875,h=14.3125]
+//    	H logB java.awt.geom.Rectangle2D$Float[x=0.0,y=-20.107422,w=14.443359,h=25.15625]
+//
+//    	JavaScript:
+//
+//    	java.awt.Font[family=SansSerif,name=SansSerif,style=plain,size=20]a=20.10742 d=4.394 h=25.155420000000003
+//
+//    	H outB java.awt.geom.Rectangle2D$Float[x=1.607568359375,y=-14.3700927734375,w=11.272583770751954,h=14.3700927734375]
+//    	H logB java.awt.geom.Rectangle2D$Float[x=0.0,y=-20.10742,w=14.487720489501953,h=25.155420000000003]
+//
+//    	jstxtm -1.607568359375 12.880152130126953 14.5 14.3700927734375 0.0
+//
+//    	Java:
+//
+//    	j outB java.awt.geom.Rectangle2D$Float[x=-0.921875,y=-14.3125,w=3.984375,h=18.515625]
+//    	j logB java.awt.geom.Rectangle2D$Float[x=0.0,y=-20.107422,w=4.4433594,h=25.15625]
+//
+//    	JavaScript:
+//
+//    	j outB java.awt.geom.Rectangle2D$Float[x=-0.9214111328125001,y=-14.3700927734375,w=3.99931640625,h=18.59486083984375]
+//    	j logB java.awt.geom.Rectangle2D$Float[x=0.0,y=-20.10742,w=2.156494140625,h=25.155420000000003]
+//
+//    	jstxtm 0.9214111328125001 3.0779052734375 4.449999809265137 14.3700927734375 4.22476806640625
+//
+//    	Java:
+//
+//    	Hj outB java.awt.geom.Rectangle2D$Float[x=1.609375,y=-14.3125,w=15.896484,h=18.515625]
+//    	Hj logB java.awt.geom.Rectangle2D$Float[x=0.0,y=-20.107422,w=18.886719,h=25.15625]
+//    	Hj pos [0.0, 0.0, 14.443359, 0.0]
+//
+//    	JavaScript:
+//
+//    	Hj outB java.awt.geom.Rectangle2D$Float[x=1.607568359375,y=-14.3700927734375,w=15.970336914062502,h=18.59486083984375]
+//    	Hj logB java.awt.geom.Rectangle2D$Float[x=0.0,y=-20.10742,w=19.185473632812503,h=25.155420000000003]
+//    	Hj pos [0, 0, 14.487720489501953, 0]
+//
+//    	jstxtm 0.9214111328125001 3.0779052734375 4.449999809265137 14.3700927734375 4.22476806640625
+//    	jstxtm -1.607568359375 12.880152130126953 14.5 14.3700927734375 0.0
+//    	jstxtm -1.607568359375 17.5779052734375 18.950000762939453 14.3700927734375 4.22476806640625
+//
+//    	Java:
+//
+//    	HjHjHj outB java.awt.geom.Rectangle2D$Float[x=1.609375,y=-14.3125,w=53.66992,h=18.515625]
+//    	HjHjHj logB java.awt.geom.Rectangle2D$Float[x=0.0,y=-20.107422,w=56.660156,h=25.15625]
+//    	HjHjHj pos [0.0, 0.0, 14.443359, 0.0, 18.886719, 0.0, 33.33008, 0.0, 37.773438, 0.0, 52.216797, 0.0]
+//
+//    	JavaScipt:
+//
+//    	HjHjHj outB java.awt.geom.Rectangle2D$Float[x=1.607568359375,y=-14.3700927734375,w=53.870336914062506,h=18.59486083984375]
+//    	HjHjHj logB java.awt.geom.Rectangle2D$Float[x=0.0,y=-20.10742,w=57.08547363281251,h=25.155420000000003]
+//    	HjHjHj pos [0, 0, 14.487720489501953, 0, 16.644214630126953, 0, 31.131935119628906, 0, 33.288429260253906, 0, 47.77614974975586, 0]
+//
+//    	jstxtm 0.9214111328125001 3.0779052734375 4.449999809265137 14.3700927734375 4.22476806640625
+//    	jstxtm -1.607568359375 12.880152130126953 14.5 14.3700927734375 0.0
+//    	jstxtm 0.9214111328125001 3.0779052734375 4.449999809265137 14.3700927734375 4.22476806640625
+//    	jstxtm -1.607568359375 12.880152130126953 14.5 14.3700927734375 0.0
+//    	jstxtm 0.9214111328125001 3.0779052734375 4.449999809265137 14.3700927734375 4.22476806640625
+//    	jstxtm -1.607568359375 12.880152130126953 14.5 14.3700927734375 0.0
+//    	jstxtm -1.607568359375 55.47790527343751 56.849998474121094 14.3700927734375 4.22476806640625
+
 }
+

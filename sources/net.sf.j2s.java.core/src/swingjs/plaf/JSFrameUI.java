@@ -14,6 +14,7 @@ import java.beans.PropertyChangeEvent;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.LookAndFeel;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import swingjs.JSUtil;
@@ -180,9 +181,15 @@ public class JSFrameUI extends JSWindowUI implements FramePeer, JSComponentUI.Em
 			if (dim.width > 0) {
 				frame.setUndecorated(true);
 				frame.setLocation(0, 0);
+				DOMNode.setStyles(containerNode, "width",  dim.width + "px", "height", dim.height + "px");
 				String resize = DOMNode.getStyle(node, "resize");
-				if (resize == "none")
-					frame.秘freezeBounds(dim.width, dim.height);
+				if (resize == "none") {
+					SwingUtilities.invokeLater(()->{
+						// this allows the freeze to be after the 
+						// currently executing reshape execution
+						frame.秘freezeBounds(dim.width, dim.height);
+					});
+				}
 			} else {
 				DOMNode.setStyles(node, "position", "relative", "overflow", "hidden");
 			}

@@ -26,11 +26,15 @@ public class CorePlugin extends Plugin {
 	 * the actual "x.y.z" version is specified in plugin.xml.
 	 * 
 	 */
-	public static String VERSION = "5.0.1-v4";
+	public static String VERSION = "5.0.1-v7";
 	
 	// if you change the x.x.x number, be sure to also indicate that in 
 	// j2sApplet.js and also (Bob only) update.bat, update-clean.bat
 
+	// BH 2025.03.21 -- 5.0.1-v7 adds @j2sAlias with no name as "strip $"; multiple signatures distinguished with multiple $ appended, starting with "$$"
+	// BH 2025.03.21 -- 5.0.1-v7 adds @j2sExport equivalent to @j2sAlias for all public methods
+	// BH 2025.03.05 -- 5.0.1-v6 adds native interface methods for WASM
+	// BH 2025.02.22 -- 5.0.1-v5 fixes Iterable<IAtom> AtomIterator::new missing [this,null] in generator  
 	// BH 2024.07.14 -- 5.0.1-v4 fixes numerical array initializer using characters ['a','b',...]
 	// BH 2024.02.22 -- 5.0.1-v3 fixes long extension issue causing MutableBitInteger to miscalculate subtraction(no change in version #)
 	// BH 2023.11.27 -- 5.0.1-v2 final refactoring and creatiton of J2SUtil

@@ -10686,6 +10686,9 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// BH 2025.04.20 adds Info.coreAssets:"coreAssets.zip"
+// BH 2025.04.18 enables Info.readyFunction for headless apps
+// BH 2025.04.17 adds option for explicit directory for core files different from j2sPath/core
 // BH 2024.11.09 makes equivalent J2S._debugCore and J2S._nozcore, as well as J2S._debugCode and J2S._nocore
 // BH 2024.10.03 adds two-finger tap as "click"; reinstates touch gestures lost when we went to pointerup 2023.11.01
 // BH 2023.12.14 fixes resizing into application (making it smaller)
@@ -13273,26 +13276,39 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			type = null;
 		}
 
+		var thisPath, isFullName;
 		if (type) {
-			type = type.toLowerCase().split(".")[0]; // package name only
+			var key = type.toLowerCase().substring(type.lastIndexOf("/") + 1);
+			key = key.toLowerCase().split(".")[0]; // package name only
 
 			// return if type is already part of the set.
-			if (__coreSet.join("").indexOf(type) >= 0)
+			if (__coreSet.join("").indexOf(key) >= 0)
 				return;
+
+			__coreSet.push(key);
+			__coreSet.sort();
 
 			// create a concatenated lower-case name for a core file that
 			// includes
 			// all Java applets on the page
+			// only if this is not a full name
 
-			__coreSet.push(type);
-			__coreSet.sort();
-			J2S._coreFiles = [ path + "/core/core" + __coreSet.join("")
-					+ ".z.js" ];
+			// 2025.04.17 adds option to give full (local) path to core file
+			isFullName = (type.indexOf("/") >= 0);
+			if (isFullName){
+				// bypass core/package.js
+				J2S.Globals["core.registered"] = true;
+			}
+			thisPath = (isFullName ? type : path + "/core/core" + __coreSet.join("") + ".z.js");			
+			J2S._coreFiles = [ thisPath ];
 		}
 		if (more && (Array.isArray(more) || (more = more.split(" "))))
 			for (var i = 0; i < more.length; i++)
-				if (more[i] && __coreMore.join("").indexOf(more[i]) < 0)
-					__coreMore.push(path + "/core/core" + more[i] + ".z.js")
+				if (more[i] && __coreMore.join("").indexOf(more[i]) < 0) {
+					isFullName = (more[i].indexOf("/") >= 0);
+					thisPath = (isFullName ? type : path + "/core/core" + more[i] + ".z.js");
+					__coreMore.push(thisPath);
+				}
 		for (var i = 0; i < __coreMore.length; i++)
 			J2S._coreFiles.push(__coreMore[i]);
 	}
@@ -13567,6 +13583,10 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 					alert("Java class " + clazz + " was not found.");
 					return;
 				}
+				var assets = applet.__Info.coreAssets;
+				if (assets) {
+					loadAssets(assets);
+				}
 				if (applet.__Info.code)
 					codePath += applet.__Info.code.replace(/\./g, "/");
 				codePath = codePath.substring(0,
@@ -13575,7 +13595,11 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 					applet._codePath = codePath;
 					Clazz.loadClass("java.lang.Thread").currentThread$().group.html5Applet = applet;
 					cl.main$SA(applet.__Info.args || []);
-					System.exit$(0);
+					if (applet.__Info.readyFunction) {
+						J2S._addExec([ this, function(){applet.__Info.readyFunction(applet);}, null, "Info.readyFunction" ]);
+					} else {
+						System.exit$(0);
+					}
 				} else {
 					
 					var viewerOptions = Clazz.new_("java.util.Hashtable");
@@ -13680,6 +13704,27 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		return proto;
 	};
 
+	var loadAssets = function(assets) {
+		if (!assets) return;
+		if (typeof assets != "string") {
+			// assume array
+			for (var i = 0; i < assets.length; i++) {
+				loadAssets(assets[i]);
+			}
+			return;
+		}
+		try {
+			var bytes = J2S.getFileData(assets,null, true, true);
+			var bis = Clazz.loadClass("javajs.util.Rdr").getBIS$BA(bytes);
+			var cache = J2S.getSetJavaFileCache();
+			var len0 = cache.size$();
+			Clazz.loadClass("javajs.util.ZipTools").readFileAsMap$java_io_BufferedInputStream$java_util_Map$S(bis, cache);
+			System.out.println((cache.size$() - len0) + " items cached from " + assets);
+		} catch(e) {
+			System.out.println("error reading " + assets);
+		}
+	}
+		
 	J2S.repaint = function(applet, asNewThread) {
 		// JmolObjectInterface
 		// asNewThread: true is from RepaintManager.repaintNow()
@@ -14143,6 +14188,11 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2025.04.17 adds option for explicit directory for core files different from j2sPath/core
+// BH 2025.03.12 adds support for writable byte[] parameters in WASM
+// BH 2025.03.06 adds support for JNA+WASM, automated loading of Java native classes if WASM is available
+// BH 2025.02.22 add hashCode$() for Java Integer.TYPE and related types
+// BH 2025.01.31 added checks for JavaScript SyntaxError similar to other Error types
 // BH 2024.11.23 implementing java.awt.Toolkit.getDefaultToolkit().getDesktopProperty("awt.multiClickInterval")
 // BH 2024.06.22 adds Integer.getIngeger(String, int) (returning null)
 // BH 2024.03.03 removes unnecessary loadClass("xxxx") on exceptionOf(e,"xxxx") call
@@ -14854,11 +14904,198 @@ Clazz.new_ = function(c, args, cl) {
   return obj;
 }
 
-// var C$=Clazz.newClass(P$,
-// "Test_Local$1",
-// function(){Clazz.newInstance(this, arguments[0],1,C$);},
-// Clazz.load('test.Test_Local$1ReducingSink'), null, 1);
-//
+Clazz._Pointer = null;
+
+Clazz._loadWasm = function(cls, lib){
+	if (cls.wasmLoaded)
+		return;
+	cls.wasmLoaded = true;
+	var libName = lib.getName$(); // "jnainchi"	var wasmName = libName + ".wasm";
+	if (J2S.wasm && J2S.wasm[libname])
+		return;
+	var className = cls.getName$();
+	var classPath = className.substring(0, className.lastIndexOf(".") + 1).replaceAll(".", "/");
+	var j2sdir = Thread.秘thisThread.getContextClassLoader$().$_$base;
+	var libPath = j2sdir + classPath;
+	var jsClass = cls.$clazz$;
+	var m;
+	Clazz._isQuietLoad = true;
+	var aMethods = cls.getMethods$();
+	var nameMap = {};
+	var funcs = [];
+	J2S.wasm || (J2S.wasm = {});
+	J2S.wasm[libName] || (J2S.wasm[libName] = {});
+	var getFunc = function(cls, newName, sig, ptypes, retType, fargs, fret) {
+		System.out.println("Clazz.loadWasm creating J2S.wasm." + libName + "." + newName);
+		return function(module) { 
+			var f = [];
+			f[0] = module.cwrap(newName, retType, ptypes);	
+			//System.out.println(newName + " " + retType + " " + ptypes);
+			J2S.wasm[libName][newName] = jsClass[newName] = jsClass[sig] = function() {
+				var rgs = [];
+				var ba = [];
+				var pa = [];
+				var getNewFunc = false;
+				for (var i = arguments.length; --i >= 0;) {
+					var a = arguments[i];
+					if (a && a.__NDIM) {
+						// we have a signature "BA" (byte[]), and the 
+						// developer has passed byte[] rather than the assumed
+						// String value. So we need to allocate memory for
+						// the array, fill it, change the wrapping to "number" (for a pointer)
+						// execute the function, and then retrieve the value. 
+						// Emscripten missed this for some reason, and only reads the array 
+						// but does not re-fill it. I think this is a bug. 
+						ba[i] = a;
+						pa[i] = module._malloc(a.length);
+						module.writeArrayToMemory(ba[i], pa[i]);
+						a = pa[i];
+						if (ptypes[i] == "string") {
+							// now we know that a byte[] is being used at runtime instead of a String, 
+							// we need to recreate the wrapped function.
+							// this will only happen once.
+							ptypes[i] = "number";
+							getNewFunc = true;
+						}
+					}
+					rgs[i] = (fargs[i] ? fargs[i](a) : a);
+				}
+				if (getNewFunc) {
+					f[0] = module.cwrap(newName, retType, ptypes);
+				}
+				var val = f[0].apply(null, rgs);
+				if (ba.length) {
+					for (var i = pa.length; --i >= 0;) {
+						if (pa[i]) {
+							// fill original array from pointer
+							for (var pt = pa[i], a = ba[i], n = a.length, j = 0; j < n; j++) {
+								a[j] = module.getValue(pt++);
+							}
+							module._free(pa[i]);
+						}
+					}
+					
+				}
+				return (fret ? fret(val, module) : val);			
+			}
+		}
+	}
+	
+	var argPtr = function(p) { return (p ? p.peer : 0); };
+	var retPtr = function(i) { return Clazz.new_(com.sun.jna.Pointer.c$$I, [i]);};
+	var retStr = function(p) { if (p < 0) return null;var ret = module.UTF8ToString(p); module._free(p);return ret;};
+	var retNull = function() { return null; };
+	
+	for (var i = 0, n = aMethods.length; i < n; i++) {
+		try {
+			m = aMethods[i];
+			var jsm = m.$meth$;
+			if (!jsm.isNative)
+				continue;
+			var name = m.getName$();
+			var newName = name;
+			var ext = nameMap[name] || 0;
+			if (ext) {
+				newName += ext;
+			} else {
+				ext++;
+			}
+			nameMap[name] = ++ext;
+			var sig = m.getSignature$();
+			var aParams = sig.split("$");
+			var ptypes = [];
+			var fargs = [];
+			for (var p = 1, np = aParams.length; sig != null && p <np; p++) {
+				var f = null;
+				var par = aParams[p];
+				switch (par) {
+				case "":
+					// xxxx$()
+					continue;
+				case "com_sun_jna_Pointer":
+					ptypes.push("number");
+					f = argPtr;
+					break;
+				case "BA": // It is assumed these are strings
+				case "S":
+					ptypes.push("string");
+					break;
+				case "B":
+				case "I":
+				case "H":
+				case "J":
+				case "Z":
+				case "F":
+				case "D":
+					ptypes.push("number");
+					break;
+				default:
+					System.err.println("loadWasm unknown param type " + sig + " " + par);
+					sig = null;
+					break;
+				}
+				fargs.push(f);
+			}
+			if (sig == null)
+				continue;
+			var fret = null;
+			var retType = "number"; 
+			switch (jsm.nativeReturn) {
+			case "com.sun.jna.Pointer":
+				if (!Clazz._Pointer) {
+					Clazz._Pointer = Clazz.load("com.sun.jna.Pointer");
+				}
+				fret = retPtr; 
+				break;
+			case "[B": // It is assumed these are strings
+			case "java.lang.String":
+			case "String":
+				retType = "string";
+			break;
+			case "void":
+			case "java.lang.Void":
+				fret = retNull;
+				retType = null;
+			case "byte":
+			case "int":
+			case "short":
+			case "long":
+			case "boolean":
+			case "float":
+			case "double":
+			break;
+			default:
+				System.err.println("loadWasm unknown return type for " + sig + ": " +  jsm.nativeReturn);
+				sig = null;
+				break;
+			}
+			if (sig == null)
+				continue;
+			funcs.push(getFunc(cls, newName, sig, ptypes, retType, fargs, fret));
+		} catch (e) {
+			System.err.println("loadWasm method " + m + " failed - skipped " + e);
+			// something can't be translated
+		}
+	}
+	J2S._nativeDefs || (J2S._nativeDefs = {});
+	J2S._nativeDefs[libName] = funcs;	
+	Clazz._isQuietLoad = false;
+	J2S._wasmPath = libPath;
+	var src = libPath + libName + ".js";
+	var f = function(module){
+		J2S._module = module;
+		for (var i = 0; i < funcs.length; i++) {
+			funcs[i].apply(null, [module]);
+		}
+		cls.wasmInitialized = true;
+		J2S.wasm[libName].$ready = true;
+	}
+	var module = J2S[libName + "_module"]
+	if (module)
+		f(module);
+	else
+		$.getScript(src, function() {jnainchiModule().then(function(module) { f(module) })});
+}
 
 Clazz.newClass = function (prefix, name, clazz, clazzSuper, interfacez, type) { 
 // if (J2S._debugCore) {
@@ -15083,7 +15320,7 @@ Clazz.newInterface = function (prefix, name, f, _null2, interfacez, _0) {
 
 var __allowOverwriteClass = true;
 
-Clazz.newMeth = function (clazzThis, funName, funBody, modifiers) {
+Clazz.newMeth = function (clazzThis, funName, funBody, modifiers, nativeReturn) {
 
 	if (!__allowOverwriteClass && clazzThis.prototype[funName]) 
 		return;
@@ -15105,6 +15342,7 @@ Clazz.newMeth = function (clazzThis, funName, funBody, modifiers) {
     return;
   }
   
+  var isNative = (modifiers == 2);
   var isStatic = (modifiers == 1 || modifiers == 2);
   var isPrivate = (typeof modifiers == "object");
   if (isPrivate) 
@@ -15113,6 +15351,11 @@ Clazz.newMeth = function (clazzThis, funName, funBody, modifiers) {
   funBody.exName = funName; // mark it as one of our methods
   funBody.exClazz = clazzThis; // make it traceable
   funBody.isPrivate = isPrivate;
+  if (isNative) {
+	  funBody.isNative = true;
+	  funBody.nativeReturn = nativeReturn;
+  }
+	  
   var f;
   if (isStatic || funName == "c$")
     clazzThis[funName] = funBody;
@@ -15496,7 +15739,7 @@ var getClassName = function(obj, fAsClassName) {
         return "Boolean";
       if (obj instanceof Array || obj.__BYTESIZE)
         return "Array";
-      if (obj instanceof ReferenceError || obj instanceof TypeError) {
+      if (obj instanceof ReferenceError || obj instanceof TypeError || obj instanceof SyntaxError) {
           // note that this is not technically the case.
     	  // we use this to ensure that try/catch delivers these as java.lang.Error instances
        	  return "Error";   	  
@@ -16643,9 +16886,10 @@ _Loader.loadPackageClasspath = function (pkg, base, isIndex, fSuccess, mode, pt)
 	  // the package idea has been deprecated
 	  // the only package is core/package.js
     if (pkg == "java")
-      pkg = "core" // JSmol -- moves java/package.js to core/package.js
+        pkg = (J2S.Globals["core.registered"] ? null : "core") // JSmol -- moves java/package.js to core/package.js
     // not really asynchronous
-    _Loader.loadClass(pkg + ".package", null, true, true, 1);
+    if (pkg)
+    	_Loader.loadClass(pkg + ".package", null, true, true, 1);
   }
   fSuccess && fSuccess();
 };
@@ -17975,6 +18219,7 @@ var setJ2STypeclass = function(cl, type, paramCode) {
     __PARAMCODE:paramCode, 
     __PRIMITIVE:1  // referenced in java.lang.Class
   };
+  cl.TYPE.hashCode$ = function() {return type.hashCode$()};
   cl.TYPE.isArray$ = cl.TYPE.isEnum$ = cl.TYPE.isAnnotation$ = FALSE;
   cl.TYPE.toString = cl.TYPE.getName$ = cl.TYPE.getTypeName$ 
     = cl.TYPE.getCanonicalName$ = cl.TYPE.getSimpleName$ = function() {return type};
@@ -21207,14 +21452,30 @@ if(lineNum>=0){
 
 TypeError.prototype.getMessage$ || (
 		
- ReferenceError.prototype.getMessage$ = TypeError.prototype.getMessage$ 
-		= ReferenceError.prototype.getMessage$ = TypeError.prototype.getLocalizedMessage$ 
+SyntaxError.prototype.getMessage$ 
+  = ReferenceError.prototype.getMessage$ 
+  = TypeError.prototype.getMessage$ 
+  = SyntaxError.prototype.getLocalizedMessage$ 
+  = ReferenceError.prototype.getLocalizedMessage$ 
+  = TypeError.prototype.getLocalizedMessage$ 
 			= function(){ return (this.stack ? this.stack : this.message || this.toString()) + (this.getStackTrace ? this.getStackTrace$() : Clazz._getStackTrace())});
 
-TypeError.prototype.getStackTrace$ = ReferenceError.prototype.getStackTrace$ = function() { return Clazz._getStackTrace() }
-TypeError.prototype.printStackTrace$ = ReferenceError.prototype.printStackTrace$ = function() { printStackTrace(this,System.err) }
-ReferenceError.prototype.printStackTrace$java_io_PrintStream = TypeError.prototype.printStackTrace$java_io_PrintStream = function(stream){stream.println$S(this + "\n" + this.stack);};
-ReferenceError.prototype.printStackTrace$java_io_PrintWriter = TypeError.prototype.printStackTrace$java_io_PrintWriter = function(printer){printer.println$S(this + "\n" + this.stack);};
+TypeError.prototype.getStackTrace$ 
+= SyntaxError.prototype.getStackTrace$ 
+= ReferenceError.prototype.getStackTrace$ 
+= function() { return Clazz._getStackTrace() }
+TypeError.prototype.printStackTrace$ 
+= SyntaxError.prototype.printStackTrace$ 
+= ReferenceError.prototype.printStackTrace$ 
+= function() { printStackTrace(this,System.err) }
+ReferenceError.prototype.printStackTrace$java_io_PrintStream 
+= TypeError.prototype.printStackTrace$java_io_PrintStream 
+= SyntaxError.prototype.printStackTrace$java_io_PrintStream 
+= function(stream){stream.println$S(this + "\n" + this.stack);};
+ReferenceError.prototype.printStackTrace$java_io_PrintWriter 
+= TypeError.prototype.printStackTrace$java_io_PrintWriter 
+= SyntaxError.prototype.printStackTrace$java_io_PrintWriter 
+= function(printer){printer.println$S(this + "\n" + this.stack);};
 
 Clazz.Error = Error;
 
