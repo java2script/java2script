@@ -1,5 +1,6 @@
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// BH 2025.10.28 moves template.html getClassList to here as J2S.getClassList(optionalName)
 // BH 2025.10.15 allowing ../../.... at the start of Info.j2sPath
 // BH 2025.08.16 allow loading file:/// from current directory
 // BH 2025.04.20 adds Info.coreAssets:"coreAssets.zip"
@@ -2361,6 +2362,11 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	}
 
 	var __profiling;
+
+	J2S.getClassList = function(name){
+		name || (name = '_j2sclasslist.txt');
+		J2S._saveFile(name, Clazz.ClassFilesLoaded.sort().join('\n'));
+	}
 
 	J2S.getProfile = function(doProfile) {
 		if (__profiling || arguments.length == 1 && !doProfile) {
