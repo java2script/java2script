@@ -1,5 +1,8 @@
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
+// BH 2025.10.28 moves template.html getClassList to here as J2S.getClassList(optionalName)
+// BH 2025.10.15 allowing ../../.... at the start of Info.j2sPath
+// BH 2025.08.16 allow loading file:/// from current directory
 // BH 2025.04.20 adds Info.coreAssets:"coreAssets.zip"
 // BH 2025.04.18 enables Info.readyFunction for headless apps
 // BH 2025.04.17 adds option for explicit directory for core files different from j2sPath/core
@@ -189,6 +192,7 @@ window.J2S = J2S = (function() {
 					// null here means no conversion necessary
 					"INTERNET.TEST" : "https://pubchem.ncbi.nlm.nih.gov",
 					"chemapps.stolaf.edu" : null,
+        				"zakodium.com":null,
 					"cactus.nci.nih.gov" : null,
 					".x3dna.org" : null,
 					"rruff.geo.arizona.edu" : null,
@@ -922,17 +926,25 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 		// swingjs.api.J2SInterface
 		// use host-server PHP relay if not from this host
 
-		if (fileName.indexOf("/") == 0)
+		if (fileName.indexOf("/") == 0) {
 			fileName = "." + fileName;
-		else if (fileName.indexOf("https://./") == 0)
+		} else if (fileName.indexOf("https://./") == 0) {
 			fileName = fileName.substring(10);
-		else if (fileName.indexOf("http://./") == 0)
+		} else if (fileName.indexOf("http://./") == 0) {
 			fileName = fileName.substring(9);
-		else if (fileName.indexOf("file:/") >= 0 
-				&& Clazz.loadClass("swingjs.JSUtil") != null
-				&& fileName.indexOf(swingjs.JSUtil.getAppletDocumentPath$()) != 0
-				&& fileName.indexOf(swingjs.JSUtil.getAppletCodePath$()) != 0)
-			fileName = "./" + fileName.substring(5);
+		} else if (fileName.indexOf("file:/") >= 0) {
+			var pt = fileName.lastIndexOf("/");
+			if (fileName.indexOf("/core_") == pt && fileName.endsWith(".js")
+					|| document && (pt = document.location.href.lastIndexOf("/") + 1) > 0
+					   && fileName.indexOf(document.location.href.substring(0, pt) == 0)) {
+			  // allow core_*.js from anywhere, or other files within the local document path
+			} else if (Clazz.loadClass("swingjs.JSUtil") != null
+					&& fileName.indexOf(swingjs.JSUtil.getAppletDocumentPath$()) != 0
+					&& fileName.indexOf(swingjs.JSUtil.getAppletCodePath$()) != 0) {
+				// applet only, not application
+				fileName = "./" + fileName.substring(5);
+			}
+		} 
 		isBinary = (isBinary || J2S.isBinaryUrl(fileName));
 		var isPDB = !noProxy && (fileName.indexOf("pdb.gz") >= 0 && fileName
 				.indexOf("//www.rcsb.org/pdb/files/") >= 0);
@@ -977,6 +989,10 @@ if (database == "_" && J2S._serverUrl.indexOf("//your.server.here/") >= 0) {
 				info.type = "POST";
 				info.url = fileName.split("?POST?")[0]
 				info.data = fileName.split("?POST?")[1]
+				if (info.data.startsWith('{"')) {
+					info.contentType = "application/json";
+					info.data = info.data.replaceAll("\n", "\\\\n");
+				}
 			} else {
 				!info.type && (info.type = "GET");
 				info.url = fileName;
@@ -2347,6 +2363,11 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 	var __profiling;
 
+	J2S.getClassList = function(name){
+		name || (name = '_j2sclasslist.txt');
+		J2S._saveFile(name, Clazz.ClassFilesLoaded.sort().join('\n'));
+	}
+
 	J2S.getProfile = function(doProfile) {
 		if (__profiling || arguments.length == 1 && !doProfile) {
 			var s = Clazz.getProfile();
@@ -2866,10 +2887,15 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 				if (codePath.indexOf("://") < 0) {
 					var base = document.location.href.split("#")[0]
 							.split("?")[0].split("/");
-					if (codePath.indexOf("/") == 0)
+					if (codePath.indexOf("/") == 0) {
 						base = [ base[0], codePath.substring(1) ];
-					else
+					} else {
+						while (codePath.indexOf("../") == 0) {
+							base = base.slice(0, base.length - 1);
+							codePath = codePath.substring(3);
+						}
 						base[base.length - 1] = codePath;
+					}
 					codePath = base.join("/");
 				}
 				applet._j2sFullPath = codePath.substring(0, codePath.length - 1);

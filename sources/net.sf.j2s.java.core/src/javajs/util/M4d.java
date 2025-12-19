@@ -1023,10 +1023,10 @@ public double getElement(int row, int col) {
    */
   @Override
   public String toString() {
-    return "[\n  [" + m00 + "\t" + m01 + "\t" + m02 + "\t" + m03 + "]"
+    return "[[" + m00 + "\t" + m01 + "\t" + m02 + "\t" + m03 + "]"
         + "\n  [" + m10 + "\t" + m11 + "\t" + m12 + "\t" + m13 + "]" + "\n  ["
         + m20 + "\t" + m21 + "\t" + m22 + "\t" + m23 + "]" + "\n  [" + m30
-        + "\t" + m31 + "\t" + m32 + "\t" + m33 + "] ]";
+        + "\t" + m31 + "\t" + m32 + "\t" + m33 + "]]";
   }
   public M4d round(double f) {
     m00 = rnd(m00, f);

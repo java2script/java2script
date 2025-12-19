@@ -400,7 +400,7 @@ public class Arrays {
 			// public static void sort(Object[] a, int fromIndex, int toIndex, Comparator c)
 		int n = 0;
 		Comparator p = null;
-		/** @j2sNative n = arguments.count; p = fromIndex;*/
+		/** @j2sNative n = arguments.length; p = fromIndex;*/
 		{
 		}
 		// 1 or 3 args use comp; 2 uses "fromIndex", 4 uses c
@@ -415,7 +415,7 @@ public class Arrays {
 			toIndex = a.length;
 			break;
 		case 3:
-			p = null;
+			c = null;
 			// fall through //
 		case 4:
 			p = c;
@@ -441,7 +441,7 @@ public class Arrays {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			temp.sort(c.compare);
+		 * 			temp.sort(function(a,b){return c.compare(a,b)});
 		 */
 		{
 		}

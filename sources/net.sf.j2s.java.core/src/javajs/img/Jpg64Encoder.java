@@ -45,7 +45,7 @@ public class Jpg64Encoder extends JpgEncoder {
 
   @Override
   protected void setParams(Map<String, Object> params) {
-    defaultQuality = 75;
+    defaultQuality = 75; // assuming this is for the web; only 30% of the size relative to 100
     outTemp = (OC) params.remove("outputChannelTemp");
     super.setParams(params);
   }

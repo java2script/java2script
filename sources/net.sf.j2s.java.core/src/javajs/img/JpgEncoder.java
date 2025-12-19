@@ -36,7 +36,6 @@ package javajs.img;
 import java.io.IOException;
 import java.util.Map;
 
-import javajs.img.ImageEncoder;
 import javajs.util.AU;
 import javajs.util.OC;
 
@@ -65,7 +64,7 @@ public class JpgEncoder extends ImageEncoder {
   private JpegObj jpegObj;
   private Huffman huf;
   private DCT dct;
-  protected int defaultQuality = 100;
+  protected int defaultQuality = 100; // set to 75 for Base64
   private String applicationTag;
 
   public JpgEncoder() {
@@ -74,11 +73,19 @@ public class JpgEncoder extends ImageEncoder {
 
   @Override
   protected void setParams(Map<String, Object> params) {
-    if (quality <= 0)
-      quality = (params.containsKey("qualityJPG") ? ((Integer) params.get("qualityJPG")).intValue() : defaultQuality);
     jpegObj = new JpegObj();
     jpegObj.comment = (String) params.get("comment");
     applicationTag = (String) params.get("jpgAppTag");
+    dpi = 300;
+    if (quality <= 0)
+      quality = (params.containsKey("qualityJPG") ? ((Integer) params.get("qualityJPG")).intValue() : -1);
+    if (quality >= 90) {
+      // 96, 100, 200, 300, 600, etc.
+      dpi = quality;
+      quality = -1;
+    }    
+    if (quality < 0)
+      quality = defaultQuality;
   }
 
   @Override
@@ -186,24 +193,33 @@ public class JpgEncoder extends ImageEncoder {
   private static byte[] eoi = { (byte) 0xFF, (byte) 0xD9 };
 
   private static byte[] jfif = new byte[] {
-  /* JFIF[0] =*/(byte) 0xff,
-  /* JFIF[1] =*/(byte) 0xe0,
-  /* JFIF[2] =*/0,
-  /* JFIF[3] =*/16,
-  /* JFIF[4] =*/(byte) 0x4a, //'J'
+      // application use marker
+      /* JFIF[0] =*/(byte) 0xff,
+      /* JFIF[1] =*/(byte) 0xe0,
+      // APP0 field size; starting at [2]
+      /* JFIF[2] =*/0,
+      /* JFIF[3] =*/16,
+      
+      /* JFIF[4] =*/(byte) 0x4a, //'J'
       /* JFIF[5] =*/(byte) 0x46, //'F'
       /* JFIF[6] =*/(byte) 0x49, //'I'
       /* JFIF[7] =*/(byte) 0x46, //'F'
       /* JFIF[8] =*/0,
+
       /* JFIF[9] =*/1,
       /* JFIF[10] =*/0,
-      /* JFIF[11] =*/0,
-      /* JFIF[12] =*/0,
-      /* JFIF[13] =*/1,
-      /* JFIF[14] =*/0,
-      /* JFIF[15] =*/1,
-      /* JFIF[16] =*/0,
-      /* JFIF[17] =*/0 };
+      
+      // quality (5 bytes) and thumbnail (2 bytes) follow; not included here
+  };      
+
+  
+//  BYTE Identifier[5];   /* 06h  "JFIF" (zero terminated) Id String */
+//  BYTE Version[2];      /* 07h  JFIF Format Revision      */
+//  BYTE Units;           /* 09h  Units used for Resolution */
+//  BYTE Xdensity[2];     /* 0Ah  Horizontal Resolution     */
+//  BYTE Ydensity[2];     /* 0Ch  Vertical Resolution       */
+//  BYTE XThumbnail;      /* 0Eh  Horizontal Pixel Count    */
+//  BYTE YThumbnail;      /* 0Fh  Vertical Pixel Count      */
 
   private static byte[] soi = { (byte) 0xFF, (byte) 0xD8 };
 
@@ -217,6 +233,9 @@ public class JpgEncoder extends ImageEncoder {
     // The order of the following headers is quite inconsequential.
     // the JFIF header
     writeArray(jfif);
+    
+    writeDensities();
+    writeThumbNailSize();
 
     // Comment Header
     String comment = null;
@@ -285,6 +304,30 @@ public class JpgEncoder extends ImageEncoder {
     sos[index++] = (byte) ((jpegObj.ah << 4) + jpegObj.al);
     writeArray(sos);
     return comment;
+  }
+
+  private void writeDensities() {
+//    Units, Xdensity, and Ydensity identify the unit of measurement 
+//    used to describe the image resolution. 
+//    Units may be 01h for dots per inch, 
+//    02h for dots per centimeter, 
+//    or 00h for none (use measurement as pixel aspect ratio). 
+//    Xdensity and Ydensity are the horizontal and vertical resolution 
+//    of the image data, respectively. 
+//    If the Units field value is 00h, the Xdensity and Ydensity fields 
+//    will contain the pixel aspect ratio (Xdensity : Ydensity) 
+//    rather than the image resolution. 
+//    Because non-square pixels are discouraged for portability 
+//    reasons, the Xdensity and Ydensity values normally 
+//    equal 1 when the Units value is 0.
+
+    out.writeByteAsInt(1);
+    out.writeShort((short) dpi);
+    out.writeShort((short) dpi);
+  }
+
+  private void writeThumbNailSize() {
+    writeArray(new byte[2]);
   }
 
   private void writeString(String s, byte id) {

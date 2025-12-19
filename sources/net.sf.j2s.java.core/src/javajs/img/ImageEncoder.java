@@ -80,6 +80,8 @@ public abstract class ImageEncoder implements GenericImageEncoder {
   protected int width = -1;
   protected int height = -1;
   protected int quality = -1;
+  protected int dpi = -1;
+
   protected String date;
   protected boolean logging;
   protected boolean doClose = true;
@@ -103,6 +105,9 @@ public abstract class ImageEncoder implements GenericImageEncoder {
     setParams(params);
     generate();
     close(); // GIF will override this and not close
+    params.put("qualityActual", Integer.valueOf(quality));
+    if (dpi > 0)
+        params.put("DPI", Integer.valueOf(dpi));
     return doClose;
   }
 

@@ -1,6 +1,7 @@
 java2script/SwingJS Notes
 =========================
 
+updated 5/4/2025 -- clarity about not supporting UI subclassing
 updated 3/11/2023 -- adds support for Java Regex Matcher.start/end(groupID) and .start/end(groupName)
 updated 12/31/2020 -- full support for 64-bit long
 updated 12/6/2020 -- note about restrictions on long, including BitSet and Scanner
@@ -359,6 +360,9 @@ Java or JavaScript equivalents.
 Swing GUI Peers and UIClasses
 -----------------------------
 
+SwingJS does not support custom UI classes that subclass UI classes in javax/swing/plaf 
+or com/sun/javax/swing/plaf.
+
 One of the biggest adaptations introduced in SwingJS is in the area of the graphical 
 user interface. Basically, what we have is a Java Swing "LookAndFeel" customized for HTML.
 
@@ -369,7 +373,7 @@ component "uiClass" (one per component, such as BasicButtonUI or BasicTextFieldU
 Peers are native objects of the operating system. These are the virtual buttons and text areas
 that the user is interacting with at a very base level. They are chunks of low-level code that
 paint the screen to give the illusion that you really are pressing a button or typing text 
-ot the screen. Their events are being passed on to Java or the browser by the operating system. 
+to the screen. Their events are being passed on to Java or the browser by the operating system. 
 
 UI classes provide a consistent "look and feel" for these native objects, rendering them onto 
 the native window canvas and handling all user-generated events. They paint the borders, 

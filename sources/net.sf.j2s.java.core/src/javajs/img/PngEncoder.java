@@ -32,26 +32,25 @@ import java.util.Map;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 
-
-
 /**
  * 
  * Modified by Bob Hanson hansonr@stolaf.edu to be a subclass of ImageEncoder
- * and to use javajs.util.OutputChannel instead of just returning bytes. Also includes: 
- *  
+ * and to use javajs.util.OutputChannel instead of just returning bytes. Also
+ * includes:
+ * 
  * -- JavaScript-compatible image processing
- *  
+ * 
  * -- transparent background option
- *  
- * -- more efficient calculation of needs for pngBytes 
+ * 
+ * -- more efficient calculation of needs for pngBytes
  * 
  * -- option to use pre-created PNGJ image data (3/19/14; Jmol 14.1.12)
  * 
  * -- PNGJ format:
  * 
- * // IHDR chunk 
+ * // IHDR chunk
  * 
- * // tEXt chunk "Jmol type - <PNG0|PNGJ|PNGT><0000000pt>+<000000len>" 
+ * // tEXt chunk "Jmol type - <PNG0|PNGJ|PNGT><0000000pt>+<000000len>"
  * 
  * // tEXt chunk "Software - Jmol <version>"
  * 
@@ -61,7 +60,7 @@ import java.util.zip.DeflaterOutputStream;
  *
  * // IDAT chunk (image data)
  * 
- * // IEND chunk 
+ * // IEND chunk
  * 
  * // [JMOL ZIP FILE APPENDIX]
  * 
@@ -92,7 +91,7 @@ public class PngEncoder extends CRCEncoder {
   public static final int FILTER_SUB = 1;
   public static final int FILTER_UP = 2;
   public static final int FILTER_LAST = 2;
-  
+
   private static final int PT_FIRST_TAG = 37;
 
   private boolean encodeAlpha;
@@ -107,18 +106,27 @@ public class PngEncoder extends CRCEncoder {
   private String comment;
   private byte[] bytes;
 
-  
+  private final static double inchesPerMeter = 39.3700787;
+
   public PngEncoder() {
     super();
   }
 
   @Override
   protected void setParams(Map<String, Object> params) {
-    if (quality < 0)
-      quality = (params.containsKey("qualityPNG") ? ((Integer) params
-          .get("qualityPNG")).intValue() : 2);
-    if (quality > 9)
+    if (quality < 0) {
+      quality = (params.containsKey("qualityPNG")
+          ? ((Integer) params.get("qualityPNG")).intValue()
+          : 2);
+    } else if (quality > 9 && quality < 90) {
       quality = 9;
+    }
+    dpi = 300;
+    if (quality >= 90) {
+      // 96, 100, 200, 300, 600, etc.
+      dpi = quality;
+      quality = 2;
+    }    
     encodeAlpha = false;
     filter = FILTER_NONE;
     compressionLevel = quality;
@@ -129,8 +137,6 @@ public class PngEncoder extends CRCEncoder {
     appData = (byte[]) params.get("pngAppData");
     appPrefix = (String) params.get("pngAppPrefix");
   }
-
-  
 
   @Override
   protected void generate() throws IOException {
@@ -145,20 +151,18 @@ public class PngEncoder extends CRCEncoder {
     }
     int len = dataLen;
     if (appData != null) {
-      setJmolTypeText(appPrefix, bytes, len, appData.length,
-          type);
+      setJmolTypeText(appPrefix, bytes, len, appData.length, type);
       out.write(bytes, 0, len);
       len = (bytes = appData).length;
     }
     out.write(bytes, 0, len);
   }
 
-
   /**
    * Creates an array of bytes that is the PNG equivalent of the current image,
    * specifying whether to encode alpha or not.
    * 
-   * @return        true if successful
+   * @return true if successful
    * 
    */
   private boolean pngEncode() {
@@ -172,6 +176,9 @@ public class PngEncoder extends CRCEncoder {
 
     writeText("Software\0" + comment);
     writeText("Creation Time\0" + date);
+
+    if (dpi > 0)
+      writePhysicalSize();
 
     if (!encodeAlpha && transparentColor != null)
       writeTransparentColor(transparentColor.intValue());
@@ -189,20 +196,22 @@ public class PngEncoder extends CRCEncoder {
    * This was corrected for Jmol 12.3.30. Between 12.3.7 and 12.3.29, PNG files
    * created by Jmol have incorrect checksums.
    * 
-   * @param prefix 
+   * @param prefix
    * 
    * @param b
    * @param nPNG
    * @param nState
    * @param type
    */
-  private static void setJmolTypeText(String prefix, byte[] b, int nPNG, int nState, String type) {
+  private static void setJmolTypeText(String prefix, byte[] b, int nPNG,
+                                      int nState, String type) {
     String s = "tEXt" + getApplicationText(prefix, type, nPNG, nState);
     CRCEncoder encoder = new PngEncoder();
     byte[] test = s.substring(0, 4 + prefix.length()).getBytes();
-    for (int i = test.length; -- i >= 0;) 
+    for (int i = test.length; --i >= 0;)
       if (b[i + PT_FIRST_TAG] != test[i]) {
-        System.out.println("image is not of the right form; appending data, but not adding tEXt tag.");
+        System.out.println(
+            "image is not of the right form; appending data, but not adding tEXt tag.");
         return;
       }
     encoder.setData(b, PT_FIRST_TAG);
@@ -213,35 +222,37 @@ public class PngEncoder extends CRCEncoder {
   /**
    * Generate the PNGJ directory identifier:
    * 
-   *    xxxxxxxxx\0ttttiiiiiiiii+ddddddddd
-   *    
-   * where 
+   * xxxxxxxxx\0ttttiiiiiiiii+ddddddddd
    * 
-   * xxxxxxxxx is a unique 9-character software identifier
-   * tttt is a four-byte software-specific type indicator (PNG0, PNGJ, PNGT, etc.)
-   * iiiiiiiii is the file pointer to the start of app data
-   * ddddddddd is the length of the app data
+   * where
    * 
-   * @param prefix up to 9 characters to allow software to recognize itself 
-   * @param type PNGx, where x is J or T for Jmol; original type "PNG" is now "PNG0" 
+   * xxxxxxxxx is a unique 9-character software identifier tttt is a four-byte
+   * software-specific type indicator (PNG0, PNGJ, PNGT, etc.) iiiiiiiii is the
+   * file pointer to the start of app data ddddddddd is the length of the app
+   * data
+   * 
+   * @param prefix
+   *        up to 9 characters to allow software to recognize itself
+   * @param type
+   *        PNGx, where x is J or T for Jmol; original type "PNG" is now "PNG0"
    * @param nPNG
    * @param nData
-   * @return
+   * @return text
    */
-	private static String getApplicationText(String prefix, String type,
-			int nPNG, int nData) {
-		String sPNG = "000000000" + nPNG;
-		sPNG = sPNG.substring(sPNG.length() - 9);
-		String sData = "000000000" + nData;
-		sData = sData.substring(sData.length() - 9);
-		if (prefix == null)
-			prefix = "#SwingJS.";			
-		if (prefix.length() < 9)
-			prefix = (prefix + ".........");
-		if (prefix.length() > 9)
-			prefix = prefix.substring(0, 9);
-		return prefix + "\0" + type + sPNG + "+" + sData;
-	}
+  private static String getApplicationText(String prefix, String type, int nPNG,
+                                           int nData) {
+    String sPNG = "000000000" + nPNG;
+    sPNG = sPNG.substring(sPNG.length() - 9);
+    String sData = "000000000" + nData;
+    sData = sData.substring(sData.length() - 9);
+    if (prefix == null)
+      prefix = "#SwingJS.";
+    if (prefix.length() < 9)
+      prefix = (prefix + ".........");
+    if (prefix.length() > 9)
+      prefix = prefix.substring(0, 9);
+    return prefix + "\0" + type + sPNG + "+" + sData;
+  }
 
   //  /**
   //   * Set the filter to use
@@ -322,13 +333,28 @@ public class PngEncoder extends CRCEncoder {
     writeCRC();
   }
 
+  /**
+   * Write a PNG "pHYs" chunk into the pngBytes array, setting the dots per
+   * meter.
+   * 
+   */
+  private void writePhysicalSize() {
+
+    writeInt4(9);
+    writeString("pHYs");
+    int ppm = (int) Math.round(inchesPerMeter * dpi);
+    writeInt4(ppm);
+    writeInt4(ppm);
+    writeByte(1);
+    writeCRC();
+  }
+
   private byte[] scanLines; // the scan lines to be compressed
   private int byteWidth; // width * bytesPerPixel
 
   //private int hdrPos, dataPos, endPos;
   //private byte[] priorRow;
   //private byte[] leftBytes;
-
 
   /**
    * Write the image data into the pngBytes array. This will write one or more
@@ -360,9 +386,9 @@ public class PngEncoder extends CRCEncoder {
         deflater);
 
     int pt = 0; // overall image byte pointer
-    
+
     // Jmol note: The entire image has been stored in pixels[] already
-    
+
     try {
       while (rowsLeft > 0) {
         nRows = Math.max(1, Math.min(32767 / scanWidth, rowsLeft));

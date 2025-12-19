@@ -7,10 +7,11 @@ import java.util.Map;
 public interface GenericCifDataParser {
 
   static final int NONE = -1;
-
-  String fullTrim(String str);
+  static final int EMPTY = -2;
 
   Map<String, Object> getAllCifData();
+
+  Map<String, Object> getAllCifDataType(String[] types);
 
   boolean getData() throws Exception;
 

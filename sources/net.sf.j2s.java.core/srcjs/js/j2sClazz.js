@@ -7,6 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2025.10.16 minimizing missing package.js message
 // BH 2025.04.17 adds option for explicit directory for core files different from j2sPath/core
 // BH 2025.03.12 adds support for writable byte[] parameters in WASM
 // BH 2025.03.06 adds support for JNA+WASM, automated loading of Java native classes if WASM is available
@@ -2144,13 +2145,13 @@ var setSuperclass = function(clazzThis, clazzSuper){
       clazzThis.prototype = new clazzSuper(inheritArgs);     
       if (clazzSuper == Error) {
         var pp = Throwable.prototype;
-        for (o in pp) {
+        for (var o in pp) {
           if (!pp.exClazz || pp.exClazz != Clazz._O)
             clazzThis.prototype[o] = pp[o];
         }
       }
     } 
-    for (o in p) {
+    for (var o in p) {
       if (!p[o].exClazz || p[o].exClazz != Clazz._O)
       clazzThis.prototype[o] = p[o];
     }      
@@ -2903,10 +2904,13 @@ var evaluate = function(file, js) {
 	else
 		new Function((J2S._strict ? '"use strict";':'')+js + ";//# sourceURL="+file)();
   } catch (e) {      
-    var s = "[Java2Script] The required class file \n\n" + file + (js.indexOf("data: no") ? 
+    var s = "[Java2Script] " + (
+    		file.indexOf("/core/package.js") >= 0 
+    		? file + " not found (ignored)"
+    		: "The required class file \n\n" + file + (js.indexOf("data: no") ? 
        "\nwas not found.\n"
       : "\ncould not be loaded. Script error: " + e.message + " \n\ndata:\n\n" + js) + "\n\n" 
-      + (e.stack ? e.stack : Clazz._getStackTrace());
+      + (e.stack ? e.stack : Clazz._getStackTrace()));
     Clazz._lastEvalError = s;    
     if (Clazz._isQuietLoad) 
       return;
@@ -3011,7 +3015,7 @@ Clazz.loadScript = function(file, nameForList) {
 	Clazz.ClassFilesLoaded.pop();
     _Loader.onScriptLoaded(file, e, data);
     var s = ""+e;
-    if (data.indexOf("Error") >= 0)
+    if (data && data.indexOf("Error") >= 0)
       s = data;
     if (s.indexOf("missing ] after element list")>= 0)
       s = "File not found";

@@ -626,9 +626,9 @@ public class M3d extends M34d implements Serializable {
    */
   @Override
   public String toString() {
-    return "[\n  [" + m00 + "\t" + m01 + "\t" + m02 + "]" + "\n  [" + m10
+    return "[[" + m00 + "\t" + m01 + "\t" + m02 + "]" + "\n  [" + m10
         + "\t" + m11 + "\t" + m12 + "]" + "\n  [" + m20 + "\t" + m21 + "\t"
-        + m22 + "] ]";
+        + m22 + "]]";
   }
 
   /**
@@ -657,6 +657,13 @@ public class M3d extends M34d implements Serializable {
    * Graphics in Dimensions Greater than Three
    * Course Notes for SIGGRAPH ’98
    * http://www.cse.ohio-state.edu/~hwshen/888_su02/hanson_note.pdf
+   * and 
+   * https://argos.vu/wp-content/uploads/2016/04/course11.pdf
+   * 
+   * from Helgason
+   * 
+   * https://www.ams.org/books/chel/341/chel341-endmatter.pdf
+   * 
    * 
    * @param responseFactor Jmol uses 0.02 here
    * @param dx
