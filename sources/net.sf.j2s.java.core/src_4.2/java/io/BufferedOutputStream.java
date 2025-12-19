@@ -52,26 +52,26 @@ public class BufferedOutputStream extends FilterOutputStream {
         buf = new byte[8192];
     }
 
-    /**
-     * Constructs a new BufferedOutputStream on the OutputStream
-     * <code>out</code>. The buffer size is set to <code>size</code> and
-     * all writes are now filtered through this stream.
-     * 
-     * @param out
-     *            the OutputStream to buffer writes on.
-     * @param size
-     *            the size of the buffer in bytes.
-     * @throws IllegalArgumentException
-     *             the size is <= 0
-     */
-    public BufferedOutputStream(OutputStream out, int size) {
-  		jzSetFOS(out);
-        if (size <= 0) {
-            // K0058=size must be > 0
-            throw new IllegalArgumentException(("K0058")); //$NON-NLS-1$
-        }
-        buf = new byte[size];
-    }
+//    /**
+//     * Constructs a new BufferedOutputStream on the OutputStream
+//     * <code>out</code>. The buffer size is set to <code>size</code> and
+//     * all writes are now filtered through this stream.
+//     * 
+//     * @param out
+//     *            the OutputStream to buffer writes on.
+//     * @param size
+//     *            the size of the buffer in bytes.
+//     * @throws IllegalArgumentException
+//     *             the size is <= 0
+//     */
+//    public BufferedOutputStream(OutputStream out, int size) {
+//  		jzSetFOS(out);
+//        if (size <= 0) {
+//            // K0058=size must be > 0
+//            throw new IllegalArgumentException(("K0058")); //$NON-NLS-1$
+//        }
+//        buf = new byte[size];
+//    }
 
     /**
      * Flush this BufferedOutputStream to ensure all pending data is written out
