@@ -1993,7 +1993,7 @@ public class JSComponentUI extends ComponentUI
 				DOMNode.transferTo(outerNode, body);
 				DOMNode.setStyle(outerNode,  "position", "absolute");
 			}
-		} else {
+		} else if (imageNode == null){
 			DOMNode.setStyle(outerNode, "overflow", "hidden");
 		}
 		setTainted(false);
