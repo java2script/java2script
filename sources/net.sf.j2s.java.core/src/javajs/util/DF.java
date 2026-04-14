@@ -125,7 +125,7 @@ public class DF {
         return (isNeg ? "-" : "") + s1 + formattingStrings[decimalDigits].substring(1);
     int pt1 = s1.indexOf("E-");
     if (pt1 > 0) {
-      n = PT.parseInt(s1.substring(pt1 + 1));
+      n = Math.max(-40, PT.parseInt(s1.substring(pt1 + 1)));
       // 3.567E-2
       // 0.03567
       // -0.0001
