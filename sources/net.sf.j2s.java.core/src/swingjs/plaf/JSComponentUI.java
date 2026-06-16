@@ -52,17 +52,17 @@ import javax.swing.event.ChangeListener;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.UIResource;
 
+import javajs.api.js.HTML5Applet;
 import sun.awt.CausedFocusEvent.Cause;
 import swingjs.JSFocusPeer;
 import swingjs.JSGraphics2D;
 import swingjs.JSToolkit;
 import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
-import swingjs.api.js.HTML5Applet;
 import swingjs.api.js.J2SInterface;
 import swingjs.api.js.JQuery;
 import swingjs.api.js.JQueryObject;
-import swingjs.api.js.JSFunction;
+import javajs.api.js.HTML5Applet.JSFunction;
 
 /**
  * The JSComponentUI subclasses are where all the detailed HTML5 implementation

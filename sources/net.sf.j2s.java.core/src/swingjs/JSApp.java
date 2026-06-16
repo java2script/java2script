@@ -4,7 +4,7 @@ import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Map.Entry;
 
-import swingjs.api.js.HTML5Applet;
+import javajs.api.js.HTML5Applet;
 
 @SuppressWarnings("rawtypes")
 public class JSApp {

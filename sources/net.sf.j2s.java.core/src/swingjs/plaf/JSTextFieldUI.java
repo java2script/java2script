@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.Action;
+import javax.swing.BoundedRangeModel;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JTextField;
@@ -70,6 +71,7 @@ public class JSTextFieldUI extends JSTextUI {
 	 * ENTER :: JtextField.notifyAction
 	 */
 	private InputMap jsmap;
+	private boolean isAdjustingScroll;
 
 	/**
 	 * Get the InputMap to use for the UI.
@@ -105,9 +107,6 @@ public class JSTextFieldUI extends JSTextUI {
 		return (text == null ? null : text.length() + "ch");
 	}
 
-
-    
-
 	@Override
 	public Dimension getMinimumSize(JComponent jc) {
 		return JSLabelUI.getMinimumSizePeer(jc, editor, false);
@@ -120,5 +119,82 @@ public class JSTextFieldUI extends JSTextUI {
 			d.width = Integer.MAX_VALUE;
 		return d; 
 	}
+
+	public void updateDOMFromModel() {
+		addScrollListeners();
+		BoundedRangeModel model = textField.getHorizontalVisibility();
+		int value = model.getValue();
+		int extent = Math.round(DOMNode.getAttrInt(domNode, "clientWidth"));
+		int max = Math.round(DOMNode.getAttrInt(domNode, "scrollWidth"));
+		DOMNode.setAttrInt(domNode, "scrollLeft", value);
+	}
+	
+	public int lastScrollLeft = Integer.MAX_VALUE;
+
+	public void notifyDomNodeScrolled() {
+		updateVisibilityModel(textField.getHorizontalVisibility());
+	}
+	
+	public void addScrollListeners() {
+		Object me = this;
+		DOMNode node = domNode;
+		if (lastScrollLeft != Integer.MAX_VALUE)
+			return;
+		lastScrollLeft = 0;
+		/** @j2sNative
+			var listener = function() {
+	        	if (node.scrollLeft !== me.lastScrollLeft) {
+        			me.lastScrollLeft = node.scrollLeft;
+        			me.notifyDomNodeScrolled$();
+    			}
+    		};
+    		node.addEventListener('input', listener);
+    		node.addEventListener('keydown', listener);
+    		node.addEventListener('keyup', listener);
+    		node.addEventListener('wheel', listener);
+    		node.addEventListener('mousemove', listener);
+    		node.addEventListener('mouseup', listener);
+		    // selectionchange needs to be on document for some browsers
+		 */
+		{}	
+	}
+	
+	/**
+	 * direct assignment of values
+	 * @param model
+	 * @return
+	 */
+	public BoundedRangeModel updateVisibilityModelPrivate(BoundedRangeModel model) {
+		int extent = Math.round(DOMNode.getAttrInt(domNode, "clientWidth"));
+		int max = Math.round(DOMNode.getAttrInt(domNode, "scrollWidth"));
+		if (max == 0)
+			return model;
+		/**
+		 * @j2sNative
+		 * 
+		 * model.extent = extent;
+		 * model.max = max;
+		 */
+		return model;
+	}
+	
+	public BoundedRangeModel updateVisibilityModel(BoundedRangeModel model) {
+		if (isAdjustingScroll)
+			return model;
+		// How much text is hidden to the left		  
+		int value = Math.round(DOMNode.getAttrInt(domNode, "scrollLeft"));
+	    // Width of the text that is actually visible
+		int extent = Math.round(DOMNode.getAttrInt(domNode, "clientWidth"));
+	    // Total width of the text content
+		int max = Math.round(DOMNode.getAttrInt(domNode, "scrollWidth"));
+//	    value: inputElement.scrollLeft,
+//	    extent: inputElement.clientWidth,
+//	    maximum: inputElement.scrollWidth,
+		isAdjustingScroll = true;
+		model.setRangeProperties(value, extent, 0, max, false);
+		isAdjustingScroll = false;
+		return model;
+	}	
+	
 
 }

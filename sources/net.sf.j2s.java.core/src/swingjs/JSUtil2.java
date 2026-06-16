@@ -2,7 +2,7 @@ package swingjs;
 
 import java.util.function.Consumer;
 
-import swingjs.api.js.DOMNode.Promise;
+import javajs.api.js.HTML5Applet.Promise;
 
 /** Do not include this class in files to compress, as the GCC cannot handle that.
  * 

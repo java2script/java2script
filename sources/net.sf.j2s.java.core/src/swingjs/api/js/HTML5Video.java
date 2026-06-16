@@ -20,7 +20,8 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import swingjs.api.JSUtilI;
+import javajs.api.js.JSUtilI;
+import javajs.api.js.HTML5Applet.Promise;
 
 /**
  * A full-service interface for HTML5 video element interaction. Allows setting

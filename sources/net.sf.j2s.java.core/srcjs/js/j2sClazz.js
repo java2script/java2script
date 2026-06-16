@@ -7,6 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2026.06.16 fixing x.replace(y,"...$...") not working properly
 // BH 2025.10.16 minimizing missing package.js message
 // BH 2025.04.17 adds option for explicit directory for core files different from j2sPath/core
 // BH 2025.03.12 adds support for writable byte[] parameters in WASM
@@ -6185,7 +6186,14 @@ sp.replace$ = function(c1,c2){
   } else {    
     c1=c1.replace(/([\\\$\.\*\+\|\?\^\{\}\(\)\[\]])/g,function($0,$1){return "\\"+$1;});
   }
-  return this.replace(new RegExp(c1,"gm"),c2);
+	var pt = c2.indexOf("$");
+	var is$ = (pt >= 0 && pt < c2.length - 1);
+	if (is$)
+		c2 = c2.replaceAll("\\$", "\uFFFD");
+	var ret = this.replace(new RegExp(c1,"gm"),c2);
+	if (is$)
+		ret = ret.replaceAll("\uFFFD", "$");
+	return ret;	
 };
 
 // fastest:

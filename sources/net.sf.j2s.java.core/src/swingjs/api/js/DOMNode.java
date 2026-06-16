@@ -2,8 +2,6 @@ package swingjs.api.js;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * A mix of direct DOM calls on DOM nodes and convenience methods to do that.
@@ -14,23 +12,6 @@ import java.util.function.Function;
  *
  */
 public interface DOMNode {
-	/**
-	 * avoiding GCC inability to handle .finally and .catch
-	 * 
-	 * @j2sNative
-	 * 
-	 * 		eval("Promise.prototype.$then = function(resolve,reject){return this.then(function(value) {return resolve ? resolve.apply$O(value) : value},function(reason){return reject ? reject.apply$O(reason) : reason})};");
-	 *      eval("Promise.prototype.$finally = function(r){this.finally(function(){r.run$()})};");
-	 *      eval("Promise.prototype.$catch = function(err){this.catch(function(){err.accept$S('' + err)})};");
-	 */
-
-	public interface Promise {
-		public Promise then(JSFunction resolve, JSFunction reject);
-		public Promise $then(Function<Object, Object> resolve, Function<Object, Object> reject);
-		public Promise $finally(Runnable whenDone);
-		public Promise $catch(Consumer<String> onRejected);
-	}
-
 	public static JQuery jQuery = /** @j2sNative jQuery.$ || (jQuery.$ = jQuery) || */null;
 
 	// "abstract" in the sense that these are the exact calls to JavaScript

@@ -61,7 +61,8 @@ import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
 
-import swingjs.api.js.JSFunction;
+import javajs.api.js.HTML5Applet.JSFunction;
+import javajs.api.js.HTML5Applet;
 import javajs.util.JSThread;
 import javajs.util.PT;
 import sun.awt.AppContext;
@@ -70,7 +71,6 @@ import sun.awt.image.FileImageSource;
 import sun.awt.image.ToolkitImage;
 import swingjs.api.Interface;
 import swingjs.api.JSFileHandler;
-import swingjs.api.js.HTML5Applet;
 import swingjs.api.js.HTML5CanvasContext2D;
 import swingjs.api.js.JQuery;
 import swingjs.plaf.JSComponentUI;

@@ -34,20 +34,25 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Insets;
+import java.awt.Rectangle;
 //import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.EventListenerList;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.PlainDocument;
 //import javax.swing.text.PlainDocument;
 import javax.swing.text.TextAction;
+
+import swingjs.plaf.JSTextFieldUI;
 
 /**
  * <code>JTextField</code> is a lightweight component that allows the editing
@@ -174,7 +179,7 @@ import javax.swing.text.TextAction;
 @SuppressWarnings({"rawtypes"})
 public class JTextField extends JTextComponent implements SwingConstants {
 
-    /**
+	/**
      * Constructs a new <code>TextField</code>.  A default model is created,
      * the initial string is <code>null</code>,
      * and the number of columns is set to 0.
@@ -247,8 +252,6 @@ public class JTextField extends JTextComponent implements SwingConstants {
 		if (columns < 0) {
 			throw new IllegalArgumentException("columns less than zero.");
 		}
-		// visibility = new DefaultBoundedRangeModel();
-		// visibility.addChangeListener(new ScrollRepainter());
 		this.columns = columns;
 		if (doc == null) {
 			doc = createDefaultModel();
@@ -770,61 +773,75 @@ public class JTextField extends JTextComponent implements SwingConstants {
 
     // --- Scrolling support -----------------------------------
 
-// SwingJS n/a    /**
-//     * Gets the visibility of the text field.  This can
-//     * be adjusted to change the location of the visible
-//     * area if the size of the field is greater than
-//     * the area that was allocated to the field.
-//     *
-//     * <p>
-//     * The fields look-and-feel implementation manages
-//     * the values of the minimum, maximum, and extent
-//     * properties on the <code>BoundedRangeModel</code>.
-//     *
-//     * @return the visibility
-//     * @see BoundedRangeModel
-//     */
-//    public BoundedRangeModel getHorizontalVisibility() {
-//        return visibility;
-//    }
-//
-//    /**
-//     * Gets the scroll offset, in pixels.
-//     *
-//     * @return the offset >= 0
-//     */
-//    public int getScrollOffset() {
-//        return visibility.getValue();
-//    }
-//
-//    /**
-//     * Sets the scroll offset, in pixels.
-//     *
-//     * @param scrollOffset the offset >= 0
-//     */
-//    public void setScrollOffset(int scrollOffset) {
-//        visibility.setValue(scrollOffset);
-//    }
-//
-//    /**
-//     * Scrolls the field left or right.
-//     *
-//     * @param r the region to scroll
-//     */
-//    public void scrollRectToVisible(Rectangle r) {
-//        // convert to coordinate system of the bounded range
-//        Insets i = getInsets();
-//        int x0 = r.x + visibility.getValue() - i.left;
-//        int x1 = x0 + r.width;
-//        if (x0 < visibility.getValue()) {
-//            // Scroll to the left
-//            visibility.setValue(x0);
-//        } else if(x1 > visibility.getValue() + visibility.getExtent()) {
-//            // Scroll to the right
-//            visibility.setValue(x1 - visibility.getExtent());
-//        }
-//    }
-//
+    /**
+     * Gets the visibility of the text field.  This can
+     * be adjusted to change the location of the visible
+     * area if the size of the field is greater than
+     * the area that was allocated to the field.
+     *
+     * <p>
+     * The fields look-and-feel implementation manages
+     * the values of the minimum, maximum, and extent
+     * properties on the <code>BoundedRangeModel</code>.
+     *
+     * @return the visibility
+     * @see BoundedRangeModel
+     */
+    public BoundedRangeModel getHorizontalVisibility() {
+        return 秘getVisibility();
+    }
+    
+    /**
+     * SwingJS lazy instantiation
+     * 
+     * @return
+     */
+    private BoundedRangeModel 秘getVisibility() {
+    	if (visibility == null) {
+    		visibility = new DefaultBoundedRangeModel();
+    		visibility.addChangeListener(new ScrollRepainter());
+    	}
+    	return ((JSTextFieldUI)getUI()).updateVisibilityModelPrivate(visibility);    	
+    }
+
+    /**
+     * Gets the scroll offset, in pixels.
+     *
+     * @return the offset >= 0
+     */
+    public int getScrollOffset() {
+        return 秘getVisibility().getValue();
+    }
+
+    /**
+     * Sets the scroll offset, in pixels.
+     *
+     * @param scrollOffset the offset >= 0
+     */
+    public void setScrollOffset(int scrollOffset) {
+        	秘getVisibility().setValue(scrollOffset);
+    }
+
+    /**
+     * Scrolls the field left or right.
+     *
+     * @param r the region to scroll
+     */
+    @Override
+	public void scrollRectToVisible(Rectangle r) {
+        // convert to coordinate system of the bounded range
+        Insets i = getInsets();
+        int x0 = r.x + 秘getVisibility().getValue() - i.left;
+        int x1 = x0 + r.width;
+        if (x0 < visibility.getValue()) {
+            // Scroll to the left
+            visibility.setValue(x0);
+        } else if(x1 > visibility.getValue() + visibility.getExtent()) {
+            // Scroll to the right
+            visibility.setValue(x1 - visibility.getExtent());
+        }
+    }
+
     /**
      * Returns true if the receiver has an <code>ActionListener</code>
      * installed.
@@ -851,7 +868,7 @@ public class JTextField extends JTextComponent implements SwingConstants {
      */
     public static final String notifyAction = "notify-field-accept";
 
-//    private BoundedRangeModel visibility;
+    private BoundedRangeModel visibility;
     private int horizontalAlignment = LEADING;
     protected int columns;
     protected int columnWidth;
@@ -891,10 +908,12 @@ public class JTextField extends JTextComponent implements SwingConstants {
 
     class ScrollRepainter implements ChangeListener {
 
-        @Override
-				public void stateChanged(ChangeEvent e) {
-            秘repaint();
-        }
+		@Override
+		public void stateChanged(ChangeEvent e) {
+			((JSTextFieldUI) ui).updateDOMFromModel();
+//			
+//			秘repaint();
+		}
 
     }
 

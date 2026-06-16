@@ -43,12 +43,12 @@ import javax.swing.Timer;
 import javax.swing.TransferHandler;
 import javax.swing.WindowConstants;
 
+import javajs.api.js.JSUtilI;
 import javajs.async.SwingJSUtils.StateHelper;
 import javajs.util.Rdr;
 import javajs.util.VideoReader;
 import swingjs.JSImagekit;
 import swingjs.JSUtil;
-import swingjs.api.JSUtilI;
 import swingjs.api.js.HTML5Video;
 
 /**

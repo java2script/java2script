@@ -171,6 +171,8 @@ java/util/Set.js
 java/util/TimSort.js
 java/util/Vector.js
 javajs/api/JSFunction.js
+javajs/api/JSUtilI.js
+javajs/api/js/HTML5Applet.js
 javajs/util/AjaxURLConnection.js
 javajs/util/AjaxURLStreamHandlerFactory.js
 javajs/util/AU.js
@@ -370,7 +372,6 @@ swingjs/JSNullComponentPeer.js
 swingjs/JSScreenDevice.js
 swingjs/JSThreadGroup.js
 swingjs/JSToolkit.js
-swingjs/JSUtil.js
 swingjs/plaf/ButtonListener.js
 swingjs/plaf/DefaultMenuLayout.js
 swingjs/plaf/HTML5LookAndFeel.js
