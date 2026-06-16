@@ -171,7 +171,7 @@ java/util/Set.js
 java/util/TimSort.js
 java/util/Vector.js
 javajs/api/JSFunction.js
-javajs/api/JSUtilI.js
+javajs/api/js/JSUtilI.js
 javajs/api/js/HTML5Applet.js
 javajs/util/AjaxURLConnection.js
 javajs/util/AjaxURLStreamHandlerFactory.js
