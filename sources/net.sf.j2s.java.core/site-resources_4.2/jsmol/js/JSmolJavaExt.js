@@ -1035,10 +1035,10 @@ sp.$replace=function(c1,c2){
 	var pt = c2.indexOf("$");
 	var is$ = (pt >= 0 && pt < c2.length - 1);
 	if (is$)
-		c2 = c2.replaceAll("\\$", "\uFFFD");
+		c2 = c2.split("$").join("\uFFFD");
 	var ret = this.replace(new RegExp(c1,"gm"),c2);
 	if (is$)
-		ret = ret.replaceAll("\uFFFD", "$");
+		ret = ret.split("\uFFFD").join("$");
 	return ret;	
 };
 sp.$generateExpFunction=function(str){
