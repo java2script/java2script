@@ -29,10 +29,11 @@ public interface J2SObjectInterface {
 
 	void showInfo(JSAppletObject html5Applet, boolean show);
 
-// also in swingjs.api.js: 
+// also in SwingJS: 
 	
 	boolean isBinaryUrl(String filename);
 
 	void saveFile(String fileName, Object data, String mimeType, String encoding);
 
+// only in SwingJS
 }

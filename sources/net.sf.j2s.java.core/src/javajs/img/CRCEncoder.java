@@ -13,7 +13,7 @@ abstract class CRCEncoder extends ImageEncoder {
   protected byte[] pngBytes;  
   protected int dataLen;
   private byte[] int2 = new byte[2];
-  private byte[] int4 = new byte[4];
+  protected byte[] int4 = new byte[4];
 
   CRCEncoder() {
     pngBytes = new byte[250];
@@ -43,9 +43,13 @@ abstract class CRCEncoder extends ImageEncoder {
    * @param n The integer to be written into pngBytes.
    */
   protected void writeInt2(int n) {
-    int2[0] = (byte) ((n >> 8) & 0xff);
-    int2[1] = (byte) (n & 0xff);
+    getInt2(n, int2, 0);
     writeBytes(int2);
+  }
+
+  protected static void getInt2(int n, byte[] b, int offset) {
+    b[offset++] = (byte) ((n >> 8) & 0xff);
+    b[offset] = (byte) (n & 0xff);
   }
 
   /**
@@ -54,17 +58,17 @@ abstract class CRCEncoder extends ImageEncoder {
    * @param n The integer to be written into pngBytes.
    */
   protected void writeInt4(int n) {
-    getInt4(n, int4);
+    getInt4(n, int4, 0);
     writeBytes(int4);
   }
 
-  protected static void getInt4(int n, byte[] int4) {
-    int4[0] = (byte) ((n >> 24) & 0xff);
-    int4[1] = (byte) ((n >> 16) & 0xff);
-    int4[2] = (byte) ((n >> 8) & 0xff);
-    int4[3] = (byte) (n & 0xff);
+  protected static void getInt4(int n, byte[] b, int offset) {
+    b[offset++] = (byte) ((n >> 24) & 0xff);
+    b[offset++] = (byte) ((n >> 16) & 0xff);
+    b[offset++] = (byte) ((n >> 8) & 0xff);
+    b[offset] = (byte) (n & 0xff);
   }
-
+  
   /**
    * Write a single byte into the pngBytes array at a given position.
    *

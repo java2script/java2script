@@ -4,6 +4,9 @@ import java.awt.Component;
 import java.awt.Point;
 import java.util.Hashtable;
 
+import javajs.api.js.HTML5Applet;
+import javajs.api.js.HTML5Applet.JSFunction;
+
 
 /**
  * An interface to J2S.xxx() functions.

@@ -19,7 +19,7 @@ import javax.swing.Timer;
 
 import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
-import swingjs.api.js.JSFunction;
+import javajs.api.js.HTML5Applet.JSFunction;
 
 /**
  * New! Frame, JFrame, and JInternalFrame embedding on a web page:

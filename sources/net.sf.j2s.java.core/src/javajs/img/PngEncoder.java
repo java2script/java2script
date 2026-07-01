@@ -28,6 +28,8 @@ package javajs.img;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
@@ -86,27 +88,264 @@ import java.util.zip.DeflaterOutputStream;
  */
 public class PngEncoder extends CRCEncoder {
 
+  /**
+   * Note that for Jmol 12.3.7-29 and 14.3.25-16.4.9, PNG files created by Jmol
+   * have incorrect checksums.
+   * 
+   */
+  
   /** Constants for filters */
   public static final int FILTER_NONE = 0;
   public static final int FILTER_SUB = 1;
   public static final int FILTER_UP = 2;
   public static final int FILTER_LAST = 2;
 
-  private static final int PT_FIRST_TAG = 37;
+  private PNG png;
 
   private boolean encodeAlpha;
   private int filter = FILTER_NONE;
   private int bytesPerPixel;
   private int compressionLevel;
-  private String type;
   private Integer transparentColor;
-
-  private byte[] appData;
-  private String appPrefix;
   private String comment;
-  private byte[] bytes;
 
   private final static double inchesPerMeter = 39.3700787;
+
+  public final static byte[] pngIdBytes = { -119, 80, 78, 71, 13, 10, 26, 10 };
+
+  private class PNG {
+
+    /**
+     * four characters; PNGx, where x is J or T for Jmol; original type "PNG" is
+     * now "PNG0"
+     * 
+     */
+    private String type;
+
+    /**
+     * nine characters to allow software to recognize itself
+     * 
+     */
+    private String appPrefix;
+    /**
+     * zip data or state
+     */
+    protected byte[] appData;
+    protected byte[] bytes;
+
+    private int dataPt;
+
+    private List<Chunk> data = new ArrayList<>();
+
+    /**
+     * pointer to first tEXt chunk
+     */
+    private int textPt;
+
+    /**
+     * has IDAT chunk
+     */
+    private boolean isValid;
+
+    protected PNG(String type, String appPrefix) {
+      this.type = type;
+      if (appPrefix == null)
+        appPrefix = "#SwingJS.";
+      if (appPrefix.length() < 9)
+        appPrefix = (appPrefix + ".........");
+      if (appPrefix.length() > 9)
+        appPrefix = appPrefix.substring(0, 9);
+      this.appPrefix = appPrefix;
+    }
+
+    protected void addChunk(Chunk c) {
+      if (textPt <= 0 && c.name.equals("tEXt"))
+        textPt = data.size();
+      if (!isValid && c.name.equals("IDAT"))
+          isValid = true;
+      data.add(c);
+    }
+
+    protected void writePNGData() {
+      if (appData != null) {
+        setJmolTypeText(0, 0);
+        dataPt = pngIdBytes.length;
+        Chunk last = data.get(data.size() - 1);
+        if (last.name == null)
+          data.remove(data.size() - 1);
+        for (int i = 0, n = data.size(); i < n; i++) {
+          dataPt += data.get(i).getWritelength();
+        }
+        data.add(new Chunk(null, appData));
+        setJmolTypeText(dataPt, appData.length);
+      }
+      for (int i = 0, n = data.size(); i < n; i++) {
+        data.get(i).write();
+      }
+    }
+
+    /**
+     * Generate the 33-byte PNGJ directory identifier:
+     * 
+     * xxxxxxxxx\0ttttiiiiiiiii+ddddddddd
+     * 
+     * 000000000.111111111122222222223333 123456789.012345678901234567890123
+     * 
+     * where
+     * 
+     * xxxxxxxxx is a unique 9-character software identifier tttt is a four-byte
+     * software-specific type indicator (PNG0, PNGJ, PNGT, etc.) iiiiiiiii is
+     * the file pointer to the start of app data ddddddddd is the length of the
+     * app data
+     * 
+     * @param nPNG
+     * @param nData
+     * @return text
+     */
+    protected String getApplicationText(int nPNG, int nData) {
+      String sPNG = "000000000" + nPNG;
+      sPNG = sPNG.substring(sPNG.length() - 9);
+      String sData = "000000000" + nData;
+      sData = sData.substring(sData.length() - 9);
+      return appPrefix + "\0" + type + sPNG + "+" + sData;
+    }
+
+    /**
+     * Add or replace the Jmol type text chunk (the first tEXt chunk) with number of
+     * bytes of PNG data and number of bytes of Jmol state data.
+     * 
+     * @param nPNG
+     * @param nState
+     */
+    private void setJmolTypeText(int nPNG, int nState) {
+      String s = getApplicationText(nPNG, nState);
+      byte[] test = appPrefix.getBytes();
+      Chunk c = new Chunk("tEXt", s);
+      if (textPt == 1 && data.get(1).startsWith(test)) {
+        data.remove(1);
+      }
+      data.add(1, c);
+      textPt = 1;
+    }
+
+    /**
+     * Read chunks from PNG data. Trailing data will be found in a
+     * final (disposable?) null-named chunk.
+     * 
+     * @return bytes read; dataPt will be end of IEND record
+     */
+    protected int readDataFromBytes() {
+      for (int i = pngIdBytes.length; --i >= 0;)
+        if (bytes[i] != pngIdBytes[i])
+          return -1;
+      dataPt = pngIdBytes.length;
+      while (dataPt < bytes.length) {
+        if (!readDataChunk())
+          break;
+      }
+      if (!isValid)
+        return -1;
+      if (dataPt < bytes.length) {
+        byte[] extra = new byte[bytes.length - dataPt];
+        System.arraycopy(bytes, dataPt, extra, 0, extra.length);
+        data.add(new Chunk(null, extra));
+      }
+      return bytes.length;
+    }
+
+    private boolean readDataChunk() {
+      int n = readInt4();
+      byte[] b = new byte[n];
+      String name = new String(readBytes(int4));
+      readBytes(b);
+      addChunk(new Chunk(name, b));
+      dataPt += 4; // past CRC
+      return (n > 0 || !name.equals("IEND"));
+    }
+
+    private int readInt4() {
+      int j = dataPt;
+      int n = (bytes[j + 3] & 0xff) | (bytes[j + 2] & 0xff) << 8
+          | (bytes[j + 1] & 0xff) << 16 | (bytes[j] & 0xff) << 24;
+      dataPt += 4;
+      return n | 0; // for JavaScript   
+    }
+
+    private byte[] readBytes(byte[] b) {
+      System.arraycopy(bytes, dataPt, b, 0, b.length);
+      dataPt += b.length;
+      return b;
+    }
+
+  
+  }
+
+  protected class Chunk {
+    String name;
+    private byte[] bytes;
+    private int len, pt;
+    private String text;
+
+    protected Chunk(String name, String text) {
+      this(name, text.getBytes());
+      this.text = text;
+    }
+
+    protected Chunk(String name, byte[] bytes) {
+      this.name = name;
+      this.bytes = bytes;
+      len = bytes.length;
+    }
+
+    int write() {
+      if (name == null) {
+        writeBytes(bytes);
+      } else {
+        writeInt4(len);
+        startPos = bytePos;
+        writeString(name);
+        writeBytes(bytes);
+        writeCRC();
+      }
+      return len;
+    }
+
+    public void addByte(int i) {
+      bytes[pt++] = (byte) i;
+    }
+
+    public void addInt2(int n) {
+      getInt2(n, bytes, pt);
+      pt += 2;
+    }
+
+    public void addInt4(int n) {
+      getInt4(n, bytes, pt);
+      pt += 4;
+    }
+
+    /**
+     * @return length of LEN + NAME + bytes + CRC
+     */
+    public int getWritelength() {
+      return len + 12;
+    }
+
+    public boolean startsWith(byte[] test) {
+      if (bytes.length < test.length)
+        return false;
+      for (int i = test.length; --i >= 0;)
+        if (bytes[i] != test[i]) {
+          return false;
+        }
+      return true;
+    }
+
+    @Override
+    public String toString() {
+      return "[Chunk " + name + " " + len + " " + (text == null ? "" : text) + "]";
+    }
+  }
 
   public PngEncoder() {
     super();
@@ -126,40 +365,43 @@ public class PngEncoder extends CRCEncoder {
       // 96, 100, 200, 300, 600, etc.
       dpi = quality;
       quality = 2;
-    }    
+    }
     encodeAlpha = false;
     filter = FILTER_NONE;
     compressionLevel = quality;
     transparentColor = (Integer) params.get("transparentColor");
     comment = (String) params.get("comment");
-    type = (params.get("type") + "0000").substring(0, 4);
-    bytes = (byte[]) params.get("pngImgData");
-    appData = (byte[]) params.get("pngAppData");
-    appPrefix = (String) params.get("pngAppPrefix");
+    String type = (params.get("type") + "0000").substring(0, 4);
+    String appPrefix = (String) params.get("pngAppPrefix");
+    png = new PNG(type, appPrefix);
+    png.bytes = (byte[]) params.get("pngImgData");
+    png.appData = (byte[]) params.get("pngAppData");
   }
 
   @Override
   protected void generate() throws IOException {
-    if (bytes == null) {
-      if (!pngEncode()) {
-        out.cancel();
-        return;
+    boolean ok;
+    try {
+      ok = (png.bytes == null ? pngEncode()
+          : png.readDataFromBytes() > 0);
+      if (ok) {
+        writeBytes(pngIdBytes);
+        png.writePNGData();
+        // for Legacy J2S, do not use out.write(b)
+        byte[] b = getBytes();
+        out.write(b, 0, b.length);
       }
-      bytes = getBytes();
-    } else {
-      dataLen = bytes.length;
+    } catch (Exception e) {
+      e.printStackTrace();
+      ok = false;
     }
-    int len = dataLen;
-    if (appData != null) {
-      setJmolTypeText(appPrefix, bytes, len, appData.length, type);
-      out.write(bytes, 0, len);
-      len = (bytes = appData).length;
+    if (!ok) {
+      out.cancel();
     }
-    out.write(bytes, 0, len);
   }
 
   /**
-   * Creates an array of bytes that is the PNG equivalent of the current image,
+   * Creates an array of Chunks that is the PNG equivalent of the current image,
    * specifying whether to encode alpha or not.
    * 
    * @return true if successful
@@ -167,91 +409,21 @@ public class PngEncoder extends CRCEncoder {
    */
   private boolean pngEncode() {
 
-    byte[] pngIdBytes = { -119, 80, 78, 71, 13, 10, 26, 10 };
-
-    writeBytes(pngIdBytes);
     //hdrPos = bytePos;
-    writeHeader();
-    writeText(getApplicationText(appPrefix, type, 0, 0));
-
-    writeText("Software\0" + comment);
-    writeText("Creation Time\0" + date);
+    addHeader();
+    addText("Software\0" + comment);
+    addText("Creation Time\0" + date);
 
     if (dpi > 0)
-      writePhysicalSize();
+      addPhysicalSize();
 
     if (!encodeAlpha && transparentColor != null)
-      writeTransparentColor(transparentColor.intValue());
+      addTransparentColor(transparentColor.intValue());
     //dataPos = bytePos;
-    return writeImageData();
-  }
-
-  /**
-   * Fill in the Jmol type text area with number of bytes of PNG data and number
-   * of bytes of Jmol state data and fix checksum.
-   * 
-   * If we do not do this, then the checksum will be wrong, and Jmol and some
-   * other programs may not be able to read the PNG image.
-   * 
-   * This was corrected for Jmol 12.3.30. Between 12.3.7 and 12.3.29, PNG files
-   * created by Jmol have incorrect checksums.
-   * 
-   * @param prefix
-   * 
-   * @param b
-   * @param nPNG
-   * @param nState
-   * @param type
-   */
-  private static void setJmolTypeText(String prefix, byte[] b, int nPNG,
-                                      int nState, String type) {
-    String s = "tEXt" + getApplicationText(prefix, type, nPNG, nState);
-    CRCEncoder encoder = new PngEncoder();
-    byte[] test = s.substring(0, 4 + prefix.length()).getBytes();
-    for (int i = test.length; --i >= 0;)
-      if (b[i + PT_FIRST_TAG] != test[i]) {
-        System.out.println(
-            "image is not of the right form; appending data, but not adding tEXt tag.");
-        return;
-      }
-    encoder.setData(b, PT_FIRST_TAG);
-    encoder.writeString(s);
-    encoder.writeCRC();
-  }
-
-  /**
-   * Generate the PNGJ directory identifier:
-   * 
-   * xxxxxxxxx\0ttttiiiiiiiii+ddddddddd
-   * 
-   * where
-   * 
-   * xxxxxxxxx is a unique 9-character software identifier tttt is a four-byte
-   * software-specific type indicator (PNG0, PNGJ, PNGT, etc.) iiiiiiiii is the
-   * file pointer to the start of app data ddddddddd is the length of the app
-   * data
-   * 
-   * @param prefix
-   *        up to 9 characters to allow software to recognize itself
-   * @param type
-   *        PNGx, where x is J or T for Jmol; original type "PNG" is now "PNG0"
-   * @param nPNG
-   * @param nData
-   * @return text
-   */
-  private static String getApplicationText(String prefix, String type, int nPNG,
-                                           int nData) {
-    String sPNG = "000000000" + nPNG;
-    sPNG = sPNG.substring(sPNG.length() - 9);
-    String sData = "000000000" + nData;
-    sData = sData.substring(sData.length() - 9);
-    if (prefix == null)
-      prefix = "#SwingJS.";
-    if (prefix.length() < 9)
-      prefix = (prefix + ".........");
-    if (prefix.length() > 9)
-      prefix = prefix.substring(0, 9);
-    return prefix + "\0" + type + sPNG + "+" + sData;
+    if (!addImageData())
+      return false;
+    addEnd();
+    return true;
   }
 
   //  /**
@@ -295,26 +467,20 @@ public class PngEncoder extends CRCEncoder {
   /**
    * Write a PNG "IHDR" chunk into the pngBytes array.
    */
-  private void writeHeader() {
-
-    writeInt4(13);
-    startPos = bytePos;
-    writeString("IHDR");
-    writeInt4(width);
-    writeInt4(height);
-    writeByte(8); // bit depth
-    writeByte(encodeAlpha ? 6 : 2); // color type or direct model
-    writeByte(0); // compression method
-    writeByte(0); // filter method
-    writeByte(0); // no interlace
-    writeCRC();
+  private void addHeader() {
+    Chunk c = new Chunk("IHDR", new byte[13]);
+    c.addInt4(width);
+    c.addInt4(height);
+    c.addByte(8); // bit depth
+    c.addByte(encodeAlpha ? 6 : 2); // color type or direct model
+    c.addByte(0); // compression method
+    c.addByte(0); // filter method
+    c.addByte(0); // no interlace
+    png.addChunk(c);
   }
 
-  private void writeText(String msg) {
-    writeInt4(msg.length());
-    startPos = bytePos;
-    writeString("tEXt" + msg);
-    writeCRC();
+  private void addText(String msg) {
+    png.addChunk(new Chunk("tEXt", msg));
   }
 
   /**
@@ -322,15 +488,12 @@ public class PngEncoder extends CRCEncoder {
    * 
    * @param icolor
    */
-  private void writeTransparentColor(int icolor) {
-
-    writeInt4(6);
-    startPos = bytePos;
-    writeString("tRNS");
-    writeInt2((icolor >> 16) & 0xFF);
-    writeInt2((icolor >> 8) & 0xFF);
-    writeInt2(icolor & 0xFF);
-    writeCRC();
+  private void addTransparentColor(int icolor) {
+    Chunk c = new Chunk("tRNS", new byte[6]);
+    c.addInt2((icolor >> 16) & 0xFF);
+    c.addInt2((icolor >> 8) & 0xFF);
+    c.addInt2(icolor & 0xFF);
+    png.addChunk(c);
   }
 
   /**
@@ -338,15 +501,13 @@ public class PngEncoder extends CRCEncoder {
    * meter.
    * 
    */
-  private void writePhysicalSize() {
-
-    writeInt4(9);
-    writeString("pHYs");
+  private void addPhysicalSize() {
+    Chunk c = new Chunk("pHYs", new byte[9]);
     int ppm = (int) Math.round(inchesPerMeter * dpi);
-    writeInt4(ppm);
-    writeInt4(ppm);
-    writeByte(1);
-    writeCRC();
+    c.addInt4(ppm);
+    c.addInt4(ppm);
+    c.addByte(0);
+    png.addChunk(c);
   }
 
   private byte[] scanLines; // the scan lines to be compressed
@@ -364,7 +525,7 @@ public class PngEncoder extends CRCEncoder {
    * 
    * @return true if no errors; false if error grabbing pixels
    */
-  private boolean writeImageData() {
+  private boolean addImageData() {
 
     bytesPerPixel = (encodeAlpha ? 4 : 3);
     byteWidth = width * bytesPerPixel;
@@ -442,13 +603,8 @@ public class PngEncoder extends CRCEncoder {
        * Write the compressed bytes
        */
       byte[] compressedLines = outBytes.toByteArray();
-      writeInt4(compressedLines.length);
-      startPos = bytePos;
-      writeString("IDAT");
-      writeBytes(compressedLines);
-      writeCRC();
-      writeEnd();
       deflater.finish();
+      png.addChunk(new Chunk("IDAT", compressedLines));
       return true;
     } catch (IOException e) {
       System.err.println(e.toString());
@@ -459,11 +615,8 @@ public class PngEncoder extends CRCEncoder {
   /**
    * Write a PNG "IEND" chunk into the pngBytes array.
    */
-  private void writeEnd() {
-    writeInt4(0);
-    startPos = bytePos;
-    writeString("IEND");
-    writeCRC();
+  private void addEnd() {
+    png.addChunk(new Chunk("IEND", new byte[0]));
   }
 
   ///**

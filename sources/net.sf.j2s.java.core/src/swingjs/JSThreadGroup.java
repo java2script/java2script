@@ -28,7 +28,7 @@
 
 package swingjs;
 
-import swingjs.api.js.HTML5Applet;
+import javajs.api.js.HTML5Applet;
 
 /**
  * A thread group represents a set of threads. In addition, a thread

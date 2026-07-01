@@ -54,7 +54,7 @@ import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 
 import swingjs.api.js.DOMNode;
-import swingjs.api.js.JSFunction;
+import javajs.api.js.HTML5Applet.JSFunction;
 import swingjs.JSToolkit;
 import swingjs.api.js.JSInterface;
 

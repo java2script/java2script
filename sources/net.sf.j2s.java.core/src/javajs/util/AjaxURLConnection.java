@@ -19,7 +19,7 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 
 import javajs.api.js.J2SObjectInterface;
-import swingjs.api.JSUtilI;
+import javajs.api.js.JSUtilI;
 
 /**
  * 
