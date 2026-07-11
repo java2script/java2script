@@ -18,6 +18,8 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Locale;
@@ -1310,6 +1312,59 @@ public class JSUtil implements JSUtilI {
 	@Override
 	public void getMediaInfoAsync(byte[] data, String trackType, String path, Consumer<Map<String, Object>> success, Consumer<String> onError) {
 		JSImagekit.getMediaInfoAsync(data, trackType, path, success, onError);
+	}
+
+	public static String getDateFormat(String isoType) {
+	  if (isoType != null && isoType.contains("32000")) {
+	    return "D:" + getDateFormat("8224") + "'00'";
+	  }
+	  Date d = new Date();
+	  if (isoType == null) {
+	    isoType = "EEE, d MMM yyyy HH:mm:ss Z";
+	  } else {
+	      String result = getDataFormatJS(isoType, d);
+	      if (result != null)
+	        return result;
+	  }
+	  try {
+	    return newSimpleDateFormat(isoType).format(d);
+	  } catch (Exception e) {
+	    return "?";
+	  }
+	}
+	  
+	private static SimpleDateFormat newSimpleDateFormat(String format) {   
+		  return (SimpleDateFormat) javajs.api.Interface.getInstanceWithParams("java.text.SimpleDateFormat", new Class<?>[] { String.class }, new Object[] { format });
+		}
+		  
+	private static String getDataFormatJS(String isoType, Date d) {
+	  // all time are local
+	  // 32000 is PDF file specification (ISO 32000)
+	  // /CreationDate(D:20150131213455-06'00')
+      /**
+       * 
+       * @j2sNative
+       * 
+       * if (isoType.indexOf("8601") >= 0){
+       *   var x = d.toString().split(" ");
+       *   if (x.length == 1)
+       *     return x[0];
+       *   var MM = "0" + (1 + d.getMonth()); MM = MM.substring(MM.length - 2);
+       *   var dd = "0" + d.getDate(); dd = dd.substring(dd.length - 2);
+       *   return x[3] + '-' + MM + '-' + dd + 'T' + x[4];   
+       * } else if (isoType.indexOf("32000") >= 0) {
+       *   var x = d.toString().split(" ");
+       *   var MM = "0" + (1 + d.getMonth()); MM = MM.substring(MM.length - 2);
+       *   var dd = "0" + d.getDate(); dd = dd.substring(dd.length - 2);
+       *   return "D:" + x[3] + MM + dd + x[4].replace(/\:/g,"") + x[5].substring(3,6) + "'" + x[5].substring(6,8) + "'";
+       * } else if (isoType.indexOf("8824") >= 0) {
+       *   var x = d.toString().split(" ");
+       *   var MM = "0" + (1 + d.getMonth()); MM = MM.substring(MM.length - 2);
+       *   var dd = "0" + d.getDate(); dd = dd.substring(dd.length - 2);
+       *   return x[3] + MM + dd + x[4].replace(/\:/g,"") + x[5].substring(3,6);
+       * }
+       */
+	  return null;
 	}
 }
 

@@ -583,6 +583,7 @@ public class SimpleDateFormat extends DateFormat {
 		this.pattern = pattern;
 		this.locale = locale;
 		this.isSimpleMMDDYY = isSimple(pattern, locale);
+		this.isISO8601 = pattern.startsWith("yyyy-MM-dd'T'HH:mm:ss");
 		// lazy calendar initialization for SwingJS
 		// avoids loading 49 classes!
 //      this.formatData = DateFormatSymbols.getInstance(locale);
@@ -594,6 +595,8 @@ public class SimpleDateFormat extends DateFormat {
 
 	/* Initialize compiledPattern and numberFormat fields */
 	private void initializeLocale() {
+		if (this.isSimpleMMDDYY || this.isISO8601)
+			return;
 		if (locale == null)
 			locale = Locale.getDefault();
 		// Verify and compile the given pattern.
@@ -622,11 +625,10 @@ public class SimpleDateFormat extends DateFormat {
 
 	@Override
 	public Calendar getCalendar() {
-		Calendar cal = super.getCalendar();
-		if (cal == null) {
+		if (super.getCalendar() == null) {
 			initializeCalendar();
 		}
-		return cal;
+		return calendar;
 	}
 
 	private void initializeCalendar() {
@@ -894,11 +896,11 @@ public class SimpleDateFormat extends DateFormat {
 		return format(date, toAppendTo, pos.getFieldDelegate());
 	}
 
-    @Override
-	public final String format (Object obj) {
-        return format(obj, new StringBuffer(), isSimpleMMDDYY ? null : new FieldPosition(0)).toString();
-    }
-    
+	@Override
+	public final String format(Object obj) {
+		return format(obj, new StringBuffer(), isSimpleMMDDYY ? null : new FieldPosition(0)).toString();
+	}
+
 	@Override
 	public String format(Date date) {
 		if (isSimpleMMDDYY) {
@@ -923,8 +925,8 @@ public class SimpleDateFormat extends DateFormat {
 			switch (ch) {
 			case 'M':
 			case 'd':
-			case 'H': //  H 	Hour in day (0-23)
-			case 'k': //  k 	Hour in day (1-24) 
+			case 'H': // H Hour in day (0-23)
+			case 'k': // k Hour in day (1-24)
 			case 'y':
 			case 'h':
 			case 'm':
@@ -940,27 +942,29 @@ public class SimpleDateFormat extends DateFormat {
 
 	// toISOString() returns a string in the
 	// 1970-01-01T00:00:00.000Z
-	// 0.........1.........        
+	// 0.........1.........
 	// 01234567890123456789
 	//
-	//new Date().toString()
+	// new Date().toString()
 	// Sun Mar 09 14:35:53 GMT-0500 2025"
-	// 0.........1.........        
+	// 0.........1.........
 	// 01234567890123456789
-	private final static String[] fields = { "yyyy", "yy", "MM", "M", "dd", "d", "hh", "h", "HH", "H", "kk", "k", "mm", "m", "ss", "s" };
-	private final static int[] fieldlens = {  4,      2,    2,    1,   2,    1,    2,   1,    2,   1,   2,    1,   2,    1,   2,    1  };
-	private final static int[] fieldzero = {  0,      0,    0,    1,   0,    1,    0,   1,    0,   1,   0,    1,   0,    1,   0,    1 };
-	private final static int[] adj =       {  0,      0,    3,    3,   0,    0,   12,  12,   23,  23,  24,   24,   0,    0,   0,    0 };
-	private final static int[] isopts =    {  0,      2,    5,    5,   8,    8,   11,  11,   11,  11,  11,   11,  14,   14,  17,   17 };
-	private final static int[] isolens =   {  4,      2,    2,    2,   2,    2,    2,   2,    2,   2,   2,    2,   2,    2,   2,    2 };
-	private final static int[] locpts =    { -4,     -2,    4,    4,   8,    8,   11,  11,   11,  11,  11,   11,  14,   14,  17,   17 };
-	private final static int[] loclens =   {  4,      2,    3,    3,   2,    2,    2,   2,    2,   2,   2,    2,   2,    2,   2,    2 };
+	private final static String[] fields = { "yyyy", "yy", "MM", "M", "dd", "d", "hh", "h", "HH", "H", "kk", "k", "mm",
+			"m", "ss", "s" };
+	private final static int[] fieldlens = { 4, 2, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1 };
+	private final static int[] fieldzero = { 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 };
+	private final static int[] adj = { 0, 0, 3, 3, 0, 0, 12, 12, 23, 23, 24, 24, 0, 0, 0, 0 };
+	private final static int[] isopts = { 0, 2, 5, 5, 8, 8, 11, 11, 11, 11, 11, 11, 14, 14, 17, 17 };
+	private final static int[] isolens = { 4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2 };
+	private final static int[] locpts = { -4, -2, 4, 4, 8, 8, 11, 11, 11, 11, 11, 11, 14, 14, 17, 17 };
+	private final static int[] loclens = { 4, 2, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2 };
 	private final static int fieldCount = fields.length;
 
 	private Object formatSimpleJS(Date date, StringBuffer sb) {
 		// considered doing this -- still could if we want GMT
-		//String iso = (/** @j2sNative date.toISOString() || */"");
-		String loc = (/** @j2sNative date.toString() || */"");
+		// String iso = (/** @j2sNative date.toISOString() || */"");
+		String loc = (/** @j2sNative date.toString() || */
+		"");
 		String ret = pattern;
 		for (int i = 0, l = 2; i < fieldCount; i++, l = 3 - l) {
 			int pt = ret.indexOf(fields[i]);
@@ -980,7 +984,7 @@ public class SimpleDateFormat extends DateFormat {
 		String v = (i0 < 0 ? iso.substring(iso.length() + i0) : iso.substring(i0, i0 + isolen));
 		int iv = -1;
 		if (isoadj == 3) {
-			iv = (months.indexOf(v)/3 + 1);
+			iv = (months.indexOf(v) / 3 + 1);
 		} else if (isoadj != 0) {
 			iv = Integer.parseInt(v);
 			switch (isoadj) {
@@ -1085,17 +1089,19 @@ public class SimpleDateFormat extends DateFormat {
 
 	// Maps from DecimalFormatSymbols index to Field constant
 	private static Field[] PATTERN_INDEX_TO_DATE_FORMAT_FIELD_ID;
-	
+
 	private static Field[] getPatternIndexFieldIDs() {
 		if (PATTERN_INDEX_TO_DATE_FORMAT_FIELD_ID == null) {
 			PATTERN_INDEX_TO_DATE_FORMAT_FIELD_ID = new Field[] { Field.ERA, Field.YEAR, Field.MONTH,
-			Field.DAY_OF_MONTH, Field.HOUR_OF_DAY1, Field.HOUR_OF_DAY0, Field.MINUTE, Field.SECOND, Field.MILLISECOND,
-			Field.DAY_OF_WEEK, Field.DAY_OF_YEAR, Field.DAY_OF_WEEK_IN_MONTH, Field.WEEK_OF_YEAR, Field.WEEK_OF_MONTH,
-			Field.AM_PM, Field.HOUR1, Field.HOUR0, Field.TIME_ZONE, Field.TIME_ZONE, };
+					Field.DAY_OF_MONTH, Field.HOUR_OF_DAY1, Field.HOUR_OF_DAY0, Field.MINUTE, Field.SECOND,
+					Field.MILLISECOND, Field.DAY_OF_WEEK, Field.DAY_OF_YEAR, Field.DAY_OF_WEEK_IN_MONTH,
+					Field.WEEK_OF_YEAR, Field.WEEK_OF_MONTH, Field.AM_PM, Field.HOUR1, Field.HOUR0, Field.TIME_ZONE,
+					Field.TIME_ZONE, };
 		}
-		return PATTERN_INDEX_TO_DATE_FORMAT_FIELD_ID;	
-			
+		return PATTERN_INDEX_TO_DATE_FORMAT_FIELD_ID;
+
 	}
+
 	/**
 	 * Private member function that does the real date/time formatting.
 	 */

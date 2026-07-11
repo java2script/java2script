@@ -78,7 +78,7 @@ import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
-import java.time.format.DateTimeFormatter;
+//import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
@@ -92,6 +92,7 @@ import java.time.temporal.TemporalQuery;
 import java.time.temporal.TemporalUnit;
 import java.time.temporal.UnsupportedTemporalTypeException;
 import java.time.temporal.ValueRange;
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -392,7 +393,9 @@ public final class Instant
      * @throws DateTimeParseException if the text cannot be parsed
      */
     public static Instant parse(final CharSequence text) {
-        return DateTimeFormatter.ISO_INSTANT.parse(text, Instant::from);
+        long l = /** j2sNative new Date(text.toString()).getTime() || */0; 
+        return ofEpochMilli(l);
+        //DateTimeFormatter.ISO_INSTANT.parse(text, Instant::from);
     }
 
     //-----------------------------------------------------------------------
@@ -1321,45 +1324,57 @@ public final class Instant
      */
     @Override
     public String toString() {
-        return DateTimeFormatter.ISO_INSTANT.format(this);
+      @SuppressWarnings("unused")
+      Date d = new Date(this.toEpochMilli());
+      
+      /**
+       * 
+       * @j2sNative
+       * 
+       * return d.toISOString();
+       */
+      {
+        return null;
+//        return DateTimeFormatter.ISO_INSTANT.format(this);
+      }
     }
 
-    // -----------------------------------------------------------------------
-    /**
-     * Writes the object using a
-     * <a href="../../serialized-form.html#java.time.Ser">dedicated serialized form</a>.
-     * @serialData
-     * <pre>
-     *  out.writeByte(2);  // identifies an Instant
-     *  out.writeLong(seconds);
-     *  out.writeInt(nanos);
-     * </pre>
-     *
-     * @return the instance of {@code Ser}, not null
-     */
-    private Object writeReplace() {
-        return new Ser(Ser.INSTANT_TYPE, this);
-    }
-
-    /**
-     * Defend against malicious streams.
-     *
-     * @param s the stream to read
-     * @throws InvalidObjectException always
-     */
-    private void readObject(ObjectInputStream s) throws InvalidObjectException {
-        throw new InvalidObjectException("Deserialization via serialization delegate");
-    }
-
-    void writeExternal(DataOutput out) throws IOException {
-        out.writeLong(seconds);
-        out.writeInt(nanos);
-    }
-
-    static Instant readExternal(DataInput in) throws IOException {
-        long seconds = in.readLong();
-        int nanos = in.readInt();
-        return Instant.ofEpochSecond(seconds, nanos);
-    }
-
+//    // -----------------------------------------------------------------------
+//    /**
+//     * Writes the object using a
+//     * <a href="../../serialized-form.html#java.time.Ser">dedicated serialized form</a>.
+//     * @serialData
+//     * <pre>
+//     *  out.writeByte(2);  // identifies an Instant
+//     *  out.writeLong(seconds);
+//     *  out.writeInt(nanos);
+//     * </pre>
+//     *
+//     * @return the instance of {@code Ser}, not null
+//     */
+//    private Object writeReplace() {
+//        return new Ser(Ser.INSTANT_TYPE, this);
+//    }
+//
+//    /**
+//     * Defend against malicious streams.
+//     *
+//     * @param s the stream to read
+//     * @throws InvalidObjectException always
+//     */
+//    private void readObject(ObjectInputStream s) throws InvalidObjectException {
+//        throw new InvalidObjectException("Deserialization via serialization delegate");
+//    }
+//
+//    void writeExternal(DataOutput out) throws IOException {
+//        out.writeLong(seconds);
+//        out.writeInt(nanos);
+//    }
+//
+//    static Instant readExternal(DataInput in) throws IOException {
+//        long seconds = in.readLong();
+//        int nanos = in.readInt();
+//        return Instant.ofEpochSecond(seconds, nanos);
+//    }
+//
 }
