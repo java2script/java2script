@@ -44,9 +44,11 @@ TrackerJS https://physlets.org/tracker/trackerJS
 
 InChI-SwingJS https://github.com/BobHanson/InChI-SwingJS
 
+The Chemical Development Kit (CDK) (CDK-SwingJS) https://github.com/BobHanson/CDK-SwingJS
+
 OpenChemLib (OCL-SwingJS) https://github.com/BobHanson/OCL-SwingJS
 
-
+PhET, Falstad, and other tests https://chemapps.stolaf.edu/swingjs/phet/site/swingjs/examples  (These are all early "first-generation" SwingJS tests converting AWT to Swing in Java, then transpiling.)
 
 
 # QuickStart
