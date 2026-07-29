@@ -36,13 +36,15 @@ Jmol-SwingJS  https://github.com/BobHanson/Jmol-SwingJS
 
 JalView-JS https://www.jalview.org/jalview-js
 
-InChI-SwingJS https://github.com/BobHanson/InChI-SwingJS
+InChI-SwingJS https://github.com/BobHanson/InChI-SwingJS  (Incorporates Java JNI interface to InchI via webAssembly.)
 
 The Chemical Development Kit (CDK) (CDK-SwingJS) https://github.com/BobHanson/CDK-SwingJS
 
 OpenChemLib (OCL-SwingJS) https://github.com/BobHanson/OCL-SwingJS
 
-Varna https://github.com/BobHanson/VARNA and https://chemapps.stolaf.edu/swingjs/varna 
+Varna (Varna-SwingJS) https://github.com/BobHanson/VARNA and https://chemapps.stolaf.edu/swingjs/varna 
+
+DiffractOGram https://github.com/BobHanson/diffractOgram/tree/SwingJS 
 
 Open Source Physics (OSP) https://github.com/OpenSourcePhysics/osp/tree/swingJS
 
@@ -50,7 +52,7 @@ TrackerJS https://physlets.org/tracker/trackerJS
 
 MathePrisma https://www.matheprisma.de/  (over 600 applets)
 
-PhET, Falstad, and other tests https://chemapps.stolaf.edu/swingjs/phet/site/swingjs/examples  (These are all early "first-generation" SwingJS tests converting AWT to Swing in Java, then transpiling.)
+PhET, Falstad, and other tests https://chemapps.stolaf.edu/swingjs/site/swingjs/examples  (These are all early "first-generation" SwingJS tests converting AWT to Swing in Java, then transpiling.)
 
 
 # QuickStart
@@ -109,7 +111,7 @@ Synchronized with https://github.com/BobHanson/java2script as the stable master 
 
 Examples include:
 
-PhET, Falstad, and other tests https://chemapps.stolaf.edu/swingjs/phet/site/swingjs/examples  Initial SwingJS tests converting AWT to Swing in Java, then transpiling.
+PhET, Falstad, and other tests https://chemapps.stolaf.edu/swingjs/site/swingjs/examples Initial SwingJS tests converting AWT to Swing in Java, then transpiling.
 
 JSmol: https://chemapps.stolaf.edu/jmol/jsmol  Non-AWT, Non-Swing version, our initial application of Java2Script technology.
   
