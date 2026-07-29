@@ -607,9 +607,11 @@ public abstract class DateFormat extends Format {
      */
     public static Locale[] getAvailableLocales()
     {
-        LocaleServiceProviderPool pool =
-            LocaleServiceProviderPool.getPool(DateFormatProvider.class);
-        return pool.getAvailableLocales();
+    	// SwingJS just return US locale
+    	return new Locale[] { Locale.US };
+//        LocaleServiceProviderPool pool =
+//            LocaleServiceProviderPool.getPool(DateFormatProvider.class);
+//        return pool.getAvailableLocales();
     }
 
     /**

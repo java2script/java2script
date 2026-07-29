@@ -140,6 +140,7 @@ public abstract class Format implements Serializable, Cloneable {
 
     private static final long serialVersionUID = -299282585814624189L;
 	protected boolean isSimpleMMDDYY;
+	protected boolean isISO8601;
 
 
     
