@@ -36,17 +36,19 @@ Jmol-SwingJS  https://github.com/BobHanson/Jmol-SwingJS
 
 JalView-JS https://www.jalview.org/jalview-js
 
-MathePrisma https://www.matheprisma.de/  (over 600 applets)
-
-Open Source Physics (OSP) https://github.com/OpenSourcePhysics/osp/tree/swingJS
-
-TrackerJS https://physlets.org/tracker/trackerJS
-
 InChI-SwingJS https://github.com/BobHanson/InChI-SwingJS
 
 The Chemical Development Kit (CDK) (CDK-SwingJS) https://github.com/BobHanson/CDK-SwingJS
 
 OpenChemLib (OCL-SwingJS) https://github.com/BobHanson/OCL-SwingJS
+
+Varna https://github.com/BobHanson/VARNA and https://chemapps.stolaf.edu/swingjs/varna 
+
+Open Source Physics (OSP) https://github.com/OpenSourcePhysics/osp/tree/swingJS
+
+TrackerJS https://physlets.org/tracker/trackerJS
+
+MathePrisma https://www.matheprisma.de/  (over 600 applets)
 
 PhET, Falstad, and other tests https://chemapps.stolaf.edu/swingjs/phet/site/swingjs/examples  (These are all early "first-generation" SwingJS tests converting AWT to Swing in Java, then transpiling.)
 
